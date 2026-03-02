@@ -18,57 +18,64 @@ def analisar_detalhes(url_jogo):
         soup = BeautifulSoup(res.text, 'html.parser')
         placares = [p.text.strip() for p in soup.find_all('span', class_='score')]
         total = len(placares)
-        if total == 0: return None
+        if total < 2: return None
 
-        # --- CÁLCULOS PARA ODDS BAIXAS (ESTRATÉGIA DE ACÚMULO) ---
-        v_casa = sum(1 for p in placares if int(p.split('-')[0]) > int(p.split('-')[1]))
-        v_fora = sum(1 for p in placares if int(p.split('-')[1]) > int(p.split('-')[0]))
-        mais_1_5 = sum(1 for p in placares if sum(map(int, p.split('-'))) >= 2)
-        ambas = sum(1 for p in placares if '-' in p and all(int(x) > 0 for x in p.split('-')))
+        # Cálculos de Probabilidade
+        v_casa = (sum(1 for p in placares if int(p.split('-')[0]) > int(p.split('-')[1])) / total) * 100
+        v_fora = (sum(1 for p in placares if int(p.split('-')[1]) > int(p.split('-')[0])) / total) * 100
+        mais_1_5 = (sum(1 for p in placares if sum(map(int, p.split('-'))) >= 2) / total) * 100
+        ambas = (sum(1 for p in placares if '-' in p and all(int(x) > 0 for x in p.split('-'))) / total) * 100
+        zero_gols = (sum(1 for p in placares if sum(map(int, p.split('-'))) == 0) / total) * 100
 
-        return {
-            "p_casa": (v_casa/total)*100, "p_fora": (v_fora/total)*100,
-            "p_gols": (mais_1_5/total)*100, "p_ambas": (ambas/total)*100,
-            "total": total
-        }
+        # Encontra a melhor opção estatística deste jogo específico
+        opcoes = [
+            (v_casa, "Vitória Casa"),
+            (v_fora, "Vitória Fora"),
+            (mais_1_5, "Mais de 1.5 Gols"),
+            (ambas, "Ambas Marcam: Sim"),
+            (zero_gols, "Menos de 0.5 Gols (0-0)")
+        ]
+        melhor_valor, mercado = max(opcoes)
+        return {"prob": melhor_valor, "mercado": mercado}
     except: return None
 
 def executar_robo():
-    enviar_telegram("🎯 *PodeApostar_Bot:* Buscando bases para sua Super Múltipla...")
-    
+    enviar_telegram("🎯 *PodeApostar_Bot:* Selecionando os 10 Melhores para sua Super Múltipla...")
     url_base = "https://www.placardefutebol.com.br"
-    ligas = [
-        "/brasileirao-serie-a", "/campeonato-paulista", "/campeonato-carioca",
-        "/campeonato-ingles", "/campeonato-italiano", "/campeonato-espanhol", 
-        "/campeonato-portugues", "/campeonato-argentino"
-    ]
+    ligas = ["/brasileirao-serie-a", "/campeonato-paulista", "/campeonato-carioca", 
+             "/campeonato-ingles", "/campeonato-italiano", "/campeonato-espanhol", 
+             "/campeonato-portugues", "/campeonato-argentino"]
     
-    total_avisos = 0
+    lista_final = []
+
     for liga in ligas:
-        try:
-            response = requests.get(url_base + liga, headers={'User-Agent': 'Mozilla/5.0'})
-            soup = BeautifulSoup(response.text, 'html.parser')
-            for link in soup.find_all('a', href=True):
-                if '/jogo/' in link['href']:
-                    times = link.find_all('span', class_='team-name')
-                    if len(times) < 2: continue
-                    
-                    res = analisar_detalhes(url_base + link['href'])
-                    if res:
-                        # BAIXAMOS A RÉGUA: Se tiver 35% de chance de vitória ou 50% de gols, ele já avisa.
-                        # Isso garante que os favoritos de odd 1.30 (como o Flamengo) apareçam.
-                        dicas = []
-                        if res["p_casa"] >= 35: dicas.append(f"🏆 Vitória {times[0].text} ({res['p_casa']:.0f}%)")
-                        if res["p_fora"] >= 35: dicas.append(f"🏆 Vitória {times[1].text} ({res['p_fora']:.0f}%)")
-                        if res["p_gols"] >= 50: dicas.append(f"⚽ +1.5 Gols ({res['p_gols']:.0f}%)")
-                        if res["p_ambas"] >= 40: dicas.append(f"🔄 Ambas Marcam ({res['p_ambas']:.0f}%)")
-                        
-                        if dicas:
-                            msg = f"🏟️ *{times[0].text} x {times[1].text}*\n" + "\n".join(dicas)
-                            enviar_telegram(msg)
-                            total_avisos += 1
-                        time.sleep(1)
-        except: continue
+        response = requests.get(url_base + liga, headers={'User-Agent': 'Mozilla/5.0'})
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for link in soup.find_all('a', href=True):
+            if '/jogo/' in link['href']:
+                times = link.find_all('span', class_='team-name')
+                if len(times) < 2: continue
+                
+                res = analisar_detalhes(url_base + link['href'])
+                if res:
+                    lista_final.append({
+                        "jogo": f"{times[0].text} x {times[1].text}",
+                        "prob": res["prob"],
+                        "mercado": res["mercado"]
+                    })
+                time.sleep(0.5)
+
+    # ORDENAÇÃO INTELIGENTE: Pega os 10 jogos com as MAIORES probabilidades do dia
+    lista_final.sort(key=lambda x: x['prob'], reverse=True)
+    top_10 = lista_final[:10]
+
+    if top_10:
+        msg = "📝 *SEU BILHETE DE HOJE (TOP 10):*\n\n"
+        for i, item in enumerate(top_10, 1):
+            msg += f"{i}. 🏟️ {item['jogo']}\n📍 *Aposta:* {item['mercado']} ({item['prob']:.0f}%)\n\n"
+        enviar_telegram(msg)
+    else:
+        enviar_telegram("🔍 Não encontrei jogos suficientes com dados para o Top 10.")
 
 if __name__ == "__main__":
     executar_robo()
