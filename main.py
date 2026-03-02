@@ -78,4 +78,3 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
-        
