@@ -16,41 +16,32 @@ def analisar_detalhes(url_jogo):
     try:
         res = requests.get(url_jogo, headers=headers)
         soup = BeautifulSoup(res.text, 'html.parser')
-        texto_pagina = soup.get_text().lower()
-
-        # Status de Escalação
-        status = "✅ Titulares Prováveis"
-        if any(w in texto_pagina for w in ["reserva", "poupado", "desfalques", "injury"]):
-            status = "⚠️ Atenção: Possíveis Reservas"
-
-        # Coleta de placares históricos (H2H)
         placares = [p.text.strip() for p in soup.find_all('span', class_='score')]
         total = len(placares)
-        if total == 0: return None
+        if total < 3: return None
 
-        # Contagem de cenários
-        zero_gols = sum(1 for p in placares if sum(map(int, p.split('-'))) == 0)
-        exato_1 = sum(1 for p in placares if sum(map(int, p.split('-'))) == 1)
-        exato_2 = sum(1 for p in placares if sum(map(int, p.split('-'))) == 2)
-        tres_ou_mais = sum(1 for p in placares if sum(map(int, p.split('-'))) >= 3)
+        # --- CÁLCULO DE PROBABILIDADES ---
+        vitoria_casa = sum(1 for p in placares if int(p.split('-')[0]) > int(p.split('-')[1]))
+        vitoria_fora = sum(1 for p in placares if int(p.split('-')[1]) > int(p.split('-')[0]))
+        mais_1_5 = sum(1 for p in placares if sum(map(int, p.split('-'))) >= 2)
+        ambas_sim = sum(1 for p in placares if '-' in p and all(int(x) > 0 for x in p.split('-')))
 
         return {
-            "0_gols": (zero_gols / total),
-            "1_gol": (exato_1 / total),
-            "2_gols": (exato_2 / total),
-            "3_mais": (tres_ou_mais / total),
-            "status": status
+            "casa": (vitoria_casa / total) * 100,
+            "fora": (vitoria_fora / total) * 100,
+            "gols": (mais_1_5 / total) * 100,
+            "ambas": (ambas_sim / total) * 100,
+            "total": total
         }
     except: return None
 
 def executar_robo():
-    enviar_telegram("🎯 *PodeApostar_Bot:* Varredura Multi-Alertas Iniciada!")
+    enviar_telegram("📊 *PodeApostar_Bot:* Caçando Melhores Mercados para Múltipla...")
     url_base = "https://www.placardefutebol.com.br"
-    ligas = ["/brasileirao-serie-a", "/campeonato-ingles", "/campeonato-italiano", 
+    # Ligas da sua print: Carioca (Flamengo), Argentina, Europa
+    ligas = ["/campeonato-carioca", "/campeonato-ingles", "/campeonato-italiano", 
              "/campeonato-espanhol", "/campeonato-portugues", "/campeonato-argentino"]
     
-    total_encontrados = 0
-
     for liga in ligas:
         response = requests.get(url_base + liga, headers={'User-Agent': 'Mozilla/5.0'})
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -60,32 +51,28 @@ def executar_robo():
                 if len(times) < 2: continue
                 
                 res = analisar_detalhes(url_base + link['href'])
-                if not res: continue
+                if res:
+                    time_a, time_b = times[0].text, times[1].text
+                    sugestao = ""
+                    
+                    # --- LÓGICA DE DECISÃO DA ESTRATÉGIA ---
+                    # 1. Se um time vence muito (ex: Flamengo ou Real Madrid)
+                    if res["casa"] >= 60: sugestao = f"🏆 *Vitória:* {time_a}"
+                    elif res["fora"] >= 60: sugestao = f"🏆 *Vitória:* {time_b}"
+                    
+                    # 2. Se o Ambas Marcam é muito forte (ex: Fiorentina ou Benfica)
+                    elif res["ambas"] >= 55: sugestao = "🔄 *Ambas Marcam: SIM*"
+                    
+                    # 3. Se o foco for apenas 2 gols na partida (Over 1.5)
+                    elif res["gols"] >= 70: sugestao = "⚽ *Mínimo 2 Gols na partida*"
 
-                # Lógica de Alertas Separados (Foco em Odd ~1.40)
-                # Se a probabilidade é > 40%, a estatística justifica a entrada
-                alertas = []
-                if res["0_gols"] > 0.40: alertas.append("🚫 *Alerta:* Tendência 0 Gols (Under 0.5)")
-                if res["1_gol"] > 0.40:  alertas.append("⚽ *Alerta:* Tendência 1 Gol Exato")
-                if res["2_gols"] > 0.40: alertas.append("✌️ *Alerta:* Tendência 2 Gols Exatos")
-                if res["3_mais"] > 0.40: alertas.append("🔥 *Alerta:* Tendência 3+ Gols (Over 2.5)")
-                
-                # Alerta para sua estratégia de Mínimo 2 Gols (Over 1.5)
-                if (res["2_gols"] + res["3_mais"]) > 0.50:
-                    alertas.append("🚀 *ESTRATÉGIA:* Mínimo 2 Gols (Over 1.5)")
-
-                if alertas:
-                    msg = (f"🏆 *{liga.replace('/','').upper()}*\n"
-                           f"🏟️ {times[0].text} x {times[1].text}\n"
-                           f"📋 {res['status']}\n"
-                           + "\n".join(alertas))
-                    enviar_telegram(msg)
-                    total_encontrados += 1
+                    if sugestao:
+                        msg = (f"🏟️ *{time_a} x {time_b}*\n"
+                               f"📍 {sugestao}\n"
+                               f"📈 Confiança: {max(res['casa'], res['fora'], res['ambas'], res['gols']):.0f}%\n"
+                               f"📚 Histórico: {res['total']} jogos")
+                        enviar_telegram(msg)
                 time.sleep(1)
-
-    if total_encontrados == 0:
-        enviar_telegram("🔍 Sem jogos com padrões de odds mínimas para hoje.")
 
 if __name__ == "__main__":
     executar_robo()
-                
