@@ -1,10 +1,10 @@
 name: Executar PodeApostar Bot
 on:
-  workflow_dispatch: # Permite rodar manualmente clicando no botão
+  workflow_dispatch:
   schedule:
-    # O horário UTC é 3h a mais que o de Brasília.
-    # '0 13 * * 6,0' roda Sábado e Domingo às 10h da manhã (Horário de Brasília)
-    - cron: '0 13 * * 6,0'
+    # 3 = Quarta-feira, 6 = Sábado
+    # '0 12 * * 3,6' significa: Minuto 0, Hora 12 (9h no Brasil)
+    - cron: '0 12 * * 3,6'
 
 jobs:
   job_bot:
@@ -21,7 +21,7 @@ jobs:
       - name: Instalar Bibliotecas
         run: pip install -r requirements.txt
 
-      - name: Rodar Analisador de Gols
+      - name: Rodar Analisador
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
