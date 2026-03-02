@@ -10,74 +10,64 @@ def enviar_telegram(mensagem):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={CHAT_ID}&text={mensagem}&parse_mode=Markdown"
     requests.get(url)
 
-def analisar_historico(url_jogo):
-    """Entra no link do jogo e analisa os últimos resultados"""
+def analisar_detalhes(url_jogo):
     headers = {'User-Agent': 'Mozilla/5.0'}
     try:
         res = requests.get(url_jogo, headers=headers)
         soup = BeautifulSoup(res.text, 'html.parser')
-        
-        # Aqui o robô busca os placares (ex: '2-1', '1-0')
-        # Esta parte simula a captura de dados de gols
+        texto_pagina = soup.get_text().lower()
+
+        # --- LÓGICA DE ESCALAÇÃO ---
+        # O robô procura indícios de que o time pode estar desfalcado
+        alerta_escalacao = "✅ Titulares Prováveis"
+        if "reserva" in texto_pagina or "poupado" in texto_pagina or "desfalques" in texto_pagina:
+            alerta_escalacao = "⚠️ ATENÇÃO: Possíveis Desfalques/Reservas detectados!"
+
+        # --- LÓGICA DE GOLS (H2H) ---
         placares = [p.text.strip() for p in soup.find_all('span', class_='score')]
-        
         gols_no_range = 0
-        total_jogos = len(placares)
-        
-        for placar in placares:
+        for p in placares:
             try:
-                gols = sum(map(int, placar.split('-')))
-                if 1 <= gols <= 3:
-                    gols_no_range += 1
-            except:
-                continue
+                total = sum(map(int, p.split('-')))
+                if 1 <= total <= 3: gols_no_range += 1
+            except: continue
         
-        # Retorna a porcentagem de jogos que ficaram entre 1 e 3 gols
-        return (gols_no_range / total_jogos) if total_jogos > 0 else 0
+        prob = (gols_no_range / len(placares)) if placares else 0
+        return prob, alerta_escalacao
     except:
-        return 0
+        return 0, "❌ Erro ao ler escalação"
 
 def executar_robo():
-    enviar_telegram("🚀 *PodeApostar_Bot:* Iniciando análise profunda da rodada...")
+    enviar_telegram("🤖 *PodeApostar_Bot:* Iniciando análise para a rodada!")
     
     url_base = "https://www.placardefutebol.com.br"
-    url_serie_a = f"{url_base}/brasileirao-serie-a"
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    
-    response = requests.get(url_serie_a, headers=headers)
+    # Focando no Brasileirão Série A
+    response = requests.get(f"{url_base}/brasileirao-serie-a", headers={'User-Agent': 'Mozilla/5.0'})
     soup = BeautifulSoup(response.text, 'html.parser')
     
-    links_jogos = soup.find_all('a', href=True)
-    jogos_analisados = 0
+    links = soup.find_all('a', href=True)
+    encontrados = 0
 
-    for link in links_jogos:
+    for link in links:
         if '/jogo/' in link['href']:
-            url_final = url_base + link['href']
-            # O robô "entra" no jogo para analisar
-            print(f"Analisando: {url_final}")
-            
-            # Pegamos os nomes dos times
             times = link.find_all('span', class_='team-name')
             if len(times) < 2: continue
             
             casa, fora = times[0].text, times[1].text
+            prob, status_time = analisar_detalhes(url_base + link['href'])
             
-            # Chama a função de inteligência
-            probabilidade = analisar_historico(url_final)
-            
-            # SE A PROBABILIDADE FOR MAIOR QUE 70%, MANDA O ALERTA
-            if probabilidade >= 0.7:
-                msg = (f"✅ *OPORTUNIDADE DETECTADA*\n"
-                       f"🏟️ {casa} x {fora}\n"
-                       f"📈 Tendência 1-3 Gols: {probabilidade*100:.0f}%\n"
-                       f"🔥 Dica: Entrar em 1-3 Gols e Over 0.5 HT")
+            # Filtro de 50% para ser mais abrangente na análise
+            if prob >= 0.5:
+                msg = (f"🏟️ *{casa} x {fora}*\n"
+                       f"📈 Tendência 1-3 Gols: {prob*100:.0f}%\n"
+                       f"📋 Info: {status_time}\n"
+                       f"🎯 Sugestão: 1-3 Gols & HT")
                 enviar_telegram(msg)
-                jogos_analisados += 1
-            
-            time.sleep(1) # Pausa para não ser bloqueado pelo site
+                encontrados += 1
+            time.sleep(1)
 
-    if jogos_analisados == 0:
-        enviar_telegram("Checking... Nenhum jogo com 70%+ de tendência encontrado hoje.")
+    if encontrados == 0:
+        enviar_telegram("Checking... Nenhum jogo com padrão 1-3 gols detectado para hoje.")
 
 if __name__ == "__main__":
     executar_robo()
