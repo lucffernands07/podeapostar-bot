@@ -2,9 +2,9 @@ name: Executar PodeApostar Bot
 on:
   workflow_dispatch: # Permite que você rode manualmente quando quiser
   schedule:
-    # Roda TODOS OS DIAS às 13:00 UTC (10:00 Horário de Brasília)
+    # Roda TODOS OS DIAS às 12:00 UTC (9:00 Horário de Brasília)
     # O '*' no lugar do dia da semana significa 'todos os dias'
-    - cron: '0 13 * * *'
+    - cron: '0 12 * * *'
 
 jobs:
   job_bot:
