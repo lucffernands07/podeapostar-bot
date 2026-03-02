@@ -17,58 +17,58 @@ def analisar_detalhes(url_jogo):
         soup = BeautifulSoup(res.text, 'html.parser')
         texto_pagina = soup.get_text().lower()
 
-        # --- LÓGICA DE ESCALAÇÃO ---
-        # O robô procura indícios de que o time pode estar desfalcado
-        alerta_escalacao = "✅ Titulares Prováveis"
-        if "reserva" in texto_pagina or "poupado" in texto_pagina or "desfalques" in texto_pagina:
-            alerta_escalacao = "⚠️ ATENÇÃO: Possíveis Desfalques/Reservas detectados!"
+        # Lógica de Escalação
+        status_time = "✅ Titulares Prováveis"
+        if any(word in texto_pagina for word in ["reserva", "poupado", "desfalques", "injury", "substitute"]):
+            status_time = "⚠️ Atenção: Possíveis Desfalques!"
 
-        # --- LÓGICA DE GOLS (H2H) ---
+        # Lógica de Gols (H2H)
         placares = [p.text.strip() for p in soup.find_all('span', class_='score')]
-        gols_no_range = 0
-        for p in placares:
-            try:
-                total = sum(map(int, p.split('-')))
-                if 1 <= total <= 3: gols_no_range += 1
-            except: continue
+        gols_no_range = sum(1 for p in placares if 1 <= sum(map(int, p.split('-'))) <= 3)
         
         prob = (gols_no_range / len(placares)) if placares else 0
-        return prob, alerta_escalacao
+        return prob, status_time
     except:
-        return 0, "❌ Erro ao ler escalação"
+        return 0, "❌ Erro na análise"
 
 def executar_robo():
-    enviar_telegram("🤖 *PodeApostar_Bot:* Iniciando análise para a rodada!")
+    enviar_telegram("🌍 *PodeApostar_Bot:* Iniciando Varredura Internacional (BRA, ING, ITA)...")
     
     url_base = "https://www.placardefutebol.com.br"
-    # Focando no Brasileirão Série A
-    response = requests.get(f"{url_base}/brasileirao-serie-a", headers={'User-Agent': 'Mozilla/5.0'})
-    soup = BeautifulSoup(response.text, 'html.parser')
+    # Lista de ligas para o robô monitorar
+    ligas = [
+        "/brasileirao-serie-a",
+        "/campeonato-ingles",
+        "/campeonato-italiano"
+    ]
     
-    links = soup.find_all('a', href=True)
-    encontrados = 0
+    total_encontrados = 0
 
-    for link in links:
-        if '/jogo/' in link['href']:
-            times = link.find_all('span', class_='team-name')
-            if len(times) < 2: continue
-            
-            casa, fora = times[0].text, times[1].text
-            prob, status_time = analisar_detalhes(url_base + link['href'])
-            
-            # Filtro de 50% para ser mais abrangente na análise
-            if prob >= 0.5:
-                msg = (f"🏟️ *{casa} x {fora}*\n"
-                       f"📈 Tendência 1-3 Gols: {prob*100:.0f}%\n"
-                       f"📋 Info: {status_time}\n"
-                       f"🎯 Sugestão: 1-3 Gols & HT")
-                enviar_telegram(msg)
-                encontrados += 1
-            time.sleep(1)
+    for liga in ligas:
+        response = requests.get(url_base + liga, headers={'User-Agent': 'Mozilla/5.0'})
+        soup = BeautifulSoup(response.text, 'html.parser')
+        links = soup.find_all('a', href=True)
 
-    if encontrados == 0:
-        enviar_telegram("Checking... Nenhum jogo com padrão 1-3 gols detectado para hoje.")
+        for link in links:
+            if '/jogo/' in link['href']:
+                times = link.find_all('span', class_='team-name')
+                if len(times) < 2: continue
+                
+                casa, fora = times[0].text, times[1].text
+                prob, status = analisar_detalhes(url_base + link['href'])
+                
+                if prob >= 0.5:
+                    msg = (f"🏆 *{liga.replace('/','').upper()}*\n"
+                           f"🏟️ {casa} x {fora}\n"
+                           f"📈 Tendência 1-3 Gols: {prob*100:.0f}%\n"
+                           f"📋 Info: {status}\n"
+                           f"🎯 Sugestão: 1-3 Gols & HT")
+                    enviar_telegram(msg)
+                    total_encontrados += 1
+                time.sleep(1)
+
+    if total_encontrados == 0:
+        enviar_telegram("Checking... Sem padrões de 1-3 gols nas ligas principais hoje.")
 
 if __name__ == "__main__":
     executar_robo()
-    
