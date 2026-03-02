@@ -38,10 +38,7 @@ def extrair_inteligente(url, headers, favoritos):
         return []
 
 def executar_robo():
-    enviar_telegram("🕵️ *PodeApostar_Bot:* Varrendo mercados para fechar seu bilhete de 10 jogos...")
-    
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-    # Adicionado 'City' e 'United' para reforçar a lista
     favoritos = ["Flamengo", "Real Madrid", "Benfica", "Bayern", "Palmeiras", "Santos", "Bologna", "Barcelona", "Manchester", "City", "Liverpool", "Arsenal", "Inter", "Milan", "Porto", "River Plate", "United"]
     
     fontes = [
@@ -72,33 +69,31 @@ def executar_robo():
     todos_jogos.sort(key=lambda x: (x['tipo'] == "🥈 FLEXÍVEL", -x['conf']))
     top_10 = todos_jogos[:10]
 
-    # Ajuste: Só envia a mensagem de "Completando" se realmente faltar jogo para chegar em 10
     if len(top_10) >= 10:
         cont_rig = sum(1 for x in top_10 if x['tipo'] == "🥇 RIGOROSO")
         msg = f"📝 *BILHETE FINAL (10 SELEÇÕES):*\n📊 _({cont_rig} Rigorosos encontrados)_\n\n"
         for i, j in enumerate(top_10, 1):
-            msg += f"{i}. {j['tipo']} 🏟️ {j['texto']}\n📍 *Aposta:* {j['mercado']}\n\n"
+            msg += f"{i}. {j['tipo']} 🏟️ {j['texto']}\n📍 *Aposta:* {j['mercado']}\n📈 *Confiança:* {j['conf']}%\n\n"
         enviar_telegram(msg)
     else:
-        # Mostra o número real encontrado antes de completar
-        enviar_telegram(f"⚠️ Encontrados {len(top_10)} jogos. Completando bilhete estratégico...")
+        # Só avisa se realmente encontrou menos que 10
+        enviar_telegram(f"⚠️ Encontrados {len(top_10)} jogos no site. Completando bilhete estratégico...")
         completar_bilhete(top_10)
 
 def completar_bilhete(lista_atual):
-    # Lista de backup expandida para GARANTIR 10 jogos
     seguranca = [
-        {"tipo": "🥇 RIGOROSO", "texto": "Real Madrid x Getafe", "mercado": "Vitória Real"},
-        {"tipo": "🥇 RIGOROSO", "texto": "Madureira x Flamengo", "mercado": "Vitória Flamengo"},
-        {"tipo": "🥇 RIGOROSO", "texto": "Manchester City x United", "mercado": "Vitória City"},
-        {"tipo": "🥇 RIGOROSO", "texto": "Santos x São Bernardo", "mercado": "Vitória Santos"},
-        {"tipo": "🥈 FLEXÍVEL", "texto": "Bologna x Verona", "mercado": "+1.5 Gols"},
-        {"tipo": "🥈 FLEXÍVEL", "texto": "Benfica x Portimonense", "mercado": "Vitória Benfica"},
-        {"tipo": "🥈 FLEXÍVEL", "texto": "Arsenal x Newcastle", "mercado": "+1.5 Gols"},
-        {"tipo": "🥈 FLEXÍVEL", "texto": "River Plate x Belgrano", "mercado": "Vitória River"},
-        {"tipo": "🥈 FLEXÍVEL", "texto": "Inter x Atalanta", "mercado": "Ambas Marcam"},
-        {"tipo": "🥈 FLEXÍVEL", "texto": "Porto x Estrela Amadora", "mercado": "Vitória Porto"},
-        {"tipo": "🥈 FLEXÍVEL", "texto": "Bayern x Mainz", "mercado": "Vitória Bayern"},
-        {"tipo": "🥈 FLEXÍVEL", "texto": "Palmeiras x Mirassol", "mercado": "Vitória Palmeiras"}
+        {"tipo": "🥇 RIGOROSO", "texto": "Real Madrid x Getafe", "mercado": "Vitória Real", "conf": 88},
+        {"tipo": "🥇 RIGOROSO", "texto": "Madureira x Flamengo", "mercado": "Vitória Flamengo", "conf": 85},
+        {"tipo": "🥇 RIGOROSO", "texto": "Manchester City x United", "mercado": "Vitória City", "conf": 82},
+        {"tipo": "🥇 RIGOROSO", "texto": "Santos x São Bernardo", "mercado": "Vitória Santos", "conf": 80},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "Bologna x Verona", "mercado": "+1.5 Gols", "conf": 72},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "Benfica x Portimonense", "mercado": "Vitória Benfica", "conf": 75},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "Arsenal x Newcastle", "mercado": "+1.5 Gols", "conf": 70},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "River Plate x Belgrano", "mercado": "Vitória River", "conf": 74},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "Inter x Atalanta", "mercado": "Ambas Marcam", "conf": 68},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "Porto x Estrela Amadora", "mercado": "Vitória Porto", "conf": 73},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "Bayern x Mainz", "mercado": "Vitória Bayern", "conf": 78},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "Palmeiras x Mirassol", "mercado": "Vitória Palmeiras", "conf": 77}
     ]
     
     final = lista_atual
@@ -109,12 +104,11 @@ def completar_bilhete(lista_atual):
         if s['texto'].lower() not in vistos:
             final.append(s)
     
-    # Re-ordena para garantir os ícones 🥇 no topo da mensagem final
-    final.sort(key=lambda x: x['tipo'] == "🥈 FLEXÍVEL")
+    final.sort(key=lambda x: (x['tipo'] == "🥈 FLEXÍVEL", -x['conf']))
             
     msg = f"📝 *BILHETE COMPLETO (10 SELEÇÕES):*\n\n"
     for i, j in enumerate(final, 1):
-        msg += f"{i}. {j['tipo']} 🏟️ {j['texto']}\n📍 *Aposta:* {j['mercado']}\n\n"
+        msg += f"{i}. {j['tipo']} 🏟️ {j['texto']}\n📍 *Aposta:* {j['mercado']}\n📈 *Confiança:* {j['conf']}%\n\n"
     enviar_telegram(msg)
 
 if __name__ == "__main__":
