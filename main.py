@@ -11,74 +11,82 @@ def enviar_telegram(mensagem):
     try: requests.get(url)
     except: pass
 
-def extrair_jogos(url, headers):
-    """ Tenta extrair jogos de uma URL específica """
-    jogos_na_pagina = []
+def analisar_probabilidades(url_jogo):
+    headers = {'User-Agent': 'Mozilla/5.0'}
     try:
-        res = requests.get(url, headers=headers, timeout=15)
-        if res.status_code != 200: return []
-        
+        res = requests.get(url_jogo, headers=headers, timeout=10)
         soup = BeautifulSoup(res.text, 'html.parser')
-        # Busca links de jogos ou textos que contenham "x" ou "-" entre times
-        elementos = soup.find_all(['a', 'div', 'span'])
+        placares = [p.text.strip() for p in soup.find_all('span', class_='score')]
+        total = len(placares)
         
-        for el in elementos:
-            texto = el.get_text().strip()
-            if " x " in texto and len(texto) < 50:
-                # Lógica de mercado simplificada para o bilhete
-                mercado = "+1.5 Gols" 
-                if any(f in texto for f in ["Real Madrid", "Flamengo", "Benfica", "Bayern"]):
-                    mercado = "Vitória Favorito"
-                
-                jogos_na_pagina.append(f"🏟️ {texto}\n📍 *Aposta:* {mercado}")
-        return jogos_na_pagina
+        if total < 2: return None # Ignora jogos sem histórico suficiente
+
+        # Cálculo Real de Tendência
+        v_casa = (sum(1 for p in placares if int(p.split('-')[0]) > int(p.split('-')[1])) / total) * 100
+        v_fora = (sum(1 for p in placares if int(p.split('-')[1]) > int(p.split('-')[0])) / total) * 100
+        mais_1_5 = (sum(1 for p in placares if sum(map(int, p.split('-'))) >= 2) / total) * 100
+        ambas = (sum(1 for p in placares if '-' in p and all(int(x) > 0 for x in p.split('-'))) / total) * 100
+
+        # Identifica o mercado com maior probabilidade neste jogo
+        opcoes = [
+            (v_casa, "Vitória Casa"),
+            (v_fora, "Vitória Fora"),
+            (mais_1_5, "Mais de 1.5 Gols"),
+            (ambas, "Ambas Marcam")
+        ]
+        
+        prob_max, mercado_eleito = max(opcoes)
+        return {"confianca": prob_max, "mercado": mercado_eleito}
     except:
-        return []
+        return None
 
 def executar_robo():
-    enviar_telegram("🔎 *PodeApostar_Bot:* Iniciando busca em múltiplas fontes...")
+    enviar_telegram("🧠 *Estrategista_Bot:* Analisando o mundo para encontrar o Top 10...")
     
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-    
-    # Lista de Fontes (Plano A, B e C)
-    fontes = [
-        "https://www.placardefutebol.com.br/jogos-de-hoje",
-        "https://www.placardefutebol.com.br/campeonato-espanhol",
-        "https://www.placardefutebol.com.br/campeonato-portugues",
-        "https://www.placardefutebol.com.br/campeonato-carioca",
-        "https://www.resultados.com" # Exemplo de Plano B
+    url_base = "https://www.placardefutebol.com.br"
+    ligas = [
+        "/campeonato-espanhol", "/campeonato-ingles", "/campeonato-italiano", 
+        "/campeonato-portugues", "/campeonato-alemao", "/campeonato-frances",
+        "/campeonato-carioca", "/campeonato-paulista", "/brasileirao-serie-a", 
+        "/campeonato-argentino", "/copa-sul-americana", "/campeonato-holandes"
     ]
     
-    todos_jogos = []
-    
-    for url in fontes:
-        enviar_telegram(f"📡 Verificando: {url.split('/')[2]}...")
-        resultados = extrair_jogos(url, headers)
-        todos_jogos.extend(resultados)
-        
-        # Se já achamos mais de 10, podemos parar a busca pesada
-        if len(set(todos_jogos)) >= 15:
-            break
-        time.sleep(2) # Pausa estratégica para não ser bloqueado
+    banco_de_dados = []
+    jogos_vistos = set()
 
-    # Limpeza e Seleção
-    lista_final = list(dict.fromkeys(todos_jogos))[:10]
+    for liga in ligas:
+        try:
+            res = requests.get(url_base + liga, headers={'User-Agent': 'Mozilla/5.0'})
+            soup = BeautifulSoup(res.text, 'html.parser')
+            
+            for link in soup.find_all('a', href=True):
+                if '/jogo/' in link['href']:
+                    times = link.find_all('span', class_='team-name')
+                    if len(times) >= 2:
+                        nome_jogo = f"{times[0].text} x {times[1].text}"
+                        if nome_jogo not in jogos_vistos:
+                            analise = analisar_probabilidades(url_base + link['href'])
+                            if analise:
+                                banco_de_dados.append({
+                                    "jogo": nome_jogo,
+                                    "mercado": analise["mercado"],
+                                    "confianca": analise["confianca"]
+                                })
+                                jogos_vistos.add(nome_jogo)
+            time.sleep(0.5)
+        except: continue
 
-    if len(lista_final) >= 5:
-        msg = "📝 *BILHETE DO DIA (TOP 10 SELEÇÕES):*\n\n" + "\n\n".join(lista_final)
+    # ESTRATÉGIA: Ordenar do maior para o menor (Ranking de Confiança)
+    banco_de_dados.sort(key=lambda x: x['confianca'], reverse=True)
+    top_10 = banco_de_dados[:10]
+
+    if top_10:
+        msg = "🏆 *TOP 10 MELHORES APOSTAS DO MUNDO (HOJE):*\n\n"
+        for i, item in enumerate(top_10, 1):
+            msg += f"{i}. 🏟️ {item['jogo']}\n📍 *Aposta:* {item['mercado']}\n📈 *Confiança:* {item['confianca']:.0f}%\n\n"
         enviar_telegram(msg)
     else:
-        enviar_telegram("⚠️ Poucos jogos encontrados. Tentando análise profunda de ligas...")
-        # Se falhar, ele tenta uma última vez em ligas específicas
-        executar_busca_emergencia()
-
-def executar_busca_emergencia():
-    # Uma função simples caso as URLs principais falhem totalmente
-    msg = "🏆 *Sugestão de Emergência (Favoritos do Dia):*\n\n"
-    msg += "1. 🏟️ Real Madrid x Getafe -> Vitória\n"
-    msg += "2. 🏟️ Madureira x Flamengo -> Vitória\n"
-    msg += "3. 🏟️ Gil Vicente x Benfica -> +1.5 Gols\n"
-    enviar_telegram(msg)
+        enviar_telegram("❌ Dados insuficientes para montar o Top 10 estratégico hoje.")
 
 if __name__ == "__main__":
     executar_robo()
