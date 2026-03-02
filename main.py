@@ -12,25 +12,21 @@ def enviar_telegram(mensagem):
     except: pass
 
 def extrair_inteligente(url, headers, favoritos):
-    """ Extrai jogos e já classifica entre Rigoroso e Flexível """
     coletados = []
     try:
         res = requests.get(url, headers=headers, timeout=15)
         if res.status_code != 200: return []
         
         soup = BeautifulSoup(res.text, 'html.parser')
-        # Buscamos em links e spans (onde ficam os nomes dos times)
-        elementos = soup.find_all(['a', 'span', 'div'])
-        
-        for el in elementos:
+        # Busca em links e textos planos para capturar o padrão "Time x Time"
+        for el in soup.find_all(['a', 'span', 'div', 'p']):
             texto = el.get_text().strip()
-            # Padrão: Time A x Time B
-            if " x " in texto and len(texto) < 50:
+            # Filtro para identificar um jogo real (precisa ter ' x ' e não ser muito longo)
+            if " x " in texto and 5 < len(texto) < 60 and '\n' not in texto:
                 tipo = "🥈 FLEXÍVEL"
                 mercado = "+1.5 Gols"
                 conf = 65
                 
-                # Se um dos favoritos estiver no jogo, vira RIGOROSO
                 for fav in favoritos:
                     if fav.lower() in texto.lower():
                         tipo = "🥇 RIGOROSO"
@@ -38,67 +34,83 @@ def extrair_inteligente(url, headers, favoritos):
                         conf = 85
                         break
                 
-                coletados.append({
-                    "texto": texto,
-                    "tipo": tipo,
-                    "mercado": mercado,
-                    "conf": conf
-                })
+                coletados.append({"texto": texto, "tipo": tipo, "mercado": mercado, "conf": conf})
         return coletados
     except:
         return []
 
 def executar_robo():
-    enviar_telegram("🔎 *PodeApostar_Bot:* Iniciando busca estratégica global...")
+    enviar_telegram("🕵️ *PodeApostar_Bot:* Varrendo mercados para fechar seu bilhete de 10 jogos...")
     
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-    favoritos = ["Flamengo", "Real Madrid", "Benfica", "Bayern", "Palmeiras", "Santos", "Bologna", "Barcelona", "Manchester", "Liverpool", "Arsenal"]
+    favoritos = ["Flamengo", "Real Madrid", "Benfica", "Bayern", "Palmeiras", "Santos", "Bologna", "Barcelona", "Manchester", "Liverpool", "Arsenal", "Inter", "Milan", "Porto", "River Plate"]
     
     fontes = [
         "https://www.placardefutebol.com.br/jogos-de-hoje",
         "https://www.placardefutebol.com.br/copa-sul-americana",
         "https://www.placardefutebol.com.br/campeonato-ingles",
-        "https://www.placardefutebol.com.br/campeonato-carioca"
+        "https://www.placardefutebol.com.br/campeonato-espanhol",
+        "https://www.placardefutebol.com.br/campeonato-italiano",
+        "https://www.placardefutebol.com.br/campeonato-carioca",
+        "https://www.placardefutebol.com.br/campeonato-paulista"
     ]
     
     todos_jogos = []
     jogos_vistos = set()
 
     for url in fontes:
-        # Extrai os jogos da fonte atual
         resultados = extrair_inteligente(url, headers, favoritos)
-        
         for item in resultados:
-            # Evita duplicados
             id_jogo = item['texto'].lower().replace(" ", "")
             if id_jogo not in jogos_vistos:
                 todos_jogos.append(item)
                 jogos_vistos.add(id_jogo)
         
-        if len(todos_jogos) >= 20: break
+        # Se já temos 15 ou mais, podemos parar para organizar o Top 10
+        if len(todos_jogos) >= 15:
+            break
         time.sleep(1)
 
-    # ORDENAÇÃO: Coloca os 🥇 RIGOROSOS no topo
+    # Ordenação: Rigorosos primeiro
     todos_jogos.sort(key=lambda x: (x['tipo'] == "🥈 FLEXÍVEL", -x['conf']))
     
+    # PEGA OS 10 MELHORES
     top_10 = todos_jogos[:10]
 
-    if len(top_10) >= 1:
+    if len(top_10) >= 10:
         cont_rig = sum(1 for x in top_10 if x['tipo'] == "🥇 RIGOROSO")
-        msg = f"📝 *BILHETE MISTO (TOP 10):*\n📊 _Encontrados {cont_rig} jogos de nível Rigoroso_\n\n"
-        
+        msg = f"📝 *BILHETE FINAL (10 SELEÇÕES):*\n📊 _({cont_rig} Rigorosos encontrados)_\n\n"
         for i, j in enumerate(top_10, 1):
             msg += f"{i}. {j['tipo']} 🏟️ {j['texto']}\n📍 *Aposta:* {j['mercado']}\n\n"
-        
         enviar_telegram(msg)
     else:
-        executar_busca_emergencia()
+        # Se não achou 10, ele complementa com a lista de segurança
+        enviar_telegram(f"⚠️ Encontrados apenas {len(top_10)} jogos. Completando bilhete...")
+        completar_bilhete(top_10)
 
-def executar_busca_emergencia():
-    msg = "🏆 *Sugestão de Emergência (Favoritos Confirmados):*\n\n"
-    msg += "1. 🥇 RIGOROSO 🏟️ Real Madrid x Getafe -> Vitória Real\n"
-    msg += "2. 🥇 RIGOROSO 🏟️ Madureira x Flamengo -> Vitória Flamengo\n"
-    msg += "3. 🥈 FLEXÍVEL 🏟️ Jogo do dia -> +1.5 Gols\n"
+def completar_bilhete(lista_atual):
+    # Lista de segurança para garantir que o usuário SEMPRE receba 10 opções
+    seguranca = [
+        {"tipo": "🥇 RIGOROSO", "texto": "Real Madrid x Getafe", "mercado": "Vitória Real"},
+        {"tipo": "🥇 RIGOROSO", "texto": "Madureira x Flamengo", "mercado": "Vitória Flamengo"},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "Bologna x Verona", "mercado": "+1.5 Gols"},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "Benfica x Portimonense", "mercado": "Vitória Benfica"},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "Arsenal x Newcastle", "mercado": "+1.5 Gols"},
+        {"tipo": "🥈 FLEXÍVEL", "texto": "River Plate x Belgrano", "mercado": "Vitória River"},
+        {"tipo": "🥇 RIGOROSO", "texto": "Santos x São Bernardo", "mercado": "Vitória Santos"}
+    ]
+    
+    final = lista_atual
+    vistos = {x['texto'].lower() for x in final}
+    
+    for s in seguranca:
+        if len(final) >= 10: break
+        if s['texto'].lower() not in vistos:
+            final.append(s)
+            
+    msg = f"📝 *BILHETE COMPLETO (10 SELEÇÕES):*\n\n"
+    for i, j in enumerate(final, 1):
+        msg += f"{i}. {j['tipo']} 🏟️ {j['texto']}\n📍 *Aposta:* {j['mercado']}\n\n"
     enviar_telegram(msg)
 
 if __name__ == "__main__":
