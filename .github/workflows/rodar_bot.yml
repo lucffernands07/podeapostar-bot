@@ -1,29 +1,29 @@
 name: Executar PodeApostar Bot
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Permite rodar manualmente clicando no botão
   schedule:
-    # Roda Sábado e Domingo às 11:00 BRT (14:00 UTC)
-    - cron: '0 14 * * 6,0'
+    # O horário UTC é 3h a mais que o de Brasília.
+    # '0 13 * * 6,0' roda Sábado e Domingo às 10h da manhã (Horário de Brasília)
+    - cron: '0 13 * * 6,0'
 
 jobs:
-  build:
+  job_bot:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout código
+      - name: Checkout do Código
         uses: actions/checkout@v3
 
-      - name: Setup Python
+      - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Instalar Dependências
+      - name: Instalar Bibliotecas
         run: pip install -r requirements.txt
 
-      - name: Rodar Script
+      - name: Rodar Analisador de Gols
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-          GOOGLE_SHEET_URL: ${{ secrets.GOOGLE_SHEET_URL }}
         run: python main.py
         
