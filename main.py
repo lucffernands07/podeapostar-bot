@@ -3,7 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-# Configurações do Telegram vindas dos Secrets do GitHub
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 
@@ -11,8 +10,8 @@ def enviar_telegram(mensagem):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={CHAT_ID}&text={mensagem}&parse_mode=Markdown"
     try:
         requests.get(url)
-    except Exception as e:
-        print(f"Erro ao enviar: {e}")
+    except:
+        pass
 
 def analisar_detalhes(url_jogo):
     headers = {'User-Agent': 'Mozilla/5.0'}
@@ -21,44 +20,40 @@ def analisar_detalhes(url_jogo):
         soup = BeautifulSoup(res.text, 'html.parser')
         texto_pagina = soup.get_text().lower()
 
-        # --- LÓGICA DE ESCALAÇÃO ---
-        status_time = "✅ Titulares Prováveis"
-        # Termos em português e inglês para cobrir as ligas internacionais
-        termos_alerta = ["reserva", "poupado", "desfalques", "injury", "substitute", "ausentes"]
-        if any(word in texto_pagina for word in termos_alerta):
-            status_time = "⚠️ Atenção: Possíveis Desfalques!"
+        # Detetive de Escalação
+        status_time = "✅ Titulares"
+        if any(word in texto_pagina for word in ["reserva", "poupado", "desfalques", "injury", "ausentes"]):
+            status_time = "⚠️ Atenção: Reservas"
 
-        # --- LÓGICA DE GOLS (HISTÓRICO H2H) ---
+        # Lógica Focada em Mínimo de 2 Gols (Over 1.5)
         placares = [p.text.strip() for p in soup.find_all('span', class_='score')]
         total_jogos = len(placares)
-        gols_no_range = 0
+        jogos_over_1_5 = 0
         
         for p in placares:
             try:
-                # Soma os gols do placar (ex: "2-1" vira 3)
                 gols = sum(map(int, p.split('-')))
-                # Verifica se está no padrão de 1 a 3 gols
-                if 1 <= gols <= 3:
-                    gols_no_range += 1
+                if gols >= 2: # Foco total em 2 gols ou mais
+                    jogos_over_1_5 += 1
             except:
                 continue
         
-        prob = (gols_no_range / total_jogos) if total_jogos > 0 else 0
+        prob = (jogos_over_1_5 / total_jogos) if total_jogos > 0 else 0
         return prob, status_time
     except:
-        return 0, "❌ Erro na análise detalhada"
+        return 0, "❌ Erro"
 
 def executar_robo():
-    enviar_telegram("🌍 *PodeApostar_Bot:* Varredura (BRA, ING, ITA, ESP, POR) Iniciada!")
+    enviar_telegram("🎯 *PodeApostar_Bot:* Varredura para Mínimo 2 Gols Iniciada!")
     
     url_base = "https://www.placardefutebol.com.br"
-    # Lista atualizada com 5 ligas
     ligas = [
         "/brasileirao-serie-a",
         "/campeonato-ingles",
         "/campeonato-italiano",
         "/campeonato-espanhol",
-        "/campeonato-portugues"
+        "/campeonato-portugues",
+        "/campeonato-argentino" # <--- Campeonato Argentino Adicionado!
     ]
     
     total_encontrados = 0
@@ -77,34 +72,22 @@ def executar_robo():
                     casa, fora = times[0].text, times[1].text
                     prob, status = analisar_detalhes(url_base + link['href'])
                     
-                    # FILTRO DE SENSIBILIDADE EM 0.4 (40%)
-                    if prob >= 0.4:
-                        # --- DEFINIÇÃO DA SUGESTÃO DE ENTRADA ---
-                        if prob >= 0.7:
-                            sugestao = "🔥 *FORTE:* Mínimo 2 Gols (Over 1.5)"
-                        elif prob >= 0.5:
-                            sugestao = "✅ *PADRÃO:* Mercado 1-3 Gols"
-                        else:
-                            sugestao = "⚠️ *MÍNIMO:* Mínimo 1 Gol (Over 0.5)"
-
+                    # Filtro calibrado para te dar mais opções (Volume para sua múltipla)
+                    if prob >= 0.35:
                         msg = (f"🏆 *{liga.replace('/','').upper()}*\n"
                                f"🏟️ {casa} x {fora}\n"
-                               f"📈 Tendência: {prob*100:.0f}%\n"
+                               f"📈 Chance +1.5 Gols: {prob*100:.0f}%\n"
                                f"📋 Info: {status}\n"
-                               f"🎯 Sugestão: {sugestao}\n"
-                               f"⏱️ Estratégia: Buscar Gol no HT")
-                        
+                               f"🚀 *Sugestão:* Mínimo 2 Gols")
                         enviar_telegram(msg)
                         total_encontrados += 1
-                    
-                    # Pausa curta para evitar bloqueio do servidor
                     time.sleep(1)
-        except Exception as e:
-            print(f"Erro ao processar liga {liga}: {e}")
+        except:
             continue
 
     if total_encontrados == 0:
-        enviar_telegram("🔍 *Checking:* Sem padrões claros de gols encontrados nas ligas monitoradas hoje.")
+        enviar_telegram("🔍 Sem jogos com tendência de 2 gols hoje.")
 
 if __name__ == "__main__":
     executar_robo()
+    
