@@ -37,18 +37,25 @@ def analisar_estatisticas(nome_jogo):
 def executar_robo():
     print(f"[{datetime.now().strftime('%H:%M')}] A iniciar Chrome no GitHub Actions...")
     
-    # Configurações críticas para evitar erro de versão e conexão
+    # Configurações de blindagem para o ambiente do GitHub (Ubuntu)
     options = uc.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-dev-shm-usage') # Resolve falta de memória
     options.add_argument('--disable-gpu')
+    options.add_argument('--disable-software-rasterizer')
     options.add_argument('--remote-debugging-port=9222')
+    options.add_argument('--window-size=1920,1080') # Evita elementos escondidos
 
     driver = None
     try:
-        # Forçamos a versão 145 para bater com o Chrome do GitHub Actions
-        driver = uc.Chrome(options=options, use_subprocess=True, version_main=145)
+        # Removido use_subprocess=True para maior estabilidade no log do GitHub
+        # Mantida a versão 145 que o seu erro anterior confirmou ser a correta
+        driver = uc.Chrome(options=options, version_main=145)
+        
+        # Timeout de segurança para sites pesados
+        driver.set_page_load_timeout(60)
+        
         bilhete = []
         vistos = set()
 
@@ -56,7 +63,7 @@ def executar_robo():
         driver.get("https://www.sportinglife.com/football/fixtures-results")
         
         # Espera o carregamento inicial (Anti-bot)
-        wait = WebDriverWait(driver, 30)
+        wait = WebDriverWait(driver, 40)
         wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'MatchList__MatchItem')))
         
         # 2. Capturar links de partidas (Status: Próximos)
@@ -81,7 +88,8 @@ def executar_robo():
         for nome_jogo, url in urls_validas:
             try:
                 driver.get(url)
-                time.sleep(random.uniform(4, 6)) # Delay humano anti-bloqueio
+                # Delay um pouco maior para garantir o carregamento das estatísticas
+                time.sleep(random.uniform(5, 8)) 
                 
                 mercado, conf, obs = analisar_estatisticas(nome_jogo)
                 
@@ -111,7 +119,8 @@ def executar_robo():
             print(f"Jogos insuficientes encontrados ({len(bilhete)}). Mínimo é 5.")
 
     except Exception as e:
-        print(f"Erro Crítico: {e}")
+        # Se falhar aqui, o erro será detalhado no log
+        print(f"Erro Crítico no Driver: {e}")
     finally:
         if driver:
             try:
@@ -121,4 +130,3 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
-            
