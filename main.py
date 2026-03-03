@@ -1,8 +1,6 @@
 import os
-import time
-import random
 import requests
-from bs4 import BeautifulSoup
+import random
 from datetime import datetime
 
 # --- CONFIGURAÇÃO ---
@@ -11,90 +9,87 @@ CHAT_ID = os.getenv('CHAT_ID')
 
 def enviar_telegram(mensagem):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {
-        "chat_id": CHAT_ID,
-        "text": mensagem,
-        "parse_mode": "Markdown",
-        "disable_web_page_preview": "true"
-    }
+    payload = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown", "disable_web_page_preview": "true"}
     try:
         requests.post(url, json=payload, timeout=15)
     except:
         pass
 
-def analisar_estatisticas(nome_jogo):
+def analisar_estatisticas(jogo):
     opcoes = [
         ("🎯 Ambas Marcam", 79, "Tendência de golos no H2H."),
         ("🛡️ DNB (Empate Anula)", 76, "Equilíbrio no histórico recente."),
         ("🔥 +1.5 Golos", 84, "Média de golos elevada."),
-        ("🚩 +8.5 Cantos", 72, "Jogo vertical detectado."),
-        ("⏱️ Golo HT", 81, "Início de jogo intenso.")
+        ("🚩 +8.5 Cantos", 72, "Estilo de jogo vertical."),
+        ("⏱️ Golo HT", 81, "Equipas com início forte.")
     ]
     return random.choice(opcoes)
 
 def executar_robo():
-    print(f"[{datetime.now().strftime('%H:%M')}] Iniciando Modo API Direta...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Conectando à API do Sporting Life...")
     
-    url_base = "https://www.sportinglife.com"
-    url_jogos = f"{url_base}/football/fixtures-results"
+    # URL da API de jogos de futebol do Sporting Life
+    hoje = datetime.now().strftime('%Y-%m-%d')
+    url_api = f"https://www.sportinglife.com/api/football/fixtures?date={hoje}"
     
-    # Headers que imitam um navegador real para pular o bot
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Referer': 'https://www.google.com/'
+        'Accept': 'application/json'
     }
 
     try:
-        session = requests.Session()
-        res = session.get(url_jogos, headers=headers, timeout=20)
+        res = requests.get(url_api, headers=headers, timeout=20)
         
         if res.status_code != 200:
-            print(f"Erro de acesso: {res.status_code}. O site bloqueou o IP.")
+            print(f"Erro na API: {res.status_code}")
             return
 
-        soup = BeautifulSoup(res.text, 'html.parser')
-        
-        # Busca todos os links de jogos
-        links = soup.find_all('a', href=True)
-        urls_validas = []
-        vistos = set()
-
-        for link in links:
-            href = link['href']
-            texto = link.get_text().strip()
-            
-            if "/football/live/" in href and " vs " in texto.lower():
-                url_completa = url_base + href if href.startswith('/') else href
-                if url_completa not in vistos:
-                    urls_validas.append((texto.replace("\n", " "), url_completa))
-                    vistos.add(url_completa)
-            
-            if len(urls_validas) >= 12: break
-
-        print(f"Encontrados {len(urls_validas)} jogos. Gerando bilhete...")
-
+        dados = res.json()
         bilhete = []
-        for nome, url in urls_validas:
-            mercado, conf, obs = analisar_estatisticas(nome)
-            bilhete.append({
-                "jogo": nome, "aposta": mercado, "conf": conf, "obs": obs, "link": url
-            })
+        
+        # O Sporting Life organiza por competições
+        for competicao in dados.get('competitions', []):
+            for jogo in competicao.get('fixtures', []):
+                # Pegamos apenas jogos que ainda não começaram
+                status = jogo.get('status', '').lower()
+                if status == 'fixture' or status == 'scheduled':
+                    home_team = jogo['home_team']['name']
+                    away_team = jogo['away_team']['name']
+                    nome_jogo = f"{home_team} vs {away_team}"
+                    
+                    # Geramos o link oficial
+                    id_jogo = jogo['id']
+                    link = f"https://www.sportinglife.com/football/live/{id_jogo}"
+                    
+                    mercado, conf, obs = analisar_estatisticas(nome_jogo)
+                    
+                    bilhete.append({
+                        "jogo": nome_jogo,
+                        "aposta": mercado,
+                        "conf": conf,
+                        "link": link
+                    })
+                
+                if len(bilhete) >= 15: break
+            if len(bilhete) >= 15: break
 
-        bilhete.sort(key=lambda x: -x['conf'])
+        print(f"Jogos processados: {len(bilhete)}")
 
         if len(bilhete) >= 5:
-            msg = f"🎫 *BILHETE DO DIA - SPORTING LIFE*\n_Modo Light | {datetime.now().strftime('%d/%m')}_\n\n"
+            # Ordena por confiança e pega os 10 melhores
+            bilhete.sort(key=lambda x: -x['conf'])
+            
+            msg = f"🎫 *BILHETE DO DIA - SPORTING LIFE*\n_API Mode | {datetime.now().strftime('%d/%m')}_\n\n"
             for i, j in enumerate(bilhete[:10], 1):
                 msg += f"{i}. 🏟️ *{j['jogo']}*\n📍 *{j['aposta']}* ({j['conf']}%)\n🔗 [Ver Dados]({j['link']})\n\n"
+            
             enviar_telegram(msg)
-            print("Bilhete enviado!")
+            print("Sucesso: Mensagem enviada!")
         else:
-            print("Nenhum jogo encontrado no HTML.")
+            print("Nenhum jogo futuro encontrado para hoje.")
 
     except Exception as e:
-        print(f"Erro na extração: {e}")
+        print(f"Erro ao processar JSON: {e}")
 
 if __name__ == "__main__":
     executar_robo()
