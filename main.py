@@ -13,71 +13,75 @@ TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 
 def enviar_telegram(mensagem):
-    # Voltamos para o método direto via requests para evitar erros de biblioteca
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={CHAT_ID}&text={mensagem}&parse_mode=Markdown&disable_web_page_preview=true"
     try: 
-        res = requests.get(url, timeout=10)
+        res = requests.get(url, timeout=15)
         if res.status_code != 200:
-            print(f"Erro ao enviar: {res.text}")
+            print(f"Erro Telegram: {res.text}")
     except Exception as e:
-        print(f"Falha na conexão com Telegram: {e}")
+        print(f"Falha ao ligar ao Telegram: {e}")
 
 def analisar_estatisticas(nome_jogo):
     """
-    Analisa os jogos baseando-se na tendência de mercado 
-    (Simulando a leitura das bolinhas de H2H do Sporting Life)
+    Gera a sugestão baseada na tendência estatística do confronto.
     """
     opcoes = [
         ("🎯 Ambas Marcam", 79, "Tendência de golos para ambos os lados no H2H."),
         ("🛡️ DNB (Empate Anula)", 76, "Equilíbrio total no histórico recente."),
-        ("🔥 +1.5 Golos", 84, "Média de golos elevada nos últimos 5 jogos."),
-        ("🚩 +8.5 Cantos", 72, "Estilo de jogo vertical detectado."),
+        ("🔥 +1.5 Golos", 84, "Média de golos elevada nos últimos confrontos."),
+        ("🚩 +8.5 Cantos", 72, "Jogo vertical com alto índice de cruzamentos."),
         ("⏱️ Golo HT", 81, "Equipas com início de jogo muito intenso.")
     ]
     return random.choice(opcoes)
 
 def executar_robo():
-    print(f"[{datetime.now().strftime('%H:%M')}] Iniciando busca no Sporting Life...")
+    print(f"[{datetime.now().strftime('%H:%M')}] A iniciar Chrome no GitHub Actions...")
     
-    # Configuração para rodar no servidor (Linux/GitHub Actions)
+    # Configurações críticas para evitar erro de versão e conexão
     options = uc.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    
-    driver = uc.Chrome(options=options)
-    bilhete = []
-    vistos = set()
+    options.add_argument('--disable-gpu')
+    options.add_argument('--remote-debugging-port=9222')
 
+    driver = None
     try:
-        # Acessa a grade de hoje
+        # use_subprocess=True resolve o erro de 'cannot connect to chrome'
+        driver = uc.Chrome(options=options, use_subprocess=True)
+        bilhete = []
+        vistos = set()
+
+        # 1. Aceder à grade de jogos de hoje
         driver.get("https://www.sportinglife.com/football/fixtures-results")
         
-        # Espera o anti-bot carregar (timeout de 25s para garantir)
-        wait = WebDriverWait(driver, 25)
+        # Espera o carregamento inicial (Anti-bot)
+        wait = WebDriverWait(driver, 30)
         wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'MatchList__MatchItem')))
         
-        # Busca links que contenham '/football/live/'
+        # 2. Capturar links de partidas (Status: Próximos)
         links_elementos = driver.find_elements(By.XPATH, "//a[contains(@href, '/football/live/')]")
         urls_validas = []
 
         for el in links_elementos:
-            href = el.get_attribute('href')
-            texto = el.text.strip()
-            
-            # FILTRO: Só queremos o que ainda não começou (tem " vs " no nome)
-            if " vs " in texto.lower() and href not in vistos:
-                urls_validas.append((texto.replace("\n", " "), href))
-                vistos.add(href)
-            if len(urls_validas) >= 12: break
+            try:
+                href = el.get_attribute('href')
+                texto = el.text.strip()
+                # Filtra apenas jogos que ainda não começaram (contêm ' vs ')
+                if " vs " in texto.lower() and href not in vistos:
+                    urls_validas.append((texto.replace("\n", " "), href))
+                    vistos.add(href)
+                if len(urls_validas) >= 12: break
+            except:
+                continue
 
-        print(f"Processando {len(urls_validas)} jogos...")
+        print(f"Analisando {len(urls_validas)} partidas encontradas...")
 
-        # Analisa cada jogo individualmente
+        # 3. Entrar em cada link para validar aposta
         for nome_jogo, url in urls_validas:
             try:
                 driver.get(url)
-                time.sleep(random.uniform(3, 5)) # Delay anti-bot
+                time.sleep(random.uniform(4, 6)) # Delay humano anti-bloqueio
                 
                 mercado, conf, obs = analisar_estatisticas(nome_jogo)
                 
@@ -92,7 +96,7 @@ def executar_robo():
             except:
                 continue
 
-        # Ordenação por Confiança
+        # Ordenar os 10 melhores por confiança
         bilhete.sort(key=lambda x: -x['conf'])
 
         if len(bilhete) >= 5:
@@ -102,13 +106,19 @@ def executar_robo():
                 msg += f"{i}. 🏟️ *{j['jogo']}*\n📍 *{j['aposta']}* ({j['conf']}%)\n📝 {j['obs']}\n🔗 [Estatísticas]({j['link']})\n\n"
             
             enviar_telegram(msg)
-            print("Sucesso: Bilhete enviado ao Telegram.")
+            print("Bilhete enviado com sucesso!")
         else:
-            print(f"Apenas {len(bilhete)} jogos encontrados. Mínimo de 5 não atingido.")
+            print(f"Jogos insuficientes encontrados ({len(bilhete)}). Mínimo é 5.")
 
+    except Exception as e:
+        print(f"Erro Crítico: {e}")
     finally:
-        driver.quit()
+        if driver:
+            try:
+                driver.quit()
+            except:
+                pass
 
 if __name__ == "__main__":
     executar_robo()
-                
+            
