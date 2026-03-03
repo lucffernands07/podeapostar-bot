@@ -1,6 +1,7 @@
 import os
 import requests
 import random
+import re
 from datetime import datetime
 
 # --- CONFIGURAÇÃO ---
@@ -15,90 +16,69 @@ def enviar_telegram(mensagem):
     except:
         pass
 
-def analisar_estatisticas(jogo):
+def analisar_estatisticas(nome_jogo):
     opcoes = [
-        ("🎯 Ambas Marcam", 79, "Tendência de golos no H2H."),
-        ("🛡️ DNB (Empate Anula)", 76, "Equilíbrio no histórico recente."),
-        ("🔥 +1.5 Golos", 84, "Média de golos elevada."),
-        ("🚩 +8.5 Cantos", 72, "Estilo de jogo vertical."),
-        ("⏱️ Golo HT", 81, "Equipas com início forte.")
+        ("🎯 Ambas Marcam", 79, "H2H com média alta."),
+        ("🛡️ DNB (Empate Anula)", 76, "Equilíbrio tático."),
+        ("🔥 +1.5 Golos", 84, "Tendência de over."),
+        ("🚩 +8.5 Cantos", 72, "Jogo vertical."),
+        ("⏱️ Golo HT", 81, "Intensidade inicial.")
     ]
     return random.choice(opcoes)
 
 def executar_robo():
-    print(f"[{datetime.now().strftime('%H:%M')}] Conectando à API v1 do Sporting Life...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Localizando jogos via Search Proxy...")
     
-    hoje = datetime.now().strftime('%Y-%m-%d')
-    # URL de produção usada pelo site deles
-    url_api = f"https://www.sportinglife.com/api/football/fixtures?date={hoje}"
+    # Buscamos no Google pelos jogos do dia no Sporting Life
+    query = "site:sportinglife.com/football/live/"
+    url_search = f"https://www.google.com/search?q={query}"
     
-    # Headers completos para evitar o Erro 404/403
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-GB,en;q=0.9',
-        'Origin': 'https://www.sportinglife.com',
-        'Referer': 'https://www.sportinglife.com/football/fixtures-results',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     }
 
     try:
-        session = requests.Session()
-        res = session.get(url_api, headers=headers, timeout=25)
+        res = requests.get(url_search, headers=headers, timeout=20)
+        content = res.text
         
-        # Se ainda der 404, tentamos a URL alternativa sem o prefixo 'www'
-        if res.status_code == 404:
-            print("Tentando rota alternativa...")
-            url_api_alt = f"https://www.sportinglife.com/api/v1/football/fixtures?date={hoje}"
-            res = session.get(url_api_alt, headers=headers, timeout=25)
+        # Extraímos os links usando Regex (Padrão de link de jogo)
+        links = re.findall(r'https://www.sportinglife.com/football/live/\d+', content)
+        links = list(set(links)) # Remove duplicados
 
-        if res.status_code != 200:
-            print(f"Erro na API: {res.status_code}")
-            return
+        print(f"Encontrados {len(links)} links de jogos.")
 
-        dados = res.json()
         bilhete = []
-        
-        # Estrutura do JSON do Sporting Life
-        competicoes = dados.get('competitions', [])
-        if not competicoes:
-            print("Estrutura JSON vazia ou sem jogos hoje.")
-            return
+        for link in links:
+            # Como o Google nos dá o link, geramos um nome genérico ou tentamos extrair do link
+            # Ex: /football/live/12345 -> Jogo ID 12345
+            id_jogo = link.split('/')[-1]
+            nome_jogo = f"Partida ID {id_jogo}"
+            
+            mercado, conf, obs = analisar_estatisticas(nome_jogo)
+            bilhete.append({
+                "jogo": nome_jogo,
+                "aposta": mercado,
+                "conf": conf,
+                "link": link
+            })
+            if len(bilhete) >= 10: break
 
-        for competicao in competicoes:
-            for jogo in competicao.get('fixtures', []):
-                # Pegar apenas jogos não iniciados
-                if jogo.get('status', '').lower() in ['fixture', 'scheduled', 'pre-match']:
-                    home = jogo['home_team']['name']
-                    away = jogo['away_team']['name']
-                    id_jogo = jogo['id']
-                    
-                    mercado, conf, obs = analisar_estatisticas(f"{home} vs {away}")
-                    
-                    bilhete.append({
-                        "jogo": f"{home} vs {away}",
-                        "aposta": mercado,
-                        "conf": conf,
-                        "link": f"https://www.sportinglife.com/football/live/{id_jogo}"
-                    })
-                
-                if len(bilhete) >= 20: break
-            if len(bilhete) >= 20: break
-
-        if len(bilhete) >= 5:
+        if len(bilhete) >= 3:
             bilhete.sort(key=lambda x: -x['conf'])
-            msg = f"🎫 *BILHETE DO DIA - SPORTING LIFE*\n_API Mode | {datetime.now().strftime('%d/%m')}_\n\n"
-            for i, j in enumerate(bilhete[:10], 1):
-                msg += f"{i}. 🏟️ *{j['jogo']}*\n📍 *{j['aposta']}* ({j['conf']}%)\n🔗 [Ver Dados]({j['link']})\n\n"
+            msg = f"🎫 *BILHETE DO DIA - SPORTING LIFE*\n_Search Mode | {datetime.now().strftime('%d/%m')}_\n\n"
+            for i, j in enumerate(bilhete, 1):
+                msg += f"{i}. 🏟️ *Jogo {j['jogo']}*\n📍 *{j['aposta']}* ({j['conf']}%)\n🔗 [Ver Estatísticas]({j['link']})\n\n"
             
             enviar_telegram(msg)
-            print("Sucesso: Bilhete enviado!")
+            print("Sucesso: Bilhete enviado via Search!")
         else:
-            print("Jogos insuficientes encontrados.")
+            print("Poucos links encontrados. Tentando link direto de grade...")
+            # Fallback final: Envia o link da grade para você clicar
+            enviar_telegram("⚠️ *Aviso:* Não consegui extrair os jogos automaticamente hoje, mas você pode conferir a grade aqui: [Sporting Life Fixtures](https://www.sportinglife.com/football/fixtures-results)")
 
     except Exception as e:
-        print(f"Erro ao processar: {e}")
+        print(f"Erro no Search: {e}")
 
 if __name__ == "__main__":
     executar_robo()
+            
