@@ -47,8 +47,8 @@ def executar_robo():
 
     driver = None
     try:
-        # use_subprocess=True resolve o erro de 'cannot connect to chrome'
-        driver = uc.Chrome(options=options, use_subprocess=True)
+        # Forçamos a versão 145 para bater com o Chrome do GitHub Actions
+        driver = uc.Chrome(options=options, use_subprocess=True, version_main=145)
         bilhete = []
         vistos = set()
 
