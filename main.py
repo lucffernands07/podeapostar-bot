@@ -27,36 +27,47 @@ def analisar_estatisticas(nome_jogo):
     return random.choice(opcoes)
 
 def executar_robo():
-    print(f"[{datetime.now().strftime('%H:%M')}] Localizando jogos via Search Proxy...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Ignorando Pop-ups e buscando jogos...")
     
-    # Buscamos no Google pelos jogos do dia no Sporting Life
-    query = "site:sportinglife.com/football/live/"
-    url_search = f"https://www.google.com/search?q={query}"
+    url_alvo = "https://www.sportinglife.com/football/fixtures-results"
     
+    # Headers simulando que VOCÊ já clicou em "Allow All Cookies"
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Referer': 'https://www.google.com/',
+        'Connection': 'keep-alive'
+    }
+
+    # Injetamos o cookie que o site espera para "pular" o pop-up da imagem
+    cookies = {
+        'notice_gdpr_prefs': '0,1,2:', # Simula aceitação de cookies
+        'skybet_odds_format': 'decimal',
+        'st_active_section': 'football'
     }
 
     try:
-        res = requests.get(url_search, headers=headers, timeout=20)
-        content = res.text
+        session = requests.Session()
+        res = session.get(url_alvo, headers=headers, cookies=cookies, timeout=25)
         
-        # Extraímos os links usando Regex (Padrão de link de jogo)
-        links = re.findall(r'https://www.sportinglife.com/football/live/\d+', content)
-        links = list(set(links)) # Remove duplicados
-
-        print(f"Encontrados {len(links)} links de jogos.")
+        # Procuramos por links de partidas ao vivo ou futuras
+        # O padrão no HTML é /football/live/ seguido de números
+        links_raw = re.findall(r'href="/football/live/(\d+)"', res.text)
+        
+        # Limpamos duplicados
+        ids_jogos = list(set(links_raw))
+        
+        print(f"Detectados {len(ids_jogos)} jogos após ignorar bloqueio.")
 
         bilhete = []
-        for link in links:
-            # Como o Google nos dá o link, geramos um nome genérico ou tentamos extrair do link
-            # Ex: /football/live/12345 -> Jogo ID 12345
-            id_jogo = link.split('/')[-1]
-            nome_jogo = f"Partida ID {id_jogo}"
+        for id_j in ids_jogos:
+            link = f"https://www.sportinglife.com/football/live/{id_j}"
+            nome_fake = f"Confronto {id_j}" # O nome exato só vem com Selenium ou API
             
-            mercado, conf, obs = analisar_estatisticas(nome_jogo)
+            mercado, conf, obs = analisar_estatisticas(nome_fake)
             bilhete.append({
-                "jogo": nome_jogo,
+                "jogo": nome_fake,
                 "aposta": mercado,
                 "conf": conf,
                 "link": link
@@ -65,20 +76,20 @@ def executar_robo():
 
         if len(bilhete) >= 3:
             bilhete.sort(key=lambda x: -x['conf'])
-            msg = f"🎫 *BILHETE DO DIA - SPORTING LIFE*\n_Search Mode | {datetime.now().strftime('%d/%m')}_\n\n"
+            msg = f"🎫 *BILHETE DO DIA - SPORTING LIFE*\n_Bypass Mode | {datetime.now().strftime('%d/%m')}_\n\n"
             for i, j in enumerate(bilhete, 1):
-                msg += f"{i}. 🏟️ *Jogo {j['jogo']}*\n📍 *{j['aposta']}* ({j['conf']}%)\n🔗 [Ver Estatísticas]({j['link']})\n\n"
+                msg += f"{i}. 🏟️ *Jogo {j['jogo']}*\n📍 *{j['aposta']}* ({j['conf']}%)\n🔗 [Analisar no Site]({j['link']})\n\n"
             
             enviar_telegram(msg)
-            print("Sucesso: Bilhete enviado via Search!")
+            print("Sucesso: Bilhete enviado furando o Pop-up!")
         else:
-            print("Poucos links encontrados. Tentando link direto de grade...")
-            # Fallback final: Envia o link da grade para você clicar
-            enviar_telegram("⚠️ *Aviso:* Não consegui extrair os jogos automaticamente hoje, mas você pode conferir a grade aqui: [Sporting Life Fixtures](https://www.sportinglife.com/football/fixtures-results)")
+            # Se ainda assim não achar, mandamos o link direto para você
+            print("Ainda bloqueado pelo Pop-up.")
+            enviar_telegram("⚠️ *Aviso:* O Sporting Life reforçou o bloqueio de Cookies. Acesse manualmente: [Grade de Jogos](https://www.sportinglife.com/football/fixtures-results)")
 
     except Exception as e:
-        print(f"Erro no Search: {e}")
+        print(f"Erro ao tentar burlar pop-up: {e}")
 
 if __name__ == "__main__":
     executar_robo()
-          
+                
