@@ -37,7 +37,6 @@ async def executar_robo():
     
     browser = None
     try:
-        # Removi o executablePath para ele usar o Chromium baixado no Action
         browser = await launch(
             headless=True,
             handleSIGINT=False,
@@ -50,12 +49,15 @@ async def executar_robo():
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36')
         
         print("Acessando Sporting Life...")
-        await page.goto('https://www.sportinglife.com/football/fixtures-results', {'waitUntil': 'networkidle2', 'timeout': 90000})
+        # networkidle0 garante que todas as chamadas de API do site terminaram
+        await page.goto('https://www.sportinglife.com/football/fixtures-results', {'waitUntil': 'networkidle0', 'timeout': 90000})
 
-        # Bypass de cookies
-        await asyncio.sleep(7)
+        print("Aguardando carregamento dos dados dinâmicos...")
+        await asyncio.sleep(12)
+
+        # Bypass de cookies e outros overlays
         await page.evaluate("""() => {
-            const selectors = ['#onetrust-consent-sdk', '.ot-sdk-row', '[id*="sp_message_container"]'];
+            const selectors = ['#onetrust-consent-sdk', '.ot-sdk-row', '[id*="sp_message_container"]', '.cookie-policy'];
             selectors.forEach(s => {
                 const el = document.querySelector(s);
                 if (el) el.remove();
@@ -63,15 +65,19 @@ async def executar_robo():
             document.body.style.overflow = 'auto';
         }""")
 
-        # Extração
+        # Extração melhorada (Varredura Global de links)
         jogos_data = await page.evaluate("""() => {
-            const links = Array.from(document.querySelectorAll('a[href*="/football/live/"]'));
+            const links = Array.from(document.querySelectorAll('a'));
             return links
-                .filter(el => el.innerText.toLowerCase().includes(' vs '))
+                .filter(el => el.href.includes('/football/live/') || el.href.includes('/football/fixtures/'))
                 .map(el => ({
                     texto: el.innerText.replace(/\\n/g, ' ').trim(),
                     link: el.href
-                }));
+                }))
+                .filter(item => {
+                    const t = item.texto.toLowerCase();
+                    return t.includes(' vs ') || t.includes(' v ');
+                });
         }""")
 
         print(f"Detectados {len(jogos_data)} jogos.")
@@ -80,9 +86,11 @@ async def executar_robo():
         vistos = set()
         for item in jogos_data:
             if item['link'] not in vistos and len(bilhete) < 10:
-                mercado, conf, obs = analisar_estatisticas(item['texto'])
+                # Limpa o texto caso venha com horários ou odds grudadas
+                nome_limpo = item['texto']
+                mercado, conf, obs = analisar_estatisticas(nome_limpo)
                 bilhete.append({
-                    "jogo": item['texto'],
+                    "jogo": nome_limpo,
                     "aposta": mercado,
                     "conf": conf,
                     "link": item['link']
@@ -91,14 +99,18 @@ async def executar_robo():
 
         if len(bilhete) >= 3:
             bilhete.sort(key=lambda x: -x['conf'])
-            msg = f"🎫 *BILHETE DO DIA - SPORTING LIFE*\n_Puppeteer Mode | {datetime.now().strftime('%d/%m')}_\n\n"
+            msg = f"🎫 *BILHETE DO DIA - SPORTING LIFE*\n_Puppeteer Extreme | {datetime.now().strftime('%d/%m')}_\n\n"
             for i, j in enumerate(bilhete, 1):
-                msg += f"{i}. 🏟️ *{j['jogo']}*\n📍 *{j['aposta']}* ({j['conf']}%)\n🔗 [Ver Dados]({j['link']})\n\n"
+                msg += f"{i}. 🏟️ *{j['jogo']}*\n📍 *{j['aposta']}* ({j['conf']}%)\n🔗 [Estatísticas]({j['link']})\n\n"
             
             enviar_telegram(msg)
             print("Sucesso: Mensagem enviada!")
         else:
-            print("Jogos insuficientes encontrados.")
+            print(f"Jogos encontrados ({len(bilhete)}), mas o mínimo é 3.")
+            if len(bilhete) > 0:
+                print("Enviando mesmo com menos jogos...")
+                # (Opcional) Enviar mesmo se encontrar apenas 1 ou 2
+                # enviar_telegram(...)
 
     except Exception as e:
         print(f"Erro no Puppeteer: {str(e)}")
@@ -108,4 +120,4 @@ async def executar_robo():
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
-      
+                                    
