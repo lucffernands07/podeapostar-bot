@@ -32,21 +32,29 @@ def analisar_estatisticas(nome_jogo):
     return random.choice(opcoes)
 
 def executar_robo():
-    print(f"[{datetime.now().strftime('%H:%M')}] Iniciando Selenium Estável...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Iniciando Selenium Blindado...")
     
     chrome_options = Options()
-    chrome_options.add_argument('--headless')
+    # Mudança: Usando o novo modo headless que evita detecção e crash no Linux
+    chrome_options.add_argument('--headless=new') 
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--disable-gpu')
-    # O segredo: User-Agent real para não precisar do undetected-chromedriver
-    chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+    
+    # Evita que o Chrome se identifique como automação
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_experimental_option('useAutomationExtension', False)
+    
+    # User-Agent atualizado para Windows 10
+    chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36')
 
     driver = None
     try:
-        # Usando o webdriver padrão que já vem no ambiente do GitHub
+        # Forçamos o uso do binário instalado no GitHub
+        chrome_options.binary_location = "/usr/bin/google-chrome"
+        
         driver = webdriver.Chrome(options=chrome_options)
-        driver.set_page_load_timeout(60)
+        driver.set_page_load_timeout(90) # Mais tempo para o Sporting Life
         
         bilhete = []
         vistos = set()
@@ -54,9 +62,13 @@ def executar_robo():
         print("Acessando Sporting Life...")
         driver.get("https://www.sportinglife.com/football/fixtures-results")
         
-        wait = WebDriverWait(driver, 45)
-        # Espera pela lista de jogos
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'MatchList__MatchItem')))
+        # Simula uma rolagem leve para parecer humano e carregar elementos
+        driver.execute_script("window.scrollTo(0, 500);")
+        time.sleep(3)
+
+        wait = WebDriverWait(driver, 60)
+        # Espera pela lista de jogos usando um seletor mais genérico por precaução
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[class*="MatchList__MatchItem"]')))
         
         links_elementos = driver.find_elements(By.XPATH, "//a[contains(@href, '/football/live/')]")
         urls_validas = []
@@ -77,7 +89,8 @@ def executar_robo():
         for nome_jogo, url in urls_validas:
             try:
                 driver.get(url)
-                time.sleep(random.uniform(5, 7))
+                # Pausa randômica entre cada jogo para não parecer robô
+                time.sleep(random.uniform(6, 9))
                 
                 mercado, conf, obs = analisar_estatisticas(nome_jogo)
                 bilhete.append({
@@ -96,10 +109,11 @@ def executar_robo():
             enviar_telegram(msg)
             print("Bilhete enviado!")
         else:
-            print("Jogos insuficientes.")
+            print(f"Jogos insuficientes: {len(bilhete)}")
 
     except Exception as e:
-        print(f"Erro no Processo: {e}")
+        # Captura o erro detalhado
+        print(f"Erro no Processo: {str(e)}")
     finally:
         if driver:
             driver.quit()
