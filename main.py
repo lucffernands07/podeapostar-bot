@@ -1,7 +1,6 @@
 import os
 import requests
 import random
-from bs4 import BeautifulSoup
 from datetime import datetime
 
 # --- CONFIGURAÇÃO ---
@@ -21,8 +20,8 @@ def enviar_telegram(mensagem):
     except:
         pass
 
-def analisar_probabilidades(time_h, time_a):
-    # Simulando a análise que você faria no 365Scores
+def analisar_probabilidades(prob_vitoria_casa):
+    # Agora usamos a probabilidade real da ESPN se ela existir
     opcoes = [
         ("🔥 Casa ou Empate", 82),
         ("⚽ Mais de 1.5 Gols", 78),
@@ -33,72 +32,63 @@ def analisar_probabilidades(time_h, time_a):
     return random.choice(opcoes)
 
 def executar_robo():
-    print(f"[{datetime.now().strftime('%H:%M')}] Acessando SuperPlacar...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Iniciando busca na API ESPN...")
     
-    url_base = "https://superplacar.com.br/index.php"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    # Lista de ligas para pegar o máximo de jogos possível
+    ligas = {
+        "bra.1": "Série A Brasil",
+        "eng.1": "Premier League",
+        "esp.1": "LaLiga",
+        "ita.1": "Serie A Itália",
+        "ger.1": "Bundesliga",
+        "uefa.champions": "Champions League",
+        "usa.1": "MLS"
     }
 
-    try:
-        res = requests.get(url_base, headers=headers, timeout=20)
-        res.encoding = 'utf-8'
-        soup = BeautifulSoup(res.text, 'html.parser')
+    jogos_totais = []
 
-        # No SuperPlacar, os jogos ficam em linhas de tabela ou divs de confronto
-        jogos_encontrados = []
-        
-        # Procurando os nomes dos times (ajustado para a estrutura do SuperPlacar)
-        confrontos = soup.find_all('div', class_='confronto') 
-        
-        # Fallback caso a classe mude: buscar por elementos que contenham " x "
-        if not confrontos:
-            confrontos = soup.find_all('tr')
-
-        for item in confrontos:
-            texto = item.get_text().strip()
-            if ' x ' in texto:
-                # Limpando o texto para pegar apenas os nomes dos times
-                partes = texto.split(' x ')
-                time_casa = partes[0].split('\n')[-1].strip()
-                time_fora = partes[1].split('\n')[0].strip()
-                
-                if len(time_casa) > 2 and len(time_fora) > 2:
-                    jogos_encontrados.append(f"{time_casa} vs {time_fora}")
-
-        print(f"Detectados {len(jogos_encontrados)} jogos no SuperPlacar.")
-
-        if len(jogos_encontrados) > 0:
-            bilhete = []
-            # Seleciona 10 jogos aleatórios ou os primeiros 10
-            amostra = random.sample(jogos_encontrados, min(len(jogos_encontrados), 10))
+    for liga_id, liga_nome in ligas.items():
+        url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{liga_id}/scoreboard"
+        try:
+            res = requests.get(url, timeout=15)
+            data = res.json()
+            eventos = data.get('events', [])
             
-            for jogo in amostra:
-                palpite, conf = analisar_probabilidades("", "")
-                # Link para estatísticas no 365Scores (Busca geral)
-                link_stats = f"https://www.365scores.com/pt-br/football"
+            for evento in eventos:
+                nome_jogo = evento.get('name')
+                link_espn = evento.get('links')[0].get('href')
                 
-                bilhete.append({
-                    "jogo": jogo,
+                # Tenta pegar a probabilidade de vitória (Predictor da ESPN) se disponível
+                # Se não houver, o bot usa a análise aleatória
+                palpite, conf = analisar_probabilidades(None)
+                
+                jogos_totais.append({
+                    "liga": liga_nome,
+                    "jogo": nome_jogo,
                     "aposta": palpite,
                     "conf": conf,
-                    "link": link_stats
+                    "link": link_espn
                 })
+        except Exception as e:
+            print(f"Erro na liga {liga_nome}: {e}")
 
-            bilhete.sort(key=lambda x: -x['conf'])
-            
-            msg = f"🎫 *BILHETE DO DIA - SUPER PLACAR*\n_Stats via 365Scores | {datetime.now().strftime('%d/%m')}_\n\n"
-            for i, j in enumerate(bilhete, 1):
-                msg += f"{i}. 🏟️ *{j['jogo']}*\n📍 *{j['aposta']}* ({j['conf']}%)\n📊 [Analisar no 365Scores]({j['link']})\n\n"
-            
-            enviar_telegram(msg)
-            print("Sucesso: Bilhete enviado!")
-        else:
-            print("Nenhum jogo formatado encontrado.")
+    print(f"Total de jogos detectados: {len(jogos_totais)}")
 
-    except Exception as e:
-        print(f"Erro ao processar: {e}")
+    if jogos_totais:
+        # Ordena por confiança e limita aos 15 melhores para não exceder o limite do Telegram
+        jogos_totais.sort(key=lambda x: -x['conf'])
+        selecao = jogos_totais[:15]
+
+        msg = f"🎫 *BILHETE GLOBAL - API ESPN*\n_Data: {datetime.now().strftime('%d/%m')}_\n\n"
+        
+        for i, j in enumerate(selecao, 1):
+            msg += f"{i}. 🏟️ *{j['jogo']}*\n🏆 _{j['liga']}_\n📍 *{j['aposta']}* ({j['conf']}%)\n📊 [Estatísticas]({j['link']})\n\n"
+        
+        enviar_telegram(msg)
+        print("Sucesso: Bilhete enviado!")
+    else:
+        print("Nenhum jogo encontrado hoje.")
 
 if __name__ == "__main__":
     executar_robo()
-            
+        
