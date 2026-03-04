@@ -40,11 +40,9 @@ def definir_palpite_mais_provavel():
     return random.choice(palpites_faciais)
 
 def executar_robo():
-    print(f"[{datetime.now().strftime('%H:%M')}] Varrendo o Mercado Global e Copas da Imagem...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Varrendo o Mercado Global e Copas...")
     
-    # DICIONÁRIO ATUALIZADO (Incluindo Copa del Rey e Coppa Italia da imagem)
     ligas = {
-        # BRASIL E AMÉRICA
         "bra.1": "Série A Brasil",
         "bra.2": "Série B Brasil",
         "bra.copa_do_brasil": "Copa do Brasil",
@@ -52,23 +50,17 @@ def executar_robo():
         "bra.camp_carioca": "Cariocão",
         "conmebol.libertadores": "Libertadores",
         "conmebol.sudamericana": "Sul-Americana",
-        
-        # EUROPA ELITE + COPAS DA IMAGEM
         "eng.1": "Premier League (Ing)",
         "esp.1": "LaLiga (Esp)",
-        "esp.copa_del_rey": "Copa del Rey (Esp)", # Adicionado com base na imagem
+        "esp.copa_del_rey": "Copa del Rey (Esp)",
         "ita.1": "Série A (Ita)",
-        "ita.coppa_italia": "Coppa Italia (Ita)", # Adicionado com base na imagem
+        "ita.coppa_italia": "Coppa Italia (Ita)",
         "ger.1": "Bundesliga (Ale)",
         "por.1": "Liga Portugal (Por)",
         "uefa.champions": "Champions League",
-        
-        # MÁQUINAS DE GOLOS
         "ned.1": "Eredivisie (Hol)",
         "aut.1": "Bundesliga (Aut)",
         "bel.1": "Pro League (Bel)",
-        
-        # OUTRAS
         "usa.1": "MLS (EUA)"
     }
 
@@ -82,10 +74,12 @@ def executar_robo():
             eventos = data.get('events', [])
             
             for evento in eventos:
-                nome_jogo = evento.get('name')
-                link_espn = evento.get('links')[0].get('href')
+                nome_bruto = evento.get('name')
                 
-                # Horário ajustado para Brasília
+                # --- AJUSTE AQUI: Substitui "at" e "&" por "x" ---
+                nome_jogo = nome_bruto.replace(' at ', ' x ').replace(' & ', ' x ')
+                
+                link_espn = evento.get('links')[0].get('href')
                 data_jogo_iso = evento.get('date')
                 hora_jogo = formatar_horario(data_jogo_iso)
                 
@@ -103,7 +97,6 @@ def executar_robo():
             continue
 
     if jogos_totais:
-        # Ordenação por Probabilidade e seleção dos TOP 10
         jogos_totais.sort(key=lambda x: -x['conf'])
         selecao = jogos_totais[:10]
 
@@ -119,4 +112,4 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
-              
+    
