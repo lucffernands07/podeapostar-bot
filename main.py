@@ -21,17 +21,7 @@ def enviar_telegram(mensagem):
         pass
 
 def obter_data_hoje_br():
-    # Retorna a data atual no fuso de Brasília (UTC-3)
     return (datetime.utcnow() - timedelta(hours=3)).strftime('%Y-%m-%d')
-
-def formatar_horario_br(data_iso):
-    try:
-        data_limpa = data_iso.replace('Z', '')
-        dt_utc = datetime.fromisoformat(data_limpa)
-        dt_br = dt_utc - timedelta(hours=3)
-        return dt_br.strftime("%H:%M")
-    except:
-        return "Horário a definir"
 
 def definir_palpite_estrategico():
     # Mercado, Confiança, Odd Estimada
@@ -45,9 +35,22 @@ def definir_palpite_estrategico():
     ]
     return random.choice(opcoes)
 
+def tornar_mais_seguro(palpite_original):
+    """
+    Converte palpites arriscados para opções mais seguras,
+    mantendo odds que ajudem o Bilhete 2 a ficar entre 80 e 100.
+    """
+    if "+2.5" in palpite_original:
+        return "⚽ +1.5 Gols na Partida", 1.45
+    if "Ambas Marcam" in palpite_original:
+        return "⚽ +1.5 Gols na Partida", 1.45
+    if "Empate Anula" in palpite_original:
+        return "🔥 Casa ou Empate", 1.25
+    return palpite_original, 1.15
+
 def executar_robo():
     hoje_br = obter_data_hoje_br()
-    print(f"[{datetime.now().strftime('%H:%M')}] Filtrando jogos de HOJE ({hoje_br}) para Odd 90-110...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Iniciando calibração de bilhetes para {hoje_br}...")
     
     ligas = {
         "bra.1": "Série A Brasil", "bra.2": "Série B Brasil", "bra.copa_do_brasil": "Copa do Brasil",
@@ -60,73 +63,78 @@ def executar_robo():
     }
 
     jogos_hoje = []
-
     for liga_id, liga_nome in ligas.items():
         url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{liga_id}/scoreboard"
         try:
             res = requests.get(url, timeout=15)
             data = res.json()
-            eventos = data.get('events', [])
-            for evento in eventos:
-                # Extrair data do jogo e ajustar fuso
-                data_iso = evento.get('date')
-                dt_utc = datetime.fromisoformat(data_iso.replace('Z', ''))
+            for evento in data.get('events', []):
+                dt_utc = datetime.fromisoformat(evento.get('date').replace('Z', ''))
                 dt_br = dt_utc - timedelta(hours=3)
-                
-                # TRAVA: Só adiciona se o jogo for HOJE
                 if dt_br.strftime('%Y-%m-%d') == hoje_br:
-                    nome_bruto = evento.get('name')
-                    nome_jogo = nome_bruto.replace(' at ', ' x ').replace(' & ', ' x ')
-                    link_estatistica = evento.get('links')[0].get('href')
-                    
                     jogos_hoje.append({
                         "liga": liga_nome,
-                        "jogo": nome_jogo,
+                        "jogo": evento.get('name').replace(' at ', ' x ').replace(' & ', ' x '),
                         "hora": dt_br.strftime("%H:%M"),
-                        "link": link_estatistica
+                        "link": evento.get('links')[0].get('href')
                     })
-        except:
-            continue
+        except: continue
 
     if len(jogos_hoje) < 10:
-        msg_aviso = f"⚠️ *Aviso:* Encontrados apenas {len(jogos_hoje)} jogos para hoje ({hoje_br}). Impossível montar múltipla de 10 jogos."
-        enviar_telegram(msg_aviso)
+        enviar_telegram(f"⚠️ *Aviso:* Apenas {len(jogos_hoje)} jogos hoje. Múltiplas canceladas.")
         return
 
-    # --- LOOP DE CALIBRAGEM (Tenta até 2000 combinações) ---
+    # --- LOOP DE CALIBRAGEM DUPLA ---
     tentativas = 0
-    while tentativas < 2000:
+    while tentativas < 3000:
         selecao = random.sample(jogos_hoje, 10)
-        odd_total = 1.0
-        bilhete_final = []
-
-        for jogo in selecao:
-            palpite, conf, odd_est = definir_palpite_estrategico()
-            odd_total *= odd_est
-            bilhete_final.append({**jogo, "aposta": palpite, "odd": odd_est})
-
-        # Verifica se a odd está no intervalo desejado (90-110)
-        if 90 <= odd_total <= 110:
-            msg = f"🎯 *BILHETE DO DIA: ODD {odd_total:.2f}*\n"
-            msg += f"_Apenas jogos de HOJE ({hoje_br}) | Alvo: 100x_\n\n"
-            
-            for i, j in enumerate(bilhete_final, 1):
-                msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 {j['hora']} | _{j['liga']}_\n🎯 *{j['aposta']}*\n📊 [Estatísticas]({j['link']})\n\n"
-            
-            msg += "---\n"
-            msg += "💸 *APOSTAR AGORA:*\n"
-            msg += "🔹 [Ir para Bet365](https://www.bet365.com/#/AS/B1/)\n"
-            msg += "🔸 [Ir para Betano](https://br.betano.com/sport/futebol/)\n\n"
-            msg += "⚠️ _Odds estimadas. Confira no site das casas._"
-            
-            enviar_telegram(msg)
-            print(f"Sucesso! Odd {odd_total:.2f} enviada em {tentativas} tentativas.")
-            return
         
+        # Simulação Bilhete 1 (Alavancagem 90-110)
+        b1_lista = []
+        odd_t1 = 1.0
+        for j in selecao:
+            p, c, o = definir_palpite_estrategico()
+            odd_t1 *= o
+            b1_lista.append({**j, "aposta": p, "odd": o})
+
+        if 90 <= odd_t1 <= 110:
+            # Simulação Bilhete 2 (Segurança 80-100)
+            b2_lista = []
+            odd_t2 = 1.0
+            limite_25 = 1 # Máximo de uma aposta +2.5 no segurança
+
+            for j in b1_lista:
+                if "+2.5" in j['aposta'] and limite_25 > 0:
+                    nova_p, nova_o = j['aposta'], j['odd']
+                    limite_25 -= 1
+                else:
+                    nova_p, nova_o = tornar_mais_seguro(j['aposta'])
+                
+                odd_t2 *= nova_o
+                b2_lista.append({**j, "aposta": nova_p, "odd": nova_o})
+
+            # Só dispara se AMBOS os bilhetes estiverem calibrados nos intervalos
+            if 80 <= odd_t2 <= 100:
+                # ENVIO BILHETE 1
+                msg1 = f"🚀 *BILHETE 1: ALAVANCAGEM (ODD {odd_t1:.2f})*\n_Jogos de Hoje | Alvo: 90-110x_\n\n"
+                for i, x in enumerate(b1_lista, 1):
+                    msg1 += f"{i}. 🏟️ *{x['jogo']}*\n🕒 {x['hora']} | 🎯 *{x['aposta']}*\n📊 [Estatísticas]({x['link']})\n\n"
+                enviar_telegram(msg1)
+
+                # ENVIO BILHETE 2
+                msg2 = f"🛡️ *BILHETE 2: SEGURANÇA (ODD {odd_t2:.2f})*\n_Jogos de Hoje | Alvo: 80-100x (Mais +1.5)_\n\n"
+                for i, x in enumerate(b2_lista, 1):
+                    msg2 += f"{i}. 🏟️ *{x['jogo']}*\n🕒 {x['hora']} | 🎯 *{x['aposta']}*\n📊 [Estatísticas]({x['link']})\n\n"
+                
+                msg2 += "---\n💸 *APOSTAR:* [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
+                enviar_telegram(msg2)
+                
+                print(f"Sucesso! B1: {odd_t1:.2f} | B2: {odd_t2:.2f}")
+                return
         tentativas += 1
 
-    print("Não foi possível calibrar a Odd no intervalo solicitado com os jogos de hoje.")
+    print("Não foi possível calibrar os dois bilhetes simultaneamente.")
 
 if __name__ == "__main__":
     executar_robo()
-    
+                        
