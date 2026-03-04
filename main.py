@@ -40,9 +40,9 @@ def definir_palpite_mais_provavel():
     return random.choice(palpites_faciais)
 
 def executar_robo():
-    print(f"[{datetime.now().strftime('%H:%M')}] Varrendo o Mercado Global de Probabilidades...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Varrendo o Mercado Global e Copas da Imagem...")
     
-    # DICIONÁRIO COMPLETO DE LIGAS (Brasil, Europa Elite, Portugal e Gols)
+    # DICIONÁRIO ATUALIZADO (Incluindo Copa del Rey e Coppa Italia da imagem)
     ligas = {
         # BRASIL E AMÉRICA
         "bra.1": "Série A Brasil",
@@ -53,15 +53,17 @@ def executar_robo():
         "conmebol.libertadores": "Libertadores",
         "conmebol.sudamericana": "Sul-Americana",
         
-        # EUROPA ELITE
+        # EUROPA ELITE + COPAS DA IMAGEM
         "eng.1": "Premier League (Ing)",
         "esp.1": "LaLiga (Esp)",
+        "esp.copa_del_rey": "Copa del Rey (Esp)", # Adicionado com base na imagem
         "ita.1": "Série A (Ita)",
+        "ita.coppa_italia": "Coppa Italia (Ita)", # Adicionado com base na imagem
         "ger.1": "Bundesliga (Ale)",
         "por.1": "Liga Portugal (Por)",
         "uefa.champions": "Champions League",
         
-        # MÁQUINAS DE GOLOS (Probabilidade Máxima)
+        # MÁQUINAS DE GOLOS
         "ned.1": "Eredivisie (Hol)",
         "aut.1": "Bundesliga (Aut)",
         "bel.1": "Pro League (Bel)",
@@ -111,10 +113,10 @@ def executar_robo():
             msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 Hora: {j['hora']} (Brasília)\n🏆 _{j['liga']}_\n🎯 *{j['aposta']}* ({j['conf']}%)\n📊 [Estatísticas]({j['link']})\n\n"
         
         enviar_telegram(msg)
-        print("Sucesso: Todas as ligas globais processadas!")
+        print(f"Sucesso: {len(selecao)} jogos processados!")
     else:
         print("Nenhum jogo encontrado agora.")
 
 if __name__ == "__main__":
     executar_robo()
-        
+              
