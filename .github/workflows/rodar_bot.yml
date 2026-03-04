@@ -16,17 +16,10 @@ jobs:
         with:
           python-version: '3.10'
 
-      # ETAPA ESSENCIAL: Instala as bibliotecas de sistema para o Chromium rodar no Linux
-      - name: Instalar Dependências do Sistema
-        run: |
-          sudo apt-get update
-          # Instalamos o pacote atualizado e as dependências básicas
-          sudo apt-get install -y libgbm-dev libnss3 libatk-bridge2.0-0 libgtk-3-0 libx11-xcb1 libxss1 libasound2t64 libpangocairo-1.0-0 libpango-1.0-0
-
       - name: Instalar Bibliotecas Python
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Rodar Analisador
         env:
