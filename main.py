@@ -32,7 +32,8 @@ def definir_palpite_com_prioridade(contador_25):
         ("⚽ +0.5 Gols (Base Segura)", 1.10, 30),
         ("🎯 Ambas Marcam - Sim", 1.80, 15),
     ]
-    if contador_25 < 3:
+    # Reduzido para no máximo 2 palpites de +2.5
+    if contador_25 < 2:
         opcoes.append(("⚽ +2.5 Gols na Partida", 1.90, 10))
 
     mercados = [o[0] for o in opcoes]
@@ -44,7 +45,7 @@ def definir_palpite_com_prioridade(contador_25):
 
 def executar_robo():
     hoje_br = obter_data_hoje_br()
-    print(f"[{datetime.now().strftime('%H:%M')}] Gerando bilhete com resumo de ligas...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Gerando bilhete (Máx 2 de +2.5)...")
     
     ligas_config = {
         "bra.1": "Série A Brasil", "bra.2": "Série B Brasil", "bra.copa_do_brasil": "Copa do Brasil",
@@ -95,13 +96,13 @@ def executar_robo():
             melhor_bilhete = lista_atual
 
     if melhor_bilhete:
-        # Extrair ligas únicas para o resumo
+        # Extrair ligas únicas e formatar uma embaixo da outra
         ligas_no_bilhete = sorted(list(set([j['liga'] for j in melhor_bilhete])))
-        resumo_ligas = " | ".join(ligas_no_bilhete)
+        resumo_ligas_vertical = "\n".join([f"🔹 {liga}" for liga in ligas_no_bilhete])
 
-        msg = f"🎯 *BILHETE CALIBRADO: ODD {melhor_odd:.2f}*\n"
-        msg += f"🏟️ *LIGAS:* _{resumo_ligas}_\n"
-        msg += f"⚠️ _Máximo 3 palpites de +2.5 Gols | HOJE ({hoje_br})_\n\n"
+        msg = f"🎯 *BILHETE CALIBRADO: ODD {melhor_odd:.2f}*\n\n"
+        msg += f"🏟️ *LIGAS ENCONTRADAS:*\n{resumo_ligas_vertical}\n\n"
+        msg += f"⚠️ _Máximo 2 palpites de +2.5 Gols | HOJE ({hoje_br})_\n\n"
         
         for i, j in enumerate(melhor_bilhete, 1):
             msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 {j['hora']} | _{j['liga']}_\n🎯 *{j['aposta']}*\n📊 [Estatísticas]({j['link']})\n\n"
@@ -113,4 +114,4 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
-            
+    
