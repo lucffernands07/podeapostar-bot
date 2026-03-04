@@ -109,18 +109,17 @@ def executar_robo():
         ligas_no_bilhete = sorted(list(set([j['liga'] for j in melhor_bilhete])))
         resumo_ligas_vertical = "\n".join([f"🔹 {liga}" for liga in ligas_no_bilhete])
 
-        msg = f"🎯 *BILHETE CALIBRADO: ODD {melhor_odd:.2f}* DE 100\n\n"
+        msg = f"🎯 *BILHETE CALIBRADO: ODD {melhor_odd:.2f}/100*\n\n"
         msg += f"🏟️ *LIGAS ENCONTRADAS:*\n{resumo_ligas_vertical}\n\n"
         msg += f"⚠️ _Máximo 2 palpites de +2.5 Gols | HOJE ({hoje_br})_\n\n"
         
         for i, j in enumerate(melhor_bilhete, 1):
             msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 {j['hora']} | _{j['liga']}_\n🎯 *{j['aposta']}*\n📊 [Estatísticas]({j['link']})\n\n"
         
-        msg += "---\n💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
+        msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         
         enviar_telegram(msg)
         print(f"Sucesso! Bilhete com Odd {melhor_odd:.2f} enviado.")
 
 if __name__ == "__main__":
     executar_robo()
-                    
