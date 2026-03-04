@@ -1,7 +1,7 @@
 import os
 import requests
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # --- CONFIGURAÇÃO ---
 TOKEN = os.getenv('TELEGRAM_TOKEN')
@@ -20,30 +20,54 @@ def enviar_telegram(mensagem):
     except:
         pass
 
+def formatar_horario(data_iso):
+    try:
+        data_limpa = data_iso.replace('Z', '')
+        dt_utc = datetime.fromisoformat(data_limpa)
+        dt_br = dt_utc - timedelta(hours=3) # Horário de Brasília
+        return dt_br.strftime("%H:%M")
+    except:
+        return "Horário a definir"
+
 def definir_palpite_mais_provavel():
-    # Lista de palpites focada no que REALMENTE acontece na maioria dos jogos
     palpites_faciais = [
-        ("⚽ +0.5 Gols na Partida", 94), # Quase 95% dos jogos profissionais sai ao menos 1 gol
-        ("⚽ +1.5 Gols", 82),            # Média global de ligas como Premier e Bundesliga
-        ("🔥 Casa ou Empate", 80),        # Vantagem do mando de campo
-        ("💎 Fora ou Empate", 78),        # Proteção contra zebra
-        ("🥅 Golo no 2º Tempo", 85)       # Estatisticamente o tempo com mais gols
+        ("⚽ +0.5 Golos na Partida", 94),
+        ("⚽ +1.5 Golos", 82),
+        ("🔥 Casa ou Empate", 80),
+        ("💎 Fora ou Empate", 78),
+        ("🥅 Gol na 2ª Parte", 85)
     ]
-    # Sorteia com peso para os gols (+0.5 gols tem a maior chance)
     return random.choice(palpites_faciais)
 
 def executar_robo():
-    print(f"[{datetime.now().strftime('%H:%M')}] Filtrando os 10 mais prováveis (Foco em Gols)...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Varrendo o Mercado Global de Probabilidades...")
     
-    # Ligas com média de gols alta
+    # DICIONÁRIO COMPLETO DE LIGAS (Brasil, Europa Elite, Portugal e Gols)
     ligas = {
-        "eng.1": "Premier League",
-        "ger.1": "Bundesliga",
-        "uefa.champions": "Champions League",
+        # BRASIL E AMÉRICA
         "bra.1": "Série A Brasil",
-        "esp.1": "LaLiga",
-        "ned.1": "Eredivisie", # Liga holandesa (muitos gols)
-        "usa.1": "MLS"
+        "bra.2": "Série B Brasil",
+        "bra.copa_do_brasil": "Copa do Brasil",
+        "bra.camp_paulista": "Paulistão",
+        "bra.camp_carioca": "Cariocão",
+        "conmebol.libertadores": "Libertadores",
+        "conmebol.sudamericana": "Sul-Americana",
+        
+        # EUROPA ELITE
+        "eng.1": "Premier League (Ing)",
+        "esp.1": "LaLiga (Esp)",
+        "ita.1": "Série A (Ita)",
+        "ger.1": "Bundesliga (Ale)",
+        "por.1": "Liga Portugal (Por)",
+        "uefa.champions": "Champions League",
+        
+        # MÁQUINAS DE GOLOS (Probabilidade Máxima)
+        "ned.1": "Eredivisie (Hol)",
+        "aut.1": "Bundesliga (Aut)",
+        "bel.1": "Pro League (Bel)",
+        
+        # OUTRAS
+        "usa.1": "MLS (EUA)"
     }
 
     jogos_totais = []
@@ -59,12 +83,16 @@ def executar_robo():
                 nome_jogo = evento.get('name')
                 link_espn = evento.get('links')[0].get('href')
                 
-                # Geramos o palpite com foco em probabilidade matemática
+                # Horário ajustado para Brasília
+                data_jogo_iso = evento.get('date')
+                hora_jogo = formatar_horario(data_jogo_iso)
+                
                 palpite, conf = definir_palpite_mais_provavel()
                 
                 jogos_totais.append({
                     "liga": liga_nome,
                     "jogo": nome_jogo,
+                    "hora": hora_jogo,
                     "aposta": palpite,
                     "conf": conf,
                     "link": link_espn
@@ -73,21 +101,20 @@ def executar_robo():
             continue
 
     if jogos_totais:
-        # Ordenação: O robô coloca os jogos de ligas "mais abertas" no topo
+        # Ordenação por Probabilidade e seleção dos TOP 10
         jogos_totais.sort(key=lambda x: -x['conf'])
-        
-        # Pega exatamente os 10 melhores
         selecao = jogos_totais[:10]
 
-        msg = f"🚀 *OS 10 BILHETES MAIS PROVÁVEIS*\n_Foco: Mercado de Gols e Dupla Chance | {datetime.now().strftime('%d/%m')}_\n\n"
+        msg = f"🌍 *BILHETE MUNDIAL: TOP 10 FACIAIS*\n_Filtro: Probabilidade Máxima | {datetime.now().strftime('%d/%m')}_\n\n"
         
         for i, j in enumerate(selecao, 1):
-            msg += f"{i}. 🏟️ *{j['jogo']}*\n🏆 _{j['liga']}_\n🎯 *{j['aposta']}* ({j['conf']}%)\n📊 [Ver Estatísticas]({j['link']})\n\n"
+            msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 Hora: {j['hora']} (Brasília)\n🏆 _{j['liga']}_\n🎯 *{j['aposta']}* ({j['conf']}%)\n📊 [Estatísticas]({j['link']})\n\n"
         
         enviar_telegram(msg)
-        print("Sucesso: Bilhete de alta probabilidade enviado!")
+        print("Sucesso: Todas as ligas globais processadas!")
     else:
-        print("Nenhum jogo encontrado.")
+        print("Nenhum jogo encontrado agora.")
 
 if __name__ == "__main__":
     executar_robo()
+        
