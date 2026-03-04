@@ -32,7 +32,6 @@ def definir_palpite_com_prioridade(contador_25):
         ("⚽ +0.5 Gols (Base Segura)", 1.10, 30),
         ("🎯 Ambas Marcam - Sim", 1.80, 15),
     ]
-    # Reduzido para no máximo 2 palpites de +2.5
     if contador_25 < 2:
         opcoes.append(("⚽ +2.5 Gols na Partida", 1.90, 10))
 
@@ -45,7 +44,7 @@ def definir_palpite_com_prioridade(contador_25):
 
 def executar_robo():
     hoje_br = obter_data_hoje_br()
-    print(f"[{datetime.now().strftime('%H:%M')}] Gerando bilhete (Máx 2 de +2.5)...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Gerando bilhete ordenado por ligas...")
     
     ligas_config = {
         "bra.1": "Série A Brasil", "bra.2": "Série B Brasil", "bra.copa_do_brasil": "Copa do Brasil",
@@ -96,11 +95,15 @@ def executar_robo():
             melhor_bilhete = lista_atual
 
     if melhor_bilhete:
-        # Extrair ligas únicas e formatar uma embaixo da outra
+        # --- ORDENAÇÃO DOS JOGOS POR LIGA ---
+        # Isso garante que os jogos da mesma liga fiquem juntos na lista
+        melhor_bilhete = sorted(melhor_bilhete, key=lambda x: x['liga'])
+
+        # Extrair ligas únicas (já estarão em ordem por causa do sorted acima)
         ligas_no_bilhete = sorted(list(set([j['liga'] for j in melhor_bilhete])))
         resumo_ligas_vertical = "\n".join([f"🔹 {liga}" for liga in ligas_no_bilhete])
 
-        msg = f"🎯 *BILHETE CALIBRADO: ODD {melhor_odd:.2f}*\n\n"
+        msg = f"🎯 *BILHETE CALIBRADO: ODD {melhor_odd:.2f}* DE 100\n\n"
         msg += f"🏟️ *LIGAS ENCONTRADAS:*\n{resumo_ligas_vertical}\n\n"
         msg += f"⚠️ _Máximo 2 palpites de +2.5 Gols | HOJE ({hoje_br})_\n\n"
         
@@ -110,8 +113,8 @@ def executar_robo():
         msg += "---\n💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         
         enviar_telegram(msg)
-        print(f"Bilhete enviado! Odd: {melhor_odd:.2f}")
+        print(f"Bilhete enviado! Odd: {melhor_odd:.2f} (Ordenado por Liga)")
 
 if __name__ == "__main__":
     executar_robo()
-    
+                
