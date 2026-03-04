@@ -107,10 +107,10 @@ def executar_robo():
         jogos_totais.sort(key=lambda x: -x['conf'])
         selecao = jogos_totais[:10]
 
-        msg = f"🌍 *BILHETE MUNDIAL: TOP 10 FACIAIS*\n_Filtro: Probabilidade Máxima | {datetime.now().strftime('%d/%m')}_\n\n"
+        msg = f"🎫 *APOSTAS MULTIPLAS: TOP 10*\n_Filtro: Probabilidade Máxima | {datetime.now().strftime('%d/%m')}_\n\n"
         
         for i, j in enumerate(selecao, 1):
-            msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 Hora: {j['hora']} (Brasília)\n🏆 _{j['liga']}_\n🎯 *{j['aposta']}* ({j['conf']}%)\n📊 [Estatísticas]({j['link']})\n\n"
+            msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 Hora: {j['hora']} \n🏆 _{j['liga']}_\n🎯 *{j['aposta']}* ({j['conf']}%)\n📊 [Estatísticas]({j['link']})\n\n"
         
         enviar_telegram(msg)
         print(f"Sucesso: {len(selecao)} jogos processados!")
