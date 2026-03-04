@@ -24,7 +24,6 @@ def obter_data_hoje_br():
     return (datetime.utcnow() - timedelta(hours=3)).strftime('%Y-%m-%d')
 
 def definir_palpite_com_prioridade(contador_25):
-    # (Mercado, Odd, Peso)
     opcoes = [
         ("⚽ +1.5 Gols na Partida", 1.45, 40),
         ("🛡️ Empate Anula Fav.", 1.40, 25),
@@ -44,7 +43,7 @@ def definir_palpite_com_prioridade(contador_25):
 
 def executar_robo():
     hoje_br = obter_data_hoje_br()
-    print(f"[{datetime.now().strftime('%H:%M')}] Gerando bilhete ordenado por ligas...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Gerando bilhete (Ordem: Casa x Fora + Ligas)...")
     
     ligas_config = {
         "bra.1": "Série A Brasil", "bra.2": "Série B Brasil", "bra.copa_do_brasil": "Copa do Brasil",
@@ -62,17 +61,26 @@ def executar_robo():
             data = res.json()
             for evento in data.get('events', []):
                 dt_br = datetime.fromisoformat(evento.get('date').replace('Z', '')) - timedelta(hours=3)
+                
                 if dt_br.strftime('%Y-%m-%d') == hoje_br:
+                    # Captura Mandante e Visitante de forma explícita
+                    competitors = evento.get('competitions')[0].get('competitors')
+                    home_team = next(t.get('team').get('displayName') for t in competitors if t.get('homeAway') == 'home')
+                    away_team = next(t.get('team').get('displayName') for t in competitors if t.get('homeAway') == 'away')
+                    
+                    nome_correto = f"{home_team} x {away_team}"
+                    link_estatistica = evento.get('links')[0].get('href')
+                    
                     jogos_hoje.append({
                         "liga": liga_nome,
-                        "jogo": evento.get('name').replace(' at ', ' x ').replace(' & ', ' x '),
+                        "jogo": nome_correto,
                         "hora": dt_br.strftime("%H:%M"),
-                        "link": evento.get('links')[0].get('href')
+                        "link": link_estatistica
                     })
         except: continue
 
     if len(jogos_hoje) < 10:
-        print("Jogos insuficientes.")
+        print(f"Jogos insuficientes: {len(jogos_hoje)} encontrados.")
         return
 
     melhor_bilhete = None
@@ -95,11 +103,9 @@ def executar_robo():
             melhor_bilhete = lista_atual
 
     if melhor_bilhete:
-        # --- ORDENAÇÃO DOS JOGOS POR LIGA ---
-        # Isso garante que os jogos da mesma liga fiquem juntos na lista
+        # Ordena por Liga para facilitar a busca
         melhor_bilhete = sorted(melhor_bilhete, key=lambda x: x['liga'])
 
-        # Extrair ligas únicas (já estarão em ordem por causa do sorted acima)
         ligas_no_bilhete = sorted(list(set([j['liga'] for j in melhor_bilhete])))
         resumo_ligas_vertical = "\n".join([f"🔹 {liga}" for liga in ligas_no_bilhete])
 
@@ -113,8 +119,8 @@ def executar_robo():
         msg += "---\n💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         
         enviar_telegram(msg)
-        print(f"Bilhete enviado! Odd: {melhor_odd:.2f} (Ordenado por Liga)")
+        print(f"Sucesso! Bilhete com Odd {melhor_odd:.2f} enviado.")
 
 if __name__ == "__main__":
     executar_robo()
-                
+                    
