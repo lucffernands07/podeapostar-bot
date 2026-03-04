@@ -24,15 +24,22 @@ def obter_data_hoje_br():
     return (datetime.utcnow() - timedelta(hours=3)).strftime('%Y-%m-%d')
 
 def definir_palpite_com_prioridade(contador_25):
+    """
+    Prioriza mercados de segurança. 
+    Limite rigoroso de apenas 1 jogo de +2.5 gols.
+    """
+    # (Mercado, Odd Estimada, Peso de sorteio)
     opcoes = [
-        ("⚽ +1.5 Gols na Partida", 1.45, 40),
-        ("🛡️ Empate Anula Fav.", 1.40, 25),
-        ("🔥 Casa ou Fora (12)", 1.35, 25),
-        ("⚽ +0.5 Gols (Base Segura)", 1.10, 30),
-        ("🎯 Ambas Marcam - Sim", 1.80, 15),
+        ("⚽ +1.5 Gols na Partida", 1.45, 50), # Prioridade alta
+        ("🔥 Casa ou Fora (12)", 1.35, 30),     # Prioridade alta
+        ("🎯 Ambas Marcam - Sim", 1.80, 25),    # Prioridade média
+        ("🛡️ Empate Anula Fav.", 1.40, 20),
+        ("⚽ +0.5 Gols (Base Segura)", 1.10, 20),
     ]
-    if contador_25 < 2:
-        opcoes.append(("⚽ +2.5 Gols na Partida", 1.90, 10))
+    
+    # Trava: apenas 1 jogo de +2.5 por bilhete
+    if contador_25 < 1:
+        opcoes.append(("⚽ +2.5 Gols na Partida", 1.95, 5)) # Peso muito baixo
 
     mercados = [o[0] for o in opcoes]
     odds = [o[1] for o in opcoes]
@@ -43,7 +50,7 @@ def definir_palpite_com_prioridade(contador_25):
 
 def executar_robo():
     hoje_br = obter_data_hoje_br()
-    print(f"[{datetime.now().strftime('%H:%M')}] Gerando bilhete (Ordem: Casa x Fora + Ligas)...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Gerando bilhete (Foco: Segurança Máxima + Máx 1 de 2.5)...")
     
     ligas_config = {
         "bra.1": "Série A Brasil", "bra.2": "Série B Brasil", "bra.copa_do_brasil": "Copa do Brasil",
@@ -63,55 +70,46 @@ def executar_robo():
                 dt_br = datetime.fromisoformat(evento.get('date').replace('Z', '')) - timedelta(hours=3)
                 
                 if dt_br.strftime('%Y-%m-%d') == hoje_br:
-                    # Captura Mandante e Visitante de forma explícita
                     competitors = evento.get('competitions')[0].get('competitors')
                     home_team = next(t.get('team').get('displayName') for t in competitors if t.get('homeAway') == 'home')
                     away_team = next(t.get('team').get('displayName') for t in competitors if t.get('homeAway') == 'away')
                     
-                    nome_correto = f"{home_team} x {away_team}"
-                    link_estatistica = evento.get('links')[0].get('href')
-                    
                     jogos_hoje.append({
                         "liga": liga_nome,
-                        "jogo": nome_correto,
+                        "jogo": f"{home_team} x {away_team}",
                         "hora": dt_br.strftime("%H:%M"),
-                        "link": link_estatistica
+                        "link": evento.get('links')[0].get('href')
                     })
         except: continue
 
     if len(jogos_hoje) < 10:
-        print(f"Jogos insuficientes: {len(jogos_hoje)} encontrados.")
+        print("Jogos insuficientes.")
         return
 
-    melhor_bilhete = None
-    melhor_odd = 0
+    melhor_bilhete, melhor_odd = None, 0
     alvo = 100.0
 
     for _ in range(5000):
         selecao = random.sample(jogos_hoje, 10)
-        odd_atual = 1.0
-        lista_atual = []
-        contador_25 = 0
+        odd_atual, lista_atual, c25 = 1.0, [], 0
+        
         for jogo in selecao:
-            palpite, odd_est = definir_palpite_com_prioridade(contador_25)
-            if "+2.5" in palpite: contador_25 += 1
+            palpite, odd_est = definir_palpite_com_prioridade(c25)
+            if "+2.5" in palpite: c25 += 1
             odd_atual *= odd_est
             lista_atual.append({**jogo, "aposta": palpite, "odd": odd_est})
 
         if odd_atual <= alvo and odd_atual > melhor_odd:
-            melhor_odd = odd_atual
-            melhor_bilhete = lista_atual
+            melhor_odd, melhor_bilhete = odd_atual, lista_atual
 
     if melhor_bilhete:
-        # Ordena por Liga para facilitar a busca
         melhor_bilhete = sorted(melhor_bilhete, key=lambda x: x['liga'])
-
         ligas_no_bilhete = sorted(list(set([j['liga'] for j in melhor_bilhete])))
         resumo_ligas_vertical = "\n".join([f"🔹 {liga}" for liga in ligas_no_bilhete])
 
         msg = f"🎯 *BILHETE CALIBRADO: ODD {melhor_odd:.2f}/100*\n\n"
         msg += f"🏟️ *LIGAS ENCONTRADAS:*\n{resumo_ligas_vertical}\n\n"
-        msg += f"⚠️ _Máximo 2 palpites de +2.5 Gols | HOJE ({hoje_br})_\n\n"
+        msg += f"⚠️ _Máximo 1 palpite de +2.5 Gols | HOJE ({hoje_br})_\n\n"
         
         for i, j in enumerate(melhor_bilhete, 1):
             msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 {j['hora']} | _{j['liga']}_\n🎯 *{j['aposta']}*\n📊 [Estatísticas]({j['link']})\n\n"
@@ -123,3 +121,4 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
+    
