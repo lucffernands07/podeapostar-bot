@@ -29,18 +29,24 @@ def formatar_horario(data_iso):
     except:
         return "Horário a definir"
 
-def definir_palpite_mais_provavel():
-    palpites_faciais = [
-        ("⚽ +0.5 Gols na Partida", 94),
-        ("⚽ +1.5 Gols", 82),
-        ("🔥 Casa ou Empate", 80),
-        ("💎 Fora ou Empate", 78),
-        ("🥅 Gol na 2ª Parte", 85)
+def definir_palpite_estrategico():
+    """
+    Retorna palpite, Confiança e Odd Estimada para cálculo do bilhete 100x.
+    A média aqui é buscar palpites entre 1.40 e 1.80.
+    """
+    opcoes = [
+        ("⚽ +1.5 Gols na Partida", 82, 1.45),
+        ("⚽ +2.5 Gols na Partida", 70, 1.90),
+        ("🎯 Ambas Marcam - Sim", 75, 1.80),
+        ("🛡️ Empate Anula Fav.", 85, 1.40),
+        ("🔥 Casa ou Fora (12)", 78, 1.35),
+        ("⚽ +0.5 Gols (Base Segura)", 94, 1.10)
     ]
-    return random.choice(palpites_faciais)
+    # Usamos pesos para não pegar apenas odds baixas
+    return random.choice(opcoes)
 
 def executar_robo():
-    print(f"[{datetime.now().strftime('%H:%M')}] Varrendo o Mercado Global e Copas...")
+    print(f"[{datetime.now().strftime('%H:%M')}] Gerando Bilhete Busca Odd 100...")
     
     ligas = {
         "bra.1": "Série A Brasil",
@@ -75,15 +81,14 @@ def executar_robo():
             
             for evento in eventos:
                 nome_bruto = evento.get('name')
-                
-                # --- AJUSTE AQUI: Substitui "at" e "&" por "x" ---
                 nome_jogo = nome_bruto.replace(' at ', ' x ').replace(' & ', ' x ')
                 
                 link_espn = evento.get('links')[0].get('href')
                 data_jogo_iso = evento.get('date')
                 hora_jogo = formatar_horario(data_jogo_iso)
                 
-                palpite, conf = definir_palpite_mais_provavel()
+                # Pega palpite, confiança e odd
+                palpite, conf, odd_est = definir_palpite_estrategico()
                 
                 jogos_totais.append({
                     "liga": liga_nome,
@@ -91,25 +96,32 @@ def executar_robo():
                     "hora": hora_jogo,
                     "aposta": palpite,
                     "conf": conf,
+                    "odd": odd_est,
                     "link": link_espn
                 })
         except:
             continue
 
-    if jogos_totais:
-        jogos_totais.sort(key=lambda x: -x['conf'])
-        selecao = jogos_totais[:10]
+    if len(jogos_totais) >= 10:
+        # Sorteia 10 jogos da lista para garantir variedade e Odd alta
+        selecao = random.sample(jogos_totais, 10)
+        
+        # Calcula a Odd Total Estimada
+        odd_total = 1.0
+        for j in selecao:
+            odd_total *= j['odd']
 
-        msg = f"🎫 *APOSTAS MULTIPLAS: TOP 10*\n_Filtro: Probabilidade Máxima | {datetime.now().strftime('%d/%m')}_\n\n"
+        msg = f"🚀 *BILHETE BUSCA ODD 100+*\n_Múltipla 10 Jogos | Odd Total Est: {odd_total:.2f}_\n\n"
         
         for i, j in enumerate(selecao, 1):
-            msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 Hora: {j['hora']} \n🏆 _{j['liga']}_\n🎯 *{j['aposta']}* ({j['conf']}%)\n📊 [Estatísticas]({j['link']})\n\n"
+            msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 {j['hora']} | _{j['liga']}_\n🎯 *{j['aposta']}* (Odd ~{j['odd']})\n\n"
+        
+        msg += f"📊 [Analisar Todos no ESPN]({selecao[0]['link']})\n\n⚠️ _Odds estimadas. Confira no seu site de apostas._"
         
         enviar_telegram(msg)
-        print(f"Sucesso: {len(selecao)} jogos processados!")
+        print(f"Sucesso: Bilhete Odd {odd_total:.2f} enviado!")
     else:
-        print("Nenhum jogo encontrado agora.")
+        print("Poucos jogos para gerar um Top 10.")
 
 if __name__ == "__main__":
     executar_robo()
-    
