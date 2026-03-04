@@ -1,4 +1,4 @@
-import os
+   ,import os
 import requests
 import random
 from datetime import datetime, timedelta
@@ -31,8 +31,8 @@ def formatar_horario(data_iso):
 
 def definir_palpite_mais_provavel():
     palpites_faciais = [
-        ("⚽ +0.5 Golos na Partida", 94),
-        ("⚽ +1.5 Golos", 82),
+        ("⚽ +0.5 Gols na Partida", 94),
+        ("⚽ +1.5 Gols", 82),
         ("🔥 Casa ou Empate", 80),
         ("💎 Fora ou Empate", 78),
         ("🥅 Gol na 2ª Parte", 85)
