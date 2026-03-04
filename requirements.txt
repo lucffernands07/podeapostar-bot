@@ -1,2 +1,2 @@
-pyppeteer
 requests
+beautifulsoup4
