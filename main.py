@@ -1,7 +1,7 @@
 import os
 import requests
 import random
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # --- CONFIGURAÇÃO ---
 TOKEN = os.getenv('TELEGRAM_TOKEN')
@@ -35,11 +35,11 @@ def analisar_partida(j, contador_25):
     s_15 = max(get_sucessos(h_id, '1.5'), get_sucessos(a_id, '1.5'))
     s_am = max(get_sucessos(h_id, 'ambas'), get_sucessos(a_id, 'ambas'))
 
-    # 1. Ambas Marcam (Mínimo 4/5 conforme sua regra)
+    # 1. Ambas Marcam (Mínimo 4/5)
     if s_am >= 4: 
         return "🎯 Ambas Marcam", 1.85, f"{s_am}/5"
     
-    # 2. +2.5 Gols (Máximo 1x no bilhete)
+    # 2. +2.5 Gols (Máximo 1x no bilhete conforme regra)
     if contador_25 < 1 and s_15 >= 4:
         s_25 = get_sucessos(h_id, '2.5')
         if s_25 >= 4: return "🔥 +2.5 Gols", 2.15, f"{s_25}/5"
@@ -48,24 +48,32 @@ def analisar_partida(j, contador_25):
     if s_15 >= 3: 
         return "⚽ +1.5 Gols", 1.48, f"{s_15}/5"
     
-    # 4. +0.5 Gols HT/FT (Critério de Segurança para volume)
+    # 4. +0.5 Gols HT/FT (Incluso para volume e facilidade)
     return "⚡ +0.5 Gols (HT/FT)", 1.38, f"{s_15}/5 (Média)"
 
 def executar_robo():
     hoje = "2026-03-05"
     
-    # IDs ATUALIZADOS CONFORME SUAS URLs MANUAIS
+    # MAPA DE IDS EXTRAÍDO DO SEU HTML (Garante acerto na Copa do Brasil e Estaduais)
     ligas_ids = {
         "bra.copa_do_brazil": "Copa do Brasil",
         "conmebol.libertadores": "Libertadores",
         "conmebol.sudamericana": "Sul-Americana",
-        "eng.1": "Premier League (Ing)",
-        "esp.1": "LaLiga (Esp)",
-        "ita.1": "Série A (Ita)",
-        "ger.1": "Bundesliga (Ale)"
+        "eng.1": "Premier League",
+        "esp.1": "LALIGA",
+        "ger.1": "Bundesliga",
+        "ita.1": "Serie A",
+        "fra.1": "Ligue 1",
+        "por.1": "Campeonato Português",
+        "bra.1": "Brasileirão",
+        "bra.camp.paulista": "Paulistão",
+        "bra.camp.carioca": "Cariocão",
+        "bra.camp.mineiro": "Mineiro",
+        "bra.camp.gaucho": "Gauchão",
+        "bra.copa_do_nordeste": "Copa do Nordeste"
     }
 
-    # Scanner dinâmico para capturar qualquer outro ID que mude
+    # Scanner dinâmico para novos IDs da ESPN
     try:
         url_scan = "http://site.api.espn.com/apis/site/v2/sports/soccer/scoreboards"
         data_scan = requests.get(url_scan, timeout=10).json()
@@ -76,7 +84,7 @@ def executar_robo():
                 if slug not in ligas_ids:
                     ligas_ids[slug] = nome
             except: continue
-    except: print("Aviso: Scanner Global indisponível.")
+    except: print("Aviso: Scanner Global offline.")
 
     radar = []
     for l_id, l_nome in ligas_ids.items():
@@ -96,7 +104,7 @@ def executar_robo():
                     })
         except: continue
 
-    print(f"Jogos encontrados no radar: {len(radar)}")
+    print(f"Jogos encontrados: {len(radar)}")
 
     candidatos = []
     contador_25 = 0
@@ -105,7 +113,7 @@ def executar_robo():
         if "+2.5" in aposta: contador_25 += 1
         candidatos.append({**j, "aposta": aposta, "odd": odd, "qualidade": qual})
 
-    # SELEÇÃO INTELIGENTE (7 A 10 JOGOS)
+    # LÓGICA DE SELEÇÃO (Escolhe os 10 que mais se aproximam de Odd 100)
     final_escolhidos = []
     if len(candidatos) > 10:
         melhor_distancia = float('inf')
@@ -120,14 +128,14 @@ def executar_robo():
     else:
         final_escolhidos = candidatos
 
-    # ENVIO (Requisito: Mínimo de 7 jogos)
+    # ENVIO (Requisito: Mínimo 7 para enviar)
     if len(final_escolhidos) >= 7:
         total_odd = 1.0
         for b in final_escolhidos: total_odd *= b['odd']
 
         resumo_ligas = "\n".join([f"🔹 {l}" for l in sorted(list(set([j['liga'] for j in final_escolhidos])))])
 
-        msg = f"🎯 *BILHETE ANALISADO ({len(final_escolhidos)} JOGOS)*\n"
+        msg = f"🎯 *BILHETE CALIBRADO ({len(final_escolhidos)} JOGOS)*\n"
         msg += f"💰 *ODD TOTAL: {total_odd:.2f}*\n\n"
         msg += f"🏟️ *LIGAS ENCONTRADAS:*\n{resumo_ligas}\n\n"
         
@@ -137,10 +145,10 @@ def executar_robo():
         msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         
         enviar_telegram(msg)
-        print(f"Sucesso! Bilhete com {len(final_escolhidos)} jogos enviado.")
+        print(f"Sucesso! Odd: {total_odd:.2f}")
     else:
-        print(f"Volume insuficiente: {len(final_escolhidos)} jogos encontrados. Mínimo é 7.")
+        print(f"Volume insuficiente: {len(final_escolhidos)} jogos.")
 
 if __name__ == "__main__":
     executar_robo()
-                
+        
