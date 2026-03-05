@@ -35,9 +35,7 @@ def analisar_partida(j, contador_25):
     s_15 = max(get_sucessos(h_id, '1.5'), get_sucessos(a_id, '1.5'))
     s_am = max(get_sucessos(h_id, 'ambas'), get_sucessos(a_id, 'ambas'))
 
-    # --- FUNIL DE DECISÃO MELHORADO ---
-    
-    # 1. Ambas Marcam (Mínimo 4/5)
+    # 1. Ambas Marcam (Mínimo 4/5 conforme sua regra)
     if s_am >= 4: 
         return "🎯 Ambas Marcam", 1.85, f"{s_am}/5"
     
@@ -50,15 +48,15 @@ def analisar_partida(j, contador_25):
     if s_15 >= 3: 
         return "⚽ +1.5 Gols", 1.48, f"{s_15}/5"
     
-    # 4. +0.5 Gols Jogo Todo + +0.5 HT (Critério de Segurança/Média)
-    # Se a média for baixa, ele sugere o gol no 1º tempo para valorizar a Odd
+    # 4. +0.5 Gols HT/FT (Critério de Segurança para volume)
     return "⚡ +0.5 Gols (HT/FT)", 1.38, f"{s_15}/5 (Média)"
 
 def executar_robo():
     hoje = "2026-03-05"
     
+    # IDs ATUALIZADOS CONFORME SUAS URLs MANUAIS
     ligas_ids = {
-        "bra.copa_do_brasil": "Copa do Brasil",
+        "bra.copa_do_brazil": "Copa do Brasil",
         "conmebol.libertadores": "Libertadores",
         "conmebol.sudamericana": "Sul-Americana",
         "eng.1": "Premier League (Ing)",
@@ -67,7 +65,7 @@ def executar_robo():
         "ger.1": "Bundesliga (Ale)"
     }
 
-    # SCANNER DINÂMICO
+    # Scanner dinâmico para capturar qualquer outro ID que mude
     try:
         url_scan = "http://site.api.espn.com/apis/site/v2/sports/soccer/scoreboards"
         data_scan = requests.get(url_scan, timeout=10).json()
@@ -98,7 +96,7 @@ def executar_robo():
                     })
         except: continue
 
-    print(f"Jogos encontrados: {len(radar)}")
+    print(f"Jogos encontrados no radar: {len(radar)}")
 
     candidatos = []
     contador_25 = 0
@@ -107,7 +105,7 @@ def executar_robo():
         if "+2.5" in aposta: contador_25 += 1
         candidatos.append({**j, "aposta": aposta, "odd": odd, "qualidade": qual})
 
-    # SELEÇÃO DE 7 A 10 JOGOS
+    # SELEÇÃO INTELIGENTE (7 A 10 JOGOS)
     final_escolhidos = []
     if len(candidatos) > 10:
         melhor_distancia = float('inf')
@@ -122,7 +120,7 @@ def executar_robo():
     else:
         final_escolhidos = candidatos
 
-    # ENVIO (Mínimo 7 jogos)
+    # ENVIO (Requisito: Mínimo de 7 jogos)
     if len(final_escolhidos) >= 7:
         total_odd = 1.0
         for b in final_escolhidos: total_odd *= b['odd']
@@ -139,9 +137,10 @@ def executar_robo():
         msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         
         enviar_telegram(msg)
-        print(f"Bilhete enviado! Odd: {total_odd:.2f}")
+        print(f"Sucesso! Bilhete com {len(final_escolhidos)} jogos enviado.")
     else:
-        print(f"Volume insuficiente ({len(final_escolhidos)}).")
+        print(f"Volume insuficiente: {len(final_escolhidos)} jogos encontrados. Mínimo é 7.")
 
 if __name__ == "__main__":
     executar_robo()
+                
