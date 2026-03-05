@@ -39,7 +39,7 @@ def analisar_partida(j, contador_25):
     if s_am >= 4: 
         return "🎯 Ambas Marcam", 1.85, f"{s_am}/5"
     
-    # 2. +2.5 Gols (Máximo 1x no bilhete conforme regra)
+    # 2. +2.5 Gols (Máximo 1x no bilhete)
     if contador_25 < 1 and s_15 >= 4:
         s_25 = get_sucessos(h_id, '2.5')
         if s_25 >= 4: return "🔥 +2.5 Gols", 2.15, f"{s_25}/5"
@@ -48,13 +48,13 @@ def analisar_partida(j, contador_25):
     if s_15 >= 3: 
         return "⚽ +1.5 Gols", 1.48, f"{s_15}/5"
     
-    # 4. +0.5 Gols HT/FT (Incluso para volume e facilidade)
+    # 4. +0.5 Gols HT/FT (Incluso para volume)
     return "⚡ +0.5 Gols (HT/FT)", 1.38, f"{s_15}/5 (Média)"
 
 def executar_robo():
     hoje = "2026-03-05"
     
-    # MAPA DE IDS EXTRAÍDO DO SEU HTML (Garante acerto na Copa do Brasil e Estaduais)
+    # DICIONÁRIO AMPLIADO COM AS NOVAS LIGAS
     ligas_ids = {
         "bra.copa_do_brazil": "Copa do Brasil",
         "conmebol.libertadores": "Libertadores",
@@ -70,10 +70,12 @@ def executar_robo():
         "bra.camp.carioca": "Cariocão",
         "bra.camp.mineiro": "Mineiro",
         "bra.camp.gaucho": "Gauchão",
-        "bra.copa_do_nordeste": "Copa do Nordeste"
+        "bra.copa_do_nordeste": "Copa do Nordeste",
+        "bra.camp.acreano": "Camp. Acreano",
+        "bra.camp.amazonense": "Camp. Amazonense",
+        "bra.camp.amapaense": "Camp. Amapaense"
     }
 
-    # Scanner dinâmico para novos IDs da ESPN
     try:
         url_scan = "http://site.api.espn.com/apis/site/v2/sports/soccer/scoreboards"
         data_scan = requests.get(url_scan, timeout=10).json()
@@ -113,7 +115,7 @@ def executar_robo():
         if "+2.5" in aposta: contador_25 += 1
         candidatos.append({**j, "aposta": aposta, "odd": odd, "qualidade": qual})
 
-    # LÓGICA DE SELEÇÃO (Escolhe os 10 que mais se aproximam de Odd 100)
+    # LÓGICA DE SELEÇÃO
     final_escolhidos = []
     if len(candidatos) > 10:
         melhor_distancia = float('inf')
@@ -128,7 +130,7 @@ def executar_robo():
     else:
         final_escolhidos = candidatos
 
-    # ENVIO (Requisito: Mínimo 5 para enviar)
+    # ENVIO (MÍNIMO REDUZIDO PARA 5 JOGOS)
     if len(final_escolhidos) >= 5:
         total_odd = 1.0
         for b in final_escolhidos: total_odd *= b['odd']
@@ -151,4 +153,3 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
-        
