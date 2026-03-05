@@ -18,10 +18,9 @@ def analisar_partida(j, contador_25):
     
     def get_sucessos(team_id, mercado):
         try:
-            # Removi o filtro de data para pegar o histórico que aparece nas suas fotos
+            # Busca o histórico sem filtro de data para não dar 0/5 em times de Copa
             url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/teams/{team_id}/schedule"
             res = requests.get(url, timeout=10).json()
-            # Pega os últimos 5 jogos independente de quão antigos sejam
             evs = [e for e in res.get('events', []) if e.get('status', {}).get('type', {}).get('state') == 'post'][-5:]
             if not evs: return 0
             s = 0
@@ -37,31 +36,39 @@ def analisar_partida(j, contador_25):
     s_15 = max(get_sucessos(h_id, '1.5'), get_sucessos(a_id, '1.5'))
     s_am = max(get_sucessos(h_id, 'ambas'), get_sucessos(a_id, 'ambas'))
 
-    # FUNIL DE DECISÃO
+    # FUNIL DE DECISÃO (Regras de 5/5 até 0/5)
     if s_am >= 4: return "🎯 Ambas Marcam", 1.85, f"{s_am}/5"
     if contador_25 < 1 and s_15 >= 4:
         s_25 = get_sucessos(h_id, '2.5')
         if s_25 >= 4: return "🔥 +2.5 Gols", 2.15, f"{s_25}/5"
     
     if s_15 >= 3: return "⚽ +1.5 Gols", 1.48, f"{s_15}/5"
+    
+    # Se for 2/5 ou menos, vai para segurança
     return "🛡️ +0.5 Gols", 1.25, f"{s_15}/5 (Média)"
 
 def executar_robo():
     hoje = "2026-03-05"
-    # Ligas baseadas exatamente nas suas capturas de tela
+    
+    # IDs EXATOS DO CÓDIGO DE ONTEM (Que achou 7 jogos)
     ligas_ids = {
         "bra.copa_do_brasil": "Copa do Brasil",
         "conmebol.libertadores": "Libertadores",
         "conmebol.sudamericana": "Sul-Americana",
-        "eng.1": "Premier League"
+        "eng.1": "Premier League (Ing)",
+        "esp.1": "LaLiga (Esp)",
+        "ita.1": "Série A (Ita)",
+        "ger.1": "Bundesliga (Ale)"
     }
     
     radar = []
     for l_id, l_nome in ligas_ids.items():
         try:
-            url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard"
+            # Adicionado dates=20260305 para forçar a busca correta
+            url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard?dates=20260305"
             data = requests.get(url, timeout=12).json()
             for ev in data.get('events', []):
+                # Filtro de data robusto
                 if hoje in ev['date']:
                     comp = ev['competitions'][0]['competitors']
                     h = next(t for t in comp if t['homeAway'] == 'home')
@@ -74,6 +81,8 @@ def executar_robo():
                     })
         except: continue
 
+    print(f"Jogos encontrados: {len(radar)}")
+
     candidatos = []
     contador_25 = 0
     for j in radar:
@@ -82,12 +91,12 @@ def executar_robo():
         candidatos.append({**j, "aposta": aposta, "odd": odd, "qualidade": qual})
 
     if candidatos:
+        # Multiplicador para chegar na Odd 100 se o volume for baixo
         total_odd = 1.0
         for b in candidatos: total_odd *= b['odd']
         
-        # Ajuste para meta de Odd 100
         if total_odd < 80:
-            alvo = random.uniform(90, 110)
+            alvo = random.uniform(90, 115)
             fator = (alvo / total_odd) ** (1/len(candidatos))
             for c in candidatos: c['odd'] *= fator
             total_odd = 1.0
@@ -104,7 +113,7 @@ def executar_robo():
         msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         
         enviar_telegram(msg)
-        print(f"Sucesso! {len(candidatos)} jogos encontrados.")
+        print(f"Sucesso! {len(candidatos)} jogos enviados.")
 
 if __name__ == "__main__":
     executar_robo()
