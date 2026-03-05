@@ -16,122 +16,110 @@ def enviar_telegram(mensagem):
 def obter_data_hoje_br():
     return (datetime.utcnow() - timedelta(hours=3)).strftime('%Y-%m-%d')
 
-def analisar_retrospecto(liga_id, team_id, mercado, exigencia):
+def analisar_estatisticas_copa(liga_id, team_id, mercado):
+    """
+    Para COPAS: Analisa as estatísticas gerais da temporada (média de gols).
+    """
+    try:
+        url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{liga_id}/teams/{team_id}/statistics"
+        res = requests.get(url, timeout=10).json()
+        stats = res.get('results', {}).get('stats', [])
+        
+        # Pega média de gols marcados e sofridos
+        gp = next((s['value'] for s in stats if s['name'] == 'goalsFor'), 0)
+        gs = next((s['value'] for s in stats if s['name'] == 'goalsAgainst'), 0)
+        jogos = next((s['value'] for s in stats if s['name'] == 'gamesPlayed'), 1)
+        
+        media_total = (gp + gs) / jogos
+        tem_gol = gp > 0 and gs > 0 # Base para "Ambas Marcam"
+
+        if mercado == '2.5': return media_total >= 2.5
+        if mercado == '1.5': return media_total >= 1.6
+        if mercado == 'ambas': return gp/jogos > 0.8 and gs/jogos > 0.8
+        return True
+    except: return True
+
+def analisar_retrospecto_liga(liga_id, team_id, mercado, exigencia):
+    """
+    Para LIGAS: Mantém sua regra de 5/5, 4/5 ou 3/5.
+    """
     try:
         url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{liga_id}/teams/{team_id}/schedule"
         res = requests.get(url, timeout=10).json()
-        jogos = res.get('events', [])[-5:]
+        jogos = [e for e in res.get('events', []) if e.get('status', {}).get('type', {}).get('state') == 'post'][-5:]
+        if not jogos: return False
         sucessos = 0
-        for jogo in jogos:
-            score = jogo.get('competitions')[0].get('competitors')
-            g1, g2 = int(score[0].get('score', 0)), int(score[1].get('score', 0))
+        for j in jogos:
+            comp = j.get('competitions')[0].get('competitors')
+            g1, g2 = int(comp[0].get('score', 0)), int(comp[1].get('score', 0))
             if mercado == '2.5' and (g1 + g2) >= 3: sucessos += 1
             elif mercado == '1.5' and (g1 + g2) >= 2: sucessos += 1
-            elif mercado == '0.5' and (g1 + g2) >= 1: sucessos += 1
             elif mercado == 'ambas' and (g1 > 0 and g2 > 0): sucessos += 1
         return sucessos >= exigencia
     except: return False
 
-def checar_motivacao(liga_id, home_id, away_id):
-    try:
-        url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{liga_id}/standings"
-        res = requests.get(url, timeout=10).json()
-        standings = res['standings']['entries']
-        total = len(standings)
-        pos_h = next(i for i, s in enumerate(standings) if s['team']['id'] == home_id) + 1
-        pos_a = next(i for i, s in enumerate(standings) if s['team']['id'] == away_id) + 1
-        return (pos_h <= 5 or pos_h > total-5) or (pos_a <= 5 or pos_a > total-5)
-    except: return True # Copas não tem tabela de pontos, então assume motivação alta
-
-def definir_melhor_palpite_disponivel(c25, jogo, nivel):
-    l_id, h_id, a_id = jogo['liga_id'], jogo['h_id'], jogo['a_id']
-    
-    # 1. AMBAS MARCAM (Regra fixa: min 4/5)
-    exig_ambas = max(nivel, 4)
-    if analisar_retrospecto(l_id, h_id, 'ambas', exig_ambas) and analisar_retrospecto(l_id, a_id, 'ambas', exig_ambas):
-        return "🎯 Ambas Marcam - Sim", 1.80
-
-    # 2. MAIS DE 2.5 (Máximo 1 por bilhete + Motivação + Nível)
-    if c25 < 1 and jogo['motivacao']:
-        if analisar_retrospecto(l_id, h_id, '2.5', nivel) or analisar_retrospecto(l_id, a_id, '2.5', nivel):
-            return "⚽ +2.5 Gols na Partida", 1.95
-
-    # 3. MAIS DE 1.5 (Nível atual)
-    if analisar_retrospecto(l_id, h_id, '1.5', nivel) or analisar_retrospecto(l_id, a_id, '1.5', nivel):
-        return "⚽ +1.5 Gols na Partida", 1.45
-
-    # 4. MAIS DE 0.5 (Nível atual - para não descartar o jogo)
-    if analisar_retrospecto(l_id, h_id, '0.5', nivel) or analisar_retrospecto(l_id, a_id, '0.5', nivel):
-        return "⚽ +0.5 Gols (Base)", 1.12
-
-    return None, None
-
 def executar_robo():
     hoje_br = obter_data_hoje_br()
-    # Incluindo campeonatos grifados e principais
-    ligas = {
-        "bra.cup": "Copa do Brasil", "libertadores": "Libertadores", "sudamericana": "Copa Sul-Americana",
-        "eng.1": "Premier League", "eng.2": "Championship", "eng.premier.2": "PL 2 Div 1",
-        "fra.cup": "Coupe de France", "bra.1": "Série A Brasil", "esp.1": "LaLiga",
-        "ita.1": "Série A", "ger.1": "Bundesliga", "por.1": "Liga Portugal"
-    }
+    # Diferenciamos LIGAS de COPAS
+    ligas_normais = {"eng.1": "Premier League", "eng.2": "Championship", "bra.1": "Série A Brasil", "esp.1": "LaLiga", "ita.1": "Série A", "ger.1": "Bundesliga", "por.1": "Liga Portugal", "eng.premier.2": "PL 2 Div 1"}
+    copas = {"bra.cup": "Copa do Brasil", "libertadores": "Libertadores", "sudamericana": "Sul-Americana", "fra.cup": "Coupe de France"}
     
+    todas_as_ligas = {**ligas_normais, **copas}
     todos_jogos = []
-    for l_id, l_nome in ligas.items():
+
+    for l_id, l_nome in todas_as_ligas.items():
         try:
-            url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard"
-            data = requests.get(url, timeout=15).json()
+            data = requests.get(f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard", timeout=15).json()
             for ev in data.get('events', []):
                 dt = datetime.fromisoformat(ev['date'].replace('Z', '')) - timedelta(hours=3)
                 if dt.strftime('%Y-%m-%d') == hoje_br:
                     comp = ev['competitions'][0]['competitors']
-                    h = next(t for t in comp if t['homeAway'] == 'home')
-                    a = next(t for t in comp if t['homeAway'] == 'away')
-                    todos_jogos.append({
-                        "liga": l_nome, "liga_id": l_id, "h_id": h['team']['id'], "a_id": a['team']['id'],
-                        "jogo": f"{h['team']['displayName']} x {a['team']['displayName']}",
-                        "hora": dt.strftime("%H:%M"), "link": ev['links'][0]['href'],
-                        "motivacao": checar_motivacao(l_id, h['team']['id'], a['team']['id'])
-                    })
+                    h, a = next(t for t in comp if t['homeAway'] == 'home'), next(t for t in comp if t['homeAway'] == 'away')
+                    todos_jogos.append({"liga": l_nome, "liga_id": l_id, "h_id": h['team']['id'], "a_id": a['team']['id'], "jogo": f"{h['team']['displayName']} x {a['team']['displayName']}", "hora": dt.strftime("%H:%M"), "is_copa": l_id in copas})
         except: continue
 
-    bilhete_final = []
-    jogos_na_lista = set()
+    bilhete = []
+    jogos_usados = set()
 
-    # BUSCA EM CASCATA ACUMULATIVA (5/5 -> 4/5 -> 3/5)
     for exigencia in [5, 4, 3]:
-        for jogo in todos_jogos:
-            if len(bilhete_final) >= 10: break
-            if jogo['jogo'] in jogos_na_lista: continue
+        for j in todos_jogos:
+            if len(bilhete) >= 10 or j['jogo'] in jogos_usados: continue
             
-            p, o = definir_melhor_palpite_disponivel(sum(1 for x in bilhete_final if "+2.5" in x['aposta']), jogo, exigencia)
+            # Escolha da função baseada no tipo de campeonato
+            if j['is_copa']:
+                val_ambas = analisar_estatisticas_copa(j['liga_id'], j['h_id'], 'ambas') and analisar_estatisticas_copa(j['liga_id'], j['a_id'], 'ambas')
+                val_15 = analisar_estatisticas_copa(j['liga_id'], j['h_id'], '1.5') or analisar_estatisticas_copa(j['liga_id'], j['a_id'], '1.5')
+                val_25 = analisar_estatisticas_copa(j['liga_id'], j['h_id'], '2.5') or analisar_estatisticas_copa(j['liga_id'], j['a_id'], '2.5')
+            else:
+                val_ambas = analisar_retrospecto_liga(j['liga_id'], j['h_id'], 'ambas', max(exigencia, 4)) and analisar_retrospecto_liga(j['liga_id'], j['a_id'], 'ambas', max(exigencia, 4))
+                val_15 = analisar_retrospecto_liga(j['liga_id'], j['h_id'], '1.5', exigencia) or analisar_retrospecto_liga(j['liga_id'], j['a_id'], '1.5', exigencia)
+                val_25 = analisar_retrospecto_liga(j['liga_id'], j['h_id'], '2.5', exigencia) or analisar_retrospecto_liga(j['liga_id'], j['a_id'], '2.5', exigencia)
+
+            # Define Palpite
+            p, o = None, 0
+            if val_ambas: p, o = "🎯 Ambas Marcam - Sim", 1.80
+            elif sum(1 for x in bilhete if "+2.5" in x['aposta']) < 1 and val_25: p, o = "⚽ +2.5 Gols na Partida", 1.95
+            elif val_15: p, o = "⚽ +1.5 Gols na Partida", 1.45
             
             if p:
-                bilhete_final.append({**jogo, "aposta": p, "odd": o, "qualidade": exigencia})
-                jogos_na_lista.add(jogo['jogo'])
+                bilhete.append({**j, "aposta": p, "odd": o, "qualidade": exigencia if not j['is_copa'] else "Stats"})
+                jogos_usados.add(j['jogo'])
 
-    if len(bilhete_final) >= 10:
-        bilhete_final = bilhete_final[:10]
+    # Fallback para completar 10 jogos
+    if len(bilhete) < 10:
+        for j in todos_jogos:
+            if len(bilhete) >= 10 or j['jogo'] in jogos_usados: continue
+            bilhete.append({**j, "aposta": "🔥 Casa ou Fora (12)", "odd": 1.35, "qualidade": "Segurança"})
+            jogos_usados.add(j['jogo'])
+
+    if len(bilhete) >= 10:
         total_odd = 1.0
-        for b in bilhete_final: total_odd *= b['odd']
-        
-        # Ajuste para manter entre 80 e 100 se necessário
-        if total_odd < 80: total_odd *= 1.25 
-
-        msg = f"🎯 *BILHETE ACUMULADO (ODD {total_odd:.2f})*\n\n"
-        for n in [5, 4, 3]:
-            qtd = sum(1 for x in bilhete_final if x['qualidade'] == n)
-            if qtd > 0: msg += f"⭐ {qtd} jogos em nível {n}/5\n"
-        
-        msg += f"\n⚠️ _Filtro Dinâmico: Gols + Ambas Marcam_\n\n"
-        for i, b in enumerate(sorted(bilhete_final, key=lambda x: x['liga']), 1):
-            msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | _{b['liga']}_ ({b['qualidade']}/5)\n🎯 *{b['aposta']}*\n\n"
-        
-        msg += "---\n💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
+        for b in bilhete: total_odd *= b['odd']
+        msg = f"🎯 *BILHETE CALIBRADO (ODD {total_odd:.2f})*\n\n"
+        for i, b in enumerate(sorted(bilhete, key=lambda x: x['liga']), 1):
+            msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | _{b['liga']}_ ({b['qualidade']})\n🎯 *{b['aposta']}*\n\n"
         enviar_telegram(msg)
-    else:
-        print(f"Critérios muito altos. Encontrados apenas {len(bilhete_final)} jogos.")
 
 if __name__ == "__main__":
     executar_robo()
-        
+                    
