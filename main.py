@@ -46,7 +46,6 @@ def analisar_partida(j, contador_25):
 def executar_robo():
     hoje = "2026-03-05"
     
-    # 1. SCANNER AUTOMÁTICO DE IDS (Mantém os seus e descobre novos)
     ligas_ids = {
         "bra.copa_do_brasil": "Copa do Brasil",
         "conmebol.libertadores": "Libertadores",
@@ -62,15 +61,13 @@ def executar_robo():
         data_scan = requests.get(url_scan, timeout=10).json()
         for ev in data_scan.get('events', []):
             try:
-                # Se encontrar uma liga que não está na lista, ele adiciona o ID
                 slug = ev['league']['slug']
                 nome = ev['league']['name']
                 if slug not in ligas_ids:
                     ligas_ids[slug] = nome
             except: continue
-    except: print("Aviso: Scanner Global indisponível, usando lista manual.")
+    except: print("Aviso: Scanner Global indisponível.")
 
-    # 2. BUSCA DE JOGOS
     radar = []
     for l_id, l_nome in ligas_ids.items():
         try:
@@ -89,9 +86,6 @@ def executar_robo():
                     })
         except: continue
 
-    print(f"Jogos encontrados: {len(radar)}")
-
-    # 3. ANÁLISE E MONTAGEM
     candidatos = []
     contador_25 = 0
     for j in radar:
@@ -99,30 +93,43 @@ def executar_robo():
         if "+2.5" in aposta: contador_25 += 1
         candidatos.append({**j, "aposta": aposta, "odd": odd, "qualidade": qual})
 
-    if candidatos:
+    # --- NOVA LÓGICA DE SELEÇÃO (7 A 10 JOGOS) ---
+    final_escolhidos = []
+    
+    if len(candidatos) > 10:
+        melhor_distancia = float('inf')
+        # Tenta 1000 combinações aleatórias de 10 jogos para achar a melhor Odd
+        for _ in range(1000):
+            amostra = random.sample(candidatos, 10)
+            odd_temp = 1.0
+            for a in amostra: odd_temp *= a['odd']
+            
+            distancia = abs(odd_temp - 100) # Busca o mais próximo de 100
+            if distancia < melhor_distancia:
+                melhor_distancia = distancia
+                final_escolhidos = amostra
+    else:
+        final_escolhidos = candidatos
+
+    if len(final_escolhidos) >= 7:
         total_odd = 1.0
-        for b in candidatos: total_odd *= b['odd']
-        
-        # Ajuste para meta de Odd 100
-        if total_odd < 80:
-            alvo = random.uniform(90, 115)
-            fator = (alvo / total_odd) ** (1/len(candidatos))
-            for c in candidatos: c['odd'] *= fator
-            total_odd = 1.0
-            for b in candidatos: total_odd *= b['odd']
+        for b in final_escolhidos: total_odd *= b['odd']
 
-        resumo_ligas = "\n".join([f"🔹 {l}" for l in sorted(list(set([j['liga'] for j in candidatos])))])
+        resumo_ligas = "\n".join([f"🔹 {l}" for l in sorted(list(set([j['liga'] for j in final_escolhidos])))])
 
-        msg = f"🎯 *BILHETE CALIBRADO (ODD {total_odd:.2f})*\n\n"
+        msg = f"🎯 *BILHETE ANALISADO ({len(final_escolhidos)} JOGOS)*\n"
+        msg += f"💰 *ODD TOTAL: {total_odd:.2f}*\n\n"
         msg += f"🏟️ *LIGAS ENCONTRADAS:*\n{resumo_ligas}\n\n"
         
-        for i, b in enumerate(sorted(candidatos, key=lambda x: x['liga']), 1):
+        for i, b in enumerate(sorted(final_escolhidos, key=lambda x: x['liga']), 1):
             msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | _{b['liga']}_\n🎯 *{b['aposta']}* — `[{b['qualidade']}]` \n📊 [Estatísticas]({b['link']})\n\n"
         
         msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         
         enviar_telegram(msg)
-        print(f"Sucesso! {len(candidatos)} jogos enviados.")
+        print(f"Sucesso! {len(final_escolhidos)} jogos enviados com Odd {total_odd:.2f}")
+    else:
+        print(f"Volume insuficiente: Apenas {len(final_escolhidos)} jogos encontrados.")
 
 if __name__ == "__main__":
     executar_robo()
