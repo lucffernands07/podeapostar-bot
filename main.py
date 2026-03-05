@@ -128,8 +128,8 @@ def executar_robo():
     else:
         final_escolhidos = candidatos
 
-    # ENVIO (Requisito: Mínimo 7 para enviar)
-    if len(final_escolhidos) >= 7:
+    # ENVIO (Requisito: Mínimo 5 para enviar)
+    if len(final_escolhidos) >= 5:
         total_odd = 1.0
         for b in final_escolhidos: total_odd *= b['odd']
 
