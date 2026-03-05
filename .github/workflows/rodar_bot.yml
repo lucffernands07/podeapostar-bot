@@ -1,4 +1,4 @@
-name: Robo de Apostas Diário
+name: Apostas Diária
 
 on:
   schedule:
