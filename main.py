@@ -35,13 +35,24 @@ def analisar_partida(j, contador_25):
     s_15 = max(get_sucessos(h_id, '1.5'), get_sucessos(a_id, '1.5'))
     s_am = max(get_sucessos(h_id, 'ambas'), get_sucessos(a_id, 'ambas'))
 
-    if s_am >= 4: return "🎯 Ambas Marcam", 1.85, f"{s_am}/5"
+    # --- FUNIL DE DECISÃO MELHORADO ---
+    
+    # 1. Ambas Marcam (Mínimo 4/5)
+    if s_am >= 4: 
+        return "🎯 Ambas Marcam", 1.85, f"{s_am}/5"
+    
+    # 2. +2.5 Gols (Máximo 1x no bilhete)
     if contador_25 < 1 and s_15 >= 4:
         s_25 = get_sucessos(h_id, '2.5')
         if s_25 >= 4: return "🔥 +2.5 Gols", 2.15, f"{s_25}/5"
     
-    if s_15 >= 3: return "⚽ +1.5 Gols", 1.48, f"{s_15}/5"
-    return "🛡️ +0.5 Gols", 1.25, f"{s_15}/5 (Média)"
+    # 3. +1.5 Gols (Foco estatístico 3/5 a 5/5)
+    if s_15 >= 3: 
+        return "⚽ +1.5 Gols", 1.48, f"{s_15}/5"
+    
+    # 4. +0.5 Gols Jogo Todo + +0.5 HT (Critério de Segurança/Média)
+    # Se a média for baixa, ele sugere o gol no 1º tempo para valorizar a Odd
+    return "⚡ +0.5 Gols (HT/FT)", 1.38, f"{s_15}/5 (Média)"
 
 def executar_robo():
     hoje = "2026-03-05"
@@ -56,6 +67,7 @@ def executar_robo():
         "ger.1": "Bundesliga (Ale)"
     }
 
+    # SCANNER DINÂMICO
     try:
         url_scan = "http://site.api.espn.com/apis/site/v2/sports/soccer/scoreboards"
         data_scan = requests.get(url_scan, timeout=10).json()
@@ -86,6 +98,8 @@ def executar_robo():
                     })
         except: continue
 
+    print(f"Jogos encontrados: {len(radar)}")
+
     candidatos = []
     contador_25 = 0
     for j in radar:
@@ -93,24 +107,22 @@ def executar_robo():
         if "+2.5" in aposta: contador_25 += 1
         candidatos.append({**j, "aposta": aposta, "odd": odd, "qualidade": qual})
 
-    # --- NOVA LÓGICA DE SELEÇÃO (7 A 10 JOGOS) ---
+    # SELEÇÃO DE 7 A 10 JOGOS
     final_escolhidos = []
-    
     if len(candidatos) > 10:
         melhor_distancia = float('inf')
-        # Tenta 1000 combinações aleatórias de 10 jogos para achar a melhor Odd
         for _ in range(1000):
             amostra = random.sample(candidatos, 10)
             odd_temp = 1.0
             for a in amostra: odd_temp *= a['odd']
-            
-            distancia = abs(odd_temp - 100) # Busca o mais próximo de 100
+            distancia = abs(odd_temp - 100)
             if distancia < melhor_distancia:
                 melhor_distancia = distancia
                 final_escolhidos = amostra
     else:
         final_escolhidos = candidatos
 
+    # ENVIO (Mínimo 7 jogos)
     if len(final_escolhidos) >= 7:
         total_odd = 1.0
         for b in final_escolhidos: total_odd *= b['odd']
@@ -127,9 +139,9 @@ def executar_robo():
         msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         
         enviar_telegram(msg)
-        print(f"Sucesso! {len(final_escolhidos)} jogos enviados com Odd {total_odd:.2f}")
+        print(f"Bilhete enviado! Odd: {total_odd:.2f}")
     else:
-        print(f"Volume insuficiente: Apenas {len(final_escolhidos)} jogos encontrados.")
+        print(f"Volume insuficiente ({len(final_escolhidos)}).")
 
 if __name__ == "__main__":
     executar_robo()
