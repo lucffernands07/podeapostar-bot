@@ -13,27 +13,13 @@ def enviar_telegram(mensagem):
     try: requests.post(url, json=payload, timeout=15)
     except: pass
 
-def obter_stats_basicas(liga_id, team_id):
-    """Retorna média de gols pro e contra quando não há histórico 5/5"""
-    try:
-        url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{liga_id}/teams/{team_id}/statistics"
-        res = requests.get(url, timeout=10).json()
-        stats = res.get('results', {}).get('stats', [])
-        gp = next((s['value'] for s in stats if s['name'] == 'goalsFor'), 0)
-        gs = next((s['value'] for s in stats if s['name'] == 'goalsAgainst'), 0)
-        jogos = next((s['value'] for s in stats if s['name'] == 'gamesPlayed'), 1)
-        return (gp + gs) / jogos
-    except: return 0
-
 def analisar_partida(j, contador_25):
     """
-    Funil de Decisão:
-    1. Tenta Ambas Marcam (4/5 ou 5/5)
-    2. Tenta +2.5 (5/5 e se houver vaga)
-    3. Tenta +1.5 (5/5 -> 4/5 -> 3/5)
-    4. Tenta +0.5 (Baseado em Médias Pro/Contra - 0/5)
+    Funil de Decisão conforme solicitado:
+    Busca 5/5, 4/5, 3/5... até 0/5 (Média)
     """
-    l_id, h_id, a_id = j['liga_id'], j['h_id'], j['a_id']
+    l_id = j['liga_id']
+    h_id = j['h_id']
     
     def get_sucessos(mercado):
         try:
@@ -51,65 +37,70 @@ def analisar_partida(j, contador_25):
             return s
         except: return 0
 
-    # Teste Ambas Marcam (Mínimo 4/5 conforme regra)
+    # 1. Tenta Ambas Marcam (Mínimo 4/5)
     s_am = get_sucessos('ambas')
-    if s_am >= 4:
-        return "🎯 Ambas Marcam", 1.85, f"{s_am}/5"
+    if s_am >= 4: return "🎯 Ambas Marcam", 1.82, f"{s_am}/5"
 
-    # Teste +2.5 (Apenas 1 no bilhete)
+    # 2. Tenta +2.5 (Máximo 1x no bilhete, requer 4/5 ou 5/5)
     if contador_25 < 1:
         s_25 = get_sucessos('2.5')
-        if s_25 >= 4:
-            return "🔥 +2.5 Gols", 2.10, f"{s_25}/5"
+        if s_25 >= 4: return "🔥 +2.5 Gols", 2.15, f"{s_25}/5"
 
-    # Teste +1.5 (Funil 5/5 até 3/5)
+    # 3. Tenta +1.5 (Escala 5/5, 4/5, 3/5)
     s_15 = get_sucessos('1.5')
-    if s_15 >= 3:
-        return "⚽ +1.5 Gols", 1.48, f"{s_15}/5"
+    if s_15 >= 3: return "⚽ +1.5 Gols", 1.48, f"{s_15}/5"
 
-    # Fallback: +0.5 Gols (Análise de Médias Pro/Contra - 0/5)
-    media = obter_stats_basicas(l_id, h_id)
-    return "🛡️ +0.5 Gols", 1.22, "0/5 (Média)"
+    # 4. Fallback 0/5 (Baseado em média ou apenas presença)
+    return "🛡️ +0.5 Gols", 1.20, "0/5 (Média)"
 
 def executar_robo():
     hoje = "2026-03-05"
-    ligas_config = {
-        "eng.1": "Premier League", "bra.1": "Série A Brasil", "conmebol.libertadores": "Libertadores",
-        "conmebol.sudamericana": "Sul-Americana", "esp.1": "LaLiga", "ita.1": "Série A", 
-        "ger.1": "Bundesliga", "por.1": "Liga Portugal", "bra.copa_do_brasil": "Copa do Brasil"
-    }
+    # BUSCA GLOBAL: Pega todos os jogos de futebol do mundo de uma vez
+    url_global = "http://site.api.espn.com/apis/site/v2/sports/soccer/scoreboards"
     
     radar = []
-    for l_id, l_nome in ligas_config.items():
-        try:
-            url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard"
-            data = requests.get(url, timeout=15).json()
-            for ev in data.get('events', []):
-                if hoje in ev['date']:
-                    comp = ev['competitions'][0]['competitors']
-                    h, a = next(t for t in comp if t['homeAway'] == 'home'), next(t for t in comp if t['homeAway'] == 'away')
-                    radar.append({
-                        "liga": l_nome, "liga_id": l_id, "h_id": h['team']['id'], "a_id": a['team']['id'],
-                        "jogo": f"{h['team']['displayName']} x {a['team']['displayName']}", "hora": ev['date'][11:16]
-                    })
-        except: continue
+    try:
+        data = requests.get(url_global, timeout=20).json()
+        for ev in data.get('events', []):
+            if hoje in ev['date']:
+                # Extraímos o ID da liga diretamente do evento (evita erro de ID mudado)
+                # O ID da liga na ESPN costuma estar em links ou na season
+                try:
+                    liga_id = ev['links'][0]['href'].split('/')[-3] 
+                except:
+                    liga_id = ev.get('season', {}).get('slug', 'eng.1')
 
-    print(f"Jogos no radar: {len(radar)}")
-    
-    # Gera palpites para TODOS os jogos do radar
+                comp = ev['competitions'][0]['competitors']
+                h = next(t for t in comp if t['homeAway'] == 'home')
+                a = next(t for t in comp if t['homeAway'] == 'away')
+                
+                radar.append({
+                    "liga": ev['competitions'][0].get('notes', [{}])[0].get('headline', 'Futebol'),
+                    "liga_id": liga_id,
+                    "h_id": h['team']['id'],
+                    "a_id": a['team']['id'],
+                    "jogo": f"{h['team']['displayName']} x {a['team']['displayName']}",
+                    "hora": ev['date'][11:16]
+                })
+    except Exception as e:
+        print(f"Erro na varredura: {e}")
+
+    print(f"Total de jogos no radar global: {len(radar)}")
+
     candidatos = []
     contador_25 = 0
+    # Processa TODOS os jogos que encontrou
     for j in radar:
         aposta, odd, qual = analisar_partida(j, contador_25)
         if "+2.5" in aposta: contador_25 += 1
         candidatos.append({**j, "aposta": aposta, "odd": odd, "qualidade": qual})
 
-    # Seleção de 10 jogos (Se houver mais de 10, busca aproximar Odd 100)
+    # Seleção Final
     bilhete_final = []
     if len(candidatos) >= 10:
-        # Tenta 1000 combinações para achar a melhor Odd próxima de 100
+        # Busca a combinação que mais se aproxima de ODD 100
         melhor_total = 0
-        for _ in range(1000):
+        for _ in range(2000):
             teste = random.sample(candidatos, 10)
             o_t = 1.0
             for t in teste: o_t *= t['odd']
@@ -124,13 +115,13 @@ def executar_robo():
         total_odd = 1.0
         for b in bilhete_final: total_odd *= b['odd']
         
-        msg = f"🎯 *BILHETE ANALISADO (ODD {total_odd:.2f})*\n\n"
+        msg = f"🎯 *BILHETE VARREDURA TOTAL (ODD {total_odd:.2f})*\n\n"
         for i, b in enumerate(sorted(bilhete_final, key=lambda x: x['liga']), 1):
             msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | _{b['liga']}_\n🎯 *{b['aposta']}* — `[{b['qualidade']}]` \n\n"
         
         enviar_telegram(msg)
-        print(f"Bilhete enviado com {len(bilhete_final)} jogos.")
+        print(f"Bilhete enviado! {len(bilhete_final)} jogos.")
 
 if __name__ == "__main__":
     executar_robo()
-    
+                    
