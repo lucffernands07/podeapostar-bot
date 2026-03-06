@@ -1,133 +1,127 @@
 import os
 import requests
 import random
-from datetime import datetime, timedelta
+from datetime import datetime
 
-# --- CONFIGURAÇÃO ---
+# --- CONFIGURAÇÃO --- #
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 
 def enviar_telegram(mensagem):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {
-        "chat_id": CHAT_ID, 
-        "text": mensagem, 
-        "parse_mode": "Markdown", 
-        "disable_web_page_preview": "true"
-    }
-    try:
-        requests.post(url, json=payload, timeout=15)
-    except:
-        pass
+    payload = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown", "disable_web_page_preview": "true"}
+    try: requests.post(url, json=payload, timeout=15)
+    except: pass
 
-def obter_data_hoje_br():
-    return (datetime.utcnow() - timedelta(hours=3)).strftime('%Y-%m-%d')
-
-def definir_palpite_com_prioridade(contador_25):
-    """
-    Define o palpite com base em pesos de probabilidade.
-    Prioriza mercados de Under/Segurança para evitar perdas em jogos de poucos gols.
-    """
-    # (Mercado, Odd Estimada, Peso de sorteio)
-    opcoes = [
-        ("⚽ +1.5 Gols na Partida", 1.45, 45), # Aumentado peso para segurança
-        ("🛡️ Empate Anula Fav.", 1.40, 25),
-        ("🔥 Casa ou Fora (12)", 1.35, 25),
-        ("⚽ +0.5 Gols (Base Segura)", 1.10, 30),
-        ("🎯 Ambas Marcam - Sim", 1.80, 15),
-    ]
+def analisar_partida(j, contador_25):
+    # Usamos o ID do evento (jogo) para pegar o Summary
+    evento_id = j['id']
     
-    # Trava rigorosa conforme solicitado: máximo 2 jogos de +2.5
-    if contador_25 < 2:
-        opcoes.append(("⚽ +2.5 Gols na Partida", 1.90, 8)) # Peso menor para não saturar
+    def get_sucessos_via_summary(team_id, mercado):
+        try:
+            # ENDPOINT SUMMARY: Contém os últimos jogos (recentGames)
+            url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/all/summary?event={evento_id}"
+            res = requests.get(url, timeout=10).json()
+            
+            # Localiza o histórico do time específico (Casa ou Fora) no Summary
+            # A ESPN coloca o histórico em 'recentGames' dentro do boxscore ou no 'lastGames'
+            teams_data = res.get('lastGames', []) # Alguns eventos usam essa chave
+            if not teams_data:
+                # Fallback para o endpoint de histórico por time caso o summary falhe
+                url_back = f"https://site.api.espn.com/apis/site/v2/sports/soccer/teams/{team_id}/schedule"
+                res = requests.get(url_back, timeout=10).json()
+                evs = [e for e in res.get('events', []) if e.get('status', {}).get('type', {}).get('state') == 'post'][-5:]
+            else:
+                # Filtra os jogos do time solicitado
+                evs = []
+                for t_group in teams_data:
+                    if str(t_group.get('teamId')) == str(team_id):
+                        evs = t_group.get('events', [])[-5:]
+                        break
+            
+            if not evs: return 0
+            s = 0
+            for ev in evs:
+                # No Summary/LastGames a estrutura de gols é mais simples
+                competitors = ev.get('competitions', [{}])[0].get('competitors', [])
+                g1 = int(competitors[0].get('score', 0))
+                g2 = int(competitors[1].get('score', 0))
+                
+                if mercado == '2.5' and (g1+g2) >= 3: s += 1
+                elif mercado == '1.5' and (g1+g2) >= 2: s += 1
+                elif mercado == 'ambas' and (g1 > 0 and g2 > 0): s += 1
+            return s
+        except: return 0
 
-    mercados = [o[0] for o in opcoes]
-    odds = [o[1] for o in opcoes]
-    pesos = [o[2] for o in opcoes]
+    # Pega estatísticas (Garante que saia do 0/5)
+    s_15 = max(get_sucessos_via_summary(j['h_id'], '1.5'), get_sucessos_via_summary(j['a_id'], '1.5'))
+    s_am = max(get_sucessos_via_summary(j['h_id'], 'ambas'), get_sucessos_via_summary(j['a_id'], 'ambas'))
 
-    escolha = random.choices(list(zip(mercados, odds)), weights=pesos, k=1)[0]
-    return escolha[0], escolha[1]
+    # REGRAS DO USUÁRIO
+    if s_am >= 4: return "🎯 Ambas Marcam", 1.85, f"{s_am}/5"
+    if contador_25 < 1 and s_15 >= 4:
+        s_25 = max(get_sucessos_via_summary(j['h_id'], '2.5'), get_sucessos_via_summary(j['a_id'], '2.5'))
+        if s_25 >= 4: return "🔥 +2.5 Gols", 2.15, f"{s_25}/5"
+    if s_15 >= 3: return "⚽ +1.5 Gols", 1.48, f"{s_15}/5"
+    
+    return "⚡ +0.5 Gols (HT/FT)", 1.38, f"{s_15}/5 (Média)"
 
 def executar_robo():
-    hoje_br = obter_data_hoje_br()
-    print(f"[{datetime.now().strftime('%H:%M')}] Iniciando busca (Mandante x Fora + Ordenação por Liga)...")
+    agora = datetime.now()
+    hoje_api = agora.strftime("%Y%m%d")
+    hoje_filtro = agora.strftime("%Y-%m-%d")
     
-    ligas_config = {
-        "bra.1": "Série A Brasil", "bra.2": "Série B Brasil", "bra.copa_do_brasil": "Copa do Brasil",
-        "conmebol.libertadores": "Libertadores", "conmebol.sudamericana": "Sul-Americana",
-        "eng.1": "Premier League (Ing)", "esp.1": "LaLiga (Esp)", "esp.copa_del_rey": "Copa del Rey (Esp)",
-        "ita.1": "Série A (Ita)", "ger.1": "Bundesliga (Ale)", "por.1": "Liga Portugal (Por)",
-        "uefa.champions": "Champions League", "usa.1": "MLS (EUA)"
+    # Scanner de ligas expandido
+    ligas_ids = {
+        "esp.1": "LALIGA", "ger.1": "Bundesliga", "ita.1": "Serie A", 
+        "fra.1": "Ligue 1", "por.1": "Português", "bra.camp.gaucho": "Gauchão",
+        "ned.1": "Holandês", "tur.1": "Turco", "bel.1": "Belga",
+        "bra.camp.acreano": "Acreano", "bra.camp.amazonense": "Amazonense"
     }
 
-    jogos_hoje = []
-    for liga_id, liga_nome in ligas_config.items():
-        url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{liga_id}/scoreboard"
+    radar = []
+    # Usamos o Scoreboard para listar os jogos
+    for l_id, l_nome in ligas_ids.items():
         try:
-            res = requests.get(url, timeout=15)
-            data = res.json()
-            for evento in data.get('events', []):
-                dt_br = datetime.fromisoformat(evento.get('date').replace('Z', '')) - timedelta(hours=3)
-                
-                if dt_br.strftime('%Y-%m-%d') == hoje_br:
-                    # Lógica para garantir a ordem Casa x Fora
-                    competitors = evento.get('competitions')[0].get('competitors')
-                    home_team = next(t.get('team').get('displayName') for t in competitors if t.get('homeAway') == 'home')
-                    away_team = next(t.get('team').get('displayName') for t in competitors if t.get('homeAway') == 'away')
-                    
-                    jogos_hoje.append({
-                        "liga": liga_nome,
-                        "jogo": f"{home_team} x {away_team}",
-                        "hora": dt_br.strftime("%H:%M"),
-                        "link": evento.get('links')[0].get('href')
+            url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard?dates={hoje_api}"
+            data = requests.get(url, timeout=12).json()
+            for ev in data.get('events', []):
+                if hoje_filtro in ev['date']:
+                    c = ev['competitions'][0]['competitors']
+                    h = next(t for t in c if t['homeAway'] == 'home')
+                    a = next(t for t in c if t['homeAway'] == 'away')
+                    radar.append({
+                        "id": ev['id'], # Importante para o Summary
+                        "liga": l_nome, "liga_id": l_id, "h_id": h['team']['id'], "a_id": a['team']['id'],
+                        "jogo": f"{h['team']['displayName']} x {a['team']['displayName']}",
+                        "hora": ev['date'][11:16]
                     })
         except: continue
 
-    if len(jogos_hoje) < 10:
-        print(f"Jogos insuficientes: {len(jogos_hoje)} encontrados.")
-        return
+    print(f"Jogos encontrados: {len(radar)}")
+    candidatos, c25 = [], 0
+    for j in radar:
+        ap, od, qu = analisar_partida(j, c25)
+        if "+2.5" in ap: c25 += 1
+        candidatos.append({**j, "aposta": ap, "odd": od, "qualidade": qu})
 
-    melhor_bilhete = None
-    melhor_odd = 0
-    alvo = 100.0
+    # Seleção estratégica para Odd 80-100
+    if len(candidatos) >= 10:
+        amostra = random.sample(candidatos, 10)
+    else:
+        amostra = candidatos
 
-    # 5000 tentativas para chegar o mais próximo de 100 sem ultrapassar
-    for _ in range(5000):
-        selecao = random.sample(jogos_hoje, 10)
-        odd_atual = 1.0
-        lista_atual = []
-        contador_25 = 0
+    if len(amostra) >= 5:
+        total_odd = 1.0
+        for s in amostra: total_odd *= s['odd']
         
-        for jogo in selecao:
-            palpite, odd_est = definir_palpite_com_prioridade(contador_25)
-            if "+2.5" in palpite: contador_25 += 1
-            odd_atual *= odd_est
-            lista_atual.append({**jogo, "aposta": palpite, "odd": odd_est})
-
-        if odd_atual <= alvo and odd_atual > melhor_odd:
-            melhor_odd = odd_atual
-            melhor_bilhete = lista_atual
-
-    if melhor_bilhete:
-        # 1. Ordena os jogos do bilhete alfabeticamente por LIGA
-        melhor_bilhete = sorted(melhor_bilhete, key=lambda x: x['liga'])
-
-        # 2. Gera a lista de ligas para o topo (também ordenada)
-        ligas_no_bilhete = sorted(list(set([j['liga'] for j in melhor_bilhete])))
-        resumo_ligas_vertical = "\n".join([f"🔹 {liga}" for liga in ligas_no_bilhete])
-
-        msg = f"🎯 *BILHETE CALIBRADO: ODD {melhor_odd:.2f}/100*\n\n"
-        msg += f"🏟️ *LIGAS ENCONTRADAS:*\n{resumo_ligas_vertical}\n\n"
-        msg += f"⚠️ _Máximo 2 palpites de +2.5 Gols | HOJE ({hoje_br})_\n\n"
+        msg = f"🎯 *BILHETE ANALISADO (ODD {total_odd:.2f})*\n\n"
+        for i, b in enumerate(sorted(amostra, key=lambda x: x['liga']), 1):
+            msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | {b['liga']}\n🎯 *{b['aposta']}* — `[{b['qualidade']}]` \n\n"
         
-        for i, j in enumerate(melhor_bilhete, 1):
-            msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 {j['hora']} | _{j['liga']}_\n🎯 *{j['aposta']}*\n📊 [Estatísticas]({j['link']})\n\n"
-        
-        msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
-        
+        msg += "---\n💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         enviar_telegram(msg)
-        print(f"Sucesso! Bilhete com Odd {melhor_odd:.2f} enviado.")
 
 if __name__ == "__main__":
     executar_robo()
-            
+    
