@@ -14,50 +14,53 @@ def enviar_telegram(mensagem):
     except: pass
 
 def analisar_partida(j, contador_25):
-    l_id, h_id, a_id = j['liga_id'], j['h_id'], j['a_id']
+    h_id, a_id = j['h_id'], j['a_id']
     
     def get_sucessos(team_id, mercado):
         try:
-            url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/teams/{team_id}/schedule"
+            # AJUSTE CRÍTICO: Endpoint global para evitar erro de ID (0/5)
+            url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/teams/{team_id}/schedule"
             res = requests.get(url, timeout=10).json()
             evs = [e for e in res.get('events', []) if e.get('status', {}).get('type', {}).get('state') == 'post'][-5:]
             if not evs: return 0
             s = 0
             for ev in evs:
                 c = ev['competitions'][0]['competitors']
-                g1, g2 = int(c[0].get('score', 0)), int(c[1].get('score', 0))
-                if mercado == '2.5' and (g1+g2) >= 3: s += 1
-                elif mercado == '1.5' and (g1+g2) >= 2: s += 1
-                elif mercado == 'ambas' and (g1 > 0 and g2 > 0): s += 1
+                # Localiza os gols do time atual e do adversário no histórico
+                g_time = int(next(t['score'] for t in c if t['id'] == team_id))
+                g_adv = int(next(t['score'] for t in c if t['id'] != team_id))
+                
+                if mercado == '2.5' and (g_time + g_adv) >= 3: s += 1
+                elif mercado == '1.5' and (g_time + g_adv) >= 2: s += 1
+                elif mercado == 'ambas' and (g_time > 0 and g_adv > 0): s += 1
             return s
         except: return 0
 
+    # Pega o melhor desempenho entre os dois times para os mercados principais
     s_15 = max(get_sucessos(h_id, '1.5'), get_sucessos(a_id, '1.5'))
     s_am = max(get_sucessos(h_id, 'ambas'), get_sucessos(a_id, 'ambas'))
 
-    # 1. Ambas Marcam (Mínimo 4/5)
+    # 1. Ambas Marcam (Mínimo 4/5 conforme sua regra)
     if s_am >= 4: 
         return "🎯 Ambas Marcam", 1.85, f"{s_am}/5"
     
-    # 2. +2.5 Gols (Máximo 1x no bilhete)
+    # 2. +2.5 Gols (Máximo 1x no bilhete se 4/5 ou +)
     if contador_25 < 1 and s_15 >= 4:
-        s_25 = get_sucessos(h_id, '2.5')
+        s_25 = max(get_sucessos(h_id, '2.5'), get_sucessos(a_id, '2.5'))
         if s_25 >= 4: return "🔥 +2.5 Gols", 2.15, f"{s_25}/5"
     
     # 3. +1.5 Gols (Foco estatístico 3/5 a 5/5)
     if s_15 >= 3: 
         return "⚽ +1.5 Gols", 1.48, f"{s_15}/5"
     
-    # 4. +0.5 Gols HT/FT (Incluso para volume)
+    # 4. +0.5 Gols HT/FT (Segurança para volume)
     return "⚡ +0.5 Gols (HT/FT)", 1.38, f"{s_15}/5 (Média)"
 
 def executar_robo():
-    # DATA AUTOMÁTICA (Ajuste para pegar jogos de hoje conforme o calendário)
     agora = datetime.now()
     hoje_filtro = agora.strftime("%Y-%m-%d")
     hoje_api = agora.strftime("%Y%m%d")
     
-    # DICIONÁRIO AMPLIADO COM AS NOVAS LIGAS
     ligas_ids = {
         "bra.copa_do_brazil": "Copa do Brasil",
         "conmebol.libertadores": "Libertadores",
@@ -94,7 +97,6 @@ def executar_robo():
     radar = []
     for l_id, l_nome in ligas_ids.items():
         try:
-            # URL agora usa a data dinâmica hoje_api
             url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard?dates={hoje_api}"
             data = requests.get(url, timeout=12).json()
             for ev in data.get('events', []):
@@ -119,7 +121,6 @@ def executar_robo():
         if "+2.5" in aposta: contador_25 += 1
         candidatos.append({**j, "aposta": aposta, "odd": odd, "qualidade": qual})
 
-    # LÓGICA DE SELEÇÃO
     final_escolhidos = []
     if len(candidatos) > 10:
         melhor_distancia = float('inf')
@@ -134,7 +135,6 @@ def executar_robo():
     else:
         final_escolhidos = candidatos
 
-    # ENVIO (MÍNIMO REDUZIDO PARA 5 JOGOS)
     if len(final_escolhidos) >= 5:
         total_odd = 1.0
         for b in final_escolhidos: total_odd *= b['odd']
