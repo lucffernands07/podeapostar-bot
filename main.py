@@ -7,7 +7,6 @@ from datetime import datetime
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 
-# Cabeçalhos para burlar o bloqueio que você viu no Network do F12
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json",
@@ -20,31 +19,24 @@ def enviar_telegram(mensagem):
     try: requests.post(url, json=payload, timeout=15)
     except: pass
 
-def analisar_partida(j, contador_25):
+def analisar_opcoes(j):
     h_id, a_id, e_id = j['h_id'], j['a_id'], j['id']
     liga_atual = j['liga'].upper()
     
     def get_sucessos(team_id, mercado):
         try:
-            # Tenta o Summary primeiro (URL que você achou no F12)
             url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/all/summary?event={e_id}"
             res = requests.get(url, headers=HEADERS, timeout=10).json()
-            
             evs = []
-            # Tenta extrair o histórico mastigado do Summary
             for t_group in res.get('lastGames', []):
                 if str(t_group.get('teamId')) == str(team_id):
                     evs = t_group.get('events', [])[-5:]
                     break
-            
-            # Se falhar, tenta o Schedule Global
             if not evs:
                 url_back = f"https://site.api.espn.com/apis/site/v2/sports/soccer/teams/{team_id}/schedule"
                 res_back = requests.get(url_back, headers=HEADERS, timeout=10).json()
                 evs = [e for e in res_back.get('events', []) if e.get('status', {}).get('type', {}).get('state') == 'post'][-5:]
-            
-            if not evs: return None # Sinaliza que a API bloqueou
-            
+            if not evs: return None
             s = 0
             for ev in evs:
                 c = ev.get('competitions', [{}])[0].get('competitors', [])
@@ -55,42 +47,37 @@ def analisar_partida(j, contador_25):
             return s
         except: return None
 
-    # Tenta obter dados reais
     s_15_raw = max(get_sucessos(h_id, '1.5') or 0, get_sucessos(a_id, '1.5') or 0)
     s_am_raw = max(get_sucessos(h_id, 'ambas') or 0, get_sucessos(a_id, 'ambas') or 0)
 
-    # LÓGICA ANTI-TRAVAMENTO (Se der 0/5 em Ligas de Gols, assume nota mínima)
     ligas_gols = ["LALIGA", "BUNDESLIGA", "SERIE A", "LIGUE 1", "PORTUGUÊS", "HOLANDÊS", "GAUCHÃO", "ACREANO"]
     if s_15_raw == 0 and any(x in liga_atual for x in ligas_gols):
-        s_15, s_am = 4, 3 # Nota fake para destravar Real Madrid, PSG, etc.
-        qualidade = f"{s_15}/5 (Est.)"
+        s_15, s_am = 4, 3
+        qual = f"{s_15}/5 (Est.)"
     else:
         s_15, s_am = s_15_raw, s_am_raw
-        qualidade = f"{s_15}/5"
+        qual = f"{s_15}/5"
 
-    # REGRAS DE MERCADO (Foco Odd 80-100)
-    if s_am >= 4: 
-        return "🎯 Ambas Marcam", 1.85, qualidade
+    # Criamos o leque de opções para o sorteador escolher depois
+    opcoes = []
+    if s_am >= 4:
+        opcoes.append({"tipo": "AMBOS", "msg": "🎯 Ambas Marcam", "odd": 1.88, "q": qual})
+    if s_15 >= 4:
+        opcoes.append({"tipo": "2.5", "msg": "🔥 +2.5 Gols", "odd": 2.10, "q": qual})
+    if s_15 >= 3:
+        opcoes.append({"tipo": "1.5", "msg": "⚽ +1.5 Gols", "odd": 1.48, "q": qual})
     
-    if contador_25 < 1 and s_15 >= 4:
-        # Só libera +2.5 uma vez no bilhete conforme sua regra
-        return "🔥 +2.5 Gols", 2.15, qualidade
-
-    if s_15 >= 3: 
-        return "⚽ +1.5 Gols", 1.52, qualidade
-    
-    return "⚡ +0.5 Gols (HT/FT)", 1.38, "Segurança"
+    opcoes.append({"tipo": "0.5", "msg": "⚡ +0.5 Gols (HT/FT)", "odd": 1.32, "q": "Segurança"})
+    return opcoes
 
 def executar_robo():
     agora = datetime.now()
-    hoje_api = agora.strftime("%Y%m%d")
-    hoje_f = agora.strftime("%Y-%m-%d")
+    hoje_api, hoje_f = agora.strftime("%Y%m%d"), agora.strftime("%Y-%m-%d")
     
     ligas_ids = {
-        "esp.1": "LALIGA", "ger.1": "Bundesliga", "ita.1": "Serie A", 
-        "fra.1": "Ligue 1", "por.1": "Português", "bra.camp.gaucho": "Gauchão",
-        "ned.1": "Holandês", "tur.1": "Turco", "bel.1": "Belga",
-        "bra.camp.acreano": "Acreano", "bra.camp.amazonense": "Amazonense"
+        "esp.1": "LALIGA", "ger.1": "Bundesliga", "ita.1": "Serie A", "fra.1": "Ligue 1", 
+        "por.1": "Português", "bra.camp.gaucho": "Gauchão", "ned.1": "Holandês", 
+        "tur.1": "Turco", "bel.1": "Belga", "bra.camp.acreano": "Acreano"
     }
 
     radar = []
@@ -101,32 +88,69 @@ def executar_robo():
             for ev in data.get('events', []):
                 if hoje_f in ev['date']:
                     c = ev['competitions'][0]['competitors']
-                    h, a = c[0], c[1]
                     radar.append({
-                        "id": ev['id'], "liga": l_nome, "h_id": h['team']['id'], "a_id": a['team']['id'],
-                        "jogo": f"{h['team']['displayName']} x {a['team']['displayName']}",
+                        "id": ev['id'], "liga": l_nome, "h_id": c[0]['team']['id'], "a_id": c[1]['team']['id'],
+                        "jogo": f"{c[0]['team']['displayName']} x {c[1]['team']['displayName']}",
                         "hora": ev['date'][11:16]
                     })
         except: continue
 
-    print(f"Jogos: {len(radar)}")
-    candidatos, c25 = [], 0
-    for j in radar:
-        ap, od, qu = analisar_partida(j, c25)
-        if "+2.5" in ap: c25 += 1
-        candidatos.append({**j, "aposta": ap, "odd": od, "qualidade": qu})
+    print(f"Jogos no Radar: {len(radar)}")
+    
+    bilhete_final = []
+    melhor_bilhete_ate_agora = []
+    maior_odd_achada = 0
 
-    # Seleção para buscar Odd próxima a 100
-    if len(candidatos) >= 10:
-        amostra = random.sample(candidatos, 10)
-    else: amostra = candidatos
-
-    if len(amostra) >= 5:
-        t_odd = 1.0
-        for s in amostra: t_odd *= s['odd']
+    # Tenta 5000 combinações para cravar a Odd 80-100
+    for _ in range(5000):
+        tentativa = []
+        c_25, c_am = 0, 0
+        # Pega de 10 a 13 jogos para manter apostas fáceis mas com odd alta
+        qtd_jogos = random.randint(10, 13) if len(radar) >= 13 else len(radar)
+        amostra = random.sample(radar, qtd_jogos)
         
-        msg = f"🎯 *BILHETE CALIBRADO (ODD {t_odd:.2f})*\n\n"
-        for i, b in enumerate(sorted(amostra, key=lambda x: x['liga']), 1):
+        for j in amostra:
+            opcoes = analisar_opcoes(j)
+            escolha = opcoes[-1] # Começa com 0.5 (última da lista)
+            
+            # Prioridades: 1º Ambos (até 2), 2º +2.5 (até 1), 3º +1.5 (sem limite)
+            for o in opcoes:
+                if o['tipo'] == "AMBOS" and c_am < 2:
+                    escolha = o
+                    c_am += 1
+                    break
+                elif o['tipo'] == "2.5" and c_25 < 1:
+                    escolha = o
+                    c_25 += 1
+                    break
+                elif o['tipo'] == "1.5":
+                    escolha = o
+                    break
+            
+            tentativa.append({**j, "aposta": escolha['msg'], "odd": escolha['odd'], "qualidade": escolha['q']})
+        
+        odd_total = 1.0
+        for t in tentativa: odd_total *= t['odd']
+        
+        if 80 <= odd_total <= 110:
+            bilhete_final = tentativa
+            break
+        
+        if odd_total > maior_odd_achada:
+            maior_odd_achada = odd_total
+            melhor_bilhete_ate_agora = tentativa
+
+    # Se não achou na faixa 80-100, manda o melhor que conseguiu
+    resultado = bilhete_final if bilhete_final else melhor_bilhete_ate_agora
+
+    if resultado:
+        t_odd = 1.0
+        for r in resultado: t_odd *= r['odd']
+        
+        msg = f"🎯 *BILHETE DE ELITE (ODD {t_odd:.2f})*\n"
+        msg += f"🔥 *FOCO: ODDS 80-100 (JOGOS FÁCEIS)*\n\n"
+        
+        for i, b in enumerate(sorted(resultado, key=lambda x: x['liga']), 1):
             msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | {b['liga']}\n🎯 *{b['aposta']}* — `[{b['qualidade']}]` \n\n"
         
         msg += "---\n💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
@@ -134,4 +158,4 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
-        
+    
