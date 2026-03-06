@@ -1,52 +1,133 @@
+import os
 import requests
-import json
+import random
+from datetime import datetime, timedelta
 
-def testar_conexao_real():
-    team_id = "186" # ID do Real Madrid
-    print(f"--- INICIANDO TESTE PARA O TIME ID: {team_id} (Real Madrid) ---")
-    
-    # Tentando a URL que o robô usa
-    url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/teams/{team_id}/schedule"
-    
+# --- CONFIGURAÇÃO ---
+TOKEN = os.getenv('TELEGRAM_TOKEN')
+CHAT_ID = os.getenv('CHAT_ID')
+
+def enviar_telegram(mensagem):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    payload = {
+        "chat_id": CHAT_ID, 
+        "text": mensagem, 
+        "parse_mode": "Markdown", 
+        "disable_web_page_preview": "true"
+    }
     try:
-        response = requests.get(url, timeout=15)
-        print(f"Status da Resposta: {response.status_code}")
+        requests.post(url, json=payload, timeout=15)
+    except:
+        pass
+
+def obter_data_hoje_br():
+    return (datetime.utcnow() - timedelta(hours=3)).strftime('%Y-%m-%d')
+
+def definir_palpite_com_prioridade(contador_25):
+    """
+    Define o palpite com base em pesos de probabilidade.
+    Prioriza mercados de Under/Segurança para evitar perdas em jogos de poucos gols.
+    """
+    # (Mercado, Odd Estimada, Peso de sorteio)
+    opcoes = [
+        ("⚽ +1.5 Gols na Partida", 1.45, 45), # Aumentado peso para segurança
+        ("🛡️ Empate Anula Fav.", 1.40, 25),
+        ("🔥 Casa ou Fora (12)", 1.35, 25),
+        ("⚽ +0.5 Gols (Base Segura)", 1.10, 30),
+        ("🎯 Ambas Marcam - Sim", 1.80, 15),
+    ]
+    
+    # Trava rigorosa conforme solicitado: máximo 2 jogos de +2.5
+    if contador_25 < 2:
+        opcoes.append(("⚽ +2.5 Gols na Partida", 1.90, 8)) # Peso menor para não saturar
+
+    mercados = [o[0] for o in opcoes]
+    odds = [o[1] for o in opcoes]
+    pesos = [o[2] for o in opcoes]
+
+    escolha = random.choices(list(zip(mercados, odds)), weights=pesos, k=1)[0]
+    return escolha[0], escolha[1]
+
+def executar_robo():
+    hoje_br = obter_data_hoje_br()
+    print(f"[{datetime.now().strftime('%H:%M')}] Iniciando busca (Mandante x Fora + Ordenação por Liga)...")
+    
+    ligas_config = {
+        "bra.1": "Série A Brasil", "bra.2": "Série B Brasil", "bra.copa_do_brasil": "Copa do Brasil",
+        "conmebol.libertadores": "Libertadores", "conmebol.sudamericana": "Sul-Americana",
+        "eng.1": "Premier League (Ing)", "esp.1": "LaLiga (Esp)", "esp.copa_del_rey": "Copa del Rey (Esp)",
+        "ita.1": "Série A (Ita)", "ger.1": "Bundesliga (Ale)", "por.1": "Liga Portugal (Por)",
+        "uefa.champions": "Champions League", "usa.1": "MLS (EUA)"
+    }
+
+    jogos_hoje = []
+    for liga_id, liga_nome in ligas_config.items():
+        url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{liga_id}/scoreboard"
+        try:
+            res = requests.get(url, timeout=15)
+            data = res.json()
+            for evento in data.get('events', []):
+                dt_br = datetime.fromisoformat(evento.get('date').replace('Z', '')) - timedelta(hours=3)
+                
+                if dt_br.strftime('%Y-%m-%d') == hoje_br:
+                    # Lógica para garantir a ordem Casa x Fora
+                    competitors = evento.get('competitions')[0].get('competitors')
+                    home_team = next(t.get('team').get('displayName') for t in competitors if t.get('homeAway') == 'home')
+                    away_team = next(t.get('team').get('displayName') for t in competitors if t.get('homeAway') == 'away')
+                    
+                    jogos_hoje.append({
+                        "liga": liga_nome,
+                        "jogo": f"{home_team} x {away_team}",
+                        "hora": dt_br.strftime("%H:%M"),
+                        "link": evento.get('links')[0].get('href')
+                    })
+        except: continue
+
+    if len(jogos_hoje) < 10:
+        print(f"Jogos insuficientes: {len(jogos_hoje)} encontrados.")
+        return
+
+    melhor_bilhete = None
+    melhor_odd = 0
+    alvo = 100.0
+
+    # 5000 tentativas para chegar o mais próximo de 100 sem ultrapassar
+    for _ in range(5000):
+        selecao = random.sample(jogos_hoje, 10)
+        odd_atual = 1.0
+        lista_atual = []
+        contador_25 = 0
         
-        data = response.json()
-        # Pega os últimos 5 jogos finalizados
-        eventos = [e for e in data.get('events', []) if e.get('status', {}).get('type', {}).get('state') == 'post'][-5:]
+        for jogo in selecao:
+            palpite, odd_est = definir_palpite_com_prioridade(contador_25)
+            if "+2.5" in palpite: contador_25 += 1
+            odd_atual *= odd_est
+            lista_atual.append({**jogo, "aposta": palpite, "odd": odd_est})
+
+        if odd_atual <= alvo and odd_atual > melhor_odd:
+            melhor_odd = odd_atual
+            melhor_bilhete = lista_atual
+
+    if melhor_bilhete:
+        # 1. Ordena os jogos do bilhete alfabeticamente por LIGA
+        melhor_bilhete = sorted(melhor_bilhete, key=lambda x: x['liga'])
+
+        # 2. Gera a lista de ligas para o topo (também ordenada)
+        ligas_no_bilhete = sorted(list(set([j['liga'] for j in melhor_bilhete])))
+        resumo_ligas_vertical = "\n".join([f"🔹 {liga}" for liga in ligas_no_bilhete])
+
+        msg = f"🎯 *BILHETE CALIBRADO: ODD {melhor_odd:.2f}/100*\n\n"
+        msg += f"🏟️ *LIGAS ENCONTRADAS:*\n{resumo_ligas_vertical}\n\n"
+        msg += f"⚠️ _Máximo 2 palpites de +2.5 Gols | HOJE ({hoje_br})_\n\n"
         
-        print(f"Jogos finalizados encontrados: {len(eventos)}")
-        print("-" * 30)
-
-        for i, ev in enumerate(eventos, 1):
-            nome_jogo = ev.get('name', 'Sem nome')
-            data_jogo = ev.get('date', 'Sem data')
-            comp = ev['competitions'][0]['competitors']
-            
-            # Tenta extrair os gols
-            gols_casa = comp[0].get('score', 'N/A')
-            gols_fora = comp[1].get('score', 'N/A')
-            time_casa = comp[0]['team']['displayName']
-            time_fora = comp[1]['team']['displayName']
-
-            print(f"Jogo {i}: {nome_jogo}")
-            print(f"Data: {data_jogo}")
-            print(f"Placar: {time_casa} {gols_casa} x {gols_fora} {time_fora}")
-            
-            # Teste de Ambas Marcam
-            try:
-                g1 = int(gols_casa)
-                g2 = int(gols_fora)
-                print(f"Análise: {'✅ AMBAS MARCAM' if g1 > 0 and g2 > 0 else '❌ SÓ UM MARCOU'}")
-                print(f"Total Gols: {g1 + g2} ({'✅ +1.5' if (g1+g2) >= 2 else '❌ -1.5'})")
-            except:
-                print("Análise: Erro ao converter gols para número (API mandou dado vazio)")
-            print("-" * 30)
-
-    except Exception as e:
-        print(f"ERRO CRÍTICO NA CONEXÃO: {e}")
+        for i, j in enumerate(melhor_bilhete, 1):
+            msg += f"{i}. 🏟️ *{j['jogo']}*\n🕒 {j['hora']} | _{j['liga']}_\n🎯 *{j['aposta']}*\n📊 [Estatísticas]({j['link']})\n\n"
+        
+        msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
+        
+        enviar_telegram(msg)
+        print(f"Sucesso! Bilhete com Odd {melhor_odd:.2f} enviado.")
 
 if __name__ == "__main__":
-    testar_conexao_real()
-                
+    executar_robo()
+            
