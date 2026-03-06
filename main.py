@@ -102,7 +102,7 @@ def executar_robo():
     maior_odd_achada = 0
 
     # Tenta 5000 combinações para cravar a Odd 80-100
-    for _ in range(5000):
+    for _ in range(1000):
         tentativa = []
         c_25, c_am = 0, 0
         # Pega de 10 a 13 jogos para manter apostas fáceis mas com odd alta
