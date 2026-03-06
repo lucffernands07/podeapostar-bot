@@ -19,52 +19,63 @@ def enviar_telegram(mensagem):
     try: requests.post(url, json=payload, timeout=15)
     except: pass
 
-def analisar_opcoes(j):
-    h_id, a_id, e_id = j['h_id'], j['a_id'], j['id']
-    liga_atual = j['liga'].upper()
+def get_historico_stats(e_id, team_id):
+    """Função isolada para pegar estatísticas de um time"""
+    try:
+        url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/all/summary?event={e_id}"
+        res = requests.get(url, headers=HEADERS, timeout=7).json()
+        evs = []
+        for t_group in res.get('lastGames', []):
+            if str(t_group.get('teamId')) == str(team_id):
+                evs = t_group.get('events', [])[-5:]
+                break
+        
+        if not evs:
+            url_back = f"https://site.api.espn.com/apis/site/v2/sports/soccer/teams/{team_id}/schedule"
+            res_back = requests.get(url_back, headers=HEADERS, timeout=7).json()
+            evs = [e for e in res_back.get('events', []) if e.get('status', {}).get('type', {}).get('state') == 'post'][-5:]
+        
+        return evs
+    except:
+        return []
+
+def extrair_probabilidades(j):
+    """Analisa o jogo UMA VEZ e retorna todas as opções possíveis de mercado"""
+    evs_h = get_historico_stats(j['id'], j['h_id'])
+    evs_a = get_historico_stats(j['id'], j['a_id'])
     
-    def get_sucessos(team_id, mercado):
-        try:
-            url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/all/summary?event={e_id}"
-            res = requests.get(url, headers=HEADERS, timeout=10).json()
-            evs = []
-            for t_group in res.get('lastGames', []):
-                if str(t_group.get('teamId')) == str(team_id):
-                    evs = t_group.get('events', [])[-5:]
-                    break
-            if not evs:
-                url_back = f"https://site.api.espn.com/apis/site/v2/sports/soccer/teams/{team_id}/schedule"
-                res_back = requests.get(url_back, headers=HEADERS, timeout=10).json()
-                evs = [e for e in res_back.get('events', []) if e.get('status', {}).get('type', {}).get('state') == 'post'][-5:]
-            if not evs: return None
-            s = 0
-            for ev in evs:
+    def calcular_sucessos(evs, mercado):
+        s = 0
+        for ev in evs:
+            try:
                 c = ev.get('competitions', [{}])[0].get('competitors', [])
                 g1, g2 = int(c[0].get('score', 0)), int(c[1].get('score', 0))
                 if mercado == '2.5' and (g1+g2) >= 3: s += 1
                 elif mercado == '1.5' and (g1+g2) >= 2: s += 1
                 elif mercado == 'ambas' and (g1 > 0 and g2 > 0): s += 1
-            return s
-        except: return None
+            except: continue
+        return s
 
-    s_15_raw = max(get_sucessos(h_id, '1.5') or 0, get_sucessos(a_id, '1.5') or 0)
-    s_am_raw = max(get_sucessos(h_id, 'ambas') or 0, get_sucessos(a_id, 'ambas') or 0)
-
+    s_15 = max(calcular_sucessos(evs_h, '1.5'), calcular_sucessos(evs_a, '1.5'))
+    s_am = max(calcular_sucessos(evs_h, 'ambas'), calcular_sucessos(evs_a, 'ambas'))
+    
+    liga_atual = j['liga'].upper()
     ligas_gols = ["LALIGA", "BUNDESLIGA", "SERIE A", "LIGUE 1", "PORTUGUÊS", "HOLANDÊS", "GAUCHÃO", "ACREANO"]
-    if s_15_raw == 0 and any(x in liga_atual for x in ligas_gols):
+    
+    # Lógica de estimativa se a API falhar ou der 0
+    if s_15 == 0 and any(x in liga_atual for x in ligas_gols):
         s_15, s_am = 4, 3
         qual = f"{s_15}/5 (Est.)"
     else:
-        s_15, s_am = s_15_raw, s_am_raw
         qual = f"{s_15}/5"
 
     opcoes = []
-    if s_am >= 4:
-        opcoes.append({"tipo": "AMBOS", "msg": "🎯 Ambas Marcam", "odd": 1.88, "q": qual})
-    if s_15 >= 4:
-        opcoes.append({"tipo": "2.5", "msg": "🔥 +2.5 Gols", "odd": 2.10, "q": qual})
-    if s_15 >= 3:
-        opcoes.append({"tipo": "1.5", "msg": "⚽ +1.5 Gols", "odd": 1.48, "q": qual})
+    # 1.5 e 0.5 estão sempre disponíveis (Hierarquia de segurança)
+    if s_15 >= 3: opcoes.append({"tipo": "1.5", "msg": "⚽ +1.5 Gols", "odd": 1.48, "q": qual})
+    if s_am >= 4: opcoes.append({"tipo": "AMBOS", "msg": "🎯 Ambas Marcam", "odd": 1.88, "q": qual})
+    if s_15 >= 4: 
+        s_25 = max(calcular_sucessos(evs_h, '2.5'), calcular_sucessos(evs_a, '2.5'))
+        if s_25 >= 3: opcoes.append({"tipo": "2.5", "msg": "🔥 +2.5 Gols", "odd": 2.10, "q": qual})
     
     opcoes.append({"tipo": "0.5", "msg": "⚡ +0.5 Gols (HT/FT)", "odd": 1.32, "q": "Segurança"})
     return opcoes
@@ -79,7 +90,7 @@ def executar_robo():
         "tur.1": "Turco", "bel.1": "Belga", "bra.camp.acreano": "Acreano"
     }
 
-    radar = []
+    radar_bruto = []
     for l_id, l_nome in ligas_ids.items():
         try:
             url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard?dates={hoje_api}"
@@ -87,36 +98,41 @@ def executar_robo():
             for ev in data.get('events', []):
                 if hoje_f in ev['date']:
                     c = ev['competitions'][0]['competitors']
-                    radar.append({
+                    radar_bruto.append({
                         "id": ev['id'], "liga": l_nome, "h_id": c[0]['team']['id'], "a_id": c[1]['team']['id'],
                         "jogo": f"{c[0]['team']['displayName']} x {c[1]['team']['displayName']}",
                         "hora": ev['date'][11:16]
                     })
         except: continue
 
-    print(f"Jogos no Radar: {len(radar)}")
+    print(f"Jogos no Radar: {len(radar_bruto)}")
     
+    # PRÉ-ANÁLISE (O segredo da velocidade): Analisa cada jogo UMA VEZ
+    jogos_analisados = []
+    for j in radar_bruto:
+        print(f"Analisando: {j['jogo']}")
+        opcoes = extrair_probabilidades(j)
+        jogos_analisados.append({**j, "opcoes": opcoes})
+
     melhor_bilhete = []
     maior_odd_achada = 0
 
-    # Busca a maior Odd em 1000 tentativas sem travas de interrupção
+    # SORTEIO MATEMÁTICO (Agora sim 1000 tentativas em milissegundos)
     for _ in range(1000):
         tentativa = []
         c_25, c_am = 0, 0
         
-        # REGRA: Mínimo 5 e Máximo 10 jogos
         qtd_alvo = random.randint(5, 10)
-        qtd_real = min(len(radar), qtd_alvo)
-        
+        qtd_real = min(len(jogos_analisados), qtd_alvo)
         if qtd_real < 5: break 
 
-        amostra = random.sample(radar, qtd_real)
+        amostra = random.sample(jogos_analisados, qtd_real)
         
         for j in amostra:
-            opcoes = analisar_opcoes(j)
-            escolha = opcoes[-1] 
+            # Escolha baseada nas suas travas
+            escolha = j['opcoes'][-1] # Default 0.5
             
-            for o in opcoes:
+            for o in j['opcoes']:
                 if o['tipo'] == "AMBOS" and c_am < 2:
                     escolha = o
                     c_am += 1
@@ -129,24 +145,20 @@ def executar_robo():
                     escolha = o
                     break
             
-            tentativa.append({**j, "aposta": escolha['msg'], "odd": escolha['odd'], "qualidade": escolha['q']})
+            tentativa.append({
+                "jogo": j['jogo'], "liga": j['liga'], "hora": j['hora'],
+                "aposta": escolha['msg'], "odd": escolha['odd'], "qualidade": escolha['q']
+            })
         
-        odd_total = 1.0
-        for t in tentativa: odd_total *= t['odd']
+        odd_t = 1.0
+        for t in tentativa: odd_t *= t['odd']
         
-        # RANKING: Sempre armazena a maior Odd encontrada no sorteio
-        if odd_total > maior_odd_achada:
-            maior_odd_achada = odd_total
+        if odd_t > maior_odd_achada:
+            maior_odd_achada = odd_t
             melhor_bilhete = tentativa
 
     if melhor_bilhete:
-        t_odd = 1.0
-        for r in melhor_bilhete: t_odd *= r['odd']
-        
-        msg = f"🎯 *BILHETE CAMPEÃO (MAIOR ODD ENCONTRADA)*\n"
-        msg += f"💰 *ODD TOTAL: {t_odd:.2f}*\n"
-        msg += f"📊 *JOGOS: {len(melhor_bilhete)} (MÁX 10)*\n\n"
-        
+        msg = f"🎯 *BILHETE CAMPEÃO (MAIOR ODD)*\n💰 *ODD TOTAL: {maior_odd_achada:.2f}*\n📊 *JOGOS: {len(melhor_bilhete)}*\n\n"
         for i, b in enumerate(sorted(melhor_bilhete, key=lambda x: x['liga']), 1):
             msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | {b['liga']}\n🎯 *{b['aposta']}* — `[{b['qualidade']}]` \n\n"
         
@@ -155,4 +167,4 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
-            
+    
