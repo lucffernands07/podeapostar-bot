@@ -58,7 +58,6 @@ def extrair_probabilidades(j):
     liga_atual = j['liga'].upper()
     ligas_gols = ["LALIGA", "BUNDESLIGA", "SERIE A", "LIGUE 1", "PORTUGUÊS", "HOLANDÊS", "GAUCHÃO", "ACREANO"]
     
-    # Lógica de fallback para ligas conhecidas se a API falhar
     if s_15 == 0 and any(x in liga_atual for x in ligas_gols):
         s_15, s_am, s_25 = 4, 3, 2
         qual = f"{s_15}/5 (Est.)"
@@ -66,7 +65,6 @@ def extrair_probabilidades(j):
         qual = f"{s_15}/5"
 
     opcoes = []
-    # Prioriza mercados conforme suas regras de sucesso (4/5 para Ambas, etc)
     if s_15 >= 3: opcoes.append({"tipo": "1.5", "msg": "⚽ +1.5 Gols", "odd": 1.48, "q": qual})
     if s_am >= 4: opcoes.append({"tipo": "AMBOS", "msg": "🎯 Ambas Marcam", "odd": 1.88, "q": f"{s_am}/5"})
     if s_25 >= 3: opcoes.append({"tipo": "2.5", "msg": "🔥 +2.5 Gols", "odd": 2.15, "q": f"{s_25}/5"})
@@ -83,7 +81,7 @@ def montar_bilhete(jogos, forcar_fixos=False):
         amostra = random.sample(jogos, min(len(jogos), qtd))
         
         for j in amostra:
-            escolha = j['opcoes'][-1] # Default Segurança
+            escolha = j['opcoes'][-1]
             for o in j['opcoes']:
                 if forcar_fixos:
                     if o['tipo'] == "2.5" and c_25 < 1:
@@ -96,15 +94,15 @@ def montar_bilhete(jogos, forcar_fixos=False):
                     if o['tipo'] == "2.5" and c_25 < 1: escolha, c_25 = o, c_25 + 1; break
                     if o['tipo'] == "1.5": escolha = o; break
             
-            tentativa.append({"jogo": j['jogo'], "liga": j['liga'], "hora": j['hora'], "ap": escolha['msg'], "od": escolha['odd'], "qu": escolha['q']})
+            tentativa.append({
+                "jogo": j['jogo'], "liga": j['liga'], "hora": j['hora'], 
+                "ap": escolha['msg'], "od": escolha['odd'], "qu": escolha['q']
+            })
         
-        # Se o modo é fixo, só aceita se preencheu exatamente 1x (+2.5) e 2x (Ambas)
         if forcar_fixos and (c_25 != 1 or c_am != 2): continue
 
         total_o = 1.0
         for t in tentativa: total_o *= t['od']
-        
-        # Ranking: guarda o bilhete com a maior odd do ciclo
         if total_o > maior_o:
             maior_o, melhor_b = total_o, tentativa
                 
@@ -126,27 +124,29 @@ def executar_robo():
                     radar_bruto.append({"id": ev['id'], "liga": l_nome, "h_id": c[0]['team']['id'], "a_id": c[1]['team']['id'], "jogo": f"{c[0]['team']['displayName']} x {c[1]['team']['displayName']}", "hora": ev['date'][11:16]})
         except: continue
 
-    print(f"Jogos no Radar: {len(radar_bruto)}")
     jogos_analisados = []
     for j in radar_bruto:
         opcoes = extrair_probabilidades(j)
         jogos_analisados.append({**j, "opcoes": opcoes})
 
-    # BILHETE 01 - EQUILIBRADO (Maior Odd sem obrigação de mercados específicos)
-    b1, o1 = montar_bilhete(jogos_analisados, forcar_fixos=False)
-    if b1:
-        msg1 = f"✅ *BILHETE 01: EQUILIBRADO*\n💰 *ODD TOTAL: {o1:.2f}*\n📊 *JOGOS: {len(b1)}*\n\n"
-        for i, x in enumerate(sorted(b1, key=lambda l: l['liga']), 1):
-            msg1 += f"{i}. {x['jogo']} | {x['liga']}\n🎯 *{x['ap']}* — `[{x['qu']}]` \n\n"
-        enviar_telegram(msg1)
+    def formatar_mensagem(titulo, bilhete, odd):
+        ligas = sorted(list(set([x['liga'] for x in bilhete])))
+        msg = f"{titulo} ({len(bilhete)} JOGOS)\n💰 *ODD TOTAL: {odd:.2f}*\n\n"
+        msg += "🏟️ *LIGAS ENCONTRADAS:*\n"
+        for liga in ligas: msg += f"🔹 {liga}\n"
+        msg += "\n"
+        for i, b in enumerate(sorted(bilhete, key=lambda x: x['liga']), 1):
+            msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | {b['liga']}\n🎯 *{b['ap']}* — `[{b['qu']}]` \n📊 Estatísticas\n\n"
+        msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
+        return msg
 
-    # BILHETE 02 - ALAVANCADO (Obrigatório 1x +2.5 e 2x AMBAS)
+    # BILHETE 01
+    b1, o1 = montar_bilhete(jogos_analisados, forcar_fixos=False)
+    if b1: enviar_telegram(formatar_mensagem("🎯 BILHETE CALIBRADO", b1, o1))
+
+    # BILHETE 02
     b2, o2 = montar_bilhete(jogos_analisados, forcar_fixos=True)
-    if b2:
-        msg2 = f"🚀 *BILHETE 02: ALAVANCADO*\n💰 *ODD TOTAL: {o2:.2f}*\n📊 *REGRAS: 1x (+2.5) e 2x (AMBAS) FIXOS*\n\n"
-        for i, x in enumerate(sorted(b2, key=lambda l: l['liga']), 1):
-            msg2 += f"{i}. {x['jogo']} | {x['liga']}\n🎯 *{x['ap']}* — `[{x['qu']}]` \n\n"
-        enviar_telegram(msg2)
+    if b2: enviar_telegram(formatar_mensagem("🚀 BILHETE ALAVANCADO", b2, o2))
 
 if __name__ == "__main__":
     executar_robo()
