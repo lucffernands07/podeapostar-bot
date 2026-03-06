@@ -52,7 +52,10 @@ def analisar_partida(j, contador_25):
     return "⚡ +0.5 Gols (HT/FT)", 1.38, f"{s_15}/5 (Média)"
 
 def executar_robo():
-    hoje = "2026-03-05"
+    # DATA AUTOMÁTICA (Ajuste para pegar jogos de hoje conforme o calendário)
+    agora = datetime.now()
+    hoje_filtro = agora.strftime("%Y-%m-%d")
+    hoje_api = agora.strftime("%Y%m%d")
     
     # DICIONÁRIO AMPLIADO COM AS NOVAS LIGAS
     ligas_ids = {
@@ -91,10 +94,11 @@ def executar_robo():
     radar = []
     for l_id, l_nome in ligas_ids.items():
         try:
-            url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard?dates=20260305"
+            # URL agora usa a data dinâmica hoje_api
+            url = f"http://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard?dates={hoje_api}"
             data = requests.get(url, timeout=12).json()
             for ev in data.get('events', []):
-                if hoje in ev['date']:
+                if hoje_filtro in ev['date']:
                     comp = ev['competitions'][0]['competitors']
                     h = next(t for t in comp if t['homeAway'] == 'home')
                     a = next(t for t in comp if t['homeAway'] == 'away')
@@ -153,3 +157,4 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
+    
