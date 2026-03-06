@@ -58,7 +58,6 @@ def analisar_opcoes(j):
         s_15, s_am = s_15_raw, s_am_raw
         qual = f"{s_15}/5"
 
-    # Criamos o leque de opções para o sorteador escolher depois
     opcoes = []
     if s_am >= 4:
         opcoes.append({"tipo": "AMBOS", "msg": "🎯 Ambas Marcam", "odd": 1.88, "q": qual})
@@ -97,23 +96,26 @@ def executar_robo():
 
     print(f"Jogos no Radar: {len(radar)}")
     
-    bilhete_final = []
-    melhor_bilhete_ate_agora = []
+    melhor_bilhete = []
     maior_odd_achada = 0
 
-    # Tenta 5000 combinações para cravar a Odd 80-100
+    # Busca a maior Odd em 1000 tentativas sem travas de interrupção
     for _ in range(1000):
         tentativa = []
         c_25, c_am = 0, 0
-        # Pega de 10 a 13 jogos para manter apostas fáceis mas com odd alta
-        qtd_jogos = random.randint(10, 13) if len(radar) >= 13 else len(radar)
-        amostra = random.sample(radar, qtd_jogos)
+        
+        # REGRA: Mínimo 5 e Máximo 10 jogos
+        qtd_alvo = random.randint(5, 10)
+        qtd_real = min(len(radar), qtd_alvo)
+        
+        if qtd_real < 5: break 
+
+        amostra = random.sample(radar, qtd_real)
         
         for j in amostra:
             opcoes = analisar_opcoes(j)
-            escolha = opcoes[-1] # Começa com 0.5 (última da lista)
+            escolha = opcoes[-1] 
             
-            # Prioridades: 1º Ambos (até 2), 2º +2.5 (até 1), 3º +1.5 (sem limite)
             for o in opcoes:
                 if o['tipo'] == "AMBOS" and c_am < 2:
                     escolha = o
@@ -132,25 +134,20 @@ def executar_robo():
         odd_total = 1.0
         for t in tentativa: odd_total *= t['odd']
         
-        if 80 <= odd_total <= 110:
-            bilhete_final = tentativa
-            break
-        
+        # RANKING: Sempre armazena a maior Odd encontrada no sorteio
         if odd_total > maior_odd_achada:
             maior_odd_achada = odd_total
-            melhor_bilhete_ate_agora = tentativa
+            melhor_bilhete = tentativa
 
-    # Se não achou na faixa 80-100, manda o melhor que conseguiu
-    resultado = bilhete_final if bilhete_final else melhor_bilhete_ate_agora
-
-    if resultado:
+    if melhor_bilhete:
         t_odd = 1.0
-        for r in resultado: t_odd *= r['odd']
+        for r in melhor_bilhete: t_odd *= r['odd']
         
-        msg = f"🎯 *BILHETE DE ELITE (ODD {t_odd:.2f})*\n"
-        msg += f"🔥 *FOCO: ODDS 80-100 (JOGOS FÁCEIS)*\n\n"
+        msg = f"🎯 *BILHETE CAMPEÃO (MAIOR ODD ENCONTRADA)*\n"
+        msg += f"💰 *ODD TOTAL: {t_odd:.2f}*\n"
+        msg += f"📊 *JOGOS: {len(melhor_bilhete)} (MÁX 10)*\n\n"
         
-        for i, b in enumerate(sorted(resultado, key=lambda x: x['liga']), 1):
+        for i, b in enumerate(sorted(melhor_bilhete, key=lambda x: x['liga']), 1):
             msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | {b['liga']}\n🎯 *{b['aposta']}* — `[{b['qualidade']}]` \n\n"
         
         msg += "---\n💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
@@ -158,4 +155,4 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
-    
+            
