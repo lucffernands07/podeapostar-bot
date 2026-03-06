@@ -96,7 +96,8 @@ def montar_bilhete(jogos, forcar_fixos=False):
             
             tentativa.append({
                 "jogo": j['jogo'], "liga": j['liga'], "hora": j['hora'], 
-                "ap": escolha['msg'], "od": escolha['odd'], "qu": escolha['q']
+                "ap": escolha['msg'], "od": escolha['odd'], "qu": escolha['q'],
+                "id_jogo": j['id'] # Mantendo o ID para o link
             })
         
         if forcar_fixos and (c_25 != 1 or c_am != 2): continue
@@ -136,7 +137,8 @@ def executar_robo():
         for liga in ligas: msg += f"🔹 {liga}\n"
         msg += "\n"
         for i, b in enumerate(sorted(bilhete, key=lambda x: x['liga']), 1):
-            msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | {b['liga']}\n🎯 *{b['ap']}* — `[{b['qu']}]` \n📊 Estatísticas\n\n"
+            url_stats = f"https://www.espn.com.br/futebol/jogo/_/jogoId/{b['id_jogo']}"
+            msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | {b['liga']}\n🎯 *{b['ap']}* — `[{b['qu']}]` \n📊 [Estatísticas]({url_stats})\n\n"
         msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         return msg
 
@@ -150,4 +152,4 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
-    
+                                 
