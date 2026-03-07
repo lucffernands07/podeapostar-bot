@@ -48,34 +48,33 @@ def extrair_probabilidades(j):
     m_h, s_h, j15_h, j25_h = analisar_gols(evs_h, j['h_id'])
     m_a, s_a, j15_a, j25_a = analisar_gols(evs_a, j['a_id'])
     
-    # Log no GitHub para conferirmos
-    print(f"      📊 {j['jogo']}: Casa {m_h}G | Fora {m_a}G")
+    # Log no GitHub para conferirmos os números reais do Barça no log
+    print(f"      📊 {j['jogo']}: Casa {m_h}G ({j25_h}/5 Over 2.5) | Fora {m_a}G ({j25_a}/5 Over 2.5)")
 
     opcoes = []
     
-    # --- LÓGICA AGRESSIVA ---
-    # Se um dos times for uma máquina de gols (ex: Barcelona/Bayern)
-    if j25_h >= 4 or j25_a >= 4 or (m_h >= 10 or m_a >= 10):
-        opcoes.append({"tipo": "2.5", "msg": "🔥 +2.5 Gols", "odd": 2.15, "q": f"{m_h}/{m_a}"})
+    # 1. TENTATIVA +2.5 GOLS (SE UM TIME FOR MÁQUINA OU A SOMA FOR ALTA)
+    if j25_h >= 4 or j25_a >= 4 or m_h >= 8 or m_a >= 8 or (m_h + m_a) >= 12:
+        opcoes.append({"tipo": "2.5", "msg": "🔥 +2.5 Gols", "odd": 2.15, "q": f"V:{m_h+m_a}"})
     
-    # Se a média de +1.5 for boa ou volume de gols total for alto
-    if j15_h >= 3 or j15_a >= 3 or (m_h + m_a) >= 8:
+    # 2. TENTATIVA +1.5 GOLS (CRITÉRIO MÍNIMO PARA TIMES COMO BARCELONA)
+    if j15_h >= 2 or j15_a >= 2 or (m_h + m_a) >= 6:
         opcoes.append({"tipo": "1.5", "msg": "⚽ +1.5 Gols", "odd": 1.48, "q": f"{j15_h}/{j15_a}"})
     
-    # Segurança só entra se não tiver NADA acima
+    # 3. SEGURANÇA (SÓ SE OS TIMES FOREM EXTREMAMENTE RUINS)
     if not opcoes:
-        opcoes.append({"tipo": "0.5", "msg": "⚡ +0.5 Gols", "odd": 1.32, "q": "Segurança"})
+        opcoes.append({"tipo": "0.5", "msg": "⚡ +0.5 Gols", "odd": 1.32, "q": "Segur."})
         
     return opcoes
 
 def montar_bilhete(jogos):
     if not jogos: return [], 0
-    # Ordenar pelos jogos com MAIS volume de gols (soma de gols marcados)
-    jogos_agressivos = sorted(jogos, key=lambda x: x['opcoes'][0]['tipo'], reverse=True)
+    # ORDENAÇÃO: Prioriza quem tem a opção 2.5 disponível
+    jogos_ordenados = sorted(jogos, key=lambda x: (x['opcoes'][0]['tipo'] == "2.5"), reverse=True)
     
     bilhete = []
-    for j in jogos_agressivos[:10]: # Seleciona os 10 melhores
-        escolha = j['opcoes'][0] # Pega a opção mais agressiva disponível
+    for j in jogos_ordenados[:10]:
+        escolha = j['opcoes'][0] # Pega a mais agressiva (2.5 ou 1.5)
         bilhete.append({"jogo": j['jogo'], "ap": escolha['msg'], "od": escolha['odd'], "qu": escolha['q'], "hora": j['hora']})
     
     total_odd = 1.0
@@ -84,7 +83,7 @@ def montar_bilhete(jogos):
 
 def executar_robo():
     hoje = datetime.now().strftime("%Y%m%d")
-    print(f"🔎 BUSCA AGRESSIVA: {hoje}")
+    print(f"🔎 BUSCA MODO GOLEADA: {hoje}")
     
     ligas = {
         "eng.1": "Premier League", "esp.1": "LALIGA", "ger.1": "Bundesliga", 
@@ -110,11 +109,11 @@ def executar_robo():
 
     if jogos_ok:
         b, o = montar_bilhete(jogos_ok)
-        msg = f"🏆 *🎯 BILHETE ATROPELO AGRESSIVO*\n💰 *ODD: {o:.2f}*\n\n"
+        msg = f"🏆 *🎯 BILHETE ATROPELO GOLEADA*\n💰 *ODD: {o:.2f}*\n\n"
         for i, x in enumerate(sorted(b, key=lambda k: k['hora']), 1):
             msg += f"{i}. 🏟️ *{x['jogo']}*\n🎯 *{x['ap']}* `[{x['qu']}]`\n\n"
         enviar_telegram(msg)
 
 if __name__ == "__main__":
     executar_robo()
-    
+                
