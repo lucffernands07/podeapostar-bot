@@ -2,10 +2,8 @@ name: Apostas Diária
 
 on:
   schedule:
-    # 11:00 UTC é 08:00 Horário de Brasília
-    # 17:00 UTC é 14:00 Horário de Brasília
     - cron: '0 11,17 * * *'
-  workflow_dispatch: # Permite que você rode manualmente se quiser
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,7 +19,8 @@ jobs:
 
       - name: Instalar dependências
         run: |
-          pip install requests
+          pip install requests playwright
+          playwright install chromium
 
       - name: Executar Robô
         env:
