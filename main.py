@@ -75,9 +75,8 @@ async def executar_robo():
         }
         
         jogos_selecionados = []
-        vagas_25 = 2  # TRAVA AJUSTADA PARA 2 JOGOS MAX
+        vagas_25 = 2 
         vagas_btts = 3
-        ligas_encontradas = set()
         
         for l_id, l_nome in ligas_config.items():
             print(f"🌍 Verificando {l_nome}...")
@@ -107,15 +106,11 @@ async def executar_robo():
                                 mercado = "🛡️ +0.5 Gols (HT/FT) — [Segurança]"
                             
                             if mercado:
-                                ligas_encontradas.add(l_nome)
+                                # Guardamos a liga separada para ordenar depois
                                 jogos_selecionados.append({
-                                    "t1": t1['displayName'],
-                                    "t2": t2['displayName'],
-                                    "hora": hora,
                                     "liga": l_nome,
-                                    "mercado": mercado,
-                                    "id_espn": ev['id'],
-                                    "gols_total": d1['gols_marcados'] + d2['gols_marcados']
+                                    "texto": f"🏟️ {t1['displayName']} x {t2['displayName']}\n🕒 {hora} | {l_nome}\n🎯 {mercado}\n📊 [Estatísticas](https://www.espn.com.br/futebol/confronto/_/jogoId/{ev['id']})",
+                                    "gols": d1['gols_marcados'] + d2['gols_marcados']
                                 })
             except Exception as e:
                 print(f"Erro na liga {l_nome}: {e}")
@@ -124,30 +119,28 @@ async def executar_robo():
         await browser.close()
 
         if jogos_selecionados:
-            # Primeiro: Seleciona os 10 melhores pelo volume de gols
-            jogos_selecionados.sort(key=lambda x: x['gols_total'], reverse=True)
-            top_10 = jogos_selecionados[:10]
+            # 1. Mantém a sua lógica de pegar os 10 melhores pelo volume de gols
+            jogos_selecionados.sort(key=lambda x: x['gols'], reverse=True)
+            final_list = jogos_selecionados[:10]
             
-            # Segundo: Organiza o Top 10 por ordem alfabética de LIGA
-            top_10.sort(key=lambda x: x['liga'])
+            # 2. NOVA ORGANIZAÇÃO: Ordena esses 10 por nome de liga
+            final_list.sort(key=lambda x: x['liga'])
             
-            total_jogos = len(top_10)
+            # 3. Descobre quais ligas sobraram no bilhete final
+            ligas_no_bilhete = sorted(list(set(j['liga'] for j in final_list)))
+            
+            total_jogos = len(final_list)
             
             mensagem = f"🎯 *BILHETE DO DIA ({total_jogos} JOGOS)*\n"
             mensagem += f"💰🍀 BOA SORTE!!!\n\n"
             
             mensagem += "🏟️ *LIGAS ENCONTRADAS:*\n"
-            # Lista de ligas encontradas baseada apenas no que sobrou no Top 10
-            ligas_no_bilhete = sorted(list(set(j['liga'] for j in top_10)))
             for liga in ligas_no_bilhete:
                 mensagem += f"🔹 {liga}\n"
             
             mensagem += "\n"
-            for i, j in enumerate(top_10, 1):
-                mensagem += (f"{i}. 🏟️ {j['t1']} x {j['t2']}\n"
-                             f"🕒 {j['hora']} | {j['liga']}\n"
-                             f"🎯 {j['mercado']}\n"
-                             f"📊 [Estatísticas](https://www.espn.com.br/futebol/confronto/_/jogoId/{j['id_espn']})\n\n")
+            for i, jogo in enumerate(final_list, 1):
+                mensagem += f"{i}. {jogo['texto']}\n\n"
             
             mensagem += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
             
@@ -155,4 +148,4 @@ async def executar_robo():
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
-        
+                        
