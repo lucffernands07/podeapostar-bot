@@ -127,8 +127,8 @@ async def executar_robo():
             final_list = jogos_selecionados[:10]
             total_jogos = len(final_list)
             
-            mensagem = f"🎯 *BILHETE DO DIA ({total_jogos} JOGOS)*\n"
-            mensagem += f"💰🍀 BOA SORTE!!!\n\n"
+            mensagem = f"🎯 *BILHETE CALIBRADO ({total_jogos} JOGOS)*\n"
+            mensagem += f"💰 ODD ESTIMADA: Variação das Casas\n\n"
             
             mensagem += "🏟️ *LIGAS ENCONTRADAS:*\n"
             for liga in sorted(list(ligas_encontradas)):
@@ -144,6 +144,4 @@ async def executar_robo():
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
-    
-
-favor manter o resto da logica original
+                
