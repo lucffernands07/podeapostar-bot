@@ -37,6 +37,8 @@ def extrair_probabilidades(j):
     evs_h = get_historico_stats(j['id'], j['h_id'])
     evs_a = get_historico_stats(j['id'], j['a_id'])
     
+    if not evs_h or not evs_a: return []
+
     def calc(evs, mercado):
         s = 0
         for ev in evs:
@@ -54,16 +56,19 @@ def extrair_probabilidades(j):
     s_25_h, s_25_a = calc(evs_h, '2.5'), calc(evs_a, '2.5')
     
     opcoes = []
-    # Funil Dinâmico (5/5 até 3/5)
-    for nivel in [5, 4, 3]:
-        if s_15_h >= nivel and s_15_a >= nivel:
-            opcoes.append({"tipo": "1.5", "msg": "⚽ +1.5 Gols", "odd": 1.48, "q": f"{s_15_h}/{s_15_a}"})
-            break
-
-    if s_am_h >= 4 or s_am_a >= 4:
-        opcoes.append({"tipo": "AMBOS", "msg": "🎯 Ambas Marcam", "odd": 1.88, "q": f"{max(s_am_h, s_am_a)}/5"})
     
-    if s_25_h >= 3 and s_25_a >= 3:
+    # --- LÓGICA DE ATROPELO (Barcelona Rule) ---
+    
+    # 1. MERCADO +1.5 GOLS: Aceita se um for 5/5 OU se a soma for >= 7
+    if s_15_h == 5 or s_15_a == 5 or (s_15_h + s_15_a) >= 7:
+        opcoes.append({"tipo": "1.5", "msg": "⚽ +1.5 Gols", "odd": 1.48, "q": f"{s_15_h}/{s_15_a}"})
+
+    # 2. AMBAS MARCAM: Aceita se um for 4/5 OU se a soma for >= 7
+    if s_am_h >= 4 or s_am_a >= 4 or (s_am_h + s_am_a) >= 7:
+        opcoes.append({"tipo": "AMBOS", "msg": "🎯 Ambas Marcam", "odd": 1.88, "q": f"{s_am_h}/{s_am_a}"})
+    
+    # 3. +2.5 GOLS: Aceita se um for 5/5 OU se a soma for >= 8
+    if s_25_h == 5 or s_25_a == 5 or (s_25_h + s_25_a) >= 8:
         opcoes.append({"tipo": "2.5", "msg": "🔥 +2.5 Gols", "odd": 2.15, "q": f"{s_25_h}/{s_25_a}"})
     
     opcoes.append({"tipo": "0.5", "msg": "⚡ +0.5 Gols", "odd": 1.32, "q": "Segurança"})
@@ -72,22 +77,25 @@ def extrair_probabilidades(j):
 def montar_bilhete(jogos, forcar_fixos=False):
     melhor_b, maior_o = [], 0
     if not jogos: return melhor_b, maior_o
-    for _ in range(1500):
+    for _ in range(2000):
         tentativa, c_25, c_am = [], 0, 0
         amostra = random.sample(jogos, min(len(jogos), random.randint(6, 10)))
         for j in amostra:
-            escolha = j['opcoes'][-1]
-            for o in j['opcoes']:
-                if forcar_fixos:
-                    if o['tipo'] == "2.5" and c_25 < 1: escolha, c_25 = o, c_25 + 1; break
-                    if o['tipo'] == "AMBOS" and c_am < 2: escolha, c_am = o, c_am + 1; break
-                    if o['tipo'] == "1.5": escolha = o; break
-                else:
-                    if o['tipo'] == "2.5" and "5/5" in o['q']: escolha = o; break
-                    if o['tipo'] == "1.5": escolha = o; break
+            opcs = {o['tipo']: o for o in j['opcoes']}
+            escolha = j['opcoes'][-1] # Default Segurança
+            
+            if forcar_fixos:
+                # Regra para o Alavancado
+                if '2.5' in opcs and c_25 < 1: escolha, c_25 = opcs['2.5'], c_25 + 1
+                elif 'AMBOS' in opcs and c_am < 2: escolha, c_am = opcs['AMBOS'], c_am + 1
+                elif '1.5' in opcs: escolha = opcs['1.5']
+            else:
+                # No Calibrado: Prioriza 2.5 se tiver um time 5/5, senão vai de 1.5
+                if '2.5' in opcs and '5/' in opcs['2.5']['q']: escolha = opcs['2.5']
+                elif '1.5' in opcs: escolha = opcs['1.5']
+                
             tentativa.append({"jogo": j['jogo'], "liga": j['liga'], "hora": j['hora'], "ap": escolha['msg'], "od": escolha['odd'], "qu": escolha['q'], "id_jogo": j['id']})
         
-        if forcar_fixos and (c_25 != 1 or c_am != 2): continue
         total_o = 1.0
         for t in tentativa: total_o *= t['od']
         if total_o > maior_o: maior_o, melhor_b = total_o, tentativa
@@ -99,22 +107,12 @@ def executar_robo():
     print("-" * 50)
     
     ligas_alvo = {
-        "eng.1": "Premier League", 
-        "esp.1": "LALIGA", 
-        "ger.1": "Bundesliga", 
-        "ita.1": "Serie A", 
-        "fra.1": "Ligue 1",
-        "por.1": "Português", 
-        "ned.1": "Holandês", 
-        "tur.1": "Turco",
-        "bra.libertadores": "Libertadores",
-        "bra.sudamericana": "Sul-Americana",
-        "bra.camp.paulista": "Paulistão",
-        "bra.camp.carioca": "Carioca",
-        "bra.camp.mineiro": "Mineiro",
-        "bra.camp.gaucho": "Gauchão"
+        "eng.1": "Premier League", "esp.1": "LALIGA", "ger.1": "Bundesliga", 
+        "ita.1": "Serie A", "fra.1": "Ligue 1", "por.1": "Português", 
+        "ned.1": "Holandês", "tur.1": "Turco", "bra.libertadores": "Libertadores",
+        "bra.sudamericana": "Sul-Americana", "bra.camp.paulista": "Paulistão",
+        "bra.camp.carioca": "Carioca", "bra.camp.mineiro": "Mineiro", "bra.camp.gaucho": "Gauchão"
     }
-
 
     jogos_analisados = []
     
@@ -144,16 +142,13 @@ def executar_robo():
                     
                     if len(j_info['opcoes']) > 1:
                         jogos_analisados.append(j_info)
-                else:
-                    print(f"   🚫 Pulando: {ev.get('name')} (Já iniciado/Finalizado)")
-        except Exception as e:
-            print(f"   ❌ Erro ao acessar {l_nome}: {e}")
+        except: continue
         print("-" * 50)
 
     print(f"\n✅ ANÁLISE CONCLUÍDA. {len(jogos_analisados)} jogos aprovados pelo funil.")
     
     if not jogos_analisados:
-        print("⚠️ Fim do script: Nenhum jogo atingiu os critérios de aposta.")
+        print("⚠️ Fim do script: Nenhum jogo atingiu os critérios.")
         return
 
     def formatar(titulo, bilhete, odd):
@@ -164,18 +159,12 @@ def executar_robo():
         msg += "---\n💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         return msg
 
-    # Gerar Bilhete 01
     b1, o1 = montar_bilhete(jogos_analisados, False)
-    if b1: 
-        print("📤 Enviando Bilhete Calibrado...")
-        enviar_telegram(formatar("🎯 BILHETE CALIBRADO", b1, o1))
+    if b1: enviar_telegram(formatar("🎯 BILHETE CALIBRADO", b1, o1))
 
-    # Gerar Bilhete 02
     b2, o2 = montar_bilhete(jogos_analisados, True)
-    if b2: 
-        print("📤 Enviando Bilhete Alavancado...")
-        enviar_telegram(formatar("🚀 BILHETE ALAVANCADO", b2, o2))
+    if b2: enviar_telegram(formatar("🚀 BILHETE ALAVANCADO", b2, o2))
 
 if __name__ == "__main__":
     executar_robo()
-            
+    
