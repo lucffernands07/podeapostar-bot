@@ -75,8 +75,9 @@ async def executar_robo():
         }
         
         jogos_selecionados = []
-        vagas_25 = 2 
+        vagas_25 = 2  # TRAVA AJUSTADA PARA 2 JOGOS MAX
         vagas_btts = 3
+        ligas_encontradas = set()
         
         for l_id, l_nome in ligas_config.items():
             print(f"🌍 Verificando {l_nome}...")
@@ -94,21 +95,24 @@ async def executar_robo():
                         
                         if d1 and d2:
                             mercado = ""
+                            # Prioridade 1: +2.5 Gols (Máximo 2)
                             if vagas_25 > 0 and ((d1['over25_count'] >= 4 or d1['gols_marcados'] >= 8) or (d2['over25_count'] >= 4 or d2['gols_marcados'] >= 8)):
                                 mercado = "⚡ +2.5 Gols — [Atropelo]"
                                 vagas_25 -= 1
+                            # Prioridade 2: Ambas Marcam (Máximo 3)
                             elif vagas_btts > 0 and (d1['btts_count'] >= 4 and d2['btts_count'] >= 4):
                                 mercado = "🤝 Ambas Marcam — [4/5 (Est.)]"
                                 vagas_btts -= 1
+                            # Prioridade 3: +1.5 Gols
                             elif d1['ultimos_3_marcou'] and d2['ultimos_3_marcou']:
                                 mercado = "⚽ +1.5 Gols — [4/5 (Est.)]"
+                            # Prioridade 4: +0.5 Gols
                             elif d1['gols_marcados'] >= 3 or d2['gols_marcados'] >= 3:
                                 mercado = "🛡️ +0.5 Gols (HT/FT) — [Segurança]"
                             
                             if mercado:
-                                # Guardamos a liga separada para ordenar depois
+                                ligas_encontradas.add(l_nome)
                                 jogos_selecionados.append({
-                                    "liga": l_nome,
                                     "texto": f"🏟️ {t1['displayName']} x {t2['displayName']}\n🕒 {hora} | {l_nome}\n🎯 {mercado}\n📊 [Estatísticas](https://www.espn.com.br/futebol/confronto/_/jogoId/{ev['id']})",
                                     "gols": d1['gols_marcados'] + d2['gols_marcados']
                                 })
@@ -119,23 +123,15 @@ async def executar_robo():
         await browser.close()
 
         if jogos_selecionados:
-            # 1. Mantém a sua lógica de pegar os 10 melhores pelo volume de gols
             jogos_selecionados.sort(key=lambda x: x['gols'], reverse=True)
             final_list = jogos_selecionados[:10]
-            
-            # 2. NOVA ORGANIZAÇÃO: Ordena esses 10 por nome de liga
-            final_list.sort(key=lambda x: x['liga'])
-            
-            # 3. Descobre quais ligas sobraram no bilhete final
-            ligas_no_bilhete = sorted(list(set(j['liga'] for j in final_list)))
-            
             total_jogos = len(final_list)
             
             mensagem = f"🎯 *BILHETE DO DIA ({total_jogos} JOGOS)*\n"
             mensagem += f"💰🍀 BOA SORTE!!!\n\n"
             
             mensagem += "🏟️ *LIGAS ENCONTRADAS:*\n"
-            for liga in ligas_no_bilhete:
+            for liga in sorted(list(ligas_encontradas)):
                 mensagem += f"🔹 {liga}\n"
             
             mensagem += "\n"
@@ -148,4 +144,6 @@ async def executar_robo():
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
-                        
+    
+
+favor manter o resto da logica original
