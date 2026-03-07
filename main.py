@@ -14,12 +14,12 @@ def enviar_telegram(msg):
         "chat_id": CHAT_ID,
         "text": msg,
         "parse_mode": "Markdown",
-        "disable_web_page_preview": True  # Evita que o Telegram crie previews gigantes dos links
+        "disable_web_page_preview": True
     }
     try:
         requests.post(url, json=payload, timeout=15)
     except:
-        print("❌ Erro ao enviar mensagem para o Telegram.")
+        print("❌ Erro ao enviar para o Telegram.")
 
 async def extrair_dados_detalhados(browser, team_id):
     page = await browser.new_page()
@@ -53,18 +53,29 @@ async def executar_robo():
         hoje = datetime.now().strftime("%Y%m%d")
         
         ligas_config = {
-            "esp.1": "LaLiga", "eng.1": "Premier League", "ger.1": "Bundesliga", "ita.1": "Serie A",
-            "fra.1": "Ligue 1", "ned.1": "Holanda", "bul.1": "Bulgária", "por.1": "Portugal",
-            "bra.1": "Série A", "bra.2": "Série B", "bra.camp.paulista": "Paulistão",
-            "bra.camp.carioca": "Carioca", "bra.camp.mineiro": "Mineiro", "bra.camp.gaucho": "Gaúcho",
-            "uefa.champions": "Champions", "conmebol.libertadores": "Libertadores"
+            "esp.1": "LALIGA", 
+            "eng.1": "Premier League", 
+            "ger.1": "Bundesliga", 
+            "ita.1": "Serie A",
+            "fra.1": "Ligue 1", 
+            "ned.1": "Holandês", 
+            "bul.1": "Búlgaro", 
+            "por.1": "Português",
+            "bra.1": "Brasileirão A", 
+            "bra.2": "Brasileirão B", 
+            "bra.camp.paulista": "Paulistão",
+            "bra.camp.carioca": "Carioca", 
+            "bra.camp.mineiro": "Mineiro", 
+            "bra.camp.gaucho": "Gauchão",
+            "uefa.champions": "Champions", 
+            "bel.1": "Belga"
         }
         
-        jogos_por_liga = {}
+        jogos_selecionados = []
         vagas_25 = 1
         vagas_btts = 3
+        ligas_encontradas = set()
         
-        # 1. Coleta e processamento
         for l_id, l_nome in ligas_config.items():
             print(f"🌍 Verificando {l_nome}...")
             url_api = f"https://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard?dates={hoje}"
@@ -74,49 +85,54 @@ async def executar_robo():
                     if ev.get('status', {}).get('type', {}).get('state') == 'pre':
                         c = ev['competitions'][0]['competitors']
                         t1, t2 = c[0]['team'], c[1]['team']
-                        hora = ev['date'][11:16] # Extrai HH:MM do ISO
+                        hora = ev['date'][11:16]
                         
                         d1 = await extrair_dados_detalhados(browser, t1['id'])
                         d2 = await extrair_dados_detalhados(browser, t2['id'])
                         
                         if d1 and d2:
-                            # Decisão de Mercado
                             mercado = ""
                             if vagas_25 > 0 and ((d1['over25_count'] >= 4 or d1['gols_marcados'] >= 8) or (d2['over25_count'] >= 4 or d2['gols_marcados'] >= 8)):
-                                mercado = "🎯 🔥 +2.5 GOLS"
+                                mercado = "⚡ +2.5 Gols — [Atropelo]"
                                 vagas_25 -= 1
                             elif vagas_btts > 0 and (d1['btts_count'] >= 4 and d2['btts_count'] >= 4):
-                                mercado = "🎯 🤝 AMBAS MARCAM"
+                                mercado = "🤝 Ambas Marcam — [4/5 (Est.)]"
                                 vagas_btts -= 1
                             elif d1['ultimos_3_marcou'] and d2['ultimos_3_marcou']:
-                                mercado = "🎯 ⚽ +1.5 GOLS"
+                                mercado = "⚽ +1.5 Gols — [4/5 (Est.)]"
                             elif d1['gols_marcados'] >= 3 or d2['gols_marcados'] >= 3:
-                                mercado = "🎯 🛡️ +0.5 GOLS"
+                                mercado = "🛡️ +0.5 Gols — [Segurança]"
                             
                             if mercado:
-                                item = (f"🏟️ *{t1['displayName']} x {t2['displayName']}*\n"
-                                        f"🕒 {hora} | {mercado}\n"
-                                        f"📈 [Estatísticas](https://www.espn.com.br/futebol/confronto/_/jogoId/{ev['id']})\n"
-                                        f"🔗 [Betano](https://www.betano.com) | [Bet365](https://www.bet365.com)\n")
-                                
-                                if l_nome not in jogos_por_liga:
-                                    jogos_por_liga[l_nome] = []
-                                jogos_por_liga[l_nome].append(item)
+                                ligas_encontradas.add(l_nome)
+                                jogos_selecionados.append({
+                                    "texto": f"🏟️ {t1['displayName']} x {t2['displayName']}\n🕒 {hora} | {l_nome}\n🎯 {mercado}\n📊 [Estatísticas](https://www.espn.com.br/futebol/confronto/_/jogoId/{ev['id']})",
+                                    "gols": d1['gols_marcados'] + d2['gols_marcados']
+                                })
             except: continue
 
         await browser.close()
 
-        # 2. Formatação da Mensagem Final
-        if jogos_por_liga:
-            mensagem = "🏆 *BILHETE DO DIA (SISTEMA HÍBRIDO)*\n"
-            mensagem += "Ligas analisadas: " + ", ".join(sorted(ligas_config.values())) + "\n\n"
+        if jogos_selecionados:
+            # Ordena pelos jogos com mais gols e limita a 10 para o bilhete não ficar gigante
+            jogos_selecionados.sort(key=lambda x: x['gols'], reverse=True)
+            total_jogos = len(jogos_selecionados[:10])
             
-            # Ordenação Alfabética das Ligas
-            for liga in sorted(jogos_por_liga.keys()):
-                mensagem += f"📍 *{liga.upper()}*\n"
-                mensagem += "\n".join(jogos_por_liga[liga]) + "\n"
+            mensagem = f"🎯 *BILHETE CALIBRADO ({total_jogos} JOGOS)*\n"
+            mensagem += f"💰 ODD ESTIMADA: Variação das Casas\n\n"
+            
+            mensagem += "🏟️ *LIGAS ENCONTRADAS:*\n"
+            for liga in sorted(list(ligas_encontradas)):
+                mensagem += f"🔹 {liga}\n"
+            
+            mensagem += "\n"
+            for i, jogo in enumerate(jogos_selecionados[:10], 1):
+                mensagem += f"{i}. {jogo['texto']}\n\n"
+            
+            mensagem += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
             
             enviar_telegram(mensagem)
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
+                    
