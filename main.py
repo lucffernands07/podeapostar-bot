@@ -104,7 +104,7 @@ async def executar_robo():
                             elif d1['ultimos_3_marcou'] and d2['ultimos_3_marcou']:
                                 mercado = "⚽ +1.5 Gols — [4/5 (Est.)]"
                             elif d1['gols_marcados'] >= 3 or d2['gols_marcados'] >= 3:
-                                mercado = "🛡️ +0.5 Gols — [Segurança]"
+                                mercado = "🛡️ +0.5 Gols (HT/FT) — [Segurança]"
                             
                             if mercado:
                                 ligas_encontradas.add(l_nome)
@@ -112,4 +112,32 @@ async def executar_robo():
                                     "texto": f"🏟️ {t1['displayName']} x {t2['displayName']}\n🕒 {hora} | {l_nome}\n🎯 {mercado}\n📊 [Estatísticas](https://www.espn.com.br/futebol/confronto/_/jogoId/{ev['id']})",
                                     "gols": d1['gols_marcados'] + d2['gols_marcados']
                                 })
-      
+            except Exception as e:
+                print(f"Erro na liga {l_nome}: {e}")
+                continue
+
+        await browser.close()
+
+        if jogos_selecionados:
+            jogos_selecionados.sort(key=lambda x: x['gols'], reverse=True)
+            final_list = jogos_selecionados[:10]
+            total_jogos = len(final_list)
+            
+            mensagem = f"🎯 *BILHETE CALIBRADO ({total_jogos} JOGOS)*\n"
+            mensagem += f"💰 ODD ESTIMADA: Variação das Casas\n\n"
+            
+            mensagem += "🏟️ *LIGAS ENCONTRADAS:*\n"
+            for liga in sorted(list(ligas_encontradas)):
+                mensagem += f"🔹 {liga}\n"
+            
+            mensagem += "\n"
+            for i, jogo in enumerate(final_list, 1):
+                mensagem += f"{i}. {jogo['texto']}\n\n"
+            
+            mensagem += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
+            
+            enviar_telegram(mensagem)
+
+if __name__ == "__main__":
+    asyncio.run(executar_robo())
+        
