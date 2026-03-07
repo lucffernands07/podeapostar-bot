@@ -75,7 +75,7 @@ async def executar_robo():
         }
         
         jogos_selecionados = []
-        vagas_25 = 1
+        vagas_25 = 2  # TRAVA AJUSTADA PARA 2 JOGOS MAX
         vagas_btts = 3
         ligas_encontradas = set()
         
@@ -95,14 +95,18 @@ async def executar_robo():
                         
                         if d1 and d2:
                             mercado = ""
+                            # Prioridade 1: +2.5 Gols (Máximo 2)
                             if vagas_25 > 0 and ((d1['over25_count'] >= 4 or d1['gols_marcados'] >= 8) or (d2['over25_count'] >= 4 or d2['gols_marcados'] >= 8)):
                                 mercado = "⚡ +2.5 Gols — [Atropelo]"
                                 vagas_25 -= 1
+                            # Prioridade 2: Ambas Marcam (Máximo 3)
                             elif vagas_btts > 0 and (d1['btts_count'] >= 4 and d2['btts_count'] >= 4):
                                 mercado = "🤝 Ambas Marcam — [4/5 (Est.)]"
                                 vagas_btts -= 1
+                            # Prioridade 3: +1.5 Gols
                             elif d1['ultimos_3_marcou'] and d2['ultimos_3_marcou']:
                                 mercado = "⚽ +1.5 Gols — [4/5 (Est.)]"
+                            # Prioridade 4: +0.5 Gols
                             elif d1['gols_marcados'] >= 3 or d2['gols_marcados'] >= 3:
                                 mercado = "🛡️ +0.5 Gols (HT/FT) — [Segurança]"
                             
@@ -123,8 +127,8 @@ async def executar_robo():
             final_list = jogos_selecionados[:10]
             total_jogos = len(final_list)
             
-            mensagem = f"🎯 *BILHETE CALIBRADO ({total_jogos} JOGOS)*\n"
-            mensagem += f"💰 ODD ESTIMADA: Variação das Casas\n\n"
+            mensagem = f"🎯 *BILHETE DO DIA ({total_jogos} JOGOS)*\n"
+            mensagem += f"💰🍀 BOA SORTE!!!\n\n"
             
             mensagem += "🏟️ *LIGAS ENCONTRADAS:*\n"
             for liga in sorted(list(ligas_encontradas)):
@@ -140,4 +144,4 @@ async def executar_robo():
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
-        
+    
