@@ -1,52 +1,73 @@
-import requests
+import asyncio
+from playwright.async_api import async_playwright
 
-HEADERS = {"User-Agent": "Mozilla/5.0"}
-BARCA_ID = "83"
-
-def teste_resolucao_barcelona():
-    print(f"🚀 TENTATIVA FINAL: EXTRAÇÃO VIA EVENTOS (BARCELONA)")
-    # Esta URL traz o histórico de partidas com placar sem depender da aba 'stats'
-    url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/teams/{BARCA_ID}/schedule"
-    
-    try:
-        res = requests.get(url, headers=HEADERS, timeout=10).json()
-        eventos = res.get('events', [])
+async def teste_visual_barcelona():
+    async with async_playwright() as p:
+        print("🚀 Abrindo navegador e acessando resultados do Barcelona...")
         
-        gols_encontrados = []
+        # Lançando o navegador (headless=True para rodar no servidor)
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page()
         
-        for ev in eventos:
-            # Verifica se o jogo já aconteceu (tem placar e status 'post')
-            if ev.get('status', {}).get('type', {}).get('state') == 'post':
-                comp = ev.get('competitions', [{}])[0]
-                teams = comp.get('competitors', [])
-                
-                t_barca = next(t for t in teams if str(t['id']) == BARCA_ID)
-                t_rival = next(t for t in teams if str(t['id']) != BARCA_ID)
-                
-                gm = int(t_barca.get('score', 0))
-                gr = int(t_rival.get('score', 0))
-                data = ev.get('date', '')[:10]
-                
-                gols_encontrados.append({"data": data, "placar": f"Barça {gm} x {gr} {t_rival['team']['displayName']}", "gm": gm})
-
-        # Pega os últimos 5
-        ultimos = gols_encontrados[-5:]
+        # URL direta dos resultados do Barcelona na ESPN
+        url = "https://www.espn.com.br/futebol/time/resultados/_/id/83/esp.barcelona"
         
-        if ultimos:
-            print("\n✅ SUCESSO! GOLS LOCALIZADOS:")
-            total_gm = 0
-            for j in ultimos:
-                print(f"   📅 {j['data']} | {j['placar']}")
-                total_gm += j['gm']
+        try:
+            await page.goto(url, wait_until="networkidle", timeout=60000)
             
-            print(f"\n📊 TOTAL DE GOLS MARCADOS (5 JOGOS): {total_gm}")
-            print("💡 Se você está vendo os placares acima, o Barcelona está RESOLVIDO.")
-        else:
-            print("\n❌ A API de Schedule também não retornou placares.")
+            # Espera a tabela de resultados carregar no HTML
+            print("✅ Página carregada. Lendo a tabela de jogos...")
+            
+            # Captura as linhas de resultados (classe padrão da ESPN para tabelas)
+            rows = await page.query_selector_all(".Table__TR--sm")
+            
+            gols_marcados = 0
+            jogos_over25 = 0
+            historico = []
 
-    except Exception as e:
-        print(f"❌ Erro técnico: {e}")
+            for row in rows[:5]:  # Analisa os últimos 5 jogos
+                cols = await row.query_selector_all("td")
+                
+                if len(cols) >= 3:
+                    data = await cols[0].inner_text()
+                    oponente = await cols[1].inner_text()
+                    resultado_txt = await cols[2].inner_text() # Ex: "V 4 - 0"
+                    
+                    # Extrai apenas números e o hífen (ex: 4-0)
+                    placar = "".join([c for c in resultado_txt if c.isdigit() or c == "-"])
+                    
+                    if "-" in placar:
+                        gols = placar.split("-")
+                        gm = int(gols[0]) # Gols do Barça (ou do time da casa na lista)
+                        gr = int(gols[1]) # Gols do Rival
+                        total = gm + gr
+                        
+                        gols_marcados += gm
+                        if total >= 3:
+                            jogos_over25 += 1
+                            
+                        historico.append(f"📅 {data} | {oponente} | Placar: {placar} (Total: {total})")
+
+            print("\n--- RESULTADOS ENCONTRADOS NO HTML ---")
+            for h in historico:
+                print(h)
+            
+            print("-" * 38)
+            print(f"📊 ESTATÍSTICAS PARA O ROBÔ:")
+            print(f"   - Total de Gols Marcados: {gols_marcados}")
+            print(f"   - Frequência Over 2.5: {jogos_over25}/5")
+            
+            if gols_marcados >= 7 or jogos_over25 >= 4:
+                print("\n🔥 CONCLUSÃO: ATROPELO DETECTADO (+2.5 Gols)")
+            else:
+                print("\n⚽ CONCLUSÃO: JOGO NORMAL (+1.5 Gols)")
+
+        except Exception as e:
+            print(f"❌ Erro na extração: {e}")
+        finally:
+            await browser.close()
 
 if __name__ == "__main__":
-    teste_resolucao_barcelona()
-    
+    # Rodar o loop assíncrono
+    asyncio.run(teste_visual_barcelona())
+                            
