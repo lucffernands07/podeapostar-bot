@@ -15,8 +15,11 @@ HEADERS = {
 def enviar_telegram(mensagem):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown", "disable_web_page_preview": "true"}
-    try: requests.post(url, json=payload, timeout=15)
-    except: pass
+    try: 
+        requests.post(url, json=payload, timeout=15)
+        print("✅ Mensagem enviada ao Telegram.")
+    except Exception as e: 
+        print(f"❌ Erro ao enviar Telegram: {e}")
 
 def get_historico_stats(e_id, team_id):
     try:
@@ -46,44 +49,49 @@ def extrair_probabilidades(j):
             except: continue
         return s
 
-    # ANALISE INDIVIDUAL (O FUNIL)
     s_15_h, s_15_a = calc(evs_h, '1.5'), calc(evs_a, '1.5')
-    s_am = max(calc(evs_h, 'ambas'), calc(evs_a, 'ambas'))
-    s_25 = max(calc(evs_h, '2.5'), calc(evs_a, '2.5'))
+    s_am_h, s_am_a = calc(evs_h, 'ambas'), calc(evs_a, 'ambas')
+    s_25_h, s_25_a = calc(evs_h, '2.5'), calc(evs_a, '2.5')
     
     opcoes = []
-    # REGRA ANTI-0x0: Exige pelo menos 3/5 de CADA time
-    if s_15_h >= 3 and s_15_a >= 3:
-        opcoes.append({"tipo": "1.5", "msg": "⚽ +1.5 Gols", "odd": 1.48, "q": f"{s_15_h}/{s_15_a}"})
     
-    if s_am >= 4:
-        opcoes.append({"tipo": "AMBOS", "msg": "🎯 Ambas Marcam", "odd": 1.88, "q": f"{s_am}/5"})
+    # REGRA DO FUNIL DINÂMICO (Salva nas suas preferências)
+    # Tenta 5/5, se não 4/5, se não 3/5
+    for nivel in [5, 4, 3]:
+        if s_15_h >= nivel and s_15_a >= nivel:
+            opcoes.append({"tipo": "1.5", "msg": "⚽ +1.5 Gols", "odd": 1.48, "q": f"{s_15_h}/{s_15_a}"})
+            break
+
+    # AMBAS MARCAM (Mínimo 4/5 conforme sua regra)
+    if s_am_h >= 4 or s_am_a >= 4:
+        opcoes.append({"tipo": "AMBOS", "msg": "🎯 Ambas Marcam", "odd": 1.88, "q": f"{max(s_am_h, s_am_a)}/5"})
     
-    if s_25 >= 3:
-        opcoes.append({"tipo": "2.5", "msg": "🔥 +2.5 Gols", "odd": 2.15, "q": f"{s_25}/5"})
+    # +2.5 GOLS (Para casos tipo PSG x Monaco)
+    if s_25_h >= 3 and s_25_a >= 3:
+        opcoes.append({"tipo": "2.5", "msg": "🔥 +2.5 Gols", "odd": 2.15, "q": f"{s_25_h}/{s_25_a}"})
     
     opcoes.append({"tipo": "0.5", "msg": "⚡ +0.5 Gols (HT/FT)", "odd": 1.32, "q": "Segurança"})
     return opcoes
 
 def montar_bilhete(jogos, forcar_fixos=False):
     melhor_b, maior_o = [], 0
-    # Simula 1500 combinações para achar a melhor
+    if not jogos: return melhor_b, maior_o
+
     for _ in range(1500):
         tentativa, c_25, c_am = [], 0, 0
-        qtd = random.randint(6, 10)
-        if len(jogos) < qtd: continue
-        amostra = random.sample(jogos, qtd)
+        qtd = random.randint(5, 8) # Reduzi um pouco a qtd para facilitar encontrar bilhetes
+        amostra = random.sample(jogos, min(len(jogos), qtd))
         
         for j in amostra:
-            escolha = j['opcoes'][-1]
+            escolha = j['opcoes'][-1] # Padrão: Segurança
             for o in j['opcoes']:
                 if forcar_fixos:
                     if o['tipo'] == "2.5" and c_25 < 1: escolha, c_25 = o, c_25 + 1; break
                     if o['tipo'] == "AMBOS" and c_am < 2: escolha, c_am = o, c_am + 1; break
                     if o['tipo'] == "1.5": escolha = o; break
                 else:
-                    if o['tipo'] == "AMBOS" and c_am < 2: escolha, c_am = o, c_am + 1; break
-                    if o['tipo'] == "2.5" and c_25 < 1: escolha, c_25 = o, c_25 + 1; break
+                    # No Bilhete 1, se o jogo for MUITO bom (ex: 5/5 ou 4/4 no 2.5), ele aceita o 2.5
+                    if o['tipo'] == "2.5" and "5/5" in o['q']: escolha = o; break
                     if o['tipo'] == "1.5": escolha = o; break
             
             tentativa.append({"jogo": j['jogo'], "liga": j['liga'], "hora": j['hora'], "ap": escolha['msg'], "od": escolha['odd'], "qu": escolha['q'], "id_jogo": j['id']})
@@ -97,15 +105,18 @@ def montar_bilhete(jogos, forcar_fixos=False):
 
 def executar_robo():
     hoje = datetime.now().strftime("%Y%m%d")
-    # RADAR GLOBAL (Pega todas as ligas do mundo de uma vez)
     url_global = f"https://site.api.espn.com/apis/site/v2/sports/soccer/scorepanel?dates={hoje}"
     
+    print(f"🚀 Iniciando Radar Global para o dia: {hoje}")
     jogos_analisados = []
+    
     try:
         res = requests.get(url_global, headers=HEADERS, timeout=15).json()
+        total_jogos_dia = 0
         for league in res.get('leagues', []):
             l_nome = league.get('name', 'Outra Liga')
             for ev in league.get('events', []):
+                total_jogos_dia += 1
                 if ev.get('status', {}).get('type', {}).get('state') == 'pre':
                     c = ev['competitions'][0]['competitors']
                     j_info = {
@@ -115,21 +126,29 @@ def executar_robo():
                         "jogo": f"{c[0]['team']['displayName']} x {c[1]['team']['displayName']}"
                     }
                     j_info['opcoes'] = extrair_probabilidades(j_info)
-                    jogos_analisados.append(j_info)
-    except: pass
+                    # Só adiciona se tiver opções além da "Segurança"
+                    if len(j_info['opcoes']) > 1:
+                        jogos_analisados.append(j_info)
+        
+        print(f"📊 Radar encontrou {total_jogos_dia} jogos hoje.")
+        print(f"✅ {len(jogos_analisados)} jogos passaram no funil de estatísticas.")
 
+    except Exception as e:
+        print(f"❌ Erro ao acessar API ESPN: {e}")
+
+    if not jogos_analisados:
+        print("⚠️ Nenhum jogo qualificado para os bilhetes de hoje.")
+        return
+
+    # FORMATADOR
     def formatar_mensagem(titulo, bilhete, odd):
-        ligas = sorted(list(set([x['liga'] for x in bilhete])))
         msg = f"{titulo} ({len(bilhete)} JOGOS)\n💰 *ODD TOTAL: {odd:.2f}*\n\n"
-        msg += "🏟️ *LIGAS ENCONTRADAS:*\n"
-        for liga in ligas: msg += f"🔹 {liga}\n"
-        msg += "\n"
         for i, b in enumerate(sorted(bilhete, key=lambda x: x['liga']), 1):
             url_s = f"https://www.espn.com.br/futebol/jogo/_/jogoId/{b['id_jogo']}"
             msg += f"{i}. 🏟️ *{b['jogo']}*\n🕒 {b['hora']} | {b['liga']}\n🎯 *{b['ap']}* — `[{b['qu']}]` \n📊 [Estatísticas]({url_s})\n\n"
-        msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com/) | [Betano](https://br.betano.com/)"
         return msg
 
+    # GERAÇÃO
     b1, o1 = montar_bilhete(jogos_analisados, forcar_fixos=False)
     if b1: enviar_telegram(formatar_mensagem("🎯 BILHETE CALIBRADO", b1, o1))
 
@@ -138,4 +157,4 @@ def executar_robo():
 
 if __name__ == "__main__":
     executar_robo()
-                
+        
