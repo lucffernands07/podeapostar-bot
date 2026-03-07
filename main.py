@@ -1,58 +1,40 @@
 import requests
-import json
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 BARCA_ID = "83"
 
-def auditoria_bruta_barca():
-    print(f"🔎 BUSCA TOTAL: BARCELONA (ID: {BARCA_ID})")
-    url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/all/teams/{BARCA_ID}/schedule"
+def auditoria_estatistica_barca():
+    print(f"🔎 ACESSANDO ABA DE ESTATÍSTICAS REAIS: BARCELONA (ID: {BARCA_ID})")
+    
+    # URL que foca nas estatísticas da Liga (LaLiga)
+    url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/statistics?team={BARCA_ID}"
     
     try:
         res = requests.get(url, headers=HEADERS, timeout=10).json()
-        eventos = res.get('events', [])
         
-        if not eventos:
-            print("❌ Nenhum evento encontrado no JSON.")
+        # Procura a categoria de "Gols" (Scoring)
+        stats = res.get('stats', [])
+        
+        if not stats:
+            print("❌ Não foi possível carregar as estatísticas de gols.")
+            # Tentativa alternativa via API de Summary de Liga
             return
 
-        jogos_com_placar = []
-        for ev in eventos:
-            try:
-                # Pega o placar sem olhar o status (state)
-                comp = ev.get('competitions', [{}])[0]
-                teams = comp.get('competitors', [])
-                t_barca = next(t for t in teams if str(t['id']) == BARCA_ID)
-                t_rival = next(t for t in teams if str(t['id']) != BARCA_ID)
-                
-                score_barca = int(t_barca.get('score', -1))
-                score_rival = int(t_rival.get('score', -1))
-                
-                # Se o placar for 0 ou mais, o jogo provavelmente ocorreu
-                if score_barca >= 0:
-                    data = ev.get('date', 'Data s/n')
-                    jogos_com_placar.append({
-                        "data": data,
-                        "placar": f"Barça {score_barca} x {score_rival} {t_rival['team']['displayName']}",
-                        "total": score_barca + score_rival
-                    })
-            except: continue
-
-        # Pega os últimos 5 que têm placar
-        ultimos = jogos_com_placar[-5:]
+        print("\n✅ DADOS ENCONTRADOS NO SISTEMA:")
         
-        if not ultimos:
-            print("⚠️ Nenhum jogo com placar encontrado. Mostrando estrutura do 1º evento:")
-            print(json.dumps(eventos[0], indent=2))
-            return
+        for category in stats:
+            if category.get('name') == 'scoring':
+                for stat in category.get('stats', []):
+                    nome = stat.get('displayName')
+                    valor = stat.get('displayValue')
+                    print(f"   📊 {nome}: {valor}")
 
-        print("\n✅ JOGOS ENCONTRADOS:")
-        for j in ultimos:
-            print(f"📅 {j['data']} | {j['placar']} (Total: {j['total']})")
+        print("\n🚀 Se os números acima apareceram (Gols, Assistências),")
+        print("   o robô principal vai usar a média de gols para decidir!")
 
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f"❌ Erro na requisição: {e}")
 
 if __name__ == "__main__":
-    auditoria_bruta_barca()
+    auditoria_estatistica_barca()
     
