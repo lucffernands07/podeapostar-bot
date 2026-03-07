@@ -24,7 +24,15 @@ def enviar_telegram(msg):
 async def extrair_dados_detalhados(browser, team_id):
     page = await browser.new_page()
     url = f"https://www.espn.com.br/futebol/time/resultados/_/id/{team_id}"
-    dados = {"gols_marcados": 0, "over25_count": 0, "btts_count": 0, "ultimos_3_marcou": True}
+    # Adicionamos 'gols_sofridos' para a trava do Ambas Marcam
+    dados = {
+        "gols_marcados": 0, 
+        "gols_sofridos": 0,
+        "over25_count": 0, 
+        "btts_count": 0, 
+        "jogos_com_gol_sofrido": 0,
+        "marcou_nos_ultimos_2": True
+    }
     
     try:
         await page.goto(url, wait_until="networkidle", timeout=30000)
@@ -38,9 +46,13 @@ async def extrair_dados_detalhados(browser, team_id):
                     p = placar.split("-")
                     gm, gr = int(p[0][:1]), int(p[1][:1])
                     dados["gols_marcados"] += gm
+                    dados["gols_sofridos"] += gr
                     if (gm + gr) >= 3: dados["over25_count"] += 1
                     if gm > 0 and gr > 0: dados["btts_count"] += 1
-                    if i < 3 and gm == 0: dados["ultimos_3_marcou"] = False
+                    if gr > 0: dados["jogos_com_gol_sofrido"] += 1
+                    # Trava de momento: Não marcou em nenhum dos 2 últimos jogos
+                    if i < 2 and gm == 0: 
+                        dados["marcou_nos_ultimos_2"] = False
         await page.close()
         return dados
     except:
@@ -53,25 +65,14 @@ async def executar_robo():
         hoje = datetime.now().strftime("%Y%m%d")
         
         ligas_config = {
-            "bel.1": "Belga",
-            "bra.1": "Brasileirão A",
-            "bra.2": "Brasileirão B",
-            "bra.camp.carioca": "Carioca",
-            "bra.camp.gaucho": "Gauchão",
-            "bra.camp.mineiro": "Mineiro",
-            "bra.camp.paulista": "Paulistão",
-            "bra.copa_do_brasil": "Copa do Brasil",
-            "bul.1": "Búlgaro",
-            "conmebol.libertadores": "Libertadores",
-            "conmebol.sudamericana": "Sul-Americana",
-            "eng.1": "Premier League",
-            "esp.1": "LALIGA",
-            "fra.1": "Ligue 1",
-            "ger.1": "Bundesliga",
-            "ita.1": "Serie A",
-            "ned.1": "Holandês",
-            "por.1": "Português",
-            "uefa.champions": "Champions"
+            "bel.1": "Belga", "bra.1": "Brasileirão A", "bra.2": "Brasileirão B",
+            "bra.camp.carioca": "Carioca", "bra.camp.gaucho": "Gauchão",
+            "bra.camp.mineiro": "Mineiro", "bra.camp.paulista": "Paulistão",
+            "bra.copa_do_brasil": "Copa do Brasil", "bul.1": "Búlgaro",
+            "conmebol.libertadores": "Libertadores", "conmebol.sudamericana": "Sul-Americana",
+            "eng.1": "Premier League", "esp.1": "LALIGA", "fra.1": "Ligue 1",
+            "ger.1": "Bundesliga", "ita.1": "Serie A", "ned.1": "Holandês",
+            "por.1": "Português", "uefa.champions": "Champions"
         }
         
         jogos_selecionados = []
@@ -94,19 +95,25 @@ async def executar_robo():
                         
                         if d1 and d2:
                             mercado = ""
-                            if vagas_25 > 0 and ((d1['over25_count'] >= 4 or d1['gols_marcados'] >= 8) or (d2['over25_count'] >= 4 or d2['gols_marcados'] >= 8)):
+                            # 1. ATROPELO: Exige histórico de gols alto e momento positivo
+                            if vagas_25 > 0 and (d1['over25_count'] >= 4 and d1['gols_marcados'] >= 6) or (d2['over25_count'] >= 4 and d2['gols_marcados'] >= 6):
                                 mercado = "⚡ +2.5 Gols — [Atropelo]"
                                 vagas_25 -= 1
-                            elif vagas_btts > 0 and (d1['btts_count'] >= 4 and d2['btts_count'] >= 4):
+                            
+                            # 2. AMBAS MARCAM: Trava de vulnerabilidade (ambos devem sofrer gols com frequência)
+                            elif vagas_btts > 0 and (d1['btts_count'] >= 4 and d2['btts_count'] >= 4) and (d1['jogos_com_gol_sofrido'] >= 3 and d2['jogos_com_gol_sofrido'] >= 3):
                                 mercado = "🤝 Ambas Marcam — [4/5 (Est.)]"
                                 vagas_btts -= 1
-                            elif d1['ultimos_3_marcou'] and d2['ultimos_3_marcou']:
+                            
+                            # 3. +1.5 GOLS: Trava de momento (não pode vir de 2 jogos secos)
+                            elif d1['marcou_nos_ultimos_2'] and d2['marcou_nos_ultimos_2']:
                                 mercado = "⚽ +1.5 Gols — [4/5 (Est.)]"
+                            
+                            # 4. SEGURANÇA: Mínimo de gols marcados recentemente
                             elif d1['gols_marcados'] >= 3 or d2['gols_marcados'] >= 3:
                                 mercado = "🛡️ +0.5 Gols (HT/FT) — [Segurança]"
                             
                             if mercado:
-                                # Guardamos a liga separada para ordenar depois
                                 jogos_selecionados.append({
                                     "liga": l_nome,
                                     "texto": f"🏟️ {t1['displayName']} x {t2['displayName']}\n🕒 {hora} | {l_nome}\n🎯 {mercado}\n📊 [Estatísticas](https://www.espn.com.br/futebol/confronto/_/jogoId/{ev['id']})",
@@ -119,16 +126,14 @@ async def executar_robo():
         await browser.close()
 
         if jogos_selecionados:
-            # 1. Mantém a sua lógica de pegar os 10 melhores pelo volume de gols
+            # Pega os 10 com maior volume de gols histórico
             jogos_selecionados.sort(key=lambda x: x['gols'], reverse=True)
             final_list = jogos_selecionados[:10]
             
-            # 2. NOVA ORGANIZAÇÃO: Ordena esses 10 por nome de liga
+            # Organiza alfabeticamente por liga
             final_list.sort(key=lambda x: x['liga'])
             
-            # 3. Descobre quais ligas sobraram no bilhete final
             ligas_no_bilhete = sorted(list(set(j['liga'] for j in final_list)))
-            
             total_jogos = len(final_list)
             
             mensagem = f"🎯 *BILHETE DO DIA ({total_jogos} JOGOS)*\n"
@@ -148,4 +153,3 @@ async def executar_robo():
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
-        
