@@ -95,26 +95,27 @@ async def executar_robo():
                         
                         if d1 and d2:
                             mercado = ""
-                            # Prioridade 1: +2.5 Gols (Máximo 2)
                             if vagas_25 > 0 and ((d1['over25_count'] >= 4 or d1['gols_marcados'] >= 8) or (d2['over25_count'] >= 4 or d2['gols_marcados'] >= 8)):
                                 mercado = "⚡ +2.5 Gols — [Atropelo]"
                                 vagas_25 -= 1
-                            # Prioridade 2: Ambas Marcam (Máximo 3)
                             elif vagas_btts > 0 and (d1['btts_count'] >= 4 and d2['btts_count'] >= 4):
                                 mercado = "🤝 Ambas Marcam — [4/5 (Est.)]"
                                 vagas_btts -= 1
-                            # Prioridade 3: +1.5 Gols
                             elif d1['ultimos_3_marcou'] and d2['ultimos_3_marcou']:
                                 mercado = "⚽ +1.5 Gols — [4/5 (Est.)]"
-                            # Prioridade 4: +0.5 Gols
                             elif d1['gols_marcados'] >= 3 or d2['gols_marcados'] >= 3:
                                 mercado = "🛡️ +0.5 Gols (HT/FT) — [Segurança]"
                             
                             if mercado:
                                 ligas_encontradas.add(l_nome)
                                 jogos_selecionados.append({
-                                    "texto": f"🏟️ {t1['displayName']} x {t2['displayName']}\n🕒 {hora} | {l_nome}\n🎯 {mercado}\n📊 [Estatísticas](https://www.espn.com.br/futebol/confronto/_/jogoId/{ev['id']})",
-                                    "gols": d1['gols_marcados'] + d2['gols_marcados']
+                                    "t1": t1['displayName'],
+                                    "t2": t2['displayName'],
+                                    "hora": hora,
+                                    "liga": l_nome,
+                                    "mercado": mercado,
+                                    "id_espn": ev['id'],
+                                    "gols_total": d1['gols_marcados'] + d2['gols_marcados']
                                 })
             except Exception as e:
                 print(f"Erro na liga {l_nome}: {e}")
@@ -123,20 +124,30 @@ async def executar_robo():
         await browser.close()
 
         if jogos_selecionados:
-            jogos_selecionados.sort(key=lambda x: x['gols'], reverse=True)
-            final_list = jogos_selecionados[:10]
-            total_jogos = len(final_list)
+            # Primeiro: Seleciona os 10 melhores pelo volume de gols
+            jogos_selecionados.sort(key=lambda x: x['gols_total'], reverse=True)
+            top_10 = jogos_selecionados[:10]
+            
+            # Segundo: Organiza o Top 10 por ordem alfabética de LIGA
+            top_10.sort(key=lambda x: x['liga'])
+            
+            total_jogos = len(top_10)
             
             mensagem = f"🎯 *BILHETE DO DIA ({total_jogos} JOGOS)*\n"
             mensagem += f"💰🍀 BOA SORTE!!!\n\n"
             
             mensagem += "🏟️ *LIGAS ENCONTRADAS:*\n"
-            for liga in sorted(list(ligas_encontradas)):
+            # Lista de ligas encontradas baseada apenas no que sobrou no Top 10
+            ligas_no_bilhete = sorted(list(set(j['liga'] for j in top_10)))
+            for liga in ligas_no_bilhete:
                 mensagem += f"🔹 {liga}\n"
             
             mensagem += "\n"
-            for i, jogo in enumerate(final_list, 1):
-                mensagem += f"{i}. {jogo['texto']}\n\n"
+            for i, j in enumerate(top_10, 1):
+                mensagem += (f"{i}. 🏟️ {j['t1']} x {j['t2']}\n"
+                             f"🕒 {j['hora']} | {j['liga']}\n"
+                             f"🎯 {j['mercado']}\n"
+                             f"📊 [Estatísticas](https://www.espn.com.br/futebol/confronto/_/jogoId/{j['id_espn']})\n\n")
             
             mensagem += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
             
@@ -144,4 +155,4 @@ async def executar_robo():
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
-    
+        
