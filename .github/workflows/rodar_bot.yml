@@ -2,7 +2,6 @@ name: Apostas Diária
 
 on:
   schedule:
-    # Roda às 08:00 e 14:00 (Horário de Brasília)
     - cron: '0 11,17 * * *'
   workflow_dispatch:
 
@@ -21,12 +20,10 @@ jobs:
       - name: Instalar dependências
         run: |
           python -m pip install --upgrade pip
-          # Removido cloudscraper que não precisamos mais com ZenRows
-          pip install beautifulsoup4 lxml requests
+          pip install -r requirements.txt
 
       - name: Executar Robô
         env:
-          # É ESTA LINHA ABAIXO QUE ESTAVA FALTANDO:
           ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
