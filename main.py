@@ -1,75 +1,53 @@
 import os
-import requests
-from bs4 import BeautifulSoup
-import re
+import asyncio
+from playwright.async_api import async_playwright
 
-def analisar_separado():
+async def run():
+    # Sua chave da API
     api_key = os.getenv("ZENROWS_KEY")
-    url = "https://footystats.org/brazil/se-palmeiras-vs-gremio-novorizontino-h2h-stats"
+    url_jogo = "https://footystats.org/brazil/se-palmeiras-vs-gremio-novorizontino-h2h-stats"
     
-    params = {
-        'url': url,
-        'apikey': api_key,
-        'js_render': 'true',
-        'premium_proxy': 'true',
-        'wait': '5000' 
-    }
+    # URL de conexão do ZenRows (Modo Browser Renting)
+    ws_endpoint = f"wss://proxy.zenrows.com/playwright?apikey={api_key}&js_render=true&wait_for=.stat-strong"
 
-    print("📡 Capturando com extração por tags separadas...")
-    response = requests.get('https://api.zenrows.com/v1/', params=params)
-    
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        resultados = {"Over 1.5": "0%", "Over 2.5": "0%", "BTTS": "0%", "CS_Palmeiras": "0%", "CS_Novorizontino": "0%"}
+    async with async_playwright() as pw:
+        print("🚀 Iniciando Playwright via ZenRows (Aguardando renderização)...")
+        browser = await pw.chromium.connect_over_cdp(ws_endpoint)
+        context = await browser.new_context()
+        page = await context.new_page()
 
-        # Procuramos todas as divs que têm a classe 'stat-strong'
-        stats = soup.select(".stat-strong")
+        await page.goto(url_jogo, wait_until="networkidle")
         
-        for s in stats:
-            # 1. Pega apenas o primeiro pedaço de texto (o 80%)
-            # O .contents[0] pega o que vem ANTES do <span>
-            try:
-                valor_bruto = s.contents[0].strip()
-                if "%" not in valor_bruto:
-                    continue
-            except:
-                continue
+        # Espera o widget do 80% carregar de verdade
+        await page.wait_for_selector(".stat-strong")
 
-            # 2. Pega o nome do mercado dentro do span (Over 1.5, BTTS, etc)
-            span = s.find("span")
-            mercado = span.get_text(strip=True).upper() if span else ""
+        # Agora pegamos os dados direto da tela
+        dados = await page.evaluate('''() => {
+            const resultados = {};
+            const itens = document.querySelectorAll('.grid-item');
             
-            # 3. Pega o texto de apoio que fica na mesma caixa (stat-text)
-            caixa_pai = s.find_parent(class_="grid-item")
-            sub_texto = caixa_pai.select_one(".stat-text").get_text().upper() if caixa_pai and caixa_pai.select_one(".stat-text") else ""
+            itens.forEach(item => {
+                const valor = item.querySelector('.stat-strong').innerText;
+                const mercado = item.querySelector('span').innerText;
+                const sub = item.querySelector('.stat-text') ? item.querySelector('.stat-text').innerText : "";
+                
+                if (mercado.includes("Over 1.5")) resultados["o15"] = valor;
+                if (mercado.includes("BTTS")) resultados["btts"] = valor;
+                if (mercado.includes("Clean Sheets")) {
+                    if (sub.includes("Palmeiras")) resultados["cs_pal"] = valor;
+                    if (sub.includes("Novorizontino")) resultados["cs_nov"] = valor;
+                }
+            });
+            return resultados;
+        }''')
 
-            # Mapeamento exato
-            if "OVER 1.5" in mercado:
-                resultados["Over 1.5"] = valor_bruto
-            elif "OVER 2.5" in mercado:
-                resultados["Over 2.5"] = valor_bruto
-            elif "BTTS" in mercado:
-                resultados["BTTS"] = valor_bruto
-            elif "CLEAN SHEETS" in mercado:
-                if "PALMEIRAS" in sub_texto:
-                    resultados["CS_Palmeiras"] = valor_bruto
-                elif "NOVORIZONTINO" in sub_texto:
-                    resultados["CS_Novorizontino"] = valor_bruto
+        print("\n📊 DADOS CAPTURADOS PELO PLAYWRIGHT:")
+        print(f"📍 Over 1.5: {dados.get('o15')}")
+        print(f"📍 BTTS: {dados.get('btts')}")
+        print(f"📍 CS Palmeiras: {dados.get('cs_pal')}")
+        print(f"📍 CS Novorizontino: {dados.get('cs_nov')}")
 
-        print("\n📊 RESULTADOS (EXTRAÇÃO POR TAG):")
-        for k, v in resultados.items():
-            print(f"📍 {k}: {v}")
-
-        # Validação 80%
-        num_o15 = int(resultados["Over 1.5"].replace('%', ''))
-        if num_o15 >= 80:
-            print(f"\n✅ BINGO! Over 1.5 aprovado com {num_o15}%.")
-        else:
-            print("\n⚠️ AVISO: Ainda não chegamos nos 80% no Over 1.5.")
-
-    else:
-        print(f"❌ Erro na API: {response.status_code}")
+        await browser.close()
 
 if __name__ == "__main__":
-    analisar_separado()
-    
+    asyncio.run(run())
