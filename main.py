@@ -28,7 +28,8 @@ async def extrair_dados_detalhados(browser, team_id):
         "gols_marcados": 0, 
         "over25_count": 0, 
         "btts_count": 0, 
-        "vitoria_ht_count": 0, # Estatística para Primeiro Tempo
+        "vitoria_ht_count": 0,
+        "derrotas": 0, # Para Dupla Chance
         "ultimos_3_marcou": True
     }
     
@@ -38,6 +39,9 @@ async def extrair_dados_detalhados(browser, team_id):
         for i, row in enumerate(rows[:5]):
             cols = await row.query_selector_all("td")
             if len(cols) >= 3:
+                res_status = await cols[2].inner_text()
+                if "D" in res_status: dados["derrotas"] += 1 # Conta derrotas recentes
+                
                 txt = await cols[2].inner_text()
                 placar = "".join([c for c in txt if c.isdigit() or c == "-"])
                 if "-" in placar:
@@ -46,7 +50,7 @@ async def extrair_dados_detalhados(browser, team_id):
                     dados["gols_marcados"] += gm
                     if (gm + gr) >= 3: dados["over25_count"] += 1
                     if gm > 0 and gr > 0: dados["btts_count"] += 1
-                    if gm >= 2: dados["vitoria_ht_count"] += 1 # Indicador de domínio HT
+                    if gm >= 2: dados["vitoria_ht_count"] += 1
                     if i < 3 and gm == 0: dados["ultimos_3_marcou"] = False
         await page.close()
         return dados
@@ -71,9 +75,11 @@ async def executar_robo():
         }
         
         jogos_selecionados = []
-        vagas_ht = 2    # Máximo 2 jogos de vitória no HT para equilibrar a odd
-        vagas_25 = 3    # Aumentado para o máximo de 3 como solicitado
+        vagas_ht = 2    
+        vagas_25 = 3    
         vagas_btts = 3
+        vagas_escanteios = 2 # Limite para cantos
+        vagas_dc = 2         # Limite para dupla chance
         
         for l_id, l_nome in ligas_config.items():
             print(f"🌍 Verificando {l_nome}...")
@@ -92,28 +98,37 @@ async def executar_robo():
                         if d1 and d2:
                             mercado = ""
                             
-                            # Prioridade 1: Vitória no Primeiro Tempo (HT) - Odd Turbinada
-                            if vagas_ht > 0 and (d1['vitoria_ht_count'] >= 3 or d2['vitoria_ht_count'] >= 3):
+                            # 1. Escanteios (Baseado em Volume de Finalização/Gols marcados > 10 nos últimos 5)
+                            if vagas_escanteios > 0 and (d1['gols_marcados'] + d2['gols_marcados'] >= 13):
+                                mercado = "🚩 Mais de 8.5 Escanteios — [Volume Alto]"
+                                vagas_escanteios -= 1
+
+                            # 2. Dupla Chance (Baseado em 0 ou 1 derrota no máximo em 5 jogos)
+                            elif vagas_dc > 0 and d1['derrotas'] == 0:
+                                mercado = f"🛡️ Chance Dupla — {t1['displayName']} ou Empate"
+                                vagas_dc -= 1
+                            elif vagas_dc > 0 and d2['derrotas'] == 0:
+                                mercado = f"🛡️ Chance Dupla — {t2['displayName']} ou Empate"
+                                vagas_dc -= 1
+
+                            # 3. Vitória no Primeiro Tempo (HT)
+                            elif vagas_ht > 0 and (d1['vitoria_ht_count'] >= 3 or d2['vitoria_ht_count'] >= 3):
                                 mercado = "⏱️ Vence no 1º Tempo — [Domínio]"
                                 vagas_ht -= 1
                             
-                            # Prioridade 2: +2.5 Gols (Máximo 3)
+                            # 4. +2.5 Gols (Máximo 3)
                             elif vagas_25 > 0 and ((d1['over25_count'] >= 4 or d1['gols_marcados'] >= 8) or (d2['over25_count'] >= 4 or d2['gols_marcados'] >= 8)):
                                 mercado = "⚡ +2.5 Gols — [Atropelo]"
                                 vagas_25 -= 1
                             
-                            # Prioridade 3: Ambas Marcam
+                            # 5. Ambas Marcam
                             elif vagas_btts > 0 and (d1['btts_count'] >= 4 and d2['btts_count'] >= 4):
                                 mercado = "🤝 Ambas Marcam — [4/5 (Est.)]"
                                 vagas_btts -= 1
                             
-                            # Prioridade 4: +1.5 Gols
+                            # 6. +1.5 Gols
                             elif d1['ultimos_3_marcou'] and d2['ultimos_3_marcou']:
                                 mercado = "⚽ +1.5 Gols — [4/5 (Est.)]"
-                            
-                            # Prioridade 5: Segurança
-                            elif d1['gols_marcados'] >= 3 or d2['gols_marcados'] >= 3:
-                                mercado = "🛡️ +0.5 Gols (HT/FT) — [Segurança]"
                             
                             if mercado:
                                 jogos_selecionados.append({
@@ -152,4 +167,4 @@ async def executar_robo():
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
-        
+    
