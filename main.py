@@ -1,44 +1,77 @@
+import os
+import requests
 from bs4 import BeautifulSoup
 
-def analisar_html_neo(html_content):
-    soup = BeautifulSoup(html_content, 'html.parser')
+def analisar_grid_neo():
+    api_key = os.getenv("ZENROWS_KEY")
+    url = "https://footystats.org/brazil/se-palmeiras-vs-gremio-novorizontino-h2h-stats"
     
-    # Dicionário para os dados que você foca
-    resultados = {
-        "Over 1.5": "0%", "Over 2.5": "0%", 
-        "BTTS": "0%", "CS_Palmeiras": "0%", "CS_Novorizontino": "0%"
+    params = {
+        'url': url,
+        'apikey': api_key,
+        'js_render': 'true',
+        'premium_proxy': 'true',
+        'wait': '5000' 
     }
 
-    # 1. Pegando Over 1.5, 2.5 e BTTS
-    itens = soup.select(".grid-item")
-    for item in itens:
-        valor = item.select_one(".stat-strong").get_text(strip=True)
-        label = item.select_one("span").get_text(strip=True)
-        sub_text = item.select_one(".stat-text").get_text(strip=True)
-
-        if "Over 1.5" in label: resultados["Over 1.5"] = valor
-        if "Over 2.5" in label: resultados["Over 2.5"] = valor
-        if "BTTS" in label:     resultados["BTTS"] = valor
+    print("📡 Capturando dados do Grid H2H...")
+    response = requests.get('https://api.zenrows.com/v1/', params=params)
+    
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
         
-        # 2. Pegando Clean Sheets (Diferenciando por Time)
-        if "Clean Sheets" in label:
-            if "Palmeiras" in sub_text:
-                resultados["CS_Palmeiras"] = valor
-            elif "Novorizontino" in sub_text:
-                resultados["CS_Novorizontino"] = valor
+        # Dicionário para guardar os resultados
+        resultados = {
+            "Over 1.5": "0%", "Over 2.5": "0%", "BTTS": "0%",
+            "CS_Novorizontino": "0%", "CS_Palmeiras": "0%"
+        }
 
-    # --- TESTE DE OUTPUT ---
-    print("🚀 DADOS DO H2H-NEO (PALMEIRAS vs NOVORIZONTINO):")
-    for k, v in resultados.items():
-        print(f"📍 {k}: {v}")
+        # Buscamos cada item do grid
+        itens = soup.select(".grid-item")
+        
+        for item in itens:
+            # Pega a porcentagem (ex: 80%)
+            valor_el = item.select_one(".stat-strong")
+            if not valor_el: continue
+            
+            # Limpa o valor para pegar só o que vem antes do <span>
+            porcentagem = valor_el.get_text(strip=True).split('%')[0] + '%'
+            
+            # Pega o nome do mercado (ex: Over 1.5 ou Clean Sheets)
+            mercado = item.select_one("span").get_text(strip=True)
+            
+            # Pega o texto de apoio (ex: 8/10 matches ou o nome do time)
+            sub_texto = item.select_one(".stat-text").get_text(strip=True)
 
-    # Validação da sua regra 4/5 (80%)
-    o15 = int(resultados["Over 1.5"].replace('%', ''))
-    if o15 >= 80:
-        print("\n✅ SEGURANÇA: Over 1.5 aprovado para o bilhete!")
+            # Mapeamento
+            if "Over 1.5" in mercado: resultados["Over 1.5"] = porcentagem
+            if "Over 2.5" in mercado: resultados["Over 2.5"] = porcentagem
+            if "BTTS" in mercado:     resultados["BTTS"] = porcentagem
+            
+            # Lógica para Clean Sheets separada por time
+            if "Clean Sheets" in mercado:
+                if "Palmeiras" in sub_texto:
+                    resultados["CS_Palmeiras"] = porcentagem
+                elif "Novorizontino" in sub_texto:
+                    resultados["CS_Novorizontino"] = porcentagem
+
+        print("\n📊 DADOS EXTRAÍDOS COM SUCESSO:")
+        for k, v in resultados.items():
+            print(f"📍 {k}: {v}")
+
+        # --- Validação da sua regra de 4/5 (80%) ---
+        try:
+            o15_int = int(resultados["Over 1.5"].replace('%', ''))
+            if o15_int >= 80:
+                print(f"\n✅ SEGURANÇA: Over 1.5 com {o15_int}% (Mínimo 4/5 atingido).")
+            else:
+                print(f"\n⚠️ AVISO: Over 1.5 abaixo de 80%.")
+        except:
+            print("\n❌ Erro ao validar regra.")
+
     else:
-        print("\n⚠️ SEGURANÇA: Abaixo de 80%, atenção.")
+        print(f"❌ Erro na API: {response.status_code}")
 
-# Testando com o HTML que você mandou
-html_bruto = """... cole o seu HTML aqui ...""" 
-analisar_html_neo(html_bruto)
+if __name__ == "__main__":
+    analisar_grid_neo()
+                    
