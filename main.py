@@ -1,39 +1,55 @@
-import cloudscraper
+import os
+import requests
 from bs4 import BeautifulSoup
-import json
 
-def extrair_dados():
-    # Criar o scraper
-    scraper = cloudscraper.create_scraper()
-
-    # Dados extraídos DAS TUAS IMAGENS (Aba Network -> Headers)
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Linux; Android 10; Redmi Note 8 Build/QKQ1.200114.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/145.0.7632.122 Mobile Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        # O PHPSESSID é o que diz ao site que tu ainda tens "créditos" para ver o jogo
-        "Cookie": "PHPSESSID=31g6mg14pgc7ose5iog67c10ap; country=BR; darkmode=off; __cflb=02DiuH2TTY8vZPoegopGsE5PDtezuLNPreDwommKLY1pQ;"
+def testar_extracao():
+    api_key = os.getenv("ZENROWS_KEY")
+    # URL do jogo do Palmeiras que você pediu
+    url = "https://footystats.org/brazil/se-palmeiras-vs-gremio-novorizontino-h2h-stats"
+    
+    params = {
+        'url': url,
+        'apikey': api_key,
+        'js_render': 'true',
+        'premium_proxy': 'true',
+        'wait': '4000' # Tempo extra para garantir que todas as tabelas carreguem
     }
 
-    url = "https://footystats.org/spain/deportivo-alaves-vs-valencia-cf-h2h-stats"
+    print("📡 Iniciando teste de captura de dados...")
+    response = requests.get('https://api.zenrows.com/v1/', params=params)
     
-    print(f"📡 Tentando acesso com a tua sessão real...")
-    response = scraper.get(url, headers=headers)
-
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # Extração baseada nas tuas imagens (BTTS 67%)
-        btts_val = soup.find(text="BTTS").find_parent("div").get_text(strip=True) if soup.find(text="BTTS") else "N/A"
-        
-        dados = {
-            "partida": "Valencia CF vs Deportivo Alavés",
-            "btts": btts_val,
-            "status": "Sucesso"
-        }
-        print(json.dumps(dados, indent=4))
+        # 1. Teste Gols e BTTS
+        print("\n--- [TESTE: MERCADOS DE GOLS] ---")
+        stats = soup.select(".stat-strong")
+        for s in stats:
+            texto_pai = s.parent.get_text().upper()
+            valor = s.get_text(strip=True)
+            
+            if "OVER 1.5" in texto_pai: print(f"📍 Over 1.5 detectado: {valor}")
+            if "OVER 2.5" in texto_pai: print(f"📍 Over 2.5 detectado: {valor}")
+            if "BTTS" in texto_pai:     print(f"📍 BTTS detectado: {valor}")
+
+        # 2. Teste Clean Sheets (Tabela H2H)
+        print("\n--- [TESTE: CLEAN SHEETS (FOLHA LIMPA)] ---")
+        # Procuramos a linha que contém o texto "Clean Sheets"
+        linhas = soup.find_all("tr")
+        for linha in linhas:
+            if "Clean Sheets" in linha.get_text():
+                colunas = linha.find_all("td")
+                if len(colunas) >= 3:
+                    print(f"📍 CS Palmeiras (Casa): {colunas[0].get_text(strip=True)}")
+                    print(f"📍 CS Novorizontino (Fora): {colunas[2].get_text(strip=True)}")
+                    break
+                    
+        print("\n--- FIM DO TESTE ---")
     else:
-        print(f"❌ Erro {response.status_code}: O site detetou o bot ou o cookie expirou.")
+        print(f"❌ Falha no teste. Status: {response.status_code}")
+        if response.status_code == 401: print("Motivo: Chave API inválida.")
+        if response.status_code == 403: print("Motivo: Bloqueio de Proxy.")
 
 if __name__ == "__main__":
-    extrair_dados()
-    
+    testar_extracao()
+                
