@@ -2,60 +2,65 @@ import asyncio
 import json
 from playwright.async_api import async_playwright
 
-async def validar_adam_choi_direto():
+async def analisar_footystats():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(viewport={'width': 1280, 'height': 1200})
-        page = await context.new_page()
-
-        url_liga = "https://www.adamchoi.co.uk/leagues/spain-la-liga"
+        page = await browser.new_page()
         
-        relatorio = {"partida": "Valencia x Alavés", "dados": {}}
+        url = "https://footystats.org/spain/deportivo-alaves-vs-valencia-cf-h2h-stats"
+        
+        print(f"🚀 Acessando FootyStats: {url}")
+        await page.goto(url, wait_until="domcontentloaded")
+
+        analise = {
+            "partida": "Valencia CF vs Deportivo Alavés",
+            "mercados": {},
+            "probabilidades": {}
+        }
 
         try:
-            print(f"🚀 Acessando: {url_liga}")
-            # Esperamos o carregamento total da rede
-            await page.goto(url_liga, wait_until="networkidle", timeout=60000)
-
-            # 1. Esperar o Widget existir no HTML
-            print("⏳ Aguardando componente de estatísticas...")
-            await page.wait_for_selector("league-fixtures-widget", timeout=20000)
-
-            # 2. Localizar os Dropdowns (Usando seletores mais simples)
-            # Tentamos clicar no primeiro select que aparecer dentro do widget
-            dropdowns = page.locator("league-fixtures-widget select")
+            # 1. Capturar BTTS e Over Gols (Pelas classes grid-item)
+            # Buscamos todos os blocos de estatísticas fortes
+            stats = page.locator(".stat-strong")
+            count = await stats.count()
             
-            print("🚩 Configurando: Total Match Corners...")
-            # O primeiro select costuma ser o StatType
-            await dropdowns.nth(0).select_option(label="Total Match Corners")
-            await page.wait_for_timeout(2000)
+            for i in range(count):
+                texto = await stats.nth(i).inner_text()
+                # O texto vem como '67%BTTS' ou '76%Over 1.5'
+                if "BTTS" in texto:
+                    analise["mercados"]["BTTS"] = texto.replace("BTTS", "").strip()
+                elif "Over 1.5" in texto:
+                    analise["mercados"]["Over_1_5"] = texto.replace("Over 1.5", "").strip()
+                elif "Over 2.5" in texto:
+                    analise["mercados"]["Over_2_5"] = texto.replace("Over 2.5", "").strip()
 
-            print("🚩 Configurando: Over 8.5...")
-            # O segundo select costuma ser o Market/Line
-            await dropdowns.nth(1).select_option(label="8.5")
-            await page.wait_for_timeout(3000)
+            # 2. Capturar Probabilidades de Vitória (Comparison Bar)
+            # O Valencia é o primeiro (winner) e o empate é o segundo (draw)
+            win_valencia = await page.locator(".bar-item.winner").first.inner_text()
+            draw_prob = await page.locator(".bar-item.draw").first.inner_text()
+            
+            analise["probabilidades"] = {
+                "vitoria_valencia": win_valencia.strip(),
+                "empate": draw_prob.strip(),
+                "dupla_chance_valencia": f"{int(win_valencia.replace('%','')) + int(draw_prob.replace('%',''))}%"
+            }
 
-            # 3. Extrair os dados da tabela que apareceu
-            # Vamos buscar a linha que contém o nome do Valencia
-            print("📊 Extraindo valores da tabela...")
-            linha_valencia = page.locator("tr").filter(has_text="Valencia").first
+            # --- VALIDAÇÃO DAS SUAS REGRAS ---
+            btts_val = int(analise["mercados"]["BTTS"].replace("%",""))
             
-            # Pegamos o texto das células de resultado (os círculos coloridos)
-            resultados = await linha_valencia.locator(".fixture-result-cell").all_inner_texts()
-            
-            relatorio["dados"] = {
-                "time": "Valencia",
-                "ultimos_resultados": resultados[:5], # Pega os últimos 5
-                "sucesso": f"{len([r for r in resultados[:5] if r != '-'])}/5"
+            analise["veredito"] = {
+                "btts_aprovado": btts_val >= 60, # Sua regra de 4/5 (80%) ou ajuste para 60%
+                "seguranca": "Valencia ou Empate" if int(analise["probabilidades"]["dupla_chance_valencia"].replace("%","")) >= 60 else "Risco"
             }
 
         except Exception as e:
-            relatorio["erro"] = str(e)[:200]
+            analise["erro"] = str(e)
 
-        print("\n=== JSON BRUTO (ADAM CHOI DIRETO) ===")
-        print(json.dumps(relatorio, indent=4, ensure_ascii=False))
+        print("\n=== JSON VALIDADO (FOOTYSTATS) ===")
+        print(json.dumps(analise, indent=4, ensure_ascii=False))
         
         await browser.close()
 
 if __name__ == "__main__":
-    asyncio.run(validar_adam_choi_direto())
+    asyncio.run(analis_footystats())
+            
