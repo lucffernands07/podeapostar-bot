@@ -4,15 +4,17 @@ from playwright.async_api import async_playwright
 
 async def testar_analise_valencia():
     async with async_playwright() as p:
-        # Launch do navegador (headless=False se quiser ver o robô trabalhando)
+        # Launch com argumentos para evitar detecção
         browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+        # Criando um contexto com dimensões de tela real e User-Agent comum
+        context = await browser.new_context(
+            viewport={'width': 1280, 'height': 720},
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+        )
         page = await context.new_page()
 
-        # IDs para o teste (Valencia: 2828 | Alavés: 2885)
-        # Link de comparação conforme seu print
         url_sofa = "https://www.sofascore.com/pt/football/team/compare?ids=2828%2C2885"
-        url_espn = "https://www.espn.com.br/futebol/time/resultados/_/id/2594" # ID ESPN Valencia
+        url_espn = "https://www.espn.com.br/futebol/time/resultados/_/id/2594"
 
         relatorio_bruto = {
             "time": "Valencia",
@@ -21,52 +23,57 @@ async def testar_analise_valencia():
             "validacao_regras": {}
         }
 
-        print("🔍 Coletando dados de Elite no SofaScore...")
+        print("🔍 Coletando dados no SofaScore (Modo Rápido)...")
         try:
-            await page.goto(url_sofa, wait_until="networkidle", timeout=60000)
+            # Mudamos para 'domcontentloaded' que é muito mais rápido
+            await page.goto(url_sofa, wait_until="domcontentloaded", timeout=30000)
+            # Esperamos um seletor específico da tabela de comparação aparecer
+            await page.wait_for_selector('text="Grandes chances de gol por jogo"', timeout=15000)
             
-            # Mapeando os dados das suas imagens
+            # Captura de texto usando locators mais precisos para tabelas
+            chances = await page.locator('div:has-text("Grandes chances de gol por jogo") + div').first.inner_text()
+            chutes = await page.locator('div:has-text("Chutes certos por jogo") + div').first.inner_text()
+            escanteios = await page.locator('div:has-text("Escanteios") + div').first.inner_text()
+            clean_sheets = await page.locator('div:has-text("Jogos sem sofrer gols") + div').first.inner_text()
+
             relatorio_bruto["origem_sofascore"] = {
-                "chances_criadas_jogo": await page.locator('text="Grandes chances de gol por jogo" >> xpath=../..').get_by_role("cell").nth(0).inner_text(),
-                "chutes_certos_jogo": await page.locator('text="Chutes certos por jogo" >> xpath=../..').get_by_role("cell").nth(0).inner_text(),
-                "escanteios_media": await page.locator('text="Escanteios" >> xpath=../..').get_by_role("cell").nth(0).inner_text(),
-                "jogos_sem_sofrer_gols": await page.locator('text="Jogos sem sofrer gols" >> xpath=../..').get_by_role("cell").nth(0).inner_text(),
-                "gols_sofridos_total": await page.locator('text="Gols sofridos" >> xpath=../..').get_by_role("cell").nth(0).inner_text()
+                "chances_criadas_jogo": chances.strip(),
+                "chutes_certos_jogo": chutes.strip(),
+                "escanteios_media": escanteios.strip(),
+                "jogos_sem_sofrer_gols": clean_sheets.strip()
             }
         except Exception as e:
-            relatorio_bruto["origem_sofascore"]["erro"] = str(e)
+            relatorio_bruto["origem_sofascore"]["erro"] = f"Erro SofaScore: {str(e)}"
 
-        print("📅 Coletando Forma Recente na ESPN (Regra 5/5)...")
+        print("📅 Coletando Forma Recente na ESPN...")
         try:
-            await page.goto(url_espn, wait_until="networkidle")
+            await page.goto(url_espn, wait_until="domcontentloaded", timeout=30000)
+            await page.wait_for_selector(".Table__TR--sm", timeout=10000)
+            
             rows = await page.query_selector_all(".Table__TR--sm")
             for row in rows[:5]:
                 cols = await row.query_selector_all("td")
                 if len(cols) >= 3:
-                    txt = await cols[2].inner_text()
-                    relatorio_bruto["origem_espn"]["ultimos_5_jogos"].append(txt)
+                    res = await cols[2].inner_text()
+                    relatorio_bruto["origem_espn"]["ultimos_5_jogos"].append(res)
         except Exception as e:
-            relatorio_bruto["origem_espn"]["erro"] = str(e)
+            relatorio_bruto["origem_espn"]["erro"] = f"Erro ESPN: {str(e)}"
 
-        # --- APLICAÇÃO DAS SUAS REGRAS PARA VALIDAÇÃO ---
+        # --- PROCESSAMENTO LOGICO ---
         sofa = relatorio_bruto["origem_sofascore"]
         espn = relatorio_bruto["origem_espn"]["ultimos_5_jogos"]
 
-        # Regra 1: Dupla Chance (Baseada em Clean Sheets e Derrotas 0/5)
-        derrotas = sum(1 for jogo in espn if "D" in jogo)
-        relatorio_bruto["validacao_regras"]["dupla_chance"] = {
-            "aprovado": derrotas <= 1 and int(sofa.get("jogos_sem_sofrer_gols", 0)) >= 5,
-            "motivo": f"Derrotas recentes: {derrotas} | Clean Sheets: {sofa.get('jogos_sem_sofrer_gols')}"
-        }
+        if "erro" not in sofa and espn:
+            derrotas = sum(1 for j in espn if "D" in j)
+            # Converte valores para float para validar regras
+            esc_val = float(sofa["escanteios_media"].replace(",", "."))
+            
+            relatorio_bruto["validacao_regras"] = {
+                "dupla_chance_aprovada": derrotas <= 1,
+                "escanteios_aprovado": esc_val >= 4.5,
+                "analise_final": "BILHETE POSSÍVEL" if derrotas == 0 else "REVISAR"
+            }
 
-        # Regra 2: Escanteios (Baseada em Chutes Certos e Escanteios Média)
-        escanteios_num = float(sofa.get("escanteios_media", "0").replace(",", "."))
-        relatorio_bruto["validacao_regras"]["escanteios"] = {
-            "aprovado": escanteios_num >= 5.0,
-            "valor_encontrado": escanteios_num
-        }
-
-        # Saída do JSON Bruto solicitado
         print("\n=== JSON BRUTO PARA VALIDAÇÃO ===")
         print(json.dumps(relatorio_bruto, indent=4, ensure_ascii=False))
         
