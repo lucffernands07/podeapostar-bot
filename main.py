@@ -3,12 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
-def limpar_porcentagem(texto):
-    # Busca qualquer número seguido de % no texto (ex: "80%Over")
-    match = re.search(r'(\d+)%', texto)
-    return match.group(0) if match else "0%"
-
-def analisar_grid_neo():
+def analisar_separado():
     api_key = os.getenv("ZENROWS_KEY")
     url = "https://footystats.org/brazil/se-palmeiras-vs-gremio-novorizontino-h2h-stats"
     
@@ -20,52 +15,61 @@ def analisar_grid_neo():
         'wait': '5000' 
     }
 
-    print("📡 Capturando dados do Grid H2H...")
+    print("📡 Capturando com extração por tags separadas...")
     response = requests.get('https://api.zenrows.com/v1/', params=params)
     
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
-        resultados = {
-            "Over 1.5": "0%", "Over 2.5": "0%", "BTTS": "0%",
-            "CS_Novorizontino": "0%", "CS_Palmeiras": "0%"
-        }
+        resultados = {"Over 1.5": "0%", "Over 2.5": "0%", "BTTS": "0%", "CS_Palmeiras": "0%", "CS_Novorizontino": "0%"}
 
-        itens = soup.select(".grid-item")
-        for item in itens:
-            # Pega todo o texto da caixinha (ex: "80% Over 1.5 8 / 10 matches")
-            texto_todo = item.get_text(separator=" ").upper()
-            valor = limpar_porcentagem(texto_todo)
+        # Procuramos todas as divs que têm a classe 'stat-strong'
+        stats = soup.select(".stat-strong")
+        
+        for s in stats:
+            # 1. Pega apenas o primeiro pedaço de texto (o 80%)
+            # O .contents[0] pega o que vem ANTES do <span>
+            try:
+                valor_bruto = s.contents[0].strip()
+                if "%" not in valor_bruto:
+                    continue
+            except:
+                continue
 
-            if "OVER 1.5" in texto_todo:
-                resultados["Over 1.5"] = valor
-            elif "OVER 2.5" in texto_todo:
-                resultados["Over 2.5"] = valor
-            elif "BTTS" in texto_todo:
-                resultados["BTTS"] = valor
-            elif "CLEAN SHEETS" in texto_todo:
-                # Verifica qual time está no texto de apoio (stat-text)
-                sub_texto = item.select_one(".stat-text").get_text().upper() if item.select_one(".stat-text") else ""
-                if "PALMEIRAS" in sub_texto or "PALMEIRAS" in texto_todo:
-                    resultados["CS_Palmeiras"] = valor
-                elif "NOVORIZONTINO" in sub_texto or "NOVORIZONTINO" in texto_todo:
-                    resultados["CS_Novorizontino"] = valor
+            # 2. Pega o nome do mercado dentro do span (Over 1.5, BTTS, etc)
+            span = s.find("span")
+            mercado = span.get_text(strip=True).upper() if span else ""
+            
+            # 3. Pega o texto de apoio que fica na mesma caixa (stat-text)
+            caixa_pai = s.find_parent(class_="grid-item")
+            sub_texto = caixa_pai.select_one(".stat-text").get_text().upper() if caixa_pai and caixa_pai.select_one(".stat-text") else ""
 
-        print("\n📊 DADOS EXTRAÍDOS COM SUCESSO:")
+            # Mapeamento exato
+            if "OVER 1.5" in mercado:
+                resultados["Over 1.5"] = valor_bruto
+            elif "OVER 2.5" in mercado:
+                resultados["Over 2.5"] = valor_bruto
+            elif "BTTS" in mercado:
+                resultados["BTTS"] = valor_bruto
+            elif "CLEAN SHEETS" in mercado:
+                if "PALMEIRAS" in sub_texto:
+                    resultados["CS_Palmeiras"] = valor_bruto
+                elif "NOVORIZONTINO" in sub_texto:
+                    resultados["CS_Novorizontino"] = valor_bruto
+
+        print("\n📊 RESULTADOS (EXTRAÇÃO POR TAG):")
         for k, v in resultados.items():
             print(f"📍 {k}: {v}")
 
-        # Validação da regra 4/5 (80%)
-        try:
-            o15_num = int(resultados["Over 1.5"].replace('%', ''))
-            if o15_num >= 80:
-                print(f"\n✅ SEGURANÇA: Over 1.5 aprovado ({o15_num}%).")
-            else:
-                print(f"\n⚠️ AVISO: Over 1.5 abaixo de 80%.")
-        except:
-            print("\n❌ Erro ao converter valores.")
+        # Validação 80%
+        num_o15 = int(resultados["Over 1.5"].replace('%', ''))
+        if num_o15 >= 80:
+            print(f"\n✅ BINGO! Over 1.5 aprovado com {num_o15}%.")
+        else:
+            print("\n⚠️ AVISO: Ainda não chegamos nos 80% no Over 1.5.")
+
     else:
         print(f"❌ Erro na API: {response.status_code}")
 
 if __name__ == "__main__":
-    analisar_grid_neo()
-                       
+    analisar_separado()
+    
