@@ -29,7 +29,7 @@ async def extrair_dados_detalhados(browser, team_id):
         "over25_count": 0, 
         "btts_count": 0, 
         "vitoria_ht_count": 0,
-        "derrotas": 0, # Para Dupla Chance
+        "derrotas": 0, 
         "ultimos_3_marcou": True
     }
     
@@ -40,7 +40,7 @@ async def extrair_dados_detalhados(browser, team_id):
             cols = await row.query_selector_all("td")
             if len(cols) >= 3:
                 res_status = await cols[2].inner_text()
-                if "D" in res_status: dados["derrotas"] += 1 # Conta derrotas recentes
+                if "D" in res_status: dados["derrotas"] += 1
                 
                 txt = await cols[2].inner_text()
                 placar = "".join([c for c in txt if c.isdigit() or c == "-"])
@@ -75,11 +75,11 @@ async def executar_robo():
         }
         
         jogos_selecionados = []
-        vagas_ht = 2    
+        vagas_15_top = 2    # Substituiu o HT (Foco em +1.5 com confiança alta)
         vagas_25 = 3    
         vagas_btts = 3
-        vagas_escanteios = 2 # Limite para cantos
-        vagas_dc = 2         # Limite para dupla chance
+        vagas_escanteios = 2 
+        vagas_dc = 2         
         
         for l_id, l_nome in ligas_config.items():
             print(f"🌍 Verificando {l_nome}...")
@@ -98,12 +98,12 @@ async def executar_robo():
                         if d1 and d2:
                             mercado = ""
                             
-                            # 1. Escanteios (Baseado em Volume de Finalização/Gols marcados > 10 nos últimos 5)
+                            # 1. Escanteios (Validado por volume de gols combinados)
                             if vagas_escanteios > 0 and (d1['gols_marcados'] + d2['gols_marcados'] >= 13):
                                 mercado = "🚩 Mais de 8.5 Escanteios — [Volume Alto]"
                                 vagas_escanteios -= 1
 
-                            # 2. Dupla Chance (Baseado em 0 ou 1 derrota no máximo em 5 jogos)
+                            # 2. Dupla Chance (Validado por 0 derrotas nos últimos 5 jogos)
                             elif vagas_dc > 0 and d1['derrotas'] == 0:
                                 mercado = f"🛡️ Chance Dupla — {t1['displayName']} ou Empate"
                                 vagas_dc -= 1
@@ -111,10 +111,10 @@ async def executar_robo():
                                 mercado = f"🛡️ Chance Dupla — {t2['displayName']} ou Empate"
                                 vagas_dc -= 1
 
-                            # 3. Vitória no Primeiro Tempo (HT)
-                            elif vagas_ht > 0 and (d1['vitoria_ht_count'] >= 3 or d2['vitoria_ht_count'] >= 3):
-                                mercado = "⏱️ Vence no 1º Tempo — [Domínio]"
-                                vagas_ht -= 1
+                            # 3. +1.5 Gols (Substituto do HT - Validado por histórico avassalador)
+                            elif vagas_15_top > 0 and (d1['vitoria_ht_count'] >= 3 or d2['vitoria_ht_count'] >= 3):
+                                mercado = "⚽ +1.5 Gols — [Confiança Máxima]"
+                                vagas_15_top -= 1
                             
                             # 4. +2.5 Gols (Máximo 3)
                             elif vagas_25 > 0 and ((d1['over25_count'] >= 4 or d1['gols_marcados'] >= 8) or (d2['over25_count'] >= 4 or d2['gols_marcados'] >= 8)):
@@ -126,7 +126,7 @@ async def executar_robo():
                                 mercado = "🤝 Ambas Marcam — [4/5 (Est.)]"
                                 vagas_btts -= 1
                             
-                            # 6. +1.5 Gols
+                            # 6. +1.5 Gols (Padrão)
                             elif d1['ultimos_3_marcou'] and d2['ultimos_3_marcou']:
                                 mercado = "⚽ +1.5 Gols — [4/5 (Est.)]"
                             
@@ -167,4 +167,4 @@ async def executar_robo():
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
-    
+        
