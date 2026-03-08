@@ -2,65 +2,70 @@ import asyncio
 import json
 from playwright.async_api import async_playwright
 
-async def analisar_footystats():
+async def analisar_partida(page, url):
+    """Extrai dados de qualquer link H2H do FootyStats"""
+    try:
+        # Aumentamos o timeout para garantir o carregamento em servidores mais lentos
+        await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+        
+        dados_jogo = {"url": url}
+        
+        # 1. Capturar Nome dos Times (do Título ou H1)
+        dados_jogo["partida"] = await page.locator("h1").inner_text()
+
+        # 2. Capturar BTTS e Over Gols (Pelas classes que você enviou)
+        stats = page.locator(".stat-strong")
+        count = await stats.count()
+        for i in range(count):
+            texto = await stats.nth(i).inner_text()
+            if "BTTS" in texto:
+                dados_jogo["BTTS"] = texto.replace("BTTS", "").strip()
+            elif "Over 1.5" in texto:
+                dados_jogo["Over_1_5"] = texto.replace("Over 1.5", "").strip()
+            elif "Over 2.5" in texto:
+                dados_jogo["Over_2_5"] = texto.replace("Over 2.5", "").strip()
+
+        # 3. Capturar Probabilidades (Comparison Bar)
+        # Primeiro item é a vitória do mandante, segundo é o empate
+        win_a = await page.locator(".bar-item.winner").first.inner_text()
+        draw = await page.locator(".bar-item.draw").first.inner_text()
+        
+        v_win = int(win_a.replace('%',''))
+        v_draw = int(draw.replace('%',''))
+        
+        dados_jogo["probabilidades"] = {
+            "vitoria_casa": f"{v_win}%",
+            "empate": f"{v_draw}%",
+            "dupla_chance_casa": f"{v_win + v_draw}%"
+        }
+        
+        return dados_jogo
+    except Exception as e:
+        return {"url": url, "erro": str(e)}
+
+async def executar_script():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
         
-        url = "https://footystats.org/spain/deportivo-alaves-vs-valencia-cf-h2h-stats"
-        
-        print(f"🚀 Acessando FootyStats: {url}")
-        await page.goto(url, wait_until="domcontentloaded")
+        # LISTA DE JOGOS: Basta adicionar os links do dia aqui
+        links_do_dia = [
+            "https://footystats.org/spain/deportivo-alaves-vs-valencia-cf-h2h-stats",
+            # "adicione_outro_link_aqui"
+        ]
 
-        analise = {
-            "partida": "Valencia CF vs Deportivo Alavés",
-            "mercados": {},
-            "probabilidades": {}
-        }
+        relatorio_final = []
 
-        try:
-            # 1. Capturar BTTS e Over Gols (Pelas classes grid-item)
-            # Buscamos todos os blocos de estatísticas fortes
-            stats = page.locator(".stat-strong")
-            count = await stats.count()
-            
-            for i in range(count):
-                texto = await stats.nth(i).inner_text()
-                # O texto vem como '67%BTTS' ou '76%Over 1.5'
-                if "BTTS" in texto:
-                    analise["mercados"]["BTTS"] = texto.replace("BTTS", "").strip()
-                elif "Over 1.5" in texto:
-                    analise["mercados"]["Over_1_5"] = texto.replace("Over 1.5", "").strip()
-                elif "Over 2.5" in texto:
-                    analise["mercados"]["Over_2_5"] = texto.replace("Over 2.5", "").strip()
+        for link in links_do_dia:
+            print(f"🧐 Analisando partida: {link}")
+            resultado = await analisar_partida(page, link)
+            relatorio_final.append(resultado)
 
-            # 2. Capturar Probabilidades de Vitória (Comparison Bar)
-            # O Valencia é o primeiro (winner) e o empate é o segundo (draw)
-            win_valencia = await page.locator(".bar-item.winner").first.inner_text()
-            draw_prob = await page.locator(".bar-item.draw").first.inner_text()
-            
-            analise["probabilidades"] = {
-                "vitoria_valencia": win_valencia.strip(),
-                "empate": draw_prob.strip(),
-                "dupla_chance_valencia": f"{int(win_valencia.replace('%','')) + int(draw_prob.replace('%',''))}%"
-            }
-
-            # --- VALIDAÇÃO DAS SUAS REGRAS ---
-            btts_val = int(analise["mercados"]["BTTS"].replace("%",""))
-            
-            analise["veredito"] = {
-                "btts_aprovado": btts_val >= 60, # Sua regra de 4/5 (80%) ou ajuste para 60%
-                "seguranca": "Valencia ou Empate" if int(analise["probabilidades"]["dupla_chance_valencia"].replace("%","")) >= 60 else "Risco"
-            }
-
-        except Exception as e:
-            analise["erro"] = str(e)
-
-        print("\n=== JSON VALIDADO (FOOTYSTATS) ===")
-        print(json.dumps(analise, indent=4, ensure_ascii=False))
+        print("\n=== JSON FINAL DE VALIDAÇÃO ===")
+        print(json.dumps(relatorio_final, indent=4, ensure_ascii=False))
         
         await browser.close()
 
 if __name__ == "__main__":
-    asyncio.run(analis_footystats())
-            
+    # Corrigido: Agora o nome da função bate com o definido acima
+    asyncio.run(executar_script())
