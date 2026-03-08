@@ -1,45 +1,66 @@
-import asyncio
+import cloudscraper
 import json
-from playwright.async_api import async_playwright
+from bs4 import BeautifulSoup
 
-async def extrair_dados_reais():
-    async with async_playwright() as p:
-        # Usamos um perfil de telemóvel (conforme as tuas imagens)
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(
-            user_agent="Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
-            viewport={'width': 393, 'height': 851}
-        )
-        page = await context.new_page()
+def extrair_dados_footystats(url):
+    # Cria um "raspador" que pula o desafio do Cloudflare
+    scraper = cloudscraper.create_scraper(
+        browser={
+            'browser': 'chrome',
+            'platform': 'windows',
+            'mobile': False
+        }
+    )
 
-        url = "https://footystats.org/spain/deportivo-alaves-vs-valencia-cf-h2h-stats"
+    print(f"📡 Tentando acesso direto via CloudScraper: {url}")
+    
+    try:
+        response = scraper.get(url, timeout=30)
+        if response.status_code != 200:
+            return {"erro": f"Status {response.status_code}. O site ainda está bloqueando o IP do servidor."}
+
+        soup = BeautifulSoup(response.text, 'html.parser')
         
-        try:
-            print(f"📡 Acedendo via Mobile Simulation: {url}")
-            # O truque é esperar o 'ajax_pong.php' que aparece no teu network
-            await page.goto(url, wait_until="commit")
-            await page.wait_for_selector(".stat-strong", timeout=20000)
+        # O dicionário onde vamos guardar os dados "mastigados"
+        dados = {
+            "partida": "Valencia x Alavés",
+            "mercados": {},
+            "probabilidades": {}
+        }
 
-            # Extração dos dados que confirmaste nas imagens
-            dados = {
-                "btts": await page.locator(".stat-strong:has-text('BTTS')").inner_text(),
-                "over_1_5": await page.locator(".stat-strong:has-text('Over 1.5')").inner_text(),
-                "vitoria_casa": await page.locator(".bar-item.winner").first.inner_text(),
-                "empate": await page.locator(".bar-item.draw").first.inner_text()
+        # 1. Extrair BTTS e Overs (Baseado nas classes que você me deu)
+        # No seu HTML: <div class="stat-strong">67%<span>BTTS</span></div>
+        for item in soup.select(".grid-item"):
+            strong = item.select_one(".stat-strong")
+            if strong:
+                texto = strong.get_text(strip=True)
+                if "BTTS" in texto:
+                    dados["mercados"]["BTTS"] = texto.replace("BTTS", "")
+                elif "Over 1.5" in texto:
+                    dados["mercados"]["Over_1.5"] = texto.replace("Over 1.5", "")
+                elif "Over 2.5" in texto:
+                    dados["mercados"]["Over_2.5"] = texto.replace("Over 2.5", "")
+
+        # 2. Extrair Probabilidades (Barra de Comparação que você viu no Network)
+        bar_items = soup.select(".bar-item")
+        if len(bar_items) >= 2:
+            v_casa = bar_items[0].get_text(strip=True).replace('%','')
+            v_empate = bar_items[1].get_text(strip=True).replace('%','')
+            
+            dados["probabilidades"] = {
+                "vitoria_casa": f"{v_casa}%",
+                "empate": f"{v_draw}%",
+                "dupla_chance_casa": f"{int(v_casa) + int(v_empate)}%"
             }
-            
-            # Limpeza rápida
-            for k, v in dados.items():
-                dados[k] = v.replace("BTTS", "").replace("Over 1.5", "").strip()
 
-            print("\n=== DADOS VALIDADOS ===")
-            print(json.dumps(dados, indent=4))
+        return dados
 
-        except Exception as e:
-            print(f"❌ Erro: O firewall bloqueou a simulação. Tentando ler cache...")
-            
-        await browser.close()
+    except Exception as e:
+        return {"erro": f"Falha na requisição: {str(e)}"}
 
 if __name__ == "__main__":
-    asyncio.run(extrair_dados_reais())
+    url_jogo = "https://footystats.org/spain/deportivo-alaves-vs-valencia-cf-h2h-stats"
+    resultado = extrair_dados_footystats(url_jogo)
     
+    print("\n=== JSON EXTRAÍDO COM SUCESSO ===")
+    print(json.dumps([resultado], indent=4, ensure_ascii=False))
