@@ -1,55 +1,126 @@
 import os
+import asyncio
 import requests
-import json
+from datetime import datetime
 
-# --- CONFIGURAÇÃO --- #
-API_KEY = "a09ce48543msh617f960e6fbcb8dp1b8d01jsned842e01d8f5"
-HEADERS = {'x-rapidapi-host': "api-football-v1.p.rapidapi.com", 'x-rapidapi-key': API_KEY}
+# --- CONFIGURAÇÃO (GitHub Secrets) --- #
+TOKEN = os.getenv('TELEGRAM_TOKEN')
+CHAT_ID = os.getenv('CHAT_ID')
+API_KEY = os.getenv('X_RAPIDAPI_KEY') 
+HOST = "api-football-v1.p.rapidapi.com"
+HEADERS = {'x-rapidapi-host': HOST, 'x-rapidapi-key': API_KEY}
 
-def testar_jogo_especifico(match_name, league_id, team_home_id, team_away_id, season):
-    print(f"🔬 --- RAIO-X DO JOGO: {match_name} ---")
-    
-    # URL onde a API busca as estatísticas de desempenho da temporada
-    url_home = f"https://api-football-v1.p.rapidapi.com/v3/teams/statistics?league={league_id}&team={team_home_id}&season={season}"
-    url_away = f"https://api-football-v1.p.rapidapi.com/v3/teams/statistics?league={league_id}&team={team_away_id}&season={season}"
-    
+def enviar_telegram(msg):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
     try:
-        res_h = requests.get(url_home, headers=HEADERS).json()['response']
-        res_a = requests.get(url_away, headers=HEADERS).json()['response']
+        requests.post(url, json=payload, timeout=15)
+    except: print("❌ Erro Telegram")
 
-        # DADOS QUE A API ESTÁ VENDO (O que o robô usa para decidir)
-        stats = {
-            "Home (Casa)": {
-                "Gols Marcados": res_h['goals']['for']['total']['total'],
-                "Jogos Feitos": res_h['fixtures']['played']['total'],
-                "Ambas Marcam (BTTS)": res_h['goals']['both_teams_score']['percentage'],
-                "Média Escanteios": res_h['corners']['avg']
-            },
-            "Away (Fora)": {
-                "Gols Marcados": res_a['goals']['for']['total']['total'],
-                "Jogos Feitos": res_a['fixtures']['played']['total'],
-                "Ambas Marcam (BTTS)": res_a['goals']['both_teams_score']['percentage'],
-                "Média Escanteios": res_a['corners']['avg']
-            }
+def pegar_previsao(fixture_id):
+    """ Consulta o endpoint de Predictions para pegar os cálculos prontos """
+    url = f"https://api-football-v1.p.rapidapi.com/v3/predictions?fixture={fixture_id}"
+    try:
+        res = requests.get(url, headers=HEADERS, timeout=12).json()
+        if not res.get('response'): return None
+        data = res['response'][0]
+        
+        # Probabilidades calculadas pela API
+        perc = data['predictions']['percent']
+        
+        return {
+            "o15": int(perc.get('over_1_5', '0%').replace('%','')),
+            "o25": int(perc.get('over_2_5', '0%').replace('%','')),
+            "btts": int(perc.get('btts', '0%').replace('%','')),
+            "conselho": data['predictions']['advice']
         }
-        
-        # Exibe o JSON que a API entregou (Igual ao "conteúdo da página" do FootyStats)
-        print(json.dumps(stats, indent=4, ensure_ascii=False))
-        
-        # VALIDAÇÃO DO ROBÔ
-        media_gols = (stats['Home (Casa)']['Gols Marcados'] / stats['Home (Casa)']['Jogos Feitos'] + 
-                      stats['Away (Fora)']['Gols Marcados'] / stats['Away (Fora)']['Jogos Feitos']) / 2
-        
-        print(f"\n✅ CONCLUSÃO DO ROBÔ PARA {match_name}:")
-        print(f"📊 Média Combinada de Gols: {media_gols:.2f}")
-        
-        if media_gols > 1.8: print("🎯 Mercado sugerido: +1.5 Gols")
-        if float(stats['Home (Casa)']['Média Escanteios'] or 0) > 4.5: print("🎯 Mercado sugerido: +8.5 Cantos")
+    except: return None
 
-    except Exception as e:
-        print(f"❌ Erro ao buscar dados: {e}")
+async def executar_robo():
+    hoje = datetime.now().strftime("%Y-%m-%d")
+    
+    # LIGAS MAPEADAS (IDs Oficiais)
+    ligas_config = {
+        39: "Premier League", 140: "LALIGA", 78: "Bundesliga", 135: "Serie A",
+        61: "Ligue 1", 94: "Português", 88: "Holandês", 71: "Brasileirão A",
+        471: "Paulistão", 472: "Carioca", 141: "LaLiga 2", 62: "Ligue 2",
+        203: "Super Lig (Turquia)", 218: "Áustria"
+    }
+    
+    jogos_analisados = []
+    ligas_no_bilhete = set()
 
-# TESTE REAL: Lazio (487) x Sassuolo (489) | Liga: Serie A (135) | Temporada: 2025
+    print(f"🚀 Iniciando Varredura para o Bilhete do Dia...")
+
+    for l_id, l_nome in ligas_config.items():
+        # Testa 2026 (Brasil) e 2025 (Europa)
+        for season in [2026, 2025]:
+            url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
+            res = requests.get(url, headers=HEADERS).json()
+            matches = res.get('response', [])
+            
+            if not matches: continue
+            
+            for m in matches:
+                f_id = m['fixture']['id']
+                t1, t2 = m['teams']['home']['name'], m['teams']['away']['name']
+                hora = m['fixture']['date'][11:16]
+                
+                print(f"🔮 Analisando: {t1} x {t2}")
+                pred = pegar_previsao(f_id)
+                
+                if pred:
+                    mercado = ""
+                    prio = 0
+                    
+                    # --- LÓGICA DE SELEÇÃO IDENTICA AO SEU FRONT ---
+                    if pred['o25'] >= 75:
+                        mercado = "⚡ +2.5 Gols — Atropelo"
+                        prio = 100
+                    elif pred['o15'] >= 85:
+                        mercado = "⚽ +1.5 Gols — Confiança Máxima"
+                        prio = 90
+                    elif pred['btts'] >= 75:
+                        mercado = "🤝 Ambas Marcam — 4/5 (Est.)"
+                        prio = 85
+                    elif pred['o15'] >= 70:
+                        mercado = "⚽ +1.5 Gols — 4/5 (Est.)"
+                        prio = 75
+                    elif pred['o15'] >= 50:
+                        mercado = "🛡️ +0.5 Gols — Segurança"
+                        prio = 60
+                    
+                    if mercado:
+                        ligas_no_bilhete.add(l_nome)
+                        jogos_analisados.append({
+                            "prio": prio,
+                            "liga": l_nome,
+                            "texto": f"🏟️ *{t1} x {t2}*\n🕒 {hora} | {l_nome}\n🎯 {mercado}\n📊 [Estatísticas](https://www.sofascore.com/pt/futebol/jogo/{f_id})"
+                        })
+            break 
+
+    if jogos_analisados:
+        # Pega os 10 melhores
+        jogos_analisados.sort(key=lambda x: x['prio'], reverse=True)
+        top_10 = jogos_analisados[:10]
+        top_10.sort(key=lambda x: x['liga']) # Ordena por liga para o visual
+
+        # --- MONTAGEM DA MENSAGEM (SEU MODELO) ---
+        msg = f"🎯 *BILHETE DO DIA ({len(top_10)} JOGOS)*\n💰🍀 BOA SORTE!!!\n\n"
+        
+        msg += "🏟️ *LIGAS ENCONTRADAS:*\n"
+        for liga in sorted(list(ligas_no_bilhete)):
+            msg += f"🔹 {liga}\n"
+        
+        msg += "\n"
+        for i, jogo in enumerate(top_10, 1):
+            msg += f"{i}. {jogo['texto']}\n\n"
+        
+        msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
+        enviar_telegram(msg)
+    else:
+        print("⚠️ Nenhum jogo qualificado encontrado hoje.")
+
 if __name__ == "__main__":
-    testar_jogo_especifico("Lazio x Sassuolo", 135, 487, 489, 2025)
+    asyncio.run(executar_robo())
         
