@@ -3,7 +3,7 @@ name: Apostas Diária
 on:
   schedule:
     - cron: '0 11,17 * * *'
-  workflow_dispatch:
+  workflow_dispatch: # Permite rodar manualmente no botão "Run workflow"
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
       - name: Executar Robô
         env:
           ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
+          # TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }} # Descomente quando usar
+          # CHAT_ID: ${{ secrets.CHAT_ID }}               # Descomente quando usar
         run: python main.py
         
