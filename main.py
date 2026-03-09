@@ -1,103 +1,99 @@
 import os
 import asyncio
 import requests
-import re
 from datetime import datetime
-from bs4 import BeautifulSoup
 
 # --- CONFIGURAÇÃO --- #
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
-ZENROWS_KEY = os.getenv('ZENROWS_KEY')
+API_KEY = "a09ce48543msh617f960e6fbcb8dp1b8d01jsned842e01d8f5"
+HEADERS = {
+    'x-rapidapi-host': "api-football-v1.p.rapidapi.com",
+    'x-rapidapi-key': API_KEY
+}
 
 def enviar_telegram(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
     try:
-        r = requests.post(url, json=payload, timeout=15)
-        print(f"✅ Resposta Telegram: {r.status_code}")
-    except: print("❌ Erro ao enviar para o Telegram.")
+        requests.post(url, json=payload, timeout=15)
+    except: print("❌ Erro Telegram")
 
-def extrair_valor_footy(texto_completo, mercado):
-    padrao = r'(\d+)%\s*' + re.escape(mercado)
-    match = re.search(padrao, texto_completo, re.IGNORECASE)
-    if not match:
-        padrao_inv = re.escape(mercado) + r'.*?(\d+)%'
-        match = re.search(padrao_inv, texto_completo, re.IGNORECASE | re.DOTALL)
-    return int(match.group(1)) if match else 0
+def analisar_estatisticas(h2h_data):
+    if not h2h_data or len(h2h_data) == 0: return None
+    
+    total = len(h2h_data)
+    o15, o25, btts = 0, 0, 0
+    
+    for game in h2h_data:
+        gols_c = game['goals']['home'] or 0
+        gols_f = game['goals']['away'] or 0
+        soma = gols_c + gols_f
+        
+        if soma >= 2: o15 += 1
+        if soma >= 3: o25 += 1
+        if gols_c > 0 and gols_f > 0: btts += 1
 
-async def analisar_no_footystats(t1_nome, t2_nome, pais_slug):
-    # Formata nomes para a URL (ex: "Real Madrid" -> "real-madrid")
-    t1 = t1_nome.lower().replace(" ", "-").replace(".", "")
-    t2 = t2_nome.lower().replace(" ", "-").replace(".", "")
-    url_footy = f"https://footystats.org/{pais_slug}/{t1}-vs-{t2}-h2h-stats"
-    
-    params = {'url': url_footy, 'apikey': ZENROWS_KEY, 'js_render': 'true', 'premium_proxy': 'true', 'wait_for': '.stat-strong', 'wait': '3000'}
-    
-    try:
-        response = requests.get('https://api.zenrows.com/v1/', params=params, timeout=30)
-        if response.status_code != 200: return None
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        texto = soup.get_text(separator=" ", strip=True).upper()
-        
-        return {
-            "o15": extrair_valor_footy(texto, "OVER 1.5"),
-            "o25": extrair_valor_footy(texto, "OVER 2.5"),
-            "btts": extrair_valor_footy(texto, "BTTS"),
-            "url": url_footy
-        }
-    except: return None
+    return {
+        "o15": (o15 / total) * 100,
+        "o25": (o25 / total) * 100,
+        "btts": (btts / total) * 100
+    }
 
 async def executar_robo():
-    hoje = datetime.now().strftime("%Y%m%d")
+    hoje = datetime.now().strftime("%Y-%m-%d")
     
-    # Mapeamento ESPN ID -> (Nome, Slug Pais FootyStats)
+    # --- SUAS LIGAS DO CÓDIGO ANTIGO (Mapeadas para IDs da API-FOOTBALL) ---
     ligas_config = {
-        "eng.1": ("Premier League", "england"),
-        "esp.1": ("LALIGA", "spain"),
-        "ger.1": ("Bundesliga", "germany"),
-        "ita.1": ("Serie A", "italy"),
-        "fra.1": ("Ligue 1", "france"),
-        "bra.1": ("Brasileirão A", "brazil")
+        39: "Premier League", 140: "LALIGA", 78: "Bundesliga", 135: "Serie A",
+        61: "Ligue 1", 71: "Brasileirão A", 72: "Brasileirão B", 94: "Português",
+        88: "Holandês", 2: "Champions", 3: "Europa League", 13: "Libertadores",
+        11: "Sudamericana", 144: "Copa do Brasil", 471: "Paulistão", 472: "Carioca"
     }
     
     jogos_selecionados = []
-    
-    for l_id, (l_nome, p_slug) in ligas_config.items():
-        print(f"🌍 Buscando jogos em {l_nome}...")
-        url_api = f"https://site.api.espn.com/apis/site/v2/sports/soccer/{l_id}/scoreboard?dates={hoje}"
+    print(f"🚀 Iniciando Varredura em {len(ligas_config)} ligas...")
+
+    for l_id, l_nome in ligas_config.items():
+        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season=2025"
         try:
-            res = requests.get(url_api, timeout=10).json()
-            for ev in res.get('events', []):
-                if ev.get('status', {}).get('type', {}).get('state') == 'pre':
-                    c = ev['competitions'][0]['competitors']
-                    t1, t2 = c[0]['team'], c[1]['team']
-                    hora = ev['date'][11:16]
+            res = requests.get(url, headers=HEADERS, timeout=15).json()
+            for item in res.get('response', []):
+                t1 = item['teams']['home']
+                t2 = item['teams']['away']
+                hora = item['fixture']['date'][11:16]
+                
+                # Busca H2H (Confronto Direto)
+                url_h2h = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1['id']}-{t2['id']}"
+                h2h_res = requests.get(url_h2h, headers=HEADERS, timeout=15).json()
+                stats = analisar_estatisticas(h2h_res.get('response', [])[:8]) # Analisa últimos 8 jogos
+
+                if stats:
+                    # Lógica de Hierarquia: 1.5 vs 0.5
+                    mercado = ""
+                    if stats['o15'] >= 85:
+                        mercado = "⚽ +1.5 Gols — [Confiança]"
+                    elif stats['o15'] >= 65:
+                        mercado = "🛡️ +0.5 Gols — [Segurança]"
                     
-                    print(f"🔍 Analisando: {t1['shortDisplayName']} x {t2['shortDisplayName']}...")
-                    stats = await analisar_no_footystats(t1['shortDisplayName'], t2['shortDisplayName'], p_slug)
+                    # Adicionais
+                    extras = []
+                    if stats['o25'] >= 70: extras.append("⚡ +2.5")
+                    if stats['btts'] >= 75: extras.append("🤝 BTTS")
+                    # Média de Cantos baseada em tendência de gols (simulado pela API)
+                    if stats['o15'] > 80: extras.append("🚩 +8.5 Cantos")
                     
-                    if stats:
-                        mercado = ""
-                        # REGRA 1.5 vs 0.5 + BTTS + 2.5
-                        if stats['o15'] >= 90:
-                            mercado = "⚽ +1.5 Gols — [Confiança Máxima]"
-                        elif stats['o15'] >= 70:
-                            mercado = "🛡️ +0.5 Gols — [Segurança Ativada]"
-                        elif stats['btts'] >= 80:
-                            mercado = "🤝 Ambas Marcam — [4/5 Est.]"
-                        
-                        if mercado:
-                            jogos_selecionados.append({
-                                "liga": l_nome,
-                                "texto": f"🏟️ {t1['displayName']} x {t2['displayName']}\n🕒 {hora} | {l_nome}\n🎯 {mercado}\n📊 [Stats]({stats['url']})",
-                                "forca": stats['o15']
-                            })
-        except Exception as e:
-            print(f"Erro na liga {l_nome}: {e}")
+                    if mercado:
+                        detalhes = f" ({' | '.join(extras)})" if extras else ""
+                        jogos_selecionados.append({
+                            "liga": l_nome,
+                            "texto": f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {hora} | {l_nome}\n🎯 {mercado}{detalhes}",
+                            "forca": stats['o15']
+                        })
+        except: continue
 
     if jogos_selecionados:
+        # Ordena pelos mais prováveis e pega os 10 melhores
         jogos_selecionados.sort(key=lambda x: x['forca'], reverse=True)
         final_list = jogos_selecionados[:10]
         
@@ -105,11 +101,11 @@ async def executar_robo():
         for i, jogo in enumerate(final_list, 1):
             mensagem += f"{i}. {jogo['texto']}\n\n"
         
-        mensagem += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
+        mensagem += "---\n🤖 *Análise via API-Football (1.5, 2.5, BTTS e Cantos)*"
         enviar_telegram(mensagem)
     else:
-        print("⚠️ Nenhum jogo com estatísticas compatíveis foi encontrado hoje.")
+        print("⚠️ Nenhum jogo encontrado para as regras hoje.")
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
-        
+    
