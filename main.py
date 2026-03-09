@@ -3,12 +3,14 @@ import asyncio
 import requests
 from datetime import datetime
 
-# --- CONFIGURAÇÃO --- #
+# --- CONFIGURAÇÃO (Lidas do GitHub Secrets) --- #
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
-API_KEY = "a09ce48543msh617f960e6fbcb8dp1b8d01jsned842e01d8f5"
+API_KEY = os.getenv('X_RAPIDAPI_KEY') 
+HOST = "api-football-v1.p.rapidapi.com"
+
 HEADERS = {
-    'x-rapidapi-host': "api-football-v1.p.rapidapi.com",
+    'x-rapidapi-host': HOST,
     'x-rapidapi-key': API_KEY
 }
 
@@ -42,8 +44,9 @@ def analisar_estatisticas(h2h_data):
 
 async def executar_robo():
     hoje = datetime.now().strftime("%Y-%m-%d")
+    ano_atual = datetime.now().year
     
-    # --- SUAS LIGAS DO CÓDIGO ANTIGO (Mapeadas para IDs da API-FOOTBALL) ---
+    # --- SUAS LIGAS MAPEADAS ---
     ligas_config = {
         39: "Premier League", 140: "LALIGA", 78: "Bundesliga", 135: "Serie A",
         61: "Ligue 1", 71: "Brasileirão A", 72: "Brasileirão B", 94: "Português",
@@ -52,10 +55,11 @@ async def executar_robo():
     }
     
     jogos_selecionados = []
-    print(f"🚀 Iniciando Varredura em {len(ligas_config)} ligas...")
+    print(f"🚀 Iniciando Varredura em {len(ligas_config)} ligas para a data {hoje}...")
 
     for l_id, l_nome in ligas_config.items():
-        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season=2025"
+        # Tentamos a temporada atual
+        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano_atual}"
         try:
             res = requests.get(url, headers=HEADERS, timeout=15).json()
             for item in res.get('response', []):
@@ -63,24 +67,21 @@ async def executar_robo():
                 t2 = item['teams']['away']
                 hora = item['fixture']['date'][11:16]
                 
-                # Busca H2H (Confronto Direto)
+                # Busca H2H (Últimos 8 jogos entre eles)
                 url_h2h = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1['id']}-{t2['id']}"
                 h2h_res = requests.get(url_h2h, headers=HEADERS, timeout=15).json()
-                stats = analisar_estatisticas(h2h_res.get('response', [])[:8]) # Analisa últimos 8 jogos
+                stats = analisar_estatisticas(h2h_res.get('response', [])[:8])
 
                 if stats:
-                    # Lógica de Hierarquia: 1.5 vs 0.5
                     mercado = ""
                     if stats['o15'] >= 85:
                         mercado = "⚽ +1.5 Gols — [Confiança]"
                     elif stats['o15'] >= 65:
                         mercado = "🛡️ +0.5 Gols — [Segurança]"
                     
-                    # Adicionais
                     extras = []
                     if stats['o25'] >= 70: extras.append("⚡ +2.5")
                     if stats['btts'] >= 75: extras.append("🤝 BTTS")
-                    # Média de Cantos baseada em tendência de gols (simulado pela API)
                     if stats['o15'] > 80: extras.append("🚩 +8.5 Cantos")
                     
                     if mercado:
@@ -93,7 +94,6 @@ async def executar_robo():
         except: continue
 
     if jogos_selecionados:
-        # Ordena pelos mais prováveis e pega os 10 melhores
         jogos_selecionados.sort(key=lambda x: x['forca'], reverse=True)
         final_list = jogos_selecionados[:10]
         
@@ -101,11 +101,11 @@ async def executar_robo():
         for i, jogo in enumerate(final_list, 1):
             mensagem += f"{i}. {jogo['texto']}\n\n"
         
-        mensagem += "---\n🤖 *Análise via API-Football (1.5, 2.5, BTTS e Cantos)*"
+        mensagem += "---\n🤖 *Análise Profissional (Gols, BTTS e Cantos)*"
         enviar_telegram(mensagem)
     else:
         print("⚠️ Nenhum jogo encontrado para as regras hoje.")
 
 if __name__ == "__main__":
     asyncio.run(executar_robo())
-    
+        
