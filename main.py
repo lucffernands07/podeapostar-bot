@@ -46,7 +46,7 @@ def executar():
         135: ("Serie A", "italy-serie-a"),
         78: ("Bundesliga", "germany-bundesliga"),
         71: ("Brasileirão A", "brazil-serie-a"),
-        239: ("Colômbia", "colombia-primera-a"),
+        239: ("Colômbia", "colombia-colombia-primera-a"),
         268: ("Argentina", "argentina-primera-division"),
         88: ("Holandês", "netherlands-eredivisie")
     }
