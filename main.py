@@ -101,7 +101,7 @@ def executar():
                     })
                 elif len(opcoes) == 1: # Aposta Simples
                     ligas_encontradas.add(l_nome)
-                    link = f"https://www.adamchoi.co.uk/search?query={t1['name'].replace(' ', '%20')}"
+                    link = f"https://www.adamchoi.co.uk/{l_slug}"
                     bilhete.append({
                         "prio": prio,
                         "texto": f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {m['fixture']['date'][11:16]} | {l_nome}\n🎯 {opcoes[0]}\n📊 [Estatísticas]({link})"
