@@ -35,41 +35,44 @@ def get_adamchoi_stats(team_id):
     except: return 0, 0, 0, 0
 
 def executar():
-    # Ajuste de Data para o fuso de Brasília
+    # Ajuste para fuso de Brasília
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
-    
-    print(f"🚀 Varredura para o dia: {hoje}")
     
     ligas_config = {
         2: ("Champions", "uefa-champions-league"),
         39: ("Premier League", "premier-league"),
+        40: ("Championship", "championship"),
         140: ("LALIGA", "la-liga"),
+        141: ("LaLiga 2", "segunda-division"),
         135: ("Serie A", "serie-a"),
         78: ("Bundesliga", "bundesliga"),
         94: ("Português", "primeira-liga"),
         71: ("Brasileirão A", "brazilian-serie-a"),
         239: ("Colômbia", "colombian-primera-a"),
+        268: ("Argentina", "argentinian-primera-division"),
         88: ("Holandês", "eredivisie"),
         203: ("Turquia", "turkish-super-lig"),
-        475: ("Carioca", "brazilian-carioca-a"),
-        477: ("Paulista", "brazilian-paulista-a")
+        262: ("México", "mexican-liga-mx")
     }
     
     bilhete = []
     ligas_encontradas = set()
 
     for l_id, (l_nome, l_slug) in ligas_config.items():
-        season = 2026 if l_id in [71, 239, 475, 477] else 2025
+        # Temporadas: 2026 para Américas, 2025 para Europa
+        season = 2026 if l_id in [71, 239, 268, 262] else 2025
         url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
         
         try:
             res = requests.get(url, headers=HEADERS).json()
             matches = res.get('response', [])
             for m in matches:
-                # Verificação extra: Se o jogo já passou do horário atual, ignora
-                hora_jogo = datetime.fromisoformat(m['fixture']['date'][:-6]) - timedelta(hours=3)
-                if hora_jogo < agora_br: continue
+                # Converter data do jogo para fuso BR e filtrar os que já passaram
+                hora_utc = datetime.fromisoformat(m['fixture']['date'][:-6])
+                hora_jogo_br = hora_utc - timedelta(hours=3)
+                
+                if hora_jogo_br < agora_br: continue
 
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 h15, h25, hbtts, hwd = get_adamchoi_stats(t1['id'])
@@ -85,15 +88,18 @@ def executar():
                 elif awd >= 80: 
                     opcoes.append(f"🔸 X2 ({t2['name']} ou Empate)")
                     prio += 40
+                
                 if m25 >= 75: 
                     opcoes.append("🔸 Mais de 2.5 Gols")
                     prio += 50
                 elif m15 >= 75: 
                     opcoes.append("🔸 Mais de 1.5 Gols")
                     prio += 30
+                
                 if mbtts >= 75: 
                     opcoes.append("🔸 Ambas Marcam — Sim")
                     prio += 35
+                
                 if m15 >= 80:
                     opcoes.append("🔸 +8.5 Cantos (Tendência)")
                     prio += 15
@@ -105,7 +111,7 @@ def executar():
                     
                     bilhete.append({
                         "prio": prio,
-                        "texto": f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {hora_jogo.strftime('%H:%M')} | {l_nome}\n{titulo}\n" + "\n".join(opcoes) + f"\n📊 [Estatísticas]({link})"
+                        "texto": f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {hora_jogo_br.strftime('%H:%M')} | {l_nome}\n{titulo}\n" + "\n".join(opcoes) + f"\n📊 [Estatísticas]({link})"
                     })
         except: continue
 
@@ -117,8 +123,3 @@ def executar():
             msg += f"{i}. {jogo['texto']}\n\n"
         msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
         enviar_telegram(msg)
-    else:
-        print("⚠️ Sem jogos para o horário restante de hoje.")
-
-if __name__ == "__main__":
-    executar()
