@@ -144,8 +144,8 @@ def executar():
         bilhete_ordenado = sorted(jogos_agrupados.values(), key=lambda x: x['liga'])
 
         # Montagem da Mensagem
-        msg = f"🔥 *BILHETE DE ELITE - TOP SELEÇÕES ({hoje})*\n"
-        msg += f"🎯 Foco: 12 Entradas (DC Mínimo 85%)\n\n"
+        msg = f"🎫 *BILHETE DE ELITE - TOP APOSTAS ({hoje})*\n"
+        msg += f"🎯 Foco: 12 Entradas de mercados\n\n"
         
         for i, jogo in enumerate(bilhete_ordenado, 1):
             tipo = "🔥 *Criar Aposta*" if len(jogo['mercados']) > 1 else "🎯 *Aposta Simples*"
@@ -153,7 +153,7 @@ def executar():
             msg += "\n".join(jogo['mercados'])
             msg += f"\n📊 [Estatísticas]({jogo['link']})\n\n"
         
-        msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
+        msg += "---\nAPOSTAR: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
         enviar_telegram(msg)
 
 if __name__ == "__main__":
