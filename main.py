@@ -93,7 +93,7 @@ def executar():
                 if len(opcoes) >= 2: # CRIAR APOSTA (Duas ou mais)
                     ligas_encontradas.add(l_nome)
                     txt_aposta = "🔥 *Criar Aposta*\n" + "\n".join(opcoes)
-                    link = f"https://www.adamchoi.co.uk/search?query={t1['name'].replace(' ', '%20')}"
+                    link = f"https://www.adamchoi.co.uk/{l_slug}"
                     
                     bilhete.append({
                         "prio": prio,
