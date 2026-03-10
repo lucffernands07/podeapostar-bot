@@ -13,41 +13,42 @@ def enviar_telegram(msg):
     payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
     try:
         requests.post(url, json=payload, timeout=15)
-        print("✅ Bilhete enviado com sucesso!")
+        print("✅ Bilhete enviado!")
     except:
         print("❌ Erro no Telegram")
 
-def scan_adamchoi_stats(team_id):
-    """Analisa histórico real de 10 jogos para todos os mercados"""
+def get_adamchoi_stats(team_id):
+    """Analisa os últimos 10 jogos para gerar as combinações"""
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10"
     try:
         res = requests.get(url, headers=HEADERS, timeout=10).json()
         fixtures = res.get('response', [])
-        if not fixtures: return 0, 0, 0, 0, 0
+        if not fixtures: return 0, 0, 0, 0
         
-        o15, o25, btts, wd, corners = 0, 0, 0, 0, 0
+        o15, o25, btts, wd = 0, 0, 0, 0
         for f in fixtures:
             g_h, g_a = f['goals']['home'] or 0, f['goals']['away'] or 0
             if (g_h + g_a) >= 2: o15 += 1
             if (g_h + g_a) >= 3: o25 += 1
             if g_h > 0 and g_a > 0: btts += 1
+            # Win or Draw
             if (f['teams']['home']['id'] == team_id and g_h >= g_a) or \
                (f['teams']['away']['id'] == team_id and g_a >= g_h): wd += 1
         
-        return (o15/10)*100, (o25/10)*100, (btts/10)*100, (wd/10)*100
+        return (o15*10), (o25*10), (btts*10), (wd*10)
     except: return 0, 0, 0, 0
 
 def executar():
     hoje = datetime.now().strftime("%Y-%m-%d")
-    print(f"🚀 Iniciando Varredura: {hoje}")
+    print(f"🚀 Gerando Bilhetes Combinados: {hoje}")
     
     ligas_config = {
-        2: "Champions League", 39: "Premier League", 140: "LALIGA", 135: "Serie A",
-        78: "Bundesliga", 94: "Português", 71: "Brasileirão A", 239: "Colômbia",
-        203: "Süper Lig", 172: "Bulgária", 233: "Egito", 88: "Holandês", 144: "Belga"
+        2: "Champions", 39: "Premier League", 140: "LALIGA", 135: "Serie A",
+        94: "Português", 71: "Brasileirão A", 239: "Colômbia", 88: "Holandês",
+        203: "Turquia", 172: "Bulgária", 144: "Bélgica"
     }
     
-    jogos_analisados = []
+    bilhete = []
     ligas_encontradas = set()
 
     for l_id, l_nome in ligas_config.items():
@@ -56,47 +57,63 @@ def executar():
         try:
             res = requests.get(url, headers=HEADERS).json()
             matches = res.get('response', [])
-            if not matches: continue
-            
             for m in matches:
                 t1, t2 = m['teams']['home'], m['teams']['away']
-                h15, h25, hbtts, hwd = scan_adamchoi_stats(t1['id'])
-                a15, a25, abtts, awd = scan_adamchoi_stats(t2['id'])
+                h15, h25, hbtts, hwd = get_adamchoi_stats(t1['id'])
+                a15, a25, abtts, awd = get_adamchoi_stats(t2['id'])
                 
+                # Médias
                 m15, m25, mbtts = (h15+a15)/2, (h25+a25)/2, (hbtts+abtts)/2
-                mercado, nota = "", 0
+                
+                opcoes = []
+                prio = 0
+                
+                # Regras de Combinação (Igual sua imagem da Betano)
+                # 1. Chance Dupla
+                if hwd >= 80: 
+                    opcoes.append(f"🔸 1X (Chance Dupla - {t1['name']})")
+                    prio += 40
+                elif awd >= 80: 
+                    opcoes.append(f"🔸 X2 (Chance Dupla - {t2['name']})")
+                    prio += 40
+                
+                # 2. Gols
+                if m25 >= 70: 
+                    opcoes.append("🔸 Mais de 2.5 Gols")
+                    prio += 50
+                elif m15 >= 75: 
+                    opcoes.append("🔸 Mais de 1.5 Gols")
+                    prio += 30
+                
+                # 3. Ambas Marcam
+                if mbtts >= 75: 
+                    opcoes.append("🔸 Ambas Marcam - Sim")
+                    prio += 35
 
-                # LÓGICA DE SELEÇÃO
-                if m25 >= 75: mercado, nota = "⚡ +2.5 Gols — Atropelo", 100
-                elif m15 >= 75: mercado, nota = "⚽ +1.5 Gols — 4/5 (Est.)", 90
-                elif mbtts >= 75: mercado, nota = "🤝 Ambas Marcam — 4/5 (Est.)", 85
-                elif hwd >= 80 or awd >= 80:
-                    time_f = t1['name'] if hwd >= awd else t2['name']
-                    mercado, nota = f"🛡️ Dupla Chance — {time_f} ou Empate", 75
-                elif m15 >= 60: mercado, nota = "🛡️ +0.5 Gols (HT/FT) — Segurança", 70
-
-                if mercado:
+                if len(opcoes) >= 2: # CRIAR APOSTA (Duas ou mais)
                     ligas_encontradas.add(l_nome)
-                    # Link AdamChoi corrigido
-                    link_stats = f"https://www.adamchoi.co.uk/search?query={t1['name'].replace(' ', '%20')}"
+                    txt_aposta = "🔥 *Criar Aposta*\n" + "\n".join(opcoes)
+                    link = f"https://www.adamchoi.co.uk/search?query={t1['name'].replace(' ', '%20')}"
                     
-                    canto_txt = "\n🚩 +8.5 Cantos (Tendência)" if m15 > 75 else ""
-                    
-                    jogos_analisados.append({
-                        "prio": nota,
-                        "texto": f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {m['fixture']['date'][11:16]} | {l_nome}\n🎯 {mercado}{canto_txt}\n📊 [Estatísticas]({link_stats})"
+                    bilhete.append({
+                        "prio": prio,
+                        "texto": f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {m['fixture']['date'][11:16]} | {l_nome}\n{txt_aposta}\n📊 [Estatísticas]({link})"
+                    })
+                elif len(opcoes) == 1: # Aposta Simples
+                    ligas_encontradas.add(l_nome)
+                    link = f"https://www.adamchoi.co.uk/search?query={t1['name'].replace(' ', '%20')}"
+                    bilhete.append({
+                        "prio": prio,
+                        "texto": f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {m['fixture']['date'][11:16]} | {l_nome}\n🎯 {opcoes[0]}\n📊 [Estatísticas]({link})"
                     })
         except: continue
 
-    if jogos_analisados:
-        jogos_analisados.sort(key=lambda x: x['prio'], reverse=True)
-        
+    if bilhete:
+        bilhete.sort(key=lambda x: x['prio'], reverse=True)
         msg = "🎯 *BILHETE DO DIA (10 JOGOS)*\n💰🍀 BOA SORTE!!!\n\n"
-        msg += "🏟️ *LIGAS ENCONTRADAS:*\n"
-        msg += "\n".join([f"🔹 {l}" for l in sorted(list(ligas_encontradas))])
-        msg += "\n\n"
+        msg += "🏟️ *LIGAS ENCONTRADAS:*\n" + "\n".join([f"🔹 {l}" for l in sorted(list(ligas_encontradas))]) + "\n\n"
         
-        for i, jogo in enumerate(jogos_analisados[:10], 1):
+        for i, jogo in enumerate(bilhete[:10], 1):
             msg += f"{i}. {jogo['texto']}\n\n"
         
         msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
@@ -104,4 +121,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-            
+                
