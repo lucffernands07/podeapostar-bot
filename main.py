@@ -94,7 +94,7 @@ def executar():
                 
                 match_id = m['fixture']['id']
                 match_info = f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {hora_jogo.strftime('%H:%M')}"
-                link = f"https://www.adamchoi.co.uk/leagues/{l_slug}"
+                link = f"https://www.adamchoi.co.uk/fixtures/leagues/{l_slug}"
 
                 # --- APLICAÇÃO DAS REGRAS DE MERCADO --- #
                 
