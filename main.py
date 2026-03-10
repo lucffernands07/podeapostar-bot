@@ -13,7 +13,7 @@ def enviar_telegram(msg):
     payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
     try:
         requests.post(url, json=payload, timeout=15)
-        print("✅ Bilhete de Elite enviado e organizado!")
+        print("✅ Bilhete de 12 seleções enviado!")
     except:
         print("❌ Erro no Telegram")
 
@@ -77,47 +77,47 @@ def executar():
                 match_info = f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {hora_br.strftime('%H:%M')}"
                 link = f"https://www.adamchoi.co.uk/leagues/{l_slug}"
 
-                # --- FILTROS DE MERCADO --- #
-                # 1. Chance Dupla (80%)
-                if hwd >= 80: todas_selecoes_ranking.append({"prio": hwd, "mkt": f"🔸 1X ({t1['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
-                elif awd >= 80: todas_selecoes_ranking.append({"prio": awd, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                # --- FILTROS DE MERCADO COM PESOS --- #
+                # 1. Chance Dupla (80%) - Bônus +15 para garantir o topo do ranking
+                if hwd >= 80: 
+                    todas_selecoes_ranking.append({"prio": hwd + 15, "mkt": f"🔸 1X ({t1['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                elif awd >= 80: 
+                    todas_selecoes_ranking.append({"prio": awd + 15, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
                 
-                # 2. Gols +2.5 (Rigoroso 85%) ou +1.5 (80%)
-                if m25 >= 85: todas_selecoes_ranking.append({"prio": m25+5, "mkt": "🔸 Mais de 2.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
-                elif m15 >= 80: todas_selecoes_ranking.append({"prio": m15, "mkt": "🔸 Mais de 1.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                # 2. Gols +2.5 (85%) ou +1.5 (80%)
+                if m25 >= 85: 
+                    todas_selecoes_ranking.append({"prio": m25 + 5, "mkt": "🔸 Mais de 2.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                elif m15 >= 80: 
+                    todas_selecoes_ranking.append({"prio": m15, "mkt": "🔸 Mais de 1.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
                 
                 # 3. Ambas Marcam (80%)
-                if mbtts >= 80: todas_selecoes_ranking.append({"prio": mbtts+2, "mkt": "🔸 Ambas Marcam — Sim", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                if mbtts >= 80: 
+                    todas_selecoes_ranking.append({"prio": mbtts + 2, "mkt": "🔸 Ambas Marcam — Sim", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
                 
-                # 4. Menos de 9.5 Escanteios (Gatilho de Tendência 85%)
-                if m15 >= 85: todas_selecoes_ranking.append({"prio": 83, "mkt": "🔸 Menos de 9.5 Escanteios (-9.5)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                # 4. Menos de 9.5 Escanteios (85%)
+                if m15 >= 85: 
+                    todas_selecoes_ranking.append({"prio": 83, "mkt": "🔸 Menos de 9.5 Escanteios (-9.5)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
 
         except: continue
 
     if todas_selecoes_ranking:
-        # Primeiro pegamos as 10 melhores seleções absolutas
+        # Pega as 12 melhores seleções (vagas aumentadas)
         todas_selecoes_ranking.sort(key=lambda x: x['prio'], reverse=True)
-        top_selecoes = todas_selecoes_ranking[:10]
+        top_selecoes = todas_selecoes_ranking[:12]
 
-        # Agrupamos por jogo
         jogos_agrupados = {}
         for sel in top_selecoes:
             m_id = sel['id']
             if m_id not in jogos_agrupados:
-                jogos_agrupados[m_id] = {
-                    "info": sel['info'], 
-                    "liga": sel['liga'], 
-                    "mercados": [], 
-                    "link": sel['link']
-                }
+                jogos_agrupados[m_id] = {"info": sel['info'], "liga": sel['liga'], "mercados": [], "link": sel['link']}
+            # Máximo de 3 mercados por partida
             if len(jogos_agrupados[m_id]["mercados"]) < 3:
                 jogos_agrupados[m_id]["mercados"].append(sel['mkt'])
 
-        # --- ORGANIZAÇÃO ALFABÉTICA POR LIGA --- #
-        # Transformamos o dicionário em uma lista para ordenar por 'liga'
+        # Ordenar por Liga (A-Z)
         lista_ordenada = sorted(jogos_agrupados.values(), key=lambda x: x['liga'])
 
-        msg = f"🔥 *BILHETE DE ELITE - TOP SELEÇÕES ({hoje})*\n🎯 Foco: 8 a 10 Melhores Entradas Agrupadas\n\n"
+        msg = f"🔥 *BILHETE DE ELITE - TOP SELEÇÕES ({hoje})*\n🎯 Foco: 12 Melhores Entradas Agrupadas\n\n"
         
         for i, jogo in enumerate(lista_ordenada, 1):
             tipo = "🔥 *Criar Aposta*" if len(jogo['mercados']) > 1 else "🎯 *Aposta Simples*"
