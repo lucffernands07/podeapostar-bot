@@ -46,7 +46,7 @@ def executar():
     ligas_config = {
         2: ("Champions", "uefa-champions-league"),
         39: ("Premier League", "premier-league"),
-        40: ("Championship", "championship"),
+        40: ("Championship", "england-championship"),
         140: ("LALIGA", "la-liga"),
         141: ("LaLiga 2", "segunda-division"),
         135: ("Serie A", "serie-a"),
