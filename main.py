@@ -13,28 +13,26 @@ def enviar_telegram(msg):
     payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
     try:
         requests.post(url, json=payload, timeout=15)
-        print("✅ Bilhete enviado!")
+        print("✅ Bilhete de Elite enviado!")
     except: print("❌ Erro Telegram")
 
-def get_stats(team_id, league_id):
-    """Pega Gols e Escanteios em uma única chamada (Alta Velocidade)"""
-    url = f"https://api-football-v1.p.rapidapi.com/v3/teams/statistics?league={league_id}&season=2025&team={team_id}"
-    # Se for liga brasileira/sul-americana, muda para 2026 (ajuste automático se necessário)
+def get_corner_stats(team_id):
+    """Pega a média de escanteios independente de temporada"""
+    # Usamos o endpoint de estatísticas gerais do time na temporada atual
+    # Para o Brasil em Março, 2026 já tem dados.
     try:
-        res = requests.get(url, headers=HEADERS, timeout=10).json()
-        data = res.get('response', {})
-        
-        # Gols (Últimos jogos) - Mantendo sua lógica de 10 jogos
-        # Aqui simplificamos para a média da liga para evitar o bloqueio de requisições
-        fixtures = data.get('fixtures', {}).get('played', {}).get('total', 1)
-        corners_avg = float(data.get('corners', {}).get('avg', 0) or 0)
-        
-        # Como precisamos da lógica de 10 jogos específica (AdamChoi), mantemos a sua original 
-        # mas só chamamos escanteio se necessário.
-        return corners_avg
+        url = f"https://api-football-v1.p.rapidapi.com/v3/teams/statistics?season=2026&team={team_id}&league=71"
+        res = requests.get(url, headers=HEADERS, timeout=7).json()
+        avg = float(res.get('response', {}).get('corners', {}).get('avg', 0) or 0)
+        if avg == 0: # Se não achar em 2026, tenta 2025
+             url = f"https://api-football-v1.p.rapidapi.com/v3/teams/statistics?season=2025&team={team_id}&league=71"
+             res = requests.get(url, headers=HEADERS, timeout=7).json()
+             avg = float(res.get('response', {}).get('corners', {}).get('avg', 0) or 0)
+        return avg
     except: return 0
 
 def get_adamchoi_stats(team_id):
+    """PEGA OS ÚLTIMOS 10 JOGOS REAIS (Independente de Campeonato ou Ano)"""
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10"
     try:
         res = requests.get(url, headers=HEADERS, timeout=10).json()
@@ -54,20 +52,15 @@ def get_adamchoi_stats(team_id):
 def executar():
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
+    
+    # IDs atualizados para 2026
     ligas_config = {
         2: ("Champions League", "uefa-champions-league"),
         39: ("Premier League", "england-premier-league"),
-        40: ("Championship", "england-championship"),
         140: ("LaLiga", "spain-la-liga"),
         135: ("Serie A", "italy-serie-a"),
         78: ("Bundesliga", "germany-bundesliga"),
-        94: ("Português", "portugal-primeira-liga"),
-        71: ("Brasileirão A", "brazil-serie-a"),
-        239: ("Colômbia", "colombia-primera-a"),
-        268: ("Argentina", "argentina-primera-division"),
-        88: ("Holandês", "netherlands-eredivisie"),
-        203: ("Turquia", "turkish-super-lig"),
-        262: ("México", "mexico-liga-mx"),
+        71: ("Brasileirão A", "brazil-serie-a"), # Brasileirão
         475: ("Carioca", "brazil-carioca-a"),
         477: ("Paulista", "brazil-paulista-a")
     }
@@ -75,44 +68,43 @@ def executar():
     ranking_geral = []
 
     for l_id, (l_nome, l_slug) in ligas_config.items():
-        season = 2026 if l_id in [71, 239, 268, 262, 475, 477] else 2025
-        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
-        try:
-            res = requests.get(url, headers=HEADERS).json()
-            for m in res.get('response', []):
-                hora_jogo = datetime.fromisoformat(m['fixture']['date'][:-6]) - timedelta(hours=3)
-                if hora_jogo < agora_br: continue
+        # Tentamos buscar o jogo em 2026 primeiro (Brasil), se não achar, vai 2025 (Europa)
+        for season in [2026, 2025]:
+            url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
+            try:
+                res = requests.get(url, headers=HEADERS).json()
+                if not res.get('response'): continue # Tenta a outra season se não achar nada
+                
+                for m in res.get('response', []):
+                    hora_jogo = datetime.fromisoformat(m['fixture']['date'][:-6]) - timedelta(hours=3)
+                    if hora_jogo < agora_br: continue
 
-                t1, t2 = m['teams']['home'], m['teams']['away']
-                
-                # Chamada original (Rápida)
-                h15, h25, hbtts, hwd = get_adamchoi_stats(t1['id'])
-                a15, a25, abtts, awd = get_adamchoi_stats(t2['id'])
-                m15, m25, mbtts = (h15+a15)/2, (h25+a25)/2, (hbtts+abtts)/2
-                
-                match_id = m['fixture']['id']
-                match_info = f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {hora_jogo.strftime('%H:%M')}"
-                link = f"https://www.adamchoi.co.uk/leagues/{l_slug}"
+                    t1, t2 = m['teams']['home'], m['teams']['away']
+                    h15, h25, hbtts, hwd = get_adamchoi_stats(t1['id'])
+                    a15, a25, abtts, awd = get_adamchoi_stats(t2['id'])
+                    m15, m25, mbtts = (h15+a15)/2, (h25+a25)/2, (hbtts+abtts)/2
+                    
+                    match_id = m['fixture']['id']
+                    match_info = f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {hora_jogo.strftime('%H:%M')}"
+                    link = f"https://www.adamchoi.co.uk/leagues/{l_slug}"
 
-                # 1. Dupla Chance
-                if hwd >= 85: ranking_geral.append({"prio": hwd + 10, "mkt": f"🔸 1X ({t1['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
-                elif awd >= 85: ranking_geral.append({"prio": awd + 10, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                    # 1. Dupla Chance
+                    if hwd >= 85: ranking_geral.append({"prio": hwd + 10, "mkt": f"🔸 1X ({t1['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                    elif awd >= 85: ranking_geral.append({"prio": awd + 10, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                    
+                    # 2. Gols
+                    if m25 >= 85: ranking_geral.append({"prio": m25 + 5, "mkt": "🔸 Mais de 2.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                    elif m15 >= 80: ranking_geral.append({"prio": m15, "mkt": "🔸 Mais de 1.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                    
+                    # 3. Escanteios (Média somada < 10.5)
+                    if m15 >= 85:
+                        c1 = get_corner_stats(t1['id'])
+                        c2 = get_corner_stats(t2['id'])
+                        if 0 < (c1 + c2) < 10.5:
+                            ranking_geral.append({"prio": 83, "mkt": "🔸 Menos de 9.5 Escanteios (-9.5)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
                 
-                # 2. Gols
-                if m25 >= 85: ranking_geral.append({"prio": m25 + 5, "mkt": "🔸 Mais de 2.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
-                elif m15 >= 80: ranking_geral.append({"prio": m15, "mkt": "🔸 Mais de 1.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
-                
-                # 3. Escanteios (SÓ ENTRA SE O JOGO PASSAR NA MÉDIA DA LIGA)
-                if m15 >= 85:
-                    c_avg1 = get_stats(t1['id'], l_id)
-                    c_avg2 = get_stats(t2['id'], l_id)
-                    # Se a média somada for menor que 10.5 e maior que 0 (evitar erro de dado vazio)
-                    if 0 < (c_avg1 + c_avg2) < 10.5:
-                        ranking_geral.append({"prio": 83, "mkt": "🔸 Menos de 9.5 Escanteios (-9.5)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
-
-                # 4. Ambas Marcam
-                if mbtts >= 80: ranking_geral.append({"prio": mbtts + 2, "mkt": "🔸 Ambas Marcam — Sim", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
-        except: continue
+                break # Se encontrou jogos em uma season, não precisa olhar a outra
+            except: continue
 
     if ranking_geral:
         ranking_geral.sort(key=lambda x: x['prio'], reverse=True)
@@ -125,13 +117,12 @@ def executar():
             if len(jogos_agrupados[m_id]["mercados"]) < 3:
                 jogos_agrupados[m_id]["mercados"].append(s['mkt'])
 
-        msg = f"🎫 *BILHETE DE ELITE - TOP APOSTAS ({hoje})*\n🎯 Foco: 12 Entradas de mercados\n\n"
+        msg = f"🎫 *BILHETE DE ELITE - TOP APOSTAS ({hoje})*\n"
         for i, jogo in enumerate(sorted(jogos_agrupados.values(), key=lambda x: x['liga']), 1):
             tipo = "🔥 *Criar Aposta*" if len(jogo['mercados']) > 1 else "🎯 *Aposta Simples*"
             msg += f"{i}. {jogo['info']} | {jogo['liga']}\n{tipo}\n" + "\n".join(jogo['mercados']) + f"\n📊 [Estatísticas]({jogo['link']})\n\n"
-        msg += "---\nAPOSTAR: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
         enviar_telegram(msg)
 
 if __name__ == "__main__":
     executar()
-                
+    
