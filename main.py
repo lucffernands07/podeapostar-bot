@@ -14,17 +14,16 @@ def enviar_telegram(msg):
     try: requests.post(url, json=payload, timeout=15)
     except: pass
 
-def get_corner_avg(team_id, league_id, season):
-    """Busca a média de escanteios (Igual ao dado do Sofascore)"""
+def get_corner_stats(team_id, league_id, season):
+    """Busca a média de escanteios (Fonte: Sofascore/API)"""
     try:
         url = f"https://api-football-v1.p.rapidapi.com/v3/teams/statistics?season={season}&team={team_id}&league={league_id}"
         res = requests.get(url, headers=HEADERS, timeout=7).json()
-        avg = float(res.get('response', {}).get('corners', {}).get('avg', 0) or 0)
-        return avg
+        return float(res.get('response', {}).get('corners', {}).get('avg', 0) or 0)
     except: return 0
 
-def get_adamchoi_stats(team_id):
-    """Analisa os últimos 10 jogos reais (Tendência de Gols e Dupla Chance)"""
+def get_stats(team_id):
+    """Calcula frequências reais dos últimos 10 jogos"""
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10"
     try:
         res = requests.get(url, headers=HEADERS, timeout=8).json()
@@ -45,25 +44,18 @@ def executar():
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
     
-    # LISTA DE LIGAS FOCO (Sua lista de Elite)
     ligas_config = {
-        2: ("Champions League", "uefa-champions-league"),
-        3: ("Europa League", "uefa-europa-league"),
-        39: ("Premier League", "england-premier-league"),
-        40: ("Championship", "england-championship"),
-        140: ("LaLiga", "spain-la-liga"),
-        135: ("Serie A", "italy-serie-a"),
-        78: ("Bundesliga", "germany-bundesliga"),
-        94: ("Português", "portugal-primeira-liga"),
-        88: ("Holandês", "netherlands-eredivisie"),
-        71: ("Brasileirão A", "brazil-serie-a"),
-        268: ("Argentina", "argentina-primera-division"),
-        203: ("Turquia", "turkish-super-lig")
+        2: ("Champions League", "uefa-champions-league"), 3: ("Europa League", "uefa-europa-league"),
+        39: ("Premier League", "england-premier-league"), 40: ("Championship", "england-championship"),
+        140: ("LaLiga", "spain-la-liga"), 135: ("Serie A", "italy-serie-a"),
+        78: ("Bundesliga", "germany-bundesliga"), 94: ("Português", "portugal-primeira-liga"),
+        88: ("Holandês", "netherlands-eredivisie"), 71: ("Brasileirão A", "brazil-serie-a"),
+        268: ("Argentina", "argentina-primera-division"), 203: ("Turquia", "turkish-super-lig")
     }
     
-    pre_ranking = []
+    pool_entradas = []
 
-    # FASE 1: SCANNER GLOBAL DE GOLS E RESULTADOS
+    # 1. MINERAÇÃO E CÁLCULO DE TODOS OS MERCADOS
     for l_id, (l_nome, l_slug) in ligas_config.items():
         for season in [2026, 2025]:
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
@@ -77,71 +69,64 @@ def executar():
                     if hora < agora_br: continue
                     
                     t1, t2 = m['teams']['home'], m['teams']['away']
-                    h15, h25, hbtts, hwd = get_adamchoi_stats(t1['id'])
-                    a15, a25, abtts, awd = get_adamchoi_stats(t2['id'])
-                    m15, m25 = (h15+a15)/2, (h25+a25)/2
-
-                    game_data = {
-                        "id": m['fixture']['id'], 
-                        "info": f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {hora.strftime('%H:%M')}",
-                        "l_id": l_id, "season": m['league']['season'], "t1": t1['id'], "t2": t2['id'], 
-                        "liga": l_nome, "link": f"https://www.adamchoi.co.uk/leagues/{l_slug}"
+                    h15, h25, hbtts, hwd = get_stats(t1['id'])
+                    a15, a25, abtts, awd = get_stats(t2['id'])
+                    
+                    p15, p25, pbtts = (h15+a15)/2, (h25+a25)/2, (hbtts+abtts)/2
+                    
+                    g_info = {
+                        "id": m['fixture']['id'], "info": f"*{t1['name']} x {t2['name']}*",
+                        "hora": hora.strftime('%H:%M'), "liga": l_nome, "link": f"https://www.adamchoi.co.uk/leagues/{l_slug}"
                     }
 
-                    # Critérios de entrada (Mínimo 75% para garantir volume)
-                    if hwd >= 75: pre_ranking.append({"prio": hwd+10, "mkt": f"🔸 1X ({t1['name']} ou Empate)", **game_data})
-                    elif awd >= 75: pre_ranking.append({"prio": awd+10, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", **game_data})
-                    if m25 >= 75: pre_ranking.append({"prio": m25+5, "mkt": "🔸 Mais de 2.5 Gols", **game_data})
-                    elif m15 >= 75: pre_ranking.append({"prio": m15, "mkt": "🔸 Mais de 1.5 Gols", **game_data})
+                    # Adiciona ao Pool se atingir o mínimo de 65%
+                    if hwd >= 65: pool_entradas.append({"prio": hwd, "mkt": f"🔸 1X ({t1['name']} ou Empate)", **g_info})
+                    if awd >= 65: pool_entradas.append({"prio": awd, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", **g_info})
+                    if p15 >= 65: pool_entradas.append({"prio": p15, "mkt": "🔸 Mais de 1.5 Gols", **g_info})
+                    if p25 >= 60: pool_entradas.append({"prio": p25, "mkt": "🔸 Mais de 2.5 Gols", **g_info})
+                    if pbtts >= 60: pool_entradas.append({"prio": pbtts, "mkt": "🔸 Ambas Marcam — Sim", **g_info})
+                    
+                    # Escanteios (Conversão de Média para % de Segurança)
+                    c1 = get_corner_stats(t1['id'], l_id, season)
+                    c2 = get_corner_stats(t2['id'], l_id, season)
+                    soma_cantos = c1 + c2
+                    if 0 < soma_cantos < 10.5:
+                        # Cálculo: Se soma é 7, segurança é ~86%. Se soma é 10, segurança é ~70%.
+                        p_corner = 100 - (soma_cantos * 3)
+                        pool_entradas.append({"prio": p_corner, "mkt": "🔸 Menos de 9.5 Escanteios", **g_info})
                 break
             except: continue
 
-    # FASE 2: SELECIONA AS 8 MELHORES (Máx 2 por jogo)
-    pre_ranking.sort(key=lambda x: x['prio'], reverse=True)
-    selecoes_8 = []
-    jogos_contagem = {}
-    for s in pre_ranking:
-        if len(selecoes_8) >= 8: break
-        m_id = s['id']
-        jogos_contagem[m_id] = jogos_contagem.get(m_id, 0)
-        if jogos_contagem[m_id] < 2:
-            selecoes_8.append(s)
-            jogos_contagem[m_id] += 1
+    # 2. RANKING GERAL (DA MAIOR % PARA A MENOR)
+    pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
 
-    # FASE 3: POLIMENTO DE ESCANTEIOS (Até completar 12 entradas)
-    bilhete_final = list(selecoes_8)
-    jogos_ja_no_bilhete = {s['id'] for s in selecoes_8}
+    # 3. FILTRO DE ELITE (Limite 12 entradas / Máx 3 por jogo)
+    bilhete_final = []
+    contagem_por_jogo = {}
     
-    for s in selecoes_8:
+    for e in pool_entradas:
         if len(bilhete_final) >= 12: break
+        m_id = e['id']
+        contagem_por_jogo[m_id] = contagem_por_jogo.get(m_id, 0)
         
-        # Só busca escanteio se o jogo for promissor
-        c1 = get_corner_avg(s['t1'], s['l_id'], s['season'])
-        c2 = get_corner_avg(s['t2'], s['l_id'], s['season'])
-        
-        # Se a média somada for baixa (estilo Sofascore), adiciona
-        if 0 < (c1 + c2) < 10.5:
-            bilhete_final.append({
-                "mkt": "🔸 Menos de 9.5 Escanteios (-9.5)", 
-                "id": s['id'], "info": s['info'], "liga": s['liga'], "link": s['link']
-            })
+        if contagem_por_jogo[m_id] < 3:
+            bilhete_final.append(e)
+            contagem_por_jogo[m_id] += 1
 
-    # AGRUPAMENTO E ENVIO
-    jogos_agrupados = {}
-    for s in bilhete_final:
-        m_id = s['id']
-        if m_id not in jogos_agrupados:
-            jogos_agrupados[m_id] = {"info": s['info'], "liga": s['liga'], "mercados": [], "link": s['link']}
-        jogos_agrupados[m_id]["mercados"].append(s['mkt'])
+    # 4. AGRUPAMENTO E FORMATAÇÃO FINAL
+    jogos_final = {}
+    for e in bilhete_final:
+        m_id = e['id']
+        if m_id not in jogos_final:
+            jogos_final[m_id] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": e['link'], "mercados": []}
+        jogos_final[m_id]["mercados"].append(f"{e['mkt']} — **{int(e['prio'])}%**")
 
-    msg = f"🎫 *BILHETE DE ELITE - TOP APOSTAS ({hoje})*\n🎯 12 Entradas (8 Elite + 4 Cantos Cirúrgicos)\n\n"
-    for i, (m_id, j) in enumerate(jogos_agrupados.items(), 1):
+    msg = f"🎫 *BILHETE TOP ENTRADAS - ELITE GLOBAL*\n📊 Regra: Melhores % de hoje (Máx 12)\n\n"
+    for i, j in enumerate(jogos_final.values(), 1):
         tipo = "🔥 *Criar Aposta*" if len(j['mercados']) > 1 else "🎯 *Aposta Simples*"
-        msg += f"{i}. {j['info']} | {j['liga']}\n{tipo}\n" + "\n".join(j['mercados']) + f"\n📊 [Estatísticas]({j['link']})\n\n"
+        msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n{tipo}\n" + "\n".join(j['mercados']) + f"\n📊 [Estatísticas]({j['link']})\n\n"
     
-    msg += "---\nAPOSTAR: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
-    enviar_telegram(msg)
+    enviar_telegram(msg + "---\nAPOSTAR: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)")
 
-if __name__ == "__main__":
-    executar()
-                                   
+if __name__ == "__main__": executar()
+    
