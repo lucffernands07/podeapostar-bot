@@ -33,14 +33,13 @@ def get_corner_stats(team_id):
         total_corners = 0
         count = 0
         for f in fixtures:
-            # Tenta pegar os escanteios das estatísticas da partida
             f_id = f['fixture']['id']
             stats_url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/statistics?fixture={f_id}&team={team_id}"
             s_res = requests.get(stats_url, headers=HEADERS, timeout=5).json()
             
             for s in s_res.get('response', []):
                 for stat in s.get('statistics', []):
-                    if stat['type'] == 'Corner Kicks' and stat['value']:
+                    if stat['type'] == 'Corner Kicks' and stat['value'] is not None:
                         total_corners += stat['value']
                         count += 1
         return total_corners / count if count > 0 else 0
@@ -128,12 +127,16 @@ def executar():
                 elif m15 >= 80: 
                     ranking_geral.append({"prio": m15, "mkt": "🔸 Mais de 1.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
                 
-                # 3. Escanteios - NOVA REGRA COM FILTRO DE MÉDIA REAL
+                # 3. Escanteios (Menos de 9.5) - AJUSTE PARA NÃO TRAVAR O RESTO DO JOGO
                 if m15 >= 85:
-                    c1 = get_corner_stats(t1['id'])
-                    c2 = get_corner_stats(t2['id'])
-                    if (c1 + c2) < 9.5: # Trava de segurança contra times de "abafa"
-                        ranking_geral.append({"prio": 83, "mkt": "🔸 Menos de 9.5 Escanteios (-9.5)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                    try:
+                        c1 = get_corner_stats(t1['id'])
+                        c2 = get_corner_stats(t2['id'])
+                        # Usamos 10.5 como margem de segurança
+                        if 0 < (c1 + c2) < 10.5: 
+                            ranking_geral.append({"prio": 85, "mkt": "🔸 Menos de 9.5 Escanteios (-9.5)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                    except:
+                        pass # Se falhar a API de cantos, não trava o processamento do jogo
                 
                 # 4. Ambas Marcam
                 if mbtts >= 80:
@@ -169,3 +172,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
+                        
