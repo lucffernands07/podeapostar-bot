@@ -13,21 +13,19 @@ def enviar_telegram(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
     try: requests.post(url, json=payload, timeout=15)
-    except: print("❌ Erro Telegram")
+    except: pass
 
 def get_stats_fast(team_id, league_id, season):
-    """Busca estatísticas de escanteios de forma otimizada"""
     try:
         url = f"https://api-football-v1.p.rapidapi.com/v3/teams/statistics?season={season}&team={team_id}&league={league_id}"
-        res = requests.get(url, headers=HEADERS, timeout=8).json()
+        res = requests.get(url, headers=HEADERS, timeout=5).json()
         return float(res.get('response', {}).get('corners', {}).get('avg', 0) or 0)
     except: return 0
 
 def get_adamchoi_stats(team_id):
-    """Pega os últimos 10 jogos reais (forma atual)"""
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10"
     try:
-        res = requests.get(url, headers=HEADERS, timeout=10).json()
+        res = requests.get(url, headers=HEADERS, timeout=8).json()
         fixtures = res.get('response', [])
         if not fixtures: return 0, 0, 0, 0
         o15, o25, btts, wd = 0, 0, 0, 0
@@ -45,23 +43,21 @@ def executar():
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
     
-    # LISTA DE LIGAS ELITE
     ligas_config = {
         2: ("Champions League", "uefa-champions-league"),
-        3: ("Europa League", "uefa-europa-league"),
         39: ("Premier League", "england-premier-league"),
         140: ("LaLiga", "spain-la-liga"),
         135: ("Serie A", "italy-serie-a"),
         78: ("Bundesliga", "germany-bundesliga"),
         71: ("Brasileirão A", "brazil-serie-a"),
         268: ("Argentina", "argentina-primera-division"),
-        203: ("Turquia", "turkish-super-lig")
+        203: ("Turquia", "turkish-super-lig"),
+        94: ("Português", "portugal-primeira-liga")
     }
     
     ranking_geral = []
 
     for l_id, (l_nome, l_slug) in ligas_config.items():
-        # Busca em 2026 e 2025 para garantir cobertura total
         jogos_encontrados = []
         for season in [2026, 2025]:
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
@@ -79,14 +75,12 @@ def executar():
 
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 h15, h25, hbtts, hwd = get_adamchoi_stats(t1['id'])
-                time.sleep(0.2) # Pausa curta para não estressar a API
                 a15, a25, abtts, awd = get_adamchoi_stats(t2['id'])
                 
                 m15, m25, mbtts = (h15+a15)/2, (h25+a25)/2, (hbtts+abtts)/2
                 match_id, match_info = m['fixture']['id'], f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {hora_jogo.strftime('%H:%M')}"
                 link = f"https://www.adamchoi.co.uk/leagues/{l_slug}"
 
-                # --- RANKING DE PRIORIDADE ---
                 if hwd >= 85: ranking_geral.append({"prio": hwd + 10, "mkt": f"🔸 1X ({t1['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
                 elif awd >= 85: ranking_geral.append({"prio": awd + 10, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
                 
@@ -95,7 +89,6 @@ def executar():
                 
                 if mbtts >= 80: ranking_geral.append({"prio": mbtts + 2, "mkt": "🔸 Ambas Marcam — Sim", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
 
-                # Escanteios: Só busca se o jogo for promissor em gols (Economia de API)
                 if m15 >= 85:
                     c1 = get_stats_fast(t1['id'], l_id, m['league']['season'])
                     c2 = get_stats_fast(t2['id'], l_id, m['league']['season'])
@@ -125,4 +118,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-                                                               
+                
