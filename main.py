@@ -15,7 +15,6 @@ def enviar_telegram(msg):
     except: pass
 
 def get_corner_stats(team_id, league_id, season):
-    """Busca a média de escanteios (Fonte: Sofascore/API)"""
     try:
         url = f"https://api-football-v1.p.rapidapi.com/v3/teams/statistics?season={season}&team={team_id}&league={league_id}"
         res = requests.get(url, headers=HEADERS, timeout=7).json()
@@ -23,7 +22,6 @@ def get_corner_stats(team_id, league_id, season):
     except: return 0
 
 def get_stats(team_id):
-    """Calcula frequências reais dos últimos 10 jogos"""
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10"
     try:
         res = requests.get(url, headers=HEADERS, timeout=8).json()
@@ -55,7 +53,6 @@ def executar():
     
     pool_entradas = []
 
-    # 1. MINERAÇÃO E CÁLCULO DE TODOS OS MERCADOS
     for l_id, (l_nome, l_slug) in ligas_config.items():
         for season in [2026, 2025]:
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
@@ -72,56 +69,54 @@ def executar():
                     h15, h25, hbtts, hwd = get_stats(t1['id'])
                     a15, a25, abtts, awd = get_stats(t2['id'])
                     
-                    p15, p25, pbtts = (h15+a15)/2, (h25+a25)/2, (hbtts+abtts)/2
-                    
-                    g_info = {
-                        "id": m['fixture']['id'], "info": f"*{t1['name']} x {t2['name']}*",
-                        "hora": hora.strftime('%H:%M'), "liga": l_nome, "link": f"https://www.adamchoi.co.uk/leagues/{l_slug}"
-                    }
+                    # REGRA DO JOGO TRAVADO: Se ambos têm Dupla Chance >= 80%, descarta o jogo
+                    if hwd >= 80 and awd >= 80:
+                        continue 
 
-                    # Adiciona ao Pool se atingir o mínimo de 65%
-                    if hwd >= 65: pool_entradas.append({"prio": hwd, "mkt": f"🔸 1X ({t1['name']} ou Empate)", **g_info})
-                    if awd >= 65: pool_entradas.append({"prio": awd, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", **g_info})
-                    if p15 >= 65: pool_entradas.append({"prio": p15, "mkt": "🔸 Mais de 1.5 Gols", **g_info})
-                    if p25 >= 60: pool_entradas.append({"prio": p25, "mkt": "🔸 Mais de 2.5 Gols", **g_info})
-                    if pbtts >= 60: pool_entradas.append({"prio": pbtts, "mkt": "🔸 Ambas Marcam — Sim", **g_info})
+                    p15, p25, pbtts = (h15+a15)/2, (h25+a25)/2, (hbtts+abtts)/2
+                    g_info = {"id": m['fixture']['id'], "info": f"*{t1['name']} x {t2['name']}*", "hora": hora.strftime('%H:%M'), "liga": l_nome, "link": f"https://www.adamchoi.co.uk/leagues/{l_slug}"}
+
+                    # Dupla Chance (Já filtrado o conflito pelo "Jogo Travado" acima)
+                    if hwd >= 75: pool_entradas.append({"prio": hwd, "mkt": f"🔸 1X ({t1['name']} ou Empate)", **g_info})
+                    if awd >= 75: pool_entradas.append({"prio": awd, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", **g_info})
                     
-                    # Escanteios (Conversão de Média para % de Segurança)
+                    # Gols e BTTS
+                    if p15 >= 75: pool_entradas.append({"prio": p15, "mkt": "🔸 Mais de 1.5 Gols", **g_info})
+                    if p25 >= 70: pool_entradas.append({"prio": p25, "mkt": "🔸 Mais de 2.5 Gols", **g_info})
+                    if pbtts >= 70: pool_entradas.append({"prio": pbtts, "mkt": "🔸 Ambas Marcam — Sim", **g_info})
+                    
+                    # Escanteios (Média baixa = Segurança alta)
                     c1 = get_corner_stats(t1['id'], l_id, season)
                     c2 = get_corner_stats(t2['id'], l_id, season)
-                    soma_cantos = c1 + c2
-                    if 0 < soma_cantos < 10.5:
-                        # Cálculo: Se soma é 7, segurança é ~86%. Se soma é 10, segurança é ~70%.
-                        p_corner = 100 - (soma_cantos * 3)
+                    if 0 < (c1 + c2) < 10.5:
+                        p_corner = 100 - ((c1+c2)*3)
                         pool_entradas.append({"prio": p_corner, "mkt": "🔸 Menos de 9.5 Escanteios", **g_info})
                 break
             except: continue
 
-    # 2. RANKING GERAL (DA MAIOR % PARA A MENOR)
+    # Ordenar por maior probabilidade
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
 
-    # 3. FILTRO DE ELITE (Limite 12 entradas / Máx 3 por jogo)
-    bilhete_final = []
-    contagem_por_jogo = {}
-    
+    bilhete_final, contagem_por_jogo = [], {}
     for e in pool_entradas:
         if len(bilhete_final) >= 12: break
         m_id = e['id']
         contagem_por_jogo[m_id] = contagem_por_jogo.get(m_id, 0)
-        
         if contagem_por_jogo[m_id] < 3:
             bilhete_final.append(e)
             contagem_por_jogo[m_id] += 1
 
-    # 4. AGRUPAMENTO E FORMATAÇÃO FINAL
     jogos_final = {}
     for e in bilhete_final:
         m_id = e['id']
         if m_id not in jogos_final:
             jogos_final[m_id] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": e['link'], "mercados": []}
-        jogos_final[m_id]["mercados"].append(f"{e['mkt']} — **{int(e['prio'])}%**")
+        
+        # Destaque em negrito para 90% ou mais
+        p_str = f"**{int(e['prio'])}%**" if e['prio'] >= 90 else f"{int(e['prio'])}%"
+        jogos_final[m_id]["mercados"].append(f"{e['mkt']} — {p_str}")
 
-    msg = f"🎫 *BILHETE TOP ENTRADAS - ELITE GLOBAL*\n📊 Regra: Melhores % de hoje (Máx 12)\n\n"
+    msg = f"🎫 *BILHETE TOP ENTRADAS - ELITE GLOBAL*\n📊 Regra: Melhores % de hoje (Filtro Jogo Travado)\n\n"
     for i, j in enumerate(jogos_final.values(), 1):
         tipo = "🔥 *Criar Aposta*" if len(j['mercados']) > 1 else "🎯 *Aposta Simples*"
         msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n{tipo}\n" + "\n".join(j['mercados']) + f"\n📊 [Estatísticas]({j['link']})\n\n"
@@ -129,4 +124,4 @@ def executar():
     enviar_telegram(msg + "---\nAPOSTAR: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)")
 
 if __name__ == "__main__": executar()
-    
+        
