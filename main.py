@@ -116,7 +116,7 @@ def executar():
         p_str = f"**{int(e['prio'])}%**" if e['prio'] >= 90 else f"{int(e['prio'])}%"
         jogos_final[m_id]["mercados"].append(f"{e['mkt']} — {p_str}")
 
-    msg = f"🎫 *BILHETE TOP ENTRADAS - ELITE GLOBAL*\n📊 Regra: Melhores % de hoje (Filtro Jogo Travado)\n\n"
+    msg = f"🎫 *BILHETE TOP ENTRADAS - ELITE GLOBAL*\n📊 Regra: Melhores % de hoje (>= 75%)\n\n"
     for i, j in enumerate(jogos_final.values(), 1):
         tipo = "🔥 *Criar Aposta*" if len(j['mercados']) > 1 else "🎯 *Aposta Simples*"
         msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n{tipo}\n" + "\n".join(j['mercados']) + f"\n📊 [Estatísticas]({j['link']})\n\n"
