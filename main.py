@@ -1,7 +1,6 @@
 import os
 import requests
 from datetime import datetime, timedelta
-import time
 
 # --- CONFIGURAÇÃO --- #
 TOKEN = os.getenv('TELEGRAM_TOKEN')
@@ -62,7 +61,7 @@ def executar():
         for season in [2026, 2025]:
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
             try:
-                res = requests.get(url, headers=HEADERS, timeout=10).json()
+                res = requests.get(url, headers=HEADERS).json()
                 if res.get('response'):
                     jogos_encontrados = res.get('response')
                     break
@@ -81,15 +80,16 @@ def executar():
                 match_id, match_info = m['fixture']['id'], f"🏟️ *{t1['name']} x {t2['name']}*\n🕒 {hora_jogo.strftime('%H:%M')}"
                 link = f"https://www.adamchoi.co.uk/leagues/{l_slug}"
 
-                if hwd >= 85: ranking_geral.append({"prio": hwd + 10, "mkt": f"🔸 1X ({t1['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
-                elif awd >= 85: ranking_geral.append({"prio": awd + 10, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                # LÓGICA DE RANKING (Ajustada para preencher 12 vagas)
+                if hwd >= 75: ranking_geral.append({"prio": hwd + 10, "mkt": f"🔸 1X ({t1['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                elif awd >= 75: ranking_geral.append({"prio": awd + 10, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
                 
-                if m25 >= 85: ranking_geral.append({"prio": m25 + 5, "mkt": "🔸 Mais de 2.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
-                elif m15 >= 80: ranking_geral.append({"prio": m15, "mkt": "🔸 Mais de 1.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                if m25 >= 75: ranking_geral.append({"prio": m25 + 5, "mkt": "🔸 Mais de 2.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                elif m15 >= 75: ranking_geral.append({"prio": m15, "mkt": "🔸 Mais de 1.5 Gols", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
                 
-                if mbtts >= 80: ranking_geral.append({"prio": mbtts + 2, "mkt": "🔸 Ambas Marcam — Sim", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
+                if mbtts >= 75: ranking_geral.append({"prio": mbtts + 2, "mkt": "🔸 Ambas Marcam — Sim", "id": match_id, "info": match_info, "liga": l_nome, "link": link})
 
-                if m15 >= 85:
+                if m15 >= 80: # Só olha escanteios em jogos com tendência de gol real
                     c1 = get_stats_fast(t1['id'], l_id, m['league']['season'])
                     c2 = get_stats_fast(t2['id'], l_id, m['league']['season'])
                     if 0 < (c1 + c2) < 10.5:
@@ -97,6 +97,7 @@ def executar():
             except: continue
 
     if ranking_geral:
+        # Pega as 12 MELHORES absolutas de todos os jogos processados
         ranking_geral.sort(key=lambda x: x['prio'], reverse=True)
         selecoes_finais = ranking_geral[:12]
         
@@ -118,4 +119,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-                
+    
