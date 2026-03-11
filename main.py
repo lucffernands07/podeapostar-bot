@@ -69,35 +69,36 @@ def executar():
                     h15, h25, hbtts, hwd = get_stats(t1['id'])
                     a15, a25, abtts, awd = get_stats(t2['id'])
                     
-                    # REGRA DO JOGO TRAVADO: Se ambos têm Dupla Chance >= 80%, descarta o jogo
-                    if hwd >= 80 and awd >= 80:
-                        continue 
-
                     p15, p25, pbtts = (h15+a15)/2, (h25+a25)/2, (hbtts+abtts)/2
                     g_info = {"id": m['fixture']['id'], "info": f"*{t1['name']} x {t2['name']}*", "hora": hora.strftime('%H:%M'), "liga": l_nome, "link": f"https://www.adamchoi.co.uk/leagues/{l_slug}"}
 
-                    # Dupla Chance (Já filtrado o conflito pelo "Jogo Travado" acima)
-                    if hwd >= 75: pool_entradas.append({"prio": hwd, "mkt": f"🔸 1X ({t1['name']} ou Empate)", **g_info})
-                    if awd >= 75: pool_entradas.append({"prio": awd, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", **g_info})
+                    # --- LÓGICA DE ANULAÇÃO SELETIVA --- #
+                    # Se ambos têm Dupla Chance >= 80%, chamamos de "Jogo Travado"
+                    jogo_travado = hwd >= 80 and awd >= 80 
                     
-                    # Gols e BTTS
+                    # 1. Dupla Chance (SÓ entra se NÃO for jogo travado)
+                    if not jogo_travado:
+                        if hwd >= 75: pool_entradas.append({"prio": hwd, "mkt": f"🔸 1X ({t1['name']} ou Empate)", **g_info})
+                        if awd >= 75: pool_entradas.append({"prio": awd, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", **g_info})
+                    
+                    # 2. Gols e Ambas Marcam (SEMPRE podem entrar, mesmo em jogo travado)
                     if p15 >= 75: pool_entradas.append({"prio": p15, "mkt": "🔸 Mais de 1.5 Gols", **g_info})
                     if p25 >= 70: pool_entradas.append({"prio": p25, "mkt": "🔸 Mais de 2.5 Gols", **g_info})
                     if pbtts >= 70: pool_entradas.append({"prio": pbtts, "mkt": "🔸 Ambas Marcam — Sim", **g_info})
                     
-                    # Escanteios (Média baixa = Segurança alta)
-                    c1 = get_corner_stats(t1['id'], l_id, season)
-                    c2 = get_corner_stats(t2['id'], l_id, season)
-                    if 0 < (c1 + c2) < 10.5:
-                        p_corner = 100 - ((c1+c2)*3)
-                        pool_entradas.append({"prio": p_corner, "mkt": "🔸 Menos de 9.5 Escanteios", **g_info})
+                    # 3. Escanteios (SÓ entra se NÃO for jogo travado)
+                    if not jogo_travado:
+                        c1, c2 = get_corner_stats(t1['id'], l_id, season), get_corner_stats(t2['id'], l_id, season)
+                        if 0 < (c1 + c2) < 10.5:
+                            p_corner = 100 - ((c1+c2)*3)
+                            pool_entradas.append({"prio": p_corner, "mkt": "🔸 Menos de 9.5 Escanteios", **g_info})
                 break
             except: continue
 
-    # Ordenar por maior probabilidade
+    # Ranking e Montagem
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
-
     bilhete_final, contagem_por_jogo = [], {}
+    
     for e in pool_entradas:
         if len(bilhete_final) >= 12: break
         m_id = e['id']
@@ -106,17 +107,16 @@ def executar():
             bilhete_final.append(e)
             contagem_por_jogo[m_id] += 1
 
+    # Formatação Final
     jogos_final = {}
     for e in bilhete_final:
         m_id = e['id']
         if m_id not in jogos_final:
             jogos_final[m_id] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": e['link'], "mercados": []}
-        
-        # Destaque em negrito para 90% ou mais
         p_str = f"**{int(e['prio'])}%**" if e['prio'] >= 90 else f"{int(e['prio'])}%"
         jogos_final[m_id]["mercados"].append(f"{e['mkt']} — {p_str}")
 
-    msg = f"🎫 *BILHETE TOP ENTRADAS - ELITE GLOBAL*\n📊 Regra: Melhores % de hoje (>= 75%)\n\n"
+    msg = f"🎫 *BILHETE TOP ENTRADAS - ELITE GLOBAL*\n📊 Regra: Melhores % (Filtro Inteligente de Conflito)\n\n"
     for i, j in enumerate(jogos_final.values(), 1):
         tipo = "🔥 *Criar Aposta*" if len(j['mercados']) > 1 else "🎯 *Aposta Simples*"
         msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n{tipo}\n" + "\n".join(j['mercados']) + f"\n📊 [Estatísticas]({j['link']})\n\n"
@@ -124,4 +124,4 @@ def executar():
     enviar_telegram(msg + "---\nAPOSTAR: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)")
 
 if __name__ == "__main__": executar()
-        
+                    
