@@ -1,12 +1,10 @@
 import os
 import requests
-import time
+import json
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 def configurar_browser():
@@ -18,54 +16,53 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-def executar_teste_aba_partidas():
+def extrair_dados_brutos():
     browser = configurar_browser()
+    # Usando o link do Panathinaikos que você passou
     url_alvo = "https://www.sofascore.com/pt/football/match/panathinaikos-fc-real-betis/qgbsYob"
     
-    status = {"aba": "❌ Não clicou", "span": "❌ Não encontrado"}
-    
+    status_json = "❌ Não extraído"
+    mercado_detectado = "❌ Nenhum"
+
     try:
         browser.get(url_alvo)
-        wait = WebDriverWait(browser, 20)
         
-        print("🖱️ Tentando clicar na aba 'Partidas'...")
-        # Localiza pelo href que você indicou ou pelo texto do link
-        try:
-            # Tenta clicar pelo seletor de link que você passou
-            aba_partidas = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'a[href="#tab:matches"]')))
-            browser.execute_script("arguments[0].click();", aba_partidas) # Click via JS é mais garantido
-            status["aba"] = "✅ Aba Partidas Acessada"
-            print("✅ Clique na aba realizado.")
-        except:
-            print("⚠️ Não achou o link pelo CSS, tentando por texto...")
-            aba_partidas = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[contains(text(), 'Partidas')] | //a[contains(., 'Partidas')]")))
-            aba_partidas.click()
-            status["aba"] = "✅ Aba Partidas Acessada (via texto)"
-
-        # Aguarda os cards de H2H/Tendências carregarem dentro da aba
-        time.sleep(10)
+        # Em vez de clicar, vamos pegar todo o código fonte da página
+        html_completo = browser.page_source
         
-        print("🔎 Buscando span de escanteios...")
-        # Busca o span específico que você mapeou anteriormente
-        spans = browser.find_elements(By.CLASS_NAME, "textStyle_table")
+        # O segredo: O Sofascore geralmente guarda os dados em um script chamado 'NEXT_DATA' ou 'initialProps'
+        # Vamos buscar por padrões de texto de escanteio diretamente no código-fonte bruto (JSON-like)
+        print("🔍 Analisando código bruto em busca de padrões de escanteio...")
         
-        for s in spans:
-            txt = s.text.strip()
-            if "10.5" in txt and "escanteio" in txt.lower():
-                status["span"] = f"✅ Encontrado: {txt}"
-                print(f"🔥 SUCESSO: {txt}")
-                break
+        # Regex para buscar a frase de escanteios no meio do código
+        padrão = r'([Mm]enos|[Mm]ais)\s+do\s+que\s+10\.5\s+escanteios\s+\d+/\d+'
+        resultado = re.findall(padrão, html_completo, re.IGNORECASE)
+        
+        # Se o regex simples não achar, procuramos a estrutura de "trends"
+        if not resultado:
+            # Busca manual por palavras chave próximas
+            if "10.5" in html_completo and "escanteio" in html_completo:
+                status_json = "✅ Palavras-chave encontradas no código"
+                # Tenta isolar o trecho
+                pos = html_completo.find("10.5")
+                trecho = html_completo[pos-50:pos+50]
+                mercado_detectado = f"Trecho: {trecho}"
+            else:
+                status_json = "❌ Nem no código bruto apareceu"
+        else:
+            status_json = "✅ Padrão detectado via Regex!"
+            mercado_detectado = resultado[0]
 
     except Exception as e:
         print(f"⚠️ Erro: {e}")
     finally:
         browser.quit()
 
-    # Relatório para o Telegram
+    # Relatório
     msg = (
-        "🧪 *TESTE DE ABA SOFASCORE*\n\n"
-        f"📍 *Status Aba:* {status['aba']}\n"
-        f"📈 *Resultado Span:* `{status['span']}`"
+        "💎 *EXTRAÇÃO DE DADOS BRUTOS*\n\n"
+        f"📊 *Status:* {status_json}\n"
+        f"🎯 *Captura:* `{mercado_detectado}`"
     )
     
     TOKEN = os.getenv('TELEGRAM_TOKEN')
@@ -74,4 +71,5 @@ def executar_teste_aba_partidas():
                   json={"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"})
 
 if __name__ == "__main__":
-    executar_teste_aba_partidas()
+    extrair_dados_brutos()
+            
