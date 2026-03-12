@@ -1,10 +1,10 @@
 import os
 import requests
-import json
-import re
+import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 def configurar_browser():
@@ -16,56 +16,54 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-def extrair_vencendo_sofascore():
+def minerar_escanteios_dual():
     browser = configurar_browser()
     url_alvo = "https://www.sofascore.com/pt/football/match/panathinaikos-fc-real-betis/qgbsYob"
     
-    mercado_final = "❌ Não isolado"
+    entradas = []
 
     try:
         browser.get(url_alvo)
-        # Dá um tempo para o JSON interno carregar
-        import time
-        time.sleep(10)
+        time.sleep(5)
         
-        # O Sofascore guarda TUDO nesse script aqui:
-        html = browser.page_source
+        # Clica na aba Partidas (onde ficam as tendências de H2H)
+        try:
+            aba_partidas = browser.find_element(By.CSS_SELECTOR, 'a[href="#tab:matches"]')
+            browser.execute_script("arguments[0].click();", aba_partidas)
+        except: pass
+
+        time.sleep(12) # Tempo para os cards carregarem
         
-        # 1. Tenta buscar a frase limpa (caso ela esteja renderizada)
-        busca_limpa = re.findall(r'([^">]+10\.5\s+escanteios[^"<]+)', html, re.IGNORECASE)
+        # Varredura em todos os blocos de estatística p_sm
+        blocos = browser.find_elements(By.CLASS_NAME, "p_sm")
         
-        if busca_limpa:
-            # Pega a frase que contém os números (ex: 10/10 ou 5/5)
-            for frase in busca_limpa:
-                if "/" in frase:
-                    mercado_final = frase.strip()
-                    break
-        
-        # 2. Se não achou a frase limpa, busca no JSON bruto
-        if mercado_final == "❌ Não isolado":
-            # Busca por padrões como "less than 10.5 corners" ou "Menos de 10.5"
-            # O Sofascore costuma usar chaves como "subtitle" ou "title" no JSON
-            match = re.search(r'"(Menos|Mais|Less|More)[^"]+10\.5[^"]+escanteios[^"]+"', html, re.IGNORECASE)
-            if match:
-                mercado_final = match.group(0).replace('"', '')
+        for b in blocos:
+            texto = b.text
+            if "10.5 escanteios" in texto:
+                linhas = texto.split('\n')
+                if len(linhas) >= 3:
+                    time_nome = linhas[0]
+                    mercado = linhas[1]
+                    frequencia = linhas[2]
+                    entradas.append(f"🚩 *{time_nome}*\n🔸 {mercado}\n📊 Frequência: *{frequencia}*")
 
     except Exception as e:
         print(f"Erro: {e}")
     finally:
         browser.quit()
 
-    # Relatório
-    msg = (
-        "🎯 *RESULTADO DA MINERAÇÃO*\n\n"
-        f"📊 *Mercado:* `{mercado_final}`\n"
-        "---"
-    )
-    
+    # ENVIO PARA O TELEGRAM
     TOKEN = os.getenv('TELEGRAM_TOKEN')
     CHAT_ID = os.getenv('CHAT_ID')
+    
+    if entradas:
+        corpo_msg = "\n\n".join(entradas)
+        msg = f"🎫 *TENDÊNCIAS DE ESCANTEIOS*\n🏟️ Panathinaikos x Real Betis\n\n{corpo_msg}"
+    else:
+        msg = "❌ Não foi possível encontrar tendências de escanteio (10.5) para este confronto."
+
     requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", 
                   json={"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"})
 
 if __name__ == "__main__":
-    extrair_vencendo_sofascore()
-        
+    minerar_escanteios_dual()
