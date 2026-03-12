@@ -5,69 +5,73 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-
-# --- CONFIGURAÇÃO --- #
-TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHAT_ID = os.getenv('CHAT_ID')
 
 def configurar_browser():
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-def testar_panathinaikos():
+def executar_teste_aba_partidas():
     browser = configurar_browser()
-    # O link específico que você forneceu
     url_alvo = "https://www.sofascore.com/pt/football/match/panathinaikos-fc-real-betis/qgbsYob"
     
-    print(f"🚀 Iniciando teste no link: {url_alvo}")
+    status = {"aba": "❌ Não clicou", "span": "❌ Não encontrado"}
     
     try:
         browser.get(url_alvo)
+        wait = WebDriverWait(browser, 20)
         
-        # Tempo crucial para os cards de H2H carregarem os dados de escanteio
-        print("⏳ Aguardando 15 segundos para os spans carregarem...")
-        time.sleep(15)
-        
-        # Busca pelos spans de estatística (conforme o print que você mandou)
-        elementos = browser.find_elements(By.CLASS_NAME, "textStyle_table")
-        
-        mercado_encontrado = None
-        
-        for el in elementos:
-            txt = el.text.strip()
-            if txt:
-                print(f"🔎 Analisando span: {txt}")
-                # Verifica se é o span de escanteio (ex: "Menos do que 10.5 escanteios 10/10")
-                if "escanteio" in txt.lower() and "10.5" in txt:
-                    mercado_encontrado = txt
-                    break
-        
-        if mercado_encontrado:
-            msg = (
-                "✅ *TESTE PANATHINAIKOS - SUCESSO*\n\n"
-                f"🏟️ *Panathinaikos x Real Betis*\n"
-                f"📊 Mercado Lido: `{mercado_encontrado}`\n"
-                "---"
-            )
-            print(f"🔥 Sucesso! Enviando para o Telegram: {mercado_encontrado}")
-        else:
-            msg = "❌ *TESTE PANATHINAIKOS - FALHA*\n\nO robô acessou o site, mas não encontrou o span de 10.5 escanteios."
-            print("❌ Falha: Span não encontrado.")
+        print("🖱️ Tentando clicar na aba 'Partidas'...")
+        # Localiza pelo href que você indicou ou pelo texto do link
+        try:
+            # Tenta clicar pelo seletor de link que você passou
+            aba_partidas = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'a[href="#tab:matches"]')))
+            browser.execute_script("arguments[0].click();", aba_partidas) # Click via JS é mais garantido
+            status["aba"] = "✅ Aba Partidas Acessada"
+            print("✅ Clique na aba realizado.")
+        except:
+            print("⚠️ Não achou o link pelo CSS, tentando por texto...")
+            aba_partidas = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[contains(text(), 'Partidas')] | //a[contains(., 'Partidas')]")))
+            aba_partidas.click()
+            status["aba"] = "✅ Aba Partidas Acessada (via texto)"
 
-        # Envio para o Telegram
-        url_tg = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-        requests.post(url_tg, json={"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"})
+        # Aguarda os cards de H2H/Tendências carregarem dentro da aba
+        time.sleep(10)
+        
+        print("🔎 Buscando span de escanteios...")
+        # Busca o span específico que você mapeou anteriormente
+        spans = browser.find_elements(By.CLASS_NAME, "textStyle_table")
+        
+        for s in spans:
+            txt = s.text.strip()
+            if "10.5" in txt and "escanteio" in txt.lower():
+                status["span"] = f"✅ Encontrado: {txt}"
+                print(f"🔥 SUCESSO: {txt}")
+                break
 
     except Exception as e:
-        print(f"⚠️ Erro no script: {e}")
+        print(f"⚠️ Erro: {e}")
     finally:
         browser.quit()
 
+    # Relatório para o Telegram
+    msg = (
+        "🧪 *TESTE DE ABA SOFASCORE*\n\n"
+        f"📍 *Status Aba:* {status['aba']}\n"
+        f"📈 *Resultado Span:* `{status['span']}`"
+    )
+    
+    TOKEN = os.getenv('TELEGRAM_TOKEN')
+    CHAT_ID = os.getenv('CHAT_ID')
+    requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", 
+                  json={"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"})
+
 if __name__ == "__main__":
-    testar_panathinaikos()
+    executar_teste_aba_partidas()
