@@ -16,54 +16,70 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-def minerar_escanteios_dual():
+def executar_teste_final():
+    print("🚀 Iniciando extração de elite...")
     browser = configurar_browser()
     url_alvo = "https://www.sofascore.com/pt/football/match/panathinaikos-fc-real-betis/qgbsYob"
     
-    entradas = []
+    entradas_escanteio = []
 
     try:
         browser.get(url_alvo)
         time.sleep(5)
         
-        # Clica na aba Partidas (onde ficam as tendências de H2H)
+        # 1. Forçar entrada na aba de Partidas (H2H)
         try:
             aba_partidas = browser.find_element(By.CSS_SELECTOR, 'a[href="#tab:matches"]')
             browser.execute_script("arguments[0].click();", aba_partidas)
-        except: pass
+            print("✅ Aba 'Partidas' clicada.")
+        except:
+            print("⚠️ Aba 'Partidas' não encontrada ou já selecionada.")
 
-        time.sleep(12) # Tempo para os cards carregarem
+        # 2. Aguardar renderização dos cards
+        time.sleep(12)
         
-        # Varredura em todos os blocos de estatística p_sm
+        # 3. Varredura dos blocos p_sm
         blocos = browser.find_elements(By.CLASS_NAME, "p_sm")
         
         for b in blocos:
-            texto = b.text
-            if "10.5 escanteios" in texto:
-                linhas = texto.split('\n')
-                if len(linhas) >= 3:
+            texto_bloco = b.text.strip()
+            
+            # FILTRO 1: Precisa ter a palavra 'escanteio'
+            if "escanteio" in texto_bloco.lower() and "10.5" in texto_bloco:
+                linhas = [l.strip() for l in texto_bloco.split('\n') if l.strip()]
+                
+                # FILTRO 2: Precisa ter o formato de fração (ex: 10/10) para não ser Odd
+                if len(linhas) >= 3 and "/" in linhas[-1]:
                     time_nome = linhas[0]
                     mercado = linhas[1]
                     frequencia = linhas[2]
-                    entradas.append(f"🚩 *{time_nome}*\n🔸 {mercado}\n📊 Frequência: *{frequencia}*")
+                    
+                    entrada = (
+                        f"🚩 *{time_nome}*\n"
+                        f"🔸 {mercado}\n"
+                        f"📊 Frequência: *{frequencia}*"
+                    )
+                    entradas_escanteio.append(entrada)
+                    print(f"🔥 Capturado: {mercado} ({frequencia})")
 
     except Exception as e:
-        print(f"Erro: {e}")
+        print(f"⚠️ Erro: {e}")
     finally:
         browser.quit()
 
-    # ENVIO PARA O TELEGRAM
+    # 4. Envio para o Telegram
     TOKEN = os.getenv('TELEGRAM_TOKEN')
     CHAT_ID = os.getenv('CHAT_ID')
     
-    if entradas:
-        corpo_msg = "\n\n".join(entradas)
-        msg = f"🎫 *TENDÊNCIAS DE ESCANTEIOS*\n🏟️ Panathinaikos x Real Betis\n\n{corpo_msg}"
+    if entradas_escanteio:
+        corpo = "\n\n".join(entradas_escanteio)
+        msg = f"🎫 *BILHETE DE ESCANTEIOS (10.5)*\n🏟️ Panathinaikos x Real Betis\n\n{corpo}\n\n🍀 Boa sorte!"
     else:
-        msg = "❌ Não foi possível encontrar tendências de escanteio (10.5) para este confronto."
+        msg = "❌ Não foi possível isolar o mercado de escanteios (10.5) nos cards deste jogo."
 
     requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", 
                   json={"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"})
+    print("🏁 Teste finalizado e mensagem enviada.")
 
 if __name__ == "__main__":
-    minerar_escanteios_dual()
+    executar_teste_final()
