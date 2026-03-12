@@ -56,100 +56,64 @@ def get_stats(team_id):
 def executar():
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
-    
-    ligas_config = {
-        2: ("Champions League", "uefa-champions-league"), 3: ("Europa League", "uefa-europa-league"),
-        39: ("Premier League", "england-premier-league"), 40: ("Championship", "england-championship"),
-        140: ("LaLiga", "spain-la-liga"), 135: ("Serie A", "italy-serie-a"),
-        78: ("Bundesliga", "germany-bundesliga"), 94: ("Português", "portugal-primeira-liga"),
-        88: ("Holandês", "netherlands-eredivisie"), 71: ("Brasileirão A", "brazil-serie-a"),
-        268: ("Argentina", "argentina-primera-division"), 203: ("Turquia", "turkish-super-lig")
-    }
+    ligas_config = {2: "Champions", 3: "Europa League", 39: "Premier", 140: "LaLiga", 135: "Serie A", 78: "Bundesliga", 71: "Brasileirão", 203: "Turquia"}
     
     pool_entradas = []
 
-    for l_id, (l_nome, l_slug) in ligas_config.items():
-        for season in [2026, 2025]:
-            url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
-            try:
-                res = requests.get(url, headers=HEADERS).json()
-                games = res.get('response', [])
-                if not games: continue
+    for l_id, l_nome in ligas_config.items():
+        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season=2025"
+        try:
+            res = requests.get(url, headers=HEADERS).json()
+            for m in res.get('response', []):
+                t1, t2 = m['teams']['home'], m['teams']['away']
+                h15, h25, hbtts, hwd = get_stats(t1['id'])
+                a15, a25, abtts, awd = get_stats(t2['id'])
+                h2h_t1, h2h_t2 = get_h2h_stats(t1['id'], t2['id'])
                 
-                for m in games:
-                    hora = datetime.fromisoformat(m['fixture']['date'][:-6]) - timedelta(hours=3)
-                    if hora < agora_br: continue
-                    
-                    t1, t2 = m['teams']['home'], m['teams']['away']
-                    h15, h25, hbtts, hwd = get_stats(t1['id'])
-                    a15, a25, abtts, awd = get_stats(t2['id'])
-                    h2h_t1, h2h_t2 = get_h2h_stats(t1['id'], t2['id'])
-                    
-                    p15, p25, pbtts = (h15+a15)/2, (h25+a25)/2, (hbtts+abtts)/2
-                    
-                    # Gerar link de busca do SofaScore focado no confronto
-                    query_sofa = urllib.parse.quote(f"site:sofascore.com {t1['name']} vs {t2['name']}")
-                    link_sofa = f"https://www.google.com/search?q={query_sofa}&btnI"
+                link_sofa = f"https://www.google.com/search?q=sofascore+{urllib.parse.quote(t1['name'] + ' vs ' + t2['name'])}&btnI"
+                g_info = {"id": m['fixture']['id'], "info": f"*{t1['name']} x {t2['name']}*", "hora": m['fixture']['date'][11:16], "liga": l_nome, "sofa": link_sofa}
 
-                    g_info = {
-                        "id": m['fixture']['id'], 
-                        "info": f"*{t1['name']} x {t2['name']}*", 
-                        "hora": hora.strftime('%H:%M'), 
-                        "liga": l_nome, 
-                        "link_sofa": link_sofa
-                    }
+                # --- LÓGICA DE ESCANTEIOS (ESTILO SOFASCORE 10/10) ---
+                c1, c2 = get_corner_stats(t1['id'], l_id, 2025), get_corner_stats(t2['id'], l_id, 2025)
+                soma_c = c1 + c2
+                
+                # Se soma é baixa ou alta demais, é indício de padrão 5/5, 10/10
+                if 0 < soma_c <= 8.5:
+                    pool_entradas.append({"prio": 100, "mkt": "🔸 Menos de 10.5 Escanteios", **g_info})
+                elif soma_c >= 12.5:
+                    pool_entradas.append({"prio": 100, "mkt": "🔸 Mais de 10.5 Escanteios", **g_info})
 
-                    # --- 1. DUPLA CHANCE (VETO H2H) ---
-                    jogo_travado = hwd >= 80 and awd >= 80 
-                    if not jogo_travado:
-                        if hwd >= 75 and h2h_t1 >= 70: 
-                            pool_entradas.append({"prio": (hwd + h2h_t1)/2, "mkt": f"🔸 1X ({t1['name']} ou Empate)", **g_info})
-                        if awd >= 75 and h2h_t2 >= 70: 
-                            pool_entradas.append({"prio": (awd + h2h_t2)/2, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", **g_info})
-                    
-                    # --- 2. GOLS ---
-                    if p15 >= 75: pool_entradas.append({"prio": p15, "mkt": "🔸 Mais de 1.5 Gols", **g_info})
-                    if p25 >= 70: pool_entradas.append({"prio": p25, "mkt": "🔸 Mais de 2.5 Gols", **g_info})
-                    if pbtts >= 70: pool_entradas.append({"prio": pbtts, "mkt": "🔸 Ambas Marcam — Sim", **g_info})
-                    
-                    # --- 3. ESCANTEIOS (TRAVA 5/5 + VETO CONFLITO) ---
-                    c1, c2 = get_corner_stats(t1['id'], l_id, season), get_corner_stats(t2['id'], l_id, season)
-                    soma_c = c1 + c2
-                    conflito_escanteio = (c1 >= 6.0 and c2 <= 3.5) or (c2 >= 6.0 and c1 <= 3.5)
+                # --- OUTROS MERCADOS ---
+                if hwd >= 75 and h2h_t1 >= 70: pool_entradas.append({"prio": 85, "mkt": f"🔸 1X ({t1['name']} ou Empate)", **g_info})
+                if awd >= 75 and h2h_t2 >= 70: pool_entradas.append({"prio": 85, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", **g_info})
+                if (h15 + a15)/2 >= 75: pool_entradas.append({"prio": 80, "mkt": "🔸 Mais de 1.5 Gols", **g_info})
+                if (h25 + a25)/2 >= 70: pool_entradas.append({"prio": 75, "mkt": "🔸 Mais de 2.5 Gols", **g_info})
 
-                    if not jogo_travado and not conflito_escanteio:
-                        if soma_c >= 12.0:
-                            pool_entradas.append({"prio": 95, "mkt": "🔸 Mais de 10.5 Escanteios", **g_info})
-                        elif 0 < soma_c <= 8.8:
-                            pool_entradas.append({"prio": 95, "mkt": "🔸 Menos de 10.5 Escanteios", **g_info})
-                break
-            except: continue
+        except: continue
 
+    # Seleção Final: Máximo 12 mercados totais, 3 por jogo
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
-    bilhete_final, contagem_por_jogo = [], {}
+    bilhete, contagem = [], {}
     for e in pool_entradas:
-        if len(bilhete_final) >= 12: break
-        m_id = e['id']
-        contagem_por_jogo[m_id] = contagem_por_jogo.get(m_id, 0)
-        if contagem_por_jogo[m_id] < 3:
-            bilhete_final.append(e)
-            contagem_por_jogo[m_id] += 1
+        if len(bilhete) >= 12: break
+        mid = e['id']
+        contagem[mid] = contagem.get(mid, 0)
+        if contagem[mid] < 3:
+            bilhete.append(e)
+            contagem[mid] += 1
 
+    # Formatação por Jogo
     jogos_final = {}
-    for e in bilhete_final:
-        m_id = e['id']
-        if m_id not in jogos_final:
-            jogos_final[m_id] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "sofa": e['link_sofa'], "mercados": []}
-        p_str = f"**{int(e['prio'])}%**" if e['prio'] >= 90 else f"{int(e['prio'])}%"
-        jogos_final[m_id]["mercados"].append(f"{e['mkt']} — {p_str}")
+    for e in bilhete:
+        if e['id'] not in jogos_final:
+            jogos_final[e['id']] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "sofa": e['sofa'], "mkts": []}
+        jogos_final[e['id']]["mkts"].append(e['mkt'])
 
-    msg = f"🎫 *BILHETE ELITE GLOBAL*\n📊 Regra: H2H + Trava 5/5 SofaScore\n\n"
-    for i, j in enumerate(jogos_final.values(), 1):
-        tipo = "🔥 *Criar Aposta*" if len(j['mercados']) > 1 else "🎯 *Aposta Simples*"
-        msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n{tipo}\n" + "\n".join(j['mercados'])
-        msg += f"\n📊 [Analisar no SofaScore]({j['sofa']})\n\n"
+    msg = "🎫 *BILHETE ELITE GLOBAL*\n📊 Regra: 10/10 Escanteios + H2H\n\n"
+    for j in jogos_final.values():
+        msg += f"🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n" + "\n".join(j['mkts']) + f"\n📊 [Analisar SofaScore]({j['sofa']})\n\n"
     
-    enviar_telegram(msg + "---\nAPOSTAR: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)")
+    enviar_telegram(msg + "---\n💸 [Bet365](https://www.bet365.com)")
 
 if __name__ == "__main__": executar()
                 
