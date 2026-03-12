@@ -1,7 +1,5 @@
-import os
-import requests
+import time
 import urllib.parse
-from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -10,147 +8,66 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# --- CONFIGURAÇÃO --- #
-TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHAT_ID = os.getenv('CHAT_ID')
-API_KEY = os.getenv('X_RAPIDAPI_KEY') 
-HEADERS = {'x-rapidapi-host': "api-football-v1.p.rapidapi.com", 'x-rapidapi-key': API_KEY}
-
-def configurar_browser():
+def testar_spans_panathinaikos():
+    print("🚀 Iniciando teste de raspagem no Panathinaikos...")
+    
     options = Options()
-    options.add_argument("--headless")
+    options.add_argument("--headless")  # Roda sem abrir janela
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    service = Service(ChromeDriverManager().install())
-    return webdriver.Chrome(service=service, options=options)
-
-def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    # Tenta ir direto para a aba de estatísticas se possível, ou busca via Google
-    query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} h2h statistics")
-    url_busca = f"https://www.google.com/search?q={query}"
     
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    
+    # URL de busca direta para o H2H do jogo no SofaScore
+    jogo = "Panathinaikos vs Real Betis"
+    query = urllib.parse.quote(f"sofascore h2h {jogo}")
+    url_busca = f"https://www.google.com/search?q={query}"
+
     try:
         driver.get(url_busca)
-        # Clica no primeiro resultado (geralmente o SofaScore)
-        first_link = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "h3")))
+        
+        # 1. Clica no primeiro resultado do Google
+        print("🔍 Buscando link no Google...")
+        first_link = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "h3")))
         first_link.click()
+        
+        print(f"✅ Entrou no site: {driver.current_url}")
+        print("⏳ Aguardando 15 segundos para carregar os cards de estatísticas...")
+        
+        # 2. Espera forçada para o SofaScore carregar os scripts internos
+        time.sleep(15)
+        
+        # 3. Busca todos os spans que podem conter a informação
+        # Usamos a classe que você mapeou e seletores de texto
+        spans_estatisticas = driver.find_elements(By.CLASS_NAME, "textStyle_table")
+        
+        print("\n--- RESULTADOS ENCONTRADOS ---")
+        encontrou_algo = False
+        
+        for span in spans_estatisticas:
+            texto = span.text.strip()
+            if texto:
+                # Se encontrar qualquer menção a escanteios, imprime com destaque
+                if "escanteios" in texto.lower():
+                    print(f"🔥 ACHOU: {texto}")
+                    encontrou_algo = True
+                else:
+                    # Imprime outros spans para sabermos o que o robô está lendo
+                    print(f"ℹ️ Outro card: {texto}")
 
-        # ESPERA O CARREGAMENTO DOS CARDS (O segredo está aqui)
-        # O SofaScore carrega as 'Trends' (Tendências) em cards específicos
-        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'confronto direto')]")))
-        
-        # Procura por qualquer elemento que mencione escanteios
-        elementos_h2h = driver.find_elements(By.XPATH, "//*[contains(text(), 'escanteios')]")
-        
-        for el in elementos_h2h:
-            texto = el.text.lower()
-            # Se encontrar o padrão que você busca no span
-            if "menos do que 10.5" in texto:
-                return "Menos de 10.5"
-            elif "mais do que 10.5" in texto:
-                return "Mais de 10.5"
+        if not encontrou_algo:
+            print("\n❌ Nenhum span de escanteio foi detectado com a classe 'textStyle_table'.")
+            print("💡 Tentando busca geral por texto...")
+            geral = driver.find_elements(By.XPATH, "//*[contains(text(), '10.5')]")
+            for g in geral:
+                print(f"🔎 Possível alvo: {g.text}")
+
     except Exception as e:
-        print(f"Erro ao raspar {t1_name}: {e}")
-    return None
-
-def get_h2h_dupla_chance(t1_id, t2_id):
-    """ Regra: Dupla Chance baseada apenas nos ÚLTIMOS 5 confrontos diretos """
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last=5"
-    try:
-        res = requests.get(url, headers=HEADERS).json()
-        fixtures = res.get('response', [])
-        if not fixtures: return 0, 0
-        t1_wd, t2_wd = 0, 0
-        for f in fixtures:
-            gh, ga = f['goals']['home'], f['goals']['away']
-            if (f['teams']['home']['id'] == t1_id and gh >= ga) or (f['teams']['away']['id'] == t1_id and ga >= gh): t1_wd += 1
-            if (f['teams']['home']['id'] == t2_id and gh >= ga) or (f['teams']['away']['id'] == t2_id and ga >= gh): t2_wd += 1
-        return (t1_wd / len(fixtures)) * 100, (t2_wd / len(fixtures)) * 100
-    except: return 0, 0
-
-def get_individual_stats(team_id):
-    """ Regra: Gols e Ambas Marcam baseados nos últimos 10 jogos individuais """
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10"
-    try:
-        res = requests.get(url, headers=HEADERS).json()
-        fixtures = res.get('response', [])
-        o15, btts = 0, 0
-        for f in fixtures:
-            gh, ga = (f['goals']['home'] or 0), (f['goals']['away'] or 0)
-            if (gh + ga) >= 2: o15 += 1
-            if gh > 0 and ga > 0: btts += 1
-        return (o15 * 10), (btts * 10)
-    except: return 0, 0
-
-def enviar_telegram(msg):
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
-    requests.post(url, json=payload)
-
-def executar():
-    browser = configurar_browser()
-    agora_br = datetime.utcnow() - timedelta(hours=3)
-    hoje = agora_br.strftime("%Y-%m-%d")
-    ligas = {2: "Champions", 3: "Europa League", 39: "Premier", 140: "LaLiga", 135: "Serie A", 78: "Bundesliga"}
+        print(f"⚠️ Erro durante o teste: {e}")
     
-    pool_entradas = []
+    finally:
+        driver.quit()
+        print("\n🏁 Teste finalizado.")
 
-    for l_id, l_nome in ligas.items():
-        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season=2025"
-        try:
-            res = requests.get(url, headers=HEADERS).json()
-            for m in res.get('response', []):
-                t1, t2 = m['teams']['home'], m['teams']['away']
-                
-                # 1. Regra Escanteio (Scraper H2H Span)
-                tipo_canto = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
-                
-                # 2. Regra Dupla Chance (H2H 5 jogos)
-                h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
-                
-                # 3. Regra Gols (10 jogos individuais)
-                h_o15, h_btts = get_individual_stats(t1['id'])
-                a_o15, a_btts = get_individual_stats(t2['id'])
-
-                g_info = {"id": m['fixture']['id'], "info": f"*{t1['name']} x {t2['name']}*", "hora": m['fixture']['date'][11:16], "liga": l_nome}
-
-                # --- ADICIONAR AO POOL COM PRIORIDADES ---
-                if tipo_canto:
-                    pool_entradas.append({"prio": 100, "mkt": f"🔸 {tipo_canto} Escanteios", **g_info})
-                
-                if h2h_t1 >= 80:
-                    pool_entradas.append({"prio": 85, "mkt": f"🔸 1X ({t1['name']} ou Empate)", **g_info})
-                elif h2h_t2 >= 80:
-                    pool_entradas.append({"prio": 85, "mkt": f"🔸 X2 ({t2['name']} ou Empate)", **g_info})
-
-                if (h_o15 + a_o15) / 2 >= 75:
-                    pool_entradas.append({"prio": 70, "mkt": "🔸 Mais de 1.5 Gols", **g_info})
-        except: continue
-
-    browser.quit()
-
-    # Seleção Final (12 mercados, 3 por jogo)
-    pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
-    bilhete, contagem = [], {}
-    for e in pool_entradas:
-        if len(bilhete) >= 12: break
-        mid = e['id']
-        contagem[mid] = contagem.get(mid, 0)
-        if contagem[mid] < 3:
-            bilhete.append(e)
-            contagem[mid] += 1
-
-    # Formatação e Envio
-    jogos_final = {}
-    for e in bilhete:
-        if e['id'] not in jogos_final:
-            jogos_final[e['id']] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "mkts": []}
-        jogos_final[e['id']]["mkts"].append(e['mkt'])
-
-    msg = "🎫 *BILHETE ELITE GLOBAL*\n📊 Regra: H2H (Cantos/DC) + Individual (Gols)\n\n"
-    for j in jogos_final.values():
-        msg += f"🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n" + "\n".join(j['mkts']) + "\n\n"
-    
-    enviar_telegram(msg + "---\n💸 [Bet365](https://www.bet365.com)")
-
-if __name__ == "__main__": executar()
+if __name__ == "__main__":
+    testar_spans_panathinaikos()
