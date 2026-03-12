@@ -16,53 +16,49 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-def extrair_dados_brutos():
+def extrair_vencendo_sofascore():
     browser = configurar_browser()
-    # Usando o link do Panathinaikos que você passou
     url_alvo = "https://www.sofascore.com/pt/football/match/panathinaikos-fc-real-betis/qgbsYob"
     
-    status_json = "❌ Não extraído"
-    mercado_detectado = "❌ Nenhum"
+    mercado_final = "❌ Não isolado"
 
     try:
         browser.get(url_alvo)
+        # Dá um tempo para o JSON interno carregar
+        import time
+        time.sleep(10)
         
-        # Em vez de clicar, vamos pegar todo o código fonte da página
-        html_completo = browser.page_source
+        # O Sofascore guarda TUDO nesse script aqui:
+        html = browser.page_source
         
-        # O segredo: O Sofascore geralmente guarda os dados em um script chamado 'NEXT_DATA' ou 'initialProps'
-        # Vamos buscar por padrões de texto de escanteio diretamente no código-fonte bruto (JSON-like)
-        print("🔍 Analisando código bruto em busca de padrões de escanteio...")
+        # 1. Tenta buscar a frase limpa (caso ela esteja renderizada)
+        busca_limpa = re.findall(r'([^">]+10\.5\s+escanteios[^"<]+)', html, re.IGNORECASE)
         
-        # Regex para buscar a frase de escanteios no meio do código
-        padrão = r'([Mm]enos|[Mm]ais)\s+do\s+que\s+10\.5\s+escanteios\s+\d+/\d+'
-        resultado = re.findall(padrão, html_completo, re.IGNORECASE)
+        if busca_limpa:
+            # Pega a frase que contém os números (ex: 10/10 ou 5/5)
+            for frase in busca_limpa:
+                if "/" in frase:
+                    mercado_final = frase.strip()
+                    break
         
-        # Se o regex simples não achar, procuramos a estrutura de "trends"
-        if not resultado:
-            # Busca manual por palavras chave próximas
-            if "10.5" in html_completo and "escanteio" in html_completo:
-                status_json = "✅ Palavras-chave encontradas no código"
-                # Tenta isolar o trecho
-                pos = html_completo.find("10.5")
-                trecho = html_completo[pos-50:pos+50]
-                mercado_detectado = f"Trecho: {trecho}"
-            else:
-                status_json = "❌ Nem no código bruto apareceu"
-        else:
-            status_json = "✅ Padrão detectado via Regex!"
-            mercado_detectado = resultado[0]
+        # 2. Se não achou a frase limpa, busca no JSON bruto
+        if mercado_final == "❌ Não isolado":
+            # Busca por padrões como "less than 10.5 corners" ou "Menos de 10.5"
+            # O Sofascore costuma usar chaves como "subtitle" ou "title" no JSON
+            match = re.search(r'"(Menos|Mais|Less|More)[^"]+10\.5[^"]+escanteios[^"]+"', html, re.IGNORECASE)
+            if match:
+                mercado_final = match.group(0).replace('"', '')
 
     except Exception as e:
-        print(f"⚠️ Erro: {e}")
+        print(f"Erro: {e}")
     finally:
         browser.quit()
 
     # Relatório
     msg = (
-        "💎 *EXTRAÇÃO DE DADOS BRUTOS*\n\n"
-        f"📊 *Status:* {status_json}\n"
-        f"🎯 *Captura:* `{mercado_detectado}`"
+        "🎯 *RESULTADO DA MINERAÇÃO*\n\n"
+        f"📊 *Mercado:* `{mercado_final}`\n"
+        "---"
     )
     
     TOKEN = os.getenv('TELEGRAM_TOKEN')
@@ -71,5 +67,5 @@ def extrair_dados_brutos():
                   json={"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"})
 
 if __name__ == "__main__":
-    extrair_dados_brutos()
-            
+    extrair_vencendo_sofascore()
+        
