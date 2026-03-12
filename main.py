@@ -25,21 +25,32 @@ def configurar_browser():
     return webdriver.Chrome(service=service, options=options)
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    """ Regra: Busca o padrão 10/10, 5/5 etc no span do SofaScore """
-    query = urllib.parse.quote(f"sofascore h2h {t1_name} vs {t2_name}")
-    url_busca = f"https://www.google.com/search?q={query}&btnI"
+    # Tenta ir direto para a aba de estatísticas se possível, ou busca via Google
+    query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} h2h statistics")
+    url_busca = f"https://www.google.com/search?q={query}"
+    
     try:
         driver.get(url_busca)
-        # Espera carregar os cards de estatísticas (spans de confronto)
-        wait = WebDriverWait(driver, 10)
-        spans = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "textStyle_table")))
+        # Clica no primeiro resultado (geralmente o SofaScore)
+        first_link = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "h3")))
+        first_link.click()
+
+        # ESPERA O CARREGAMENTO DOS CARDS (O segredo está aqui)
+        # O SofaScore carrega as 'Trends' (Tendências) em cards específicos
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'confronto direto')]")))
         
-        for s in spans:
-            texto = s.text.lower()
-            if "escanteios" in texto and ("menos do que 10.5" in texto or "mais do que 10.5" in texto):
-                # Se achou o span, retorna o texto (ex: "Menos do que 10.5 escanteios")
-                return "Menos de 10.5" if "menos" in texto else "Mais de 10.5"
-    except: pass
+        # Procura por qualquer elemento que mencione escanteios
+        elementos_h2h = driver.find_elements(By.XPATH, "//*[contains(text(), 'escanteios')]")
+        
+        for el in elementos_h2h:
+            texto = el.text.lower()
+            # Se encontrar o padrão que você busca no span
+            if "menos do que 10.5" in texto:
+                return "Menos de 10.5"
+            elif "mais do que 10.5" in texto:
+                return "Mais de 10.5"
+    except Exception as e:
+        print(f"Erro ao raspar {t1_name}: {e}")
     return None
 
 def get_h2h_dupla_chance(t1_id, t2_id):
