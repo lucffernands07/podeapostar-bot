@@ -1,12 +1,10 @@
 import os
 import requests
 import time
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 TOKEN = os.getenv('TELEGRAM_TOKEN')
@@ -26,57 +24,58 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-def minerar_preciso():
+def minerar_v_final():
     browser = configurar_browser()
     url_confronto = "https://www.sofascore.com/pt/football/match/panathinaikos-fc-real-betis/qgbsYob"
     
-    lista_escanteios = []
-
     try:
         browser.get(url_confronto)
-        wait = WebDriverWait(browser, 20)
+        time.sleep(5)
         
-        # Abre a aba Partidas
+        # Abre a aba Partidas para carregar o JSON interno
         try:
-            browser.execute_script("window.scrollTo(0, 500);")
-            time.sleep(2)
-            aba = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href="#tab:matches"]')))
+            aba = browser.find_element(By.CSS_SELECTOR, 'a[href="#tab:matches"]')
             browser.execute_script("arguments[0].click();", aba)
         except: pass
 
+        # Espera generosa para garantir que o texto "10/10" apareça no corpo da página
         time.sleep(15)
 
-        # Captura todos os blocos de estatística
-        blocos = browser.find_elements(By.CLASS_NAME, "p_sm")
+        # Capturamos o texto bruto exatamente como você me mandou no LOG anterior
+        texto_bruto = browser.find_element(By.TAG_NAME, "body").text
         
-        for b in blocos:
-            texto = b.text.strip()
+        # LÓGICA DE EXTRAÇÃO À DIREITA:
+        # Procuramos por "10.5 escanteios" e pegamos a FRAÇÃO mais próxima que vem DEPOIS dele.
+        
+        # Vamos usar uma expressão regular que diz: 
+        # "Ache '10.5 escanteios', pule o lixo, e pegue a primeira fração (nn/nn)"
+        resultados = []
+        matches = re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
+        
+        for m in matches:
+            inicio_busca = m.end()
+            # Olhamos os próximos 50 caracteres após a palavra "escanteios"
+            trecho_apos = texto_bruto[inicio_busca : inicio_busca + 50]
             
-            # FILTRO CRUCIAL: Só entra se a palavra 'escanteio' estiver no bloco
-            if "escanteio" in texto.lower():
-                linhas = [l.strip() for l in texto.split('\n') if l.strip()]
+            # Busca a primeira fração (ex: 10/10 ou 8/9) nesse trecho
+            frequencia = re.search(r"(\d+/\d+)", trecho_apos)
+            
+            if frequencia:
+                # Descobre se o mercado era "Menos" ou "Mais" olhando o texto antes
+                trecho_antes = texto_bruto[m.start() - 20 : m.start()]
+                tipo = "Menos" if "Menos" in trecho_antes else "Mais"
                 
-                # Procura a fração (ex: 10/10) dentro deste bloco específico
-                for linha in linhas:
-                    if "/" in linha:
-                        mercado = "Menos de 10.5" if "Menos" in texto else "Mais de 10.5"
-                        lista_escanteios.append({"mercado": mercado, "freq": linha})
-                        break 
+                resultados.append({"tipo": tipo, "freq": frequencia.group(1)})
 
-        # Montagem baseada na sua observação: 1º é Casa, 2º é Visitante
-        if len(lista_escanteios) >= 2:
-            casa = lista_escanteios[0]
-            fora = lista_escanteios[1]
-            
+        if len(resultados) >= 2:
             msg = (
-                f"🎫 *BILHETE DE ESCANTEIOS*\n🏟️ Panathinaikos x Real Betis\n\n"
-                f"🏠 *CASA (Panathinaikos)*\n🎯 {casa['mercado']}\n📊 Frequência: *{casa['freq']}*\n\n"
-                f"🚀 *FORA (Real Betis)*\n🎯 {fora['mercado']}\n📊 Frequência: *{fora['freq']}*\n\n"
-                f"✅ *Filtro aplicado:* Ignorado 6/7 de gols/cartões."
+                f"🎫 *BILHETE DE ESCANTEIOS FINAL*\n🏟️ Panathinaikos x Real Betis\n\n"
+                f"🏠 *CASA*\n🎯 {resultados[0]['tipo']} de 10.5 escanteios\n📊 Frequência: *{resultados[0]['freq']}*\n\n"
+                f"🚀 *FORA*\n🎯 {resultados[1]['tipo']} de 10.5 escanteios\n📊 Frequência: *{resultados[1]['freq']}*"
             )
             send_telegram(msg)
         else:
-            send_telegram(f"⚠️ Encontrado apenas {len(lista_escanteios)} dado de escanteio. Verifique se o mercado 10.5 está aberto para ambos.")
+            send_telegram(f"⚠️ Encontrado apenas: {resultados}. O JSON pode ter mudado.")
 
     except Exception as e:
         send_telegram(f"🚨 Erro: {e}")
@@ -84,5 +83,4 @@ def minerar_preciso():
         browser.quit()
 
 if __name__ == "__main__":
-    minerar_preciso()
-            
+    minerar_v_final()
