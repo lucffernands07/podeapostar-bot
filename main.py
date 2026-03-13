@@ -42,7 +42,6 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         time.sleep(10)
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         
-        # REGRA ESCANTEIO: Foco 80%+ (Peso 150 se for top)
         matches = list(re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE))
         percs = []
         for m in matches:
@@ -93,7 +92,6 @@ def executar():
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
     
-    # LIGAS DE HOJE (Expandido para os seus prints)
     ligas = {
         39: "Premier", 140: "LaLiga", 135: "Serie A", 78: "Bundesliga", 
         61: "Ligue 1", 203: "Turquia", 307: "Saudi Pro", 94: "Portugal"
@@ -109,44 +107,59 @@ def executar():
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 g_info = {"id": m['fixture']['id'], "info": f"*{t1['name']} x {t2['name']}*", "hora": m['fixture']['date'][11:16], "liga": l_nome}
 
-                # 1. Regra Escanteio (Foco 80% | Peso 150)
+                # 1. Regra Escanteio (Peso 150)
                 tipo_canto, peso_canto = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
                 if tipo_canto:
-                    pool_entradas.append({"prio": peso_canto, "mkt": f"🚩 {tipo_canto}", **g_info})
+                    pool_entradas.append({"prio": peso_canto, "mkt": f"🚩 {tipo_canto}", "tipo": "canto", **g_info})
 
-                # 2. Dupla Chance (Baixado para 70% | 90% peso 130)
+                # 2. Dupla Chance (Trava 70%, Peso 130 se for 90%)
                 h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
-                if h2h_t1 >= 90: pool_entradas.append({"prio": 130, "mkt": f"🔸 1X ({t1['name']})", **g_info})
-                elif h2h_t1 >= 70: pool_entradas.append({"prio": 85, "mkt": f"🔸 1X ({t1['name']})", **g_info})
-                
-                if h2h_t2 >= 90: pool_entradas.append({"prio": 130, "mkt": f"🔸 X2 ({t2['name']})", **g_info})
-                elif h2h_t2 >= 70: pool_entradas.append({"prio": 85, "mkt": f"🔸 X2 ({t2['name']})", **g_info})
+                if h2h_t1 >= 70:
+                    prio_dc = 130 if h2h_t1 >= 90 else 85
+                    pool_entradas.append({"prio": prio_dc, "mkt": f"🔸 1X ({t1['name']})", "tipo": "dc", **g_info})
+                elif h2h_t2 >= 70:
+                    prio_dc = 130 if h2h_t2 >= 90 else 85
+                    pool_entradas.append({"prio": prio_dc, "mkt": f"🔸 X2 ({t2['name']})", "tipo": "dc", **g_info})
 
-                # 3. Gols (10 jogos cada)
+                # 3. Gols (Peso 140 para Over 1.5 competir com DC)
                 h_o15, h_o25 = get_individual_stats(t1['id'])
                 a_o15, a_o25 = get_individual_stats(t2['id'])
 
-                # Regra Over 1.5 (=> 70% cada | Peso 110)
                 if h_o15 >= 70 and a_o15 >= 70:
-                    pool_entradas.append({"prio": 110, "mkt": "🔸 Mais de 1.5 Gols", **g_info})
+                    pool_entradas.append({"prio": 140, "mkt": "🔸 Mais de 1.5 Gols", "tipo": "gol", **g_info})
                 
-                # Regra Over 2.5 (=> 80% cada | Peso 100)
                 if h_o25 >= 80 and a_o25 >= 80:
-                    pool_entradas.append({"prio": 100, "mkt": "🔸 Mais de 2.5 Gols", **g_info})
+                    pool_entradas.append({"prio": 100, "mkt": "🔸 Mais de 2.5 Gols", "tipo": "gol", **g_info})
         except: continue
 
     browser.quit()
 
-    # Filtro final: 12 mercados, 3 por jogo
+    # --- FILTRAGEM COM LIMITE DE DUPLA CHANCE ---
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
-    bilhete, contagem = [], {}
+    
+    bilhete = []
+    contagem_jogo = {}
+    contagem_dc = 0  # Limitador de 1X e X2
+    
     for e in pool_entradas:
         if len(bilhete) >= 12: break
+        
+        # REGRA: No máximo 3 Dupla Chance por bilhete
+        if e.get('tipo') == 'dc' and contagem_dc >= 3:
+            continue
+            
         mid = e['id']
-        contagem[mid] = contagem.get(mid, 0)
-        if contagem[mid] < 3:
+        contagem_jogo[mid] = contagem_jogo.get(mid, 0)
+        
+        # Máximo 3 mercados por partida
+        if contagem_jogo[mid] < 3:
             bilhete.append(e)
-            contagem[mid] += 1
+            contagem_jogo[mid] += 1
+            if e.get('tipo') == 'dc':
+                contagem_dc += 1
+
+    if not bilhete:
+        return
 
     # Formatação Final
     jogos_final = {}
@@ -155,7 +168,7 @@ def executar():
             jogos_final[e['id']] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "mkts": []}
         jogos_final[e['id']]["mkts"].append(e['mkt'])
 
-    msg = "🎫 *BILHETE ELITE GLOBAL*\n"
+    msg = "🎫 *BILHETE ELITE DIVERSIFICADO*\n📊 Foco: Gols e Cantos (Max 3 Dupla Chance)\n"
     for j in jogos_final.values():
         msg += f"\n🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n" + "\n".join(j['mkts']) + "\n"
     
