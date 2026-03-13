@@ -1,7 +1,6 @@
 import os
 import requests
 import time
-import re
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -27,15 +26,17 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-def minerar_organizado():
+def minerar_preciso():
     browser = configurar_browser()
     url_confronto = "https://www.sofascore.com/pt/football/match/panathinaikos-fc-real-betis/qgbsYob"
     
+    lista_escanteios = []
+
     try:
         browser.get(url_confronto)
         wait = WebDriverWait(browser, 20)
         
-        # 1. Abre a aba Partidas
+        # Abre a aba Partidas
         try:
             browser.execute_script("window.scrollTo(0, 500);")
             time.sleep(2)
@@ -44,47 +45,38 @@ def minerar_organizado():
         except: pass
 
         time.sleep(15)
-        
-        # 2. Captura os nomes dos times no placar/topo para confirmar
-        times_header = browser.find_elements(By.CLASS_NAME, "sc-6997034c-2") # Classe comum de nomes de times no Sofa
-        nome_casa = "Casa"
-        nome_fora = "Fora"
-        if len(times_header) >= 2:
-            nome_casa = times_header[0].text
-            nome_fora = times_header[1].text
 
-        # 3. Extração dos blocos de escanteio
+        # Captura todos os blocos de estatística
         blocos = browser.find_elements(By.CLASS_NAME, "p_sm")
-        dados_escanteio = []
         
         for b in blocos:
             texto = b.text.strip()
-            if "10.5 escanteio" in texto.lower() and "/" in texto:
-                # Pegamos apenas a frequência (ex: 10/10) e o mercado
-                match_freq = re.search(r'(\d+/\d+)', texto)
-                mercado = "Menos de 10.5" if "Menos" in texto else "Mais de 10.5"
-                if match_freq:
-                    dados_escanteio.append({"mercado": mercado, "freq": match_freq.group(1)})
+            
+            # FILTRO CRUCIAL: Só entra se a palavra 'escanteio' estiver no bloco
+            if "escanteio" in texto.lower():
+                linhas = [l.strip() for l in texto.split('\n') if l.strip()]
+                
+                # Procura a fração (ex: 10/10) dentro deste bloco específico
+                for linha in linhas:
+                    if "/" in linha:
+                        mercado = "Menos de 10.5" if "Menos" in texto else "Mais de 10.5"
+                        lista_escanteios.append({"mercado": mercado, "freq": linha})
+                        break 
 
-        # 4. Montagem da Mensagem Final baseada na ordem (1º Casa, 2º Fora)
-        if len(dados_escanteio) >= 2:
+        # Montagem baseada na sua observação: 1º é Casa, 2º é Visitante
+        if len(lista_escanteios) >= 2:
+            casa = lista_escanteios[0]
+            fora = lista_escanteios[1]
+            
             msg = (
-                f"🎫 *BILHETE DE ESCANTEIOS*\n"
-                f"🏟️ {nome_casa} x {nome_fora}\n\n"
-                f"🏠 *CASA:* {nome_casa}\n"
-                f"🎯 {dados_escanteio[0]['mercado']}\n"
-                f"📊 Frequência: *{dados_escanteio[0]['freq']}*\n\n"
-                f"🚀 *FORA:* {nome_fora}\n"
-                f"🎯 {dados_escanteio[1]['mercado']}\n"
-                f"📊 Frequência: *{dados_escanteio[1]['freq']}*\n\n"
-                f"🍀 *Dica:* Entrada recomendada se ambos forem 80%+"
+                f"🎫 *BILHETE DE ESCANTEIOS*\n🏟️ Panathinaikos x Real Betis\n\n"
+                f"🏠 *CASA (Panathinaikos)*\n🎯 {casa['mercado']}\n📊 Frequência: *{casa['freq']}*\n\n"
+                f"🚀 *FORA (Real Betis)*\n🎯 {fora['mercado']}\n📊 Frequência: *{fora['freq']}*\n\n"
+                f"✅ *Filtro aplicado:* Ignorado 6/7 de gols/cartões."
             )
             send_telegram(msg)
-        elif len(dados_escanteio) == 1:
-            msg = f"🎫 *BILHETE PARCIAL*\n🎯 {dados_escanteio[0]['mercado']}\n📊 Frequência: {dados_escanteio[0]['freq']}"
-            send_telegram(msg)
         else:
-            send_telegram("❌ Nenhuma tendência de 10.5 escanteios encontrada para este jogo.")
+            send_telegram(f"⚠️ Encontrado apenas {len(lista_escanteios)} dado de escanteio. Verifique se o mercado 10.5 está aberto para ambos.")
 
     except Exception as e:
         send_telegram(f"🚨 Erro: {e}")
@@ -92,4 +84,5 @@ def minerar_organizado():
         browser.quit()
 
 if __name__ == "__main__":
-    minerar_organizado()
+    minerar_preciso()
+            
