@@ -84,3 +84,4 @@ def minerar_v_final():
 
 if __name__ == "__main__":
     minerar_v_final()
+                
