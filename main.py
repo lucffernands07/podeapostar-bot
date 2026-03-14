@@ -39,9 +39,8 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
             aba = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href*="tab:matches"]')))
             driver.execute_script("arguments[0].click();", aba)
         except: pass
-        time.sleep(10)
+        time.sleep(8)
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
-        
         matches = list(re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE))
         percs = []
         for m in matches:
@@ -50,13 +49,14 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
             if f:
                 percs.append((int(f.group(1)) / int(f.group(2))) * 100)
         
-        if len(percs) >= 2 and (percs[0] >= 80 and percs[1] >= 80):
-            return "Menos de 10.5 Escanteios", 150
+        if len(percs) >= 2:
+            media_canto = sum(percs) / len(percs)
+            return "Menos de 10.5 Escanteios", media_canto
     except: pass
     return None, 0
 
 def get_h2h_dupla_chance(t1_id, t2_id):
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last=5"
+    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last=10"
     try:
         res = requests.get(url, headers=HEADERS).json()
         fixtures = res.get('response', [])
@@ -82,20 +82,11 @@ def get_individual_stats(team_id):
         return (o15 * 10), (o25 * 10)
     except: return 0, 0
 
-def enviar_telegram(msg):
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
-    requests.post(url, json=payload)
-
 def executar():
     browser = configurar_browser()
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
-    
-    ligas = {
-        39: "Premier", 140: "LaLiga", 135: "Serie A", 78: "Bundesliga", 
-        61: "Ligue 1", 203: "Turquia", 307: "Saudi Pro", 94: "Portugal"
-    }
+    ligas = {39: "Premier", 140: "LaLiga", 135: "Serie A", 78: "Bundesliga", 61: "Ligue 1", 203: "Turquia", 307: "Saudi Pro", 94: "Portugal"}
     
     pool_entradas = []
 
@@ -107,72 +98,63 @@ def executar():
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 g_info = {"id": m['fixture']['id'], "info": f"*{t1['name']} x {t2['name']}*", "hora": m['fixture']['date'][11:16], "liga": l_nome}
 
-                # 1. Regra Escanteio (Peso 150)
-                tipo_canto, peso_canto = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
-                if tipo_canto:
-                    pool_entradas.append({"prio": peso_canto, "mkt": f"🚩 {tipo_canto}", "tipo": "canto", **g_info})
+                # 1. Escanteios (H2H SofaScore %)
+                tipo_canto, perc_canto = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
+                if tipo_canto and perc_canto >= 70:
+                    pool_entradas.append({"prio": perc_canto, "mkt": f"🚩 {tipo_canto}", "tipo": "canto", **g_info})
 
-                # 2. Dupla Chance (Trava 70%, Peso 130 se for 90%)
+                # 2. Dupla Chance (H2H %)
                 h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
-                if h2h_t1 >= 70:
-                    prio_dc = 130 if h2h_t1 >= 90 else 85
-                    pool_entradas.append({"prio": prio_dc, "mkt": f"🔸 1X ({t1['name']})", "tipo": "dc", **g_info})
-                elif h2h_t2 >= 70:
-                    prio_dc = 130 if h2h_t2 >= 90 else 85
-                    pool_entradas.append({"prio": prio_dc, "mkt": f"🔸 X2 ({t2['name']})", "tipo": "dc", **g_info})
+                if h2h_t1 >= 70: pool_entradas.append({"prio": h2h_t1, "mkt": f"🔸 1X ({t1['name']})", "tipo": "1x", **g_info})
+                if h2h_t2 >= 70: pool_entradas.append({"prio": h2h_t2, "mkt": f"🔸 X2 ({t2['name']})", "tipo": "2x", **g_info})
 
-                # 3. Gols (Peso 140 para Over 1.5 competir com DC)
+                # 3. Gols (Individual 10 jogos %)
                 h_o15, h_o25 = get_individual_stats(t1['id'])
                 a_o15, a_o25 = get_individual_stats(t2['id'])
+                media_o15, media_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
 
-                if h_o15 >= 70 and a_o15 >= 70:
-                    pool_entradas.append({"prio": 140, "mkt": "🔸 Mais de 1.5 Gols", "tipo": "gol", **g_info})
-                
-                if h_o25 >= 80 and a_o25 >= 80:
-                    pool_entradas.append({"prio": 100, "mkt": "🔸 Mais de 2.5 Gols", "tipo": "gol", **g_info})
+                if media_o15 >= 70: pool_entradas.append({"prio": media_o15, "mkt": "🔸 +1.5 Gols", "tipo": "1.5", **g_info})
+                if media_o25 >= 70: pool_entradas.append({"prio": media_o25, "mkt": "🔸 +2.5 Gols", "tipo": "2.5", **g_info})
         except: continue
-
     browser.quit()
 
-    # --- FILTRAGEM COM LIMITE DE DUPLA CHANCE ---
+    # --- FILTRAGEM POR RANK DE % REAL E LIMITES ---
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
     
     bilhete = []
-    contagem_jogo = {}
-    contagem_dc = 0  # Limitador de 1X e X2
+    cont_jogo, c_canto, c_1x, c_2x, c_25 = {}, 0, 0, 0, 0
     
     for e in pool_entradas:
         if len(bilhete) >= 12: break
         
-        # REGRA: No máximo 3 Dupla Chance por bilhete
-        if e.get('tipo') == 'dc' and contagem_dc >= 3:
-            continue
-            
-        mid = e['id']
-        contagem_jogo[mid] = contagem_jogo.get(mid, 0)
+        # Aplicando suas travas específicas
+        if e['tipo'] == 'canto' and c_canto >= 3: continue
+        if e['tipo'] == '2.5' and c_25 >= 2: continue
+        if e['tipo'] == '2x' and c_2x >= 1: continue
+        if e['tipo'] == '1x' and c_1x >= 3: continue
         
-        # Máximo 3 mercados por partida
-        if contagem_jogo[mid] < 3:
+        mid = e['id']
+        cont_jogo[mid] = cont_jogo.get(mid, 0)
+        if cont_jogo[mid] < 3:
             bilhete.append(e)
-            contagem_jogo[mid] += 1
-            if e.get('tipo') == 'dc':
-                contagem_dc += 1
-
-    if not bilhete:
-        return
+            cont_jogo[mid] += 1
+            if e['tipo'] == 'canto': c_canto += 1
+            if e['tipo'] == '2.5': c_25 += 1
+            if e['tipo'] == '2x': c_2x += 1
+            if e['tipo'] == '1x': c_1x += 1
 
     # Formatação Final
     jogos_final = {}
     for e in bilhete:
         if e['id'] not in jogos_final:
             jogos_final[e['id']] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "mkts": []}
-        jogos_final[e['id']]["mkts"].append(e['mkt'])
+        jogos_final[e['id']]["mkts"].append(f"{e['mkt']} ({e['prio']:.0f}%)")
 
-    msg = "🎫 *BILHETE ELITE DIVERSIFICADO*\n📊 Foco: Gols e Cantos (Max 3 Dupla Chance)\n"
+    msg = "🎫 *BILHETE ELITE RANKING %*\n📊 Critério: Maior Assertividade Real\n"
     for j in jogos_final.values():
         msg += f"\n🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n" + "\n".join(j['mkts']) + "\n"
     
-    rodape = "\n---\n💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
-    enviar_telegram(msg + rodape)
+    enviar_telegram(msg + "\n---\n💸 [Bet365](https://www.bet365.com)")
 
 if __name__ == "__main__": executar()
+        
