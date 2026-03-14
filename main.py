@@ -117,31 +117,29 @@ def executar():
             for m in res.get('response', []):
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 
-                # 1. Buscamos primeiro os dados do Sofa (incluindo o link real com ID)
+                # CHAMA A FUNÇÃO QUE PEGA O LINK REAL (COM ID) NO GOOGLE
                 tipo_canto, perc_canto, url_real = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
                 
-                # 2. Se não encontrou o link real, definimos um link de busca como reserva para não quebrar
-                link_final = url_real if url_real else f"https://www.sofascore.com/search?q={t1['name']}+{t2['name']}"
-                
-                # 3. Criamos o dicionário de informações básicas do jogo
+                # Se o Selenium não achou o link real, montamos o link de busca que deu certo antes
+                if not url_real:
+                    # Este formato de busca costuma abrir o confronto direto
+                    url_real = f"https://www.sofascore.com/pt/futebol/time-confronto/{t1['name'].lower().replace(' ', '-')}-{t2['name'].lower().replace(' ', '-')}"
+
                 g_info = {
                     "id": m['fixture']['id'], 
                     "info": f"*{t1['name']} x {t2['name']}*", 
                     "hora": m['fixture']['date'][11:16], 
                     "liga": l_nome, 
-                    "sofa_link": link_final # Aqui entra o link com ID capturado
+                    "sofa_link": url_real # Aqui vai o link com o ID capturado
                 }
 
-                # Adiciona mercado de cantos se houver
                 if tipo_canto and perc_canto >= 70:
                     pool_entradas.append({"prio": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
-                # Mercados de Dupla Chance
                 h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
                 if h2h_t1 >= 70: pool_entradas.append({"prio": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
                 if h2h_t2 >= 70: pool_entradas.append({"prio": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
-                # Mercados de Gols
                 h_o15, h_o25 = get_individual_stats(t1['id'])
                 a_o15, a_o25 = get_individual_stats(t2['id'])
                 m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
@@ -151,7 +149,7 @@ def executar():
     browser.quit()
 
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
-                
+
     
     # --- AGRUPAMENTO POR JOGO ---
     jogos_selecionados = {}
