@@ -38,40 +38,54 @@ def enviar_telegram(msg):
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
     query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} h2h statistics")
     url_busca = f"https://www.google.com/search?q={query}"
-    url_direta = None # Inicializa como None para não dar erro de variável
+    url_direta = None
     
     try:
         driver.get(url_busca)
-        # 1. Localiza o link e extrai a URL real (com o ID) antes de clicar
+        # Captura o link real com ID no Google
         link_elem = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, 'sofascore.com')]")))
         url_direta = link_elem.get_attribute("href")
         
-        # 2. Clica para processar os escanteios
         link_elem.click()
         time.sleep(8)
+        
+        # 1. Clica na aba "PARTIDAS" (conforme solicitado)
         try:
-            aba = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href*="tab:matches"]')))
-            driver.execute_script("arguments[0].click();", aba)
-        except: pass
-        
-        time.sleep(10)
-        texto_bruto = driver.find_element(By.TAG_NAME, "body").text
-        matches = list(re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE))
-        percs = []
-        for m in matches:
-            trecho = texto_bruto[m.end() : m.end() + 50]
-            f = re.search(r"(\d+)/(\d+)", trecho)
-            if f:
-                percs.append((int(f.group(1)) / int(f.group(2))) * 100)
-        
-        if len(percs) >= 2:
-            media_canto = sum(percs) / len(percs)
-            return "Mais de 8.5 Escanteios", media_canto, url_direta
+            # Busca por link que contenha 'partidas' ou texto 'Partidas'
+            aba_partidas = WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Partidas') or contains(@href, 'tab:matches')]"))
+            )
+            driver.execute_script("arguments[0].click();", aba_partidas)
+        except: 
+            pass # Se já estiver na aba, segue o jogo
             
-    except Exception as e:
-        print(f"Erro na busca Sofa: {e}")
+        time.sleep(8)
+        texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         
-    # O SEGREDO: Se algo falhar acima, ele retorna os 3 valores vazios/padrão
+        # 2. Busca o termo "10.5 escanteios"
+        # Usamos re.IGNORECASE para garantir que ache "Escanteios" ou "escanteios"
+        alvo = re.search(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
+        
+        if alvo:
+            # Pega o texto logo após o termo para extrair as frações
+            trecho_pos_termo = texto_bruto[alvo.end() : alvo.end() + 100]
+            # Encontra todas as frações tipo 4/5, 5/5, 10/12 no trecho
+            frações = re.findall(r"(\d+)/(\d+)", trecho_pos_termo)
+            
+            if len(frações) >= 2:
+                # Calcula porcentagem da Casa (fração 1) e Visitante (fração 2)
+                perc_casa = (int(frações[0][0]) / int(frações[0][1])) * 100
+                perc_visi = (int(frações[1][0]) / int(frações[1][1])) * 100
+                
+                media_final = (perc_casa + perc_visi) / 2
+                
+                # 3. CRITÉRIO: Média >= 85%
+                if media_final >= 85:
+                    return "Menos de 10.5 Escanteios", media_final, url_direta
+                    
+    except Exception as e:
+        print(f"Erro ao processar cantos: {e}")
+        
     return None, 0, url_direta
 
 
