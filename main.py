@@ -123,14 +123,13 @@ def executar():
         except: continue
     browser.quit()
 
-    # --- FILTRAGEM POR RANK DE % E LIMITES ---
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
     
     bilhete = []
     cont_jogo, c_canto, c_1x, c_2x, c_25 = {}, 0, 0, 0, 0
     
     for e in pool_entradas:
-        if len(bilhete) >= 10: break # Ajustado para 10 conforme exemplo
+        if len(bilhete) >= 10: break
         
         if e['tipo'] == 'canto' and c_canto >= 3: continue
         if e['tipo'] == '2.5' and c_25 >= 2: continue
@@ -148,11 +147,8 @@ def executar():
             if e['tipo'] == '1x': c_1x += 1
 
     if not bilhete: return
-
-    # Ordenar por ordem alfabética de LIGA
     bilhete.sort(key=lambda x: x['liga'])
 
-    # --- CONSTRUÇÃO DA MENSAGEM ---
     ligas_enc = sorted(list(set([e['liga'] for e in bilhete])))
     
     msg = "🎯 *BILHETE DO DIA (10 JOGOS)*\n💰🍀 *BOA SORTE!!!*\n\n"
@@ -165,14 +161,15 @@ def executar():
         q_stats = urllib.parse.quote(f"sofascore {e['info'].replace('*','')} h2h")
         l_stats = f"https://www.google.com/search?q={q_stats}"
         
+        # Formatação do texto do mercado com a porcentagem
         if e['tipo'] == 'canto':
-            mkt_label = f"🚩 {e['mkt']} — Volume Alto"
+            mkt_label = f"🚩 {e['mkt']} — {e['prio']:.0f}%"
         elif e['tipo'] in ['1x', '2x']:
-            mkt_label = f"🛡️ Chance Dupla — {e['mkt']}"
+            mkt_label = f"🛡️ Chance Dupla — {e['mkt']} ({e['prio']:.0f}%)"
         elif e['tipo'] == '2.5':
-            mkt_label = f"⚡ {e['mkt']} — Atropelo"
+            mkt_label = f"⚡ {e['mkt']} — Atropelo ({e['prio']:.0f}%)"
         else:
-            mkt_label = f"⚽ {e['mkt']} — Confiança Máxima"
+            mkt_label = f"⚽ {e['mkt']} — Confiança Máxima ({e['prio']:.0f}%)"
 
         msg += f"{i}. 🏟️ {e['info']}\n"
         msg += f"🕒 {e['hora']} | {e['liga']}\n"
@@ -184,4 +181,3 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-            
