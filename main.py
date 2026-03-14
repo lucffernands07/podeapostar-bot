@@ -28,7 +28,6 @@ def configurar_browser():
     return webdriver.Chrome(service=service, options=options)
 
 def enviar_telegram(msg):
-    """Função para enviar as mensagens ao bot do Telegram"""
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
     try:
@@ -60,7 +59,7 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         
         if len(percs) >= 2:
             media_canto = sum(percs) / len(percs)
-            return "Menos de 10.5 Escanteios", media_canto
+            return "Mais de 8.5 Escanteios", media_canto
     except: pass
     return None, 0
 
@@ -95,7 +94,7 @@ def executar():
     browser = configurar_browser()
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
-    ligas = {39: "Premier", 140: "LaLiga", 135: "Serie A", 78: "Bundesliga", 61: "Ligue 1", 203: "Turquia", 307: "Saudi Pro", 94: "Portugal"}
+    ligas = {39: "Premier", 140: "LALIGA", 135: "Serie A", 78: "Bundesliga", 61: "Ligue 1", 203: "Turquia", 307: "Saudi Pro", 94: "Português"}
     
     pool_entradas = []
 
@@ -107,36 +106,32 @@ def executar():
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 g_info = {"id": m['fixture']['id'], "info": f"*{t1['name']} x {t2['name']}*", "hora": m['fixture']['date'][11:16], "liga": l_nome}
 
-                # 1. Escanteios
                 tipo_canto, perc_canto = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
                 if tipo_canto and perc_canto >= 70:
-                    pool_entradas.append({"prio": perc_canto, "mkt": f"🚩 {tipo_canto}", "tipo": "canto", **g_info})
+                    pool_entradas.append({"prio": perc_canto, "mkt": f"{tipo_canto}", "tipo": "canto", **g_info})
 
-                # 2. Dupla Chance
                 h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
-                if h2h_t1 >= 70: pool_entradas.append({"prio": h2h_t1, "mkt": f"🔸 1X ({t1['name']})", "tipo": "1x", **g_info})
-                if h2h_t2 >= 70: pool_entradas.append({"prio": h2h_t2, "mkt": f"🔸 X2 ({t2['name']})", "tipo": "2x", **g_info})
+                if h2h_t1 >= 70: pool_entradas.append({"prio": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
+                if h2h_t2 >= 70: pool_entradas.append({"prio": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
-                # 3. Gols
                 h_o15, h_o25 = get_individual_stats(t1['id'])
                 a_o15, a_o25 = get_individual_stats(t2['id'])
                 m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
 
-                if m_o15 >= 70: pool_entradas.append({"prio": m_o15, "mkt": "🔸 +1.5 Gols", "tipo": "1.5", **g_info})
-                if m_o25 >= 70: pool_entradas.append({"prio": m_o25, "mkt": "🔸 +2.5 Gols", "tipo": "2.5", **g_info})
+                if m_o15 >= 70: pool_entradas.append({"prio": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
+                if m_o25 >= 70: pool_entradas.append({"prio": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
         except: continue
     browser.quit()
 
-    # --- FILTRAGEM POR RANK DE % REAL E LIMITES ---
+    # --- FILTRAGEM POR RANK DE % E LIMITES ---
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
     
     bilhete = []
     cont_jogo, c_canto, c_1x, c_2x, c_25 = {}, 0, 0, 0, 0
     
     for e in pool_entradas:
-        if len(bilhete) >= 12: break
+        if len(bilhete) >= 10: break # Ajustado para 10 conforme exemplo
         
-        # Travas de Categoria
         if e['tipo'] == 'canto' and c_canto >= 3: continue
         if e['tipo'] == '2.5' and c_25 >= 2: continue
         if e['tipo'] == '2x' and c_2x >= 1: continue
@@ -152,21 +147,41 @@ def executar():
             if e['tipo'] == '2x': c_2x += 1
             if e['tipo'] == '1x': c_1x += 1
 
-    # Formatação Final
-    jogos_final = {}
-    for e in bilhete:
-        if e['id'] not in jogos_final:
-            jogos_final[e['id']] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "mkts": []}
-        jogos_final[e['id']]["mkts"].append(f"{e['mkt']} ({e['prio']:.0f}%)")
-
     if not bilhete: return
 
-    msg = "🎫 *BILHETE ELITE RANKING %*\n📊 Critério: Maior Assertividade Real\n"
-    for j in jogos_final.values():
-        msg += f"\n🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n" + "\n".join(j['mkts']) + "\n"
+    # Ordenar por ordem alfabética de LIGA
+    bilhete.sort(key=lambda x: x['liga'])
+
+    # --- CONSTRUÇÃO DA MENSAGEM ---
+    ligas_enc = sorted(list(set([e['liga'] for e in bilhete])))
     
-    enviar_telegram(msg + "\n---\n💸 [Bet365](https://www.bet365.com)")
+    msg = "🎯 *BILHETE DO DIA (10 JOGOS)*\n💰🍀 *BOA SORTE!!!*\n\n"
+    msg += "🏟️ *LIGAS ENCONTRADAS:*\n"
+    for l in ligas_enc:
+        msg += f"🔹 {l}\n"
+    msg += "\n"
+
+    for i, e in enumerate(bilhete, 1):
+        q_stats = urllib.parse.quote(f"sofascore {e['info'].replace('*','')} h2h")
+        l_stats = f"https://www.google.com/search?q={q_stats}"
+        
+        if e['tipo'] == 'canto':
+            mkt_label = f"🚩 {e['mkt']} — Volume Alto"
+        elif e['tipo'] in ['1x', '2x']:
+            mkt_label = f"🛡️ Chance Dupla — {e['mkt']}"
+        elif e['tipo'] == '2.5':
+            mkt_label = f"⚡ {e['mkt']} — Atropelo"
+        else:
+            mkt_label = f"⚽ {e['mkt']} — Confiança Máxima"
+
+        msg += f"{i}. 🏟️ {e['info']}\n"
+        msg += f"🕒 {e['hora']} | {e['liga']}\n"
+        msg += f"🎯 {mkt_label}\n"
+        msg += f"📊 [Estatísticas]({l_stats})\n\n"
+    
+    msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
+    enviar_telegram(msg)
 
 if __name__ == "__main__":
     executar()
-    
+            
