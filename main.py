@@ -36,44 +36,45 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} h2h statistics")
+    query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} match")
     url_busca = f"https://www.google.com/search?q={query}"
     url_direta = None
     
     try:
         driver.get(url_busca)
-        # Captura o link real com ID no Google
-        link_elem = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, 'sofascore.com')]")))
-        url_direta = link_elem.get_attribute("href")
-        
+        # Localiza o link no Google e clica
+        link_elem = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.XPATH, "//a[contains(@href, 'sofascore.com')]"))
+        )
         link_elem.click()
+        
+        # Espera o redirecionamento e o carregamento da página real
         time.sleep(8)
         
-        # 1. Clica na aba "PARTIDAS" (conforme solicitado)
+        # --- AQUI ESTÁ O AJUSTE PARA O ID ---
+        # Pegamos a URL ATUAL do navegador, que já contém o ID gerado pelo SofaScore
+        url_direta = driver.current_url 
+        
+        # 1. Clica na aba "PARTIDAS"
         try:
-            # Busca por link que contenha 'partidas' ou texto 'Partidas'
             aba_partidas = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Partidas') or contains(@href, 'tab:matches')]"))
+                EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Partidas')]"))
             )
             driver.execute_script("arguments[0].click();", aba_partidas)
         except: 
-            pass # Se já estiver na aba, segue o jogo
+            pass 
             
         time.sleep(8)
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         
         # 2. Busca o termo "10.5 escanteios"
-        # Usamos re.IGNORECASE para garantir que ache "Escanteios" ou "escanteios"
         alvo = re.search(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
         
         if alvo:
-            # Pega o texto logo após o termo para extrair as frações
             trecho_pos_termo = texto_bruto[alvo.end() : alvo.end() + 100]
-            # Encontra todas as frações tipo 4/5, 5/5, 10/12 no trecho
             frações = re.findall(r"(\d+)/(\d+)", trecho_pos_termo)
             
             if len(frações) >= 2:
-                # Calcula porcentagem da Casa (fração 1) e Visitante (fração 2)
                 perc_casa = (int(frações[0][0]) / int(frações[0][1])) * 100
                 perc_visi = (int(frações[1][0]) / int(frações[1][1])) * 100
                 
