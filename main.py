@@ -27,6 +27,15 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
+def enviar_telegram(msg):
+    """Função para enviar as mensagens ao bot do Telegram"""
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
+    try:
+        requests.post(url, json=payload)
+    except Exception as e:
+        print(f"Erro ao enviar Telegram: {e}")
+
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
     query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} h2h statistics")
     url_busca = f"https://www.google.com/search?q={query}"
@@ -34,12 +43,12 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         driver.get(url_busca)
         first_link = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "h3")))
         first_link.click()
-        time.sleep(6)
+        time.sleep(8)
         try:
             aba = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href*="tab:matches"]')))
             driver.execute_script("arguments[0].click();", aba)
         except: pass
-        time.sleep(8)
+        time.sleep(10)
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         matches = list(re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE))
         percs = []
@@ -98,23 +107,23 @@ def executar():
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 g_info = {"id": m['fixture']['id'], "info": f"*{t1['name']} x {t2['name']}*", "hora": m['fixture']['date'][11:16], "liga": l_nome}
 
-                # 1. Escanteios (H2H SofaScore %)
+                # 1. Escanteios
                 tipo_canto, perc_canto = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
                 if tipo_canto and perc_canto >= 70:
                     pool_entradas.append({"prio": perc_canto, "mkt": f"🚩 {tipo_canto}", "tipo": "canto", **g_info})
 
-                # 2. Dupla Chance (H2H %)
+                # 2. Dupla Chance
                 h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
                 if h2h_t1 >= 70: pool_entradas.append({"prio": h2h_t1, "mkt": f"🔸 1X ({t1['name']})", "tipo": "1x", **g_info})
                 if h2h_t2 >= 70: pool_entradas.append({"prio": h2h_t2, "mkt": f"🔸 X2 ({t2['name']})", "tipo": "2x", **g_info})
 
-                # 3. Gols (Individual 10 jogos %)
+                # 3. Gols
                 h_o15, h_o25 = get_individual_stats(t1['id'])
                 a_o15, a_o25 = get_individual_stats(t2['id'])
-                media_o15, media_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
+                m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
 
-                if media_o15 >= 70: pool_entradas.append({"prio": media_o15, "mkt": "🔸 +1.5 Gols", "tipo": "1.5", **g_info})
-                if media_o25 >= 70: pool_entradas.append({"prio": media_o25, "mkt": "🔸 +2.5 Gols", "tipo": "2.5", **g_info})
+                if m_o15 >= 70: pool_entradas.append({"prio": m_o15, "mkt": "🔸 +1.5 Gols", "tipo": "1.5", **g_info})
+                if m_o25 >= 70: pool_entradas.append({"prio": m_o25, "mkt": "🔸 +2.5 Gols", "tipo": "2.5", **g_info})
         except: continue
     browser.quit()
 
@@ -127,7 +136,7 @@ def executar():
     for e in pool_entradas:
         if len(bilhete) >= 12: break
         
-        # Aplicando suas travas específicas
+        # Travas de Categoria
         if e['tipo'] == 'canto' and c_canto >= 3: continue
         if e['tipo'] == '2.5' and c_25 >= 2: continue
         if e['tipo'] == '2x' and c_2x >= 1: continue
@@ -150,11 +159,14 @@ def executar():
             jogos_final[e['id']] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "mkts": []}
         jogos_final[e['id']]["mkts"].append(f"{e['mkt']} ({e['prio']:.0f}%)")
 
+    if not bilhete: return
+
     msg = "🎫 *BILHETE ELITE RANKING %*\n📊 Critério: Maior Assertividade Real\n"
     for j in jogos_final.values():
         msg += f"\n🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n" + "\n".join(j['mkts']) + "\n"
     
     enviar_telegram(msg + "\n---\n💸 [Bet365](https://www.bet365.com)")
 
-if __name__ == "__main__": executar()
-        
+if __name__ == "__main__":
+    executar()
+    
