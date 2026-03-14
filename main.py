@@ -38,29 +38,42 @@ def enviar_telegram(msg):
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
     query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} h2h statistics")
     url_busca = f"https://www.google.com/search?q={query}"
+    url_direta = None # Inicializa como None para não dar erro de variável
+    
     try:
         driver.get(url_busca)
+        # 1. Localiza o link e extrai a URL real (com o ID) antes de clicar
         link_elem = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, 'sofascore.com')]")))
         url_direta = link_elem.get_attribute("href")
+        
+        # 2. Clica para processar os escanteios
         link_elem.click()
         time.sleep(8)
         try:
             aba = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href*="tab:matches"]')))
             driver.execute_script("arguments[0].click();", aba)
         except: pass
-        time.sleep(5)
+        
+        time.sleep(10)
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         matches = list(re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE))
         percs = []
         for m in matches:
             trecho = texto_bruto[m.end() : m.end() + 50]
             f = re.search(r"(\d+)/(\d+)", trecho)
-            if f: percs.append((int(f.group(1)) / int(f.group(2))) * 100)
+            if f:
+                percs.append((int(f.group(1)) / int(f.group(2))) * 100)
         
         if len(percs) >= 2:
-            return "Mais de 8.5 Escanteios", sum(percs) / len(percs), url_direta
-    except: pass
-    return None, 0, None
+            media_canto = sum(percs) / len(percs)
+            return "Mais de 8.5 Escanteios", media_canto, url_direta
+            
+    except Exception as e:
+        print(f"Erro na busca Sofa: {e}")
+        
+    # O SEGREDO: Se algo falhar acima, ele retorna os 3 valores vazios/padrão
+    return None, 0, url_direta
+
 
 def get_h2h_dupla_chance(t1_id, t2_id):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last=10"
@@ -103,20 +116,32 @@ def executar():
             res = requests.get(url, headers=HEADERS).json()
             for m in res.get('response', []):
                 t1, t2 = m['teams']['home'], m['teams']['away']
-                slug_sofa = f"{t1['name']}-{t2['name']}".lower().replace(" ", "-")
-                url_fb = f"https://www.sofascore.com/pt/futebol/time-confronto/{slug_sofa}"
                 
-                g_info = {"id": m['fixture']['id'], "info": f"*{t1['name']} x {t2['name']}*", "hora": m['fixture']['date'][11:16], "liga": l_nome, "sofa_link": url_fb}
-
+                # 1. Buscamos primeiro os dados do Sofa (incluindo o link real com ID)
                 tipo_canto, perc_canto, url_real = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
-                if url_real: g_info["sofa_link"] = url_real
+                
+                # 2. Se não encontrou o link real, definimos um link de busca como reserva para não quebrar
+                link_final = url_real if url_real else f"https://www.sofascore.com/search?q={t1['name']}+{t2['name']}"
+                
+                # 3. Criamos o dicionário de informações básicas do jogo
+                g_info = {
+                    "id": m['fixture']['id'], 
+                    "info": f"*{t1['name']} x {t2['name']}*", 
+                    "hora": m['fixture']['date'][11:16], 
+                    "liga": l_nome, 
+                    "sofa_link": link_final # Aqui entra o link com ID capturado
+                }
+
+                # Adiciona mercado de cantos se houver
                 if tipo_canto and perc_canto >= 70:
                     pool_entradas.append({"prio": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
+                # Mercados de Dupla Chance
                 h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
                 if h2h_t1 >= 70: pool_entradas.append({"prio": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
                 if h2h_t2 >= 70: pool_entradas.append({"prio": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
+                # Mercados de Gols
                 h_o15, h_o25 = get_individual_stats(t1['id'])
                 a_o15, a_o25 = get_individual_stats(t2['id'])
                 m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
@@ -126,6 +151,7 @@ def executar():
     browser.quit()
 
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
+                
     
     # --- AGRUPAMENTO POR JOGO ---
     jogos_selecionados = {}
