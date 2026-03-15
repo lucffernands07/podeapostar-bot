@@ -36,32 +36,37 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} match")
-    url_busca = f"https://www.google.com/search?q={query}"
+    # DuckDuckGo é mais fácil de "raspar" que o Google e evita o erro de Stacktrace
+    query = urllib.parse.quote(f"site:sofascore.com {t1_name} {t2_name} match")
+    url_busca = f"https://duckduckgo.com/?q={query}"
     url_direta = None
     
     try:
         driver.get(url_busca)
-        # Aumentamos para 10 segundos para evitar o erro de 'Stacktrace'
+        
+        # 1. Localiza o link do SofaScore no DuckDuckGo
+        # O seletor do DuckDuckGo é mais simples
         link_elem = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//a[contains(@href, 'sofascore.com')]"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "a[href*='sofascore.com']"))
         )
         link_elem.click()
         
-        # O SEGREDO DA QUINTA-FEIRA: Esperar o carregamento total para pegar a URL com ID
+        # 2. ESPERA O REDIRECIONAMENTO PARA PEGAR O ID (Igual na quinta!)
         time.sleep(12) 
-        url_direta = driver.current_url # Pega a URL da barra de endereços (com ID EgbsWgb)
-        
+        url_direta = driver.current_url
+        print(f"Link com ID capturado: {url_direta}") 
+
+        # 3. CLICA NA ABA PARTIDAS
         try:
-            # Tenta clicar na aba 'Partidas'
-            aba_partidas = WebDriverWait(driver, 8).until(
-                EC.element_to_be_clickable((By.XPATH, "//a[contains(., 'Partidas')]"))
+            aba_partidas = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//a[contains(., 'Partidas') or contains(@href, 'matches')]"))
             )
             driver.execute_script("arguments[0].click();", aba_partidas)
             time.sleep(7)
         except:
             pass 
-            
+
+        # 4. CÁLCULO DA MÉDIA 85% PARA -10.5 ESCANTEIOS
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         alvo = re.search(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
         
@@ -74,12 +79,11 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
                 perc_visi = (int(frações[1][0]) / int(frações[1][1])) * 100
                 media_final = (perc_casa + perc_visi) / 2
                 
-                # SÓ RETORNA O MERCADO SE A MÉDIA FOR >= 85%
                 if media_final >= 85:
                     return "Menos de 10.5 Escanteios", media_final, url_direta
                     
     except Exception as e:
-        print(f"Erro no Sofa: {e}")
+        print(f"Erro ao buscar ID no Sofa: {str(e)[:50]}")
         
     return None, 0, url_direta
 
