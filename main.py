@@ -36,6 +36,8 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
+def get_sofa_h2h_corners(driver, t1_name, t2_name):
+    # Busca direta para cair no jogo de hoje
     query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} match")
     url_busca = f"https://www.google.com/search?q={query}"
     url_direta = None
@@ -48,46 +50,44 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         )
         link_elem.click()
         
-        # Espera o redirecionamento e o carregamento da página real
-        time.sleep(8)
+        # O QUE FUNCIONOU NA QUINTA: Esperar o carregamento e pegar a URL da barra de endereços
+        time.sleep(10) 
+        url_direta = driver.current_url # Aqui vem o ID exato (ex: EgbsWgb)
         
-        # --- AQUI ESTÁ O AJUSTE PARA O ID ---
-        # Pegamos a URL ATUAL do navegador, que já contém o ID gerado pelo SofaScore
-        url_direta = driver.current_url 
-        
-        # 1. Clica na aba "PARTIDAS"
+        # Clica na aba "Partidas"
         try:
-            aba_partidas = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Partidas')]"))
+            aba_partidas = WebDriverWait(driver, 7).until(
+                EC.element_to_be_clickable((By.XPATH, "//a[contains(., 'Partidas')]"))
             )
             driver.execute_script("arguments[0].click();", aba_partidas)
-        except: 
+            time.sleep(6)
+        except:
             pass 
             
-        time.sleep(8)
+        # Extração e cálculo da média de 85% para -10.5 escanteios
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
-        
-        # 2. Busca o termo "10.5 escanteios"
         alvo = re.search(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
         
         if alvo:
-            trecho_pos_termo = texto_bruto[alvo.end() : alvo.end() + 100]
-            frações = re.findall(r"(\d+)/(\d+)", trecho_pos_termo)
+            # Captura as frações (ex: 4/5, 5/5) logo após o termo
+            trecho = texto_bruto[alvo.end() : alvo.end() + 100]
+            frações = re.findall(r"(\d+)/(\d+)", trecho)
             
             if len(frações) >= 2:
                 perc_casa = (int(frações[0][0]) / int(frações[0][1])) * 100
                 perc_visi = (int(frações[1][0]) / int(frações[1][1])) * 100
-                
                 media_final = (perc_casa + perc_visi) / 2
                 
-                # 3. CRITÉRIO: Média >= 85%
+                # Critério solicitado: Média >= 85%
                 if media_final >= 85:
                     return "Menos de 10.5 Escanteios", media_final, url_direta
                     
     except Exception as e:
-        print(f"Erro ao processar cantos: {e}")
+        print(f"Erro no Sofa: {e}")
         
+    # Retorna o link com ID mesmo que não atinja os 85% para o g_info não ficar vazio
     return None, 0, url_direta
+
 
 
 def get_h2h_dupla_chance(t1_id, t2_id):
