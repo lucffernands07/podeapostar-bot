@@ -36,53 +36,52 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    # Query otimizada para o Google encontrar o H2H direto
     query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} match")
     url_busca = f"https://www.google.com/search?q={query}"
     url_real_com_id = None
     
     try:
         driver.get(url_busca)
-        # 1. Busca o primeiro link do SofaScore no Google
         first_link = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "h3")))
         first_link.click()
 
-        # 2. ESPERA O ID REAL (Lógica do código antigo que funcionava)
-        # Aguarda até a URL mudar para o domínio do SofaScore
-        WebDriverWait(driver, 15).until(EC.url_contains("sofascore.com"))
-        time.sleep(2) # Respiro para o JS carregar a URL final
-        url_real_com_id = driver.current_url 
-        print(f"DEBUG: ID Real Capturado -> {url_real_com_id}")
+        # Captura o link real do SofaScore (com ID) para usar no bilhete
+        try:
+            WebDriverWait(driver, 15).until(EC.url_contains("sofascore.com"))
+            url_real_com_id = driver.current_url 
+        except:
+            url_real_com_id = driver.current_url
 
-        # 3. NAVEGAÇÃO NA ABA (Usando XPATH flexível)
         try:
             aba = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//a[contains(., 'Partidas') or contains(@href, 'matches')]"))
             )
             driver.execute_script("arguments[0].click();", aba)
-            time.sleep(6)
-        except: pass
+            time.sleep(7)
+        except: 
+            pass
         
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         
-        # 4. FILTRAGEM DE ESCANTEIOS (CASA/VISITANTE)
         frequencias = []
         matches = re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
         for m in matches:
-            trecho = texto_bruto[m.end() : m.end() + 50]
-            frequencia = re.search(r"(\d+)/(\d+)", trecho)
+            trecho_apos = texto_bruto[m.end() : m.end() + 50]
+            frequencia = re.search(r"(\d+)/(\d+)", trecho_apos)
             if frequencia:
                 num, den = int(frequencia.group(1)), int(frequencia.group(2))
-                frequencias.append((num / den) * 100)
+                perc = (num / den) * 100
+                frequencias.append(perc)
 
         if len(frequencias) >= 2:
             media = (frequencias[0] + frequencias[1]) / 2
             return "Menos de 10.5 Escanteios", media, url_real_com_id
             
     except Exception as e:
-        print(f"Erro no Sofa ({t1_name}): {str(e)[:50]}")
+        print(f"Erro na busca Sofa: {e}")
     
     return None, 0, url_real_com_id
+
 
 def get_h2h_dupla_chance(t1_id, t2_id):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last=10"
@@ -115,8 +114,7 @@ def executar():
     browser = configurar_browser()
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
-    # Ligas principais para o bilhete elite
-    ligas = {39: "Premier", 140: "LALIGA", 135: "Serie A", 78: "Bundesliga", 61: "Ligue 1", 94: "Português"}
+    ligas = {39: "Premier", 140: "LALIGA", 135: "Serie A", 78: "Bundesliga", 61: "Ligue 1", 203: "Turquia", 307: "Saudi Pro", 94: "Português"}
     
     pool_entradas = []
 
@@ -129,8 +127,8 @@ def executar():
                 
                 tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
                 
-                # LINK SEGURO: Se falhar o ID, ele não manda o link de busca que dá 404
-                link_bilhete = url_real_sofa if (url_real_sofa and "search" not in url_real_sofa) else f"https://www.sofascore.com/pt/"
+                # SELEÇÃO DO LINK: Usa o link direto da análise se disponível
+                link_bilhete = url_real_sofa if (url_real_sofa and "google.com" not in url_real_sofa) else f"https://www.sofascore.com/search?q={t1['name']}+{t2['name']}"
 
                 g_info = {
                     "id": m['fixture']['id'], 
@@ -144,42 +142,63 @@ def executar():
                     pool_entradas.append({"prio": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
                 h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
-                if h2h_t1 >= 75: pool_entradas.append({"prio": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
-                if h2h_t2 >= 75: pool_entradas.append({"prio": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
+                if h2h_t1 >= 70: pool_entradas.append({"prio": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
+                if h2h_t2 >= 70: pool_entradas.append({"prio": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
                 h_o15, h_o25 = get_individual_stats(t1['id'])
                 a_o15, a_o25 = get_individual_stats(t2['id'])
                 m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
-                if m_o15 >= 80: pool_entradas.append({"prio": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
-                if m_o25 >= 80: pool_entradas.append({"prio": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
-        except: continue
+                if m_o15 >= 70: pool_entradas.append({"prio": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
+                if m_o25 >= 70: pool_entradas.append({"prio": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
+        except Exception as e:
+            continue
             
     browser.quit()
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
     
     jogos_selecionados = {}
+    c_canto, c_1x, c_2x, c_25 = 0, 0, 0, 0
+    
     for e in pool_entradas:
         mid = e['id']
         if len(jogos_selecionados) >= 10 and mid not in jogos_selecionados: continue
+        
+        if e['tipo'] == 'canto' and c_canto >= 3: continue
+        if e['tipo'] == '2.5' and c_25 >= 2: continue
+        if e['tipo'] == '2x' and c_2x >= 1: continue
+        if e['tipo'] == '1x' and c_1x >= 3: continue
+
         if mid not in jogos_selecionados:
             jogos_selecionados[mid] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": e['sofa_link'], "mkts": []}
+        
         if len(jogos_selecionados[mid]["mkts"]) < 2:
             jogos_selecionados[mid]["mkts"].append(e)
+            if e['tipo'] == 'canto': c_canto += 1
+            if e['tipo'] == '2.5': c_25 += 1
+            if e['tipo'] == '2x': c_2x += 1
+            if e['tipo'] == '1x': c_1x += 1
 
     if not jogos_selecionados: return
 
     lista_final = sorted(jogos_selecionados.values(), key=lambda x: x['liga'])
-    msg = "🎯 *BILHETE ELITE (10 JOGOS)*\n💰 *FOCO: ALTA ASSERTIVIDADE*\n\n"
+
+    msg = "🎯 *BILHETE DO DIA (10 JOGOS)*\n💰🍀 *BOA SORTE!!!*\n\n🏟️ *LIGAS ENCONTRADAS:*\n"
+    for l in sorted(list(set([j['liga'] for j in lista_final]))): msg += f"🔹 {l}\n"
+    msg += "\n"
 
     for i, j in enumerate(lista_final, 1):
         msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n"
         for mkt in j['mkts']:
-            icon = "🚩" if mkt['tipo'] == 'canto' else "🛡️" if mkt['tipo'] in ['1x','2x'] else "⚽"
-            msg += f"{icon} {mkt['mkt']} ({mkt['prio']:.0f}%)\n"
-        msg += f"📊 [Estatísticas H2H]({j['link']})\n\n"
+            if mkt['tipo'] == 'canto': label = f"🚩 {mkt['mkt']} {mkt['prio']:.0f}%"
+            elif mkt['tipo'] in ['1x', '2x']: label = f"🛡️ {mkt['mkt']} ({mkt['prio']:.0f}%)"
+            elif mkt['tipo'] == '2.5': label = f"⚡ {mkt['mkt']} ({mkt['prio']:.0f}%)"
+            else: label = f"⚽ {mkt['mkt']} ({mkt['prio']:.0f}%)"
+            msg += f"🔶 {label}\n"
+        msg += f"📊 [Estatísticas]({j['link']})\n\n"
     
-    enviar_telegram(msg + "---\n💸 [Bet365](https://www.bet365.com)")
+    msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
+    enviar_telegram(msg)
 
 if __name__ == "__main__":
     executar()
-        
+            
