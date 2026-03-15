@@ -36,7 +36,6 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-def get_sofa_h2h_corners(driver, t1_name, t2_name):
     # Busca direta para cair no jogo de hoje
     query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} match")
     url_busca = f"https://www.google.com/search?q={query}"
@@ -87,8 +86,6 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         
     # Retorna o link com ID mesmo que não atinja os 85% para o g_info não ficar vazio
     return None, 0, url_direta
-
-
 
 def get_h2h_dupla_chance(t1_id, t2_id):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last=10"
