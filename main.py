@@ -36,7 +36,7 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    # O uso do DuckDuckGo é o que evita o bloqueio (Captcha) do Google
+def get_sofa_h2h_corners(driver, t1_name, t2_name):
     query = urllib.parse.quote(f"site:sofascore.com {t1_name} {t2_name} match")
     url_busca = f"https://duckduckgo.com/?q={query}"
     url_direta = None
@@ -44,32 +44,33 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
     try:
         driver.get(url_busca)
         
-        # AJUSTE 1: Espera um pouco mais (15s) pelo link, servidores do Github podem ser lentos
+        # 1. EM VEZ DE CLICAR, PEGAMOS O LINK (Atributo 'href')
+        # Isso evita que o robô trave na página de busca
         link_elem = WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "a[href*='sofascore.com']"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "a[href*='sofascore.com/pt/futebol/partida/'], a[href*='sofascore.com/football/match/']"))
         )
-        link_elem.click()
+        url_sofa_bruto = link_elem.get_attribute("href")
         
-        # AJUSTE 2: Tempo para o redirecionamento carregar o ID (Ex: EgbsWgb)
+        # 2. NAVEGA DIRETO PARA O LINK DO JOGO
+        driver.get(url_sofa_bruto)
+        
+        # 3. ESPERA O REDIRECIONAMENTO PARA O ID REAL (O QUE FUNCIONOU NA QUINTA)
         time.sleep(12) 
         url_direta = driver.current_url
-        print(f"DEBUG: URL capturada com ID -> {url_direta}") 
+        print(f"DEBUG: Agora sim! Link Real com ID -> {url_direta}") 
 
-        # 3. CLICA NA ABA PARTIDAS
+        # 4. CLICA NA ABA PARTIDAS
         try:
-            # AJUSTE 3: Seletor focado no texto 'Partidas' que é mais estável
-            aba_partidas = WebDriverWait(driver, 10).until(
+            aba_partidas = WebDriverWait(driver, 12).until(
                 EC.element_to_be_clickable((By.XPATH, "//a[contains(., 'Partidas')]"))
             )
             driver.execute_script("arguments[0].click();", aba_partidas)
             time.sleep(7)
         except:
-            print("Aviso: Não conseguiu clicar na aba Partidas, tentando ler página atual.")
             pass 
 
-        # 4. CÁLCULO DA MÉDIA 85% PARA -10.5 ESCANTEIOS
+        # 5. CÁLCULO DA MÉDIA 85%
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
-        # re.IGNORECASE ajuda se o site mudar para "Escanteios" com E maiúsculo
         alvo = re.search(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
         
         if alvo:
@@ -81,7 +82,6 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
                 perc_visi = (int(frações[1][0]) / int(frações[1][1])) * 100
                 media_final = (perc_casa + perc_visi) / 2
                 
-                # SÓ RETORNA O MERCADO SE BATER SUA MÉDIA DE 85%
                 if media_final >= 85:
                     return "Menos de 10.5 Escanteios", media_final, url_direta
                     
