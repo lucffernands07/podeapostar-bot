@@ -129,25 +129,26 @@ def executar():
             for m in res.get('response', []):
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 
-                # CHAMA A FUNÇÃO QUE PEGA O LINK REAL (COM ID) NO GOOGLE
-                tipo_canto, perc_canto, url_real = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
+                # 1. PEGA OS DADOS E O LINK REAL (COM ID)
+                tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
                 
-                # Se o Selenium não achou o link real, montamos o link de busca que deu certo antes
-                if not url_real:
-                    # Este formato de busca costuma abrir o confronto direto
-                    url_real = f"https://www.sofascore.com/pt/futebol/time-confronto/{t1['name'].lower().replace(' ', '-')}-{t2['name'].lower().replace(' ', '-')}"
+                # 2. DEFINIR O LINK DO BILHETE: Prioridade total ao link com ID capturado
+                # Se o url_real_sofa vier vazio, usamos uma busca simples como segurança
+                link_bilhete = url_real_sofa if url_real_sofa else f"https://www.sofascore.com/search?q={t1['name']}+{t2['name']}"
 
                 g_info = {
                     "id": m['fixture']['id'], 
                     "info": f"*{t1['name']} x {t2['name']}*", 
                     "hora": m['fixture']['date'][11:16], 
                     "liga": l_nome, 
-                    "sofa_link": url_real # Aqui vai o link com o ID capturado
+                    "sofa_link": link_bilhete # O link com ID EgbsWgb entra aqui
                 }
 
-                if tipo_canto and perc_canto >= 70:
+                # Ajustado para o critério de 85% que você pediu
+                if tipo_canto and perc_canto >= 85:
                     pool_entradas.append({"prio": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
+                # Outros mercados usam o mesmo g_info (com o link corrigido)
                 h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
                 if h2h_t1 >= 70: pool_entradas.append({"prio": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
                 if h2h_t2 >= 70: pool_entradas.append({"prio": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
@@ -157,10 +158,13 @@ def executar():
                 m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
                 if m_o15 >= 70: pool_entradas.append({"prio": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
                 if m_o25 >= 70: pool_entradas.append({"prio": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
-        except: continue
+        except Exception as e:
+            print(f"Erro na liga {l_nome}: {e}")
+            continue
+            
     browser.quit()
-
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
+    return pool_entradas # Não esqueça de retornar a lista no final
 
     
     # --- AGRUPAMENTO POR JOGO ---
