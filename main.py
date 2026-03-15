@@ -1,4 +1,3 @@
-import urllib.parse
 import time
 import re
 from selenium import webdriver
@@ -9,90 +8,89 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-def testar_analise_detalhada(t1, t2):
+def testar_navegação_direta_home(time_casa, time_fora):
     options = Options()
-    options.add_argument("--headless") 
+    # options.add_argument("--headless") # Descomente para rodar escondido
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+    
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
     
-    print(f"\n🔍 --- INICIANDO DIAGNÓSTICO: {t1} x {t2} ---")
+    print(f"\n🚀 --- INICIANDO TESTE NA HOME: {time_casa} x {time_fora} ---")
     
     try:
-        # 1. BUSCA NO GOOGLE
-        query = urllib.parse.quote(f"sofascore {t1} {t2} match")
-        driver.get(f"https://www.google.com/search?q={query}")
-        
-        link = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "h3")))
-        print(f"✅ LOG: Partida encontrada no Google. Entrando no SofaScore...")
-        link.click()
+        # 1. ACESSA A HOME
+        driver.get("https://www.sofascore.com/pt/")
+        print("✅ LOG: Home do SofaScore carregada.")
+        time.sleep(5) # Espera o carregamento dos jogos do dia
 
-        # 2. ESPERA REDIRECIONAMENTO
-        WebDriverWait(driver, 15).until(EC.url_contains("sofascore.com"))
-        print(f"✅ LOG: SofaScore carregado. URL: {driver.current_url}")
-
-        # 3. ABA PARTIDAS
-        print(f"⏳ LOG: Tentando abrir a aba 'Partidas'...")
+        # 2. BUSCA O JOGO NA LISTA DA HOME
+        # Procura por um elemento que contenha o nome de um dos times
+        print(f"🔍 LOG: Procurando o jogo {time_casa} na lista de hoje...")
         try:
-            # Tenta clicar pelo texto ou pelo href
-            aba = WebDriverWait(driver, 12).until(
-                EC.presence_of_element_located((By.XPATH, "//a[contains(., 'Partidas') or contains(@href, 'matches')]"))
+            # Seletor que busca o texto do time dentro da lista de eventos
+            seletor_jogo = f"//div[contains(text(), '{time_casa}')]"
+            jogo_elemento = WebDriverWait(driver, 15).until(
+                EC.presence_of_element_located((By.XPATH, seletor_jogo))
             )
-            driver.execute_script("arguments[0].click();", aba)
-            time.sleep(8) # Tempo crucial para carregar os cards de estatísticas
-            print(f"✅ LOG: Aba 'Partidas' aberta com sucesso!")
+            # Sobe para o elemento 'a' pai que contém o link do jogo
+            link_jogo = jogo_elemento.find_element(By.XPATH, "./ancestor::a")
+            driver.execute_script("arguments[0].scrollIntoView(true);", link_jogo)
+            time.sleep(1)
+            driver.execute_script("arguments[0].click();", link_jogo)
+            print(f"✅ LOG: Jogo encontrado e clicado!")
         except Exception as e:
-            print(f"❌ LOG ERRO: Não conseguiu abrir a aba 'Partidas'. Verifique o seletor.")
+            print(f"❌ LOG ERRO: Jogo não encontrado na lista da Home. (O jogo é hoje?)")
+            return
 
-        # 4. EXTRAÇÃO E MAPEAMENTO DE FRAÇÕES
+        # 3. CLICA NA ABA PARTIDAS (H2H)
+        print("⏳ LOG: Aguardando carregamento da página do jogo...")
+        try:
+            # Usando o seletor exato que você passou
+            aba_partidas = WebDriverWait(driver, 15).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, 'a[href="#tab:matches"]'))
+            )
+            driver.execute_script("arguments[0].click();", aba_partidas)
+            print("✅ LOG: Aba 'Partidas' (H2H) aberta!")
+            time.sleep(8) # Tempo para carregar os cards de estatísticas
+        except Exception as e:
+            print(f"❌ LOG ERRO: Não encontrou o botão 'Partidas': {e}")
+            return
+
+        # 4. RASPAGEM DOS VALORES
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         
-        print(f"\n📊 --- MAPEAMENTO DE ESTATÍSTICAS (10.5 ESCANTEIOS) ---")
-        
+        # Expressão regular para capturar os blocos de 10.5 escanteios
         matches = list(re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE))
-        print(f"Encontrados {len(matches)} blocos de '10.5 escanteios' no texto bruto.")
+        print(f"\n📊 LOG: Encontrados {len(matches)} blocos de 10.5 escanteios.")
 
-        frequencias_encontradas = []
-        
+        frequencias = []
         for i, m in enumerate(matches, 1):
-            # Pega um trecho maior após o texto para garantir que a fração esteja dentro
             trecho = texto_bruto[m.end() : m.end() + 60]
             frequencia = re.search(r"(\d+)/(\d+)", trecho)
-            
             if frequencia:
                 num, den = int(frequencia.group(1)), int(frequencia.group(2))
                 perc = (num / den) * 100
-                frequencias_encontradas.append(perc)
-                print(f"📍 Fração na posição {i}: {num}/{den} ({perc:.1f}%)")
-            else:
-                print(f"📍 Fração na posição {i}: Não encontrada no trecho: '{trecho[:20]}...'")
+                frequencias.append(perc)
+                print(f"   🔹 Posição {i}: {num}/{den} ({perc:.1f}%)")
 
-        # 5. VALIDAÇÃO DA REGRA (7ª e 8ª)
-        print(f"\n🎯 --- VALIDAÇÃO DA REGRA (7ª e 8ª) ---")
-        
-        if len(frequencias_encontradas) >= 8:
-            casa = frequencias_encontradas[6]  # Índice 6 é a 7ª posição
-            fora = frequencias_encontradas[7]  # Índice 7 é a 8ª posição
-            
-            print(f"🏠 LOG CASA (7ª): {casa:.1f}%")
-            print(f"🚌 LOG VISITANTE (8ª): {fora:.1f}%")
-            
-            media = (casa + fora) / 2
-            print(f"📈 MÉDIA FINAL H2H: {media:.1f}%")
-            
-            if media >= 85:
-                print("✅ RESULTADO: Jogo aprovado para o bilhete!")
-            else:
-                print("⚠️ RESULTADO: Média abaixo de 85%.")
+        # 5. VALIDAÇÃO DA 7ª E 8ª POSIÇÃO
+        if len(frequencias) >= 8:
+            casa_val = frequencias[6] # 7ª posição
+            fora_val = frequencias[7] # 8ª posição
+            print(f"\n🏠 LOG CASA (7ª): {casa_val:.1f}%")
+            print(f"🚌 LOG VISITANTE (8ª): {fora_val:.1f}%")
+            print(f"📈 MÉDIA FINAL: {(casa_val + fora_val)/2:.1f}%")
         else:
-            print(f"❌ LOG FALHA: Foram encontradas apenas {len(frequencias_encontradas)} frações.")
-            print("Dica: Se o número for menor que 8, o SofaScore não carregou todos os cards de H2H.")
+            print(f"\n⚠️ LOG AVISO: Apenas {len(frequencias)} frações encontradas. Precisamos de pelo menos 8.")
 
     except Exception as e:
         print(f"🚨 LOG ERRO CRÍTICO: {e}")
     finally:
         driver.quit()
+        print("\n🏁 Teste finalizado.")
 
 if __name__ == "__main__":
-    # Testando com Como x Roma
-    testar_analise_detalhada("Como", "AS Roma")
+    # Teste com Como x Roma (Certifique-se que o jogo aparece na home hoje)
+    testar_navegação_direta_home("Como", "Roma")
+            
