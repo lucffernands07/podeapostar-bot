@@ -36,27 +36,41 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} h2h statistics")
+    # Ajustei a query para ser mais direta ao ponto
+    query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} match")
     url_busca = f"https://www.google.com/search?q={query}"
     url_real_com_id = None
     
     try:
         driver.get(url_busca)
-        first_link = WebDriverWait(driver, 7).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "h3")))
+        # 1. Clica no primeiro título (h3) que encontrar no Google
+        first_link = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "h3")))
         first_link.click()
 
-        time.sleep(10)
-        url_real_com_id = driver.current_url 
-        print(f"ID Capturado: {url_real_com_id}")
-
+        # 2. O PULO DO GATO: Espera a URL mudar do Google para o SofaScore
+        # Isso garante que pegamos o link com o ID (ex: EgbsWgb)
         try:
-            aba = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href="#tab:matches"]')))
+            WebDriverWait(driver, 15).until(EC.url_contains("sofascore.com"))
+            url_real_com_id = driver.current_url 
+            print(f"ID Capturado com Sucesso: {url_real_com_id}")
+        except:
+            # Se falhar a espera, tenta pegar o que estiver na barra
+            url_real_com_id = driver.current_url
+
+        # 3. CLICA NA ABA PARTIDAS
+        try:
+            # Usei um seletor mais flexível que busca 'Partidas' ou o link interno da aba
+            aba = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//a[contains(., 'Partidas') or contains(@href, 'matches')]"))
+            )
             driver.execute_script("arguments[0].click();", aba)
-        except: pass
+            time.sleep(7) # Espera os cards de estatísticas carregarem
+        except: 
+            pass
         
-        time.sleep(8) 
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         
+        # --- SUA REGRA DE CÁLCULO (MANTIDA) ---
         frequencias = []
         matches = re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
         for m in matches:
@@ -70,9 +84,12 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         if len(frequencias) >= 2:
             media = (frequencias[0] + frequencias[1]) / 2
             return "Menos de 10.5 Escanteios", media, url_real_com_id
-    except: pass
+            
+    except Exception as e:
+        print(f"Erro na busca Sofa: {e}")
     
     return None, 0, url_real_com_id
+
 
 def get_h2h_dupla_chance(t1_id, t2_id):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last=10"
