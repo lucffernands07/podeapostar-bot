@@ -126,9 +126,9 @@ def executar():
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 
                 tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
-                
-                # SELEÇÃO DO LINK: Usa o link direto da análise se disponível
-                link_bilhete = url_real_sofa if (url_real_sofa and "google.com" not in url_real_sofa) else f"https://www.sofascore.com/search?q={t1['name']}+{t2['name']}"
+
+                # Força o link a ser sempre a Home do SofaScore para evitar o erro 404 de busca
+                link_bilhete = "https://www.sofascore.com/"
 
                 g_info = {
                     "id": m['fixture']['id'], 
