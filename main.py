@@ -36,59 +36,50 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    query = urllib.parse.quote(f"site:sofascore.com {t1_name} {t2_name} match")
-    url_busca = f"https://duckduckgo.com/?q={query}"
-    url_direta = None
+    # Mantive a sua query original do código antigo
+    query = urllib.parse.quote(f"sofascore {t1_name} {t2_name} h2h statistics")
+    url_busca = f"https://www.google.com/search?q={query}"
+    url_real_com_id = None
     
     try:
         driver.get(url_busca)
-        
-        # 1. EM VEZ DE CLICAR, PEGAMOS O LINK (Atributo 'href')
-        # Isso evita que o robô trave na página de busca
-        link_elem = WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "a[href*='sofascore.com/pt/futebol/partida/'], a[href*='sofascore.com/football/match/']"))
-        )
-        url_sofa_bruto = link_elem.get_attribute("href")
-        
-        # 2. NAVEGA DIRETO PARA O LINK DO JOGO
-        driver.get(url_sofa_bruto)
-        
-        # 3. ESPERA O REDIRECIONAMENTO PARA O ID REAL (O QUE FUNCIONOU NA QUINTA)
-        time.sleep(12) 
-        url_direta = driver.current_url
-        print(f"DEBUG: Agora sim! Link Real com ID -> {url_direta}") 
+        # Busca o primeiro link (h3) como no seu código antigo
+        first_link = WebDriverWait(driver, 7).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "h3")))
+        first_link.click()
 
-        # 4. CLICA NA ABA PARTIDAS
+        # O SEGREDO: Espera o site carregar e captura a URL da barra de endereços (com ID)
+        time.sleep(10)
+        url_real_com_id = driver.current_url 
+        print(f"ID Capturado: {url_real_com_id}")
+
+        # Clica na aba Partidas (Igual ao seu antigo)
         try:
-            aba_partidas = WebDriverWait(driver, 12).until(
-                EC.element_to_be_clickable((By.XPATH, "//a[contains(., 'Partidas')]"))
-            )
-            driver.execute_script("arguments[0].click();", aba_partidas)
-            time.sleep(7)
-        except:
-            pass 
-
-        # 5. CÁLCULO DA MÉDIA 85%
+            aba = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href="#tab:matches"]')))
+            driver.execute_script("arguments[0].click();", aba)
+        except: pass
+        
+        time.sleep(8) 
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
-        alvo = re.search(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
         
-        if alvo:
-            trecho = texto_bruto[alvo.end() : alvo.end() + 100]
-            frações = re.findall(r"(\d+)/(\d+)", trecho)
-            
-            if len(frações) >= 2:
-                perc_casa = (int(frações[0][0]) / int(frações[0][1])) * 100
-                perc_visi = (int(frações[1][0]) / int(frações[1][1])) * 100
-                media_final = (perc_casa + perc_visi) / 2
-                
-                if media_final >= 85:
-                    return "Menos de 10.5 Escanteios", media_final, url_direta
-                    
-    except Exception as e:
-        print(f"Erro no Sofa: {str(e)[:50]}")
-        
-    return None, 0, url_direta
+        # --- SUA REGRA DE CÁLCULO (NÃO MEXI) ---
+        frequencias = []
+        matches = re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
+        for m in matches:
+            trecho_apos = texto_bruto[m.end() : m.end() + 50]
+            frequencia = re.search(r"(\d+)/(\d+)", trecho_apos)
+            if frequencia:
+                num, den = int(frequencia.group(1)), int(frequencia.group(2))
+                perc = (num / den) * 100
+                frequencias.append(perc)
+
+        if len(frequencias) >= 2:
+            if frequencias[0] >= 90 and frequencias[1] >= 90:
+                return "Menos de 10.5 (PRIORITÁRIO)", 150, url_real_com_id
+            elif (frequencias[0] + frequencias[1]) / 2 >= 80:
+                return "Menos de 10.5", 100, url_real_com_id
+    except: pass
+    
+    return None, 0, url_real_com_id
 
 
 def get_h2h_dupla_chance(t1_id, t2_id):
