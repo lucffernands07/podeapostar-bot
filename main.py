@@ -202,10 +202,10 @@ def executar():
         msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n"
         for mkt in j['mkts']:
             if mkt['tipo'] == 'canto': label = f"🚩 {mkt['mkt']} {mkt['prio']:.0f}%"
-            elif mkt['tipo'] in ['1x', '2x']: label = f"🛡 {mkt['mkt']} ({mkt['prio']:.0f}%)"
+            elif mkt['tipo'] in ['1x', '2x']: label = f"🛡️ {mkt['mkt']} ({mkt['prio']:.0f}%)"
             elif mkt['tipo'] == '2.5': label = f"⚡ {mkt['mkt']} ({mkt['prio']:.0f}%)"
             else: label = f"⚽ {mkt['mkt']} ({mkt['prio']:.0f}%)"
-            msg += f"🔸 {label}\n"
+            msg += f"🔶 {label}\n"
         msg += f"📊 [Estatísticas]({j['link']})\n\n"
     
     msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
