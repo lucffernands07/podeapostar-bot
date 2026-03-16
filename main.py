@@ -38,7 +38,7 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    """ MOTOR REVISADO: Filtra 'Menos de', aceita 1 ou 2 frações e gera URL real """
+    """ MOTOR REVISADO: Busca 'Menos de 10.5' com espaços flexíveis para quebra de linha """
     url_real_com_id = "https://www.sofascore.com/"
     wait = WebDriverWait(driver, 20)
     try:
@@ -53,17 +53,17 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         
         url_h2h = url_real_com_id.split('#')[0] + "#tab:matches"
         driver.get(url_h2h)
-        time.sleep(12)
+        time.sleep(15) # Aumentado para garantir carga total do H2H
         driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
         time.sleep(5)
         
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         percs_menos = []
         
-        # BUSCA MELHORADA: Procura 'Menos de' e o '10.5' próximo, ignorando 'Mais de'
-        matches = re.finditer(r"Menos de.{1,15}10\.5", texto_bruto, re.IGNORECASE | re.DOTALL)
+        # Regex ultra-flexível: aceita espaços, quebras de linha e tabulações entre as palavras
+        matches = re.finditer(r"Menos\s+de\s+10\.5", texto_bruto, re.IGNORECASE)
         for m in matches:
-            trecho = texto_bruto[m.end() : m.end() + 50]
+            trecho = texto_bruto[m.end() : m.end() + 60]
             busca_f = re.search(r"(\d+)/(\d+)", trecho)
             if busca_f:
                 n, d = int(busca_f.group(1)), int(busca_f.group(2))
@@ -112,7 +112,6 @@ def executar():
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
     
-    # LISTA DE LIGAS AMPLIADA (Mantendo a lógica original sem pesos)
     ligas = {
         2: "Champions League", 39: "Premier League", 140: "LALIGA", 135: "Serie A", 
         78: "Bundesliga", 61: "Ligue 1", 94: "Português", 71: "Brasileirão A", 
@@ -126,38 +125,43 @@ def executar():
     pool_entradas = []
 
     for l_id, l_nome in ligas.items():
-        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season=2025"
-        try:
-            res = requests.get(url, headers=HEADERS).json()
-            for m in res.get('response', []):
-                t1, t2 = m['teams']['home'], m['teams']['away']
-                
-                tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
+        # TENTA 2026 PRIMEIRO, SE VAZIO, TENTA 2025
+        fixtures_hoje = []
+        for ano in [2026, 2025]:
+            url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
+            try:
+                res = requests.get(url, headers=HEADERS).json()
+                if res.get('response'):
+                    fixtures_hoje = res['response']
+                    break # Se achou jogos, não precisa tentar o outro ano
+            except: continue
 
-                g_info = {
-                    "id": m['fixture']['id'], 
-                    "info": f"*{t1['name']} x {t2['name']}*", 
-                    "hora": m['fixture']['date'][11:16], 
-                    "liga": l_nome, 
-                    "sofa_link": url_real_sofa 
-                }
+        for m in fixtures_hoje:
+            t1, t2 = m['teams']['home'], m['teams']['away']
+            tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
 
-                if tipo_canto and perc_canto >= 70:
-                    pool_entradas.append({"prio": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
+            g_info = {
+                "id": m['fixture']['id'], 
+                "info": f"*{t1['name']} x {t2['name']}*", 
+                "hora": m['fixture']['date'][11:16], 
+                "liga": l_nome, 
+                "sofa_link": url_real_sofa 
+            }
 
-                h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
-                if h2h_t1 >= 70: pool_entradas.append({"prio": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
-                if h2h_t2 >= 70: pool_entradas.append({"prio": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
+            if tipo_canto and perc_canto >= 70:
+                pool_entradas.append({"prio": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
-                h_o15, h_o25 = get_individual_stats(t1['id'])
-                a_o15, a_o25 = get_individual_stats(t2['id'])
-                m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
-                if m_o15 >= 70: pool_entradas.append({"prio": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
-                if m_o25 >= 70: pool_entradas.append({"prio": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
-        except: continue
+            h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
+            if h2h_t1 >= 70: pool_entradas.append({"prio": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
+            if h2h_t2 >= 70: pool_entradas.append({"prio": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
+
+            h_o15, h_o25 = get_individual_stats(t1['id'])
+            a_o15, a_o25 = get_individual_stats(t2['id'])
+            m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
+            if m_o15 >= 70: pool_entradas.append({"prio": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
+            if m_o25 >= 70: pool_entradas.append({"prio": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
             
     browser.quit()
-    
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
     
     jogos_selecionados = {}
@@ -187,4 +191,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-                
+        
