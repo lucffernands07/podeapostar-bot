@@ -38,15 +38,13 @@ def enviar_telegram(msg):
     except Exception as e:
         print(f"Erro ao enviar Telegram: {e}")
 
-
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
     """ MOTOR COM ORDEM DE MANDO: Respeita Casa x Fora para garantir o ID correto """
     url_real_com_id = "https://www.sofascore.com/"
-    wait = WebDriverWait(driver, 25) # Aumentado para dar margem em buscas lentas
+    wait = WebDriverWait(driver, 25)
     try:
         driver.get("https://www.sofascore.com/pt/")
         
-        # Fecha possíveis pop-ups de privacidade que travam o clique
         try:
             cookies_btn = driver.find_elements(By.XPATH, "//button[contains(., 'Aceito') or contains(., 'Agree')]")
             if cookies_btn: cookies_btn[0].click()
@@ -55,33 +53,25 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
         search_input.click()
         
-        # RESPEITA FATOR CASA-FORA: t1_name (Casa) sempre vem primeiro
         search_input.send_keys(f"{t1_name} {t2_name}")
-        time.sleep(10) # Tempo vital para o SofaScore filtrar os resultados
+        time.sleep(10)
         
-        # CLIQUE BLINDADO: Busca o link de partida de futebol
         resultado_xpath = "//a[contains(@href, '/football/match/')]"
         try:
-            # Pega todos os resultados e tenta validar o que melhor se encaixa
             resultados = driver.find_elements(By.XPATH, resultado_xpath)
             if not resultados:
-                # Se não achou com os dois nomes, tenta só com o da Casa (t1)
                 search_input.clear()
                 search_input.send_keys(t1_name)
                 time.sleep(7)
                 resultados = driver.find_elements(By.XPATH, resultado_xpath)
 
-            # Seleciona o primeiro link válido de futebol
             resultado_link = resultados[0]
             url_real_com_id = resultado_link.get_attribute("href")
-            
-            # Navega direto para a URL para evitar erros de clique
             driver.get(url_real_com_id)
         except Exception as e:
             print(f"Não localizou link de partida para {t1_name}: {e}")
             return None, 0, url_real_com_id
         
-        # ACESSA ABA H2H
         url_h2h = url_real_com_id.split('#')[0] + "#tab:matches"
         driver.get(url_h2h)
         time.sleep(15)
@@ -92,7 +82,6 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         percs_menos = []
         
-        # MÉTODO CONTÉM (Flexível para 'Menos de', 'Menos do que')
         matches = re.finditer(r"Menos.*?10\.5", texto_bruto, re.IGNORECASE | re.DOTALL)
         for m in matches:
             trecho = texto_bruto[m.end() : m.end() + 65]
@@ -103,13 +92,11 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
                     percs_menos.append((n / d) * 100)
 
         if percs_menos:
-            # 1. Primeiro calcula o valor (seja de um time ou a média de dois)
             percs_unicos = sorted(list(set(percs_menos)), reverse=True)
             valor_calculado = percs_unicos[0]
             if len(percs_unicos) >= 2:
                 valor_calculado = (percs_unicos[0] + percs_unicos[1]) / 2
             
-            # 2. Agora sim, valida se o resultado final bate os seus 80%
             if valor_calculado >= 80:
                 return "Menos 10.5 Escanteios", valor_calculado, url_real_com_id
     
@@ -146,8 +133,7 @@ def get_individual_stats(team_id):
 def executar():
     browser = configurar_browser()
     
-    # --- AJUSTE FUSO HORÁRIO (BUSCA) ---
-    import pytz # Certifique-se de ter 'import pytz' no topo do arquivo
+    # --- AJUSTE FUSO HORÁRIO ---
     fuso_br = pytz.timezone('America/Sao_Paulo')
     agora_br = datetime.now(fuso_br)
     hoje = agora_br.strftime("%Y-%m-%d")
@@ -174,8 +160,6 @@ def executar():
             except: continue
 
         for m in fixtures_hoje:
-            # --- AJUSTE FUSO HORÁRIO (HORA DO JOGO NO BILHETE) ---
-            # Converte a string UTC da API para o objeto datetime e depois para Brasília
             hora_utc = datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00'))
             hora_br = hora_utc.astimezone(fuso_br).strftime("%H:%M")
 
@@ -185,30 +169,28 @@ def executar():
             g_info = {
                 "id": m['fixture']['id'], 
                 "info": f"*{t1['name']} x {t2['name']}*", 
-                "hora": hora_br, # <--- Usando a variável corrigida
+                "hora": hora_br, 
                 "liga": l_nome, 
                 "sofa_link": url_real_sofa 
             }
 
-            # CANTO (>= 80% conforme sua nova regra)
             if tipo_canto and perc_canto >= 80:
                 pool_entradas.append({"perc": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
-            # DUPLA CHANCE (1x >= 80% | 2x >= 90%)
             h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
             if h2h_t1 >= 80: 
                 pool_entradas.append({"perc": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
             if h2h_t2 >= 90: 
                 pool_entradas.append({"perc": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
-            # GOLS (+1.5 >= 70%)
             h_o15 = get_individual_stats(t1['id'])
             a_o15 = get_individual_stats(t2['id'])
             m_o15 = (h_o15 + a_o15)/2
             if m_o15 >= 70: 
                 pool_entradas.append({"perc": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
                 
-                browser.quit()
+    # --- FECHA O NAVEGADOR APÓS TERMINAR TODAS AS LIGAS ---
+    browser.quit()
     
     # RANKING GERAL POR %
     pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
@@ -243,4 +225,3 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-        
