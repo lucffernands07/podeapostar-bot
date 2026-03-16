@@ -7,9 +7,11 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# --- CONFIGURAÇÕES (Pegando das variáveis do GitHub) ---
+# --- CONFIGURAÇÕES ---
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 
@@ -23,98 +25,92 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-def buscar_id_direto(driver, t1, t2):
-    """ Busca via URL de pesquisa para evitar erros de clique no menu """
-    print(f"🔍 Buscando link para: {t1} x {t2}...")
-    url_busca = f"https://www.sofascore.com/pt/busca?q={t1}+{t2}"
-    driver.get(url_busca)
-    time.sleep(8) 
-    
-    links = driver.find_elements(By.TAG_NAME, "a")
-    for link in links:
-        href = link.get_attribute("href")
-        if href and "/football/match/" in href:
-            if t1.lower() in href.lower() or t2.lower() in href.lower():
-                # Retorna a URL base sem o resto
-                return href.split('#')[0]
-    return None
-
-def extrair_dados_h2h(driver, url_jogo):
-    """ A lógica que funcionou: Aba Partidas + Scroll + Texto Bruto """
-    url_final = url_jogo + "#tab:matches"
-    print(f"📡 Acessando H2H: {url_final}")
-    driver.get(url_final)
-    
-    # Espera generosa para garantir que os cards carreguem
-    time.sleep(12)
-    
-    # Rola a página para baixo (essencial para renderizar os cards)
-    driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
-    time.sleep(5)
-    
-    texto_bruto = driver.find_element(By.TAG_NAME, "body").text
-    
-    frequencias_percs = []
-    fracoes_unicas = []
-    
-    # Scanner de frações
-    matches = re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
-    for m in matches:
-        trecho = texto_bruto[m.end() : m.end() + 50]
-        busca = re.search(r"(\d+)/(\d+)", trecho)
-        if busca:
-            num, den = busca.group(1), busca.group(2)
-            fracao = f"{num}/{den}"
-            # Evita duplicatas do mesmo dado que o SofaScore às vezes repete no texto
-            if fracao not in fracoes_unicas:
-                fracoes_unicas.append(fracao)
-                p = (int(num) / int(den)) * 100
-                frequencias_percs.append(p)
-                print(f"✅ Capturado: {fracao} ({p:.1f}%)")
-    
-    return fracoes_unicas, frequencias_percs
-
-def enviar_telegram(msg):
-    if not TOKEN or not CHAT_ID: return
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    try:
-        requests.post(url, json={"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"})
-    except:
-        print("❌ Erro ao enviar Telegram")
-
-def executar():
+def executar_fluxo_completo(time_casa, time_fora):
     driver = configurar_browser()
-    # No futuro, aqui você pode colocar um loop vindo da API-Football
-    time_casa, time_fora = "Lazio", "Milan"
+    wait = WebDriverWait(driver, 20)
     
-    url = buscar_id_direto(driver, time_casa, time_fora)
-    if url:
-        fracoes, percs = extrair_dados_h2h(driver, url)
+    print(f"\n🚀 --- INICIANDO FLUXO: {time_casa} x {time_fora} ---")
+    
+    try:
+        # 1. ACESSAR LINK INICIAL
+        print("🏠 Passo 1: Acessando Home do SofaScore...")
+        driver.get("https://www.sofascore.com/pt/")
         
-        # O código antigo pegava as 2 primeiras. Aqui garantimos que temos 2 diferentes.
-        if len(percs) >= 2:
-            p_casa, p_fora = percs[0], percs[1]
-            media = (p_casa + p_fora) / 2
+        # 2. BUSCAR O JOGO
+        print(f"🔍 Passo 2: Buscando por '{time_casa} {time_fora}'...")
+        search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
+        search_input.click()
+        search_input.send_keys(f"{time_casa} {time_fora}")
+        time.sleep(6) # Tempo para os resultados aparecerem
+        
+        # 3. CAPTURAR O ID/LINK (LOG DA ID)
+        print("🔗 Passo 3: Localizando link do jogo nos resultados...")
+        # Procura um link que contenha os nomes dos times e o padrão de partida
+        resultado_link = wait.until(EC.presence_of_element_located((By.XPATH, f"//a[contains(@href, '/football/match/') and (contains(., '{time_casa}') or contains(., '{time_fora}'))]")))
+        url_jogo = resultado_link.get_attribute("href")
+        
+        print(f"📊 LOG DA ID/URL ENCONTRADA: {url_jogo}")
+
+        # 4. ACESSAR ABA PARTIDAS H2H
+        url_h2h = url_jogo.split('#')[0] + "#tab:matches"
+        print(f"📡 Passo 4: Indo para aba Partidas H2H: {url_h2h}")
+        driver.get(url_h2h)
+        
+        # Espera o carregamento e faz o scroll necessário
+        time.sleep(12)
+        driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
+        print("📜 Rolando a página para carregar cards de estatísticas...")
+        time.sleep(5)
+
+        # 5. RASPAR FRAÇÃO DE ESCANTEIO
+        print("✂️ Passo 5: Raspando frações do texto bruto...")
+        texto_bruto = driver.find_element(By.TAG_NAME, "body").text
+        
+        fracoes_encontradas = []
+        # Mesma lógica do código antigo validado
+        matches = re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
+        
+        for m in matches:
+            trecho = texto_bruto[m.end() : m.end() + 50]
+            busca_frequencia = re.search(r"(\d+)/(\d+)", trecho)
+            if busca_frequencia:
+                num, den = busca_frequencia.group(1), busca_frequencia.group(2)
+                item = f"{num}/{den}"
+                # Evita duplicatas se o dado aparecer mais de uma vez
+                if item not in fracoes_encontradas:
+                    fracoes_encontradas.append(item)
+                    print(f"✅ Fração capturada: {item}")
+
+        # RESULTADO FINAL E ENVIO
+        if len(fracoes_encontradas) >= 2:
+            f1, f2 = fracoes_encontradas[0], fracoes_encontradas[1]
+            p1 = (int(f1.split('/')[0]) / int(f1.split('/')[1])) * 100
+            p2 = (int(f2.split('/')[0]) / int(f2.split('/')[1])) * 100
+            media = (p1 + p2) / 2
             
-            msg = f"🏟️ *{time_casa} x {time_fora}*\n🚩 Menos 10.5 Escanteios\n\n"
-            msg += f"🏠 Casa: {fracoes[0]} ({p_casa:.1f}%)\n"
-            msg += f"🚌 Fora: {fracoes[1]} ({p_fora:.1f}%)\n"
-            msg += f"📊 Média: {media:.1f}%\n"
+            relatorio = (
+                f"🎫 *RELATÓRIO H2H*\n"
+                f"🏟️ {time_casa} x {time_fora}\n"
+                f"🚩 Menos 10.5 Escanteios\n\n"
+                f"🏠 Casa: {f1} ({p1:.1f}%)\n"
+                f"🚌 Fora: {f2} ({p2:.1f}%)\n"
+                f"📊 Média: {media:.1f}%"
+            )
+            print("\n📈 Resultado calculado com sucesso!")
             
-            if p_casa >= 90 and p_fora >= 90:
-                msg += "\n🔥 *PALPITE: PRIORITÁRIO*"
-            elif media >= 85:
-                msg += "\n✅ *PALPITE: APROVADO*"
-            
-            enviar_telegram(msg)
-            print(f"🚀 Relatório enviado!")
+            # Envio ao Telegram (opcional para o seu teste de log)
+            if TOKEN and CHAT_ID:
+                requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", 
+                              json={"chat_id": CHAT_ID, "text": relatorio, "parse_mode": "Markdown"})
         else:
-            print(f"⚠️ Apenas {len(percs)} frações encontradas. Requisito mínimo: 2.")
-    else:
-        print(f"❌ Jogo {time_casa} x {time_fora} não localizado.")
-    
-    driver.quit()
+            print(f"⚠️ Aviso: Apenas {len(fracoes_encontradas)} frações encontradas. O site pode não ter o H2H completo ainda.")
+
+    except Exception as e:
+        print(f"🚨 ERRO DURANTE O FLUXO: {e}")
+    finally:
+        driver.quit()
+        print("\n🏁 Fim do teste.")
 
 if __name__ == "__main__":
-    executar()
+    executar_fluxo_completo("Cremonese", "Fiorentina")
             
