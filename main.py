@@ -8,6 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
@@ -20,9 +21,10 @@ HEADERS = {'x-rapidapi-host': "api-football-v1.p.rapidapi.com", 'x-rapidapi-key'
 
 def configurar_browser():
     options = Options()
-    options.add_argument("--headless")
+    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--window-size=1920,1080")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
@@ -36,22 +38,22 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    """ MOTOR REVISADO: Anti-duplicagem condicional e captura de ID real """
+    """ MOTOR REVISADO: Captura ID real e anti-duplicagem condicional """
     url_real_com_id = "https://www.sofascore.com/"
     wait = WebDriverWait(driver, 20)
     
     try:
-        # 1. Busca do Jogo
         driver.get("https://www.sofascore.com/pt/")
         search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
         search_input.click()
         search_input.send_keys(f"{t1_name} {t2_name}")
         time.sleep(7)
         
+        # Localiza o link da partida e extrai a URL com ID
         resultado_link = wait.until(EC.presence_of_element_located((By.XPATH, f"//a[contains(@href, '/football/match/') and (contains(., '{t1_name}') or contains(., '{t2_name}'))]")))
         url_real_com_id = resultado_link.get_attribute("href")
         
-        # 2. Navegação para H2H
+        # Navega para a aba de H2H (Partidas)
         url_h2h = url_real_com_id.split('#')[0] + "#tab:matches"
         driver.get(url_h2h)
         
@@ -61,10 +63,8 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         
-        # 3. Extração com Regra de Anti-duplicagem (mínimo 3 achados)
         bruto_matches = []
         matches = re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
-        
         for m in matches:
             trecho = texto_bruto[m.end() : m.end() + 50]
             busca_f = re.search(r"(\d+)/(\d+)", trecho)
@@ -72,7 +72,7 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
                 bruto_matches.append(f"{busca_f.group(1)}/{busca_f.group(2)}")
 
         finais = []
-        # REGRA: Se achar 3 ou mais, remove duplicatas. Se achar 2, usa como está.
+        # Regra Anti-duplicagem: só limpa se houver 3 ou mais ocorrências no texto
         if len(bruto_matches) >= 3:
             for item in bruto_matches:
                 if item not in finais:
@@ -92,7 +92,6 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         print(f"Erro Sofa {t1_name}: {e}")
     
     return None, 0, url_real_com_id
-
 
 def get_h2h_dupla_chance(t1_id, t2_id):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last=10"
@@ -125,7 +124,7 @@ def executar():
     browser = configurar_browser()
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
-    ligas = {39: "Premier", 140: "LALIGA", 135: "Serie A", 78: "Bundesliga", 61: "Ligue 1", 203: "Turquia", 307: "Saudi Pro", 94: "Português"}
+    ligas = {39: "Premier", 140: "LALIGA", 135: "Serie A", 78: "Bundesliga", 61: "Ligue 1", 94: "Português"}
     
     pool_entradas = []
 
@@ -136,17 +135,15 @@ def executar():
             for m in res.get('response', []):
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 
+                # Chamada do Motor de Escanteios que agora retorna a URL real do jogo
                 tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
-
-                # Força o link a ser sempre a Home do SofaScore para evitar o erro 404 de busca
-                link_bilhete = "https://www.sofascore.com/"
 
                 g_info = {
                     "id": m['fixture']['id'], 
                     "info": f"*{t1['name']} x {t2['name']}*", 
                     "hora": m['fixture']['date'][11:16], 
                     "liga": l_nome, 
-                    "sofa_link": link_bilhete
+                    "sofa_link": url_real_sofa # URL COM ID REAL DA PARTIDA
                 }
 
                 if tipo_canto and perc_canto >= 85:
@@ -159,9 +156,9 @@ def executar():
                 h_o15, h_o25 = get_individual_stats(t1['id'])
                 a_o15, a_o25 = get_individual_stats(t2['id'])
                 m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
-                if m_o15 >= 70: pool_entradas.append({"prio": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
-                if m_o25 >= 70: pool_entradas.append({"prio": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
-        except Exception as e:
+                if m_o15 >= 75: pool_entradas.append({"prio": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
+                if m_o25 >= 75: pool_entradas.append({"prio": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
+        except:
             continue
             
     browser.quit()
@@ -174,12 +171,13 @@ def executar():
         mid = e['id']
         if len(jogos_selecionados) >= 10 and mid not in jogos_selecionados: continue
         
-        if e['tipo'] == 'canto' and c_canto >= 3: continue
+        if e['tipo'] == 'canto' and c_canto >= 4: continue
         if e['tipo'] == '2.5' and c_25 >= 2: continue
         if e['tipo'] == '2x' and c_2x >= 1: continue
         if e['tipo'] == '1x' and c_1x >= 3: continue
 
         if mid not in jogos_selecionados:
+            # Aqui garantimos que o link da partida seja o 'sofa_link' capturado no motor
             jogos_selecionados[mid] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": e['sofa_link'], "mkts": []}
         
         if len(jogos_selecionados[mid]["mkts"]) < 2:
@@ -193,10 +191,7 @@ def executar():
 
     lista_final = sorted(jogos_selecionados.values(), key=lambda x: x['liga'])
 
-    msg = "🎯 *BILHETE DO DIA (10 JOGOS)*\n💰🍀 *BOA SORTE!!!*\n\n🏟️ *LIGAS ENCONTRADAS:*\n"
-    for l in sorted(list(set([j['liga'] for j in lista_final]))): msg += f"🔹 {l}\n"
-    msg += "\n"
-
+    msg = "🎯 *BILHETE DO DIA (SISTEMA H2H)*\n💰🍀 *BOA SORTE!!!*\n\n"
     for i, j in enumerate(lista_final, 1):
         msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n"
         for mkt in j['mkts']:
@@ -205,11 +200,11 @@ def executar():
             elif mkt['tipo'] == '2.5': label = f"⚡ {mkt['mkt']} ({mkt['prio']:.0f}%)"
             else: label = f"⚽ {mkt['mkt']} ({mkt['prio']:.0f}%)"
             msg += f"🔶 {label}\n"
-        msg += f"📊 [Estatísticas]({j['link']})\n\n"
+        msg += f"📊 [Análise Sofa]({j['link']})\n\n" # O LINK AGORA ABRE A PARTIDA REAL
     
-    msg += "---\nAPOSTAR COM: 💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
+    msg += "---\n💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
     enviar_telegram(msg)
 
 if __name__ == "__main__":
     executar()
-            
+                
