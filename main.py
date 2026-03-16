@@ -38,7 +38,7 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    """ MOTOR REVISADO: Alta sensibilidade para capturar os 90% do Grêmio """
+    """ MÉTODO CONTÉM: Busca se existem as palavras chaves e extrai a fração """
     url_real_com_id = "https://www.sofascore.com/"
     wait = WebDriverWait(driver, 20)
     try:
@@ -60,17 +60,26 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         percs_menos = []
         
-        matches = re.finditer(r"Menos\s+de\s+10\.5", texto_bruto, re.IGNORECASE)
+        # Lógica 'Contém': Se houver 'Menos' e '10.5' na mesma linha/bloco
+        # O re.finditer com .*? funciona como o 'contém' entre duas âncoras
+        matches = re.finditer(r"Menos.*?10\.5", texto_bruto, re.IGNORECASE | re.DOTALL)
+        
         for m in matches:
-            trecho = texto_bruto[m.end() : m.end() + 65]
+            trecho = texto_bruto[m.end() : m.end() + 60]
             busca_f = re.search(r"(\d+)/(\d+)", trecho)
             if busca_f:
                 n, d = int(busca_f.group(1)), int(busca_f.group(2))
-                percs_menos.append((n / d) * 100)
+                if d >= 5: # Filtro de amostragem mínima
+                    percs_menos.append((n / d) * 100)
 
         if percs_menos:
-            # Pega a maior porcentagem de "Menos de" encontrada (ex: os 9/10 do Grêmio)
-            return "Menos 10.5 Escanteios", max(percs_menos), url_real_com_id
+            # Ordena e calcula a média se houver mais de um time com o dado
+            percs_unicos = sorted(list(set(percs_menos)), reverse=True)
+            valor_final = percs_unicos[0]
+            if len(percs_unicos) >= 2:
+                valor_final = (percs_unicos[0] + percs_unicos[1]) / 2
+            
+            return "Menos 10.5 Escanteios", valor_final, url_real_com_id
             
     except Exception as e:
         print(f"Erro Sofa {t1_name}: {e}")
@@ -95,13 +104,12 @@ def get_individual_stats(team_id):
     try:
         res = requests.get(url, headers=HEADERS).json()
         fixtures = res.get('response', [])
-        o15, o25 = 0, 0
+        o15 = 0
         for f in fixtures:
             total = (f['goals']['home'] or 0) + (f['goals']['away'] or 0)
             if total >= 2: o15 += 1
-            if total >= 3: o25 += 1
-        return (o15 * 10), (o25 * 10)
-    except: return 0, 0
+        return (o15 * 10)
+    except: return 0
 
 def executar():
     browser = configurar_browser()
@@ -113,9 +121,7 @@ def executar():
         78: "Bundesliga", 61: "Ligue 1", 94: "Português", 71: "Brasileirão A", 
         88: "Holandês", 144: "Belga", 203: "Süper Lig", 172: "Bulgária", 
         265: "Chile", 239: "Colômbia", 233: "Egito", 141: "LaLiga 2", 
-        72: "Brasileirão B", 13: "Libertadores", 11: "Sudamericana", 
-        45: "FA Cup", 48: "League Cup", 143: "Copa del Rey", 
-        137: "Coppa Italia", 81: "DFB Pokal", 66: "Coupe de France"
+        72: "Brasileirão B", 13: "Libertadores", 11: "Sudamericana"
     }
     
     pool_entradas = []
@@ -143,7 +149,7 @@ def executar():
                 "sofa_link": url_real_sofa 
             }
 
-            # CANTO (90% vai pro topo)
+            # CANTO (>= 70%)
             if tipo_canto and perc_canto >= 70:
                 pool_entradas.append({"perc": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
@@ -155,50 +161,34 @@ def executar():
                 pool_entradas.append({"perc": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
             # GOLS (+1.5 >= 70%)
-            h_o15, h_o25 = get_individual_stats(t1['id'])
-            a_o15, a_o25 = get_individual_stats(t2['id'])
-            m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
+            h_o15 = get_individual_stats(t1['id'])
+            a_o15 = get_individual_stats(t2['id'])
+            m_o15 = (h_o15 + a_o15)/2
             if m_o15 >= 70: 
                 pool_entradas.append({"perc": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
             
     browser.quit()
     
-    # RANKING GERAL (Ordena tudo por %)
+    # RANKING GERAL POR %
     pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
     
     jogos_selecionados = {}
-    
-    # LÓGICA DE PREENCHIMENTO DO BILHETE
     for e in pool_entradas:
         mid = e['id']
-        
-        # Se o jogo ainda não está no bilhete e já temos 10 jogos, ignora
-        if mid not in jogos_selecionados and len(jogos_selecionados) >= 10:
-            continue
+        if mid not in jogos_selecionados and len(jogos_selecionados) >= 10: continue
             
-        # Cria a entrada do jogo se for a primeira vez que ele aparece (pelo mercado de maior %)
         if mid not in jogos_selecionados:
-            jogos_selecionados[mid] = {
-                "info": e['info'], 
-                "hora": e['hora'], 
-                "liga": e['liga'], 
-                "link": e['sofa_link'], 
-                "mkts": []
-            }
+            jogos_selecionados[mid] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": e['sofa_link'], "mkts": []}
         
-        # Adiciona o mercado se o jogo tiver menos de 3 mercados
         if len(jogos_selecionados[mid]["mkts"]) < 3:
             jogos_selecionados[mid]["mkts"].append(e)
 
     if not jogos_selecionados: return
-
-    # Ordena o bilhete final por Liga para facilitar a leitura
     lista_final = sorted(jogos_selecionados.values(), key=lambda x: x['liga'])
 
     msg = "🎯 *BILHETE DO DIA (SISTEMA H2H)*\n💰🍀 *BOA SORTE!!!*\n\n"
     for i, j in enumerate(lista_final, 1):
         msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n"
-        # Garante que dentro do jogo o mercado de maior % apareça primeiro
         j['mkts'].sort(key=lambda x: x['perc'], reverse=True)
         for mkt in j['mkts']:
             if mkt['tipo'] == 'canto': label = f"🚩 {mkt['mkt']} {mkt['perc']:.0f}%"
@@ -212,3 +202,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
+        
