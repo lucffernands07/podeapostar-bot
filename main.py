@@ -38,10 +38,9 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    """ MOTOR REVISADO: Captura 10.5 flexível e anti-duplicagem condicional """
+    """ MOTOR REVISADO: Filtra 'Menos de', aceita 1 ou 2 frações e gera URL real """
     url_real_com_id = "https://www.sofascore.com/"
     wait = WebDriverWait(driver, 20)
-    
     try:
         driver.get("https://www.sofascore.com/pt/")
         search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
@@ -54,42 +53,31 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         
         url_h2h = url_real_com_id.split('#')[0] + "#tab:matches"
         driver.get(url_h2h)
-        
         time.sleep(12)
         driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
         time.sleep(5)
         
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
+        percs_menos = []
         
-        # Busca todas as frações próximas ao termo 10.5 (independente de texto extra)
-        bruto_matches = []
-        matches = re.finditer(r"10\.5", texto_bruto)
+        # Busca especificamente 'Menos de 10.5' e ignora o resto
+        matches = re.finditer(r"Menos de\s+10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
         for m in matches:
-            trecho = texto_bruto[max(0, m.start()-10) : m.end()+50]
+            trecho = texto_bruto[m.end() : m.end() + 40]
             busca_f = re.search(r"(\d+)/(\d+)", trecho)
             if busca_f:
-                bruto_matches.append(f"{busca_f.group(1)}/{busca_f.group(2)}")
+                n, d = int(busca_f.group(1)), int(busca_f.group(2))
+                percs_menos.append((n / d) * 100)
 
-        finais = []
-        # Regra Anti-duplicagem: só limpa se houver 3 ou mais ocorrências (repetições do site)
-        if len(bruto_matches) >= 3:
-            for item in bruto_matches:
-                if item not in finais:
-                    finais.append(item)
-        else:
-            finais = bruto_matches
+        percs_unicos = sorted(list(set(percs_menos)), reverse=True)
 
-        if len(finais) >= 2:
-            num1, den1 = map(int, finais[0].split('/'))
-            num2, den2 = map(int, finais[1].split('/'))
-            p1 = (num1 / den1) * 100
-            p2 = (num2 / den2) * 100
-            media = (p1 + p2) / 2
-            return "Menos 10.5 Escanteios", media, url_real_com_id
+        if len(percs_unicos) >= 2:
+            return "Menos 10.5 Escanteios", (percs_unicos[0] + percs_unicos[1]) / 2, url_real_com_id
+        elif len(percs_unicos) == 1:
+            return "Menos 10.5 Escanteios", percs_unicos[0], url_real_com_id
             
     except Exception as e:
         print(f"Erro Sofa {t1_name}: {e}")
-    
     return None, 0, url_real_com_id
 
 def get_h2h_dupla_chance(t1_id, t2_id):
@@ -134,7 +122,6 @@ def executar():
             for m in res.get('response', []):
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 
-                # Busca Escanteios
                 tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
 
                 g_info = {
@@ -145,7 +132,8 @@ def executar():
                     "sofa_link": url_real_sofa 
                 }
 
-                if tipo_canto and perc_canto >= 85:
+                # Adiciona ao pool se atingir o critério mínimo (70%)
+                if tipo_canto and perc_canto >= 70:
                     pool_entradas.append({"prio": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
                 h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
@@ -155,35 +143,28 @@ def executar():
                 h_o15, h_o25 = get_individual_stats(t1['id'])
                 a_o15, a_o25 = get_individual_stats(t2['id'])
                 m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
-                if m_o15 >= 75: pool_entradas.append({"prio": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
-                if m_o25 >= 75: pool_entradas.append({"prio": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
-        except:
-            continue
+                if m_o15 >= 70: pool_entradas.append({"prio": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
+                if m_o25 >= 70: pool_entradas.append({"prio": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
+        except: continue
             
     browser.quit()
+    
+    # RANKING: Ordena do maior (100%) para o menor (70%)
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
     
     jogos_selecionados = {}
-    c_canto, c_1x, c_2x, c_25 = 0, 0, 0, 0
     
     for e in pool_entradas:
         mid = e['id']
+        # Para quando atingir 10 jogos diferentes
         if len(jogos_selecionados) >= 10 and mid not in jogos_selecionados: continue
-        
-        if e['tipo'] == 'canto' and c_canto >= 4: continue
-        if e['tipo'] == '2.5' and c_25 >= 2: continue
-        if e['tipo'] == '2x' and c_2x >= 1: continue
-        if e['tipo'] == '1x' and c_1x >= 3: continue
 
         if mid not in jogos_selecionados:
             jogos_selecionados[mid] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": e['sofa_link'], "mkts": []}
         
+        # Limite de 2 mercados por jogo para o bilhete não ficar gigante
         if len(jogos_selecionados[mid]["mkts"]) < 2:
             jogos_selecionados[mid]["mkts"].append(e)
-            if e['tipo'] == 'canto': c_canto += 1
-            if e['tipo'] == '2.5': c_25 += 1
-            if e['tipo'] == '2x': c_2x += 1
-            if e['tipo'] == '1x': c_1x += 1
 
     if not jogos_selecionados: return
 
@@ -195,7 +176,6 @@ def executar():
         for mkt in j['mkts']:
             if mkt['tipo'] == 'canto': label = f"🚩 {mkt['mkt']} {mkt['prio']:.0f}%"
             elif mkt['tipo'] in ['1x', '2x']: label = f"🛡️ {mkt['mkt']} ({mkt['prio']:.0f}%)"
-            elif mkt['tipo'] == '2.5': label = f"⚡ {mkt['mkt']} ({mkt['prio']:.0f}%)"
             else: label = f"⚽ {mkt['mkt']} ({mkt['prio']:.0f}%)"
             msg += f"🔶 {label}\n"
         msg += f"📊 [Análise Sofa]({j['link']})\n\n"
@@ -205,4 +185,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-        
+    
