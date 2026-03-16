@@ -60,10 +60,10 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         percs_menos = []
         
-        # Busca especificamente 'Menos de 10.5' e ignora o resto
-        matches = re.finditer(r"Menos de\s+10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
+        # BUSCA MELHORADA: Procura 'Menos de' e o '10.5' próximo, ignorando 'Mais de'
+        matches = re.finditer(r"Menos de.{1,15}10\.5", texto_bruto, re.IGNORECASE | re.DOTALL)
         for m in matches:
-            trecho = texto_bruto[m.end() : m.end() + 40]
+            trecho = texto_bruto[m.end() : m.end() + 50]
             busca_f = re.search(r"(\d+)/(\d+)", trecho)
             if busca_f:
                 n, d = int(busca_f.group(1)), int(busca_f.group(2))
@@ -111,7 +111,17 @@ def executar():
     browser = configurar_browser()
     agora_br = datetime.utcnow() - timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
-    ligas = {39: "Premier", 140: "LALIGA", 135: "Serie A", 78: "Bundesliga", 61: "Ligue 1", 94: "Português"}
+    
+    # LISTA DE LIGAS AMPLIADA (Mantendo a lógica original sem pesos)
+    ligas = {
+        2: "Champions League", 39: "Premier League", 140: "LALIGA", 135: "Serie A", 
+        78: "Bundesliga", 61: "Ligue 1", 94: "Português", 71: "Brasileirão A", 
+        88: "Holandês", 144: "Belga", 203: "Süper Lig", 172: "Bulgária", 
+        265: "Chile", 239: "Colômbia", 233: "Egito", 141: "LaLiga 2", 
+        72: "Brasileirão B", 13: "Libertadores", 11: "Sudamericana", 
+        45: "FA Cup", 48: "League Cup", 143: "Copa del Rey", 
+        137: "Coppa Italia", 81: "DFB Pokal", 66: "Coupe de France"
+    }
     
     pool_entradas = []
 
@@ -132,7 +142,6 @@ def executar():
                     "sofa_link": url_real_sofa 
                 }
 
-                # Adiciona ao pool se atingir o critério mínimo (70%)
                 if tipo_canto and perc_canto >= 70:
                     pool_entradas.append({"prio": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
@@ -149,25 +158,18 @@ def executar():
             
     browser.quit()
     
-    # RANKING: Ordena do maior (100%) para o menor (70%)
     pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
     
     jogos_selecionados = {}
-    
     for e in pool_entradas:
         mid = e['id']
-        # Para quando atingir 10 jogos diferentes
         if len(jogos_selecionados) >= 10 and mid not in jogos_selecionados: continue
-
         if mid not in jogos_selecionados:
             jogos_selecionados[mid] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": e['sofa_link'], "mkts": []}
-        
-        # Limite de 2 mercados por jogo para o bilhete não ficar gigante
         if len(jogos_selecionados[mid]["mkts"]) < 2:
             jogos_selecionados[mid]["mkts"].append(e)
 
     if not jogos_selecionados: return
-
     lista_final = sorted(jogos_selecionados.values(), key=lambda x: x['liga'])
 
     msg = "🎯 *BILHETE DO DIA (SISTEMA H2H)*\n💰🍀 *BOA SORTE!!!*\n\n"
@@ -185,4 +187,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-    
+                
