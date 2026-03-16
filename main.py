@@ -37,43 +37,71 @@ def enviar_telegram(msg):
     except Exception as e:
         print(f"Erro ao enviar Telegram: {e}")
 
+
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    """ MÉTODO CONTÉM: Busca se existem as palavras chaves e extrai a fração """
+    """ MOTOR COM ORDEM DE MANDO: Respeita Casa x Fora para garantir o ID correto """
     url_real_com_id = "https://www.sofascore.com/"
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 25) # Aumentado para dar margem em buscas lentas
     try:
         driver.get("https://www.sofascore.com/pt/")
+        
+        # Fecha possíveis pop-ups de privacidade que travam o clique
+        try:
+            cookies_btn = driver.find_elements(By.XPATH, "//button[contains(., 'Aceito') or contains(., 'Agree')]")
+            if cookies_btn: cookies_btn[0].click()
+        except: pass
+
         search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
         search_input.click()
+        
+        # RESPEITA FATOR CASA-FORA: t1_name (Casa) sempre vem primeiro
         search_input.send_keys(f"{t1_name} {t2_name}")
-        time.sleep(7)
+        time.sleep(10) # Tempo vital para o SofaScore filtrar os resultados
         
-        resultado_link = wait.until(EC.presence_of_element_located((By.XPATH, f"//a[contains(@href, '/football/match/') and (contains(., '{t1_name}') or contains(., '{t2_name}'))]")))
-        url_real_com_id = resultado_link.get_attribute("href")
+        # CLIQUE BLINDADO: Busca o link de partida de futebol
+        resultado_xpath = "//a[contains(@href, '/football/match/')]"
+        try:
+            # Pega todos os resultados e tenta validar o que melhor se encaixa
+            resultados = driver.find_elements(By.XPATH, resultado_xpath)
+            if not resultados:
+                # Se não achou com os dois nomes, tenta só com o da Casa (t1)
+                search_input.clear()
+                search_input.send_keys(t1_name)
+                time.sleep(7)
+                resultados = driver.find_elements(By.XPATH, resultado_xpath)
+
+            # Seleciona o primeiro link válido de futebol
+            resultado_link = resultados[0]
+            url_real_com_id = resultado_link.get_attribute("href")
+            
+            # Navega direto para a URL para evitar erros de clique
+            driver.get(url_real_com_id)
+        except Exception as e:
+            print(f"Não localizou link de partida para {t1_name}: {e}")
+            return None, 0, url_real_com_id
         
+        # ACESSA ABA H2H
         url_h2h = url_real_com_id.split('#')[0] + "#tab:matches"
         driver.get(url_h2h)
         time.sleep(15)
+        
         driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
         time.sleep(5)
         
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         percs_menos = []
         
-        # Lógica 'Contém': Se houver 'Menos' e '10.5' na mesma linha/bloco
-        # O re.finditer com .*? funciona como o 'contém' entre duas âncoras
+        # MÉTODO CONTÉM (Flexível para 'Menos de', 'Menos do que')
         matches = re.finditer(r"Menos.*?10\.5", texto_bruto, re.IGNORECASE | re.DOTALL)
-        
         for m in matches:
-            trecho = texto_bruto[m.end() : m.end() + 60]
+            trecho = texto_bruto[m.end() : m.end() + 65]
             busca_f = re.search(r"(\d+)/(\d+)", trecho)
             if busca_f:
                 n, d = int(busca_f.group(1)), int(busca_f.group(2))
-                if d >= 5: # Filtro de amostragem mínima
+                if d >= 5:
                     percs_menos.append((n / d) * 100)
 
         if percs_menos:
-            # Ordena e calcula a média se houver mais de um time com o dado
             percs_unicos = sorted(list(set(percs_menos)), reverse=True)
             valor_final = percs_unicos[0]
             if len(percs_unicos) >= 2:
@@ -82,7 +110,7 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
             return "Menos 10.5 Escanteios", valor_final, url_real_com_id
             
     except Exception as e:
-        print(f"Erro Sofa {t1_name}: {e}")
+        print(f"Erro Sofa {t1_name} x {t2_name}: {e}")
     return None, 0, url_real_com_id
 
 def get_h2h_dupla_chance(t1_id, t2_id):
