@@ -38,7 +38,7 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    """ MOTOR REVISADO: Busca 'Menos de 10.5' com espaços flexíveis para quebra de linha """
+    """ MOTOR REVISADO: Alta sensibilidade para capturar os 90% do Grêmio """
     url_real_com_id = "https://www.sofascore.com/"
     wait = WebDriverWait(driver, 20)
     try:
@@ -53,28 +53,24 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         
         url_h2h = url_real_com_id.split('#')[0] + "#tab:matches"
         driver.get(url_h2h)
-        time.sleep(15) # Aumentado para garantir carga total do H2H
+        time.sleep(15)
         driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
         time.sleep(5)
         
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         percs_menos = []
         
-        # Regex ultra-flexível: aceita espaços, quebras de linha e tabulações entre as palavras
         matches = re.finditer(r"Menos\s+de\s+10\.5", texto_bruto, re.IGNORECASE)
         for m in matches:
-            trecho = texto_bruto[m.end() : m.end() + 60]
+            trecho = texto_bruto[m.end() : m.end() + 65]
             busca_f = re.search(r"(\d+)/(\d+)", trecho)
             if busca_f:
                 n, d = int(busca_f.group(1)), int(busca_f.group(2))
                 percs_menos.append((n / d) * 100)
 
-        percs_unicos = sorted(list(set(percs_menos)), reverse=True)
-
-        if len(percs_unicos) >= 2:
-            return "Menos 10.5 Escanteios", (percs_unicos[0] + percs_unicos[1]) / 2, url_real_com_id
-        elif len(percs_unicos) == 1:
-            return "Menos 10.5 Escanteios", percs_unicos[0], url_real_com_id
+        if percs_menos:
+            # Pega a maior porcentagem de "Menos de" encontrada (ex: os 9/10 do Grêmio)
+            return "Menos 10.5 Escanteios", max(percs_menos), url_real_com_id
             
     except Exception as e:
         print(f"Erro Sofa {t1_name}: {e}")
@@ -125,7 +121,6 @@ def executar():
     pool_entradas = []
 
     for l_id, l_nome in ligas.items():
-        # TENTA 2026 PRIMEIRO, SE VAZIO, TENTA 2025
         fixtures_hoje = []
         for ano in [2026, 2025]:
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
@@ -133,7 +128,7 @@ def executar():
                 res = requests.get(url, headers=HEADERS).json()
                 if res.get('response'):
                     fixtures_hoje = res['response']
-                    break # Se achou jogos, não precisa tentar o outro ano
+                    break
             except: continue
 
         for m in fixtures_hoje:
@@ -148,41 +143,67 @@ def executar():
                 "sofa_link": url_real_sofa 
             }
 
+            # CANTO (90% vai pro topo)
             if tipo_canto and perc_canto >= 70:
-                pool_entradas.append({"prio": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
+                pool_entradas.append({"perc": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
+            # DUPLA CHANCE (1x >= 80% | 2x >= 90%)
             h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
-            if h2h_t1 >= 70: pool_entradas.append({"prio": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
-            if h2h_t2 >= 70: pool_entradas.append({"prio": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
+            if h2h_t1 >= 80: 
+                pool_entradas.append({"perc": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
+            if h2h_t2 >= 90: 
+                pool_entradas.append({"perc": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
+            # GOLS (+1.5 >= 70%)
             h_o15, h_o25 = get_individual_stats(t1['id'])
             a_o15, a_o25 = get_individual_stats(t2['id'])
             m_o15, m_o25 = (h_o15 + a_o15)/2, (h_o25 + a_o25)/2
-            if m_o15 >= 70: pool_entradas.append({"prio": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
-            if m_o25 >= 70: pool_entradas.append({"prio": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
+            if m_o15 >= 70: 
+                pool_entradas.append({"perc": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
             
     browser.quit()
-    pool_entradas.sort(key=lambda x: x['prio'], reverse=True)
+    
+    # RANKING GERAL (Ordena tudo por %)
+    pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
     
     jogos_selecionados = {}
+    
+    # LÓGICA DE PREENCHIMENTO DO BILHETE
     for e in pool_entradas:
         mid = e['id']
-        if len(jogos_selecionados) >= 10 and mid not in jogos_selecionados: continue
+        
+        # Se o jogo ainda não está no bilhete e já temos 10 jogos, ignora
+        if mid not in jogos_selecionados and len(jogos_selecionados) >= 10:
+            continue
+            
+        # Cria a entrada do jogo se for a primeira vez que ele aparece (pelo mercado de maior %)
         if mid not in jogos_selecionados:
-            jogos_selecionados[mid] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": e['sofa_link'], "mkts": []}
-        if len(jogos_selecionados[mid]["mkts"]) < 2:
+            jogos_selecionados[mid] = {
+                "info": e['info'], 
+                "hora": e['hora'], 
+                "liga": e['liga'], 
+                "link": e['sofa_link'], 
+                "mkts": []
+            }
+        
+        # Adiciona o mercado se o jogo tiver menos de 3 mercados
+        if len(jogos_selecionados[mid]["mkts"]) < 3:
             jogos_selecionados[mid]["mkts"].append(e)
 
     if not jogos_selecionados: return
+
+    # Ordena o bilhete final por Liga para facilitar a leitura
     lista_final = sorted(jogos_selecionados.values(), key=lambda x: x['liga'])
 
     msg = "🎯 *BILHETE DO DIA (SISTEMA H2H)*\n💰🍀 *BOA SORTE!!!*\n\n"
     for i, j in enumerate(lista_final, 1):
         msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n"
+        # Garante que dentro do jogo o mercado de maior % apareça primeiro
+        j['mkts'].sort(key=lambda x: x['perc'], reverse=True)
         for mkt in j['mkts']:
-            if mkt['tipo'] == 'canto': label = f"🚩 {mkt['mkt']} {mkt['prio']:.0f}%"
-            elif mkt['tipo'] in ['1x', '2x']: label = f"🛡️ {mkt['mkt']} ({mkt['prio']:.0f}%)"
-            else: label = f"⚽ {mkt['mkt']} ({mkt['prio']:.0f}%)"
+            if mkt['tipo'] == 'canto': label = f"🚩 {mkt['mkt']} {mkt['perc']:.0f}%"
+            elif mkt['tipo'] in ['1x', '2x']: label = f"🛡️ {mkt['mkt']} ({mkt['perc']:.0f}%)"
+            else: label = f"⚽ {mkt['mkt']} ({mkt['perc']:.0f}%)"
             msg += f"🔶 {label}\n"
         msg += f"📊 [Análise Sofa]({j['link']})\n\n"
     
@@ -191,4 +212,3 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-        
