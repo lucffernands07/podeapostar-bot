@@ -38,7 +38,7 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_sofa_h2h_corners(driver, t1_name, t2_name):
-    """ MOTOR REVISADO: Captura ID real e anti-duplicagem condicional """
+    """ MOTOR REVISADO: Captura 10.5 flexível e anti-duplicagem condicional """
     url_real_com_id = "https://www.sofascore.com/"
     wait = WebDriverWait(driver, 20)
     
@@ -49,11 +49,9 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         search_input.send_keys(f"{t1_name} {t2_name}")
         time.sleep(7)
         
-        # Localiza o link da partida e extrai a URL com ID
         resultado_link = wait.until(EC.presence_of_element_located((By.XPATH, f"//a[contains(@href, '/football/match/') and (contains(., '{t1_name}') or contains(., '{t2_name}'))]")))
         url_real_com_id = resultado_link.get_attribute("href")
         
-        # Navega para a aba de H2H (Partidas)
         url_h2h = url_real_com_id.split('#')[0] + "#tab:matches"
         driver.get(url_h2h)
         
@@ -63,16 +61,17 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
         
         texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         
+        # Busca todas as frações próximas ao termo 10.5 (independente de texto extra)
         bruto_matches = []
-        matches = re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
+        matches = re.finditer(r"10\.5", texto_bruto)
         for m in matches:
-            trecho = texto_bruto[m.end() : m.end() + 50]
+            trecho = texto_bruto[max(0, m.start()-10) : m.end()+50]
             busca_f = re.search(r"(\d+)/(\d+)", trecho)
             if busca_f:
                 bruto_matches.append(f"{busca_f.group(1)}/{busca_f.group(2)}")
 
         finais = []
-        # Regra Anti-duplicagem: só limpa se houver 3 ou mais ocorrências no texto
+        # Regra Anti-duplicagem: só limpa se houver 3 ou mais ocorrências (repetições do site)
         if len(bruto_matches) >= 3:
             for item in bruto_matches:
                 if item not in finais:
@@ -86,7 +85,7 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
             p1 = (num1 / den1) * 100
             p2 = (num2 / den2) * 100
             media = (p1 + p2) / 2
-            return "Menos de 10.5 Escanteios", media, url_real_com_id
+            return "Menos 10.5 Escanteios", media, url_real_com_id
             
     except Exception as e:
         print(f"Erro Sofa {t1_name}: {e}")
@@ -135,7 +134,7 @@ def executar():
             for m in res.get('response', []):
                 t1, t2 = m['teams']['home'], m['teams']['away']
                 
-                # Chamada do Motor de Escanteios que agora retorna a URL real do jogo
+                # Busca Escanteios
                 tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
 
                 g_info = {
@@ -143,7 +142,7 @@ def executar():
                     "info": f"*{t1['name']} x {t2['name']}*", 
                     "hora": m['fixture']['date'][11:16], 
                     "liga": l_nome, 
-                    "sofa_link": url_real_sofa # URL COM ID REAL DA PARTIDA
+                    "sofa_link": url_real_sofa 
                 }
 
                 if tipo_canto and perc_canto >= 85:
@@ -177,7 +176,6 @@ def executar():
         if e['tipo'] == '1x' and c_1x >= 3: continue
 
         if mid not in jogos_selecionados:
-            # Aqui garantimos que o link da partida seja o 'sofa_link' capturado no motor
             jogos_selecionados[mid] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": e['sofa_link'], "mkts": []}
         
         if len(jogos_selecionados[mid]["mkts"]) < 2:
@@ -200,11 +198,11 @@ def executar():
             elif mkt['tipo'] == '2.5': label = f"⚡ {mkt['mkt']} ({mkt['prio']:.0f}%)"
             else: label = f"⚽ {mkt['mkt']} ({mkt['prio']:.0f}%)"
             msg += f"🔶 {label}\n"
-        msg += f"📊 [Análise Sofa]({j['link']})\n\n" # O LINK AGORA ABRE A PARTIDA REAL
+        msg += f"📊 [Análise Sofa]({j['link']})\n\n"
     
     msg += "---\n💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
     enviar_telegram(msg)
 
 if __name__ == "__main__":
     executar()
-                
+        
