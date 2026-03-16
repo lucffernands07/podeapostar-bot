@@ -3,6 +3,7 @@ import requests
 import urllib.parse
 import time
 import re
+import pytz
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -144,7 +145,11 @@ def get_individual_stats(team_id):
 
 def executar():
     browser = configurar_browser()
-    agora_br = datetime.utcnow() - timedelta(hours=3)
+    
+    # --- AJUSTE FUSO HORÁRIO (BUSCA) ---
+    import pytz # Certifique-se de ter 'import pytz' no topo do arquivo
+    fuso_br = pytz.timezone('America/Sao_Paulo')
+    agora_br = datetime.now(fuso_br)
     hoje = agora_br.strftime("%Y-%m-%d")
     
     ligas = {
@@ -169,18 +174,23 @@ def executar():
             except: continue
 
         for m in fixtures_hoje:
+            # --- AJUSTE FUSO HORÁRIO (HORA DO JOGO NO BILHETE) ---
+            # Converte a string UTC da API para o objeto datetime e depois para Brasília
+            hora_utc = datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00'))
+            hora_br = hora_utc.astimezone(fuso_br).strftime("%H:%M")
+
             t1, t2 = m['teams']['home'], m['teams']['away']
             tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
 
             g_info = {
                 "id": m['fixture']['id'], 
                 "info": f"*{t1['name']} x {t2['name']}*", 
-                "hora": m['fixture']['date'][11:16], 
+                "hora": hora_br, # <--- Usando a variável corrigida
                 "liga": l_nome, 
                 "sofa_link": url_real_sofa 
             }
 
-            # CANTO (>= 70%)
+            # CANTO (>= 80% conforme sua nova regra)
             if tipo_canto and perc_canto >= 80:
                 pool_entradas.append({"perc": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
@@ -197,8 +207,8 @@ def executar():
             m_o15 = (h_o15 + a_o15)/2
             if m_o15 >= 70: 
                 pool_entradas.append({"perc": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
-            
-    browser.quit()
+                
+                browser.quit()
     
     # RANKING GERAL POR %
     pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
