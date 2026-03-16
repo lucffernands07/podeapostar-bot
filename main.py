@@ -7,11 +7,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# --- CONFIGURAÇÕES ---
+# --- CONFIGURAÇÕES (Pegando das variáveis do GitHub) ---
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 
@@ -25,97 +23,98 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-def buscar_id_sofascore(driver, time_casa, time_fora):
-    print(f"🔍 Buscando jogo: {time_casa} x {time_fora}...")
-    driver.get("https://www.sofascore.com/pt/")
-    wait = WebDriverWait(driver, 20)
+def buscar_id_direto(driver, t1, t2):
+    """ Busca via URL de pesquisa para evitar erros de clique no menu """
+    print(f"🔍 Buscando link para: {t1} x {t2}...")
+    url_busca = f"https://www.sofascore.com/pt/busca?q={t1}+{t2}"
+    driver.get(url_busca)
+    time.sleep(8) 
     
-    try:
-        search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
-        search_input.click()
-        search_input.send_keys(f"{time_casa} {time_fora}")
-        time.sleep(5)
-        
-        # Seleciona o link do jogo nos resultados
-        resultado = wait.until(EC.element_to_be_clickable((By.XPATH, f"//div[contains(., '{time_casa}') and contains(., '{time_fora}')]/ancestor::a[contains(@href, '/football/match/')]")))
-        return resultado.get_attribute("href")
-    except:
-        return None
+    links = driver.find_elements(By.TAG_NAME, "a")
+    for link in links:
+        href = link.get_attribute("href")
+        if href and "/football/match/" in href:
+            if t1.lower() in href.lower() or t2.lower() in href.lower():
+                # Retorna a URL base sem o resto
+                return href.split('#')[0]
+    return None
 
-def extrair_estatisticas(driver, url_jogo):
-    url_limpa = url_jogo.split('#')[0]
-    driver.get(url_limpa)
-    wait = WebDriverWait(driver, 20)
+def extrair_dados_h2h(driver, url_jogo):
+    """ A lógica que funcionou: Aba Partidas + Scroll + Texto Bruto """
+    url_final = url_jogo + "#tab:matches"
+    print(f"📡 Acessando H2H: {url_final}")
+    driver.get(url_final)
     
-    try:
-        # Clica na aba Partidas
-        aba = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, 'tab:matches')] | //div[text()='Partidas']")))
-        driver.execute_script("arguments[0].click();", aba)
-        
-        time.sleep(3)
-        driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
-        time.sleep(6)
-        
-        texto_bruto = driver.find_element(By.TAG_NAME, "body").text
-        
-        # Usamos um dicionário para evitar duplicatas de frações idênticas no mesmo bloco
-        encontrados = []
-        matches = re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
-        
-        for m in matches:
-            trecho = texto_bruto[m.end() : m.end() + 50]
-            frequencia = re.search(r"(\d+)/(\d+)", trecho)
-            if frequencia:
-                fracao = f"{frequencia.group(1)}/{frequencia.group(2)}"
-                if fracao not in encontrados:
-                    encontrados.append(fracao)
-        
-        return encontrados
-    except:
-        return []
+    # Espera generosa para garantir que os cards carreguem
+    time.sleep(12)
+    
+    # Rola a página para baixo (essencial para renderizar os cards)
+    driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
+    time.sleep(5)
+    
+    texto_bruto = driver.find_element(By.TAG_NAME, "body").text
+    
+    frequencias_percs = []
+    fracoes_unicas = []
+    
+    # Scanner de frações
+    matches = re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
+    for m in matches:
+        trecho = texto_bruto[m.end() : m.end() + 50]
+        busca = re.search(r"(\d+)/(\d+)", trecho)
+        if busca:
+            num, den = busca.group(1), busca.group(2)
+            fracao = f"{num}/{den}"
+            # Evita duplicatas do mesmo dado que o SofaScore às vezes repete no texto
+            if fracao not in fracoes_unicas:
+                fracoes_unicas.append(fracao)
+                p = (int(num) / int(den)) * 100
+                frequencias_percs.append(p)
+                print(f"✅ Capturado: {fracao} ({p:.1f}%)")
+    
+    return fracoes_unicas, frequencias_percs
 
-def enviar_telegram(mensagem):
+def enviar_telegram(msg):
+    if not TOKEN or not CHAT_ID: return
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown"}
-    requests.post(url, json=payload)
+    try:
+        requests.post(url, json={"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"})
+    except:
+        print("❌ Erro ao enviar Telegram")
 
-def executar_bot():
+def executar():
     driver = configurar_browser()
-    # Exemplo com o jogo que validamos
+    # No futuro, aqui você pode colocar um loop vindo da API-Football
     time_casa, time_fora = "Lazio", "Milan"
     
-    url = buscar_id_sofascore(driver, time_casa, time_fora)
-    
+    url = buscar_id_direto(driver, time_casa, time_fora)
     if url:
-        frações = extrair_estatisticas(driver, url)
+        fracoes, percs = extrair_dados_h2h(driver, url)
         
-        if len(frações) >= 2:
-            f1_num, f1_den = map(int, frações[0].split('/'))
-            f2_num, f2_den = map(int, frações[1].split('/'))
+        # O código antigo pegava as 2 primeiras. Aqui garantimos que temos 2 diferentes.
+        if len(percs) >= 2:
+            p_casa, p_fora = percs[0], percs[1]
+            media = (p_casa + p_fora) / 2
             
-            p1 = (f1_num / f1_den) * 100
-            p2 = (f2_num / f2_den) * 100
-            media = (p1 + p2) / 2
+            msg = f"🏟️ *{time_casa} x {time_fora}*\n🚩 Menos 10.5 Escanteios\n\n"
+            msg += f"🏠 Casa: {fracoes[0]} ({p_casa:.1f}%)\n"
+            msg += f"🚌 Fora: {fracoes[1]} ({p_fora:.1f}%)\n"
+            msg += f"📊 Média: {media:.1f}%\n"
             
-            msg = f"🏟️ *{time_casa} x {time_fora}*\n"
-            msg += f"🚩 Escanteios < 10.5\n"
-            msg += f"🏠 Casa: {frações[0]} ({p1:.1f}%)\n"
-            msg += f"🚌 Fora: {frações[1]} ({p2:.1f}%)\n"
-            msg += f"📊 Média: {media:.1f}%\n\n"
-            
-            if p1 >= 90 and p2 >= 90:
-                msg += "🔥 *PALPITE: PRIORITÁRIO*"
+            if p_casa >= 90 and p_fora >= 90:
+                msg += "\n🔥 *PALPITE: PRIORITÁRIO*"
             elif media >= 85:
-                msg += "✅ *PALPITE: APROVADO*"
+                msg += "\n✅ *PALPITE: APROVADO*"
             
             enviar_telegram(msg)
-            print("✅ Relatório enviado ao Telegram!")
+            print(f"🚀 Relatório enviado!")
         else:
-            print("❌ Não foi possível encontrar as duas frações.")
+            print(f"⚠️ Apenas {len(percs)} frações encontradas. Requisito mínimo: 2.")
     else:
-        print("❌ Jogo não encontrado.")
+        print(f"❌ Jogo {time_casa} x {time_fora} não localizado.")
     
     driver.quit()
 
 if __name__ == "__main__":
-    executar_bot()
+    executar()
+            
