@@ -4,9 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
 
 def configurar_browser():
     options = Options()
@@ -18,66 +16,76 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-def raspar_h2h_inteligente(url_jogo, casa_nome, fora_nome):
+def testar_logica_antiga_no_link_direto(url_jogo):
     driver = configurar_browser()
+    # Adicionando a aba matches para cair direto onde estão as frações
     url_final = url_jogo + "#tab:matches"
     
-    print(f"\n🚀 --- INICIANDO EXTRAÇÃO: {casa_nome} x {fora_nome} ---")
+    print(f"\n🚀 --- EXECUTANDO LÓGICA ANTIGA NO LINK ---")
+    print(f"🔗 Alvo: {url_final}")
     
     try:
         driver.get(url_final)
-        time.sleep(10)
         
-        # Scroll para carregar os componentes de estatísticas
-        driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
-        time.sleep(5)
+        # O código antigo esperava um tempo para os cards carregarem
+        print("⏳ Aguardando 12 segundos (Carga dos cards)...")
+        time.sleep(12) 
 
-        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        # --- EXATAMENTE COMO NO CÓDIGO ANTIGO ---
+        texto_bruto = driver.find_element(By.TAG_NAME, "body").text
         
-        # Vamos encontrar todos os containers de estatísticas (H2H)
-        # O SofaScore agrupa os dados do time da casa e do visitante em seções separadas
-        containers = soup.find_all('div', class_=re.compile(r'sc-.*')) # Busca divs de componentes
-
-        print(f"📊 LOG: Analisando blocos de estatísticas para {casa_nome} e {fora_nome}...")
-
-        resultados = {}
-        times_alvo = [casa_nome, fora_nome]
+        frequencias = []
+        # Scanner de Escanteios usando re.finditer
+        matches = re.finditer(r"10\.5\s+escanteios", texto_bruto, re.IGNORECASE)
         
-        # Pegamos o texto bruto para extrair as frações de forma linear
-        texto_bruto = soup.get_text(separator=' ')
+        print("\n🔍 Escaneando texto bruto por padrões '10.5 escanteios'...")
         
-        # Regex para achar "Menos de 10.5" ou "10.5 escanteios" seguido de fração
-        pattern = r"10\.5\s+escanteios.*?(\d+)/(\d+)"
-        matches = re.findall(pattern, texto_bruto, re.IGNORECASE)
-
-        if len(matches) >= 2:
-            # Seguindo sua lógica: a primeira ocorrência relevante para o contexto da casa
-            # e a primeira ocorrência relevante para o contexto de fora.
-            # No layout H2H, a lista costuma ser: [CASA, CASA, CASA..., FORA, FORA, FORA...]
-            # Mas como os escanteios 10.5 são específicos, pegamos as ocorrências:
+        for i, m in enumerate(matches, 1):
+            # Pega os 50 caracteres após o término da palavra "escanteios"
+            trecho_apos = texto_bruto[m.end() : m.end() + 50]
             
-            # Nota: Em muitos jogos, a 7ª e 8ª ocorrência no texto total 
-            # correspondem exatamente ao primeiro '10.5' da Casa e o primeiro '10.5' do Fora.
+            # Busca a fração (\d+)/(\d+)
+            frequencia = re.search(r"(\d+)/(\d+)", trecho_apos)
             
-            v_casa_num, v_casa_den = map(int, matches[6]) # 7ª ocorrência (índice 6)
-            v_fora_num, v_fora_den = map(int, matches[7]) # 8ª ocorrência (índice 7)
+            if frequencia:
+                num, den = int(frequencia.group(1)), int(frequencia.group(2))
+                perc = (num / den) * 100
+                frequencias.append(perc)
+                print(f"✅ Encontrado na posição {i}: {num}/{den} ({perc:.1f}%)")
+            else:
+                print(f"⚠️ Posição {i}: Termo encontrado, mas sem fração nos 50 caracteres seguintes.")
 
-            perc_casa = (v_casa_num / v_casa_den) * 100
-            perc_fora = (v_fora_num / v_fora_den) * 100
-
-            print(f"\n✅ LOG: Sucesso na extração!")
-            print(f"🏠 {casa_nome} (10.5 Esc): {v_casa_num}/{v_casa_den} -> {perc_casa:.1f}%")
-            print(f"🚌 {fora_nome} (10.5 Esc): {v_fora_num}/{v_fora_den} -> {perc_fora:.1f}%")
-            print(f"📈 MÉDIA: {(perc_casa + perc_fora)/2:.1f}%")
+        # --- AVALIAÇÃO DA REGRA ANTIGA ---
+        print("\n📊 --- RESUMO DAS FREQUÊNCIAS ENCONTRADAS ---")
+        print(f"Total de frações capturadas: {len(frequencias)}")
+        
+        if len(frequencias) >= 2:
+            # O código antigo usava as duas primeiras posições capturadas
+            f1 = frequencias[0]
+            f2 = frequencias[1]
+            media = (f1 + f2) / 2
+            
+            print(f"1ª Fração: {f1:.1f}%")
+            print(f"2ª Fração: {f2:.1f}%")
+            print(f"Média das duas primeiras: {media:.1f}%")
+            
+            if f1 >= 90 and f2 >= 90:
+                print("🔥 RESULTADO: Menos de 10.5 (PRIORITÁRIO)")
+            elif media >= 80:
+                print("✅ RESULTADO: Menos de 10.5 (NORMAL)")
+            else:
+                print("❌ RESULTADO: Não atinge os requisitos mínimos.")
         else:
-            print(f"⚠️ LOG: Não foi possível encontrar as duas frações de 10.5. Total encontrado: {len(matches)}")
+            print("❌ ERRO: Não foram encontradas pelo menos 2 frações de 10.5 escanteios.")
 
     except Exception as e:
-        print(f"🚨 ERRO: {e}")
+        print(f"🚨 ERRO CRÍTICO: {e}")
     finally:
         driver.quit()
+        print("\n🏁 Teste finalizado.")
 
 if __name__ == "__main__":
-    # Link obtido no teste de ID
-    url = "https://www.sofascore.com/pt/football/match/lazio-milan/RdbsZdb#id:13981707"
-    raspar_h2h_inteligente(url, "Lazio", "Milan")
+    # URL que descobrimos para Lazio x Milan
+    url_lazio_milan = "https://www.sofascore.com/pt/football/match/lazio-milan/RdbsZdb#id:13981707"
+    testar_logica_antiga_no_link_direto(url_lazio_milan)
+            
