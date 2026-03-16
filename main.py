@@ -102,13 +102,16 @@ def get_sofa_h2h_corners(driver, t1_name, t2_name):
                     percs_menos.append((n / d) * 100)
 
         if percs_menos:
+            # 1. Primeiro calcula o valor (seja de um time ou a média de dois)
             percs_unicos = sorted(list(set(percs_menos)), reverse=True)
-            valor_final = percs_unicos[0]
+            valor_calculado = percs_unicos[0]
             if len(percs_unicos) >= 2:
-                valor_final = (percs_unicos[0] + percs_unicos[1]) / 2
+                valor_calculado = (percs_unicos[0] + percs_unicos[1]) / 2
             
-            return "Menos 10.5 Escanteios", valor_final, url_real_com_id
-            
+            # 2. Agora sim, valida se o resultado final bate os seus 80%
+            if valor_calculado >= 80:
+                return "Menos 10.5 Escanteios", valor_calculado, url_real_com_id
+    
     except Exception as e:
         print(f"Erro Sofa {t1_name} x {t2_name}: {e}")
     return None, 0, url_real_com_id
@@ -178,7 +181,7 @@ def executar():
             }
 
             # CANTO (>= 70%)
-            if tipo_canto and perc_canto >= 70:
+            if tipo_canto and perc_canto >= 80:
                 pool_entradas.append({"perc": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
             # DUPLA CHANCE (1x >= 80% | 2x >= 90%)
