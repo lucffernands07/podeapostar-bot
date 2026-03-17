@@ -196,18 +196,40 @@ def executar():
     pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
     
     jogos_selecionados = {}
+    total_mercados = 0  # <--- Nova variável para controlar o limite de 13
+
     for e in pool_entradas:
         mid = e['id']
-        if mid not in jogos_selecionados and len(jogos_selecionados) >= 10: continue
+        
+        # Se já atingiu 13 mercados no total, para de processar a lista
+        if total_mercados >= 13:
+            break
+            
+        # Mantém sua lógica de no máximo 10 jogos diferentes
+        if mid not in jogos_selecionados and len(jogos_selecionados) >= 10: 
+            continue
             
         if mid not in jogos_selecionados:
-            jogos_selecionados[mid] = {"info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": e['sofa_link'], "mkts": []}
+            jogos_selecionados[mid] = {
+                "info": e['info'], 
+                "hora": e['hora'], 
+                "liga": e['liga'], 
+                "link": e['sofa_link'], 
+                "mkts": []
+            }
         
-        if len(jogos_selecionados[mid]["mkts"]) < 3:
+        # Adiciona o mercado se o jogo tiver menos de 3 (sua regra)
+        # E se ainda houver espaço no limite global de 13
+        if len(jogos_selecionados[mid]["mkts"]) < 3 and total_mercados < 13:
             jogos_selecionados[mid]["mkts"].append(e)
+            total_mercados += 1  # <--- Soma +1 ao contador global
+
+    # Remove jogos que possam ter ficado vazios por causa do limite
+    jogos_selecionados = {k: v for k, v in jogos_selecionados.items() if v["mkts"]}
 
     if not jogos_selecionados: return
     lista_final = sorted(jogos_selecionados.values(), key=lambda x: x['liga'])
+
 
     msg = "🎯 *BILHETE DO DIA (SISTEMA H2H)*\n💰🍀 *BOA SORTE!!!*\n\n"
     for i, j in enumerate(lista_final, 1):
