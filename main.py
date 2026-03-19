@@ -123,30 +123,38 @@ def executar():
     LIGAS_MATA_MATA = [2, 11, 13]
     pool_entradas = []
 
-    for l_id, l_nome in ligas.items():
-        fixtures_hoje = []
-        for ano in [2026, 2025]:
-            url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
-            try:
-                res = requests.get(url, headers=HEADERS).json()
-                if res.get('response'):
-                    fixtures_hoje = res['response']
-                    break
-            except: continue
-
-        for m in fixtures_hoje:
-            hora_utc = datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00'))
-            hora_br = hora_utc.astimezone(fuso_br).strftime("%H:%M")
-            t1, t2 = m['teams']['home'], m['teams']['away']
+    # --- BUSCA DE JOGOS (CORRIGIDA: 2 TEMPORADAS + JOGOS NÃO INICIADOS) ---
+for l_id, l_nome in ligas.items():
+    fixtures_hoje = []
+    # Removido o 'break' para buscar em 2026 E 2025 (cobre ligas que cruzam o ano)
+    for ano in [2026, 2025]:
+        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
+        try:
+            res = requests.get(url, headers=HEADERS).json()
+            if res.get('response'):
+                # Adiciona os jogos encontrados na lista temporária
+                fixtures_hoje.extend(res['response'])
+        except: continue
             
-            g_info = {
-                "id": m['fixture']['id'], 
-                "t1_id": t1['id'], "t2_id": t2['id'],
-                "t1_name": t1['name'], "t2_name": t2['name'],
-                "info": f"*{t1['name']} x {t2['name']}*", 
-                "hora": hora_br, 
-                "liga": l_nome
-            }
+        for m in fixtures_hoje:
+        # TRAVA: Só aceita jogos com status 'NS' (Not Started / Não Iniciado)
+        # Isso evita pegar jogos que já rolaram ou estão em andamento
+        status_jogo = m['fixture']['status']['short']
+        if status_jogo != "NS":
+            continue
+
+        hora_utc = datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00'))
+        hora_br = hora_utc.astimezone(fuso_br).strftime("%H:%M")
+        t1, t2 = m['teams']['home'], m['teams']['away']
+        
+        g_info = {
+            "id": m['fixture']['id'], 
+            "t1_id": t1['id'], "t2_id": t2['id'],
+            "t1_name": t1['name'], "t2_name": t2['name'],
+            "info": f"*{t1['name']} x {t2['name']}*", 
+            "hora": hora_br, 
+            "liga": l_nome
+        }
 
             h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
             if h2h_t1 >= 80: 
