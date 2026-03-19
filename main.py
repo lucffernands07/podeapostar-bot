@@ -38,7 +38,6 @@ def enviar_telegram(msg):
     except Exception as e:
         print(f"Erro ao enviar Telegram: {e}")
 
-# --- NOVA FUNÇÃO: MÉDIA DE CHUTES (APNÉTICA - ÚLTIMOS 10 JOGOS) ---
 def get_avg_shots_api(team_id):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10&status=FT"
     try:
@@ -61,7 +60,6 @@ def get_avg_shots_api(team_id):
         return total_shots / count if count > 0 else 0
     except: return 0
 
-# --- SEU MOTOR DE ID (SELENIUM) ---
 def get_id_h2h(driver, t1_name, t2_name):
     url_real = "https://www.sofascore.com/"
     wait = WebDriverWait(driver, 25)
@@ -75,7 +73,7 @@ def get_id_h2h(driver, t1_name, t2_name):
         search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
         search_input.click()
         search_input.send_keys(f"{t1_name} {t2_name}")
-        time.sleep(10) # Tempo do seu original
+        time.sleep(10)
         
         resultados = driver.find_elements(By.XPATH, "//a[contains(@href, '/football/match/')]")
         if resultados:
@@ -125,7 +123,6 @@ def executar():
     LIGAS_MATA_MATA = [2, 11, 13]
     pool_entradas = []
 
-    # BUSCA ORIGINAL - SEM ALTERAÇÕES
     for l_id, l_nome in ligas.items():
         fixtures_hoje = []
         for ano in [2026, 2025]:
@@ -161,7 +158,6 @@ def executar():
             if m_o15 >= 70: 
                 pool_entradas.append({"perc": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
                 
-    # RANKING E SELEÇÃO FINAL
     pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
     jogos_selecionados = {}
     total_mercados = 0 
@@ -174,7 +170,6 @@ def executar():
         if mid not in jogos_selecionados and len(jogos_selecionados) >= 10: continue
             
         if mid not in jogos_selecionados:
-            # SÓ AQUI BUSCAMOS O ID DO SOFASCORE E OS CHUTES
             url_sofa = get_id_h2h(browser, e['t1_name'], e['t2_name'])
             m_chutes = (get_avg_shots_api(e['t1_id']) + get_avg_shots_api(e['t2_id'])) / 2
             
@@ -198,18 +193,16 @@ def executar():
     for i, j in enumerate(lista_final, 1):
         msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n"
         
-        # APLICANDO A REGRA DE CHUTES NA DICA DO BILHETE
-        media_c = j.get('media_chutes', 0)
-        if 0 < media_c <= 10.5:
-            conf = "80%"
-            if media_c <= 5.0: conf = "100%"
-            elif media_c <= 7.0: conf = "90%"
-            msg += f"💡 *Dica:* Menos 10.5 Escanteios ({conf} conf.)\n"
-
+        # 1. MERCADOS PRINCIPAIS (1x, 2x, +1.5) primeiro
         j['mkts'].sort(key=lambda x: x['perc'], reverse=True)
         for mkt in j['mkts']:
             label = "🛡️" if mkt['tipo'] in ['1x', '2x'] else "⚽"
             msg += f"🔶 {label} {mkt['mkt']} ({mkt['perc']:.0f}%)\n"
+
+        # 2. DICA DE ESCANTEIO depois com a média final
+        media_c = j.get('media_chutes', 0)
+        if 0 < media_c <= 10.5:
+            msg += f"💡 *Dica:* Menos 10.5 Escanteios ({media_c:.1f} chutes)\n"
         
         msg += f"📊 [Análise Sofa]({j['link']})\n\n"
     
