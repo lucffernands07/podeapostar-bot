@@ -62,33 +62,43 @@ def executar_teste_individual():
                 print(f"[LOG] Acessando perfil de: {nome_log}...")
                 elemento_time = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_clique_time)))
                 driver.execute_script("arguments[0].click();", elemento_time)
-                
-                # Aguarda o botão de Estatísticas aparecer e clica
+                time.sleep(5)
+
                 print(f"[LOG] Abrindo aba 'Estatísticas'...")
                 btn_stats = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='#tab:statistics']")))
                 driver.execute_script("arguments[0].click();", btn_stats)
+                time.sleep(5)
+
+                # --- PASSO NOVO: EXPANDIR O MENU 'ATACANDO' ---
+                print(f"[LOG] Expandindo menu 'Atacando'...")
+                try:
+                    # Busca a div que contém o texto 'Atacando' e clica nela
+                    menu_atacando = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[contains(., 'Atacando') and contains(@class, 'jc_space-between')]")))
+                    driver.execute_script("arguments[0].click();", menu_atacando)
+                    print(f"[LOG] Menu 'Atacando' expandido.")
+                    time.sleep(3) # Tempo para a animação de abrir
+                except Exception as e:
+                    print(f"[AVISO] Menu 'Atacando' já pode estar aberto ou erro ao clicar: {e}")
+
+                # --- AGORA BUSCA O VALOR ---
+                print(f"[LOG] Localizando valor final após expansão...")
                 
-                # --- O PULO DO GATO ---
-                # Aguarda até que o texto "Total de finalizações por jogo" esteja presente na página
-                wait.until(EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'Total de finalizações por jogo')]")))
-                time.sleep(2) # Respiro para o número carregar ao lado
+                # Usando o XPath do container flex que você mandou anteriormente
+                xpath_final = "//span[contains(text(), 'Total de finalizações por jogo')]/parent::div/span[2]"
                 
-                # Localizamos o PAI de todos (a div que você mandou) e pegamos o texto dela
-                # Isso é muito mais estável que procurar o span[2]
-                container = driver.find_element(By.XPATH, "//div[contains(., 'Total de finalizações por jogo') and contains(@class, 'ai_center')]")
-                texto_completo = container.text # Vai retornar algo como "Total de finalizações por jogo12.2"
+                elemento_valor = wait.until(EC.presence_of_element_located((By.XPATH, xpath_final)))
+                valor_texto = elemento_valor.text
                 
-                # Limpamos o texto para sobrar apenas o número
-                # Removemos a frase fixa e o que sobrar tratamos como float
-                valor_texto = texto_completo.replace("Total de finalizações por jogo", "").strip()
-                
-                # Se o valor vier com vírgula (ex: 12,2), trocamos para ponto
-                valor = float(valor_texto.replace(',', '.'))
-                
+                valor = float(valor_texto.replace(',', '.').strip())
                 print(f"✅ [SUCESSO] {nome_log} extraído: {valor}")
                 
-                driver.get(url_confronto) # Volta para o próximo
+                driver.get(url_confronto)
                 return valor
+
+            except Exception as e:
+                print(f"❌ [FALHA] Erro ao processar {nome_log}: {str(e)[:100]}")
+                driver.get(url_confronto)
+                return 0
 
             except Exception as e:
                 print(f"❌ [FALHA] Não foi possível extrair de {nome_log}. O elemento não apareceu ou o layout mudou.")
