@@ -60,46 +60,38 @@ def executar_teste_individual():
         def raspar_dados_time(xpath_clique_time, nome_log):
             try:
                 print(f"[LOG] Acessando perfil de: {nome_log}...")
-                elemento_time = wait.until(EC.presence_of_element_located((By.XPATH, xpath_clique_time)))
+                elemento_time = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_clique_time)))
                 driver.execute_script("arguments[0].click();", elemento_time)
-                time.sleep(8)
-
+                
+                # Aguarda o botão de Estatísticas aparecer e clica
                 print(f"[LOG] Abrindo aba 'Estatísticas'...")
-                btn_aba = wait.until(EC.presence_of_element_located((By.XPATH, "//a[@href='#tab:statistics']")))
-                driver.execute_script("arguments[0].click();", btn_aba)
-                time.sleep(7)
-
-                # --- RASPAGEM BASEADA NO HTML QUE VOCÊ ENVIOU ---
-                print(f"[LOG] Localizando valor de finalizações...")
-                driver.execute_script("window.scrollBy(0, 500);")
-                time.sleep(3)
-
-                # Explicação do XPath:
-                # 1. Procura o span com o texto exato.
-                # 2. Sobe para o pai (a div d_flex).
-                # 3. Pega o segundo span (onde está o número).
-                xpath_valor = "//span[text()='Total de finalizações por jogo']/parent::div/span[2]"
+                btn_stats = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='#tab:statistics']")))
+                driver.execute_script("arguments[0].click();", btn_stats)
                 
-                try:
-                    elemento_valor = wait.until(EC.presence_of_element_located((By.XPATH, xpath_valor)))
-                    valor_bruto = elemento_valor.text
-                    
-                    # Limpeza para garantir que vire um número float
-                    valor = float(valor_bruto.replace(',', '.').strip())
-                    print(f"✅ [SUCESSO] {nome_log} extraído: {valor}")
+                # --- O PULO DO GATO ---
+                # Aguarda até que o texto "Total de finalizações por jogo" esteja presente na página
+                wait.until(EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'Total de finalizações por jogo')]")))
+                time.sleep(2) # Respiro para o número carregar ao lado
                 
-                except Exception as e:
-                    print(f"❌ [AVISO] Não encontrou o segundo span para {nome_log}. Tentando Regex reserva...")
-                    # Backup caso o Sofa mude a ordem dos spans
-                    texto_bloco = driver.find_element(By.TAG_NAME, "body").text
-                    match = re.search(r"Total de finalizações por jogo\s*(\d+[\.,]\d+)", texto_bloco)
-                    valor = float(match.group(1).replace(',', '.')) if match else 0
-
-                driver.get(url_confronto)
-                time.sleep(5)
+                # Localizamos o PAI de todos (a div que você mandou) e pegamos o texto dela
+                # Isso é muito mais estável que procurar o span[2]
+                container = driver.find_element(By.XPATH, "//div[contains(., 'Total de finalizações por jogo') and contains(@class, 'ai_center')]")
+                texto_completo = container.text # Vai retornar algo como "Total de finalizações por jogo12.2"
+                
+                # Limpamos o texto para sobrar apenas o número
+                # Removemos a frase fixa e o que sobrar tratamos como float
+                valor_texto = texto_completo.replace("Total de finalizações por jogo", "").strip()
+                
+                # Se o valor vier com vírgula (ex: 12,2), trocamos para ponto
+                valor = float(valor_texto.replace(',', '.'))
+                
+                print(f"✅ [SUCESSO] {nome_log} extraído: {valor}")
+                
+                driver.get(url_confronto) # Volta para o próximo
                 return valor
+
             except Exception as e:
-                print(f"❌ [ERRO] Falha no processo do {nome_log}")
+                print(f"❌ [FALHA] Não foi possível extrair de {nome_log}. O elemento não apareceu ou o layout mudou.")
                 driver.get(url_confronto)
                 return 0
 
