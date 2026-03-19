@@ -56,49 +56,63 @@ def executar_teste_individual():
         driver.get(url_confronto)
         time.sleep(7)
 
-        # --- FUNÇÃO DE RASPAGEM COM CLIQUE VIA JS (EVITA INTERCEPTAÇÃO) ---
-        def raspar_dados_time(xpath_clique_time, nome_log):
+# --- FUNÇÃO DE RASPAGEM COM CLIQUE VIA JS (EVITA INTERCEPTAÇÃO) ---
+def raspar_dados_time(xpath_clique_time, nome_log):
+    try:
+        print(f"[LOG] Passo 1: Clicando no time {nome_log} no H2H...")
+        # Localiza o <bdi> ou o link do time e clica
+        btn_time = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_clique_time)))
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_time)
+        time.sleep(2)
+        driver.execute_script("arguments[0].click();", btn_time)
+        
+        print(f"[LOG] Passo 2: Clicando na aba 'Estatísticas'...")
+        # Usa o seletor <a> que você passou originalmente
+        btn_stats = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='#tab:statistics']")))
+        driver.execute_script("arguments[0].click();", btn_stats)
+        
+        print(f"[LOG] Passo 3: Aguardando renderização do Grid (10s)...")
+        time.sleep(10)
+        driver.execute_script("window.scrollBy(0, 500);")
+
+        # --- LÓGICA DO CARD ATACANDO ---
+        # Verificamos se o texto 'Total de finalizações por jogo' já está no DOM
+        conteudo_atual = driver.find_element(By.TAG_NAME, "main").text
+        
+        if "Total de finalizações por jogo" not in conteudo_atual:
+            print(f"[LOG] Dado não visível. Tentando expandir card 'Atacando'...")
+            # Clica no Span/Div do card 'Atacando' para abrir
             try:
-                print(f"[LOG] Acessando perfil de: {nome_log}...")
-                elemento_time = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_clique_time)))
-                driver.execute_script("arguments[0].click();", elemento_time)
-                
-                print(f"[LOG] Abrindo aba 'Estatísticas' de {nome_log}...")
-                btn_stats = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='#tab:statistics']")))
-                driver.execute_script("arguments[0].click();", btn_stats)
-                
-                # Aguarda um tempo fixo maior para garantir que o JS do Sofa carregue os números
-                print(f"[LOG] Aguardando carregamento dos dados (12s)...")
-                time.sleep(12) 
-                
-                # Rola a página para garantir que o 'Lazy Load' seja disparado
-                driver.execute_script("window.scrollBy(0, 600);")
-                time.sleep(3)
+                card_atacando = driver.find_element(By.XPATH, "//span[contains(text(), 'Atacando')] | //div[contains(., 'Atacando') and contains(@class, 'jc_space-between')]")
+                driver.execute_script("arguments[0].click();", card_atacando)
+                time.sleep(4)
+                conteudo_atual = driver.find_element(By.TAG_NAME, "main").text
+            except:
+                print("⚠️ Não foi possível clicar no card Atacando.")
 
-                # --- ESTRATÉGIA DE RASPAGEM POR TEXTO BRUTO (ESTILO ANTIGO) ---
-                texto_pagina = driver.find_element(By.TAG_NAME, "body").text
-                
-                # Regex que procura a frase e captura o primeiro número que vier depois (ex: 12.2 ou 12,2)
-                # O \s* captura espaços e o (\d+[\.,]\d+) captura o número decimal
-                busca = re.search(r"Total de finalizações por jogo\s*(\d+[\.,]\d+)", texto_pagina, re.IGNORECASE)
-                
-                if busca:
-                    valor_str = busca.group(1).replace(',', '.')
-                    valor = float(valor_str)
-                    print(f"✅ [SUCESSO] {nome_log}: {valor}")
-                else:
-                    print(f"❌ [AVISO] Frase 'Total de finalizações por jogo' não encontrada no texto de {nome_log}.")
-                    # Log preventivo: imprimir um pedaço do texto para ver o que o robô está lendo
-                    print(f"[DEBUG] Começo do texto lido: {texto_pagina[:200]}...")
-                    valor = 0
+        # --- EXTRAÇÃO FINAL ---
+        print(f"[LOG] Passo 4: Buscando valor numérico...")
+        # Regex idêntica à de escanteios: busca a frase e captura o número decimal à frente
+        busca = re.search(r"Total de finalizações por jogo\s*(\d+[\.,]\d+)", conteudo_atual, re.IGNORECASE)
+        
+        if busca:
+            valor = float(busca.group(1).replace(',', '.'))
+            print(f"✅ [SUCESSO] {nome_log}: {valor}")
+        else:
+            print(f"❌ [FALHA] Não encontrou o valor após expandir/verificar.")
+            valor = 0
 
-                driver.get(url_confronto)
-                return valor
+        # Volta para a página do jogo para o próximo time (Bahia -> Jogo -> Bragantino)
+        driver.execute_script("window.history.go(-1);") # Volta das Stats para o Perfil
+        time.sleep(3)
+        driver.execute_script("window.history.go(-1);") # Volta do Perfil para o Jogo
+        time.sleep(5)
+        return valor
 
-            except Exception as e:
-                print(f"❌ [ERRO] Falha geral no processo de {nome_log}")
-                driver.get(url_confronto)
-                return 0
+    except Exception as e:
+        print(f"❌ [ERRO] Falha no fluxo de {nome_log}: {str(e)[:50]}")
+        driver.get(url_confronto) # Reset de segurança
+        return 0
                 
         # Executa para os dois
         # XPath do bdi que você forneceu para o Bahia e Bragantino
