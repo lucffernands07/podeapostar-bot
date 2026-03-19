@@ -38,28 +38,71 @@ def enviar_telegram(msg):
     except Exception as e:
         print(f"Erro ao enviar Telegram: {e}")
 
-def get_avg_shots_rapidapi(team_id):
-    """ Busca média de finalizações via RapidAPI (Substitui o Selenium de cantos) """
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10&status=FT"
+def get_sofa_h2h_corners(driver, t1_name, t2_name):
+    """ MOTOR COM ORDEM DE MANDO: Respeita Casa x Fora para garantir o ID correto """
+    url_real_com_id = "https://www.sofascore.com/"
+    wait = WebDriverWait(driver, 25)
     try:
-        res = requests.get(url, headers=HEADERS).json()
-        fixtures = res.get('response', [])
-        if not fixtures: return 0
-        total_shots, count = 0, 0
-        for f in fixtures:
-            f_id = f['fixture']['id']
-            url_s = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/statistics?fixture={f_id}&team={team_id}"
-            res_s = requests.get(url_s, headers=HEADERS).json()
-            stats = res_s.get('response', [])
-            if stats:
-                for s in stats[0].get('statistics', []):
-                    if s['type'] == 'Total Shots':
-                        total_shots += (s['value'] or 0)
-                        count += 1
-                        break
-            time.sleep(0.2)
-        return total_shots / count if count > 0 else 0
-    except: return 0
+        driver.get("https://www.sofascore.com/pt/")
+        
+        try:
+            cookies_btn = driver.find_elements(By.XPATH, "//button[contains(., 'Aceito') or contains(., 'Agree')]")
+            if cookies_btn: cookies_btn[0].click()
+        except: pass
+
+        search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
+        search_input.click()
+        
+        search_input.send_keys(f"{t1_name} {t2_name}")
+        time.sleep(10)
+        
+        resultado_xpath = "//a[contains(@href, '/football/match/')]"
+        try:
+            resultados = driver.find_elements(By.XPATH, resultado_xpath)
+            if not resultados:
+                search_input.clear()
+                search_input.send_keys(t1_name)
+                time.sleep(7)
+                resultados = driver.find_elements(By.XPATH, resultado_xpath)
+
+            resultado_link = resultados[0]
+            url_real_com_id = resultado_link.get_attribute("href")
+            driver.get(url_real_com_id)
+        except Exception as e:
+            print(f"Não localizou link de partida para {t1_name}: {e}")
+            return None, 0, url_real_com_id
+        
+        url_h2h = url_real_com_id.split('#')[0] + "#tab:matches"
+        driver.get(url_h2h)
+        time.sleep(15)
+        
+        driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
+        time.sleep(5)
+        
+        texto_bruto = driver.find_element(By.TAG_NAME, "body").text
+        percs_menos = []
+        
+        matches = re.finditer(r"Menos.*?10\.5", texto_bruto, re.IGNORECASE | re.DOTALL)
+        for m in matches:
+            trecho = texto_bruto[m.end() : m.end() + 65]
+            busca_f = re.search(r"(\d+)/(\d+)", trecho)
+            if busca_f:
+                n, d = int(busca_f.group(1)), int(busca_f.group(2))
+                if d >= 5:
+                    percs_menos.append((n / d) * 100)
+
+        if percs_menos:
+            percs_unicos = sorted(list(set(percs_menos)), reverse=True)
+            valor_calculado = percs_unicos[0]
+            if len(percs_unicos) >= 2:
+                valor_calculado = (percs_unicos[0] + percs_unicos[1]) / 2
+            
+            if valor_calculado >= 80:
+                return "Menos 10.5 Escanteios", valor_calculado, url_real_com_id
+    
+    except Exception as e:
+        print(f"Erro Sofa {t1_name} x {t2_name}: {e}")
+    return None, 0, url_real_com_id
 
 def get_h2h_dupla_chance(t1_id, t2_id):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last=10"
@@ -88,9 +131,9 @@ def get_individual_stats(team_id):
     except: return 0
 
 def executar():
-    # Mantive o browser caso você use para pegar o link do Sofa futuramente, 
-    # mas a raspagem de dados agora é via API.
     browser = configurar_browser()
+    
+    # --- AJUSTE FUSO HORÁRIO ---
     fuso_br = pytz.timezone('America/Sao_Paulo')
     agora_br = datetime.now(fuso_br)
     hoje = agora_br.strftime("%Y-%m-%d")
@@ -105,7 +148,6 @@ def executar():
 
     LIGAS_MATA_MATA = [2, 11, 13]
     pool_entradas = []
-    stats_fixas_chutes = {} # Armazena a dica de chutes por jogo
 
     for l_id, l_nome in ligas.items():
         fixtures_hoje = []
@@ -121,25 +163,33 @@ def executar():
         for m in fixtures_hoje:
             hora_utc = datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00'))
             hora_br = hora_utc.astimezone(fuso_br).strftime("%H:%M")
-            t1, t2 = m['teams']['home'], m['teams']['away']
-            mid = m['fixture']['id']
 
-            # --- DICA FIXA DE CHUTES (Não entra no Ranking) ---
-            m_chutes = (get_avg_shots_rapidapi(t1['id']) + get_avg_shots_rapidapi(t2['id'])) / 2
-            stats_fixas_chutes[mid] = m_chutes
+            t1, t2 = m['teams']['home'], m['teams']['away']
+            
+            # --- LÓGICA DE TRAVA: ESCANTEIOS (CORRIGIDA) ---
+            tipo_canto, perc_canto, url_real_sofa = None, 0, "https://www.sofascore.com/"
+            
+            # SÓ chama o SofaScore se NÃO for mata-mata (Isso economiza MUITO tempo)
+            if l_id not in LIGAS_MATA_MATA:
+                tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
 
             g_info = {
-                "id": mid, 
+                "id": m['fixture']['id'], 
                 "info": f"*{t1['name']} x {t2['name']}*", 
                 "hora": hora_br, 
                 "liga": l_nome, 
-                "sofa_link": f"https://www.sofascore.com/pt/futebol/match/{t1['name'].lower()}-{t2['name'].lower()}/{mid}" 
+                "sofa_link": url_real_sofa 
             }
 
-            # Outros mercados (Permanecem iguais)
+            if tipo_canto and perc_canto >= 80:
+                pool_entradas.append({"perc": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
+
             h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
+
             if h2h_t1 >= 80: 
                 pool_entradas.append({"perc": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
+            
+            # TRAVA: 2x bloqueado em mata-mata
             if h2h_t2 >= 90 and l_id not in LIGAS_MATA_MATA: 
                 pool_entradas.append({"perc": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
@@ -148,46 +198,53 @@ def executar():
                 pool_entradas.append({"perc": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
                 
     browser.quit()
+    
+    # RANKING GERAL POR %
     pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
     
     jogos_selecionados = {}
-    total_mercados = 0 
+    total_mercados = 0  # <--- Nova variável para controlar o limite de 13
 
     for e in pool_entradas:
         mid = e['id']
-        if total_mercados >= 13: break
-        if mid not in jogos_selecionados and len(jogos_selecionados) >= 10: continue
+        
+        # Se já atingiu 13 mercados no total, para de processar a lista
+        if total_mercados >= 13:
+            break
+            
+        # Mantém sua lógica de no máximo 10 jogos diferentes
+        if mid not in jogos_selecionados and len(jogos_selecionados) >= 10: 
+            continue
             
         if mid not in jogos_selecionados:
             jogos_selecionados[mid] = {
-                "info": e['info'], "hora": e['hora'], "liga": e['liga'], 
-                "link": e['sofa_link'], "mkts": []
+                "info": e['info'], 
+                "hora": e['hora'], 
+                "liga": e['liga'], 
+                "link": e['sofa_link'], 
+                "mkts": []
             }
         
+        # Adiciona o mercado se o jogo tiver menos de 3 (sua regra)
+        # E se ainda houver espaço no limite global de 13
         if len(jogos_selecionados[mid]["mkts"]) < 3 and total_mercados < 13:
             jogos_selecionados[mid]["mkts"].append(e)
-            total_mercados += 1
+            total_mercados += 1  # <--- Soma +1 ao contador global
 
+    # Remove jogos que possam ter ficado vazios por causa do limite
     jogos_selecionados = {k: v for k, v in jogos_selecionados.items() if v["mkts"]}
+
     if not jogos_selecionados: return
     lista_final = sorted(jogos_selecionados.values(), key=lambda x: x['liga'])
 
+
     msg = "🎯 *BILHETE DO DIA (SISTEMA H2H)*\n💰🍀 *BOA SORTE!!!*\n\n"
     for i, j in enumerate(lista_final, 1):
-        mid_atual = [k for k, v in jogos_selecionados.items() if v == j][0]
         msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n"
-        
-        # Exibe a Dica de Chutes se for <= 10.5
-        m_c = stats_fixas_chutes.get(mid_atual, 0)
-        if 0 < m_c <= 10.5:
-            conf = "80%"
-            if m_c <= 5.0: conf = "100%"
-            elif m_c <= 7.0: conf = "90%"
-            msg += f"💡 *Dica:* Média {m_c:.1f} chutes ({conf} conf.)\n"
-
         j['mkts'].sort(key=lambda x: x['perc'], reverse=True)
         for mkt in j['mkts']:
-            if mkt['tipo'] in ['1x', '2x']: label = f"🛡️ {mkt['mkt']} ({mkt['perc']:.0f}%)"
+            if mkt['tipo'] == 'canto': label = f"🚩 {mkt['mkt']} {mkt['perc']:.0f}%"
+            elif mkt['tipo'] in ['1x', '2x']: label = f"🛡️ {mkt['mkt']} ({mkt['perc']:.0f}%)"
             else: label = f"⚽ {mkt['mkt']} ({mkt['perc']:.0f}%)"
             msg += f"🔶 {label}\n"
         msg += f"📊 [Análise Sofa]({j['link']})\n\n"
@@ -197,4 +254,3 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-        
