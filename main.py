@@ -4,7 +4,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
@@ -19,6 +18,65 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
+# --- FUNÇÃO DE RASPAGEM (FORA DA FUNÇÃO PRINCIPAL PARA ORGANIZAÇÃO) ---
+def raspar_dados_time(driver, wait, xpath_clique_time, nome_log, url_confronto):
+    try:
+        print(f"\n[LOG] Passo 1: Clicando no time {nome_log}...")
+        # Localiza o time no H2H (usa o bdi que você passou)
+        btn_time = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_clique_time)))
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_time)
+        time.sleep(3)
+        driver.execute_script("arguments[0].click();", btn_time)
+        
+        print(f"[LOG] Passo 2: Clicando na aba 'Estatísticas'...")
+        # Espera o botão da aba carregar e clica
+        btn_stats = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='#tab:statistics']")))
+        driver.execute_script("arguments[0].click();", btn_stats)
+        
+        print(f"[LOG] Passo 3: Aguardando carregamento do Grid (12s)...")
+        time.sleep(12)
+        driver.execute_script("window.scrollBy(0, 500);")
+
+        # Pega o conteúdo do main (onde estão os cards)
+        try:
+            conteudo_main = driver.find_element(By.TAG_NAME, "main").text
+        except:
+            conteudo_main = driver.find_element(By.TAG_NAME, "body").text
+
+        # Lógica do Card: Se não achar o texto, tenta expandir o card 'Atacando'
+        if "Total de finalizações por jogo" not in conteudo_main:
+            print(f"[LOG] Dado não visível. Tentando abrir o card 'Atacando'...")
+            try:
+                card_atacando = driver.find_element(By.XPATH, "//span[contains(text(), 'Atacando')] | //div[contains(., 'Atacando')]")
+                driver.execute_script("arguments[0].click();", card_atacando)
+                time.sleep(5)
+                conteudo_main = driver.find_element(By.TAG_NAME, "main").text
+            except:
+                print("⚠️ Aviso: Não foi possível clicar no card Atacando (talvez já esteja aberto).")
+
+        # --- EXTRAÇÃO FINAL ---
+        print(f"[LOG] Passo 4: Buscando valor numérico...")
+        busca = re.search(r"Total de finalizações por jogo\s*(\d+[\.,]\d+)", conteudo_main, re.IGNORECASE)
+        
+        if busca:
+            valor = float(busca.group(1).replace(',', '.'))
+            print(f"✅ [SUCESSO] {nome_log}: {valor}")
+        else:
+            print(f"❌ [FALHA] Valor não encontrado para {nome_log}.")
+            valor = 0
+
+        # Volta para a página do jogo para o próximo time
+        print(f"[LOG] Retornando ao confronto...")
+        driver.get(url_confronto)
+        time.sleep(5)
+        return valor
+
+    except Exception as e:
+        print(f"❌ [ERRO] Falha no fluxo de {nome_log}: {str(e)[:50]}")
+        driver.get(url_confronto)
+        time.sleep(5)
+        return 0
+
 def executar_teste_individual():
     t1_name = "Bahia"
     t2_name = "Red Bull Bragantino"
@@ -29,8 +87,7 @@ def executar_teste_individual():
     wait = WebDriverWait(driver, 25)
     
     try:
-        # [PROCESSO 1] BUSCA DO ID (IGUAL AO ORIGINAL)
-        print(f"[LOG 1] Acessando SofaScore para buscar o confronto...")
+        # [PROCESSO 1] BUSCA DO ID
         driver.get("https://www.sofascore.com/pt/")
         
         try:
@@ -41,9 +98,8 @@ def executar_teste_individual():
         search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
         search_input.click()
         search_input.send_keys(f"{t1_name} {t2_name}")
-        time.sleep(10)
+        time.sleep(8)
         
-        # Pega o link real para montar a URL de estatística
         resultado_xpath = "//a[contains(@href, '/football/match/')]"
         resultados = driver.find_elements(By.XPATH, resultado_xpath)
         if not resultados:
@@ -51,85 +107,27 @@ def executar_teste_individual():
             return
 
         url_confronto = resultados[0].get_attribute("href")
-        print(f"✅ ID Encontrado! URL do Jogo: {url_confronto}")
+        print(f"✅ Confronto Encontrado: {url_confronto}")
         
         driver.get(url_confronto)
         time.sleep(7)
 
-# --- FUNÇÃO DE RASPAGEM COM CLIQUE VIA JS (EVITA INTERCEPTAÇÃO) ---
-def raspar_dados_time(xpath_clique_time, nome_log):
-    try:
-        print(f"[LOG] Passo 1: Clicando no time {nome_log} no H2H...")
-        # Localiza o <bdi> ou o link do time e clica
-        btn_time = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_clique_time)))
-        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_time)
-        time.sleep(2)
-        driver.execute_script("arguments[0].click();", btn_time)
-        
-        print(f"[LOG] Passo 2: Clicando na aba 'Estatísticas'...")
-        # Usa o seletor <a> que você passou originalmente
-        btn_stats = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='#tab:statistics']")))
-        driver.execute_script("arguments[0].click();", btn_stats)
-        
-        print(f"[LOG] Passo 3: Aguardando renderização do Grid (10s)...")
-        time.sleep(10)
-        driver.execute_script("window.scrollBy(0, 500);")
+        # [PROCESSO 2] RASPAGEM INDIVIDUAL
+        # Chamamos a função passando o driver, o wait e os nomes dos times
+        media_casa = raspar_dados_time(driver, wait, f"//bdi[contains(text(), '{t1_name}')]", t1_name, url_confronto)
+        media_fora = raspar_dados_time(driver, wait, f"//bdi[contains(text(), '{t2_name}')]", t2_name, url_confronto)
 
-        # --- LÓGICA DO CARD ATACANDO ---
-        # Verificamos se o texto 'Total de finalizações por jogo' já está no DOM
-        conteudo_atual = driver.find_element(By.TAG_NAME, "main").text
-        
-        if "Total de finalizações por jogo" not in conteudo_atual:
-            print(f"[LOG] Dado não visível. Tentando expandir card 'Atacando'...")
-            # Clica no Span/Div do card 'Atacando' para abrir
-            try:
-                card_atacando = driver.find_element(By.XPATH, "//span[contains(text(), 'Atacando')] | //div[contains(., 'Atacando') and contains(@class, 'jc_space-between')]")
-                driver.execute_script("arguments[0].click();", card_atacando)
-                time.sleep(4)
-                conteudo_atual = driver.find_element(By.TAG_NAME, "main").text
-            except:
-                print("⚠️ Não foi possível clicar no card Atacando.")
-
-        # --- EXTRAÇÃO FINAL ---
-        print(f"[LOG] Passo 4: Buscando valor numérico...")
-        # Regex idêntica à de escanteios: busca a frase e captura o número decimal à frente
-        busca = re.search(r"Total de finalizações por jogo\s*(\d+[\.,]\d+)", conteudo_atual, re.IGNORECASE)
-        
-        if busca:
-            valor = float(busca.group(1).replace(',', '.'))
-            print(f"✅ [SUCESSO] {nome_log}: {valor}")
-        else:
-            print(f"❌ [FALHA] Não encontrou o valor após expandir/verificar.")
-            valor = 0
-
-        # Volta para a página do jogo para o próximo time (Bahia -> Jogo -> Bragantino)
-        driver.execute_script("window.history.go(-1);") # Volta das Stats para o Perfil
-        time.sleep(3)
-        driver.execute_script("window.history.go(-1);") # Volta do Perfil para o Jogo
-        time.sleep(5)
-        return valor
-
-    except Exception as e:
-        print(f"❌ [ERRO] Falha no fluxo de {nome_log}: {str(e)[:50]}")
-        driver.get(url_confronto) # Reset de segurança
-        return 0
-                
-        # Executa para os dois
-        # XPath do bdi que você forneceu para o Bahia e Bragantino
-        media_casa = raspar_dados_time(f"//bdi[contains(text(), '{t1_name}')]", t1_name)
-        media_fora = raspar_dados_time(f"//bdi[contains(text(), '{t2_name}')]", t2_name)
-
-        # CÁLCULO
+        # [PROCESSO 3] RESULTADO FINAL
         print(f"\n📊 === RESULTADO FINAL === 📊")
         if media_casa > 0 and media_fora > 0:
             media_final = (media_casa + media_fora) / 2
-            print(f"🎯 Média Bahia: {media_casa} | Média Bragantino: {media_fora}")
-            print(f"📈 Resultado: {media_final:.2f}")
+            print(f"🎯 Média {t1_name}: {media_casa} | Média {t2_name}: {media_fora}")
+            print(f"📈 Resultado Combinado: {media_final:.2f}")
             
             if media_final > 10.5:
-                print("✅ APROVADO (> 10.5)")
+                print("✅ APROVADO PARA ENTRADA (> 10.5)")
             else:
-                print("⚠️ REJEITADO (<= 10.5)")
+                print("⚠️ REJEITADO (Abaixo da média)")
         else:
             print("❌ Falha ao obter uma ou ambas as médias.")
 
@@ -140,4 +138,3 @@ def raspar_dados_time(xpath_clique_time, nome_log):
 
 if __name__ == "__main__":
     executar_teste_individual()
-                      
