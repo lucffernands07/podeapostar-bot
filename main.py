@@ -59,39 +59,47 @@ def executar_teste_individual():
         # --- FUNÇÃO DE RASPAGEM COM CLIQUE VIA JS (EVITA INTERCEPTAÇÃO) ---
         def raspar_dados_time(xpath_clique_time, nome_log):
             try:
-                print(f"[LOG] Tentando acessar perfil do time: {nome_log}...")
-                
-                # Localiza o bdi do time
+                print(f"[LOG] Acessando perfil de: {nome_log}...")
                 elemento_time = wait.until(EC.presence_of_element_located((By.XPATH, xpath_clique_time)))
-                
-                # CLIQUE VIA JAVASCRIPT: Resolve o erro de 'element click intercepted'
                 driver.execute_script("arguments[0].click();", elemento_time)
-                print(f"[LOG] Clique em {nome_log} realizado com sucesso.")
                 time.sleep(8)
 
-                # Clicar na aba estatísticas (usando o seletor <a> que você passou)
-                print(f"[LOG] Clicando na aba 'Estatísticas' de {nome_log}...")
+                print(f"[LOG] Abrindo aba 'Estatísticas'...")
                 btn_aba = wait.until(EC.presence_of_element_located((By.XPATH, "//a[@href='#tab:statistics']")))
                 driver.execute_script("arguments[0].click();", btn_aba)
                 time.sleep(7)
 
-                # Busca o valor no texto bruto
-                texto_perfil = driver.find_element(By.TAG_NAME, "body").text
-                match = re.search(r"Total de finalizações por jogo\s*(\d+[\.,]\d+)", texto_perfil, re.IGNORECASE)
-                
-                valor = 0
-                if match:
-                    valor = float(match.group(1).replace(',', '.'))
-                    print(f"✅ [SUCESSO] {nome_log}: {valor}")
-                else:
-                    print(f"❌ [AVISO] Não encontrou valor de finalizações para {nome_log}")
+                # --- RASPAGEM BASEADA NO HTML QUE VOCÊ ENVIOU ---
+                print(f"[LOG] Localizando valor de finalizações...")
+                driver.execute_script("window.scrollBy(0, 500);")
+                time.sleep(3)
 
-                # Volta para o jogo para o próximo teste
+                # Explicação do XPath:
+                # 1. Procura o span com o texto exato.
+                # 2. Sobe para o pai (a div d_flex).
+                # 3. Pega o segundo span (onde está o número).
+                xpath_valor = "//span[text()='Total de finalizações por jogo']/parent::div/span[2]"
+                
+                try:
+                    elemento_valor = wait.until(EC.presence_of_element_located((By.XPATH, xpath_valor)))
+                    valor_bruto = elemento_valor.text
+                    
+                    # Limpeza para garantir que vire um número float
+                    valor = float(valor_bruto.replace(',', '.').strip())
+                    print(f"✅ [SUCESSO] {nome_log} extraído: {valor}")
+                
+                except Exception as e:
+                    print(f"❌ [AVISO] Não encontrou o segundo span para {nome_log}. Tentando Regex reserva...")
+                    # Backup caso o Sofa mude a ordem dos spans
+                    texto_bloco = driver.find_element(By.TAG_NAME, "body").text
+                    match = re.search(r"Total de finalizações por jogo\s*(\d+[\.,]\d+)", texto_bloco)
+                    valor = float(match.group(1).replace(',', '.')) if match else 0
+
                 driver.get(url_confronto)
                 time.sleep(5)
                 return valor
             except Exception as e:
-                print(f"❌ [ERRO] Falha no processo do {nome_log}: {str(e)[:100]}")
+                print(f"❌ [ERRO] Falha no processo do {nome_log}")
                 driver.get(url_confronto)
                 return 0
 
