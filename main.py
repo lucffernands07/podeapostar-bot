@@ -1,5 +1,6 @@
 import time
 import re
+import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -18,112 +19,115 @@ def configurar_browser():
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-# --- FUNÇÃO DE RASPAGEM (FORA DA FUNÇÃO PRINCIPAL PARA ORGANIZAÇÃO) ---
-def raspar_dados_time(driver, wait, xpath_clique_time, nome_log, url_confronto):
+def obter_media_chutes_api(id_time, nome_log):
+    """Consulta a API para pegar a média de chutes dos últimos 10 jogos"""
     try:
-        print(f"\n[LOG] Passo 1: Entrando no perfil de {nome_log}...")
-        btn_time = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_clique_time)))
-        driver.execute_script("arguments[0].click();", btn_time)
+        print(f"[API] Calculando média dos últimos 10 jogos para: {nome_log}...")
+        headers = {"User-Agent": "Mozilla/5.0"}
         
-        print(f"[LOG] Passo 2: Indo para a aba Estatísticas...")
-        btn_stats = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='#tab:statistics']")))
-        driver.execute_script("arguments[0].click();", btn_stats)
+        # 1. Pega os últimos eventos do time
+        url_eventos = f"https://api.sofascore.com/api/v1/team/{id_time}/events/last/0"
+        res = requests.get(url_eventos, headers=headers)
+        eventos = res.json().get('events', [])[:10]
         
-        print(f"[LOG] Passo 3: Esperando renderização (15s)...")
-        time.sleep(15) # SofaScore é lento para injetar os números no HTML
-        driver.execute_script("window.scrollBy(0, 500);")
+        total_chutes = 0
+        contagem = 0
 
-        # --- O SEU SPAN (BUSCA DIRETA PELO ELEMENTO) ---
-        print(f"[LOG] Passo 4: Extraindo valor pelo SPAN específico...")
-        try:
-            # XPath baseado no HTML que você enviou: busca o texto e pega o próximo span (o valor)
-            # Estrutura: <div> <span>Texto</span> <span>Valor</span> </div>
-            xpath_valor = "//span[text()='Total de finalizações por jogo']/parent::div/span[2]"
+        for evento in eventos:
+            id_jogo = evento.get('id')
+            # 2. Pega estatística detalhada de cada jogo
+            url_stats = f"https://api.sofascore.com/api/v1/event/{id_jogo}/statistics"
+            res_s = requests.get(url_stats, headers=headers)
+            stats_data = res_s.json()
             
-            elemento_valor = wait.until(EC.presence_of_element_located((By.XPATH, xpath_valor)))
-            valor_texto = elemento_valor.text.strip()
-            
-            # Limpeza rápida
-            valor = float(valor_texto.replace(',', '.'))
-            print(f"✅ [SUCESSO] {nome_log} encontrou: {valor}")
-            
-        except Exception as e:
-            print(f"⚠️ Erro ao achar Span direto. Tentando busca por texto no container...")
-            # Backup: tenta achar qualquer div que contenha o texto e pega o número nela
-            container = driver.find_element(By.XPATH, "//div[contains(., 'Total de finalizações por jogo')]")
-            texto = container.text
-            # Pega apenas os números e pontos/vírgulas do final da string
-            valor_extraido = re.findall(r"(\d+[\.,]\d+)", texto)[-1]
-            valor = float(valor_extraido.replace(',', '.'))
-            print(f"✅ [SUCESSO BACKUP] {nome_log}: {valor}")
-
-        driver.get(url_confronto)
-        time.sleep(5)
-        return valor
-
+            # Navega no JSON para achar 'Total de finalizações'
+            for periodo in stats_data.get('statistics', []):
+                if periodo.get('period') == 'ALL': # Estatística do jogo todo
+                    for grupo in periodo.get('groups', []):
+                        if grupo.get('groupName') == 'Atacando':
+                            for item in grupo.get('statisticsItems', []):
+                                if item.get('name') == 'Total de finalizações':
+                                    # Verifica se o time era Home ou Away no jogo passado
+                                    is_home = evento['homeTeam']['id'] == int(id_time)
+                                    valor = item['homeValue'] if is_home else item['awayValue']
+                                    total_chutes += int(valor)
+                                    contagem += 1
+        
+        media = total_chutes / contagem if contagem > 0 else 0
+        print(f"✅ [API] {nome_log}: {media:.2f} chutes (Base: {contagem} jogos)")
+        return media
     except Exception as e:
-        print(f"❌ [FALHA TOTAL] {nome_log}: {str(e)[:50]}")
-        driver.get(url_confronto)
+        print(f"❌ Erro API {nome_log}: {e}")
         return 0
 
-def executar_teste_individual():
+def executar_bot_hibrido():
     t1_name = "Bahia"
     t2_name = "Red Bull Bragantino"
     
-    print(f"\n🚀 === INICIANDO TESTE DE RASPAGEM (BUSCA + INDIVIDUAL) === 🚀")
-    
+    print(f"\n🚀 === INICIANDO PROCESSO (SELENIUM + API) === 🚀")
     driver = configurar_browser()
     wait = WebDriverWait(driver, 25)
     
     try:
-        # [PROCESSO 1] BUSCA DO ID
+        # [PASSO 1] BUSCA DO CONFRONTO
+        print(f"[LOG 1] Buscando link do confronto no SofaScore...")
         driver.get("https://www.sofascore.com/pt/")
         
-        try:
-            cookies = driver.find_elements(By.XPATH, "//button[contains(., 'Aceito') or contains(., 'Agree')]")
-            if cookies: cookies[0].click()
-        except: pass
-
         search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
-        search_input.click()
         search_input.send_keys(f"{t1_name} {t2_name}")
         time.sleep(8)
         
-        resultado_xpath = "//a[contains(@href, '/football/match/')]"
-        resultados = driver.find_elements(By.XPATH, resultado_xpath)
-        if not resultados:
-            print("❌ Falha na busca inicial.")
-            return
-
-        url_confronto = resultados[0].get_attribute("href")
+        resultado = wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/football/match/')]")))
+        url_confronto = resultado.get_attribute("href")
         print(f"✅ Confronto Encontrado: {url_confronto}")
         
         driver.get(url_confronto)
-        time.sleep(7)
+        time.sleep(5)
 
-        # [PROCESSO 2] RASPAGEM INDIVIDUAL
-        # Chamamos a função passando o driver, o wait e os nomes dos times
-        media_casa = raspar_dados_time(driver, wait, f"//bdi[contains(text(), '{t1_name}')]", t1_name, url_confronto)
-        media_fora = raspar_dados_time(driver, wait, f"//bdi[contains(text(), '{t2_name}')]", t2_name, url_confronto)
+        # [PASSO 2] CAPTURA DE IDs DOS TIMES VIA SELENIUM
+        print(f"[LOG 2] Extraindo IDs dos times para consulta API...")
+        
+        def extrair_id(xpath):
+            link = driver.find_element(By.XPATH, xpath).get_attribute("href")
+            # O ID é o último conjunto de números na URL: .../team/nome/ID
+            return link.split('/')[-1]
 
-        # [PROCESSO 3] RESULTADO FINAL
+        id_casa = extrair_id(f"//a[contains(., '{t1_name}')]")
+        id_fora = extrair_id(f"//a[contains(., '{t2_name}')]")
+        
+        print(f"🆔 ID {t1_name}: {id_casa} | ID {t2_name}: {id_fora}")
+
+        # [PASSO 3] CONSULTA API (10 JOGOS)
+        media_casa = obter_media_chutes_api(id_casa, t1_name)
+        media_fora = obter_media_chutes_api(id_fora, t2_name)
+
+        # [PASSO 4] CÁLCULO E REGRA DE PORCENTAGEM
         print(f"\n📊 === RESULTADO FINAL === 📊")
         if media_casa > 0 and media_fora > 0:
             media_final = (media_casa + media_fora) / 2
-            print(f"🎯 Média {t1_name}: {media_casa} | Média {t2_name}: {media_fora}")
-            print(f"📈 Resultado Combinado: {media_final:.2f}")
             
-            if media_final > 10.5:
-                print("✅ APROVADO PARA ENTRADA (> 10.5)")
+            # Sua regra de porcentagem
+            porcentagem = "0%"
+            if media_final <= 5.0:
+                porcentagem = "100%"
+            elif media_final <= 7.0:
+                porcentagem = "90%"
+            elif media_final <= 10.5:
+                porcentagem = "80%"
+
+            print(f"🎯 Média Combinada: {media_final:.2f} chutes")
+            
+            if media_final <= 10.5:
+                print(f"✅ ENTRADA CONFIRMADA: {porcentagem} de confiança")
             else:
-                print("⚠️ REJEITADO (Abaixo da média)")
+                print(f"⚠️ REJEITADO: Média acima de 10.5 ({media_final:.2f})")
         else:
-            print("❌ Falha ao obter uma ou ambas as médias.")
+            print("❌ Falha crítica ao obter dados da API.")
 
     except Exception as e:
-        print(f"❌ Erro Mestre: {e}")
+        print(f"❌ Erro no Processo: {e}")
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    executar_teste_individual()
+    executar_bot_hibrido()
