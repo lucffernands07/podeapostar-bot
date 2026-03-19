@@ -146,9 +146,7 @@ def executar():
         72: "Brasileirão B", 13: "Libertadores", 11: "Sudamericana"
     }
 
-    # IDs das ligas consideradas Mata-Mata ou Copas (onde você quer travar)
     LIGAS_MATA_MATA = [2, 11, 13]
-    
     pool_entradas = []
 
     for l_id, l_nome in ligas.items():
@@ -167,11 +165,11 @@ def executar():
             hora_br = hora_utc.astimezone(fuso_br).strftime("%H:%M")
 
             t1, t2 = m['teams']['home'], m['teams']['away']
-            tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
-
-            # --- LÓGICA DE TRAVA: ESCANTEIOS ---
-            # Só abre o browser e busca Sofa se NÃO for mata-mata
+            
+            # --- LÓGICA DE TRAVA: ESCANTEIOS (CORRIGIDA) ---
             tipo_canto, perc_canto, url_real_sofa = None, 0, "https://www.sofascore.com/"
+            
+            # SÓ chama o SofaScore se NÃO for mata-mata (Isso economiza MUITO tempo)
             if l_id not in LIGAS_MATA_MATA:
                 tipo_canto, perc_canto, url_real_sofa = get_sofa_h2h_corners(browser, t1['name'], t2['name'])
 
@@ -183,30 +181,22 @@ def executar():
                 "sofa_link": url_real_sofa 
             }
 
-            # CANTO (Respeita a trava de mata-mata acima)
             if tipo_canto and perc_canto >= 80:
                 pool_entradas.append({"perc": perc_canto, "mkt": tipo_canto, "tipo": "canto", **g_info})
 
-            # --- LÓGICA DE TRAVA: DUPLA CHANCE ---
             h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
 
-            # 1x (Casa ou Empate): Liberado para todas
             if h2h_t1 >= 80: 
                 pool_entradas.append({"perc": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
             
-            # 2x (Visitante ou Empate): TRAVADO em mata-mata
+            # TRAVA: 2x bloqueado em mata-mata
             if h2h_t2 >= 90 and l_id not in LIGAS_MATA_MATA: 
                 pool_entradas.append({"perc": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
-            # GOLS: Liberado para todas (estatística mais segura em Copas)
-            h_o15 = get_individual_stats(t1['id'])
-            h_o15 = get_individual_stats(t1['id'])
-            a_o15 = get_individual_stats(t2['id'])
-            m_o15 = (h_o15 + a_o15)/2
+            m_o15 = (get_individual_stats(t1['id']) + get_individual_stats(t2['id'])) / 2
             if m_o15 >= 70: 
                 pool_entradas.append({"perc": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
                 
-    # --- FECHA O NAVEGADOR APÓS TERMINAR TODAS AS LIGAS ---
     browser.quit()
     
     # RANKING GERAL POR %
