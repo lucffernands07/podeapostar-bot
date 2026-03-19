@@ -21,60 +21,49 @@ def configurar_browser():
 # --- FUNÇÃO DE RASPAGEM (FORA DA FUNÇÃO PRINCIPAL PARA ORGANIZAÇÃO) ---
 def raspar_dados_time(driver, wait, xpath_clique_time, nome_log, url_confronto):
     try:
-        print(f"\n[LOG] Passo 1: Clicando no time {nome_log}...")
-        # Localiza o time no H2H (usa o bdi que você passou)
+        print(f"\n[LOG] Passo 1: Entrando no perfil de {nome_log}...")
         btn_time = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_clique_time)))
-        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_time)
-        time.sleep(3)
         driver.execute_script("arguments[0].click();", btn_time)
         
-        print(f"[LOG] Passo 2: Clicando na aba 'Estatísticas'...")
-        # Espera o botão da aba carregar e clica
+        print(f"[LOG] Passo 2: Indo para a aba Estatísticas...")
         btn_stats = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='#tab:statistics']")))
         driver.execute_script("arguments[0].click();", btn_stats)
         
-        print(f"[LOG] Passo 3: Aguardando carregamento do Grid (12s)...")
-        time.sleep(12)
+        print(f"[LOG] Passo 3: Esperando renderização (15s)...")
+        time.sleep(15) # SofaScore é lento para injetar os números no HTML
         driver.execute_script("window.scrollBy(0, 500);")
 
-        # Pega o conteúdo do main (onde estão os cards)
+        # --- O SEU SPAN (BUSCA DIRETA PELO ELEMENTO) ---
+        print(f"[LOG] Passo 4: Extraindo valor pelo SPAN específico...")
         try:
-            conteudo_main = driver.find_element(By.TAG_NAME, "main").text
-        except:
-            conteudo_main = driver.find_element(By.TAG_NAME, "body").text
+            # XPath baseado no HTML que você enviou: busca o texto e pega o próximo span (o valor)
+            # Estrutura: <div> <span>Texto</span> <span>Valor</span> </div>
+            xpath_valor = "//span[text()='Total de finalizações por jogo']/parent::div/span[2]"
+            
+            elemento_valor = wait.until(EC.presence_of_element_located((By.XPATH, xpath_valor)))
+            valor_texto = elemento_valor.text.strip()
+            
+            # Limpeza rápida
+            valor = float(valor_texto.replace(',', '.'))
+            print(f"✅ [SUCESSO] {nome_log} encontrou: {valor}")
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao achar Span direto. Tentando busca por texto no container...")
+            # Backup: tenta achar qualquer div que contenha o texto e pega o número nela
+            container = driver.find_element(By.XPATH, "//div[contains(., 'Total de finalizações por jogo')]")
+            texto = container.text
+            # Pega apenas os números e pontos/vírgulas do final da string
+            valor_extraido = re.findall(r"(\d+[\.,]\d+)", texto)[-1]
+            valor = float(valor_extraido.replace(',', '.'))
+            print(f"✅ [SUCESSO BACKUP] {nome_log}: {valor}")
 
-        # Lógica do Card: Se não achar o texto, tenta expandir o card 'Atacando'
-        if "Total de finalizações por jogo" not in conteudo_main:
-            print(f"[LOG] Dado não visível. Tentando abrir o card 'Atacando'...")
-            try:
-                card_atacando = driver.find_element(By.XPATH, "//span[contains(text(), 'Atacando')] | //div[contains(., 'Atacando')]")
-                driver.execute_script("arguments[0].click();", card_atacando)
-                time.sleep(5)
-                conteudo_main = driver.find_element(By.TAG_NAME, "main").text
-            except:
-                print("⚠️ Aviso: Não foi possível clicar no card Atacando (talvez já esteja aberto).")
-
-        # --- EXTRAÇÃO FINAL ---
-        print(f"[LOG] Passo 4: Buscando valor numérico...")
-        busca = re.search(r"Total de finalizações por jogo\s*(\d+[\.,]\d+)", conteudo_main, re.IGNORECASE)
-        
-        if busca:
-            valor = float(busca.group(1).replace(',', '.'))
-            print(f"✅ [SUCESSO] {nome_log}: {valor}")
-        else:
-            print(f"❌ [FALHA] Valor não encontrado para {nome_log}.")
-            valor = 0
-
-        # Volta para a página do jogo para o próximo time
-        print(f"[LOG] Retornando ao confronto...")
         driver.get(url_confronto)
         time.sleep(5)
         return valor
 
     except Exception as e:
-        print(f"❌ [ERRO] Falha no fluxo de {nome_log}: {str(e)[:50]}")
+        print(f"❌ [FALHA TOTAL] {nome_log}: {str(e)[:50]}")
         driver.get(url_confronto)
-        time.sleep(5)
         return 0
 
 def executar_teste_individual():
