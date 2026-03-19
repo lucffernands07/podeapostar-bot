@@ -62,49 +62,44 @@ def executar_teste_individual():
                 print(f"[LOG] Acessando perfil de: {nome_log}...")
                 elemento_time = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_clique_time)))
                 driver.execute_script("arguments[0].click();", elemento_time)
-                time.sleep(5)
-
-                print(f"[LOG] Abrindo aba 'Estatísticas'...")
+                
+                print(f"[LOG] Abrindo aba 'Estatísticas' de {nome_log}...")
                 btn_stats = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='#tab:statistics']")))
                 driver.execute_script("arguments[0].click();", btn_stats)
-                time.sleep(5)
+                
+                # Aguarda um tempo fixo maior para garantir que o JS do Sofa carregue os números
+                print(f"[LOG] Aguardando carregamento dos dados (12s)...")
+                time.sleep(12) 
+                
+                # Rola a página para garantir que o 'Lazy Load' seja disparado
+                driver.execute_script("window.scrollBy(0, 600);")
+                time.sleep(3)
 
-                # --- PASSO NOVO: EXPANDIR O MENU 'ATACANDO' ---
-                print(f"[LOG] Expandindo menu 'Atacando'...")
-                try:
-                    # Busca a div que contém o texto 'Atacando' e clica nela
-                    menu_atacando = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[contains(., 'Atacando') and contains(@class, 'jc_space-between')]")))
-                    driver.execute_script("arguments[0].click();", menu_atacando)
-                    print(f"[LOG] Menu 'Atacando' expandido.")
-                    time.sleep(3) # Tempo para a animação de abrir
-                except Exception as e:
-                    print(f"[AVISO] Menu 'Atacando' já pode estar aberto ou erro ao clicar: {e}")
+                # --- ESTRATÉGIA DE RASPAGEM POR TEXTO BRUTO (ESTILO ANTIGO) ---
+                texto_pagina = driver.find_element(By.TAG_NAME, "body").text
+                
+                # Regex que procura a frase e captura o primeiro número que vier depois (ex: 12.2 ou 12,2)
+                # O \s* captura espaços e o (\d+[\.,]\d+) captura o número decimal
+                busca = re.search(r"Total de finalizações por jogo\s*(\d+[\.,]\d+)", texto_pagina, re.IGNORECASE)
+                
+                if busca:
+                    valor_str = busca.group(1).replace(',', '.')
+                    valor = float(valor_str)
+                    print(f"✅ [SUCESSO] {nome_log}: {valor}")
+                else:
+                    print(f"❌ [AVISO] Frase 'Total de finalizações por jogo' não encontrada no texto de {nome_log}.")
+                    # Log preventivo: imprimir um pedaço do texto para ver o que o robô está lendo
+                    print(f"[DEBUG] Começo do texto lido: {texto_pagina[:200]}...")
+                    valor = 0
 
-                # --- AGORA BUSCA O VALOR ---
-                print(f"[LOG] Localizando valor final após expansão...")
-                
-                # Usando o XPath do container flex que você mandou anteriormente
-                xpath_final = "//span[contains(text(), 'Total de finalizações por jogo')]/parent::div/span[2]"
-                
-                elemento_valor = wait.until(EC.presence_of_element_located((By.XPATH, xpath_final)))
-                valor_texto = elemento_valor.text
-                
-                valor = float(valor_texto.replace(',', '.').strip())
-                print(f"✅ [SUCESSO] {nome_log} extraído: {valor}")
-                
                 driver.get(url_confronto)
                 return valor
 
             except Exception as e:
-                print(f"❌ [FALHA] Erro ao processar {nome_log}: {str(e)[:100]}")
+                print(f"❌ [ERRO] Falha geral no processo de {nome_log}")
                 driver.get(url_confronto)
                 return 0
-
-            except Exception as e:
-                print(f"❌ [FALHA] Não foi possível extrair de {nome_log}. O elemento não apareceu ou o layout mudou.")
-                driver.get(url_confronto)
-                return 0
-
+                
         # Executa para os dois
         # XPath do bdi que você forneceu para o Bahia e Bragantino
         media_casa = raspar_dados_time(f"//bdi[contains(text(), '{t1_name}')]", t1_name)
