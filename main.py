@@ -38,7 +38,7 @@ def enviar_telegram(msg):
     except Exception as e:
         print(f"Erro ao enviar Telegram: {e}")
 
-# --- NOVA FUNÇÃO: MÉDIA DE CHUTES (RAPIDAPI) ---
+# --- NOVA FUNÇÃO: MÉDIA DE CHUTES (APNÉTICA - ÚLTIMOS 10 JOGOS) ---
 def get_avg_shots_api(team_id):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10&status=FT"
     try:
@@ -48,21 +48,20 @@ def get_avg_shots_api(team_id):
         total_shots, count = 0, 0
         for f in fixtures:
             f_id = f['fixture']['id']
-            # Busca estatísticas detalhadas da partida
             url_s = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/statistics?fixture={f_id}&team={team_id}"
             res_s = requests.get(url_s, headers=HEADERS).json()
             stats = res_s.get('response', [])
             if stats:
                 for s in stats[0].get('statistics', []):
                     if s['type'] == 'Total Shots':
-                        total_shots += (s['value'] or 0)
+                        total_shots += (int(s['value']) if s['value'] else 0)
                         count += 1
                         break
-            time.sleep(0.2) # Evita block da API
+            time.sleep(0.2)
         return total_shots / count if count > 0 else 0
     except: return 0
 
-# --- SEU SELENIUM ORIGINAL (AGORA SÓ PARA PEGAR ID/URL) ---
+# --- SEU MOTOR DE ID (SELENIUM) ---
 def get_id_h2h(driver, t1_name, t2_name):
     url_real = "https://www.sofascore.com/"
     wait = WebDriverWait(driver, 25)
@@ -76,13 +75,12 @@ def get_id_h2h(driver, t1_name, t2_name):
         search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
         search_input.click()
         search_input.send_keys(f"{t1_name} {t2_name}")
-        time.sleep(8)
+        time.sleep(10) # Tempo do seu original
         
         resultados = driver.find_elements(By.XPATH, "//a[contains(@href, '/football/match/')]")
         if resultados:
             url_real = resultados[0].get_attribute("href")
-    except Exception as e:
-        print(f"Erro ao buscar ID Sofa para {t1_name}: {e}")
+    except: pass
     return url_real
 
 def get_h2h_dupla_chance(t1_id, t2_id):
@@ -127,7 +125,7 @@ def executar():
     LIGAS_MATA_MATA = [2, 11, 13]
     pool_entradas = []
 
-    # LOOP INICIAL: Sem Selenium (Mais rápido)
+    # BUSCA ORIGINAL - SEM ALTERAÇÕES
     for l_id, l_nome in ligas.items():
         fixtures_hoje = []
         for ano in [2026, 2025]:
@@ -163,12 +161,11 @@ def executar():
             if m_o15 >= 70: 
                 pool_entradas.append({"perc": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
                 
-    # RANKING E SELEÇÃO
+    # RANKING E SELEÇÃO FINAL
     pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
     jogos_selecionados = {}
     total_mercados = 0 
 
-    # Inicia o browser APENAS para os finalistas do bilhete
     browser = configurar_browser()
 
     for e in pool_entradas:
@@ -177,10 +174,8 @@ def executar():
         if mid not in jogos_selecionados and len(jogos_selecionados) >= 10: continue
             
         if mid not in jogos_selecionados:
-            # 1. Pega o Link/ID no SofaScore com o Selenium (Sua função adaptada)
+            # SÓ AQUI BUSCAMOS O ID DO SOFASCORE E OS CHUTES
             url_sofa = get_id_h2h(browser, e['t1_name'], e['t2_name'])
-            
-            # 2. Pega a média de chutes via RapidAPI (Sua nova regra apnética)
             m_chutes = (get_avg_shots_api(e['t1_id']) + get_avg_shots_api(e['t2_id'])) / 2
             
             jogos_selecionados[mid] = {
@@ -198,7 +193,7 @@ def executar():
     if not jogos_selecionados: return
     lista_final = sorted(jogos_selecionados.values(), key=lambda x: x['liga'])
 
-    # MONTAGEM DA MENSAGEM
+    # MENSAGEM FINAL
     msg = "🎯 *BILHETE DO DIA (SISTEMA H2H)*\n💰🍀 *BOA SORTE!!!*\n\n"
     for i, j in enumerate(lista_final, 1):
         msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n"
@@ -213,9 +208,8 @@ def executar():
 
         j['mkts'].sort(key=lambda x: x['perc'], reverse=True)
         for mkt in j['mkts']:
-            if mkt['tipo'] in ['1x', '2x']: label = f"🛡️ {mkt['mkt']} ({mkt['perc']:.0f}%)"
-            else: label = f"⚽ {mkt['mkt']} ({mkt['perc']:.0f}%)"
-            msg += f"🔶 {label}\n"
+            label = "🛡️" if mkt['tipo'] in ['1x', '2x'] else "⚽"
+            msg += f"🔶 {label} {mkt['mkt']} ({mkt['perc']:.0f}%)\n"
         
         msg += f"📊 [Análise Sofa]({j['link']})\n\n"
     
