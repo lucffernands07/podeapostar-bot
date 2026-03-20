@@ -204,7 +204,7 @@ def executar():
 
         media_c = j.get('media_chutes', 0)
         if 0 < media_c <= 10.5:
-            msg += f"💡 *Dica:* Menos 10.5 Escanteios ({media_c:.1f} chutes)\n"
+            msg += f"💡 *Dica:* Escanteio menos de ({media_c:.1f})\n"
         
         msg += f"📊 [Análise Sofa]({j['link']})\n\n"
     
