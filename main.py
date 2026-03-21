@@ -82,6 +82,7 @@ def get_id_h2h(driver, t1_name, t2_name):
     return url_real
 
 def get_h2h_dupla_chance(t1_id, t2_id):
+    # Se os IDs forem iguais, a API traz os últimos 10 jogos gerais do time
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last=10"
     try:
         res = requests.get(url, headers=HEADERS).json()
@@ -90,8 +91,11 @@ def get_h2h_dupla_chance(t1_id, t2_id):
         t1_wd, t2_wd = 0, 0
         for f in fixtures:
             gh, ga = f['goals']['home'], f['goals']['away']
-            if (f['teams']['home']['id'] == t1_id and gh >= ga) or (f['teams']['away']['id'] == t1_id and ga >= gh): t1_wd += 1
-            if (f['teams']['home']['id'] == t2_id and gh >= ga) or (f['teams']['away']['id'] == t2_id and ga >= gh): t2_wd += 1
+            # Verifica invencibilidade (Vitória ou Empate)
+            if (f['teams']['home']['id'] == t1_id and gh >= ga) or (f['teams']['away']['id'] == t1_id and ga >= gh): 
+                t1_wd += 1
+            if (f['teams']['home']['id'] == t2_id and gh >= ga) or (f['teams']['away']['id'] == t2_id and ga >= gh): 
+                t2_wd += 1
         return (t1_wd / len(fixtures)) * 100, (t2_wd / len(fixtures)) * 100
     except: return 0, 0
 
@@ -125,7 +129,6 @@ def executar():
 
     for l_id, l_nome in ligas.items():
         fixtures_hoje = []
-        # Busca nas duas temporadas possíveis
         for ano in [2026, 2025]:
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
             try:
@@ -135,34 +138,55 @@ def executar():
             except: continue
             
         for m in fixtures_hoje:
-            # Filtro de Jogo Não Iniciado (NS)
             if m['fixture']['status']['short'] != "NS":
                 continue
 
-            hora_utc = datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00'))
-            hora_br = hora_utc.astimezone(fuso_br).strftime("%H:%M")
             t1, t2 = m['teams']['home'], m['teams']['away']
             
+            # PERFORMANCE ATUAL (Fase dos times nos últimos 10 jogos gerais)
+            perf_t1 = get_h2h_dupla_chance(t1['id'], t1['id']) # Retorna invencibilidade do Mandante
+            perf_t2 = get_h2h_dupla_chance(t2['id'], t2['id']) # Retorna invencibilidade do Visitante
+            
+            # CONFRONTO DIRETO (Histórico H2H entre eles)
+            h2h_direto_t1, h2h_direto_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
+
             g_info = {
-                "id": m['fixture']['id'], 
-                "t1_id": t1['id'], "t2_id": t2['id'],
+                "id": m['fixture']['id'], "t1_id": t1['id'], "t2_id": t2['id'],
                 "t1_name": t1['name'], "t2_name": t2['name'],
                 "info": f"*{t1['name']} x {t2['name']}*", 
-                "hora": hora_br, 
+                "hora": datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00')).astimezone(fuso_br).strftime("%H:%M"), 
                 "liga": l_nome
             }
 
-            h2h_t1, h2h_t2 = get_h2h_dupla_chance(t1['id'], t2['id'])
-            
-            if h2h_t1 >= 80: 
-                pool_entradas.append({"perc": h2h_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
-            
-            if h2h_t2 >= 90 and l_id not in LIGAS_MATA_MATA: 
-                pool_entradas.append({"perc": h2h_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
+            # --- LÓGICA DE DECISÃO ---
+            if l_id not in LIGAS_MATA_MATA:
+                # Regra Mandante: Superioridade Atual (80% vs 50%)
+                if perf_t1[0] >= 80 and perf_t2[1] <= 50:
+                    pool_entradas.append({"perc": perf_t1[0], "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
+                
+                # Regra Visitante: Superioridade Atual (90% vs 50%)
+                elif perf_t2[1] >= 90 and perf_t1[0] <= 50:
+                    pool_entradas.append({"perc": perf_t2[1], "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
+                
+                # Regra Backup: Se a performance atual for equilibrada, usa o Histórico H2H
+                elif h2h_direto_t1 >= 80:
+                    pool_entradas.append({"perc": h2h_direto_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
+                elif h2h_direto_t2 >= 80:
+                    pool_entradas.append({"perc": h2h_direto_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
+            else:
+                # Regra Mata-Mata: Apenas 100% no Histórico Direto
+                if h2h_direto_t1 >= 100:
+                    pool_entradas.append({"perc": 100, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
+                elif h2h_direto_t2 >= 100:
+                    pool_entradas.append({"perc": 100, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
+
+            # Mercado de Gols (Independente do mercado de vitória)
             m_o15 = (get_individual_stats(t1['id']) + get_individual_stats(t2['id'])) / 2
             if m_o15 >= 70: 
                 pool_entradas.append({"perc": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
+                
+    # O restante do código (browser, sorting e Telegram) segue abaixo desta lógica...
                 
     pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
     jogos_selecionados = {}
