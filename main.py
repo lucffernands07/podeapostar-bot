@@ -223,7 +223,8 @@ def executar():
             label = "🛡️" if mkt['tipo'] in ['1x', '2x'] else "🔥" if mkt['tipo'] == "2.5" else "⚽"
             msg += f"🔶 {label} {mkt['mkt']} ({mkt['perc']:.0f}%)\n"
         media_c = j.get('media_chutes', 0)
-        if 0 < media_c <= 10.5: msg += f"💡 *Dica:* Escanteio menos de ({media_c:.1f})\n"
+        if media_c > 0:
+            msg += f"💡 *Média Escanteios:* ({media_c:.1f})\n"
         msg += f"📊 [Análise Sofa]({j['link']})\n\n"
     
     msg += "---\n💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
