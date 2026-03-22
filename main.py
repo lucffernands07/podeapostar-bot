@@ -174,9 +174,9 @@ def executar():
 
             # --- REGRAS DE VITÓRIA / EMPATE ---
             if l_id not in LIGAS_MATA_MATA:
-                if perf_t1[0] >= 80 and perf_t2[1] <= 60:
+                if perf_t1[0] >= 70 and perf_t2[1] <= 70:
                     pool_entradas.append({"perc": perf_t1[0], "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
-                elif perf_t2[1] >= 90 and perf_t1[0] <= 50:
+                elif perf_t2[1] >= 90 and perf_t1[0] <= 60:
                     pool_entradas.append({"perc": perf_t2[1], "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
                 elif h2h_dir_10_t1 >= 80:
                     pool_entradas.append({"perc": h2h_dir_10_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
@@ -191,10 +191,12 @@ def executar():
             o25_t1, o25_t2 = get_over_stats(t1['id'], 2.5), get_over_stats(t2['id'], 2.5)
             
             m_o15 = (o15_t1 + o15_t2) / 2
-            if m_o15 >= 70:
-                pool_entradas.append({"perc": m_o15, "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
             
-            # Regra de Elite +2.5: Um time >= 80% e outro >= 60%
+            # Se a casa tem 85% individual OU a média dos dois é 70%
+            if o15_t1 >= 85 or m_o15 >= 70:
+                pool_entradas.append({"perc": max(o15_t1, m_o15), "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
+            
+            # Regra de Elite +2.5 (Mantive o original)
             if (o25_t1 >= 80 and o25_t2 >= 60) or (o25_t2 >= 80 and o25_t1 >= 60):
                 m_o25 = (o25_t1 + o25_t2) / 2
                 pool_entradas.append({"perc": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
