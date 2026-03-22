@@ -19,13 +19,15 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
+      - name: Instalar Dependencias
         run: |
-          pip install requests pytz
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Rodar Robo CachOut
+      - name: Rodar Robo CashOut
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           X_RAPIDAPI_KEY: ${{ secrets.X_RAPIDAPI_KEY }}
         run: python cachout.py
+        
