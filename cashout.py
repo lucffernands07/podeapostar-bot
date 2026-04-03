@@ -36,14 +36,18 @@ def obter_odds(fixture_id):
 
 def executar_cashout():
     fuso_br = pytz.timezone('America/Sao_Paulo')
-    hoje = datetime.now(fuso_br).strftime("%Y-%m-%d")
-    ligas_ids = [1, 10, 2, 3, 39, 40, 41, 42, 45, 48, 61, 62, 71, 72, 78, 79, 88, 94, 135, 136, 140, 141, 144, 172, 203, 233, 239, 265, 13, 11, 848, 637]
+    agora_br = datetime.now(fuso_br)
+    hoje = agora_br.strftime("%Y-%m-%d")
     
-    # 1. COLETA BRUTA (Agrupar TUDO por horário primeiro)
+    print(f"🕒 Hora atual: {agora_br.strftime('%H:%M:%S')}")
+    print(f"📅 Data: {hoje}")
+    
+    ligas_ids = [1, 10, 2, 3, 39, 40, 41, 42, 45, 48, 61, 62, 71, 72, 78, 79, 88, 94, 135, 136, 140, 141, 144, 172, 203, 233, 239, 265, 13, 11, 848, 637]
     coleta_bruta = {}
 
+    print(f"🔎 Buscando jogos em {len(ligas_ids)} ligas...")
+
     for l_id in ligas_ids:
-        # Tenta buscar em 2026 e depois em 2025
         for season in [2026, 2025]:
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
             try:
@@ -52,7 +56,6 @@ def executar_cashout():
                 
                 if fixtures:
                     for f in fixtures:
-                        # Apenas jogos que não começaram
                         if f['fixture']['status']['short'] == "NS":
                             data_utc = datetime.fromisoformat(f['fixture']['date'].replace('Z', '+00:00'))
                             hora_br = data_utc.astimezone(fuso_br).strftime("%H:%M")
@@ -60,54 +63,55 @@ def executar_cashout():
                             if hora_br not in coleta_bruta:
                                 coleta_bruta[hora_br] = []
                             
-                            # Evita duplicar o jogo se a API retornar em ambas as temporadas
                             if f['fixture']['id'] not in [x['fixture']['id'] for x in coleta_bruta[hora_br]]:
                                 coleta_bruta[hora_br].append(f)
-                    
-                    # Se encontrou jogos nesta temporada, para de procurar e vai para a próxima liga
                     break 
             except: 
                 continue
         time.sleep(0.05)
 
-    # 2. TRAVA DO BILHETE (Verifica se o horário tem volume)
+    if not coleta_bruta:
+        print("❌ Nenhum jogo 'Não Iniciado' (NS) encontrado para hoje nestas ligas.")
+        return
+
+    print(f"✅ Total de horários com jogos hoje: {len(coleta_bruta)}")
+
     for hora in sorted(coleta_bruta.keys()):
         total_jogos_janela = coleta_bruta[hora]
         
         if len(total_jogos_janela) >= 5:
-            print(f"⏰ Janela das {hora} com {len(total_jogos_janela)} jogos. Aplicando Filtro de Elite...")
-            
-            # 3. FILTRO DE ELITE (Diferença de Odds dentro da janela aprovada)
+            print(f"💎 Janela das {hora}: {len(total_jogos_janela)} jogos encontrados. Analisando Odds...")
             jogos_elite = []
+            
             for f in total_jogos_janela:
                 odd_h, odd_a = obter_odds(f['fixture']['id'])
                 
-                # Regra: Casa < Fora e Diferença >= 3.0
-                if odd_h and odd_a and odd_h < odd_a and (odd_a - odd_h) >= 3.0:
-                    jogos_elite.append({
-                        "confronto": f"{f['teams']['home']['name']} x {f['teams']['away']['name']}",
-                        "odd_h": odd_h,
-                        "odd_a": odd_a,
-                        "diff": odd_a - odd_h
-                    })
-                time.sleep(0.3) # Delay para não estourar a API
+                if odd_h and odd_a:
+                    diff = odd_a - odd_h
+                    if odd_h < odd_a and diff >= 3.0:
+                        jogos_elite.append({
+                            "confronto": f"{f['teams']['home']['name']} x {f['teams']['away']['name']}",
+                            "diff": diff
+                        })
+                time.sleep(0.3)
 
-            # Envia o bilhete apenas se o FILTRO DE ELITE encontrou jogos
             if jogos_elite:
-                # Ordena pelo maior favoritismo
                 jogos_elite.sort(key=lambda x: x['diff'], reverse=True)
-
                 msg = f"💰 *CASHOUT ELITE - {hora}*\n"
                 msg += f"🏟️ *Janela:* {len(total_jogos_janela)} jogos\n"
                 msg += f"🎯 *No padrão (Diff >= 3.0):* {len(jogos_elite)}\n"
                 msg += "----------------------------------\n"
-                
                 for idx, j in enumerate(jogos_elite, 1):
                     msg += f"{idx}. {j['confronto']} - *Diff: {j['diff']:.1f}*\n"
-                
                 msg += "\n✅ *Mercado:* +1.5 Gols"
                 enviar_telegram(msg)
+                print(f"🚀 MENSAGEM ENVIADA para as {hora}!")
+            else:
+                print(f"⚠️ Janela das {hora}: Nenhum jogo passou no filtro de Odd Diff >= 3.0.")
+        else:
+            # Esse print te diz por que o horário foi ignorado
+            print(f"⏭️ Ignorando {hora}: Apenas {len(total_jogos_janela)} jogos (Mínimo é 5).")
 
 if __name__ == "__main__":
     executar_cashout()
-                
+            
