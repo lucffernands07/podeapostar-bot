@@ -18,8 +18,8 @@ def enviar_telegram(msg):
     except Exception as e:
         print(f"Erro Telegram: {e}")
 
-def get_over_stats_cashout(team_id):
-    """Busca estatística de +1.5 para o ranking"""
+# --- FUNÇÃO DE RANKING (ADICIONADA) ---
+def get_perc_ranking(team_id):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10&status=FT"
     try:
         res = requests.get(url, headers=HEADERS).json()
@@ -37,17 +37,16 @@ def executar_cashout():
     agora_br = datetime.now(fuso_br)
     hoje = agora_br.strftime("%Y-%m-%d")
     
-    # Lista de Ligas (IDs 1 e 10 inclusos)
+    # Lista expandida (Ligas originais + 1 e 10 da Copa/Amistosos)
     ligas_ids = [
         1, 10, 2, 3, 39, 40, 41, 42, 45, 48, 61, 62, 71, 72, 78, 79, 88, 94, 135, 136, 
         140, 141, 144, 172, 203, 233, 239, 265, 13, 11, 848, 637
     ]
     
-    horarios_brutos = {}
+    horarios_agrupados = {}
 
-    print(f"1️⃣ Agrupando todos os jogos por horário...")
+    print(f"🔎 Robô CashOut buscando jogos para {hoje}...")
 
-    # PASSO 1: Agrupar tudo o que existe
     for l_id in ligas_ids:
         for ano in [2026, 2025]:
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
@@ -60,57 +59,54 @@ def executar_cashout():
                             data_utc = datetime.fromisoformat(f['fixture']['date'].replace('Z', '+00:00'))
                             hora_br = data_utc.astimezone(fuso_br).strftime("%H:%M")
                             
-                            if hora_br not in horarios_brutos:
-                                horarios_brutos[hora_br] = []
+                            if hora_br not in horarios_agrupados:
+                                horarios_agrupados[hora_br] = []
                             
-                            horarios_brutos[hora_br].append(f)
-                    break 
-            except: continue
+                            # Agora guardamos o objeto completo para processar o ranking depois
+                            horarios_agrupados[hora_br].append(f)
+                    break
+            except:
+                continue
         time.sleep(0.1)
 
-    # PASSO 2: Filtrar horários com no mínimo 5 jogos e calcular Ranking
-    for hora in sorted(horarios_brutos.keys()):
-        lista_jogos_hora = horarios_brutos[hora]
+    # --- ENVIO DOS BILHETES ---
+    for hora in sorted(horarios_agrupados.keys()):
+        jogos_brutos = horarios_agrupados[hora]
         
-        if len(lista_jogos_hora) >= 5:
-            print(f"2️⃣ Processando ranking para o horário {hora} ({len(lista_jogos_hora)} jogos)...")
+        # REGRA MESTRA: Mínimo de 5 jogos no mesmo horário (conforme seu pedido)
+        if len(jogos_brutos) >= 5:
+            print(f"📊 Processando Ranking para o horário {hora}...")
             jogos_com_ranking = []
 
-            for f in lista_jogos_hora:
+            for f in jogos_brutos:
                 t1_id = f['teams']['home']['id']
                 t2_id = f['teams']['away']['id']
                 
-                # Busca % para o ranking
-                p1 = get_over_stats_cashout(t1_id)
-                p2 = get_over_stats_cashout(t2_id)
-                
-                # Sua Regra: Prioridade 85% casa ou média
+                # Cálculo da sua regra Luciano (85% casa ou média)
+                p1 = get_perc_ranking(t1_id)
+                p2 = get_perc_ranking(t2_id)
                 conf = max(p1 if p1 >= 85 else 0, (p1 + p2) / 2)
 
-                jogos_com_ranking.append({
-                    "texto": f"🏟️ {f['teams']['home']['name']} x {f['teams']['away']['name']} ({f['league']['name']})",
-                    "conf": conf
-                })
-                time.sleep(0.3) # Delay para API não bloquear
+                info_texto = f"🏟️ {f['teams']['home']['name']} x {f['teams']['away']['name']} ({f['league']['name']})"
+                jogos_com_ranking.append({"texto": info_texto, "perc": conf})
+                time.sleep(0.2) # Proteção API
 
-            # PASSO 3: Ordenar o ranking do maior para o menor
-            jogos_com_ranking.sort(key=lambda x: x['conf'], reverse=True)
+            # ORDENAÇÃO: Aqui a mágica acontece. Coloca o maior % no topo.
+            jogos_com_ranking.sort(key=lambda x: x['perc'], reverse=True)
 
-            # PASSO 4: Enviar o bilhete pronto
             msg = f"💰 *CASHOUT: OPORTUNIDADE {hora}*\n"
             msg += f"⏰ *Início simultâneo:* {hora}\n"
             msg += f"📊 *Total de jogos:* {len(jogos_com_ranking)}\n"
-            msg += "🏆 *Ranking por Confiança (+1.5):*\n"
             msg += "----------------------------------\n"
             
-            for idx, j in enumerate(jogos_com_ranking, 1):
-                msg += f"{idx}. {j['texto']} - {j['conf']:.0f}%\n"
+            for idx, jogo in enumerate(jogos_com_ranking, 1):
+                msg += f"{idx}. {jogo['texto']} - {jogo['perc']:.0f}%\n"
             
             msg += "\n✅ *Sugestão:* Múltipla +1.5 Gols\n"
             msg += "📈 *Estratégia:* Encerrar se 70% dos gols saírem cedo!"
             
             enviar_telegram(msg)
-            print(f"✅ Bilhete das {hora} enviado com sucesso!")
+            print(f"✅ Bilhete das {hora} enviado!")
 
 if __name__ == "__main__":
     executar_cashout()
