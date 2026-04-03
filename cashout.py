@@ -13,7 +13,10 @@ HEADERS = {'x-rapidapi-host': "api-football-v1.p.rapidapi.com", 'x-rapidapi-key'
 def enviar_telegram(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"}
-    requests.post(url, json=payload)
+    try:
+        requests.post(url, json=payload)
+    except:
+        pass
 
 def obter_odds(fixture_id):
     url = f"https://api-football-v1.p.rapidapi.com/v3/odds?fixture={fixture_id}"
@@ -39,7 +42,7 @@ def executar_cashout():
     # 1. COLETA BRUTA (Agrupar TUDO por horário primeiro)
     coleta_bruta = {}
 
-        for l_id in ligas_ids:
+    for l_id in ligas_ids:
         # Tenta buscar em 2026 e depois em 2025
         for season in [2026, 2025]:
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
@@ -66,7 +69,6 @@ def executar_cashout():
             except: 
                 continue
         time.sleep(0.05)
-
 
     # 2. TRAVA DO BILHETE (Verifica se o horário tem volume)
     for hora in sorted(coleta_bruta.keys()):
@@ -96,12 +98,12 @@ def executar_cashout():
                 jogos_elite.sort(key=lambda x: x['diff'], reverse=True)
 
                 msg = f"💰 *CASHOUT ELITE - {hora}*\n"
-                msg += f"🏟️ *Jogos na janela:* {len(total_jogos_janela)}\n"
-                msg += f"🎯 *Jogos no padrão (Odd Diff >= 3.0):* {len(jogos_elite)}\n"
+                msg += f"🏟️ *Janela:* {len(total_jogos_janela)} jogos\n"
+                msg += f"🎯 *No padrão (Diff >= 3.0):* {len(jogos_elite)}\n"
                 msg += "----------------------------------\n"
                 
                 for idx, j in enumerate(jogos_elite, 1):
-                    msg += f"{idx}. {j['confronto']} - *Odd Diff: {j['diff']:.1f}*\n"
+                    msg += f"{idx}. {j['confronto']} - *Diff: {j['diff']:.1f}*\n"
                 
                 msg += "\n✅ *Mercado:* +1.5 Gols"
                 enviar_telegram(msg)
