@@ -13,84 +13,84 @@ HEADERS = {'x-rapidapi-host': "api-football-v1.p.rapidapi.com", 'x-rapidapi-key'
 def enviar_telegram(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"}
-    try:
-        requests.post(url, json=payload)
-    except: pass
+    requests.post(url, json=payload)
 
-def get_perc_individual_15(team_id):
-    # Pega os últimos 5 jogos individuais (Independente de ser casa ou fora)
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=5&status=FT"
+def obter_odds(fixture_id):
+    """Busca as odds de vitória (1X2) para a partida"""
+    url = f"https://api-football-v1.p.rapidapi.com/v3/odds?fixture={fixture_id}"
     try:
         res = requests.get(url, headers=HEADERS).json()
-        fixtures = res.get('response', [])
-        if not fixtures: return 0
-        jogos_com_15 = sum(1 for f in fixtures if (float(f['goals']['home'] or 0) + float(f['goals']['away'] or 0)) > 1.5)
-        return (jogos_com_15 / len(fixtures)) * 100
-    except: return 0
+        odds_data = res.get('response', [])
+        if not odds_data: return None, None
+        
+        # Pega as odds do primeiro bookmaker disponível (geralmente Bet365 ou 1xBet)
+        for bookmaker in odds_data[0].get('bookmakers', []):
+            for bet in bookmaker.get('bets', []):
+                if bet['name'] == "Match Winner":
+                    odd_casa = next((float(o['odd']) for o in bet['values'] if o['value'] == 'Home'), None)
+                    odd_fora = next((float(o['odd']) for o in bet['values'] if o['value'] == 'Away'), None)
+                    return odd_casa, odd_fora
+        return None, None
+    except: return None, None
 
 def executar_cashout():
     fuso_br = pytz.timezone('America/Sao_Paulo')
     hoje = datetime.now(fuso_br).strftime("%Y-%m-%d")
-    
     ligas_ids = [1, 10, 2, 3, 39, 40, 41, 42, 45, 48, 61, 62, 71, 72, 78, 79, 88, 94, 135, 136, 140, 141, 144, 172, 203, 233, 239, 265, 13, 11, 848, 637]
-    horarios_agrupados = {}
+    
+    jogos_por_horario = {}
 
-    print(f"🔎 Iniciando captura total para {hoje}...")
+    print(f"🔎 Analisando favoritos para {hoje}...")
 
-    # 1. COLETA SEM FILTROS DE STATUS (Pega tudo das ligas selecionadas)
     for l_id in ligas_ids:
-        for season in [2026, 2025]:
-            url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
-            try:
-                res = requests.get(url, headers=HEADERS).json()
-                fixtures = res.get('response', [])
-                if fixtures:
-                    for f in fixtures:
-                        data_utc = datetime.fromisoformat(f['fixture']['date'].replace('Z', '+00:00'))
-                        hora_br = data_utc.astimezone(fuso_br).strftime("%H:%M")
-                        
-                        if hora_br not in horarios_agrupados:
-                            horarios_agrupados[hora_br] = []
-                        
-                        # Evita duplicidade de ID de partida
-                        if f['fixture']['id'] not in [x['fixture']['id'] for x in horarios_agrupados[hora_br]]:
-                            horarios_agrupados[hora_br].append(f)
-                    break # Encontrou a temporada ativa da liga, pula para a próxima liga
-            except: continue
-        time.sleep(0.1)
-
-    # 2. PROCESSAMENTO E RANKING POR BLOCO DE HORÁRIO
-    for hora in sorted(horarios_agrupados.keys()):
-        jogos_do_bloco = horarios_agrupados[hora]
-        
-        # Só processa se tiver o seu mínimo de 5 jogos simultâneos
-        if len(jogos_do_bloco) >= 5:
-            print(f"✅ Bloco {hora}: Processando ranking para {len(jogos_do_bloco)} jogos...")
-            ranking_final = []
-            
-            for f in jogos_do_bloco:
-                p_home = get_perc_individual_15(f['teams']['home']['id'])
-                p_away = get_perc_individual_15(f['teams']['away']['id'])
-                media = (p_home + p_away) / 2
+        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season=2026"
+        try:
+            res = requests.get(url, headers=HEADERS).json()
+            for f in res.get('response', []):
+                f_id = f['fixture']['id']
+                odd_h, odd_a = obter_odds(f_id)
                 
-                ranking_final.append({
-                    "confronto": f"{f['teams']['home']['name']} x {f['teams']['away']['name']}",
-                    "perc": media
-                })
-                time.sleep(0.35) # Delay anti-bloqueio
+                # REGRA: Casa menor que Fora E diferença de no mínimo 3.0
+                if odd_h and odd_a and odd_h < odd_a and (odd_a - odd_h) >= 3.0:
+                    data_utc = datetime.fromisoformat(f['fixture']['date'].replace('Z', '+00:00'))
+                    hora_br = data_utc.astimezone(fuso_br).strftime("%H:%M")
+                    
+                    if hora_br not in jogos_por_horario:
+                        jogos_por_horario[hora_br] = []
+                    
+                    jogos_por_horario[hora_br].append({
+                        "id": f_id,
+                        "confronto": f"{f['teams']['home']['name']} x {f['teams']['away']['name']}",
+                        "odd_casa": odd_h,
+                        "odd_fora": odd_a,
+                        "diff": odd_a - odd_h
+                    })
+                time.sleep(0.1) # Evitar bloqueio
+        except: continue
 
-            # ORDENAÇÃO POR % DE GOLS (DO MAIOR PARA O MENOR)
-            ranking_final.sort(key=lambda x: x['perc'], reverse=True)
+    # Processar blocos com mínimo de 5 jogos que passaram na regra
+    for hora in sorted(jogos_por_horario.keys()):
+        lista_jogos = jogos_por_horario[hora]
+        
+        if len(lista_jogos) >= 5:
+            # Ordena pela maior diferença de odds (favoritos mais "esmagadores" primeiro)
+            lista_jogos.sort(key=lambda x: x['diff'], reverse=True)
 
-            # 3. MONTAGEM DA MENSAGEM
-            msg = f"💰 *CASHOUT {hora}* ({len(ranking_final)} JOGOS)\n"
+            msg = f"💰 *CASHOUT: FAVORITOS DAS {hora}*\n"
+            msg += f"🔥 *Regra:* Diferença de Odds >= 3.0 (Mandante)\n"
+            msg += f"📊 *Total no padrão:* {len(lista_jogos)} jogos\n"
             msg += "----------------------------------\n"
-            for idx, item in enumerate(ranking_final, 1):
-                msg += f"{idx}. {item['confronto']} - *{item['perc']:.0f}%*\n"
             
-            msg += "\n📈 *Estratégia:* Ranking +1.5 Gols (5 ind.)"
+            for idx, j in enumerate(lista_jogos, 1):
+                msg += f"{idx}. {j['confronto']}\n"
+                msg += f"   🏠 Odd {j['odd_casa']:.2f} | ✈️ Odd {j['odd_fora']:.2f} (Diff: {j['diff']:.1f})\n"
+            
+            msg += "\n✅ *Sugestão:* Múltipla +1.5 Gols\n"
+            msg += "📈 *Foco:* Favoritismo em casa para Cashout rápido!"
+            
             enviar_telegram(msg)
-            print(f"🚀 Mensagem das {hora} enviada com sucesso!")
+            print(f"🚀 Bilhete das {hora} enviado!")
 
 if __name__ == "__main__":
     executar_cashout()
+            
