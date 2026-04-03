@@ -16,20 +16,18 @@ def enviar_telegram(msg):
     requests.post(url, json=payload)
 
 def obter_odds(fixture_id):
-    """Busca as odds de vitória (1X2) para a partida"""
     url = f"https://api-football-v1.p.rapidapi.com/v3/odds?fixture={fixture_id}"
     try:
         res = requests.get(url, headers=HEADERS).json()
         odds_data = res.get('response', [])
         if not odds_data: return None, None
         
-        # Pega as odds do primeiro bookmaker disponível (geralmente Bet365 ou 1xBet)
         for bookmaker in odds_data[0].get('bookmakers', []):
             for bet in bookmaker.get('bets', []):
                 if bet['name'] == "Match Winner":
-                    odd_casa = next((float(o['odd']) for o in bet['values'] if o['value'] == 'Home'), None)
-                    odd_fora = next((float(o['odd']) for o in bet['values'] if o['value'] == 'Away'), None)
-                    return odd_casa, odd_fora
+                    o_h = next((float(o['odd']) for o in bet['values'] if o['value'] == 'Home'), None)
+                    o_a = next((float(o['odd']) for o in bet['values'] if o['value'] == 'Away'), None)
+                    return o_h, o_a
         return None, None
     except: return None, None
 
@@ -38,59 +36,63 @@ def executar_cashout():
     hoje = datetime.now(fuso_br).strftime("%Y-%m-%d")
     ligas_ids = [1, 10, 2, 3, 39, 40, 41, 42, 45, 48, 61, 62, 71, 72, 78, 79, 88, 94, 135, 136, 140, 141, 144, 172, 203, 233, 239, 265, 13, 11, 848, 637]
     
-    jogos_por_horario = {}
-
-    print(f"🔎 Analisando favoritos para {hoje}...")
+    # 1. COLETA BRUTA (Agrupar TUDO por horário primeiro)
+    coleta_bruta = {}
 
     for l_id in ligas_ids:
         url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season=2026"
         try:
             res = requests.get(url, headers=HEADERS).json()
             for f in res.get('response', []):
-                f_id = f['fixture']['id']
-                odd_h, odd_a = obter_odds(f_id)
-                
-                # REGRA: Casa menor que Fora E diferença de no mínimo 3.0
-                if odd_h and odd_a and odd_h < odd_a and (odd_a - odd_h) >= 3.0:
+                # Apenas jogos que não começaram
+                if f['fixture']['status']['short'] == "NS":
                     data_utc = datetime.fromisoformat(f['fixture']['date'].replace('Z', '+00:00'))
                     hora_br = data_utc.astimezone(fuso_br).strftime("%H:%M")
                     
-                    if hora_br not in jogos_por_horario:
-                        jogos_por_horario[hora_br] = []
-                    
-                    jogos_por_horario[hora_br].append({
-                        "id": f_id,
+                    if hora_br not in coleta_bruta:
+                        coleta_bruta[hora_br] = []
+                    coleta_bruta[hora_br].append(f)
+        except: continue
+        time.sleep(0.05)
+
+    # 2. TRAVA DO BILHETE (Verifica se o horário tem volume)
+    for hora in sorted(coleta_bruta.keys()):
+        total_jogos_janela = coleta_bruta[hora]
+        
+        if len(total_jogos_janela) >= 5:
+            print(f"⏰ Janela das {hora} com {len(total_jogos_janela)} jogos. Aplicando Filtro de Elite...")
+            
+            # 3. FILTRO DE ELITE (Diferença de Odds dentro da janela aprovada)
+            jogos_elite = []
+            for f in total_jogos_janela:
+                odd_h, odd_a = obter_odds(f['fixture']['id'])
+                
+                # Regra: Casa < Fora e Diferença >= 3.0
+                if odd_h and odd_a and odd_h < odd_a and (odd_a - odd_h) >= 3.0:
+                    jogos_elite.append({
                         "confronto": f"{f['teams']['home']['name']} x {f['teams']['away']['name']}",
-                        "odd_casa": odd_h,
-                        "odd_fora": odd_a,
+                        "odd_h": odd_h,
+                        "odd_a": odd_a,
                         "diff": odd_a - odd_h
                     })
-                time.sleep(0.1) # Evitar bloqueio
-        except: continue
+                time.sleep(0.3) # Delay para não estourar a API
 
-    # Processar blocos com mínimo de 5 jogos que passaram na regra
-    for hora in sorted(jogos_por_horario.keys()):
-        lista_jogos = jogos_por_horario[hora]
-        
-        if len(lista_jogos) >= 5:
-            # Ordena pela maior diferença de odds (favoritos mais "esmagadores" primeiro)
-            lista_jogos.sort(key=lambda x: x['diff'], reverse=True)
+            # Envia o bilhete apenas se o FILTRO DE ELITE encontrou jogos
+            if jogos_elite:
+                # Ordena pelo maior favoritismo
+                jogos_elite.sort(key=lambda x: x['diff'], reverse=True)
 
-            msg = f"💰 *CASHOUT: FAVORITOS DAS {hora}*\n"
-            msg += f"🔥 *Regra:* Diferença de Odds >= 3.0 (Mandante)\n"
-            msg += f"📊 *Total no padrão:* {len(lista_jogos)} jogos\n"
-            msg += "----------------------------------\n"
-            
-            for idx, j in enumerate(lista_jogos, 1):
-                msg += f"{idx}. {j['confronto']}\n"
-                msg += f"   🏠 Odd {j['odd_casa']:.2f} | ✈️ Odd {j['odd_fora']:.2f} (Diff: {j['diff']:.1f})\n"
-            
-            msg += "\n✅ *Sugestão:* Múltipla +1.5 Gols\n"
-            msg += "📈 *Foco:* Favoritismo em casa para Cashout rápido!"
-            
-            enviar_telegram(msg)
-            print(f"🚀 Bilhete das {hora} enviado!")
+                msg = f"💰 *CASHOUT ELITE - {hora}*\n"
+                msg += f"🏟️ *Jogos na janela:* {len(total_jogos_janela)}\n"
+                msg += f"🎯 *Jogos no padrão (Odd Diff >= 3.0):* {len(jogos_elite)}\n"
+                msg += "----------------------------------\n"
+                
+                for idx, j in enumerate(jogos_elite, 1):
+                    msg += f"{idx}. {j['confronto']} - *Odd Diff: {j['diff']:.1f}*\n"
+                
+                msg += "\n✅ *Mercado:* +1.5 Gols"
+                enviar_telegram(msg)
 
 if __name__ == "__main__":
     executar_cashout()
-            
+                
