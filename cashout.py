@@ -39,21 +39,34 @@ def executar_cashout():
     # 1. COLETA BRUTA (Agrupar TUDO por horário primeiro)
     coleta_bruta = {}
 
-    for l_id in ligas_ids:
-        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season=2026"
-        try:
-            res = requests.get(url, headers=HEADERS).json()
-            for f in res.get('response', []):
-                # Apenas jogos que não começaram
-                if f['fixture']['status']['short'] == "NS":
-                    data_utc = datetime.fromisoformat(f['fixture']['date'].replace('Z', '+00:00'))
-                    hora_br = data_utc.astimezone(fuso_br).strftime("%H:%M")
+        for l_id in ligas_ids:
+        # Tenta buscar em 2026 e depois em 2025
+        for season in [2026, 2025]:
+            url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
+            try:
+                res = requests.get(url, headers=HEADERS).json()
+                fixtures = res.get('response', [])
+                
+                if fixtures:
+                    for f in fixtures:
+                        # Apenas jogos que não começaram
+                        if f['fixture']['status']['short'] == "NS":
+                            data_utc = datetime.fromisoformat(f['fixture']['date'].replace('Z', '+00:00'))
+                            hora_br = data_utc.astimezone(fuso_br).strftime("%H:%M")
+                            
+                            if hora_br not in coleta_bruta:
+                                coleta_bruta[hora_br] = []
+                            
+                            # Evita duplicar o jogo se a API retornar em ambas as temporadas
+                            if f['fixture']['id'] not in [x['fixture']['id'] for x in coleta_bruta[hora_br]]:
+                                coleta_bruta[hora_br].append(f)
                     
-                    if hora_br not in coleta_bruta:
-                        coleta_bruta[hora_br] = []
-                    coleta_bruta[hora_br].append(f)
-        except: continue
+                    # Se encontrou jogos nesta temporada, para de procurar e vai para a próxima liga
+                    break 
+            except: 
+                continue
         time.sleep(0.05)
+
 
     # 2. TRAVA DO BILHETE (Verifica se o horário tem volume)
     for hora in sorted(coleta_bruta.keys()):
