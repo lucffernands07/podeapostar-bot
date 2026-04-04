@@ -107,12 +107,14 @@ def get_id_h2h(driver, t1_name, t2_name):
     except: pass
     return url_real
 
-def executar():
+def def executar():
     fuso_br = pytz.timezone('America/Sao_Paulo')
     agora_br = datetime.now(fuso_br)
     hoje = agora_br.strftime("%Y-%m-%d")
     
-    # Adicionados IDs 1 e 10 conforme o print enviado
+    print(f"🕒 Execução iniciada às: {agora_br.strftime('%H:%M:%S')}")
+
+    # Lista de Ligas atualizada conforme seu print
     ligas = {
         1: "Copa do Mundo", 10: "Amistosos Inter.", 2: "Champions League", 
         39: "Premier League", 140: "LALIGA", 135: "Serie A", 78: "Bundesliga", 
@@ -122,20 +124,33 @@ def executar():
         13: "Libertadores", 11: "Sudamericana"
     }
 
-    LIGAS_MATA_MATA = [1, 2, 11, 13]
     pool_entradas = []
 
     for l_id, l_nome in ligas.items():
         fixtures_hoje = []
+        # Tenta 2026 e 2025 (Bundesliga e LaLiga estão em 2025!)
         for ano in [2026, 2025]:
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
             try:
                 res = requests.get(url, headers=HEADERS).json()
-                if res.get('response'): fixtures_hoje.extend(res['response'])
+                data = res.get('response', [])
+                if data:
+                    fixtures_hoje.extend(data)
+                    break # Se achou a temporada da liga, não precisa buscar o outro ano
             except: continue
             
         for m in fixtures_hoje:
-            if m['fixture']['status']['short'] != "NS": continue
+            # Pega jogos "NS" (Não iniciados) ou "TBD" (A definir)
+            if m['fixture']['status']['short'] not in ["NS", "TBD"]: 
+                continue
+
+            # Converte horário do jogo para Brasília
+            data_utc = datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00'))
+            hora_jogo_br = data_utc.astimezone(fuso_br)
+
+            # SÓ PROCESSA SE O JOGO AINDA NÃO COMEÇOU
+            if hora_jogo_br <= agora_br:
+                continue
 
             t1, t2 = m['teams']['home'], m['teams']['away']
             
