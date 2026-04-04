@@ -57,10 +57,8 @@ def get_avg_shots_api(team_id):
                         jogos_com_dados_reais += 1
                         break
             time.sleep(0.4)
-
         return total_shots / jogos_com_dados_reais if jogos_com_dados_reais > 0 else 0
-    except:
-        return 0
+    except: return 0
 
 def get_h2h_dupla_chance(t1_id, t2_id, last=10):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last={last}"
@@ -107,14 +105,13 @@ def get_id_h2h(driver, t1_name, t2_name):
     except: pass
     return url_real
 
-def def executar():
+def executar():
     fuso_br = pytz.timezone('America/Sao_Paulo')
     agora_br = datetime.now(fuso_br)
     hoje = agora_br.strftime("%Y-%m-%d")
     
     print(f"🕒 Execução iniciada às: {agora_br.strftime('%H:%M:%S')}")
 
-    # Lista de Ligas atualizada conforme seu print
     ligas = {
         1: "Copa do Mundo", 10: "Amistosos Inter.", 2: "Champions League", 
         39: "Premier League", 140: "LALIGA", 135: "Serie A", 78: "Bundesliga", 
@@ -124,11 +121,11 @@ def def executar():
         13: "Libertadores", 11: "Sudamericana"
     }
 
+    LIGAS_MATA_MATA = [1, 2, 11, 13]
     pool_entradas = []
 
     for l_id, l_nome in ligas.items():
         fixtures_hoje = []
-        # Tenta 2026 e 2025 (Bundesliga e LaLiga estão em 2025!)
         for ano in [2026, 2025]:
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
             try:
@@ -136,23 +133,21 @@ def def executar():
                 data = res.get('response', [])
                 if data:
                     fixtures_hoje.extend(data)
-                    break # Se achou a temporada da liga, não precisa buscar o outro ano
+                    break 
             except: continue
             
         for m in fixtures_hoje:
-            # Pega jogos "NS" (Não iniciados) ou "TBD" (A definir)
             if m['fixture']['status']['short'] not in ["NS", "TBD"]: 
                 continue
 
-            # Converte horário do jogo para Brasília
             data_utc = datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00'))
             hora_jogo_br = data_utc.astimezone(fuso_br)
 
-            # SÓ PROCESSA SE O JOGO AINDA NÃO COMEÇOU
             if hora_jogo_br <= agora_br:
                 continue
 
             t1, t2 = m['teams']['home'], m['teams']['away']
+            print(f"🏟️ Analisando: {t1['name']} x {t2['name']} ({hora_jogo_br.strftime('%H:%M')})")
             
             perf_t1 = get_h2h_dupla_chance(t1['id'], t1['id'])
             perf_t2 = get_h2h_dupla_chance(t2['id'], t2['id'])
@@ -162,17 +157,17 @@ def def executar():
                 "id": m['fixture']['id'], "t1_id": t1['id'], "t2_id": t2['id'],
                 "t1_name": t1['name'], "t2_name": t2['name'],
                 "info": f"*{t1['name']} x {t2['name']}*", 
-                "hora": datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00')).astimezone(fuso_br).strftime("%H:%M"), 
+                "hora": hora_jogo_br.strftime("%H:%M"), 
                 "liga": l_nome
             }
 
-            # --- REGRAS DE VITÓRIA / EMPATE (AJUSTADAS) ---
+            # --- REGRAS DE VITÓRIA / EMPATE ---
             if l_id not in LIGAS_MATA_MATA:
                 if perf_t1[0] >= 70 and perf_t2[1] <= 70:
                     pool_entradas.append({"perc": perf_t1[0], "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
-                elif perf_t2[1] >= 75 and perf_t1[0] <= 65: # Baixado de 90% para 75% (X2)
+                elif perf_t2[1] >= 75 and perf_t1[0] <= 65:
                     pool_entradas.append({"perc": perf_t2[1], "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
-                elif h2h_dir_10_t1 >= 75: # Baixado de 80% para 75%
+                elif h2h_dir_10_t1 >= 75:
                     pool_entradas.append({"perc": h2h_dir_10_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
             else:
                 if perf_t1[0] >= 85:
@@ -180,7 +175,7 @@ def def executar():
                 elif perf_t2[1] >= 85:
                     pool_entradas.append({"perc": perf_t2[1], "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
-            # --- REGRAS DE GOLS (COM SUA CONDIÇÃO DE 85%) ---
+            # --- REGRAS DE GOLS ---
             o15_t1, o15_t2 = get_over_stats(t1['id'], 1.5), get_over_stats(t2['id'], 1.5)
             o25_t1, o25_t2 = get_over_stats(t1['id'], 2.5), get_over_stats(t2['id'], 2.5)
             m_o15 = (o15_t1 + o15_t2) / 2
@@ -194,6 +189,11 @@ def def executar():
                 
     pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
     jogos_selecionados, total_mercados = {}, 0
+    
+    if not pool_entradas:
+        print("⚠️ Nenhum jogo entrou nos critérios.")
+        return
+
     browser = configurar_browser()
 
     for e in pool_entradas:
@@ -210,11 +210,13 @@ def def executar():
             }
         
         if len(jogos_selecionados[mid]["mkts"]) < 3 and total_mercados < 18:
-            jogos_selecionados[mid]["mkts"].append(e)
-            total_mercados += 1
+            # Evita duplicar o mesmo mercado no mesmo jogo
+            if e['mkt'] not in [m['mkt'] for m in jogos_selecionados[mid]["mkts"]]:
+                jogos_selecionados[mid]["mkts"].append(e)
+                total_mercados += 1
 
     browser.quit()
-    jogos_finais = sorted(jogos_selecionados.values(), key=lambda x: x['liga'])
+    jogos_finais = sorted(jogos_selecionados.values(), key=lambda x: x['hora'])
     if not jogos_finais: return
 
     msg = "🎯 *BILHETE DO DIA (SISTEMA H2H)*\n💰🍀 *BOA SORTE!!!*\n\n"
@@ -224,8 +226,6 @@ def def executar():
         for mkt in j['mkts']:
             label = "🛡️" if mkt['tipo'] in ['1x', '2x'] else "🔥" if mkt['tipo'] == "2.5" else "⚽"
             msg += f"🔶 {label} {mkt['mkt']} ({mkt['perc']:.0f}%)\n"
-        if j['media_chutes'] > 0:
-            msg += f"💡 *Média Escanteios:* ({j['media_chutes']:.1f})\n"
         msg += f"📊 [Análise Sofa]({j['link']})\n\n"
     
     msg += "---\n💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
@@ -233,3 +233,4 @@ def def executar():
 
 if __name__ == "__main__":
     executar()
+                                          
