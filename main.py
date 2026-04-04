@@ -36,31 +36,30 @@ def enviar_telegram(msg):
         print(f"Erro ao enviar Telegram: {e}")
 
 def get_avg_shots_api(team_id):
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10&status=FT"
+    # Alterado para os últimos 5 jogos individuais
+    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=5&status=FT"
     try:
         res = requests.get(url, headers=HEADERS).json()
         fixtures = res.get('response', [])
         if not fixtures: return 0
-        
-        total_shots = 0
-        jogos_com_dados_reais = 0 
+        total_shots, jogos_com_dados = 0, 0
         for f in fixtures:
             f_id = f['fixture']['id']
             url_s = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/statistics?fixture={f_id}&team={team_id}"
             res_s = requests.get(url_s, headers=HEADERS).json()
             stats_list = res_s.get('response', [])
-            
             if stats_list and 'statistics' in stats_list[0]:
                 for s in stats_list[0]['statistics']:
                     if s['type'] == 'Total Shots' and s['value'] is not None:
                         total_shots += int(s['value'])
-                        jogos_com_dados_reais += 1
+                        jogos_com_dados += 1
                         break
             time.sleep(0.4)
-        return total_shots / jogos_com_dados_reais if jogos_com_dados_reais > 0 else 0
+        return total_shots / jogos_com_dados if jogos_com_dados > 0 else 0
     except: return 0
 
-def get_h2h_dupla_chance(t1_id, t2_id, last=10):
+def get_h2h_dupla_chance(t1_id, t2_id, last=5):
+    # Alterado para os últimos 5 jogos (H2H ou Individual)
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last={last}"
     try:
         res = requests.get(url, headers=HEADERS).json()
@@ -75,7 +74,8 @@ def get_h2h_dupla_chance(t1_id, t2_id, last=10):
     except: return 0, 0
 
 def get_over_stats(team_id, over_val):
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10"
+    # Alterado para os últimos 5 jogos individuais
+    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=5"
     try:
         res = requests.get(url, headers=HEADERS).json()
         fixtures = res.get('response', [])
@@ -110,18 +110,15 @@ def executar():
     agora_br = datetime.now(fuso_br)
     hoje = agora_br.strftime("%Y-%m-%d")
     
-    print(f"🕒 Execução iniciada às: {agora_br.strftime('%H:%M:%S')}")
-
     ligas = {
-        1: "Copa do Mundo", 10: "Amistosos Inter.", 2: "Champions League", 
-        39: "Premier League", 140: "LALIGA", 135: "Serie A", 78: "Bundesliga", 
-        61: "Ligue 1", 94: "Português", 71: "Brasileirão A", 88: "Holandês", 
-        144: "Belga", 203: "Süper Lig", 172: "Bulgária", 265: "Chile", 
-        239: "Colômbia", 233: "Egito", 141: "LaLiga 2", 72: "Brasileirão B", 
-        13: "Libertadores", 11: "Sudamericana"
+        2: "Champions League", 39: "Premier League", 140: "LALIGA", 135: "Serie A", 
+        78: "Bundesliga", 61: "Ligue 1", 94: "Português", 71: "Brasileirão A", 
+        88: "Holandês", 144: "Belga", 203: "Süper Lig", 172: "Bulgária", 
+        265: "Chile", 239: "Colômbia", 233: "Egito", 141: "LaLiga 2", 
+        72: "Brasileirão B", 13: "Libertadores", 11: "Sudamericana"
     }
 
-    LIGAS_MATA_MATA = [1, 2, 11, 13]
+    LIGAS_MATA_MATA = [2, 11, 13]
     pool_entradas = []
 
     for l_id, l_nome in ligas.items():
@@ -130,34 +127,26 @@ def executar():
             url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
             try:
                 res = requests.get(url, headers=HEADERS).json()
-                data = res.get('response', [])
-                if data:
-                    fixtures_hoje.extend(data)
-                    break 
+                if res.get('response'): fixtures_hoje.extend(res['response'])
             except: continue
             
         for m in fixtures_hoje:
-            if m['fixture']['status']['short'] not in ["NS", "TBD"]: 
-                continue
-
-            data_utc = datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00'))
-            hora_jogo_br = data_utc.astimezone(fuso_br)
-
-            if hora_jogo_br <= agora_br:
-                continue
+            if m['fixture']['status']['short'] != "NS": continue
 
             t1, t2 = m['teams']['home'], m['teams']['away']
-            print(f"🏟️ Analisando: {t1['name']} x {t2['name']} ({hora_jogo_br.strftime('%H:%M')})")
             
-            perf_t1 = get_h2h_dupla_chance(t1['id'], t1['id'])
-            perf_t2 = get_h2h_dupla_chance(t2['id'], t2['id'])
-            h2h_dir_10_t1, h2h_dir_10_t2 = get_h2h_dupla_chance(t1['id'], t2['id'], last=10)
+            # PERFORMANCE ATUAL (Últimos 5 jogos individuais via função H2H)
+            perf_t1 = get_h2h_dupla_chance(t1['id'], t1['id'], last=5)
+            perf_t2 = get_h2h_dupla_chance(t2['id'], t2['id'], last=5)
+            
+            # CONFRONTO DIRETO (Últimos 5 jogos)
+            h2h_dir_5_t1, h2h_dir_5_t2 = get_h2h_dupla_chance(t1['id'], t2['id'], last=5)
 
             g_info = {
                 "id": m['fixture']['id'], "t1_id": t1['id'], "t2_id": t2['id'],
                 "t1_name": t1['name'], "t2_name": t2['name'],
                 "info": f"*{t1['name']} x {t2['name']}*", 
-                "hora": hora_jogo_br.strftime("%H:%M"), 
+                "hora": datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00')).astimezone(fuso_br).strftime("%H:%M"), 
                 "liga": l_nome
             }
 
@@ -165,22 +154,23 @@ def executar():
             if l_id not in LIGAS_MATA_MATA:
                 if perf_t1[0] >= 70 and perf_t2[1] <= 70:
                     pool_entradas.append({"perc": perf_t1[0], "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
-                elif perf_t2[1] >= 75 and perf_t1[0] <= 65:
+                elif perf_t2[1] >= 90 and perf_t1[0] <= 60:
                     pool_entradas.append({"perc": perf_t2[1], "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
-                elif h2h_dir_10_t1 >= 75:
-                    pool_entradas.append({"perc": h2h_dir_10_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
+                elif h2h_dir_5_t1 >= 80:
+                    pool_entradas.append({"perc": h2h_dir_5_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
             else:
-                if perf_t1[0] >= 85:
-                    pool_entradas.append({"perc": perf_t1[0], "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
-                elif perf_t2[1] >= 85:
-                    pool_entradas.append({"perc": perf_t2[1], "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
+                if h2h_dir_5_t1 >= 100:
+                    pool_entradas.append({"perc": 100, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
+                elif h2h_dir_5_t2 >= 100:
+                    pool_entradas.append({"perc": 100, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
 
             # --- REGRAS DE GOLS ---
             o15_t1, o15_t2 = get_over_stats(t1['id'], 1.5), get_over_stats(t2['id'], 1.5)
             o25_t1, o25_t2 = get_over_stats(t1['id'], 2.5), get_over_stats(t2['id'], 2.5)
             m_o15 = (o15_t1 + o15_t2) / 2
             
-            if o15_t1 >= 85 or m_o15 >= 70:
+            # Ajustado para >= 80% individual conforme pedido
+            if o15_t1 >= 80 or m_o15 >= 70:
                 pool_entradas.append({"perc": max(o15_t1, m_o15), "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
             
             if (o25_t1 >= 80 and o25_t2 >= 60) or (o25_t2 >= 80 and o25_t1 >= 60):
@@ -188,35 +178,31 @@ def executar():
                 pool_entradas.append({"perc": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
                 
     pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
-    jogos_selecionados, total_mercados = {}, 0
-    
-    if not pool_entradas:
-        print("⚠️ Nenhum jogo entrou nos critérios.")
-        return
-
+    jogos_selecionados = {}
+    total_mercados = 0 
     browser = configurar_browser()
 
     for e in pool_entradas:
         mid = e['id']
-        if total_mercados >= 18: break
-        if mid not in jogos_selecionados and len(jogos_selecionados) >= 10: continue
+        if total_mercados >= 13: break # Limite de 13 mercados no bilhete
             
         if mid not in jogos_selecionados:
             url_sofa = get_id_h2h(browser, e['t1_name'], e['t2_name'])
-            c1, c2 = get_avg_shots_api(e['t1_id']), get_avg_shots_api(e['t2_id'])
+            chutes_t1 = get_avg_shots_api(e['t1_id'])
+            time.sleep(0.4)
+            chutes_t2 = get_avg_shots_api(e['t2_id'])
             jogos_selecionados[mid] = {
                 "info": e['info'], "hora": e['hora'], "liga": e['liga'], "link": url_sofa, 
-                "media_chutes": (c1 + c2) / 2, "mkts": []
+                "media_chutes": (chutes_t1 + chutes_t2) / 2, "mkts": []
             }
         
-        if len(jogos_selecionados[mid]["mkts"]) < 3 and total_mercados < 18:
-            # Evita duplicar o mesmo mercado no mesmo jogo
-            if e['mkt'] not in [m['mkt'] for m in jogos_selecionados[mid]["mkts"]]:
-                jogos_selecionados[mid]["mkts"].append(e)
-                total_mercados += 1
+        # Limite de 3 mercados por jogo
+        if len(jogos_selecionados[mid]["mkts"]) < 3 and total_mercados < 13:
+            jogos_selecionados[mid]["mkts"].append(e)
+            total_mercados += 1
 
     browser.quit()
-    jogos_finais = sorted(jogos_selecionados.values(), key=lambda x: x['hora'])
+    jogos_finais = sorted(jogos_selecionados.values(), key=lambda x: x['liga'])
     if not jogos_finais: return
 
     msg = "🎯 *BILHETE DO DIA (SISTEMA H2H)*\n💰🍀 *BOA SORTE!!!*\n\n"
@@ -226,6 +212,8 @@ def executar():
         for mkt in j['mkts']:
             label = "🛡️" if mkt['tipo'] in ['1x', '2x'] else "🔥" if mkt['tipo'] == "2.5" else "⚽"
             msg += f"🔶 {label} {mkt['mkt']} ({mkt['perc']:.0f}%)\n"
+        if j.get('media_chutes', 0) > 0:
+            msg += f"💡 *Média Escanteios:* ({j['media_chutes']:.1f})\n"
         msg += f"📊 [Análise Sofa]({j['link']})\n\n"
     
     msg += "---\n💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
@@ -233,4 +221,3 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-                                          
