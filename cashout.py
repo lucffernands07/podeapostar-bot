@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 # IMPORTANTE: Coloque sua nova chave do painel API-SPORTS no GitHub Secrets
-API_KEY = os.getenv('X_RAPIDAPI_KEY') 
+API_KEY = os.getenv('API_SPORTS_KEY') 
 
 # MUDANÇA AQUI: Novo Host e cabeçalho para API-SPORTS
 HEADERS = {
