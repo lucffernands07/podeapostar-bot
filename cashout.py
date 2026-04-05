@@ -1,8 +1,8 @@
 import os
 import requests
-import pytz
 import time
-from datetime import datetime
+import pytz
+from datetime import datetime, timedelta
 
 # --- CONFIGURAÇÃO --- #
 TOKEN = os.getenv('TELEGRAM_TOKEN')
@@ -12,106 +12,107 @@ HEADERS = {'x-rapidapi-host': "api-football-v1.p.rapidapi.com", 'x-rapidapi-key'
 
 def enviar_telegram(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"}
+    payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
     try:
         requests.post(url, json=payload)
-    except:
-        pass
+    except: pass
 
-def obter_odds(fixture_id):
-    url = f"https://api-football-v1.p.rapidapi.com/v3/odds?fixture={fixture_id}"
+def get_over_stats_5(team_id, over_val):
+    # Estatística de Gols baseada nos últimos 5 jogos (Forma Atual)
+    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=5"
     try:
         res = requests.get(url, headers=HEADERS).json()
-        odds_data = res.get('response', [])
-        if not odds_data: return None, None
-        
-        for bookmaker in odds_data[0].get('bookmakers', []):
-            for bet in bookmaker.get('bets', []):
-                if bet['name'] == "Match Winner":
-                    o_h = next((float(o['odd']) for o in bet['values'] if o['value'] == 'Home'), None)
-                    o_a = next((float(o['odd']) for o in bet['values'] if o['value'] == 'Away'), None)
-                    return o_h, o_a
-        return None, None
-    except: return None, None
+        fixtures = res.get('response', [])
+        if not fixtures: return 0
+        count = 0
+        for f in fixtures:
+            total = (f['goals']['home'] or 0) + (f['goals']['away'] or 0)
+            if total > over_val: count += 1
+        return (count / len(fixtures)) * 100
+    except: return 0
 
-def executar_cashout():
+def executar_cashout_3h():
     fuso_br = pytz.timezone('America/Sao_Paulo')
     agora_br = datetime.now(fuso_br)
+    limite_3h = agora_br + timedelta(hours=3)
+    
     hoje = agora_br.strftime("%Y-%m-%d")
-    
-    print(f"🕒 Hora atual: {agora_br.strftime('%H:%M:%S')}")
-    print(f"📅 Data: {hoje}")
-    
-    ligas_ids = [1, 10, 2, 3, 39, 40, 41, 42, 45, 48, 61, 62, 71, 72, 78, 79, 88, 94, 135, 136, 140, 141, 144, 172, 203, 233, 239, 265, 13, 11, 848, 637]
-    coleta_bruta = {}
+    print(f"🔎 Iniciando Cashout. Agora: {agora_br.strftime('%H:%M')} | Limite: {limite_3h.strftime('%H:%M')}")
 
-    print(f"🔎 Buscando jogos em {len(ligas_ids)} ligas...")
+    ligas = [2, 39, 140, 135, 78, 61, 94, 71, 88, 144, 203, 172, 265, 239, 233, 141, 72, 13, 11]
+    jogos_na_janela = []
 
-    for l_id in ligas_ids:
-        for season in [2026, 2025]:
-            url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={season}"
+    for l_id in ligas:
+        for ano in [2026, 2025]:
+            url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
             try:
                 res = requests.get(url, headers=HEADERS).json()
                 fixtures = res.get('response', [])
+                if not fixtures: continue
                 
-                if fixtures:
-                    for f in fixtures:
-                        if f['fixture']['status']['short'] == "NS":
-                            data_utc = datetime.fromisoformat(f['fixture']['date'].replace('Z', '+00:00'))
-                            hora_br = data_utc.astimezone(fuso_br).strftime("%H:%M")
-                            
-                            if hora_br not in coleta_bruta:
-                                coleta_bruta[hora_br] = []
-                            
-                            if f['fixture']['id'] not in [x['fixture']['id'] for x in coleta_bruta[hora_br]]:
-                                coleta_bruta[hora_br].append(f)
-                    break 
-            except: 
-                continue
-        time.sleep(0.05)
+                for f in fixtures:
+                    if f['fixture']['status']['short'] != "NS": continue
+                    
+                    data_jogo = datetime.fromisoformat(f['fixture']['date'].replace('Z', '+00:00')).astimezone(fuso_br)
+                    
+                    # Filtro de tempo: entre AGORA e AGORA + 3 HORAS
+                    if agora_br < data_jogo <= limite_3h:
+                        jogos_na_janela.append({
+                            "id": f['fixture']['id'],
+                            "t1": f['teams']['home'],
+                            "t2": f['teams']['away'],
+                            "hora_obj": data_jogo,
+                            "hora_str": data_jogo.strftime("%H:%M"),
+                            "liga": f['league']['name']
+                        })
+                break
+            except: continue
 
-    if not coleta_bruta:
-        print("❌ Nenhum jogo 'Não Iniciado' (NS) encontrado para hoje nestas ligas.")
+    if not jogos_na_janela:
+        print("Nenhum jogo encontrado para as próximas 3 horas.")
         return
 
-    print(f"✅ Total de horários com jogos hoje: {len(coleta_bruta)}")
+    # PRIORIDADE 1: Pegar os 20 jogos mais cedo (ordem cronológica)
+    jogos_na_janela.sort(key=lambda x: x['hora_obj'])
+    top_20_cedo = jogos_na_janela[:20]
 
-    for hora in sorted(coleta_bruta.keys()):
-        total_jogos_janela = coleta_bruta[hora]
+    # PRIORIDADE 2: Calcular probabilidade de +1.5 gols e Rankear
+    pool_gols = []
+    print(f"📊 Analisando +1.5 Gols em {len(top_20_cedo)} jogos...")
+
+    for j in top_20_cedo:
+        o15_t1 = get_over_stats_5(j['t1']['id'], 1.5)
+        time.sleep(0.3) # Delay API
+        o15_t2 = get_over_stats_5(j['t2']['id'], 1.5)
         
-        if len(total_jogos_janela) >= 5:
-            print(f"💎 Janela das {hora}: {len(total_jogos_janela)} jogos encontrados. Analisando Odds...")
-            jogos_elite = []
-            
-            for f in total_jogos_janela:
-                odd_h, odd_a = obter_odds(f['fixture']['id'])
-                
-                if odd_h and odd_a:
-                    diff = odd_a - odd_h
-                    if odd_h < odd_a and diff >= 3.0:
-                        jogos_elite.append({
-                            "confronto": f"{f['teams']['home']['name']} x {f['teams']['away']['name']}",
-                            "diff": diff
-                        })
-                time.sleep(0.3)
+        probabilidade = (o15_t1 + o15_t2) / 2
+        
+        pool_gols.append({
+            "info": f"*{j['t1']['name']} x {j['t2']['name']}*",
+            "hora": j['hora_str'],
+            "liga": j['liga'],
+            "perc": probabilidade
+        })
 
-            if jogos_elite:
-                jogos_elite.sort(key=lambda x: x['diff'], reverse=True)
-                msg = f"💰 *CASHOUT ELITE - {hora}*\n"
-                msg += f"🏟️ *Janela:* {len(total_jogos_janela)} jogos\n"
-                msg += f"🎯 *No padrão (Diff >= 3.0):* {len(jogos_elite)}\n"
-                msg += "----------------------------------\n"
-                for idx, j in enumerate(jogos_elite, 1):
-                    msg += f"{idx}. {j['confronto']} - *Diff: {j['diff']:.1f}*\n"
-                msg += "\n✅ *Mercado:* +1.5 Gols"
-                enviar_telegram(msg)
-                print(f"🚀 MENSAGEM ENVIADA para as {hora}!")
-            else:
-                print(f"⚠️ Janela das {hora}: Nenhum jogo passou no filtro de Odd Diff >= 3.0.")
-        else:
-            # Esse print te diz por que o horário foi ignorado
-            print(f"⏭️ Ignorando {hora}: Apenas {len(total_jogos_janela)} jogos (Mínimo é 5).")
+    # Ordenar pelos 10 melhores em probabilidade de gols
+    pool_gols.sort(key=lambda x: x['perc'], reverse=True)
+    top_10_gols = pool_gols[:10]
+
+    if not top_10_gols: return
+
+    # Montagem do Bilhete
+    msg = f"💰 *CASHOUT 3H - TOP 10 GOLS*\n"
+    msg += f"⏰ Janela: {agora_br.strftime('%H:%M')} até {limite_3h.strftime('%H:%M')}\n"
+    msg += f"----------------------------------\n\n"
+
+    for i, j in enumerate(top_10_gols, 1):
+        msg += f"{i}. 🏟️ {j['info']}\n"
+        msg += f"🕒 {j['hora']} | {j['liga']}\n"
+        msg += f"⚽ *+1.5 Gols:* ({j['perc']:.0f}%)\n\n"
+
+    msg += "---\n💸 [Betano](https://www.betano.com) | [Bet365](https://www.bet365.com)"
+    enviar_telegram(msg)
+    print("🚀 Bilhete de Cashout enviado!")
 
 if __name__ == "__main__":
-    executar_cashout()
-            
+    executar_cashout_3h()
