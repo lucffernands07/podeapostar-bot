@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do codigo
+      - name: Checkout do código
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 # Necessário para detectar qual arquivo mudou
+          fetch-depth: 2 
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -38,15 +38,15 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-          X_RAPIDAPI_KEY: ${{ secrets.X_RAPIDAPI_KEY }}
+          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}
         run: |
           # 1. Se for agendado (08h) ou manual, roda os dois
           if [[ "${{ github.event_name }}" == "schedule" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "🚀 Rodando execução completa diária..."
+            echo "🚀 Rodando execução completa diária (Main e Cashout)..."
             python main.py
             python cashout.py
           
-          # 2. Se for um Push, verifica qual arquivo foi alterado
+          # 2. Se for um Push, verifica qual arquivo específico foi alterado
           else
             MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
             
