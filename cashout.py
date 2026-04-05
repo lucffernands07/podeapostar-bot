@@ -7,8 +7,14 @@ from datetime import datetime, timedelta
 # --- CONFIGURAÇÃO --- #
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
+# IMPORTANTE: Coloque sua nova chave do painel API-SPORTS no GitHub Secrets
 API_KEY = os.getenv('X_RAPIDAPI_KEY') 
-HEADERS = {'x-rapidapi-host': "api-football-v1.p.rapidapi.com", 'x-rapidapi-key': API_KEY}
+
+# MUDANÇA AQUI: Novo Host e cabeçalho para API-SPORTS
+HEADERS = {
+    'x-apisports-key': API_KEY
+}
+BASE_URL = "https://v3.football.api-sports.io"
 
 def enviar_telegram(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -18,14 +24,10 @@ def enviar_telegram(msg):
     except: pass
 
 def get_over_stats_5(team_id, over_val):
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=5"
+    # Endpoint atualizado
+    url = f"{BASE_URL}/fixtures?team={team_id}&last=5"
     try:
         response = requests.get(url, headers=HEADERS)
-        # Se bater no limite durante a análise de estatísticas, espera um pouco
-        if response.status_code == 429:
-            time.sleep(10)
-            response = requests.get(url, headers=HEADERS)
-            
         if response.status_code != 200: return 0
         res = response.json()
         fixtures = res.get('response', [])
@@ -43,47 +45,31 @@ def executar_cashout_3h():
     limite_3h = agora_br + timedelta(hours=3)
     hoje = agora_br.strftime("%Y-%m-%d")
     
-    print(f"--- INICIANDO VALIDAÇÃO ---")
+    print(f"--- INICIANDO VALIDAÇÃO (API-SPORTS) ---")
     print(f"🕒 Agora: {agora_br.strftime('%H:%M')} | Janela até: {limite_3h.strftime('%H:%M')}")
-    
-    if not API_KEY:
-        print("❌ ERRO: X_RAPIDAPI_KEY não configurada.")
-        return
 
-    # Ligas baseadas nas fotos enviadas
-    ligas = [2, 3, 39, 40, 140, 141, 135, 136, 78, 79, 61, 62, 94, 71, 72, 88, 144, 203, 172, 265, 239, 233, 13, 11]
+    # Ligas baseadas nos seus prints (LaLiga, Serie A, Bundesliga, Ligue 1, etc.)
+    ligas = [140, 141, 135, 136, 78, 79, 61, 62, 39, 40, 94, 71, 72, 88, 144, 203, 172, 265, 239, 233, 13, 11]
     jogos_na_janela = []
 
     for l_id in ligas:
-        # Buscamos 2025 primeiro (maioria das ligas das fotos são 25/26)
+        # Focando nas temporadas 2025 e 2026 conforme solicitado
         for ano in [2025, 2026]:
-            url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
+            url = f"{BASE_URL}/fixtures?date={hoje}&league={l_id}&season={ano}"
             try:
                 response = requests.get(url, headers=HEADERS)
                 
-                # Trata limite de requisições por minuto (Status 429)
+                # Log de Quota (O plano free tem 100/dia, bom monitorar)
                 if response.status_code == 429:
-                    print(f"⏳ Limite atingido na Liga {l_id}. Aguardando 15s...")
-                    time.sleep(15)
-                    response = requests.get(url, headers=HEADERS)
-
-                if response.status_code == 403:
-                    print(f"❌ Erro 403: Sem permissão ou cota diária esgotada (Liga {l_id})")
-                    continue
-                elif response.status_code != 200:
-                    print(f"⚠️ Status {response.status_code} na Liga {l_id}")
+                    print("⚠️ Limite de requisições atingido. Pausando...")
+                    time.sleep(30)
                     continue
 
                 res = response.json()
-                if res.get('errors'):
-                    print(f"⚠️ Erro API (Liga {l_id}): {res['errors']}")
-                    continue
-
                 fixtures = res.get('response', [])
-                if not fixtures: 
-                    continue
+                if not fixtures: continue
                 
-                print(f"✅ Liga {l_id} ({ano}): {len(fixtures)} jogos encontrados.")
+                print(f"✅ Liga {l_id} ({ano}): {len(fixtures)} jogos no dia.")
                 
                 for f in fixtures:
                     if f['fixture']['status']['short'] != "NS": continue
@@ -100,57 +86,51 @@ def executar_cashout_3h():
                             "liga": f['league']['name']
                         })
                 
-                # Pausa estratégica para não estourar os 10req/min do plano Free
-                time.sleep(2.0)
+                # Pausa para respeitar o limite de 10 requisições por minuto
+                time.sleep(6.1) 
                 break 
-
-            except Exception as e:
-                print(f"💥 Erro na Liga {l_id}: {e}")
-                continue
+            except: continue
 
     if not jogos_na_janela:
-        print("ℹ️ Nenhum jogo 'NS' encontrado para as próximas 3h.")
+        print("ℹ️ Nenhum jogo pendente para as próximas 3h.")
         return
 
-    # PRIORIDADE: 20 mais cedo
+    # Filtro e análise dos Top 10
     jogos_na_janela.sort(key=lambda x: x['hora_obj'])
-    top_20_cedo = jogos_na_janela[:20]
+    top_selecao = jogos_na_janela[:15] # Reduzi para 15 para economizar sua cota de 100/dia
 
-    # PRIORIDADE: Cálculo de Gols
     pool_gols = []
-    print(f"📊 Analisando +1.5 Gols em {len(top_20_cedo)} jogos...")
+    print(f"📊 Analisando estatísticas para {len(top_selecao)} jogos...")
 
-    for j in top_20_cedo:
+    for j in top_selecao:
         o15_t1 = get_over_stats_5(j['t1']['id'], 1.5)
-        time.sleep(1.5) # Pausa entre times
+        time.sleep(6.1) # Pausa obrigatória entre chamadas
         o15_t2 = get_over_stats_5(j['t2']['id'], 1.5)
+        time.sleep(6.1)
         
         probabilidade = (o15_t1 + o15_t2) / 2
-        
         pool_gols.append({
             "info": f"*{j['t1']['name']} x {j['t2']['name']}*",
             "hora": j['hora_str'],
             "liga": j['liga'],
             "perc": probabilidade
         })
-        time.sleep(1.0) # Pausa entre jogos
 
     pool_gols.sort(key=lambda x: x['perc'], reverse=True)
-    top_10_gols = pool_gols[:10]
+    top_10 = pool_gols[:10]
 
-    if not top_10_gols: return
+    if not top_10: return
 
-    # Mensagem Final
     msg = f"💰 *CASHOUT 3H - TOP 10 GOLS*\n"
     msg += f"⏰ Janela: {agora_br.strftime('%H:%M')} até {limite_3h.strftime('%H:%M')}\n"
     msg += f"----------------------------------\n\n"
 
-    for i, j in enumerate(top_10_gols, 1):
+    for i, j in enumerate(top_10, 1):
         msg += f"{i}. 🏟️ {j['info']}\n"
         msg += f"🕒 {j['hora']} | {j['liga']}\n"
         msg += f"⚽ *+1.5 Gols:* ({j['perc']:.0f}%)\n\n"
 
-    msg += "---\n💸 [Betano](https://www.betano.com) | [Bet365](https://www.bet365.com)"
+    msg += "---\n🤖 API-SPORTS Ativa"
     enviar_telegram(msg)
     print("🚀 Bilhete enviado!")
 
