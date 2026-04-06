@@ -1,4 +1,4 @@
-name: Robô de Bilhetes - SofaScraper
+name: Robô de Bilhetes - API BSD
 
 on:
   push:
@@ -24,10 +24,7 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Instalar Google Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+      # Removi a instalação do Chrome para o bot rodar em segundos! 🚀
 
       - name: Instalar Dependências Python
         run: |
@@ -36,10 +33,13 @@ jobs:
 
       - name: Executar Rastreador de Bilhetes
         env:
+          # --- AS CHAVES ABAIXO DEVEM ESTAR NO SETTINGS > SECRETS DO GITHUB ---
+          BSD_TOKEN: ${{ secrets.BSD_TOKEN }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}
+          # Mantive as antigas caso você ainda use o ZenRows em outra parte do código
           ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
+          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}
         run: |
-          echo "🚀 Iniciando Mineração SofaScore..."
+          echo "🚀 Iniciando Mineração via API BSD..."
           python main.py
