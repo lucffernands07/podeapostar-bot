@@ -78,31 +78,38 @@ def get_over_stats(team_id, team_name, over_val):
 
 def testar_jogo_especifico():
     fuso_br = pytz.timezone('America/Sao_Paulo')
-    hoje = datetime.now(fuso_br).strftime("%Y-%m-%d")
+    log_teste("BUSCA", "Iniciando Busca Blindada pelo ID da Juventus (496)...")
     
     match = None
-    # CORREÇÃO CRÍTICA: Varre as temporadas para não dar "jogo não encontrado"
-    for ano in [2025, 2026]:
-        log_teste("BUSCA", f"Verificando temporada {ano}...")
-        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league=135&season={ano}"
+    # Buscamos os próximos 5 jogos da Juventus em qualquer liga/temporada
+    # Isso ignora erros de fuso horário e de ID de liga
+    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team=496&next=5"
+    
+    try:
         res = requests.get(url, headers=HEADERS).json()
         fixtures = res.get('response', [])
         
-        for f in fixtures:
-            if "Juventus" in f['teams']['home']['name'] or "Juventus" in f['teams']['away']['name']:
-                match = f
-                break
-        if match: break
+        if not fixtures:
+            log_teste("ERRO", "A API não retornou NENHUM jogo futuro para a Juventus.")
+            return
 
-    if not match:
-        print(f"❌ Jogo da Juventus não encontrado para o dia {hoje} nas temporadas 2025/2026.")
+        # Pegamos o primeiro jogo da lista (o mais próximo)
+        match = fixtures[0]
+        log_teste("BUSCA", f"✅ Jogo encontrado via ID Direto!")
+        
+    except Exception as e:
+        print(f"❌ Erro na chamada da API: {e}")
         return
 
     t1, t2 = match['teams']['home'], match['teams']['away']
-    print(f"\n🏟️ ANALISANDO: {t1['name']} x {t2['name']}")
+    data_jogo = match['fixture']['date']
+    
+    print(f"\n🏟️  ANALISANDO: {t1['name']} x {t2['name']}")
+    print(f"📅  Data na API: {data_jogo}")
     print("-" * 50)
 
     # 1. Teste de Performance (Dupla Chance)
+    # Importante: t1['id'] e t2['id'] pegam os IDs reais da API para não errar o cálculo
     perf_t1 = get_h2h_dupla_chance(t1['id'], t1['id'], f"Performance {t1['name']}")
     perf_t2 = get_h2h_dupla_chance(t2['id'], t2['id'], f"Performance {t2['name']}")
     
@@ -117,7 +124,7 @@ def testar_jogo_especifico():
     media_o15 = (o15_t1 + o15_t2) / 2
     
     if o15_t1 >= 85 or media_o15 >= 70:
-        log_teste("FILTRO", f"✅ ENTRARIA em Over 1.5 (Média: {media_o15}%)")
+        log_teste("FILTRO", f"✅ ENTRARIA em Over 1.5 (Média: {media_o15:.1f}%)")
     else:
         log_teste("FILTRO", f"❌ NÃO ENTRARIA em Over 1.5")
 
