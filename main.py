@@ -17,220 +17,127 @@ CHAT_ID = os.getenv('CHAT_ID')
 API_KEY = os.getenv('X_RAPIDAPI_KEY')
 HEADERS = {'x-rapidapi-host': "api-football-v1.p.rapidapi.com", 'x-rapidapi-key': API_KEY}
 
+def log_teste(etapa, msg):
+    print(f"🔍 [TESTE {etapa}] {msg}")
+
 def configurar_browser():
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=options)
 
-def enviar_telegram(msg):
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown", "disable_web_page_preview": True}
-    try:
-        requests.post(url, json=payload)
-    except Exception as e:
-        print(f"Erro ao enviar Telegram: {e}")
-
-def get_avg_shots_api(team_id):
+def get_avg_shots_api(team_id, team_name):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10&status=FT"
     try:
         res = requests.get(url, headers=HEADERS).json()
         fixtures = res.get('response', [])
-        if not fixtures: return 0
-        
         total_shots = 0
-        jogos_com_dados_reais = 0 
-
+        jogos_com_dados = 0
         for f in fixtures:
-            f_id = f['fixture']['id']
-            url_s = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/statistics?fixture={f_id}&team={team_id}"
+            url_s = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/statistics?fixture={f['fixture']['id']}&team={team_id}"
             res_s = requests.get(url_s, headers=HEADERS).json()
-            stats_list = res_s.get('response', [])
-            
-            if stats_list and 'statistics' in stats_list[0]:
-                for s in stats_list[0]['statistics']:
+            stats = res_s.get('response', [])
+            if stats and 'statistics' in stats[0]:
+                for s in stats[0]['statistics']:
                     if s['type'] == 'Total Shots' and s['value'] is not None:
-                        val = int(s['value'])
-                        total_shots += val
-                        jogos_com_dados_reais += 1
-                        break 
+                        total_shots += int(s['value'])
+                        jogos_com_dados += 1
+                        break
             time.sleep(0.4)
+        media = total_shots / jogos_com_dados if jogos_com_dados > 0 else 0
+        log_teste("CHUTES", f"{team_name}: Média de {media:.2f} chutes (Base: {jogos_com_dados} jogos)")
+        return media
+    except: return 0
 
-        if jogos_com_dados_reais > 0:
-            media_final = total_shots / jogos_com_dados_reais
-            print(f"📊 Sucesso ID {team_id}: {total_shots} chutes em {jogos_com_dados_reais} jogos. Média: {media_final:.2f}")
-            return media_final
-        else:
-            print(f"⚠️ Aviso ID {team_id}: Nenhum dado de 'Total Shots' encontrado.")
-            return 0
-    except Exception as e:
-        print(f"❌ Erro na função de chutes (ID {team_id}): {e}")
-        return 0
-
-def get_h2h_dupla_chance(t1_id, t2_id, last=10):
+def get_h2h_dupla_chance(t1_id, t2_id, label, last=10):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last={last}"
     try:
         res = requests.get(url, headers=HEADERS).json()
         fixtures = res.get('response', [])
-        if not fixtures: return 0, 0
-        t1_wd, t2_wd = 0, 0
+        t1_wd = 0
         for f in fixtures:
             gh, ga = f['goals']['home'] or 0, f['goals']['away'] or 0
             if (f['teams']['home']['id'] == t1_id and gh >= ga) or (f['teams']['away']['id'] == t1_id and ga >= gh): t1_wd += 1
-            if (f['teams']['home']['id'] == t2_id and ga >= gh) or (f['teams']['away']['id'] == t2_id and gh >= ga): t2_wd += 1
-        return (t1_wd / len(fixtures)) * 100, (t2_wd / len(fixtures)) * 100
-    except: return 0, 0
+        perc = (t1_wd / len(fixtures)) * 100 if fixtures else 0
+        log_teste("H2H", f"{label}: {perc:.0f}% de Dupla Chance")
+        return perc
+    except: return 0
 
-def get_over_stats(team_id, over_val):
+def get_over_stats(team_id, team_name, over_val):
     url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10"
     try:
         res = requests.get(url, headers=HEADERS).json()
         fixtures = res.get('response', [])
-        if not fixtures: return 0
-        count = 0
-        for f in fixtures:
-            total = (f['goals']['home'] or 0) + (f['goals']['away'] or 0)
-            if total > over_val: count += 1
-        return (count / len(fixtures)) * 100
+        count = sum(1 for f in fixtures if (f['goals']['home'] or 0) + (f['goals']['away'] or 0) > over_val)
+        perc = (count / len(fixtures)) * 100 if fixtures else 0
+        log_teste("GOLS", f"{team_name} Over {over_val}: {perc:.0f}%")
+        return perc
     except: return 0
 
-def get_id_h2h(driver, t1_name, t2_name):
-    url_real = "https://www.sofascore.com/"
-    wait = WebDriverWait(driver, 25)
-    try:
-        driver.get("https://www.sofascore.com/pt/")
-        try:
-            cookies_btn = driver.find_elements(By.XPATH, "//button[contains(., 'Aceito') or contains(., 'Agree')]")
-            if cookies_btn: cookies_btn[0].click()
-        except: pass
-        search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
-        search_input.click()
-        search_input.send_keys(f"{t1_name} {t2_name}")
-        time.sleep(8)
-        resultados = driver.find_elements(By.XPATH, "//a[contains(@href, '/football/match/')]")
-        if resultados: url_real = resultados[0].get_attribute("href")
-    except: pass
-    return url_real
-
-def executar():
+def testar_jogo_especifico():
     fuso_br = pytz.timezone('America/Sao_Paulo')
-    agora_br = datetime.now(fuso_br)
-    hoje = agora_br.strftime("%Y-%m-%d")
+    hoje = datetime.now(fuso_br).strftime("%Y-%m-%d")
     
-    ligas = {
-        2: "Champions League", 39: "Premier League", 40: "Championship", 41: "League One",
-        140: "LALIGA", 135: "Serie A", 78: "Bundesliga", 61: "Ligue 1", 
-        94: "Português", 71: "Brasileirão A", 88: "Holandês", 144: "Belga", 
-        203: "Süper Lig", 172: "Bulgária", 265: "Chile", 239: "Colômbia", 
-        233: "Egito", 141: "LaLiga 2", 72: "Brasileirão B", 13: "Libertadores", 11: "Sudamericana"
-    }
-
-    LIGAS_MATA_MATA = [2, 11, 13]
-    pool_entradas = []
-
-    for l_id, l_nome in ligas.items():
-        fixtures_hoje = []
-        for ano in [2027, 2026, 2025]:
-            url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league={l_id}&season={ano}"
-            try:
-                res = requests.get(url, headers=HEADERS).json()
-                if res.get('response'): 
-                    fixtures_hoje.extend(res['response'])
-                    break 
-            except: continue
+    # ID da Serie A é 135. Temporada atual é 2025 (ou 2026 dependendo da liga)
+    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league=135&season=2025"
+    res = requests.get(url, headers=HEADERS).json()
+    
+    match = None
+    for f in res.get('response', []):
+        if "Juventus" in f['teams']['home']['name'] or "Juventus" in f['teams']['away']['name']:
+            match = f
+            break
             
-        for m in fixtures_hoje:
-            if m['fixture']['status']['short'] != "NS": continue
+    if not match:
+        print("❌ Jogo da Juventus não encontrado para hoje na API.")
+        return
 
-            t1, t2 = m['teams']['home'], m['teams']['away']
-            
-            # Ajuste de extração da tupla (index [0] para time da casa, [1] para visitante)
-            perf_t1 = get_h2h_dupla_chance(t1['id'], t1['id'])[0]
-            perf_t2 = get_h2h_dupla_chance(t2['id'], t2['id'])[1]
-            
-            h2h_dir_10_t1, h2h_dir_10_t2 = get_h2h_dupla_chance(t1['id'], t2['id'], last=10)
-            h2h_dir_5_t1, h2h_dir_5_t2 = get_h2h_dupla_chance(t1['id'], t2['id'], last=5)
+    t1, t2 = match['teams']['home'], match['teams']['away']
+    print(f"\n🏟️ ANALISANDO: {t1['name']} x {t2['name']}")
+    print("-" * 50)
 
-            g_info = {
-                "id": m['fixture']['id'], "t1_id": t1['id'], "t2_id": t2['id'],
-                "t1_name": t1['name'], "t2_name": t2['name'],
-                "info": f"*{t1['name']} x {t2['name']}*", 
-                "hora": datetime.fromisoformat(m['fixture']['date'].replace('Z', '+00:00')).astimezone(fuso_br).strftime("%H:%M"), 
-                "liga": l_nome
-            }
+    # 1. Teste de Performance (Dupla Chance)
+    perf_t1 = get_h2h_dupla_chance(t1['id'], t1['id'], f"Performance {t1['name']}")
+    perf_t2 = get_h2h_dupla_chance(t2['id'], t2['id'], f"Performance {t2['name']}")
+    
+    if perf_t1 >= 70:
+        log_teste("FILTRO", f"✅ ENTRARIA em Dupla Chance {t1['name']}")
+    else:
+        log_teste("FILTRO", f"❌ NÃO ENTRARIA em Dupla Chance (Mínimo 70%)")
 
-            if l_id not in LIGAS_MATA_MATA:
-                if perf_t1 >= 70 and perf_t2 <= 70:
-                    pool_entradas.append({"perc": perf_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
-                elif perf_t2 >= 90 and perf_t1 <= 60:
-                    pool_entradas.append({"perc": perf_t2, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
-                elif h2h_dir_10_t1 >= 80:
-                    pool_entradas.append({"perc": h2h_dir_10_t1, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
-            else:
-                if h2h_dir_5_t1 >= 100:
-                    pool_entradas.append({"perc": 100, "mkt": f"{t1['name']} ou Empate", "tipo": "1x", **g_info})
-                elif h2h_dir_5_t2 >= 100:
-                    pool_entradas.append({"perc": 100, "mkt": f"{t2['name']} ou Empate", "tipo": "2x", **g_info})
+    # 2. Teste de Gols
+    o15_t1 = get_over_stats(t1['id'], t1['name'], 1.5)
+    o15_t2 = get_over_stats(t2['id'], t2['name'], 1.5)
+    media_o15 = (o15_t1 + o15_t2) / 2
+    
+    if o15_t1 >= 85 or media_o15 >= 70:
+        log_teste("FILTRO", f"✅ ENTRARIA em Over 1.5 (Média: {media_o15}%)")
+    else:
+        log_teste("FILTRO", f"❌ NÃO ENTRARIA em Over 1.5")
 
-            o15_t1, o15_t2 = get_over_stats(t1['id'], 1.5), get_over_stats(t2['id'], 1.5)
-            o25_t1, o25_t2 = get_over_stats(t1['id'], 2.5), get_over_stats(t2['id'], 2.5)
-            m_o15 = (o15_t1 + o15_t2) / 2
-            
-            if o15_t1 >= 85 or m_o15 >= 70:
-                pool_entradas.append({"perc": max(o15_t1, m_o15), "mkt": "+1.5 Gols", "tipo": "1.5", **g_info})
-            
-            if (o25_t1 >= 80 and o25_t2 >= 60) or (o25_t2 >= 80 and o25_t1 >= 60):
-                m_o25 = (o25_t1 + o25_t2) / 2
-                pool_entradas.append({"perc": m_o25, "mkt": "+2.5 Gols", "tipo": "2.5", **g_info})
-                
-    pool_entradas.sort(key=lambda x: x['perc'], reverse=True)
-    jogos_selecionados = {}
-    total_mercados = 0 
+    # 3. Teste de Chutes (Escanteios/Estatística)
+    chutes_t1 = get_avg_shots_api(t1['id'], t1['name'])
+    chutes_t2 = get_avg_shots_api(t2['id'], t2['name'])
+    print(f"📊 Média Combinada de Chutes: {(chutes_t1 + chutes_t2)/2:.2f}")
+
+    # 4. Selenium (SofaScore)
     browser = configurar_browser()
-
-    for e in pool_entradas:
-        mid = e['id']
-        if total_mercados >= 18: break 
-        if mid not in jogos_selecionados and len(jogos_selecionados) >= 10: continue
-            
-        if mid not in jogos_selecionados:
-            url_sofa = get_id_h2h(browser, e['t1_name'], e['t2_name'])
-            chutes_t1 = get_avg_shots_api(e['t1_id'])
-            time.sleep(0.5) 
-            chutes_t2 = get_avg_shots_api(e['t2_id'])
-            m_chutes_final = (chutes_t1 + chutes_t2) / 2
-            
-            jogos_selecionados[mid] = {
-                "info": e['info'], "hora": e['hora'], "liga": e['liga'], 
-                "link": url_sofa, "media_chutes": m_chutes_final, "mkts": []
-            }
-        
-        if len(jogos_selecionados[mid]["mkts"]) < 3 and total_mercados < 18:
-            jogos_selecionados[mid]["mkts"].append(e)
-            total_mercados += 1
-
+    log_teste("SOFASCORE", "Buscando link...")
+    # Chamando sua função original de busca
+    wait = WebDriverWait(browser, 20)
+    browser.get("https://www.sofascore.com/pt/")
+    try:
+        search = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
+        search.send_keys(f"{t1['name']} {t2['name']}")
+        time.sleep(5)
+        res_link = browser.find_elements(By.XPATH, "//a[contains(@href, '/football/match/')]")
+        if res_link:
+            print(f"🔗 Link encontrado: {res_link[0].get_attribute('href')}")
+    except:
+        print("⚠️ SofaScore Link não capturado.")
     browser.quit()
-    jogos_finais = sorted(jogos_selecionados.values(), key=lambda x: x['liga'])
-    if not jogos_finais: return
-
-    msg = "🎯 *BILHETE DO DIA (SISTEMA H2H)*\n💰🍀 *BOA SORTE!!!*\n\n"
-    for i, j in enumerate(jogos_finais, 1):
-        msg += f"{i}. 🏟️ {j['info']}\n🕒 {j['hora']} | {j['liga']}\n"
-        j['mkts'].sort(key=lambda x: x['perc'], reverse=True)
-        for mkt in j['mkts']:
-            label = "🛡️" if mkt['tipo'] in ['1x', '2x'] else "🔥" if mkt['tipo'] == "2.5" else "⚽"
-            msg += f"🔶 {label} {mkt['mkt']} ({mkt['perc']:.0f}%)\n"
-        media_c = j.get('media_chutes', 0)
-        if media_c > 0:
-            msg += f"💡 *Média Chutes:* ({media_c:.1f})\n"
-        msg += f"📊 [Análise Sofa]({j['link']})\n\n"
-    
-    msg += "---\n💸 [Bet365](https://www.bet365.com) | [Betano](https://www.betano.com)"
-    enviar_telegram(msg)
 
 if __name__ == "__main__":
-    executar()
+    testar_jogo_especifico()
