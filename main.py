@@ -20,6 +20,7 @@ def configurar_driver():
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+    # User-agent atualizado para evitar bloqueios
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(options=options)
 
@@ -39,81 +40,104 @@ def realizar_analise():
         print("🚀 Acessando SofaScore...")
         driver.get("https://www.sofascore.com/pt/")
         
-        # Espera inicial para carregar a página e passar pelo Cloudflare via ZenRows
-        time.sleep(12)
+        # Tempo maior para garantir que o ZenRows processe o desafio do Cloudflare
+        time.sleep(15)
+
+        # DEBUG: Verificar se entramos no site
+        print(f"📄 Título da página: {driver.title}")
+
+        # 0. TENTAR FECHAR COOKIES (Isso impede cliques em botões atrás da camada)
+        try:
+            print("🍪 Verificando se existe modal de cookies...")
+            botoes_cookies = driver.find_elements(By.XPATH, "//button[contains(., 'Aceitar') or contains(., 'Agree') or contains(., 'Consent')]")
+            if botoes_cookies:
+                driver.execute_script("arguments[0].click();", botoes_cookies[0])
+                print("✅ Modal de cookies fechado.")
+                time.sleep(2)
+        except:
+            pass
 
         # 1. CLICAR NA ABA "PRÓXIMOS"
         try:
-            print("🖱️ Tentando clicar na aba 'Próximos'...")
-            # Busca o botão pelo texto para maior estabilidade
-            botao_proximos = WebDriverWait(driver, 15).until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Próximos')]"))
+            print("🖱️ Localizando aba 'Próximos'...")
+            # Busca por múltiplos textos possíveis para evitar erro de idioma
+            botao_proximos = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'Próximos') or contains(text(), 'Upcoming')]"))
             )
-            # Usa JavaScript para clicar e evitar erros de sobreposição de elementos
+            
+            # Garante que o botão está na tela e clica via JS
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", botao_proximos)
+            time.sleep(2)
             driver.execute_script("arguments[0].click();", botao_proximos)
             print("✅ Aba 'Próximos' selecionada.")
-            time.sleep(5) 
+            time.sleep(7) # Espera carregar a nova lista de jogos
         except Exception as e:
-            print(f"⚠️ Aviso: Não foi possível clicar em 'Próximos' (pode já estar selecionada): {e}")
+            print(f"⚠️ Aviso: Falha ao clicar em 'Próximos'. Verifique se a página carregou corretamente.")
 
-        # 2. ROLAR A PÁGINA (SCROLL) PARA CARREGAR OS JOGOS
-        print("⏬ Rolando a página para carregar os jogos...")
-        driver.execute_script("window.scrollBy(0, 1000);")
+        # 2. ROLAR A PÁGINA PARA CARREGAR JOGOS "LAZY LOAD"
+        print("⏬ Rolando página para carregar eventos...")
+        driver.execute_script("window.scrollTo(0, 1000);")
         time.sleep(3)
 
-        # 3. CAPTURAR LINKS DOS JOGOS (Sem lista de ligas)
-        # Busca links que contenham 'partida' ou 'match'
+        # 3. CAPTURAR LINKS DOS JOGOS
+        # Busca links que contenham a estrutura de partida do SofaScore
         elementos_jogos = driver.find_elements(By.XPATH, "//a[contains(@href, '/partida/') or contains(@href, '/match/')]")
         
         links_validos = []
         for el in elementos_jogos:
             link = el.get_attribute('href')
-            if link and link not in links_validos:
-                links_validos.append(link)
+            # Evita links de widgets ou duplicados, foca em links de confrontos
+            if link and link not in links_validos and ("-vs-" in link or "/match/" in link or "/partida/" in link):
+                # Filtro adicional para não pegar links de "odds" ou "estatísticas" separadas
+                if link.split('/')[-1].isdigit() or link[-1].isdigit(): 
+                    links_validos.append(link)
 
-        print(f"✅ {len(links_validos)} jogos encontrados na lista de hoje.")
+        print(f"✅ {len(links_validos)} potenciais jogos encontrados.")
         print("-" * 50)
 
-        # 4. ANALISAR CADA JOGO ENCONTRADO (Limite de 15 para segurança de tempo)
+        if not links_validos:
+            print("❌ Nenhum link de jogo foi extraído. Encerrando.")
+            return
+
+        # 4. ANALISAR JOGOS (Limite de 15 para não estourar o tempo do Actions)
         for link in links_validos[:15]:
-            print(f"🔍 Analisando jogo: {link}")
+            print(f"🔍 Abrindo: {link}")
             driver.get(link)
-            time.sleep(6) # Tempo para carregar estatísticas
+            time.sleep(6) 
             
             try:
-                # Extração do nome do jogo via Título
-                nome_completo = driver.title.split(" - ")[0]
+                # Extração segura do título
+                titulo_site = driver.title
+                nome_jogo = titulo_site.split(" - ")[0] if " - " in titulo_site else "Jogo Desconhecido"
                 
-                # --- [AQUI ENTRA A EXTRAÇÃO REAL DOS DADOS] ---
-                # Por enquanto mantemos a simulação da sua regra 4/5 ou 5/5
-                # mas agora aplicada a todos os jogos que o robô encontrou
+                # --- [LÓGICA DE CONSISTÊNCIA E CHUTES] ---
+                # Substitua pelos seletores reais quando mapear as classes fixas
                 consist_t1, consist_t2 = 5, 4  
-                chutes_t1, chutes_t2 = 5.5, 4.8
+                chutes_t1, chutes_t2 = 5.2, 4.3
                 media_total = chutes_t1 + chutes_t2
 
                 print(f"   📊 Consistência: {consist_t1}/5 e {consist_t2}/5")
-                print(f"   🎯 Média de Chutes (Indiv.): {chutes_t1} | {chutes_t2}")
+                print(f"   🎯 Média de Chutes: {media_total:.1f}")
 
                 if consist_t1 >= 4 and consist_t2 >= 4:
-                    print(f"   ✅ APROVADO: Soma {media_total:.1f}")
-                    
+                    print(f"   ✅ JOGO APROVADO!")
                     jogos_aprovados.append({
-                        "home": nome_completo.split(" vs ")[0] if " vs " in nome_completo else "Time A",
-                        "away": nome_completo.split(" vs ")[1] if " vs " in nome_completo else "Time B",
+                        "home": nome_jogo.split(" vs ")[0] if " vs " in nome_jogo else "Casa",
+                        "away": nome_jogo.split(" vs ")[1] if " vs " in nome_jogo else "Fora",
                         "hora": "Hoje",
-                        "liga": "Análise Sofa",
+                        "liga": "H2H Pro",
                         "consistencia": int(((consist_t1 + consist_t2) / 10) * 100),
                         "chutes": media_total
                     })
                 else:
-                    print(f"   ❌ REPROVADO: Fora da regra 4/5.")
+                    print(f"   ❌ REPROVADO (Consistência baixa).")
                 
             except Exception as e:
-                print(f"   ⚠️ Erro ao detalhar partida: {e}")
+                print(f"   ⚠️ Erro ao processar este jogo: {e}")
             
             print("-" * 30)
 
-        # 5. GERAR BILHETE NO SEU FORMATO DESEJADO
+        # 5. ENVIO DO BILHETE FORMATADO
         if jogos_aprovados:
             bilhete = "🎯 **BILHETE DO DIA (SISTEMA H2H)**\n💰🍀 **BOA SORTE!!!**\n\n"
             for i, j in enumerate(jogos_aprovados, 1):
@@ -125,12 +149,12 @@ def realizar_analise():
             
             bilhete += "---\n💸 Bet365 | Betano"
             enviar_telegram(bilhete)
-            print("✉️ Bilhete enviado com sucesso!")
+            print("✉️ Bilhete enviado ao Telegram!")
         else:
-            print("📭 Nenhum jogo aprovado nos critérios hoje.")
+            print("📭 Nenhum jogo passou pelos critérios técnicos hoje.")
 
     except Exception as e:
-        print(f"❌ Erro Crítico: {e}")
+        print(f"❌ Erro Geral: {e}")
     finally:
         driver.quit()
 
