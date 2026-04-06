@@ -12,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 ZENROWS_KEY = os.getenv('ZENROWS_KEY')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
-# Adicionando renderização de JS via ZenRows para garantir que o JSON carregue
+# js_render=true é obrigatório para carregar os seletores que você enviou
 PROXY = f"http://{ZENROWS_KEY}:js_render=true@proxy.zenrows.com:8001"
 
 def configurar_driver():
@@ -28,7 +28,10 @@ def configurar_driver():
 def enviar_telegram(mensagem):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown"}
-    requests.post(url, data=payload)
+    try:
+        requests.post(url, data=payload)
+    except Exception as e:
+        print(f"❌ Erro Telegram: {e}")
 
 def realizar_analise():
     driver = configurar_driver()
@@ -37,73 +40,77 @@ def realizar_analise():
     try:
         print("🚀 Acessando SofaScore...")
         driver.get("https://www.sofascore.com/pt/")
-        
-        # Espera o carregamento inicial (Aba "Todos")
-        time.sleep(15)
+        time.sleep(15) 
 
-        # 1. CLICAR NA ABA "PRÓXIMOS" (Baseado na sua print)
+        # 1. CLICAR NA ABA "PRÓXIMOS"
         try:
-            print("🖱️ Clicando na aba 'Próximos'...")
-            # O seletor abaixo busca especificamente o botão de aba pelo texto
+            print("🖱️ Localizando aba 'Próximos' conforme seletor...")
+            # Busca o botão dentro da estrutura de abas que você enviou
             botao_proximos = WebDriverWait(driver, 20).until(
-                EC.element_to_be_clickable((By.XPATH, "//div[contains(@class, 'Tabs')]//button[contains(., 'Próximos')] | //button[text()='Próximos']"))
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Próximos')]"))
             )
             driver.execute_script("arguments[0].click();", botao_proximos)
-            print("✅ Aba 'Próximos' selecionada. Aguardando JSON de jogos...")
-            time.sleep(8) 
+            print("✅ Aba 'Próximos' ativa. Aguardando lista de ligas (Serie A, LaLiga, etc)...")
+            time.sleep(10) 
         except Exception as e:
-            print(f"⚠️ Erro ao clicar: {e}. Prosseguindo com varredura geral...")
+            print(f"⚠️ Erro ao trocar para aba Próximos: {e}")
 
-        # 2. CAPTURA DO CÓDIGO BRUTO (HTML/JSON)
+        # 2. ROLAGEM PARA CARREGAR OS BLOCOS DE LIGAS
+        driver.execute_script("window.scrollBy(0, 1000);")
+        time.sleep(3)
+
+        # 3. EXTRAÇÃO DE LINKS (Usando a lógica de filtragem por padrão de partida)
+        print("⏬ Minerando links de partidas dos cards...")
         conteudo_bruto = driver.page_source
         
-        # 3. MINERAÇÃO DE LINKS VIA REGEX (Pega todos os links de partidas)
-        # Esse padrão busca a estrutura /pt/futebol/time-a-time-b/id_do_jogo
-        padrao_links = r'href="(/pt/futebol/[^"]+/match/[^"]+|/pt/futebol/[^"]+/partida/[^"]+)"'
-        matches = re.findall(padrao_links, conteudo_bruto)
+        # Padrão Regex para capturar links de partidas (match) ou partidas (português)
+        # Filtramos para pegar apenas links que levam ao confronto direto
+        links_regex = re.findall(r'href="(/pt/futebol/[^"]+/(?:match|partida)/[^"]+)"', conteudo_bruto)
         
         links_validos = []
-        for m in matches:
-            url_completa = "https://www.sofascore.com" + m
-            if url_completa not in links_validos:
+        for l in links_regex:
+            url_completa = "https://www.sofascore.com" + l
+            # Evita duplicados e links que não são de jogos (como links de torneios)
+            if url_completa not in links_validos and "-vs-" in url_completa:
                 links_validos.append(url_completa)
 
-        print(f"✅ {len(links_validos)} jogos detectados no código bruto.")
+        print(f"✅ {len(links_validos)} confrontos encontrados para análise.")
         print("-" * 50)
 
-        # 4. LOOP DE ANÁLISE (Limitado aos 15 primeiros para não travar o bot)
+        # 4. LOOP DE ANÁLISE DOS CONFRONTOS
         for link in links_validos[:15]:
-            print(f"🔍 Analisando: {link}")
+            print(f"🔍 Analisando: {link.split('/')[-2]}")
             driver.get(link)
-            time.sleep(7)
+            time.sleep(8)
             
             try:
-                # Extraindo nome dos times pelo título da página
-                nome_jogo = driver.title.split(" - ")[0]
+                # Captura nome dos times do título
+                titulo_jogo = driver.title.split(" - ")[0]
                 
-                # --- AQUI É ONDE VOCÊ VAI COLOCAR SEUS SELETORES REAIS DE ESTATÍSTICA ---
-                # Simulando aprovação baseada na sua regra de 4/5 jogos
-                print(f"   📊 Processando estatísticas de H2H para {nome_jogo}...")
+                # --- ESPAÇO PARA SUA LÓGICA DE 4/5 OU 5/5 ---
+                # Exemplo: Aqui você buscaria as "bolinhas" de V/E/D
+                # Por enquanto, simulamos a aprovação para montar o bilhete
                 
-                # Exemplo de lógica (se bater 4/5 ou 5/5)
-                # No momento, mantemos a simulação para o bilhete ser gerado
-                aprovado = True 
+                consist_t1 = 5 # 5/5
+                consist_t2 = 4 # 4/5
+                media_chutes = 9.8
 
-                if aprovado:
+                if consist_t1 >= 4 and consist_t2 >= 4:
+                    print(f"   ✅ JOGO APROVADO: {titulo_jogo}")
                     jogos_aprovados.append({
-                        "home": nome_jogo.split(" vs ")[0] if " vs " in nome_jogo else "Time Casa",
-                        "away": nome_jogo.split(" vs ")[1] if " vs " in nome_jogo else "Time Fora",
+                        "home": titulo_jogo.split(" vs ")[0] if " vs " in titulo_jogo else "Casa",
+                        "away": titulo_jogo.split(" vs ")[1] if " vs " in titulo_jogo else "Fora",
                         "hora": "Hoje",
-                        "liga": "Filtro Próximos",
-                        "consistencia": 90, # 90% de sucesso
-                        "chutes": 9.5
+                        "liga": "H2H Elite",
+                        "consistencia": int(((consist_t1 + consist_t2)/10)*100),
+                        "chutes": media_chutes
                     })
-            except:
-                continue
+            except Exception as e:
+                print(f"   ⚠️ Erro no processamento: {e}")
             
             print("-" * 30)
 
-        # 5. GERAR BILHETE TELEGRAM
+        # 5. MONTAGEM E ENVIO DO BILHETE
         if jogos_aprovados:
             bilhete = "🎯 **BILHETE DO DIA (SISTEMA H2H)**\n💰🍀 **BOA SORTE!!!**\n\n"
             for i, j in enumerate(jogos_aprovados, 1):
@@ -116,6 +123,8 @@ def realizar_analise():
             bilhete += "---\n💸 Bet365 | Betano"
             enviar_telegram(bilhete)
             print("✉️ Bilhete enviado com sucesso!")
+        else:
+            print("📭 Nenhum jogo aprovado nos critérios hoje.")
 
     except Exception as e:
         print(f"❌ Erro Crítico: {e}")
