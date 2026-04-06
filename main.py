@@ -51,6 +51,8 @@ def analisar_partida(evento):
             sou_h = j.get('home_team') == team_name
             h_s, a_s = j.get('home_score') or 0, j.get('away_score') or 0
             if (sou_h and h_s < a_s) or (not sou_h and a_s < h_s): derrotas += 1
+        
+        if not jogos: return 5, False
         ult = jogos[0]
         sou_h_u = ult.get('home_team') == team_name
         h_u, a_u = ult.get('home_score') or 0, ult.get('away_score') or 0
@@ -72,15 +74,28 @@ def analisar_partida(evento):
     }
 
 def realizar_analise():
+    # Garante a data atual correta
     hoje = datetime.now().strftime('%Y-%m-%d')
-    res = requests.get(f"{BASE_URL}/events/", headers={"Authorization": f"Token {BSD_TOKEN}"}, 
-                       params={"date_from": hoje, "date_to": hoje, "tz": "America/Sao_Paulo"})
+    headers = {"Authorization": f"Token {BSD_TOKEN}"}
+    
+    # Filtros para pegar APENAS jogos que não começaram HOJE
+    params = {
+        "date_from": hoje, 
+        "date_to": hoje, 
+        "status": "not_started", 
+        "tz": "America/Sao_Paulo"
+    }
+
+    print(f"🚀 Buscando jogos para: {hoje}")
+    res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
     
     if res.status_code == 200:
         jogos = res.json().get("results", [])
         bilhete = "🎯 **BILHETE ESTRATÉGICO H2H**\n\n"
         count = 0
-        for j in jogos[:15]:
+        
+        # Analisamos os jogos retornados (limitando aos 30 primeiros para ter volume)
+        for j in jogos[:30]:
             a = analisar_partida(j)
             if a and (a['chance_15'] > 0 or a['chance_25'] > 0 or a['vitoria']):
                 bilhete += f"{count+1}. 🏟️ **{a['home']} x {a['away']}**\n"
@@ -90,7 +105,11 @@ def realizar_analise():
                 bilhete += "---\n\n"
                 count += 1
         
-        if count > 0: enviar_telegram(bilhete)
+        if count > 0: 
+            enviar_telegram(bilhete)
+            print(f"✅ Bilhete enviado com {count} jogos!")
+        else:
+            print("ℹ️ Nenhum jogo encontrado nos critérios hoje.")
 
 if __name__ == "__main__":
     realizar_analise()
