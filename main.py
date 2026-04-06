@@ -11,11 +11,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# --- CONFIGURAÇÃO --- #
+# --- CONFIGURAÇÃO (AJUSTADA PARA API-SPORTS) --- #
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
-API_KEY = os.getenv('X_RAPIDAPI_KEY')
-HEADERS = {'x-rapidapi-host': "api-football-v1.p.rapidapi.com", 'x-rapidapi-key': API_KEY}
+API_KEY = os.getenv('API_SPORTS_KEY')  # Usando sua variável do Git
+# No site original (API-Sports), o header obrigatório é 'x-apisports-key'
+HEADERS = {'x-apisports-key': API_KEY}
+URL_BASE = "https://v3.football.api-sports.io"
 
 def log_teste(etapa, msg):
     print(f"🔍 [TESTE {etapa}] {msg}")
@@ -29,14 +31,16 @@ def configurar_browser():
     return webdriver.Chrome(service=service, options=options)
 
 def get_avg_shots_api(team_id, team_name):
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10&status=FT"
+    # Mudança para URL da API-Sports
+    url = f"{URL_BASE}/fixtures?team={team_id}&last=10&status=FT"
     try:
         res = requests.get(url, headers=HEADERS).json()
         fixtures = res.get('response', [])
         total_shots = 0
         jogos_com_dados = 0
         for f in fixtures:
-            url_s = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/statistics?fixture={f['fixture']['id']}&team={team_id}"
+            f_id = f['fixture']['id']
+            url_s = f"{URL_BASE}/fixtures/statistics?fixture={f_id}&team={team_id}"
             res_s = requests.get(url_s, headers=HEADERS).json()
             stats = res_s.get('response', [])
             if stats and 'statistics' in stats[0]:
@@ -47,12 +51,12 @@ def get_avg_shots_api(team_id, team_name):
                         break
             time.sleep(0.4)
         media = total_shots / jogos_com_dados if jogos_com_dados > 0 else 0
-        log_teste("CHUTES", f"{team_name}: Média de {media:.2f} chutes (Base: {jogos_com_dados} jogos)")
+        log_teste("CHUTES", f"{team_name}: Média de {media:.2f} chutes")
         return media
     except: return 0
 
 def get_h2h_dupla_chance(t1_id, t2_id, label, last=10):
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures/headtohead?h2h={t1_id}-{t2_id}&last={last}"
+    url = f"{URL_BASE}/fixtures/headtohead?h2h={t1_id}-{t2_id}&last={last}"
     try:
         res = requests.get(url, headers=HEADERS).json()
         fixtures = res.get('response', [])
@@ -65,90 +69,53 @@ def get_h2h_dupla_chance(t1_id, t2_id, label, last=10):
         return perc
     except: return 0
 
-def get_over_stats(team_id, team_name, over_val):
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team={team_id}&last=10"
-    try:
-        res = requests.get(url, headers=HEADERS).json()
-        fixtures = res.get('response', [])
-        count = sum(1 for f in fixtures if (f['goals']['home'] or 0) + (f['goals']['away'] or 0) > over_val)
-        perc = (count / len(fixtures)) * 100 if fixtures else 0
-        log_teste("GOLS", f"{team_name} Over {over_val}: {perc:.0f}%")
-        return perc
-    except: return 0
-
-def testar_jogo_especifico():
-    fuso_br = pytz.timezone('America/Sao_Paulo')
-    log_teste("BUSCA", "Iniciando Busca Blindada pelo ID da Juventus (496)...")
+def testar_juventus_direto():
+    log_teste("BUSCA", "Iniciando Busca na API-Sports via ID da Juventus (496)...")
     
-    match = None
-    # Buscamos os próximos 5 jogos da Juventus em qualquer liga/temporada
-    # Isso ignora erros de fuso horário e de ID de liga
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?team=496&next=5"
+    # Busca o próximo jogo da Juventus (ID 496)
+    url = f"{URL_BASE}/fixtures?team=496&next=1"
     
     try:
         res = requests.get(url, headers=HEADERS).json()
-        fixtures = res.get('response', [])
-        
-        if not fixtures:
-            log_teste("ERRO", "A API não retornou NENHUM jogo futuro para a Juventus.")
+        # Log para conferir se a API-Sports aceitou sua chave
+        if 'errors' in res and res['errors']:
+            print(f"❌ ERRO DE AUTENTICAÇÃO: {res['errors']}")
             return
 
-        # Pegamos o primeiro jogo da lista (o mais próximo)
+        fixtures = res.get('response', [])
+        if not fixtures:
+            log_teste("ERRO", "Nenhum jogo encontrado para a Juventus. Verifique sua conta na API-Sports.")
+            return
+
         match = fixtures[0]
-        log_teste("BUSCA", f"✅ Jogo encontrado via ID Direto!")
+        t1, t2 = match['teams']['home'], match['teams']['away']
+        print(f"\n🏟️  JOGO ENCONTRADO: {t1['name']} x {t2['name']}")
+        print(f"📅  ID do Jogo: {match['fixture']['id']}")
+        print("-" * 50)
+
+        # 1. Teste Dupla Chance
+        perf_t1 = get_h2h_dupla_chance(t1['id'], t1['id'], f"Performance {t1['name']}")
         
-    except Exception as e:
-        print(f"❌ Erro na chamada da API: {e}")
-        return
-
-    t1, t2 = match['teams']['home'], match['teams']['away']
-    data_jogo = match['fixture']['date']
-    
-    print(f"\n🏟️  ANALISANDO: {t1['name']} x {t2['name']}")
-    print(f"📅  Data na API: {data_jogo}")
-    print("-" * 50)
-
-    # 1. Teste de Performance (Dupla Chance)
-    # Importante: t1['id'] e t2['id'] pegam os IDs reais da API para não errar o cálculo
-    perf_t1 = get_h2h_dupla_chance(t1['id'], t1['id'], f"Performance {t1['name']}")
-    perf_t2 = get_h2h_dupla_chance(t2['id'], t2['id'], f"Performance {t2['name']}")
-    
-    if perf_t1 >= 70:
-        log_teste("FILTRO", f"✅ ENTRARIA em Dupla Chance {t1['name']}")
-    else:
-        log_teste("FILTRO", f"❌ NÃO ENTRARIA em Dupla Chance (Mínimo 70%)")
-
-    # 2. Teste de Gols
-    o15_t1 = get_over_stats(t1['id'], t1['name'], 1.5)
-    o15_t2 = get_over_stats(t2['id'], t2['name'], 1.5)
-    media_o15 = (o15_t1 + o15_t2) / 2
-    
-    if o15_t1 >= 85 or media_o15 >= 70:
-        log_teste("FILTRO", f"✅ ENTRARIA em Over 1.5 (Média: {media_o15:.1f}%)")
-    else:
-        log_teste("FILTRO", f"❌ NÃO ENTRARIA em Over 1.5")
-
-    # 3. Teste de Chutes
-    chutes_t1 = get_avg_shots_api(t1['id'], t1['name'])
-    chutes_t2 = get_avg_shots_api(t2['id'], t2['name'])
-    print(f"📊 Média Combinada de Chutes: {(chutes_t1 + chutes_t2)/2:.2f}")
-
-    # 4. Selenium (SofaScore)
-    browser = configurar_browser()
-    log_teste("SOFASCORE", "Buscando link...")
-    wait = WebDriverWait(browser, 20)
-    try:
+        # 2. Teste Chutes
+        chutes_t1 = get_avg_shots_api(t1['id'], t1['name'])
+        
+        # 3. SofaScore
+        browser = configurar_browser()
+        log_teste("SOFASCORE", "Buscando link...")
         browser.get("https://www.sofascore.com/pt/")
-        search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
-        search_input.send_keys(f"{t1['name']} {t2['name']}")
-        time.sleep(5)
-        res_link = browser.find_elements(By.XPATH, "//a[contains(@href, '/football/match/')]")
-        if res_link:
-            print(f"🔗 Link encontrado: {res_link[0].get_attribute('href')}")
-    except Exception as e:
-        print(f"⚠️ Erro SofaScore: {e}")
-    finally:
+        wait = WebDriverWait(browser, 20)
+        try:
+            search = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
+            search.send_keys(f"{t1['name']} {t2['name']}")
+            time.sleep(5)
+            res_link = browser.find_elements(By.XPATH, "//a[contains(@href, '/football/match/')]")
+            if res_link:
+                print(f"🔗 Link encontrado: {res_link[0].get_attribute('href')}")
+        except: print("⚠️ Link não encontrado no SofaScore.")
         browser.quit()
 
+    except Exception as e:
+        print(f"❌ Erro Geral: {e}")
+
 if __name__ == "__main__":
-    testar_jogo_especifico()
+    testar_juventus_direto()
