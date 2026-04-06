@@ -80,18 +80,22 @@ def testar_jogo_especifico():
     fuso_br = pytz.timezone('America/Sao_Paulo')
     hoje = datetime.now(fuso_br).strftime("%Y-%m-%d")
     
-    # ID da Serie A é 135. Temporada atual é 2025 (ou 2026 dependendo da liga)
-    url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league=135&season=2025"
-    res = requests.get(url, headers=HEADERS).json()
-    
     match = None
-    for f in res.get('response', []):
-        if "Juventus" in f['teams']['home']['name'] or "Juventus" in f['teams']['away']['name']:
-            match = f
-            break
-            
+    # CORREÇÃO CRÍTICA: Varre as temporadas para não dar "jogo não encontrado"
+    for ano in [2025, 2026]:
+        log_teste("BUSCA", f"Verificando temporada {ano}...")
+        url = f"https://api-football-v1.p.rapidapi.com/v3/fixtures?date={hoje}&league=135&season={ano}"
+        res = requests.get(url, headers=HEADERS).json()
+        fixtures = res.get('response', [])
+        
+        for f in fixtures:
+            if "Juventus" in f['teams']['home']['name'] or "Juventus" in f['teams']['away']['name']:
+                match = f
+                break
+        if match: break
+
     if not match:
-        print("❌ Jogo da Juventus não encontrado para hoje na API.")
+        print(f"❌ Jogo da Juventus não encontrado para o dia {hoje} nas temporadas 2025/2026.")
         return
 
     t1, t2 = match['teams']['home'], match['teams']['away']
@@ -117,7 +121,7 @@ def testar_jogo_especifico():
     else:
         log_teste("FILTRO", f"❌ NÃO ENTRARIA em Over 1.5")
 
-    # 3. Teste de Chutes (Escanteios/Estatística)
+    # 3. Teste de Chutes
     chutes_t1 = get_avg_shots_api(t1['id'], t1['name'])
     chutes_t2 = get_avg_shots_api(t2['id'], t2['name'])
     print(f"📊 Média Combinada de Chutes: {(chutes_t1 + chutes_t2)/2:.2f}")
@@ -125,19 +129,19 @@ def testar_jogo_especifico():
     # 4. Selenium (SofaScore)
     browser = configurar_browser()
     log_teste("SOFASCORE", "Buscando link...")
-    # Chamando sua função original de busca
     wait = WebDriverWait(browser, 20)
-    browser.get("https://www.sofascore.com/pt/")
     try:
-        search = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
-        search.send_keys(f"{t1['name']} {t2['name']}")
+        browser.get("https://www.sofascore.com/pt/")
+        search_input = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
+        search_input.send_keys(f"{t1['name']} {t2['name']}")
         time.sleep(5)
         res_link = browser.find_elements(By.XPATH, "//a[contains(@href, '/football/match/')]")
         if res_link:
             print(f"🔗 Link encontrado: {res_link[0].get_attribute('href')}")
-    except:
-        print("⚠️ SofaScore Link não capturado.")
-    browser.quit()
+    except Exception as e:
+        print(f"⚠️ Erro SofaScore: {e}")
+    finally:
+        browser.quit()
 
 if __name__ == "__main__":
     testar_jogo_especifico()
