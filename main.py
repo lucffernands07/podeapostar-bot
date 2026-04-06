@@ -3,119 +3,97 @@ import requests
 import time
 import pytz
 from datetime import datetime
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
-# --- CONFIGURAÇÃO (AJUSTADA PARA API-SPORTS) --- #
-TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHAT_ID = os.getenv('CHAT_ID')
-API_KEY = os.getenv('API_SPORTS_KEY')  # Usando sua variável do Git
-# No site original (API-Sports), o header obrigatório é 'x-apisports-key'
+# --- CONFIGURAÇÃO --- #
+API_KEY = os.getenv('API_SPORTS_KEY') 
 HEADERS = {'x-apisports-key': API_KEY}
 URL_BASE = "https://v3.football.api-sports.io"
 
 def log_teste(etapa, msg):
     print(f"🔍 [TESTE {etapa}] {msg}")
 
-def configurar_browser():
-    options = Options()
-    options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    service = Service(ChromeDriverManager().install())
-    return webdriver.Chrome(service=service, options=options)
-
 def get_avg_shots_api(team_id, team_name):
-    # Mudança para URL da API-Sports
+    # Pega os últimos 10 jogos finalizados
     url = f"{URL_BASE}/fixtures?team={team_id}&last=10&status=FT"
     try:
         res = requests.get(url, headers=HEADERS).json()
         fixtures = res.get('response', [])
         total_shots = 0
         jogos_com_dados = 0
+        
         for f in fixtures:
             f_id = f['fixture']['id']
+            # Busca estatística detalhada de cada jogo
             url_s = f"{URL_BASE}/fixtures/statistics?fixture={f_id}&team={team_id}"
             res_s = requests.get(url_s, headers=HEADERS).json()
-            stats = res_s.get('response', [])
-            if stats and 'statistics' in stats[0]:
-                for s in stats[0]['statistics']:
+            stats_list = res_s.get('response', [])
+            
+            if stats_list and 'statistics' in stats_list[0]:
+                for s in stats_list[0]['statistics']:
                     if s['type'] == 'Total Shots' and s['value'] is not None:
                         total_shots += int(s['value'])
                         jogos_com_dados += 1
                         break
-            time.sleep(0.4)
+            time.sleep(0.5) # Respeita o limite de requisições por minuto do plano Free
+            
         media = total_shots / jogos_com_dados if jogos_com_dados > 0 else 0
-        log_teste("CHUTES", f"{team_name}: Média de {media:.2f} chutes")
+        log_teste("CHUTES", f"{team_name}: Média de {media:.2f} chutes (em {jogos_com_dados} jogos)")
         return media
-    except: return 0
+    except Exception as e:
+        print(f"Erro ao calcular chutes: {e}")
+        return 0
 
-def get_h2h_dupla_chance(t1_id, t2_id, label, last=10):
-    url = f"{URL_BASE}/fixtures/headtohead?h2h={t1_id}-{t2_id}&last={last}"
-    try:
-        res = requests.get(url, headers=HEADERS).json()
-        fixtures = res.get('response', [])
-        t1_wd = 0
-        for f in fixtures:
-            gh, ga = f['goals']['home'] or 0, f['goals']['away'] or 0
-            if (f['teams']['home']['id'] == t1_id and gh >= ga) or (f['teams']['away']['id'] == t1_id and ga >= gh): t1_wd += 1
-        perc = (t1_wd / len(fixtures)) * 100 if fixtures else 0
-        log_teste("H2H", f"{label}: {perc:.0f}% de Dupla Chance")
-        return perc
-    except: return 0
-
-def testar_juventus_direto():
-    log_teste("BUSCA", "Iniciando Busca na API-Sports via ID da Juventus (496)...")
+def testar_juventus_hoje():
+    # Define a data de hoje no fuso de SP
+    fuso_br = pytz.timezone('America/Sao_Paulo')
+    hoje = datetime.now(fuso_br).strftime("%Y-%m-%d")
     
-    # Busca o próximo jogo da Juventus (ID 496)
-    url = f"{URL_BASE}/fixtures?team=496&next=1"
+    log_teste("BUSCA", f"Buscando jogos de hoje ({hoje}) na Serie A (ID: 135)...")
+    
+    # Busca por DATA e LEAGUE (Permitido no plano Free)
+    # Importante: Na API-Sports, a temporada 25/26 é identificada como 2025
+    url = f"{URL_BASE}/fixtures?date={hoje}&league=135&season=2025"
     
     try:
         res = requests.get(url, headers=HEADERS).json()
-        # Log para conferir se a API-Sports aceitou sua chave
+        
         if 'errors' in res and res['errors']:
-            print(f"❌ ERRO DE AUTENTICAÇÃO: {res['errors']}")
+            print(f"❌ ERRO DA API: {res['errors']}")
             return
 
         fixtures = res.get('response', [])
         if not fixtures:
-            log_teste("ERRO", "Nenhum jogo encontrado para a Juventus. Verifique sua conta na API-Sports.")
+            log_teste("AVISO", "Nenhum jogo da Serie A encontrado para hoje nesta temporada.")
             return
 
-        match = fixtures[0]
+        match = None
+        for f in fixtures:
+            if "Juventus" in f['teams']['home']['name'] or "Juventus" in f['teams']['away']['name']:
+                match = f
+                break
+
+        if not match:
+            log_teste("ERRO", "Jogo da Juventus não encontrado na lista de hoje.")
+            # Opcional: imprimir nomes dos times encontrados para conferência
+            times_hoje = [f"{f['teams']['home']['name']} x {f['teams']['away']['name']}" for f in fixtures]
+            print(f"Jogos encontrados hoje: {times_hoje}")
+            return
+
         t1, t2 = match['teams']['home'], match['teams']['away']
-        print(f"\n🏟️  JOGO ENCONTRADO: {t1['name']} x {t2['name']}")
-        print(f"📅  ID do Jogo: {match['fixture']['id']}")
+        status = match['fixture']['status']['long']
+        print(f"\n🏟️  JOGO LOCALIZADO: {t1['name']} x {t2['name']}")
+        print(f"⏰ Horário (UTC): {match['fixture']['date']}")
+        print(f"📊 Status Atual: {status}")
         print("-" * 50)
 
-        # 1. Teste Dupla Chance
-        perf_t1 = get_h2h_dupla_chance(t1['id'], t1['id'], f"Performance {t1['name']}")
+        # Rodar teste de chutes para os dois times
+        s1 = get_avg_shots_api(t1['id'], t1['name'])
+        s2 = get_avg_shots_api(t2['id'], t2['name'])
         
-        # 2. Teste Chutes
-        chutes_t1 = get_avg_shots_api(t1['id'], t1['name'])
-        
-        # 3. SofaScore
-        browser = configurar_browser()
-        log_teste("SOFASCORE", "Buscando link...")
-        browser.get("https://www.sofascore.com/pt/")
-        wait = WebDriverWait(browser, 20)
-        try:
-            search = wait.until(EC.element_to_be_clickable((By.ID, "search-input")))
-            search.send_keys(f"{t1['name']} {t2['name']}")
-            time.sleep(5)
-            res_link = browser.find_elements(By.XPATH, "//a[contains(@href, '/football/match/')]")
-            if res_link:
-                print(f"🔗 Link encontrado: {res_link[0].get_attribute('href')}")
-        except: print("⚠️ Link não encontrado no SofaScore.")
-        browser.quit()
+        print(f"\n✅ RESULTADO FINAL: Média Combinada de {(s1+s2)/2:.2f} chutes.")
 
     except Exception as e:
-        print(f"❌ Erro Geral: {e}")
+        print(f"❌ Erro ao processar: {e}")
 
 if __name__ == "__main__":
-    testar_juventus_direto()
+    testar_juventus_hoje()
