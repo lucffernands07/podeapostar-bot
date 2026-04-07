@@ -74,15 +74,13 @@ def analisar_partida(evento):
     }
 
 def realizar_analise():
-    # Garante a data atual correta
     hoje = datetime.now().strftime('%Y-%m-%d')
     headers = {"Authorization": f"Token {BSD_TOKEN}"}
     
-    # Filtros para pegar APENAS jogos que não começaram HOJE
+    # Removi o status do parâmetro para evitar que a API retorne vazio por erro de termo
     params = {
         "date_from": hoje, 
         "date_to": hoje, 
-        "status": "not_started", 
         "tz": "America/Sao_Paulo"
     }
 
@@ -90,12 +88,18 @@ def realizar_analise():
     res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
     
     if res.status_code == 200:
-        jogos = res.json().get("results", [])
+        todos_jogos = res.json().get("results", [])
+        print(f"📡 API retornou {len(todos_jogos)} jogos no total.") # Log para conferir
+        
         bilhete = "🎯 **BILHETE ESTRATÉGICO H2H**\n\n"
         count = 0
         
-        # Analisamos os jogos retornados (limitando aos 30 primeiros para ter volume)
-        for j in jogos[:30]:
+        # Analisamos até 100 jogos da lista
+        for j in todos_jogos[:100]:
+            # Filtro manual de status: ignora só o que já acabou
+            if j.get('status') == 'finished':
+                continue
+                
             a = analisar_partida(j)
             if a and (a['chance_15'] > 0 or a['chance_25'] > 0 or a['vitoria']):
                 bilhete += f"{count+1}. 🏟️ **{a['home']} x {a['away']}**\n"
@@ -109,7 +113,7 @@ def realizar_analise():
             enviar_telegram(bilhete)
             print(f"✅ Bilhete enviado com {count} jogos!")
         else:
-            print("ℹ️ Nenhum jogo encontrado nos critérios hoje.")
+            print("ℹ️ Nenhum jogo passou nos critérios de 4/5 ou 5/5 hoje."))
 
 if __name__ == "__main__":
     realizar_analise()
