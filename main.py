@@ -14,7 +14,6 @@ def enviar_telegram(mensagem):
         requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
 
 def buscar_com_scraperant(url_alvo):
-def buscar_com_scraperant(url_alvo):
     api_key = os.getenv('SCRAPERANT_API_KEY')
     # Endpoint oficial do ScrapingAnt
     proxy_url = "https://api.scrapingant.com/v2/general"
