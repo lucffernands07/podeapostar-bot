@@ -1,83 +1,77 @@
 import os
+import tls_client
 import requests
+import json
 from datetime import datetime
-from dotenv import load_dotenv
 
-load_dotenv()
+# Usamos a assinatura do Chrome 120 que é a mais aceita pelo Cloudflare hoje
+session = tls_client.Session(
+    client_identifier="chrome_120",
+    random_tls_extension_order=True
+)
 
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
     if token and chat_id:
         url = f"https://api.telegram.org/bot{token}/sendMessage"
-        # Usamos o requests normal aqui pois o Telegram não bloqueia o GitHub
         requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
 
-import json
-
-def buscar_com_scraperant(url_alvo):
-    api_key = os.getenv('SCRAPERANT_API_KEY')
-    proxy_url = "https://api.scrapingant.com/v2/general"
+def obter_dados():
+    hoje = datetime.now().strftime("%Y-%m-%d")
+    # A URL mobile (api.sofascore) é a que o pessoal do fórum recomenda
+    url = f"https://api.sofascore.com/api/v1/sport/soccer/events/day/{hoje}"
     
-    params = {
-        "url": url_alvo,
-        "x-api-key": api_key,
-        "browser": "true", # Mantemos o navegador ligado para pular o Cloudflare
-        "proxy_type": "datacenter"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
+        "Accept": "*/*",
+        "Accept-Language": "pt-BR,pt;q=0.9",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+        "Referer": "https://www.sofascore.com/",
+        "Origin": "https://www.sofascore.com",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site"
     }
+
+    print(f"📡 Tentando técnica do fórum (TLS-Client + iPhone Signature)...")
     
-    print(f"📡 Minerando com Navegador Real (Capturando JSON)...")
     try:
-        res = requests.get(proxy_url, params=params, timeout=60)
+        # O segredo do fórum: Fazer um 'GET' na home antes para pegar os cookies
+        session.get("https://www.sofascore.com", headers=headers)
+        
+        # Agora sim buscamos os dados
+        res = session.get(url, headers=headers)
         
         if res.status_code == 200:
-            # Se o ScrapingAnt retornar o HTML por engano, tentamos extrair o texto
-            content = res.text
-            try:
-                # Tenta converter o que veio em dicionário de dados
-                return json.loads(content)
-            except json.JSONDecodeError:
-                print("⚠️ O site retornou HTML em vez de dados. O bloqueio está forte.")
-                # Se cair aqui, o SofaScore detectou que você não é o app
-                return None
+            return res.json()
         else:
-            print(f"❌ Erro ScrapingAnt: {res.status_code}")
+            print(f"❌ Falha: Status {res.status_code}")
             return None
     except Exception as e:
-        print(f"⚠️ Erro na conexão: {e}")
+        print(f"⚠️ Erro: {e}")
         return None
 
 def main():
-    hoje = datetime.now().strftime("%Y-%m-%d")
-    # URL que o ScraperAnt vai acessar por nós
-    url_sofascore = f"https://www.sofascore.com/api/v1/sport/soccer/events/day/{hoje}"
-    
-    dados = buscar_com_scraperant(url_sofascore)
-    
+    dados = obter_dados()
     if dados:
         eventos = dados.get('events', [])
-        print(f"✅ Sucesso! {len(eventos)} jogos recebidos.")
+        print(f"✅ Sucesso! {len(eventos)} jogos encontrados.")
         
-        times_foco = ["Sporting", "Arsenal", "Real Madrid", "Bayern", "Corinthians"]
-        bilhete = []
+        # Filtro: Sporting, Arsenal, Real, Bayern
+        times = ["Sporting", "Arsenal", "Real Madrid", "Bayern"]
+        achados = []
 
         for ev in eventos:
-            h_name = ev['homeTeam']['name']
-            a_name = ev['awayTeam']['name']
-            
-            if any(t in h_name or t in a_name for t in times_foco):
-                # Formata a hora do jogo (timestamp para HH:MM)
-                hora = datetime.fromtimestamp(ev['startTimestamp']).strftime("%H:%M")
-                bilhete.append(f"🏟️ *{h_name} x {a_name}*\n🕒 {hora}")
+            n_h, n_a = ev['homeTeam']['name'], ev['awayTeam']['name']
+            if any(t in n_h or t in n_a for t in times):
+                achados.append(f"🏟️ {n_h} x {n_a}")
 
-        if bilhete:
-            msg = "🎯 *BILHETE DO DIA (SofaScore)*\n\n" + "\n\n".join(bilhete)
-            enviar_telegram(msg)
-            print("✅ Mensagem enviada para o Telegram!")
-        else:
-            print("⚠️ Nenhum dos times foco joga hoje.")
+        if achados:
+            enviar_telegram("🎯 *JOGOS DE HOJE:*\n\n" + "\n".join(achados))
     else:
-        print("❌ Falha ao obter dados do dia.")
+        print("❌ O bloqueio continua. O IP do GitHub pode estar na 'lista negra'.")
 
 if __name__ == "__main__":
     main()
