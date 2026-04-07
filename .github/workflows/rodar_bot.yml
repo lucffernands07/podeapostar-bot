@@ -1,4 +1,4 @@
-name: Robô de Bilhetes - API BSD
+name: Robô de Bilhetes - Witchgoals PRO
 
 on:
   push:
@@ -23,22 +23,24 @@ jobs:
         with:
           python-version: '3.10'
 
-      # Removi a instalação do Chrome para o bot rodar em segundos! 🚀
-
       - name: Instalar Dependências Python
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # Garante que o 'requests' esteja instalado para as chamadas de API
+          pip install requests
 
       - name: Executar Rastreador de Bilhetes
         env:
-          # --- AS CHAVES ABAIXO DEVEM ESTAR NO SETTINGS > SECRETS DO GITHUB ---
-          BSD_TOKEN: ${{ secrets.BSD_TOKEN }}
+          # --- NOVAS CHAVES PARA WITCHGOALS ---
+          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+          WITCH_API_HOST: ${{ secrets.WITCH_API_HOST }}
+          
+          # --- NOTIFICAÇÃO ---
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-          # Mantive as antigas caso você ainda use o ZenRows em outra parte do código
-          ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
-          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}
+          
+          # Mantive as antigas caso precise de fallback
+          BSD_TOKEN: ${{ secrets.BSD_TOKEN }}
         run: |
-          echo "🚀 Iniciando Mineração via API BSD..."
+          echo "🚀 Iniciando Mineração de Elite via Witchgoals..."
           python main.py
