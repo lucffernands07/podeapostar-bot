@@ -113,7 +113,7 @@ def realizar_analise():
             enviar_telegram(bilhete)
             print(f"✅ Bilhete enviado com {count} jogos!")
         else:
-            print("ℹ️ Nenhum jogo passou nos critérios de 4/5 ou 5/5 hoje."))
+            print("ℹ️ Nenhum jogo passou nos critérios de 4/5 ou 5/5 hoje.")
 
 if __name__ == "__main__":
     realizar_analise()
