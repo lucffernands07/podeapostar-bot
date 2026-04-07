@@ -14,30 +14,27 @@ def enviar_telegram(mensagem):
         requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
 
 def buscar_com_scraperant(url_alvo):
+def buscar_com_scraperant(url_alvo):
     api_key = os.getenv('SCRAPERANT_API_KEY')
-    if not api_key:
-        print("❌ SCRAPERANT_API_KEY não encontrada nos Secrets!")
-        return None
-
-    proxy_url = "https://api.scraperant.com/v2/general"
-    # Configuramos o ScraperAnt para usar IP residencial e fingir ser um navegador
+    # Endpoint oficial do ScrapingAnt
+    proxy_url = "https://api.scrapingant.com/v2/general"
+    
     params = {
         "url": url_alvo,
         "x-api-key": api_key,
-        "browser": "false", # API direta é mais estável para JSON
-        "proxy_type": "residential"
+        "browser": "false" 
     }
     
-    print(f"📡 Minerando via ScraperAnt (Furando bloqueio)...")
+    print(f"📡 Minerando via ScrapingAnt...")
     try:
         res = requests.get(proxy_url, params=params, timeout=30)
         if res.status_code == 200:
             return res.json()
         else:
-            print(f"❌ Erro ScraperAnt: {res.status_code}")
+            print(f"❌ Erro ScrapingAnt: {res.status_code} - {res.text}")
             return None
     except Exception as e:
-        print(f"⚠️ Erro na requisição: {e}")
+        print(f"⚠️ Erro na conexão: {e}")
         return None
 
 def main():
