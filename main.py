@@ -14,10 +14,11 @@ def enviar_telegram(mensagem):
     payload = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown"}
     requests.post(url, data=payload)
 
-def get_historico(team_name):
+def get_historico(team_id): # Agora recebe o ID, não o nome
     ontem = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     headers = {"Authorization": f"Token {BSD_TOKEN}"}
-    params = {"team": team_name, "date_to": ontem, "status": "finished", "tz": "America/Sao_Paulo"}
+    # Buscamos pelo team_id que é único na API
+    params = {"team_id": team_id, "date_to": ontem, "status": "finished", "tz": "America/Sao_Paulo"}
     try:
         res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
         if res.status_code == 200:
@@ -36,12 +37,21 @@ def calcular_chance_gols(hist_h, hist_a, limite):
     return 0
 
 def analisar_partida(evento):
-    home, away = evento['home_team'], evento['away_team']
-    hist_h = get_historico(home)
-    hist_a = get_historico(away)
-    
-    if len(hist_h) < 5 or len(hist_a) < 5: return None
+    # Extraímos os nomes para o bilhete e os IDs para a busca no banco de dados
+    home_name = evento.get('home_team')
+    away_name = evento.get('away_team')
+    home_id = evento.get('home_id')
+    away_id = evento.get('away_id')
 
+    # Agora a busca do histórico usa o ID, que é infalível contra erros de digitação
+    hist_h = get_historico(home_id)
+    hist_a = get_historico(away_id)
+    
+    # Mantemos sua trava de segurança de 5 jogos
+    if len(hist_h) < 5 or len(hist_a) < 5: 
+        return None
+
+    # Cálculos de Gols
     chance_15 = calcular_chance_gols(hist_h, hist_a, 1.5)
     chance_25 = calcular_chance_gols(hist_h, hist_a, 2.5)
 
@@ -66,12 +76,13 @@ def analisar_partida(evento):
     if d_h <= 1 and v_h and d_a >= 2: mercado = f"1X (Chance {80 if d_h == 0 else 65}%)"
     elif d_a == 0 and d_h >= 2: mercado = f"2X (Chance 90%)"
 
-    return {
-        "home": home, "away": away,
+     return {
+        "home": home_name, 
+        "away": away_name,
         "chance_15": chance_15,
         "chance_25": chance_25,
         "vitoria": mercado
-    }
+     }
 
 def realizar_analise():
     hoje = datetime.now().strftime('%Y-%m-%d')
