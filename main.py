@@ -15,27 +15,28 @@ def enviar_telegram(mensagem):
     requests.post(url, data=payload)
 
 def get_historico(team_id=None, team_name=None):
-    """Busca histórico tentando ID primeiro, depois Nome."""
     ontem = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     headers = {"Authorization": f"Token {BSD_TOKEN}"}
     
-    # Tenta montar o parâmetro: Prioridade para ID, senão Nome
-    params = {"date_to": ontem, "status": "finished", "tz": "America/Sao_Paulo"}
-    if team_id:
-        params["team_id"] = team_id
-    elif team_name:
-        params["team"] = team_name
-    else:
-        return []
+    # Lista de tentativas: ID primeiro (preciso), Nome depois (flexível)
+    tentativas = []
+    if team_id: tentativas.append(("team_id", team_id))
+    if team_name: tentativas.append(("team", team_name))
 
-    try:
-        res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
-        if res.status_code == 200:
-            return res.json().get("results", [])[:5]
-    except:
-        return []
+    for chave, valor in tentativas:
+        params = {chave: valor, "date_to": ontem, "status": "finished", "tz": "America/Sao_Paulo"}
+        try:
+            res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
+            if res.status_code == 200:
+                resultados = res.json().get("results", [])
+                # SÓ RETORNA SE TIVER OS 5 JOGOS (Mantendo sua regra de rigor)
+                if len(resultados) >= 5:
+                    return resultados[:5]
+        except:
+            continue
+            
     return []
-
+    
 def calcular_chance_gols(hist_h, hist_a, limite):
     def count_gols(jogos):
         return sum(1 for j in jogos if (j.get('home_score') or 0) + (j.get('away_score') or 0) > limite)
@@ -47,25 +48,26 @@ def calcular_chance_gols(hist_h, hist_a, limite):
     return 0
 
 def analisar_partida(evento):
-    # Captura nomes e IDs (com fallback caso o ID venha com nome de campo diferente)
+    # Captura nomes para o bilhete
     home_name = evento.get('home_team')
     away_name = evento.get('away_team')
-    home_id = evento.get('home_id') or evento.get('home_team_id')
-    away_id = evento.get('away_id') or evento.get('away_team_id')
+    
+    # Captura IDs tentando todas as variações que a API costuma enviar
+    home_id = evento.get('home_id') or evento.get('home_team_id') or evento.get('h_id')
+    away_id = evento.get('away_id') or evento.get('away_team_id') or evento.get('a_id')
 
-    # Chama a busca híbrida
+    # Busca histórico usando a nova função híbrida (Tenta ID, depois Nome)
     hist_h = get_historico(team_id=home_id, team_name=home_name)
     hist_a = get_historico(team_id=away_id, team_name=away_name)
     
-    # Se não houver histórico suficiente, descarta o jogo
+    # Validação de segurança: se não achou 5 jogos após todas as tentativas, descarta
     if len(hist_h) < 5 or len(hist_a) < 5: 
         return None
 
-    # Cálculos de chances
+    # --- CÁLCULOS DE CHANCES (Sua regra original) ---
     chance_15 = calcular_chance_gols(hist_h, hist_a, 1.5)
     chance_25 = calcular_chance_gols(hist_h, hist_a, 2.5)
 
-    # Lógica de Vitória (1X ou 2X)
     def get_vitoria_stats(jogos, team_n):
         derrotas = 0
         for j in jogos:
@@ -95,7 +97,7 @@ def analisar_partida(evento):
         "chance_15": chance_15,
         "chance_25": chance_25,
         "vitoria": mercado
-}
+        }
 
 def realizar_analise():
     hoje = datetime.now().strftime('%Y-%m-%d')
