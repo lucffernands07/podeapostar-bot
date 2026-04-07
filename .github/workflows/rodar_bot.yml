@@ -26,17 +26,17 @@ jobs:
       - name: Instalar Dependências Python
         run: |
           python -m pip install --upgrade pip
-          # Adicionamos typing_extensions explicitamente para evitar o erro de import
-          pip install requests tls_client python-dotenv typing_extensions
+          # Agora só precisamos do requests e python-dotenv
+          pip install requests python-dotenv
 
       - name: Executar Rastreador de Bilhetes
         env:
+          # --- ESSA LINHA É A QUE FALTAVA ---
+          SCRAPERANT_API_KEY: ${{ secrets.SCRAPERANT_API_KEY }}
+          
           # --- CREDENCIAIS DO TELEGRAM ---
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-          
-          # Caso ainda use alguma chave de API externa
-          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
         run: |
           echo "🚀 Iniciando Mineração de Elite via SofaScore..."
           python main.py
