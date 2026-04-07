@@ -24,7 +24,8 @@ def enviar_telegram(mensagem):
 
 def obter_dados():
     hoje = datetime.now().strftime("%Y-%m-%d")
-    url = f"https://api.sofascore.com/api/v1/sport/soccer/events/day/{hoje}"
+    # A URL atualizada que o site e o app estão usando agora
+url = f"https://www.sofascore.com/api/v1/sport/soccer/events/day/{hoje}"
     
     headers = {
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
