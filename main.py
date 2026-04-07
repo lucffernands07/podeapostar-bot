@@ -95,7 +95,7 @@ def realizar_analise():
         count = 0
         
         # Analisamos até 100 jogos da lista
-        for j in todos_jogos[:100]:
+        for j in todos_jogos[:200]:
             # Filtro manual de status: ignora só o que já acabou
             if j.get('status') == 'finished':
                 continue
