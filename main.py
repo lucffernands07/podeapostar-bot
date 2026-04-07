@@ -15,22 +15,31 @@ def enviar_telegram(mensagem):
 
 def buscar_com_scraperant(url_alvo):
     api_key = os.getenv('SCRAPERANT_API_KEY')
-    # Endpoint oficial do ScrapingAnt
     proxy_url = "https://api.scrapingant.com/v2/general"
     
     params = {
         "url": url_alvo,
         "x-api-key": api_key,
-        "browser": "false" 
+        "browser": "true",        # AGORA LIGAMOS O NAVEGADOR REAL
+        "proxy_type": "datacenter",
+        "wait_for_selector": "body" # Espera o site carregar o corpo da página
     }
     
-    print(f"📡 Minerando via ScrapingAnt...")
+    print(f"📡 Minerando com Navegador Real (Modo Stealth)...")
     try:
-        res = requests.get(proxy_url, params=params, timeout=30)
+        # Aumentamos o timeout porque abrir o navegador demora um pouco mais
+        res = requests.get(proxy_url, params=params, timeout=60)
+        
         if res.status_code == 200:
-            return res.json()
+            # Como usamos 'browser=true', o retorno pode vir como texto puro (HTML) 
+            # ou JSON. Vamos garantir que tratamos como JSON.
+            try:
+                return res.json()
+            except:
+                import json
+                return json.loads(res.text)
         else:
-            print(f"❌ Erro ScrapingAnt: {res.status_code} - {res.text}")
+            print(f"❌ Erro ScrapingAnt: {res.status_code}")
             return None
     except Exception as e:
         print(f"⚠️ Erro na conexão: {e}")
