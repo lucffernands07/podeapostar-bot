@@ -1,70 +1,76 @@
 import os
-import tls_client
 import requests
 from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Sessão simulando um iPhone antigo (mais estável para a API)
-session = tls_client.Session(client_identifier="chrome_120")
-
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
     if token and chat_id:
         url = f"https://api.telegram.org/bot{token}/sendMessage"
+        # Usamos o requests normal aqui pois o Telegram não bloqueia o GitHub
         requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
+
+def buscar_com_scraperant(url_alvo):
+    api_key = os.getenv('SCRAPERANT_API_KEY')
+    if not api_key:
+        print("❌ SCRAPERANT_API_KEY não encontrada nos Secrets!")
+        return None
+
+    proxy_url = "https://api.scraperant.com/v2/general"
+    # Configuramos o ScraperAnt para usar IP residencial e fingir ser um navegador
+    params = {
+        "url": url_alvo,
+        "x-api-key": api_key,
+        "browser": "false", # API direta é mais estável para JSON
+        "proxy_type": "residential"
+    }
+    
+    print(f"📡 Minerando via ScraperAnt (Furando bloqueio)...")
+    try:
+        res = requests.get(proxy_url, params=params, timeout=30)
+        if res.status_code == 200:
+            return res.json()
+        else:
+            print(f"❌ Erro ScraperAnt: {res.status_code}")
+            return None
+    except Exception as e:
+        print(f"⚠️ Erro na requisição: {e}")
+        return None
 
 def main():
     hoje = datetime.now().strftime("%Y-%m-%d")
+    # URL que o ScraperAnt vai acessar por nós
+    url_sofascore = f"https://www.sofascore.com/api/v1/sport/soccer/events/day/{hoje}"
     
-    # URL OFICIAL DA API MOBILE (Sem o 'www')
-    url = f"https://api.sofascore.com/api/v1/sport/soccer/events/day/{hoje}"
+    dados = buscar_com_scraperant(url_sofascore)
     
-    # Headers que o App oficial do SofaScore envia
-    headers = {
-        "User-Agent": "SofaScore/6.1.1 (iPhone; iOS 17.4.1; Scale/3.00)",
-        "Accept": "*/*",
-        "Host": "api.sofascore.com",
-        "Connection": "keep-alive",
-        "Accept-Language": "pt-BR,pt;q=0.9"
-    }
-
-    print(f"📡 Tentando Rota Mobile Segura ({hoje})...")
-    
-    try:
-        res = session.get(url, headers=headers)
+    if dados:
+        eventos = dados.get('events', [])
+        print(f"✅ Sucesso! {len(eventos)} jogos recebidos.")
         
-        if res.status_code == 200:
-            print("✅ Conexão estabelecida via API Mobile!")
-            eventos = res.json().get('events', [])
+        times_foco = ["Sporting", "Arsenal", "Real Madrid", "Bayern", "Corinthians"]
+        bilhete = []
+
+        for ev in eventos:
+            h_name = ev['homeTeam']['name']
+            a_name = ev['awayTeam']['name']
             
-            # FILTRO DO LUCIANO (Sporting, Arsenal, Real, Bayern)
-            times_foco = ["Sporting", "Arsenal", "Real Madrid", "Bayern"]
-            bilhete = []
+            if any(t in h_name or t in a_name for t in times_foco):
+                # Formata a hora do jogo (timestamp para HH:MM)
+                hora = datetime.fromtimestamp(ev['startTimestamp']).strftime("%H:%M")
+                bilhete.append(f"🏟️ *{h_name} x {a_name}*\n🕒 {hora}")
 
-            for ev in eventos:
-                h_name = ev['homeTeam']['name']
-                a_name = ev['awayTeam']['name']
-                
-                if any(t in h_name or t in a_name for t in times_foco):
-                    # Aqui você pode adicionar a lógica de 4/5 e 5/5
-                    bilhete.append(f"🏟️ {h_name} x {a_name}")
-
-            if bilhete:
-                enviar_telegram("🎯 *JOGOS DE HOJE ENCONTRADOS:*\n\n" + "\n".join(bilhete))
-                print("✅ Bilhete enviado!")
-            else:
-                print("⚠️ Jogos de elite ainda não listados.")
-                
+        if bilhete:
+            msg = "🎯 *BILHETE DO DIA (SofaScore)*\n\n" + "\n\n".join(bilhete)
+            enviar_telegram(msg)
+            print("✅ Mensagem enviada para o Telegram!")
         else:
-            print(f"❌ Falha na Rota Mobile: {res.status_code}")
-            if res.status_code == 403:
-                print("💡 Dica: O SofaScore baniu o IP do GitHub temporariamente.")
-
-    except Exception as e:
-        print(f"⚠️ Erro inesperado: {e}")
+            print("⚠️ Nenhum dos times foco joga hoje.")
+    else:
+        print("❌ Falha ao obter dados do dia.")
 
 if __name__ == "__main__":
     main()
