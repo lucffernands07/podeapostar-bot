@@ -13,6 +13,8 @@ def enviar_telegram(mensagem):
         # Usamos o requests normal aqui pois o Telegram não bloqueia o GitHub
         requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
 
+import json
+
 def buscar_com_scraperant(url_alvo):
     api_key = os.getenv('SCRAPERANT_API_KEY')
     proxy_url = "https://api.scrapingant.com/v2/general"
@@ -20,24 +22,24 @@ def buscar_com_scraperant(url_alvo):
     params = {
         "url": url_alvo,
         "x-api-key": api_key,
-        "browser": "true",        # AGORA LIGAMOS O NAVEGADOR REAL
-        "proxy_type": "datacenter",
-        "wait_for_selector": "body" # Espera o site carregar o corpo da página
+        "browser": "true", # Mantemos o navegador ligado para pular o Cloudflare
+        "proxy_type": "datacenter"
     }
     
-    print(f"📡 Minerando com Navegador Real (Modo Stealth)...")
+    print(f"📡 Minerando com Navegador Real (Capturando JSON)...")
     try:
-        # Aumentamos o timeout porque abrir o navegador demora um pouco mais
         res = requests.get(proxy_url, params=params, timeout=60)
         
         if res.status_code == 200:
-            # Como usamos 'browser=true', o retorno pode vir como texto puro (HTML) 
-            # ou JSON. Vamos garantir que tratamos como JSON.
+            # Se o ScrapingAnt retornar o HTML por engano, tentamos extrair o texto
+            content = res.text
             try:
-                return res.json()
-            except:
-                import json
-                return json.loads(res.text)
+                # Tenta converter o que veio em dicionário de dados
+                return json.loads(content)
+            except json.JSONDecodeError:
+                print("⚠️ O site retornou HTML em vez de dados. O bloqueio está forte.")
+                # Se cair aqui, o SofaScore detectou que você não é o app
+                return None
         else:
             print(f"❌ Erro ScrapingAnt: {res.status_code}")
             return None
