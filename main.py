@@ -14,10 +14,9 @@ def enviar_telegram(mensagem):
     payload = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown"}
     requests.post(url, data=payload)
 
-def get_historico(team_id): # Agora recebe o ID, não o nome
+def get_historico(team_id):
     ontem = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     headers = {"Authorization": f"Token {BSD_TOKEN}"}
-    # Buscamos pelo team_id que é único na API
     params = {"team_id": team_id, "date_to": ontem, "status": "finished", "tz": "America/Sao_Paulo"}
     try:
         res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
@@ -37,21 +36,17 @@ def calcular_chance_gols(hist_h, hist_a, limite):
     return 0
 
 def analisar_partida(evento):
-    # Extraímos os nomes para o bilhete e os IDs para a busca no banco de dados
     home_name = evento.get('home_team')
     away_name = evento.get('away_team')
     home_id = evento.get('home_id')
     away_id = evento.get('away_id')
 
-    # Agora a busca do histórico usa o ID, que é infalível contra erros de digitação
     hist_h = get_historico(home_id)
     hist_a = get_historico(away_id)
     
-    # Mantemos sua trava de segurança de 5 jogos
     if len(hist_h) < 5 or len(hist_a) < 5: 
         return None
 
-    # Cálculos de Gols
     chance_15 = calcular_chance_gols(hist_h, hist_a, 1.5)
     chance_25 = calcular_chance_gols(hist_h, hist_a, 2.5)
 
@@ -69,45 +64,38 @@ def analisar_partida(evento):
         vit_u = (sou_h_u and h_u > a_u) or (not sou_h_u and a_u > h_u)
         return derrotas, vit_u
 
-    d_h, v_h = get_vitoria_stats(hist_h, home)
-    d_a, _ = get_vitoria_stats(hist_a, away)
+    # Corrigido: usando home_name e away_name aqui
+    d_h, v_h = get_vitoria_stats(hist_h, home_name)
+    d_a, _ = get_vitoria_stats(hist_a, away_name)
     
     mercado = ""
     if d_h <= 1 and v_h and d_a >= 2: mercado = f"1X (Chance {80 if d_h == 0 else 65}%)"
     elif d_a == 0 and d_h >= 2: mercado = f"2X (Chance 90%)"
 
-     return {
+    return {
         "home": home_name, 
         "away": away_name,
         "chance_15": chance_15,
         "chance_25": chance_25,
         "vitoria": mercado
-     }
+    }
 
 def realizar_analise():
     hoje = datetime.now().strftime('%Y-%m-%d')
     headers = {"Authorization": f"Token {BSD_TOKEN}"}
-    
-    # Removi o status do parâmetro para evitar que a API retorne vazio por erro de termo
-    params = {
-        "date_from": hoje, 
-        "date_to": hoje, 
-        "tz": "America/Sao_Paulo"
-    }
+    params = {"date_from": hoje, "date_to": hoje, "tz": "America/Sao_Paulo"}
 
     print(f"🚀 Buscando jogos para: {hoje}")
     res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
     
     if res.status_code == 200:
         todos_jogos = res.json().get("results", [])
-        print(f"📡 API retornou {len(todos_jogos)} jogos no total.") # Log para conferir
+        print(f"📡 API retornou {len(todos_jogos)} jogos no total.")
         
         bilhete = "🎯 **BILHETE ESTRATÉGICO H2H**\n\n"
         count = 0
         
-        # Analisamos até 100 jogos da lista
         for j in todos_jogos[:200]:
-            # Filtro manual de status: ignora só o que já acabou
             if j.get('status') == 'finished':
                 continue
                 
