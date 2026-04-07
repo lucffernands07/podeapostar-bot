@@ -4,134 +4,100 @@ from datetime import datetime, timedelta
 
 # --- CONFIGURAÇÕES ---
 BSD_TOKEN = os.getenv('BSD_TOKEN')
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHAT_ID = os.getenv('CHAT_ID')
 BASE_URL = "https://sports.bzzoiro.com/api"
 
-def enviar_telegram(mensagem):
-    if not TELEGRAM_TOKEN or not CHAT_ID: return
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown"}
-    requests.post(url, data=payload)
-
-def get_historico(team_id=None, team_name=None):
+def get_historico_debug(team_id, team_name):
     ontem = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     headers = {"Authorization": f"Token {BSD_TOKEN}"}
     
-    # Lista de tentativas: ID primeiro (preciso), Nome depois (flexível)
-    tentativas = []
-    if team_id: tentativas.append(("team_id", team_id))
-    if team_name: tentativas.append(("team", team_name))
-
-    for chave, valor in tentativas:
+    # Tenta ID, depois Nome
+    for chave, valor in [("team_id", team_id), ("team", team_name)]:
+        if not valor: continue
+        print(f"🔍 Tentando buscar histórico via {chave}: {valor}...")
         params = {chave: valor, "date_to": ontem, "status": "finished", "tz": "America/Sao_Paulo"}
-        try:
-            res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
-            if res.status_code == 200:
-                resultados = res.json().get("results", [])
-                # SÓ RETORNA SE TIVER OS 5 JOGOS (Mantendo sua regra de rigor)
-                if len(resultados) >= 5:
-                    return resultados[:5]
-        except:
-            continue
-            
-    return []
-    
-def calcular_chance_gols(hist_h, hist_a, limite):
-    def count_gols(jogos):
-        return sum(1 for j in jogos if (j.get('home_score') or 0) + (j.get('away_score') or 0) > limite)
-    
-    g_h, g_a = count_gols(hist_h), count_gols(hist_a)
-    if g_h == 5 and g_a == 5: return 100
-    elif (g_h == 5 and g_a == 4) or (g_h == 4 and g_a == 5): return 85
-    elif g_h == 4 and g_a == 4: return 70
-    return 0
-
-def analisar_partida(evento):
-    # Captura nomes para o bilhete
-    home_name = evento.get('home_team')
-    away_name = evento.get('away_team')
-    
-    # Captura IDs tentando todas as variações que a API costuma enviar
-    home_id = evento.get('home_id') or evento.get('home_team_id') or evento.get('h_id')
-    away_id = evento.get('away_id') or evento.get('away_team_id') or evento.get('a_id')
-
-    # Busca histórico usando a nova função híbrida (Tenta ID, depois Nome)
-    hist_h = get_historico(team_id=home_id, team_name=home_name)
-    hist_a = get_historico(team_id=away_id, team_name=away_name)
-    
-    # Validação de segurança: se não achou 5 jogos após todas as tentativas, descarta
-    if len(hist_h) < 5 or len(hist_a) < 5: 
-        return None
-
-    # --- CÁLCULOS DE CHANCES (Sua regra original) ---
-    chance_15 = calcular_chance_gols(hist_h, hist_a, 1.5)
-    chance_25 = calcular_chance_gols(hist_h, hist_a, 2.5)
-
-    def get_vitoria_stats(jogos, team_n):
-        derrotas = 0
-        for j in jogos:
-            sou_h = j.get('home_team') == team_n
-            h_s, a_s = j.get('home_score') or 0, j.get('away_score') or 0
-            if (sou_h and h_s < a_s) or (not sou_h and a_s < h_s): derrotas += 1
+        res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
         
-        if not jogos: return 5, False
-        ult = jogos[0]
-        sou_h_u = ult.get('home_team') == team_n
-        h_u, a_u = ult.get('home_score') or 0, ult.get('away_score') or 0
-        vit_u = (sou_h_u and h_u > a_u) or (not sou_h_u and a_u > h_u)
-        return derrotas, vit_u
+        if res.status_code == 200:
+            jogos = res.json().get("results", [])
+            print(f"📊 Encontrados {len(jogos)} jogos para {valor}.")
+            if len(jogos) >= 5:
+                return jogos[:5]
+    return []
 
-    d_h, v_h = get_vitoria_stats(hist_h, home_name)
-    d_a, _ = get_vitoria_stats(hist_a, away_name)
-    
-    mercado = ""
-    if d_h <= 1 and v_h and d_a >= 2: 
-        mercado = f"1X (Chance {80 if d_h == 0 else 65}%)"
-    elif d_a == 0 and d_h >= 2: 
-        mercado = f"2X (Chance 90%)"
-
-    return {
-        "home": home_name, 
-        "away": away_name,
-        "chance_15": chance_15,
-        "chance_25": chance_25,
-        "vitoria": mercado
-        }
-
-def realizar_analise():
+def testar_jogo_especifico():
     hoje = datetime.now().strftime('%Y-%m-%d')
     headers = {"Authorization": f"Token {BSD_TOKEN}"}
     params = {"date_from": hoje, "date_to": hoje, "tz": "America/Sao_Paulo"}
 
-    print(f"🚀 Buscando jogos para: {hoje}")
+    print(f"🚀 Iniciando Teste Específico para Sporting x Arsenal ({hoje})")
     res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
     
-    if res.status_code == 200:
-        todos_jogos = res.json().get("results", [])
-        print(f"📡 API retornou {len(todos_jogos)} jogos no total.")
+    if res.status_code != 200:
+        print("❌ Erro ao conectar na API.")
+        return
+
+    jogos = res.json().get("results", [])
+    # Filtra o jogo exato (usando 'in' para evitar erros de Sporting CP ou Arsenal FC)
+    alvo = next((j for j in jogos if "Sporting" in j['home_team'] or "Arsenal" in j['home_team']), None)
+
+    if not alvo:
+        print("❌ Jogo 'Sporting x Arsenal' não encontrado na grade de hoje da API.")
+        return
+
+    print(f"✅ Jogo localizado: {alvo['home_team']} (ID: {alvo.get('home_id')}) x {alvo['away_team']} (ID: {alvo.get('away_id')})")
+    
+    # --- 1. BUSCA DE HISTÓRICO ---
+    hist_h = get_historico_debug(alvo.get('home_id'), alvo['home_team'])
+    hist_a = get_historico_debug(alvo.get('away_id'), alvo['away_team'])
+
+    if len(hist_h) < 5 or len(hist_a) < 5:
+        print(f"⛔ DESCARTADO: Histórico insuficiente (Home: {len(hist_h)}, Away: {len(hist_a)})")
+        return
+
+    # --- 2. REGRA DE GOLS +1.5 ---
+    def check_gols(jogos, limite):
+        sucessos = sum(1 for j in jogos if (j.get('home_score') or 0) + (j.get('away_score') or 0) > limite)
+        return sucessos
+
+    g_h = check_gols(hist_h, 1.5)
+    g_a = check_gols(hist_a, 1.5)
+    print(f"⚽ Gols +1.5 -> Mandante: {g_h}/5 | Visitante: {g_a}/5")
+
+    if (g_h >= 4 and g_a >= 5) or (g_h >= 5 and g_a >= 4) or (g_h == 4 and g_a == 4):
+        print("✅ PASSOU na regra de Gols +1.5!")
+    else:
+        print("❌ REPROVOU na regra de Gols +1.5 (Não atingiu 4/5 ou 5/5 combinados)")
+
+    # --- 3. REGRA DE MERCADO (VITÓRIA) ---
+    def debug_vitoria(jogos, t_name, t_id):
+        derrotas = 0
+        for j in jogos:
+            # Comparação inteligente por ID para não errar o nome
+            h_id_hist = j.get('home_id') or j.get('home_team_id')
+            sou_h = str(h_id_hist) == str(t_id)
+            
+            h_s, a_s = j.get('home_score') or 0, j.get('away_score') or 0
+            perdeu = (sou_h and h_s < a_s) or (not sou_h and a_s < h_s)
+            if perdeu: derrotas += 1
         
-        bilhete = "🎯 **BILHETE ESTRATÉGICO H2H**\n\n"
-        count = 0
-        
-        for j in todos_jogos[:100]:
-            if j.get('status') == 'finished':
-                continue
-                
-            a = analisar_partida(j)
-            if a and (a['chance_15'] > 0 or a['chance_25'] > 0 or a['vitoria']):
-                bilhete += f"{count+1}. 🏟️ **{a['home']} x {a['away']}**\n"
-                if a['chance_15'] > 0: bilhete += f"🔶 Gols +1.5 (Chance {a['chance_15']}%)\n"
-                if a['chance_25'] > 0: bilhete += f"🔷 Gols +2.5 (Chance {a['chance_25']}%)\n"
-                if a['vitoria']: bilhete += f"💎 Mercado: {a['vitoria']}\n"
-                bilhete += "---\n\n"
-                count += 1
-        
-        if count > 0: 
-            enviar_telegram(bilhete)
-            print(f"✅ Bilhete enviado com {count} jogos!")
-        else:
-            print("ℹ️ Nenhum jogo passou nos critérios de 4/5 ou 5/5 hoje.")
+        ult = jogos[0]
+        h_id_u = ult.get('home_id') or ult.get('home_team_id')
+        venceu_ult = (str(h_id_u) == str(t_id) and (ult['home_score'] > ult['away_score'])) or \
+                     (str(h_id_u) != str(t_id) and (ult['away_score'] > ult['home_score']))
+        return derrotas, venceu_ult
+
+    d_h, v_h = debug_vitoria(hist_h, alvo['home_team'], alvo.get('home_id'))
+    d_a, v_a = debug_vitoria(hist_a, alvo['away_team'], alvo.get('away_id'))
+
+    print(f"💎 Stats Vitória -> Mandante: {d_h} derrotas, Vitória Ult: {v_h} | Visitante: {d_a} derrotas")
+
+    if d_h <= 1 and v_h and d_a >= 2:
+        print("✅ MERCADO: 1X Identificado")
+    elif d_a == 0 and d_h >= 2:
+        print("✅ MERCADO: 2X Identificado")
+    else:
+        print("ℹ️ MERCADO: Nenhuma Dupla Chance (1X/2X) atingiu o critério.")
 
 if __name__ == "__main__":
-    realizar_analise()
+    testar_jogo_especifico()
+    
