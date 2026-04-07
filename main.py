@@ -6,22 +6,43 @@ from datetime import datetime, timedelta
 BSD_TOKEN = os.getenv('BSD_TOKEN')
 BASE_URL = "https://sports.bzzoiro.com/api"
 
-def get_historico_debug(team_id, team_name):
+def get_historico(team_id=None, team_name=None):
+    """Busca histórico tentando ID primeiro, depois Nome, até achar 5 jogos."""
     ontem = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     headers = {"Authorization": f"Token {BSD_TOKEN}"}
     
-    # Tenta ID, depois Nome
-    for chave, valor in [("team_id", team_id), ("team", team_name)]:
+    # Lista de tentativas para esgotar as chances de busca
+    tentativas = []
+    if team_id: 
+        tentativas.append(("team_id", team_id))
+    if team_name: 
+        tentativas.append(("team", team_name))
+
+    for chave, valor in tentativas:
         if not valor: continue
-        print(f"🔍 Tentando buscar histórico via {chave}: {valor}...")
-        params = {chave: valor, "date_to": ontem, "status": "finished", "tz": "America/Sao_Paulo"}
-        res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
-        
-        if res.status_code == 200:
-            jogos = res.json().get("results", [])
-            print(f"📊 Encontrados {len(jogos)} jogos para {valor}.")
-            if len(jogos) >= 5:
-                return jogos[:5]
+        params = {
+            chave: valor, 
+            "date_to": ontem, 
+            "status": "finished", 
+            "tz": "America/Sao_Paulo"
+        }
+        try:
+            res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
+            if res.status_code == 200:
+                resultados = res.json().get("results", [])
+                
+                # --- LINHA DE DEBUG (MATA A CHARADA DO ARSENAL) ---
+                if len(resultados) > 0:
+                    placares = [f"{j.get('home_score')}x{j.get('away_score')}" for j in resultados[:5]]
+                    print(f"🏟️ Histórico para {valor} ({chave}): {placares}")
+
+                # Mantém sua regra rígida: só aceita se encontrar os 5 jogos
+                if len(resultados) >= 5:
+                    return resultados[:5]
+        except Exception as e:
+            print(f"⚠️ Erro ao buscar histórico de {valor}: {e}")
+            continue
+            
     return []
 
 def testar_jogo_especifico():
