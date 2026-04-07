@@ -14,15 +14,26 @@ def enviar_telegram(mensagem):
     payload = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown"}
     requests.post(url, data=payload)
 
-def get_historico(team_id):
+def get_historico(team_id=None, team_name=None):
+    """Busca histórico tentando ID primeiro, depois Nome."""
     ontem = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     headers = {"Authorization": f"Token {BSD_TOKEN}"}
-    params = {"team_id": team_id, "date_to": ontem, "status": "finished", "tz": "America/Sao_Paulo"}
+    
+    # Tenta montar o parâmetro: Prioridade para ID, senão Nome
+    params = {"date_to": ontem, "status": "finished", "tz": "America/Sao_Paulo"}
+    if team_id:
+        params["team_id"] = team_id
+    elif team_name:
+        params["team"] = team_name
+    else:
+        return []
+
     try:
         res = requests.get(f"{BASE_URL}/events/", headers=headers, params=params)
         if res.status_code == 200:
             return res.json().get("results", [])[:5]
-    except: return []
+    except:
+        return []
     return []
 
 def calcular_chance_gols(hist_h, hist_a, limite):
@@ -36,41 +47,47 @@ def calcular_chance_gols(hist_h, hist_a, limite):
     return 0
 
 def analisar_partida(evento):
+    # Captura nomes e IDs (com fallback caso o ID venha com nome de campo diferente)
     home_name = evento.get('home_team')
     away_name = evento.get('away_team')
-    home_id = evento.get('home_id')
-    away_id = evento.get('away_id')
+    home_id = evento.get('home_id') or evento.get('home_team_id')
+    away_id = evento.get('away_id') or evento.get('away_team_id')
 
-    hist_h = get_historico(home_id)
-    hist_a = get_historico(away_id)
+    # Chama a busca híbrida
+    hist_h = get_historico(team_id=home_id, team_name=home_name)
+    hist_a = get_historico(team_id=away_id, team_name=away_name)
     
+    # Se não houver histórico suficiente, descarta o jogo
     if len(hist_h) < 5 or len(hist_a) < 5: 
         return None
 
+    # Cálculos de chances
     chance_15 = calcular_chance_gols(hist_h, hist_a, 1.5)
     chance_25 = calcular_chance_gols(hist_h, hist_a, 2.5)
 
-    def get_vitoria_stats(jogos, team_name):
+    # Lógica de Vitória (1X ou 2X)
+    def get_vitoria_stats(jogos, team_n):
         derrotas = 0
         for j in jogos:
-            sou_h = j.get('home_team') == team_name
+            sou_h = j.get('home_team') == team_n
             h_s, a_s = j.get('home_score') or 0, j.get('away_score') or 0
             if (sou_h and h_s < a_s) or (not sou_h and a_s < h_s): derrotas += 1
         
         if not jogos: return 5, False
         ult = jogos[0]
-        sou_h_u = ult.get('home_team') == team_name
+        sou_h_u = ult.get('home_team') == team_n
         h_u, a_u = ult.get('home_score') or 0, ult.get('away_score') or 0
         vit_u = (sou_h_u and h_u > a_u) or (not sou_h_u and a_u > h_u)
         return derrotas, vit_u
 
-    # Corrigido: usando home_name e away_name aqui
     d_h, v_h = get_vitoria_stats(hist_h, home_name)
     d_a, _ = get_vitoria_stats(hist_a, away_name)
     
     mercado = ""
-    if d_h <= 1 and v_h and d_a >= 2: mercado = f"1X (Chance {80 if d_h == 0 else 65}%)"
-    elif d_a == 0 and d_h >= 2: mercado = f"2X (Chance 90%)"
+    if d_h <= 1 and v_h and d_a >= 2: 
+        mercado = f"1X (Chance {80 if d_h == 0 else 65}%)"
+    elif d_a == 0 and d_h >= 2: 
+        mercado = f"2X (Chance 90%)"
 
     return {
         "home": home_name, 
@@ -78,7 +95,7 @@ def analisar_partida(evento):
         "chance_15": chance_15,
         "chance_25": chance_25,
         "vitoria": mercado
-    }
+}
 
 def realizar_analise():
     hoje = datetime.now().strftime('%Y-%m-%d')
@@ -95,7 +112,7 @@ def realizar_analise():
         bilhete = "🎯 **BILHETE ESTRATÉGICO H2H**\n\n"
         count = 0
         
-        for j in todos_jogos[:200]:
+        for j in todos_jogos[:100]:
             if j.get('status') == 'finished':
                 continue
                 
