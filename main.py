@@ -2,46 +2,69 @@ import os
 import tls_client
 import requests
 from datetime import datetime
+from dotenv import load_dotenv
 
-# Sessão com identidade de Navegador Mobile (mais difícil de bloquearem)
+load_dotenv()
+
+# Sessão simulando um iPhone antigo (mais estável para a API)
 session = tls_client.Session(client_identifier="chrome_120")
 
-def minerar_v2():
+def enviar_telegram(mensagem):
+    token = os.getenv('TELEGRAM_TOKEN')
+    chat_id = os.getenv('CHAT_ID')
+    if token and chat_id:
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
+
+def main():
     hoje = datetime.now().strftime("%Y-%m-%d")
     
-    # --- ESTRATÉGIA 1: API MÓVEL ---
-    # O endpoint móvel costuma ter menos proteção que o desktop
-    url_mobile = f"https://api.sofascore.com/api/v1/sport/soccer/events/day/{hoje}"
+    # URL OFICIAL DA API MOBILE (Sem o 'www')
+    url = f"https://api.sofascore.com/api/v1/sport/soccer/events/day/{hoje}"
     
+    # Headers que o App oficial do SofaScore envia
     headers = {
-        "User-Agent": "SofaScore/6.1.1 (iPhone; iOS 17.4; Scale/3.00)", # Fingindo ser o APP do iPhone
+        "User-Agent": "SofaScore/6.1.1 (iPhone; iOS 17.4.1; Scale/3.00)",
         "Accept": "*/*",
-        "Host": "api.sofascore.com"
+        "Host": "api.sofascore.com",
+        "Connection": "keep-alive",
+        "Accept-Language": "pt-BR,pt;q=0.9"
     }
 
-    print(f"📡 Tentando Rota Mobile ({hoje})...")
+    print(f"📡 Tentando Rota Mobile Segura ({hoje})...")
     
     try:
-        res = session.get(url_mobile, headers=headers)
+        res = session.get(url, headers=headers)
         
-        # Se der 404 ou 403, tentamos a Rota de Widgets (Web)
-        if res.status_code != 200:
-            print(f"⚠️ Rota Mobile falhou ({res.status_code}). Tentando Rota Web...")
-            url_web = f"https://www.sofascore.com/api/v1/sport/soccer/events/day/{hoje}"
-            headers_web = {
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
-                "Referer": "https://www.sofascore.com/"
-            }
-            res = session.get(url_web, headers=headers_web)
-
         if res.status_code == 200:
-            print("✅ Sucesso! Dados capturados.")
-            return res.json()
-        else:
-            print(f"❌ Bloqueio total do IP do GitHub (Status {res.status_code}).")
-            # Aqui você poderia disparar um alerta pro seu Telegram avisando que o IP caiu
-            return None
+            print("✅ Conexão estabelecida via API Mobile!")
+            eventos = res.json().get('events', [])
             
+            # FILTRO DO LUCIANO (Sporting, Arsenal, Real, Bayern)
+            times_foco = ["Sporting", "Arsenal", "Real Madrid", "Bayern"]
+            bilhete = []
+
+            for ev in eventos:
+                h_name = ev['homeTeam']['name']
+                a_name = ev['awayTeam']['name']
+                
+                if any(t in h_name or t in a_name for t in times_foco):
+                    # Aqui você pode adicionar a lógica de 4/5 e 5/5
+                    bilhete.append(f"🏟️ {h_name} x {a_name}")
+
+            if bilhete:
+                enviar_telegram("🎯 *JOGOS DE HOJE ENCONTRADOS:*\n\n" + "\n".join(bilhete))
+                print("✅ Bilhete enviado!")
+            else:
+                print("⚠️ Jogos de elite ainda não listados.")
+                
+        else:
+            print(f"❌ Falha na Rota Mobile: {res.status_code}")
+            if res.status_code == 403:
+                print("💡 Dica: O SofaScore baniu o IP do GitHub temporariamente.")
+
     except Exception as e:
-        print(f"⚠️ Erro: {e}")
-        return None
+        print(f"⚠️ Erro inesperado: {e}")
+
+if __name__ == "__main__":
+    main()
