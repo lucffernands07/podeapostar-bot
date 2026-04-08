@@ -8,11 +8,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-COMPETICOES = {
-    "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
-    "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
-    "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/"
-}
+# Voltamos para a página principal que traz todos os jogos
+URL_PRINCIPAL = "https://www.flashscore.com.br/"
 
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -27,83 +24,71 @@ def configurar_driver():
     options.add_argument("--window-size=1920,5000")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    
-    # FORÇA O NAVEGADOR A OPERAR EM UTC (LONDRES)
+    # ESSENCIAL: Forçar o navegador a ser UTC para a trava bater com o horário do site
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
 
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
-    
-    # Formato exato que o Flashscore usa para data (ex: 09.04.)
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
     
-    mensagem_final = f"🏆 *JOGOS DE HOJE - {hoje_ref.strftime('%d/%m')}*\n\n"
-    encontrou_geral = False
+    mensagem_final = f"⚽ *TODOS OS JOGOS DE HOJE - {hoje_ref.strftime('%d/%m')}*\n\n"
+    contador = 0
 
     try:
-        for nome_comp, url in COMPETICOES.items():
-            driver.get(url)
-            time.sleep(10) # Tempo para carregar os scripts do Flashscore
+        driver.get(URL_PRINCIPAL)
+        time.sleep(10)
 
-            jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-            secao_adicionada = False
+        # Na home, os jogos também usam a classe .event__match
+        jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
 
-            for jogo in jogos:
-                try:
-                    # Captura o texto do bloco para análise de data e horário
-                    texto_bloco = jogo.text.replace("\n", " ")
-                    horario_raw = jogo.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
+        for jogo in jogos:
+            try:
+                # Se já pegamos 50 jogos válidos, paramos
+                if contador >= 50: break
+
+                texto_bloco = jogo.text.replace("\n", " ")
+                horario_raw = jogo.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
+                
+                # Nomes dos times (usando o seletor wcl-name que confirmamos no seu HTML)
+                times = jogo.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                if len(times) < 2: continue
+                t1, t2 = times[0].text.strip(), times[1].text.strip()
+
+                # Extração do Horário
+                h_utc_solo = horario_raw.split()[-1] 
+                h_obj = datetime.strptime(h_utc_solo, "%H:%M")
+                h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
+
+                # --- A MESMA REGRA DE OURO ---
+                aceitar = False
+                
+                # Se tem data de amanhã (ex: 09.04), só aceita se for madrugada UTC (até 3h)
+                if amanha_no_site in horario_raw or amanha_no_site in texto_bloco:
+                    if h_obj.hour <= 3:
+                        aceitar = True
+                
+                # Se não tem data, aceita se o horário de Brasília for "hoje" (>= 11h)
+                elif "." not in horario_raw:
+                    h_br_hour = (h_obj - timedelta(hours=3)).hour
+                    if h_br_hour >= 11:
+                        aceitar = True
+
+                if aceitar:
+                    mensagem_final += f"🕒 `{h_br}` | *{t1} x {t2}*\n"
+                    contador += 1
                     
-                    # Seletores dinâmicos baseados no seu HTML (wcl-name)
-                    times = jogo.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
-                    if len(times) < 2: continue
-                    t1, t2 = times[0].text.strip(), times[1].text.strip()
+                    # Envia em blocos de 25 para o Telegram não travar
+                    if contador % 25 == 0:
+                        enviar_telegram(mensagem_final)
+                        mensagem_final = "" # Limpa para o próximo bloco
 
-                    # Pega apenas o horário HH:MM (ignora a data se houver no campo)
-                    h_utc_solo = horario_raw.split()[-1] 
-                    h_obj = datetime.strptime(h_utc_solo, "%H:%M")
-                    
-                    # Conversão para exibição no Brasil (UTC - 3)
-                    h_br_obj = h_obj - timedelta(hours=3)
-                    h_br = h_br_obj.strftime("%H:%M")
+            except: continue
 
-                    # --- A REGRA DE OURO BLINDADA ---
-                    aceitar = False
-                    
-                    # 1. Se o bloco contém a data de amanhã (ex: 09.04.)
-                    if amanha_no_site in horario_raw or amanha_no_site in texto_bloco:
-                        # SÓ ACEITA se o horário em Londres for madrugada (00h até 03h)
-                        # Isso significa que no Brasil o jogo é HOJE entre 21h e 00h.
-                        if h_obj.hour <= 3:
-                            aceitar = True
-                        else:
-                            # É jogo de amanhã à noite (ex: Corinthians 21h). DESCARTA.
-                            aceitar = False
-                    
-                    # 2. Se NÃO tem a data de amanhã, aceita se a hora BR for de hoje (>= 11h)
-                    elif "." not in horario_raw:
-                        if h_br_obj.hour >= 11:
-                            aceitar = True
-
-                    if aceitar:
-                        if not secao_adicionada:
-                            mensagem_final += f"--- {nome_comp} ---\n"
-                            secao_adicionada = True
-                            encontrou_geral = True
-                        mensagem_final += f"🕒 `{h_br}` | *{t1} x {t2}*\n"
-                        
-                except Exception as e:
-                    continue
-            
-            if secao_adicionada:
-                mensagem_final += "\n"
-
-        if encontrou_geral:
+        # Envia o que sobrar
+        if mensagem_final.strip() and contador > 0:
             enviar_telegram(mensagem_final)
-        else:
-            print("Nenhum jogo encontrado para os critérios de hoje.")
 
     finally:
         driver.quit()
