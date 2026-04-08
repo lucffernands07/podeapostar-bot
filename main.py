@@ -12,10 +12,16 @@ from webdriver_manager.chrome import ChromeDriverManager
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
-    if not token or not chat_id: return
+    if not token or not chat_id:
+        print("Erro: Variáveis de ambiente não encontradas.")
+        return
+    
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"}
-    requests.post(url, data=payload)
+    try:
+        requests.post(url, data=payload)
+    except Exception as e:
+        print(f"Erro ao enviar: {e}")
 
 def configurar_driver():
     chrome_options = Options()
@@ -23,55 +29,65 @@ def configurar_driver():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=1920,1080")
-    # Importante para sites que detectam automação
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled") 
+    # Evita ser bloqueado como robô
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
     
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=chrome_options)
 
 def main():
     driver = configurar_driver()
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 25)
     
     try:
-        # 1. Acessa a página de jogos agendados (Próximos)
+        print("Acessando Flashscore...")
         driver.get("https://www.flashscore.com.br/")
         
-        # 2. Aguarda o botão de data aparecer e tenta selecionar (opcional para teste)
-        # Se você quiser apenas os jogos que já estão na tela, pule esta parte.
+        # 1. Aguarda e clica na aba 'PRÓXIMOS' para filtrar jogos que ainda não começaram
         try:
-            botao_data = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="wcl-dayPickerButton"]')))
-            print(f"Data atual no site: {botao_data.text}")
+            aba_proximos = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[contains(@class, 'filters__tab')]//div[contains(text(), 'PRÓXIMOS')]")))
+            driver.execute_script("arguments[0].click();", aba_proximos)
+            time.sleep(3)
         except:
-            print("Botão de data não encontrado, seguindo com a página padrão...")
+            print("Não foi possível clicar na aba 'Próximos', tentando extração direta...")
 
-        # 3. Localiza os blocos de jogos
-        # O Flashscore agrupa por 'event__header' (campeonato) e 'event__match' (jogo)
-        time.sleep(5) # Garantia para renderização do JS
+        # 2. Aguarda a presença dos containers de jogos
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".event__match")))
         
-        eventos = driver.find_elements(By.CSS_SELECTOR, '.leagues--live .event__match, .leagues--static .event__match')
+        jogos_elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
         
-        # Seletor baseado no seu snippet para o link do jogo
-        links_jogos = driver.find_elements(By.CSS_SELECTOR, 'a.eventRowLink')
+        lista_final = "⚽ *Jogos de Hoje (Lista Atualizada):*\n\n"
         
-        lista_jogos = "⚽ *Lista de Jogos Extraída*\n\n"
-        
-        if not links_jogos:
-            lista_jogos += "Nenhum jogo encontrado no momento."
+        contagem = 0
+        for jogo in jogos_elementos:
+            try:
+                # Extração dos dados de cada linha
+                horario = jogo.find_element(By.CSS_SELECTOR, ".event__time").text
+                home = jogo.find_element(By.CSS_SELECTOR, ".event__participant--home").text
+                away = jogo.find_element(By.CSS_SELECTOR, ".event__participant--away").text
+                
+                # Limpa horários que podem vir com 'Encerrado' ou 'Adiado'
+                if ":" in horario:
+                    lista_final += f"🕒 `{horario}` | *{home} x {away}*\n"
+                    contagem += 1
+                
+                # Limite de 30 jogos para não estourar o limite do Telegram em um único envio
+                if contagem >= 30: break
+            except:
+                continue
+
+        if contagem > 0:
+            enviar_telegram(lista_final)
         else:
-            for i, link in enumerate(links_jogos[:15]): # Pega os 15 primeiros para teste
-                # O título do link no Flashscore geralmente contém os times
-                info = link.get_attribute('title') or "Jogo sem título"
-                url_jogo = link.get_attribute('href')
-                lista_jogos += f"• {info}\n"
-
-        enviar_telegram(lista_jogos)
+            enviar_telegram("⚠️ Nenhum jogo agendado encontrado para agora.")
 
     except Exception as e:
-        enviar_telegram(f"❌ Erro ao processar: {str(e)}")
+        print(f"Erro: {e}")
+        enviar_telegram(f"❌ Erro na extração: {str(e)}")
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-        
+    
