@@ -21,16 +21,14 @@ jobs:
       - name: Instalar Dependências
         run: |
           python -m pip install --upgrade pip
-          # Aqui ele vai ler seu arquivo requirements.txt com tls-client e typing_extensions
+          # Comando para instalar tudo que está no seu requirements.txt
           pip install -r requirements.txt
 
-      - name: Executar Rastreador
+      - name: Executar Rastreador de Elite
         env:
-          # Mantive as chaves essenciais para o bot funcionar
+          # Apenas as credenciais do seu Telegram
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
-          echo "⏳ Aguardando estabilização da rede..."
-          sleep 5
           echo "🚀 Iniciando Mineração via TLS-Client (Técnica do Fórum)..."
           python main.py
