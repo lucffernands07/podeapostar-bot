@@ -25,80 +25,69 @@ def enviar_telegram(mensagem):
 def configurar_driver():
     options = Options()
     options.add_argument("--headless")
-    options.add_argument("--window-size=1920,3000")
+    options.add_argument("--window-size=1920,5000")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 def main():
     driver = configurar_driver()
-    lista_final = f"🏆 *JOGOS DE HOJE - {datetime.now().strftime('%d/%m')}*\n\n"
+    # Data de referência (Hoje no Brasil: 08/04)
+    hoje_br = datetime.now()
+    lista_final = f"🏆 *JOGOS DE HOJE - {hoje_br.strftime('%d/%m')} (COMPLETO)*\n\n"
     
-    # Datas para controle de fuso
-    agora_utc = datetime.now()
-    hoje_str = agora_utc.strftime("%d.%m.")
-    amanha_str = (agora_utc + timedelta(days=1)).strftime("%d.%m.")
+    hoje_str = hoje_br.strftime("%d.%m.")
+    amanha_str = (hoje_br + timedelta(days=1)).strftime("%d.%m.")
 
     try:
         for nome_comp, url in COMPETICOES.items():
             driver.get(url)
             time.sleep(8)
 
-            # Força o clique na aba PRÓXIMOS
+            # Força aba PRÓXIMOS
             try:
-                driver.execute_script("""
-                    var abas = document.querySelectorAll('.tabs__tab');
-                    for(var a of abas){
-                        if(a.innerText.includes('PRÓXIMOS')){ a.click(); }
-                    }
-                """)
+                driver.execute_script("var a=document.querySelectorAll('.tabs__tab');for(var t of a){if(t.innerText.includes('PRÓXIMOS'))t.click();}")
                 time.sleep(5)
             except: pass
 
-            # Extração via Texto Bruto (Método que achou a Champions)
             corpo_texto = driver.find_element(By.TAG_NAME, "body").text
             linhas = corpo_texto.split('\n')
             
             secao_adicionada = False
             for i in range(len(linhas)):
-                # Busca padrão de horário (00:00)
                 if re.match(r'^\d{2}:\d{2}$', linhas[i]):
                     try:
                         h_utc_str = linhas[i]
                         time1 = linhas[i+1]
                         time2 = linhas[i+2]
-
                         if "PREVIEW" in time1 or len(time1) < 3: continue
 
-                        # Captura a data que o site exibe (se houver, ex: 08.04. 21:00)
-                        # Se não houver data na linha, assume que é hoje
-                        data_jogo = hoje_str
-                        for j in range(max(0, i-2), i):
-                            if re.search(r'\d{2}\.\d{2}\.', linhas[j]):
-                                data_jogo = re.search(r'(\d{2}\.\d{2}\.)', linhas[j]).group(1)
+                        # Verifica se existe data explícita perto do horário
+                        texto_contexto = " ".join(linhas[max(0, i-3):i])
+                        
+                        # LOGICA DO FUSO: 
+                        # Se o site diz que é AMANHÃ, mas a hora UTC é menor que 03:00,
+                        # significa que no Brasil ainda é HOJE à noite.
+                        hora_h = int(h_utc_str.split(':')[0])
+                        
+                        eh_hoje = False
+                        if amanha_str in texto_contexto:
+                            if hora_h < 3: eh_hoje = True # Jogos das 21h, 22h, 23h do Brasil
+                        elif hoje_str in texto_contexto or re.search(r'\d{2}:\d{2}', h_utc_str):
+                            # Se não achou "amanhã", e a hora faz sentido, assume hoje
+                            if not (hoje_str not in texto_contexto and hora_h < 10): # Evita pegar jogos da manhã seguinte
+                                eh_hoje = True
 
-                        # --- LÓGICA DE CORREÇÃO DO FUSO (O AJUSTE QUE SE PERDEU) ---
-                        h_vazia = int(h_utc_str.split(':')[0])
-                        
-                        # Se for data de amanhã e hora < 3h UTC, é jogo de HOJE à noite no BR
-                        if data_jogo == amanha_str:
-                            if h_vazia >= 3: continue # Realmente é amanhã
-                        elif data_jogo != hoje_str:
-                            continue # É de outro dia bem distante
-
-                        # Conversão para Horário de Brasília
-                        h_obj = datetime.strptime(h_utc_str, "%H:%M")
-                        h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
-                        
-                        if not secao_adicionada:
-                            lista_final += f"--- {nome_comp} ---\n"
-                            secao_adicionada = True
-                        
-                        lista_final += f"🕒 `{h_br}` | *{time1} x {time2}*\n"
+                        if eh_hoje:
+                            h_br = (datetime.strptime(h_utc_str, "%H:%M") - timedelta(hours=3)).strftime("%H:%M")
+                            if not secao_adicionada:
+                                lista_final += f"--- {nome_comp} ---\n"
+                                secao_adicionada = True
+                            lista_final += f"🕒 `{h_br}` | *{time1} x {time2}*\n"
                     except: continue
             
             if secao_adicionada: lista_final += "\n"
 
-        enviar_telegram(lista_final if "🕒" in lista_final else "⚠️ Nenhum jogo capturado com os novos filtros.")
+        enviar_telegram(lista_final if "🕒" in lista_final else "⚠️ Nenhum jogo capturado. Verifique o log.")
 
     finally:
         driver.quit()
