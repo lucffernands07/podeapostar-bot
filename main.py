@@ -30,12 +30,10 @@ def configurar_driver():
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 def processar_liga(driver, nome_liga, url):
-    """Trata cada liga de forma isolada para evitar que o erro de uma afete a outra"""
     driver.get(url)
     time.sleep(7)
     jogos_da_liga = []
 
-    # 1. Força a aba PRÓXIMOS
     try:
         abas = driver.find_elements(By.CSS_SELECTOR, ".tabs__tab")
         for aba in abas:
@@ -45,58 +43,42 @@ def processar_liga(driver, nome_liga, url):
                 break
     except: pass
 
-    # 2. Captura todos os blocos de jogo (Independente da estrutura de mata-mata ou grupo)
-    # Buscamos tanto por IDs quanto por classes de evento
-    elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match, [id^='g_1_']")
+    elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
     
     for el in elementos:
         try:
-            texto = el.text.replace("\n", " ").strip()
-            # Regex flexível: Horário + Time Home + (opcional placar) + Time Away
-            # Ex: 16:00 Barcelona - Atl. Madrid
-            match = re.search(r'(\d{2}:\d{2})\s+(.+?)\s*-\s*(.+)', texto)
-            
-            if match:
-                h_utc = match.group(1)
-                t1 = match.group(2).strip()
-                t2 = match.group(3).strip()
+            # Captura os elementos internos para evitar erro de Regex no texto bruto
+            h_utc = el.find_element(By.CSS_SELECTOR, ".event__time").text.replace("\n", "").strip()
+            t1 = el.find_element(By.CSS_SELECTOR, ".event__participant--home").text.strip()
+            t2 = el.find_element(By.CSS_SELECTOR, ".event__participant--away").text.strip()
 
-                # Remove lixos comuns do texto capturado
-                t2 = re.split(r'ESTATÍSTICAS|PREVIEW|AUDIO', t2)[0].strip()
-
-                # --- CORREÇÃO DO FUSO E DATA ---
+            if h_utc and t1 and t2:
+                # Conversão de Fuso
                 h_obj = datetime.strptime(h_utc, "%H:%M")
                 h_br_obj = h_obj - timedelta(hours=3)
                 h_br = h_br_obj.strftime("%H:%M")
 
-                # Se o horário convertido para Brasília for tarde/noite (>=11h), é hoje.
-                # Isso permite que 00:30 UTC vire 21:30 Hoje sem ser bloqueado pela data.
+                # Filtro de horário para garantir que é hoje/noite de hoje
                 if h_br_obj.hour >= 11:
                     jogos_da_liga.append(f"🕒 `{h_br}` | *{t1} x {t2}*")
         except: continue
     
-    return list(dict.fromkeys(jogos_da_liga)) # Remove duplicados
+    return list(dict.fromkeys(jogos_da_liga))
 
 def main():
     driver = configurar_driver()
-    mensagem_final = f"🏆 *JOGOS DE HOJE - {datetime.now().strftime('%d/%m')}*\n\n"
+    mensagem_final = f"🏆 *LISTA DE HOJE - {datetime.now().strftime('%d/%m')}*\n\n"
     encontrou_algo = False
 
     try:
         for nome, url in COMPETICOES.items():
-            print(f"Analisando {nome}...")
             jogos = processar_liga(driver, nome, url)
-            
             if jogos:
                 encontrou_algo = True
-                mensagem_final += f"--- {nome} ---\n"
-                mensagem_final += "\n".join(jogos) + "\n\n"
+                mensagem_final += f"--- {nome} ---\n" + "\n".join(jogos) + "\n\n"
 
         if encontrou_algo:
             enviar_telegram(mensagem_final)
-        else:
-            enviar_telegram("⚠️ Nenhum jogo de hoje encontrado nas 3 ligas.")
-
     finally:
         driver.quit()
 
