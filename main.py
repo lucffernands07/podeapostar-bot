@@ -36,13 +36,13 @@ def main():
         driver.get("https://www.flashscore.com.br/")
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".event__match")))
         
-        # Scroll para garantir que a Libertadores carregue
-        for _ in range(4):
+        # Scroll para carregar a página toda
+        for _ in range(5):
             driver.execute_script("window.scrollBy(0, 1000);")
-            time.sleep(1)
+            time.sleep(1.2)
 
         jogos_elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-        lista_final = "🏆 *Jogos de Hoje (Fuso Corrigido Brasília)*\n\n"
+        lista_final = "🏆 *Jogos de Hoje (Fuso Brasília - Final)*\n\n"
         contagem = 0
 
         for jogo in jogos_elementos:
@@ -50,17 +50,24 @@ def main():
                 texto_bruto = jogo.text
                 linhas = texto_bruto.split('\n')
                 
-                # Captura e converte fuso (-3h)
+                # 1. Trata Horário com Fuso -3h
                 horario_match = re.search(r'\d{2}:\d{2}', texto_bruto)
                 if horario_match:
                     h_utc = datetime.strptime(horario_match.group(), "%H:%M")
                     horario = (h_utc - timedelta(hours=3)).strftime("%H:%M")
                 else:
-                    continue # Pula se não tiver horário
+                    continue
 
-                # Pega times limpando lixo
-                nomes = [l for l in linhas if not re.search(r'\d', l) and l not in ['PREVIEW', 'LIVE', 'AO VIVO']]
-                
+                # 2. Captura nomes dos times de forma inteligente
+                # Removemos apenas termos técnicos conhecidos e placares isolados (1, 2, 0...)
+                termos_lixo = ['PREVIEW', 'LIVE', 'AO VIVO', 'ENCERRADO', 'FIM', 'INTERVALO']
+                nomes = []
+                for l in linhas:
+                    # Se não for horário, nem termo de status, nem um número sozinho (placar)
+                    if not re.search(r'^\d{1,2}$', l) and not re.search(r'\d{2}:\d{2}', l) and l.upper() not in termos_lixo:
+                        if len(l) > 2: # Evita pegar letras soltas
+                            nomes.append(l)
+
                 if len(nomes) >= 2:
                     home, away = nomes[0], nomes[1]
                     lista_final += f"🕒 `{horario}` | *{home} x {away}*\n"
@@ -70,7 +77,7 @@ def main():
             except:
                 continue
 
-        enviar_telegram(lista_final if contagem > 0 else "⚠️ Nada encontrado.")
+        enviar_telegram(lista_final if contagem > 0 else "⚠️ Erro na filtragem.")
     finally:
         driver.quit()
 
