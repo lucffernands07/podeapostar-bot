@@ -9,7 +9,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Defina aqui os links das competições que você não pode perder
 COMPETICOES = {
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
     "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/",
@@ -21,9 +20,7 @@ def enviar_telegram(mensagem):
     chat_id = os.getenv('CHAT_ID')
     if not token or not chat_id: return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    # Fragmenta se for muito grande
-    for i in range(0, len(mensagem), 4000):
-        requests.post(url, data={"chat_id": chat_id, "text": mensagem[i:i+4000], "parse_mode": "Markdown"})
+    requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
 
 def configurar_driver():
     options = Options()
@@ -34,44 +31,68 @@ def configurar_driver():
 
 def main():
     driver = configurar_driver()
-    lista_final = "🏆 *Jogos Monitorados (Fuso Brasília)*\n\n"
+    lista_final = "🏆 *Próximos Jogos de Hoje (Filtro 23h Brasília)*\n\n"
     
+    # Datas de referência
+    agora_utc = datetime.now()
+    hoje_str = agora_utc.strftime("%d.%m.")
+    amanha_str = (agora_utc + timedelta(days=1)).strftime("%d.%m.")
+
     try:
-        for nome, url in COMPETICOES.items():
+        for nome_comp, url in COMPETICOES.items():
             driver.get(url)
-            time.sleep(3) # Espera carregar a página da competição
+            time.sleep(4)
             
-            # Pega todos os jogos da página usando o ID global 'g_1_'
-            elementos = driver.find_elements(By.CSS_SELECTOR, "[id^='g_1_']")
+            jogos = driver.find_elements(By.CSS_SELECTOR, "[id^='g_1_']")
+            secao_adicionada = False
             
-            lista_final += f"--- {nome} ---\n"
-            contagem_comp = 0
-            
-            for jogo in elementos:
+            for jogo in jogos:
                 try:
                     texto = jogo.text
+                    
+                    # 1. Ignora jogos que já começaram ou terminaram
+                    status_ignore = ['LIVE', 'AO VIVO', 'INTERVALO', 'FIM', 'ENCERRADO', 'ADIADO']
+                    if any(x in texto.upper() for x in status_ignore):
+                        continue
+                    
+                    # 2. Pega Horário e Data do texto
                     horario_match = re.search(r'\d{2}:\d{2}', texto)
+                    data_match = re.search(r'\d{2}\.\d{2}\.', texto)
                     if not horario_match: continue
                     
-                    # Correção de Fuso: Hora do site - 3h
-                    h_site = datetime.strptime(horario_match.group(), "%H:%M")
-                    h_br = (h_site - timedelta(hours=3)).strftime("%H:%M")
+                    h_texto = horario_match.group()
+                    d_texto = data_match.group() if data_match else hoje_str
+
+                    # --- LOGICA DA TRAVA UTC ---
+                    # Se for do dia seguinte (UTC), só aceita se for até as 02:00 (que é 23h Brasília)
+                    if d_texto == amanha_str:
+                        hora_int = int(h_texto.split(':')[0])
+                        if hora_int > 2: # Se for 03:00 UTC pra frente, já é amanhã de verdade no BR
+                            continue
+                    elif d_texto != hoje_str:
+                        continue # Pula datas muito distantes
+
+                    # 3. Conversão para Brasília
+                    h_obj = datetime.strptime(h_texto, "%H:%M")
+                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
+                    # 4. Captura de Nomes
                     linhas = [l.strip() for l in texto.split('\n') if l.strip()]
-                    termos_off = ['PREVIEW', 'LIVE', 'AO VIVO', 'ENCERRADO', 'INTERVALO', 'FIM']
-                    nomes = [l for l in linhas if l.upper() not in termos_off and not re.search(r'^\d{1,2}$', l) and ":" not in l]
-                    
+                    nomes = [l for l in linhas if ":" not in l and "." not in l and not re.search(r'^\d+$', l) and len(l) > 2]
+
                     if len(nomes) >= 2:
+                        if not secao_adicionada:
+                            lista_final += f"--- {nome_comp} ---\n"
+                            secao_adicionada = True
                         lista_final += f"🕒 `{h_br}` | *{nomes[0]} x {nomes[1]}*\n"
-                        contagem_comp += 1
                 except: continue
             
-            lista_final += "\n"
-            if contagem_comp == 0: lista_final += "⚠️ Nenhum jogo hoje.\n\n"
+            if secao_adicionada: lista_final += "\n"
         
-        enviar_telegram(lista_final)
+        enviar_telegram(lista_final if "🕒" in lista_final else "⚠️ Nenhum jogo agendado encontrado.")
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
+                    
