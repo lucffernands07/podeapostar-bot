@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
+# Ligas alvo
 COMPETICOES = {
     "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
@@ -18,19 +19,11 @@ COMPETICOES = {
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
-    if not token or not chat_id: return
+    if not token or not chat_id: 
+        print("Erro: TELEGRAM_TOKEN ou CHAT_ID não configurados.")
+        return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
-
-def salvar_log_debug(nome_comp, texto):
-    """Salva o texto da página em um arquivo para o GitHub Actions fazer o upload"""
-    filename = f"debug_{nome_comp.lower().replace(' ', '_')}.log"
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(f"--- DEBUG LOG: {nome_comp} ---\n")
-        f.write(f"Data/Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        f.write("-" * 50 + "\n")
-        f.write(texto)
-    print(f"Log salvo: {filename}")
 
 def configurar_driver():
     options = Options()
@@ -41,14 +34,16 @@ def configurar_driver():
 
 def main():
     driver = configurar_driver()
-    lista_final = "🏆 *Lista de Jogos (Verificação por Log)*\n\n"
+    # Cabeçalho com a data de hoje (8 de Abril de 2026)
+    lista_final = f"🏆 *Jogos de Hoje - {datetime.now().strftime('%d/%m/%Y')}*\n\n"
     
     try:
         for nome_comp, url in COMPETICOES.items():
+            print(f"Buscando: {nome_comp}...")
             driver.get(url)
-            time.sleep(10)
+            time.sleep(8)
 
-            # Clique forçado na aba PRÓXIMOS
+            # Força o clique na aba PRÓXIMOS via JavaScript
             try:
                 driver.execute_script("""
                     var tabs = document.querySelectorAll('.tabs__tab');
@@ -57,34 +52,50 @@ def main():
                     }
                 """)
                 time.sleep(5)
-            except Exception as e:
-                print(f"Erro ao clicar na aba em {nome_comp}: {e}")
+            except:
+                pass
 
-            # Captura o texto bruto para o LOG
+            # Captura o texto bruto da página
             corpo_texto = driver.find_element(By.TAG_NAME, "body").text
-            salvar_log_debug(nome_comp, corpo_texto)
-
-            # Processamento básico para o Telegram não ir vazio
             linhas = corpo_texto.split('\n')
+            
             secao_adicionada = False
             for i in range(len(linhas)):
+                # Busca padrão de horário (Ex: 16:00 ou 21:30)
                 if re.match(r'^\d{2}:\d{2}$', linhas[i]):
                     try:
-                        h_utc = linhas[i]
-                        t1, t2 = linhas[i+1], linhas[i+2]
-                        if "PREVIEW" in t1 or len(t1) < 3: continue
+                        horario_utc = linhas[i]
+                        time1 = linhas[i+1]
+                        time2 = linhas[i+2]
                         
-                        h_br = (datetime.strptime(h_utc, "%H:%M") - timedelta(hours=3)).strftime("%H:%M")
+                        # Ignora lixo ou jogos que já têm placar/ao vivo
+                        if any(x in time1.upper() for x in ['PREVIEW', 'LIVE', 'AO VIVO']): continue
+                        if len(time1) < 3 or len(time2) < 3: continue
+
+                        # Converte UTC para Brasília (UTC-3)
+                        h_obj = datetime.strptime(horario_utc, "%H:%M")
+                        h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
+                        
                         if not secao_adicionada:
                             lista_final += f"--- {nome_comp} ---\n"
                             secao_adicionada = True
-                        lista_final += f"🕒 `{h_br}` | *{t1} x {t2}*\n"
-                    except: continue
-            
-            if secao_adicionada: lista_final += "\n"
+                        
+                        lista_final += f"🕒 `{h_br}` | *{time1} x {time2}*\n"
+                    except:
+                        continue
 
-        enviar_telegram(lista_final if "🕒" in lista_final else "⚠️ Nenhum jogo no texto bruto. Verifique os arquivos .log no Github.")
+            if secao_adicionada:
+                lista_final += "\n"
 
+        # Verifica se algo foi encontrado antes de enviar
+        if "🕒" in lista_final:
+            enviar_telegram(lista_final)
+            print("Lista enviada com sucesso!")
+        else:
+            enviar_telegram("⚠️ Nenhum jogo pendente encontrado para hoje nas ligas selecionadas.")
+
+    except Exception as e:
+        print(f"Erro geral: {e}")
     finally:
         driver.quit()
 
