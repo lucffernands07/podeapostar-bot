@@ -12,8 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 COMPETICOES = {
     "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
-    "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/",
-    "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/"
+    "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/"
 }
 
 def enviar_telegram(mensagem):
@@ -32,7 +31,7 @@ def configurar_driver():
 
 def main():
     driver = configurar_driver()
-    lista_final = "🏆 *Lista de Jogos Atualizada*\n\n"
+    lista_final = "🏆 *Lista de Jogos (Busca Direta por ID)*\n\n"
     
     agora_utc = datetime.now()
     hoje_str = agora_utc.strftime("%d.%m.")
@@ -41,36 +40,48 @@ def main():
     try:
         for nome_comp, url in COMPETICOES.items():
             driver.get(url)
-            time.sleep(7)
-            
-            # 1. SCROLL para carregar os Playoffs (que você mandou no HTML)
-            driver.execute_script("window.scrollTo(0, 1000);")
-            time.sleep(2)
+            time.sleep(10) # Flashscore é pesado, 10s é o ideal no servidor
 
-            # 2. BUSCA AVANÇADA: Procuramos pelo ID g_1_ OU pelo aria-describedby que você mandou
-            # Isso garante que mesmo jogos em destaque ou playoffs sejam pegos
-            jogos = driver.find_elements(By.CSS_SELECTOR, "[id^='g_1_'], [aria-describedby^='g_1_']")
+            # Buscamos todos os IDs de jogos g_1_... que estão na página
+            # Usamos set() para não repetir o mesmo jogo
+            ids_jogos = set()
+            elementos = driver.find_elements(By.CSS_SELECTOR, "[id^='g_1_'], [aria-describedby^='g_1_']")
             
+            for el in elementos:
+                id_bruto = el.get_attribute("id") or el.get_attribute("aria-describedby")
+                if id_bruto and id_bruto.startswith("g_1_"):
+                    ids_jogos.add(id_bruto)
+
             secao_adicionada = False
-            for jogo in jogos:
+            for id_jogo in ids_jogos:
                 try:
-                    texto = jogo.text
-                    if ":" not in texto or "ENCERRADO" in texto.upper(): continue
+                    # Agora buscamos o elemento específico do jogo pelo ID
+                    container = driver.find_element(By.ID, id_jogo)
+                    texto = container.text
+                    
+                    # Se o texto vier vazio (comum em mata-mata), tentamos pegar do pai
+                    if not texto:
+                        texto = container.find_element(By.XPATH, "..").text
+                    
+                    if ":" not in texto: continue
+                    if "ENCERRADO" in texto.upper() or "LIVE" in texto.upper(): continue
 
-                    # Extração de Horário
+                    # Horário
                     h_match = re.search(r'(\d{2}:\d{2})', texto)
                     if not h_match: continue
                     h_utc = h_match.group(1)
 
-                    # Filtro de Data / Trava 2h UTC
+                    # Data
                     d_match = re.search(r'(\d{2}\.\d{2}\.)', texto)
                     d_site = d_match.group(1) if d_match else hoje_str
+                    
+                    # Trava 2h UTC
                     if d_site == amanha_str and int(h_utc.split(':')[0]) >= 2: continue
                     elif d_site != hoje_str and d_site != amanha_str: continue
 
-                    # Captura dos nomes usando as classes de participantes
-                    home = jogo.find_element(By.CSS_SELECTOR, ".event__participant--home").text
-                    away = jogo.find_element(By.CSS_SELECTOR, ".event__participant--away").text
+                    # Times (Busca por classe dentro do container)
+                    home = container.find_element(By.CSS_SELECTOR, ".event__participant--home").text
+                    away = container.find_element(By.CSS_SELECTOR, ".event__participant--away").text
 
                     if home and away:
                         h_br = (datetime.strptime(h_utc, "%H:%M") - timedelta(hours=3)).strftime("%H:%M")
@@ -82,7 +93,7 @@ def main():
             
             if secao_adicionada: lista_final += "\n"
         
-        enviar_telegram(lista_final if "🕒" in lista_final else "⚠️ Nenhum jogo pendente encontrado.")
+        enviar_telegram(lista_final if "🕒" in lista_final else "⚠️ Nenhum jogo pendente capturado.")
 
     finally:
         driver.quit()
