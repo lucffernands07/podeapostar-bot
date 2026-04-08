@@ -16,12 +16,7 @@ def enviar_telegram(mensagem):
     chat_id = os.getenv('CHAT_ID')
     if not token or not chat_id: return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    # Proteção contra mensagens gigantes
-    if len(mensagem) > 4000:
-        for i in range(0, len(mensagem), 4000):
-            requests.post(url, data={"chat_id": chat_id, "text": mensagem[i:i+4000], "parse_mode": "Markdown"})
-    else:
-        requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
+    requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
 
 def configurar_driver():
     chrome_options = Options()
@@ -38,33 +33,39 @@ def main():
     wait = WebDriverWait(driver, 30)
     
     try:
-        # 1. Abre a home (Aba TODOS por padrão)
         driver.get("https://www.flashscore.com.br/")
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".event__match")))
         
-        # 2. Scroll para carregar os blocos de elite (Liberta/Sula/Champions)
-        for _ in range(4):
+        # 1. FORÇAR ABA PRÓXIMOS: Onde o 00:30 UTC (Palmeiras) estará visível para o servidor
+        try:
+            aba_prox = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[contains(text(), 'PRÓXIMOS')]")))
+            driver.execute_script("arguments[0].click();", aba_prox)
+            time.sleep(3)
+        except:
+            print("Aba próximos não encontrada, seguindo na atual...")
+
+        # 2. Scroll para carregar conteúdo
+        for _ in range(5):
             driver.execute_script("window.scrollBy(0, 1000);")
             time.sleep(1)
 
         jogos_elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-        lista_final = "⚽ *Lista Geral de Jogos (Horário de Brasília)*\n\n"
+        lista_final = "⚽ *Lista de Jogos (Aba Próximos - Fuso Corrigido)*\n\n"
         contagem = 0
 
         for jogo in jogos_elementos:
             try:
                 texto_bruto = jogo.text
                 
-                # Procura o horário no padrão 00:00
+                # Busca horário 00:00
                 horario_match = re.search(r'\d{2}:\d{2}', texto_bruto)
                 if not horario_match: continue
 
-                # CONVERSÃO: Pega o UTC do servidor e traz para Brasília (-3h)
+                # Conversão Fuso -3h
                 h_site = datetime.strptime(horario_match.group(), "%H:%M")
                 h_br = (h_site - timedelta(hours=3)).strftime("%H:%M")
 
                 linhas = texto_bruto.split('\n')
-                # Filtra nomes de times (mais de 3 letras, ignora termos técnicos)
+                # Filtro de nomes robusto
                 termos_off = ['PREVIEW', 'LIVE', 'AO VIVO', 'ENCERRADO', 'FIM', 'INTERVALO']
                 nomes = [l for l in linhas if not re.search(r'^\d{1,2}$', l) 
                          and ":" not in l 
@@ -73,14 +74,15 @@ def main():
 
                 if len(nomes) >= 2:
                     home, away = nomes[0], nomes[1]
+                    # Só adiciona se for Junior, Palmeiras, Cusco ou Flamengo para testarmos
                     lista_final += f"🕒 `{h_br}` | *{home} x {away}*\n"
                     contagem += 1
                 
-                if contagem >= 50: break
+                if contagem >= 60: break
             except:
                 continue
 
-        enviar_telegram(lista_final if contagem > 0 else "⚠️ Erro: Nenhum jogo identificado na aba principal.")
+        enviar_telegram(lista_final if contagem > 0 else "⚠️ Nada na aba Próximos.")
     finally:
         driver.quit()
 
