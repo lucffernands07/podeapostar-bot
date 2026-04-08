@@ -14,29 +14,43 @@ def enviar_telegram(mensagem):
         requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
 
 def minerar_flashscore():
-    # URL do Feed do Flashscore (Geralmente não tem o bloqueio pesado do SofaScore)
-    # O final 'f_1_0_2_pt-br_1' indica: Futebol (1), Hoje (0), Fuso Brasil
-    url = "https://6.flashscore.com/x/feed/f_1_0_2_pt-br_1"
+    # Usamos o subdomínio 'd' (de data) que é mais estável que os números (6, 7, 8)
+    # E mudamos o final para 'f_1_0_3_pt-br_1' (o 3 é o código para buscar o feed completo de hoje)
+    url = "https://d.flashscore.com.br/x/feed/f_1_0_3_pt-br_1"
     
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "x-fsign": "SW9D1eZo", # Essa chave 'fsign' é o que valida o acesso no Flashscore
+        "x-fsign": "SW9D1eZo",
         "Referer": "https://www.flashscore.com.br/",
-        "Accept": "*/*"
+        "X-Requested-With": "XMLHttpRequest"
     }
 
-    print("📡 Minerando Feed do Flashscore...")
+    print("📡 Minerando Feed Estável do Flashscore...")
     
     try:
+        # Tentativa 1: Subdomínio 'd'
         res = requests.get(url, headers=headers, timeout=20)
+        
+        # Se o 'd' falhar (DNS), tentamos o próprio domínio principal como fallback
+        if res.status_code != 200:
+            print("⚠️ Subdomínio 'd' falhou, tentando rota alternativa...")
+            url_alt = "https://www.flashscore.com.br/x/feed/f_1_0_3_pt-br_1"
+            res = requests.get(url_alt, headers=headers, timeout=20)
+
         if res.status_code == 200:
             return res.text
         else:
             print(f"❌ Falha no Flashscore: Status {res.status_code}")
             return None
     except Exception as e:
-        print(f"⚠️ Erro na mineração: {e}")
-        return None
+        print(f"⚠️ Erro de DNS ou Conexão: {e}")
+        # Se der erro de DNS de novo, tentamos a URL sem subdomínio
+        try:
+            url_final = "https://www.flashscore.com.br/x/feed/f_1_0_3_pt-br_1"
+            res = requests.get(url_final, headers=headers, timeout=20)
+            return res.text if res.status_code == 200 else None
+        except:
+            return None
 
 def processar_texto_flashscore(texto):
     if not texto: return []
