@@ -1,17 +1,10 @@
 import os
-import tls_client
 import requests
-import json
-import time # Adicionado para o Timestamp
+import time
 from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
-
-session = tls_client.Session(
-    client_identifier="chrome_120",
-    random_tls_extension_order=True
-)
 
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -20,71 +13,81 @@ def enviar_telegram(mensagem):
         url = f"https://api.telegram.org/bot{token}/sendMessage"
         requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
 
-def obter_dados():
-    hoje = datetime.now().strftime("%Y-%m-%d")
-    # Adicionamos um timestamp (_=123456) que é como o site real faz
-    timestamp = int(time.time() * 1000)
-    url = f"https://www.sofascore.com/api/v1/sport/soccer/events/day/{hoje}?_={timestamp}"
+def minerar_flashscore():
+    # URL do Feed do Flashscore (Geralmente não tem o bloqueio pesado do SofaScore)
+    # O final 'f_1_0_2_pt-br_1' indica: Futebol (1), Hoje (0), Fuso Brasil
+    url = "https://6.flashscore.com/x/feed/f_1_0_2_pt-br_1"
     
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "*/*",
-        "Accept-Language": "pt-BR,pt;q=0.9",
-        "Referer": "https://www.sofascore.com/",
-        "x-requested-with": "XMLHttpRequest", # ESSENCIAL: Diz ao site que é uma chamada de dados
-        "Cache-Control": "no-cache"
+        "x-fsign": "SW9D1eZo", # Essa chave 'fsign' é o que valida o acesso no Flashscore
+        "Referer": "https://www.flashscore.com.br/",
+        "Accept": "*/*"
     }
 
-    print(f"📡 Tentando técnica Mkzz1 (URL com Timestamp + XMLHttpRequest)...")
+    print("📡 Minerando Feed do Flashscore...")
     
     try:
-        # Passo 1: Visitar a home para validar a sessão
-        session.get("https://www.sofascore.com/", headers=headers)
-        
-        # Passo 2: Buscar os dados reais
-        res = session.get(url, headers=headers)
-        
+        res = requests.get(url, headers=headers, timeout=20)
         if res.status_code == 200:
-            return res.json()
+            return res.text
         else:
-            print(f"❌ Falha: Status {res.status_code}")
-            # Se der 404 de novo, tentamos a URL sem o WWW (API pura)
-            url_api = f"https://api.sofascore.com/api/v1/sport/soccer/events/day/{hoje}"
-            res_api = session.get(url_api, headers=headers)
-            if res_api.status_code == 200:
-                return res_api.json()
+            print(f"❌ Falha no Flashscore: Status {res.status_code}")
             return None
     except Exception as e:
-        print(f"⚠️ Erro de Conexão: {e}")
+        print(f"⚠️ Erro na mineração: {e}")
         return None
 
-def main():
-    dados = obter_dados()
-    if dados:
-        eventos = dados.get('events', [])
-        print(f"✅ Sucesso! {len(eventos)} jogos encontrados.")
+def processar_texto_flashscore(texto):
+    if not texto: return []
+    
+    jogos = []
+    # O Flashscore separa os dados por '~' e os blocos por '¬'
+    blocos = texto.split('¬')
+    
+    time_casa = ""
+    time_fora = ""
+    hora_jogo = ""
+    
+    for bloco in blocos:
+        # AE = Nome do Time da Casa, AF = Nome do Time de Fora, AD = Hora
+        if bloco.startswith("AE÷"): time_casa = bloco.replace("AE÷", "")
+        if bloco.startswith("AF÷"): time_fora = bloco.replace("AF÷", "")
+        if bloco.startswith("AD÷"): 
+            ts = bloco.replace("AD÷", "")
+            hora_jogo = datetime.fromtimestamp(int(ts)).strftime("%H:%M")
         
-        # Seus times favoritos
+        # Quando chega no final do bloco do jogo (geralmente começa com Z~ ou algo assim)
+        if time_casa and time_fora and hora_jogo:
+            jogos.append({
+                "home": time_casa,
+                "away": time_fora,
+                "hora": hora_jogo
+            })
+            # Limpa para o próximo jogo
+            time_casa, time_fora, hora_jogo = "", "", ""
+            
+    return jogos
+
+def main():
+    conteudo = minerar_flashscore()
+    jogos = processar_texto_flashscore(conteudo)
+    
+    if jogos:
+        print(f"✅ Sucesso! {len(jogos)} jogos minerados do Flashscore.")
         times_foco = ["Sporting", "Arsenal", "Real Madrid", "Bayern", "Corinthians"]
         achados = []
 
-        for ev in eventos:
-            # Pegamos o nome do time da casa e de fora
-            n_h = ev.get('homeTeam', {}).get('name', '')
-            n_a = ev.get('awayTeam', {}).get('name', '')
-            
-            if any(t.lower() in n_h.lower() or t.lower() in n_a.lower() for t in times_foco):
-                hora = datetime.fromtimestamp(ev['startTimestamp']).strftime("%H:%M")
-                achados.append(f"🏟️ *{n_h} x {n_a}*\n🕒 {hora}")
+        for j in jogos:
+            if any(t.lower() in j['home'].lower() or t.lower() in j['away'].lower() for t in times_foco):
+                achados.append(f"🏟️ *{j['home']} x {j['away']}*\n🕒 {j['hora']}")
 
         if achados:
-            msg = "🎯 *BILHETE DE ELITE ENCONTRADO!*\n\n" + "\n\n".join(achados)
+            msg = "🎯 *BILHETE FLASH ENCONTRADO!*\n\n" + "\n\n".join(achados)
             enviar_telegram(msg)
-            print("✅ Bilhete enviado!")
-        else:
-            print("⚠️ Nenhum jogo dos seus times hoje.")
+            print("✅ Mensagem enviada ao Telegram!")
     else:
-        print("❌ O bloqueio persiste.")
+        print("❌ A mineração não trouxe dados válidos.")
 
 if __name__ == "__main__":
     main()
