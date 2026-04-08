@@ -12,16 +12,17 @@ from webdriver_manager.chrome import ChromeDriverManager
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
-    if not token or not chat_id:
-        print("Erro: Variáveis de ambiente não encontradas.")
-        return
+    if not token or not chat_id: return
     
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"}
-    try:
+    # Dividir a mensagem se ela for muito grande para o Telegram (limite de 4096 caracteres)
+    if len(mensagem) > 4000:
+        partes = [mensagem[i:i+4000] for i in range(0, len(mensagem), 4000)]
+        for parte in partes:
+            requests.post(url, data={"chat_id": chat_id, "text": parte, "parse_mode": "Markdown"})
+    else:
+        payload = {"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"}
         requests.post(url, data=payload)
-    except Exception as e:
-        print(f"Erro ao enviar: {e}")
 
 def configurar_driver():
     chrome_options = Options()
@@ -29,62 +30,63 @@ def configurar_driver():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=1920,1080")
-    # Evita ser bloqueado como robô
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
-    
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=chrome_options)
 
 def main():
     driver = configurar_driver()
-    wait = WebDriverWait(driver, 25)
+    wait = WebDriverWait(driver, 30)
     
     try:
-        print("Acessando Flashscore...")
+        print("Acessando site para colher jogos de hoje...")
         driver.get("https://www.flashscore.com.br/")
         
-        # 1. Aguarda e clica na aba 'PRÓXIMOS' para filtrar jogos que ainda não começaram
-        try:
-            aba_proximos = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[contains(@class, 'filters__tab')]//div[contains(text(), 'PRÓXIMOS')]")))
-            driver.execute_script("arguments[0].click();", aba_proximos)
-            time.sleep(3)
-        except:
-            print("Não foi possível clicar na aba 'Próximos', tentando extração direta...")
-
-        # 2. Aguarda a presença dos containers de jogos
+        # Espera inicial para carregar a estrutura
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".event__match")))
         
+        # Rolar a página algumas vezes para carregar campeonatos de baixo (Liberta, Sula)
+        for _ in range(3):
+            driver.execute_script("window.scrollBy(0, 1000);")
+            time.sleep(1)
+
         jogos_elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
         
-        lista_final = "⚽ *Jogos de Hoje (Lista Atualizada):*\n\n"
-        
+        lista_final = f"🏆 *Lista de Jogos de Hoje ({len(jogos_elementos)} encontrados)*\n\n"
         contagem = 0
+
         for jogo in jogos_elementos:
             try:
-                # Extração dos dados de cada linha
-                horario = jogo.find_element(By.CSS_SELECTOR, ".event__time").text
-                home = jogo.find_element(By.CSS_SELECTOR, ".event__participant--home").text
-                away = jogo.find_element(By.CSS_SELECTOR, ".event__participant--away").text
+                texto_bruto = jogo.text
+                dados = texto_bruto.split('\n')
                 
-                # Limpa horários que podem vir com 'Encerrado' ou 'Adiado'
-                if ":" in horario:
-                    lista_final += f"🕒 `{horario}` | *{home} x {away}*\n"
-                    contagem += 1
+                # Regra: Geralmente o horário contém ":" e é o primeiro elemento
+                if dados and ":" in dados[0]:
+                    horario = dados[0]
+                    # Identifica mandante e visitante ignorando ícones de cards ou placares
+                    # Em jogos não começados, o formato costuma ser [Horário, Mandante, Visitante]
+                    home = dados[1]
+                    away = dados[2] if len(dados) >= 3 else "A definir"
+                    
+                    # Limpeza simples para remover lixo de texto
+                    if "Encerrado" not in texto_bruto and "Adiado" not in texto_bruto:
+                        lista_final += f"🕒 `{horario}` | *{home} x {away}*\n"
+                        contagem += 1
                 
-                # Limite de 30 jogos para não estourar o limite do Telegram em um único envio
-                if contagem >= 30: break
+                # NOVO LIMITE: 50 JOGOS
+                if contagem >= 50: 
+                    break 
             except:
                 continue
 
         if contagem > 0:
             enviar_telegram(lista_final)
+            print(f"Sucesso! {contagem} jogos enviados.")
         else:
-            enviar_telegram("⚠️ Nenhum jogo agendado encontrado para agora.")
+            enviar_telegram("⚠️ Nenhum jogo agendado encontrado na varredura.")
 
     except Exception as e:
-        print(f"Erro: {e}")
-        enviar_telegram(f"❌ Erro na extração: {str(e)}")
+        enviar_telegram(f"❌ Erro crítico: {str(e)}")
     finally:
         driver.quit()
 
