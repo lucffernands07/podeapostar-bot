@@ -1,12 +1,16 @@
-name: Robô de Bilhetes - SofaScore Elite
+name: Robô de Bilhetes - Flashscore Miner
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: 
+  schedule:
+    # 08:00 Brasília = 11:00 UTC
+    # Minuto 0, Hora 11, Qualquer dia, Qualquer mês, Qualquer dia da semana
+    - cron: '0 11 * * *'
+  workflow_dispatch: # Permite rodar manualmente pelo botão 'Run workflow'
 
 jobs:
-  execucao:
+  mineracao:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,14 +25,13 @@ jobs:
       - name: Instalar Dependências
         run: |
           python -m pip install --upgrade pip
-          # Comando para instalar tudo que está no seu requirements.txt
-          pip install -r requirements.txt
+          # Requisitos mínimos para o Flashscore
+          pip install requests python-dotenv
 
-      - name: Executar Rastreador de Elite
+      - name: Executar Mineração Flashscore
         env:
-          # Apenas as credenciais do seu Telegram
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
-          echo "🚀 Iniciando Mineração via TLS-Client (Técnica do Fórum)..."
+          echo "🚀 Iniciando Mineração via Feed Bruteforce (Flashscore)..."
           python main.py
