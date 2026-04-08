@@ -7,8 +7,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 COMPETICOES = {
@@ -26,86 +24,91 @@ def enviar_telegram(mensagem):
 
 def configurar_driver():
     options = Options()
-    options.add_argument("--headless") # Se continuar dando erro, comente esta linha para ver o que acontece
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    # Simula exatamente um desktop em tela cheia para evitar a versão mobile simplificada
     options.add_argument("--window-size=1920,1080")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 def main():
     driver = configurar_driver()
-    wait = WebDriverWait(driver, 20)
-    lista_final = "🏆 *Lista Final (Força Bruta)*\n\n"
+    lista_final = "🏆 *Lista de Jogos (Recuperação Sniper)*\n\n"
     
-    # Referências de Data
-    hoje_utc = datetime.now()
-    amanha_utc = hoje_utc + timedelta(days=1)
-    datas_alvo = [hoje_utc.strftime("%d.%m."), amanha_utc.strftime("%d.%m.")]
+    agora_utc = datetime.now()
+    hoje_str = agora_utc.strftime("%d.%m.")
+    amanha_str = (agora_utc + timedelta(days=1)).strftime("%d.%m.")
 
     try:
         for nome_comp, url in COMPETICOES.items():
             driver.get(url)
+            time.sleep(10) # Tempo generoso para o JavaScript carregar tudo
+
+            # Tenta pegar qualquer div que tenha a classe de partida (event__match)
+            # ou os IDs que começam com g_1_
+            jogos = driver.find_elements(By.XPATH, "//*[contains(@id, 'g_1_')] | //*[contains(@class, 'event__match')]")
             
-            # Espera até que QUALQUER jogo apareça na tela
-            try:
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[id^='g_1_']")))
-            except:
-                continue # Se não achou nada em 20s, pula pra próxima liga
+            if not jogos:
+                continue
 
-            # Scroll para garantir carregamento total
-            driver.execute_script("window.scrollTo(0, 1000);")
-            time.sleep(2)
-
-            jogos = driver.find_elements(By.CSS_SELECTOR, "[id^='g_1_']")
             secao_adicionada = False
-            
             for jogo in jogos:
                 try:
-                    # Pega o texto e verifica se tem horário
                     texto = jogo.text
-                    if ":" not in texto: continue
+                    if not texto or ":" not in texto: continue
                     
-                    # Filtro de AO VIVO (mais simples)
-                    if "AO VIVO" in texto.upper() or "LIVE" in texto.upper():
+                    # Filtro de status
+                    if any(x in texto.upper() for x in ['LIVE', 'AO VIVO', 'ENCERRADO', 'FIM', 'INTERROMPIDO']):
                         continue
 
-                    # Horário e Data
+                    # Extração de Horário e Data
                     h_match = re.search(r'(\d{2}:\d{2})', texto)
                     if not h_match: continue
-                    h_utc_str = h_match.group(1)
-                    
-                    d_match = re.search(r'(\d{2}\.\d{2}\.)', texto)
-                    d_site = d_match.group(1) if d_match else datas_alvo[0]
+                    h_utc = h_match.group(1)
 
-                    # Trava das 2h UTC (Se for amanhã e > 02:00, pula)
-                    if d_site == datas_alvo[1]:
-                        if int(h_utc_str.split(':')[0]) >= 2: continue
-                    elif d_site not in datas_alvo:
+                    d_match = re.search(r'(\d{2}\.\d{2}\.)', texto)
+                    d_site = d_match.group(1) if d_match else hoje_str
+
+                    # Trava das 2h UTC
+                    if d_site == amanha_str:
+                        if int(h_utc.split(':')[0]) >= 2: continue
+                    elif d_site != hoje_str and d_site != amanha_str:
                         continue
 
-                    # Nomes dos times (usando as classes que não falham)
-                    home = jogo.find_element(By.CLASS_NAME, "event__participant--home").text
-                    away = jogo.find_element(By.CLASS_NAME, "event__participant--away").text
+                    # Busca os nomes dos times dentro do elemento atual por classe
+                    # Isso é mais seguro que split de texto
+                    try:
+                        home = jogo.find_element(By.CSS_SELECTOR, ".event__participant--home").text
+                        away = jogo.find_element(By.CSS_SELECTOR, ".event__participant--away").text
+                    except:
+                        # Fallback se as classes falharem (limpeza de linhas)
+                        linhas = [l.strip() for l in texto.split('\n') if len(l.strip()) > 2]
+                        # Remove horário e termos inúteis
+                        limpos = [l for l in linhas if ":" not in l and "." not in l and l.upper() not in ['PREVIEW', 'AUDIO', 'ESTATÍSTICAS']]
+                        if len(limpos) >= 2:
+                            home, away = limpos[0], limpos[1]
+                        else: continue
 
                     if home and away:
-                        # Converte fuso
-                        h_obj = datetime.strptime(h_utc_str, "%H:%M")
-                        h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
-                        
+                        h_br = (datetime.strptime(h_utc, "%H:%M") - timedelta(hours=3)).strftime("%H:%M")
                         if not secao_adicionada:
                             lista_final += f"--- {nome_comp} ---\n"
                             secao_adicionada = True
-                        
                         lista_final += f"🕒 `{h_br}` | *{home} x {away}*\n"
-                except:
-                    continue
+                except: continue
             
-            if secao_adicionada:
-                lista_final += "\n"
+            if secao_adicionada: lista_final += "\n"
         
-        enviar_telegram(lista_final if "🕒" in lista_final else "⚠️ Falha crítica: Nenhum jogo capturado.")
-        
+        if "🕒" not in lista_final:
+            # Se falhar tudo, tenta ao menos pegar o título da página para saber onde estamos
+            enviar_telegram(f"⚠️ Erro: Página carregou como '{driver.title}', mas nenhum jogo foi filtrado.")
+        else:
+            enviar_telegram(lista_final)
+
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
+    
