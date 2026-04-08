@@ -36,25 +36,32 @@ def analisar_detalhes_h2h(driver, url_jogo):
     driver.switch_to.window(driver.window_handles[-1])
     data = {"c_15": 0, "c_25": 0, "c_h": [], "f_15": 0, "f_25": 0, "f_h": []}
     try:
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
+        # Espera carregar os blocos de H2H
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        
         for i, secao in enumerate(secoes[:2]):
             pref = "c" if i == 0 else "f"
+            # Pega as últimas 5 linhas de resultados
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
             for linha in linhas:
-                res_txt = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.replace("\n", "").split("-")
-                icon_title = linha.find_element(By.CSS_SELECTOR, ".wcl-icon-rect_At-43").get_attribute("title")
-                
-                # Histórico (V, E, D) - O topo do site entra no índice [0]
-                if "Vitória" in icon_title: data[f"{pref}_h"].append("V")
-                elif "Empate" in icon_title: data[f"{pref}_h"].append("E")
-                else: data[f"{pref}_h"].append("D")
-                
-                # Gols
-                gols = [int(g) for g in res_txt if g.isdigit()]
-                if sum(gols) > 1.5: data[f"{pref}_15"] += 1
-                if sum(gols) > 2.5: data[f"{pref}_25"] += 1
-    except: pass
+                # CORREÇÃO: Busca o texto 'V', 'E' ou 'D' diretamente no elemento de resultado
+                try:
+                    res_status = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
+                    if res_status:
+                        data[f"{pref}_h"].append(res_status)
+                except: pass
+
+                # Gols (pega o placar ex: 1-2)
+                try:
+                    res_txt = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.replace("\n", "").split("-")
+                    gols = [int(g) for g in res_txt if g.strip().isdigit()]
+                    if sum(gols) > 1.5: data[f"{pref}_15"] += 1
+                    if sum(gols) > 2.5: data[f"{pref}_25"] += 1
+                except: pass
+    except Exception as e:
+        print(f"Erro ao ler H2H: {e}")
+    
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return data
@@ -66,86 +73,82 @@ def main():
     try:
         for nome_comp, url in COMPETICOES.items():
             driver.get(url)
-            time.sleep(8)
+            time.sleep(10)
             elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
             
             for el in elementos:
                 try:
-                    tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
                     id_jogo = el.get_attribute("id").split("_")[-1]
                     times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                     t1, t2 = times[0].text.strip(), times[1].text.strip()
+                    tempo = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
                     
                     st = analisar_detalhes_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall")
+                    
+                    # Se não conseguiu ler os resultados (st["c_h"]), pula para não dar erro de índice [0]
                     if not st["c_h"] or not st["f_h"]: continue
 
-                    mercados_encontrados = []
+                    mercados_jogo = []
                     
-                    # --- REGRA GOLS (Sua lógica exata) ---
-                    def calc_perc(n1, n2):
+                    # --- REGRA GOLS ---
+                    def calc_gols(n1, n2):
                         if n1 == 5 and n2 == 5: return 100
                         if (n1 == 5 and n2 == 4) or (n1 == 4 and n2 == 5): return 85
                         if n1 == 4 and n2 == 4: return 70
                         return 0
 
-                    p25 = calc_perc(st["c_25"], st["f_25"])
-                    if p25 > 0: mercados_encontrados.append({"desc": f"Gols +2.5 (Chance {p25}%)", "p": p25})
+                    p25 = calc_gols(st["c_25"], st["f_25"])
+                    if p25 > 0: mercados_jogo.append({"desc": f"Gols +2.5 (Chance {p25}%)", "p": p25})
                     
-                    p15 = calc_perc(st["c_15"], st["f_15"])
-                    if p15 > 0: mercados_encontrados.append({"desc": f"Gols +1.5 (Chance {p15}%)", "p": p15})
+                    p15 = calc_gols(st["c_15"], st["f_15"])
+                    if p15 > 0: mercados_jogo.append({"desc": f"Gols +1.5 (Chance {p15}%)", "p": p15})
 
-                    # --- REGRA 1X (Sua lógica exata) ---
-                    # Mandante: max 1 derrota, último vitória ([0]). Visitante: min 2 derrotas, último derrota ([0]).
+                    # --- REGRA 1X ---
                     if st["c_h"].count("D") <= 1 and st["c_h"][0] == "V" and \
                        st["f_h"].count("D") >= 2 and st["f_h"][0] == "D":
                         p1x = int(((5 - st["c_h"].count("D")) / 5) * 100)
-                        mercados_encontrados.append({"desc": f"1X (Confiança {p1x}%)", "p": p1x})
+                        mercados_jogo.append({"desc": f"1X (Confiança {p1x}%)", "p": p1x})
 
-                    # --- REGRA 2X (Sua lógica exata) ---
-                    # Visitante: 0 derrotas. Mandante: min 2 derrotas, último derrota ([0]).
+                    # --- REGRA 2X ---
                     if st["f_h"].count("D") == 0 and \
                        st["c_h"].count("D") >= 2 and st["c_h"][0] == "D":
-                        mercados_encontrados.append({"desc": "2X (Confiança 100%)", "p": 100})
+                        mercados_jogo.append({"desc": "2X (Confiança 100%)", "p": 100})
 
-                    if mercados_encontrados:
-                        # Pega os 3 melhores do jogo
-                        mercados_encontrados = sorted(mercados_encontrados, key=lambda x: x['p'], reverse=True)[:3]
+                    if mercados_jogo:
+                        mercados_jogo = sorted(mercados_jogo, key=lambda x: x['p'], reverse=True)[:3]
                         pool_jogos.append({
                             "camp": nome_comp,
-                            "hora": tempo_raw,
+                            "hora": tempo,
                             "confronto": f"{t1} x {t2}",
-                            "mercados": mercados_encontrados,
-                            "max_p": mercados_encontrados[0]['p']
+                            "mercados": mercados_jogo,
+                            "max_p": mercados_jogo[0]['p']
                         })
                 except: continue
 
         if pool_jogos:
-            # Seleção dos 13 melhores mercados globais
             pool_jogos.sort(key=lambda x: x['max_p'], reverse=True)
             selecionados = []
             total = 0
             for j in pool_jogos:
                 if total >= 13: break
                 vagas = 13 - total
-                mercados = j['mercados'][:vagas]
-                selecionados.append({"camp": j['camp'], "hora": j['hora'], "confronto": j['confronto'], "mercados": mercados})
-                total += len(mercados)
+                mercs = j['mercados'][:vagas]
+                selecionados.append({"camp": j['camp'], "hora": j['hora'], "confronto": j['confronto'], "mercados": mercs})
+                total += len(mercs)
 
-            # Ordenação para o Bilhete
             selecionados.sort(key=lambda x: (x['camp'], x['hora']))
             
-            msg = "📝 *BILHETE GERADO*\n"
+            msg = "📝 *BILHETE ELITE*\n"
             camp_atual = ""
             for jogo in selecionados:
                 if jogo['camp'] != camp_atual:
-                    camp_atual = jogo['camp']
-                    msg += f"\n🏆 *{camp_atual.upper()}*\n"
-                msg += f"\n*{jogo['confronto']}*\n⏱️ {jogo['hora']} | {jogo['camp']}\n"
+                    camp_atual = jogo['camp']; msg += f"\n🏆 *{camp_atual.upper()}*\n"
+                msg += f"\n*{jogo['confronto']}*\n⏱️ {jogo['hora']}\n"
                 for m in jogo['mercados']: msg += f"🎯 {m['desc']}\n"
-            
             enviar_telegram(msg)
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
+            
