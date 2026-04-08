@@ -1,7 +1,6 @@
 import os
 import time
 import requests
-import re
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -31,8 +30,11 @@ def configurar_driver():
 
 def main():
     driver = configurar_driver()
-    hoje_br = datetime.now()
-    mensagem_final = f"🏆 *JOGOS DE HOJE - {hoje_br.strftime('%d/%m')}*\n\n"
+    hoje_ref = datetime.now()
+    # Data de amanhã no formato do site para conferência
+    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
+    
+    mensagem_final = f"🏆 *JOGOS DE HOJE - {hoje_ref.strftime('%d/%m')}*\n\n"
     encontrou_geral = False
 
     try:
@@ -40,42 +42,38 @@ def main():
             driver.get(url)
             time.sleep(10)
 
-            # Captura todos os blocos de jogos usando a classe pai que você mandou: event__match
             jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-            
             secao_adicionada = False
+
             for jogo in jogos:
                 try:
-                    # 1. Pega o horário (classe event__time no seu HTML)
-                    horario_raw = jogo.find_element(By.CSS_SELECTOR, ".event__time").text.split('\n')[0].strip()
+                    # Captura o texto do bloco para ver se tem a data de amanhã
+                    texto_bloco = jogo.text.replace("\n", " ")
                     
-                    # 2. Pega os nomes dos times (usando o seletor parcial para as novas classes wcl-name)
-                    # Buscamos elementos que contenham 'wcl-name' na classe
+                    horario_raw = jogo.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
+                    # Se tiver data (ex: 09.04. 02:00), pega só o final
+                    h_utc_solo = horario_raw.split()[-1] 
+                    
                     times = jogo.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
-                    
-                    if len(times) >= 2:
-                        t1 = times[0].text.strip()
-                        t2 = times[1].text.strip()
-                    else:
-                        # Backup: tenta pegar pelo 'alt' da imagem se o span falhar
-                        logos = jogo.find_elements(By.TAG_NAME, "img")
-                        t1 = logos[0].get_attribute("alt").strip()
-                        t2 = logos[1].get_attribute("alt").strip()
+                    t1 = times[0].text.strip()
+                    t2 = times[1].text.strip()
 
-                    # 3. Lógica de Fuso (UTC -> BR)
-                    # Como o GitHub é UTC, 21:30 no seu print aparece como 00:30 do dia seguinte
-                    h_obj = datetime.strptime(horario_raw, "%H:%M")
+                    # Conversão para Brasília
+                    h_obj = datetime.strptime(h_utc_solo, "%H:%M")
                     h_br_obj = h_obj - timedelta(hours=3)
                     h_br = h_br_obj.strftime("%H:%M")
 
-                    # 4. Filtro de "Hoje": Aceita se for entre 11h e 23h59 de Brasília
-                    # Se o texto do bloco tiver a data de amanhã (ex: 09.04), mas for madrugada UTC, é hoje à noite no BR.
-                    texto_completo = jogo.text
-                    amanha_str = (hoje_br + timedelta(days=1)).strftime("%d.%m.")
-                    
+                    # --- A REGRA DE OURO ---
                     aceitar = False
-                    if amanha_str in texto_completo or "09.04" in texto_completo: # Ajuste manual se precisar
-                        if h_obj.hour < 4: aceitar = True 
+                    
+                    # 1. Se o jogo está marcado como AMANHÃ no site, mas a hora UTC é madrugada (00h-03h)
+                    # Isso significa que é HOJE à noite no Brasil (21h-23h59)
+                    if amanha_no_site in horario_raw or amanha_no_site in texto_bloco:
+                        if h_obj.hour <= 3: 
+                            aceitar = True
+                    
+                    # 2. Se o jogo está marcado como HOJE (ou sem data), aceitamos se for >= 11h BR
+                    # (Para não pegar jogos que já rolaram de manhã cedo no fuso deles)
                     elif h_br_obj.hour >= 11:
                         aceitar = True
 
@@ -85,15 +83,12 @@ def main():
                             secao_adicionada = True
                             encontrou_geral = True
                         mensagem_final += f"🕒 `{h_br}` | *{t1} x {t2}*\n"
-
                 except: continue
             
             if secao_adicionada: mensagem_final += "\n"
 
         if encontrou_geral:
             enviar_telegram(mensagem_final)
-        else:
-            print("Nenhum jogo passou pelo filtro.")
 
     finally:
         driver.quit()
