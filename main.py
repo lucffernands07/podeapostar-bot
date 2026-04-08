@@ -1,13 +1,12 @@
 import os
 import time
 import requests
+import re
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 COMPETICOES = {
@@ -27,68 +26,74 @@ def configurar_driver():
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--window-size=1920,5000")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 def main():
     driver = configurar_driver()
-    hoje_ref = datetime.now()
-    mensagem_final = f"🏆 *JOGOS DE HOJE - {hoje_ref.strftime('%d/%m')}*\n\n"
+    hoje_br = datetime.now()
+    mensagem_final = f"🏆 *JOGOS DE HOJE - {hoje_br.strftime('%d/%m')}*\n\n"
     encontrou_geral = False
 
     try:
         for nome_comp, url in COMPETICOES.items():
             driver.get(url)
+            time.sleep(10)
+
+            # Captura todos os blocos de jogos usando a classe pai que você mandou: event__match
+            jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
             
-            try:
-                # ESPERA ATÉ 15 SEGUNDOS para os jogos aparecerem na tela
-                WebDriverWait(driver, 15).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, ".event__match"))
-                )
-                
-                jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-                secao_adicionada = False
+            secao_adicionada = False
+            for jogo in jogos:
+                try:
+                    # 1. Pega o horário (classe event__time no seu HTML)
+                    horario_raw = jogo.find_element(By.CSS_SELECTOR, ".event__time").text.split('\n')[0].strip()
+                    
+                    # 2. Pega os nomes dos times (usando o seletor parcial para as novas classes wcl-name)
+                    # Buscamos elementos que contenham 'wcl-name' na classe
+                    times = jogo.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                    
+                    if len(times) >= 2:
+                        t1 = times[0].text.strip()
+                        t2 = times[1].text.strip()
+                    else:
+                        # Backup: tenta pegar pelo 'alt' da imagem se o span falhar
+                        logos = jogo.find_elements(By.TAG_NAME, "img")
+                        t1 = logos[0].get_attribute("alt").strip()
+                        t2 = logos[1].get_attribute("alt").strip()
 
-                for jogo in jogos:
-                    try:
-                        tempo_raw = jogo.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
-                        t1 = jogo.find_element(By.CSS_SELECTOR, ".event__participant--home").text.strip()
-                        t2 = jogo.find_element(By.CSS_SELECTOR, ".event__participant--away").text.strip()
+                    # 3. Lógica de Fuso (UTC -> BR)
+                    # Como o GitHub é UTC, 21:30 no seu print aparece como 00:30 do dia seguinte
+                    h_obj = datetime.strptime(horario_raw, "%H:%M")
+                    h_br_obj = h_obj - timedelta(hours=3)
+                    h_br = h_br_obj.strftime("%H:%M")
 
-                        # Pega apenas HH:MM
-                        horario_utc = tempo_raw.split()[-1]
-                        h_obj = datetime.strptime(horario_utc, "%H:%M")
-                        h_br_obj = h_obj - timedelta(hours=3)
-                        h_br = h_br_obj.strftime("%H:%M")
+                    # 4. Filtro de "Hoje": Aceita se for entre 11h e 23h59 de Brasília
+                    # Se o texto do bloco tiver a data de amanhã (ex: 09.04), mas for madrugada UTC, é hoje à noite no BR.
+                    texto_completo = jogo.text
+                    amanha_str = (hoje_br + timedelta(days=1)).strftime("%d.%m.")
+                    
+                    aceitar = False
+                    if amanha_str in texto_completo or "09.04" in texto_completo: # Ajuste manual se precisar
+                        if h_obj.hour < 4: aceitar = True 
+                    elif h_br_obj.hour >= 11:
+                        aceitar = True
 
-                        # Lógica da Virada ( Flamengo às 21:30 )
-                        amanha_str = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-                        eh_hoje = False
-                        
-                        if amanha_str in tempo_raw:
-                            if h_obj.hour < 4: eh_hoje = True # Madrugada UTC = Noite BR
-                        elif "." not in tempo_raw:
-                            eh_hoje = True
+                    if aceitar:
+                        if not secao_adicionada:
+                            mensagem_final += f"--- {nome_comp} ---\n"
+                            secao_adicionada = True
+                            encontrou_geral = True
+                        mensagem_final += f"🕒 `{h_br}` | *{t1} x {t2}*\n"
 
-                        if eh_hoje:
-                            if not secao_adicionada:
-                                mensagem_final += f"--- {nome_comp} ---\n"
-                                secao_adicionada = True
-                                encontrou_geral = True
-                            mensagem_final += f"🕒 `{h_br}` | *{t1} x {t2}*\n"
-                    except: continue
-                
-                if secao_adicionada: mensagem_final += "\n"
-
-            except Exception as e:
-                print(f"Tempo esgotado ou erro em {nome_comp}")
+                except: continue
+            
+            if secao_adicionada: mensagem_final += "\n"
 
         if encontrou_geral:
             enviar_telegram(mensagem_final)
         else:
-            print("Nenhum jogo capturado após as verificações.")
+            print("Nenhum jogo passou pelo filtro.")
 
     finally:
         driver.quit()
