@@ -9,11 +9,13 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Foco total no que você opera
+# Mantemos as competições para o bot ir direto nos links se necessário, 
+# mas o código abaixo é focado em ler a estrutura que você mandou no print.
 COMPETICOES = {
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
     "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/",
-    "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/"
+    "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
+    "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/"
 }
 
 def enviar_telegram(mensagem):
@@ -26,13 +28,16 @@ def enviar_telegram(mensagem):
 def configurar_driver():
     options = Options()
     options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+    # User-agent para simular o desktop que você está usando no mobile
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 def main():
     driver = configurar_driver()
-    lista_final = "🏆 *Análise das Competições (Filtro 23h BR)*\n\n"
+    lista_final = "🏆 *Lista de Jogos Detectados (Fuso Brasília)*\n\n"
     
     agora_utc = datetime.now()
     hoje_str = agora_utc.strftime("%d.%m.")
@@ -41,62 +46,63 @@ def main():
     try:
         for nome_comp, url in COMPETICOES.items():
             driver.get(url)
-            time.sleep(4)
+            time.sleep(6) # Tempo extra para carregar os ícones de áudio/tabela do print
             
+            # Scroll agressivo para garantir que o Santos (fim da lista) apareça
+            driver.execute_script("window.scrollTo(0, 500);")
+            time.sleep(1)
+            driver.execute_script("window.scrollTo(0, 2000);")
+            time.sleep(2)
+
+            # Buscamos todos os elementos de jogos
             jogos = driver.find_elements(By.CSS_SELECTOR, "[id^='g_1_']")
             secao_adicionada = False
             
             for jogo in jogos:
                 try:
-                    texto = jogo.text
-                    
-                    # 1. Ignora jogos ao vivo ou encerrados
-                    if any(x in texto.upper() for x in ['LIVE', 'AO VIVO', 'INTERVALO', 'FIM', 'ENCERRADO']):
+                    # Filtro rápido: Se o jogo já começou (tem score live), ignoramos
+                    html_content = jogo.get_attribute('innerHTML')
+                    if 'event__score--live' in html_content:
                         continue
-                    
-                    # 2. Captura Horário e Data
-                    horario_match = re.search(r'\d{2}:\d{2}', texto)
+
+                    # Extração de Horário
+                    texto_completo = jogo.text
+                    horario_match = re.search(r'\d{2}:\d{2}', texto_completo)
                     if not horario_match: continue
                     
-                    data_match = re.search(r'\d{2}\.\d{2}\.', texto)
-                    h_texto = horario_match.group()
-                    d_texto = data_match.group() if data_match else hoje_str
+                    h_utc = horario_match.group()
+                    d_match = re.search(r'\d{2}\.\d{2}\.', texto_completo)
+                    d_site = d_match.group() if d_match else hoje_str
 
-                    # 3. Trava 2h UTC (Até 23:00 de Brasília)
-                    if d_texto == amanha_str:
-                        if int(h_texto.split(':')[0]) >= 2: continue
-                    elif d_texto != hoje_str:
+                    # Trava UTC 2h (Para pegar Palmeiras/Flamengo e ignorar o dia seguinte)
+                    if d_site == amanha_str:
+                        if int(h_utc.split(':')[0]) >= 2: continue
+                    elif d_site != hoje_str:
                         continue
 
-                    # 4. Limpeza de nomes e remoção do 'PREVIEW'
-                    linhas = [l.strip() for l in texto.split('\n') if l.strip()]
-                    # Termos que queremos ignorar para sobrar apenas os times
-                    sujeira = ['PREVIEW', 'AUDIO', 'ESTATÍSTICAS', 'VÍDEO']
-                    
-                    nomes = []
-                    for l in linhas:
-                        if (":" not in l and "." not in l and 
-                            not re.search(r'^\d+$', l) and 
-                            l.upper() not in sujeira and 
-                            len(l) > 2):
-                            nomes.append(l)
+                    # CAPTURA DOS TIMES (Pelo seletor de classe que não falha no seu print)
+                    home = jogo.find_element(By.CSS_SELECTOR, ".event__participant--home").text
+                    away = jogo.find_element(By.CSS_SELECTOR, ".event__participant--away").text
 
-                    if len(nomes) >= 2:
-                        h_br = (datetime.strptime(h_texto, "%H:%M") - timedelta(hours=3)).strftime("%H:%M")
+                    if home and away:
+                        # Converte para Brasília
+                        h_br = (datetime.strptime(h_utc, "%H:%M") - timedelta(hours=3)).strftime("%H:%M")
                         
                         if not secao_adicionada:
                             lista_final += f"--- {nome_comp} ---\n"
                             secao_adicionada = True
                         
-                        lista_final += f"🕒 `{h_br}` | *{nomes[0]} x {nomes[1]}*\n"
-                except: continue
+                        lista_final += f"🕒 `{h_br}` | *{home} x {away}*\n"
+                except:
+                    continue
             
-            if secao_adicionada: lista_final += "\n"
+            if secao_adicionada:
+                lista_final += "\n"
         
-        enviar_telegram(lista_final if "🕒" in lista_final else "⚠️ Nenhum jogo agendado nas ligas de elite.")
+        enviar_telegram(lista_final if "🕒" in lista_final else "⚠️ Nenhum jogo agendado encontrado.")
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-                                
+            
