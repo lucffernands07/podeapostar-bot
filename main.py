@@ -9,7 +9,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Ligas alvo
 COMPETICOES = {
     "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
@@ -19,61 +18,75 @@ COMPETICOES = {
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
-    if not token or not chat_id: 
-        print("Erro: TELEGRAM_TOKEN ou CHAT_ID não configurados.")
-        return
+    if not token or not chat_id: return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
 
 def configurar_driver():
     options = Options()
     options.add_argument("--headless")
-    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--window-size=1920,3000")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 def main():
     driver = configurar_driver()
-    # Cabeçalho com a data de hoje (8 de Abril de 2026)
-    lista_final = f"🏆 *Jogos de Hoje - {datetime.now().strftime('%d/%m/%Y')}*\n\n"
+    lista_final = f"🏆 *JOGOS DE HOJE - {datetime.now().strftime('%d/%m')}*\n\n"
     
+    # Datas para controle de fuso
+    agora_utc = datetime.now()
+    hoje_str = agora_utc.strftime("%d.%m.")
+    amanha_str = (agora_utc + timedelta(days=1)).strftime("%d.%m.")
+
     try:
         for nome_comp, url in COMPETICOES.items():
-            print(f"Buscando: {nome_comp}...")
             driver.get(url)
             time.sleep(8)
 
-            # Força o clique na aba PRÓXIMOS via JavaScript
+            # Força o clique na aba PRÓXIMOS
             try:
                 driver.execute_script("""
-                    var tabs = document.querySelectorAll('.tabs__tab');
-                    for(var t of tabs){
-                        if(t.innerText.includes('PRÓXIMOS')){ t.click(); }
+                    var abas = document.querySelectorAll('.tabs__tab');
+                    for(var a of abas){
+                        if(a.innerText.includes('PRÓXIMOS')){ a.click(); }
                     }
                 """)
                 time.sleep(5)
-            except:
-                pass
+            except: pass
 
-            # Captura o texto bruto da página
+            # Extração via Texto Bruto (Método que achou a Champions)
             corpo_texto = driver.find_element(By.TAG_NAME, "body").text
             linhas = corpo_texto.split('\n')
             
             secao_adicionada = False
             for i in range(len(linhas)):
-                # Busca padrão de horário (Ex: 16:00 ou 21:30)
+                # Busca padrão de horário (00:00)
                 if re.match(r'^\d{2}:\d{2}$', linhas[i]):
                     try:
-                        horario_utc = linhas[i]
+                        h_utc_str = linhas[i]
                         time1 = linhas[i+1]
                         time2 = linhas[i+2]
-                        
-                        # Ignora lixo ou jogos que já têm placar/ao vivo
-                        if any(x in time1.upper() for x in ['PREVIEW', 'LIVE', 'AO VIVO']): continue
-                        if len(time1) < 3 or len(time2) < 3: continue
 
-                        # Converte UTC para Brasília (UTC-3)
-                        h_obj = datetime.strptime(horario_utc, "%H:%M")
+                        if "PREVIEW" in time1 or len(time1) < 3: continue
+
+                        # Captura a data que o site exibe (se houver, ex: 08.04. 21:00)
+                        # Se não houver data na linha, assume que é hoje
+                        data_jogo = hoje_str
+                        for j in range(max(0, i-2), i):
+                            if re.search(r'\d{2}\.\d{2}\.', linhas[j]):
+                                data_jogo = re.search(r'(\d{2}\.\d{2}\.)', linhas[j]).group(1)
+
+                        # --- LÓGICA DE CORREÇÃO DO FUSO (O AJUSTE QUE SE PERDEU) ---
+                        h_vazia = int(h_utc_str.split(':')[0])
+                        
+                        # Se for data de amanhã e hora < 3h UTC, é jogo de HOJE à noite no BR
+                        if data_jogo == amanha_str:
+                            if h_vazia >= 3: continue # Realmente é amanhã
+                        elif data_jogo != hoje_str:
+                            continue # É de outro dia bem distante
+
+                        # Conversão para Horário de Brasília
+                        h_obj = datetime.strptime(h_utc_str, "%H:%M")
                         h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                         
                         if not secao_adicionada:
@@ -81,24 +94,14 @@ def main():
                             secao_adicionada = True
                         
                         lista_final += f"🕒 `{h_br}` | *{time1} x {time2}*\n"
-                    except:
-                        continue
+                    except: continue
+            
+            if secao_adicionada: lista_final += "\n"
 
-            if secao_adicionada:
-                lista_final += "\n"
+        enviar_telegram(lista_final if "🕒" in lista_final else "⚠️ Nenhum jogo capturado com os novos filtros.")
 
-        # Verifica se algo foi encontrado antes de enviar
-        if "🕒" in lista_final:
-            enviar_telegram(lista_final)
-            print("Lista enviada com sucesso!")
-        else:
-            enviar_telegram("⚠️ Nenhum jogo pendente encontrado para hoje nas ligas selecionadas.")
-
-    except Exception as e:
-        print(f"Erro geral: {e}")
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-            
