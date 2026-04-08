@@ -1,37 +1,33 @@
-name: Robô de Bilhetes - Flashscore Miner
+name: Execucao Diario Bot Apostas
 
 on:
   push:
-    branches: [ main ]
+    paths:
+      - 'main.py'
   schedule:
-    # 08:00 Brasília = 11:00 UTC
-    # Minuto 0, Hora 11, Qualquer dia, Qualquer mês, Qualquer dia da semana
-    - cron: '0 11 * * *'
-  workflow_dispatch: # Permite rodar manualmente pelo botão 'Run workflow'
+    # 08:15 Horário de Brasília = 11:15 UTC
+    - cron: '15 11 * * *'
+  workflow_dispatch: # Permite rodar manualmente pelo celular se precisar
 
 jobs:
-  mineracao:
+  run-bot:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout do código
+      - name: Checkout do repositorio
         uses: actions/checkout@v3
 
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.9'
 
-      - name: Instalar Dependências
+      - name: Instalar dependencias
         run: |
-          python -m pip install --upgrade pip
-          # Requisitos mínimos para o Flashscore
-          pip install requests python-dotenv
+          pip install -r requirements.txt
 
-      - name: Executar Mineração Flashscore
+      - name: Executar bot Selenium
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-        run: |
-          echo "🚀 Iniciando Mineração via Feed Bruteforce (Flashscore)..."
-          python main.py
+        run: python main.py
+        
