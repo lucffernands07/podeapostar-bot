@@ -32,103 +32,72 @@ def configurar_driver():
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
 
-def pegar_estatisticas_h2h(driver, url_jogo):
-    """Entra no jogo e analisa os últimos 5 jogos de cada time"""
-    # Abre o link do jogo em uma nova aba para não perder a lista principal
+def calcular_chance_gols(n1, n2):
+    """Calcula a porcentagem conforme regra: 5/5+5/5=100%, 5/5+4/5=85%, 4/5+4/5=70%"""
+    if n1 == 5 and n2 == 5: return "100%"
+    if (n1 == 5 and n2 == 4) or (n1 == 4 and n2 == 5): return "85%"
+    if n1 == 4 and n2 == 4: return "70%"
+    return None
+
+def analisar_detalhes_h2h(driver, url_jogo):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
-    stats = {"casa_15": 0, "casa_25": 0, "fora_15": 0, "fora_25": 0}
+    # st: stats, h: histórico de letras (V, E, D)
+    data = {
+        "c_15": 0, "c_25": 0, "c_h": [],
+        "f_15": 0, "f_25": 0, "f_h": []
+    }
     
     try:
-        # Clica na aba H2H
-        h2h_tab = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
-        h2h_tab.click()
-        time.sleep(3)
-
-        # Analisa as seções (Casa e Fora)
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
-        for idx, secao in enumerate(secoes[:2]): # Apenas os últimos jogos de Casa e Fora
-            resultados = secao.find_elements(By.CSS_SELECTOR, ".h2h__result")[:5]
-            for res in resultados:
-                gols = [int(g) for g in res.text.split("\n")[0].split("-") if g.isdigit()]
-                total = sum(gols)
-                prefixo = "casa" if idx == 0 else "fora"
-                if total > 1.5: stats[f"{prefixo}_15"] += 1
-                if total > 2.5: stats[f"{prefixo}_25"] += 1
+        for i, secao in enumerate(secoes[:2]):
+            pref = "c" if i == 0 else "f"
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
+            for linha in linhas:
+                res_txt = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.replace("\n", "").split("-")
+                icon_title = linha.find_element(By.CSS_SELECTOR, ".wcl-icon-rect_At-43").get_attribute("title")
                 
+                # Histórico de V/E/D
+                if "Vitória" in icon_title: data[f"{pref}_h"].append("V")
+                elif "Empate" in icon_title: data[f"{pref}_h"].append("E")
+                else: data[f"{pref}_h"].append("D")
+                
+                # Contagem de Gols
+                gols = [int(g) for g in res_txt if g.isdigit()]
+                if sum(gols) > 1.5: data[f"{pref}_15"] += 1
+                if sum(gols) > 2.5: data[f"{pref}_25"] += 1
     except: pass
     
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
-    return stats
+    return data
 
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-    
     bilhete = []
-    total_jogos_25 = 0
 
     try:
         for nome_comp, url in COMPETICOES.items():
             driver.get(url)
             time.sleep(8)
+            elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
             
-            # Captura os IDs dos jogos para construir o link direto
-            elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-            
-            for el in elementos_jogos:
+            for el in elementos:
                 try:
-                    # Aplica a sua Trava UTC 3h antes de analisar
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
-                    horario_utc = tempo_raw.split()[-1]
-                    h_obj = datetime.strptime(horario_utc, "%H:%M")
+                    h_utc = tempo_raw.split()[-1]
+                    h_obj = datetime.strptime(h_utc, "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    aceitar = False
-                    if amanha_no_site in tempo_raw:
-                        if h_obj.hour <= 3: aceitar = True
-                    elif "." not in tempo_raw:
-                        if (h_obj - timedelta(hours=3)).hour >= 11: aceitar = True
+                    if not ((amanha_no_site in tempo_raw and h_obj.hour <= 3) or 
+                            ("." not in tempo_raw and (h_obj - timedelta(hours=3)).hour >= 11)):
+                        continue
 
-                    if aceitar:
-                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
-                        t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        
-                        # Pega o ID do jogo para o link
-                        id_jogo = el.get_attribute("id").split("_")[-1]
-                        link_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
-                        
-                        # ANALISA MERCADOS
-                        s = pegar_estatisticas_h2h(driver, link_jogo)
-                        
-                        # REGRA DOS 5 JOGOS (Filtro 5/5 ou 4/5)
-                        # Verifica se ambos times batem a média de gols
-                        if s["casa_15"] >= 4 and s["fora_15"] >= 4:
-                            mercado = "+1.5 Gols"
-                            # Se for 5/5 e ainda não temos jogo 2.5, promovemos um
-                            if s["casa_25"] >= 4 and s["fora_25"] >= 4 and total_jogos_25 < 1:
-                                mercado = "+2.5 Gols"
-                                total_jogos_25 += 1
-                            
-                            bilhete.append(f"✅ `{h_br}` | {t1} x {t2}\n🎯 *Mercado:* {mercado}\n📊 (Casa: {s['casa_15']}/5 | Fora: {s['fora_15']}/5)")
-
-                except: continue
-
-        # ENVIO DO BILHETE FINAL
-        if bilhete:
-            msg = f"📝 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n"
-            msg += "\n\n".join(bilhete)
-            msg += f"\n\n⚠️ _Filtro aplicado: Sucesso min 4/5 nos últimos jogos._"
-            enviar_telegram(msg)
-        else:
-            print("Nenhum jogo passou nos critérios técnicos de mercado hoje.")
-
-    finally:
-        driver.quit()
-
-if __name__ == "__main__":
-    main()
+                    id_jogo = el.get_attribute("id").split("_")[-1]
+                    times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                    t1, t2 =
