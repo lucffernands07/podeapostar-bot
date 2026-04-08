@@ -26,89 +26,82 @@ def configurar_driver():
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--window-size=1920,5000")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    # Forçamos o navegador a operar em UTC (Londres) para o site não esconder nada da virada do dia
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
+    return driver
 
 def processar_liga(driver, nome_liga, url):
     driver.get(url)
-    time.sleep(7)
-    jogos_da_liga = []
+    time.sleep(8)
+    jogos_extraidos = []
     
-    # Data de hoje para comparação (08/04)
-    hoje_ref = datetime.now().day
-
+    # 1. Força a aba PRÓXIMOS
     try:
-        abas = driver.find_elements(By.CSS_SELECTOR, ".tabs__tab")
-        for aba in abas:
-            if "PRÓXIMOS" in aba.text.upper():
-                driver.execute_script("arguments[0].click();", aba)
-                time.sleep(5)
-                break
+        driver.execute_script("var a=document.querySelectorAll('.tabs__tab');for(var t of a){if(t.innerText.includes('PRÓXIMOS'))t.click();}")
+        time.sleep(5)
     except: pass
 
-    elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match, [id^='g_1_']")
+    # 2. Captura por seletores específicos para evitar o "x -" no final
+    elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
     
     for el in elementos:
         try:
-            # Captura o texto e limpa espaços extras
-            texto = " ".join(el.text.split())
+            # Pegamos o horário que está em UTC no site
+            h_utc_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
+            t1 = el.find_element(By.CSS_SELECTOR, ".event__participant--home").text.strip()
+            t2 = el.find_element(By.CSS_SELECTOR, ".event__participant--away").text.strip()
+
+            # CONVERSÃO: O robô pegou 00:30 (UTC)? Subtraímos 3h para virar 21:30 (Brasília)
+            h_obj = datetime.strptime(h_utc_raw, "%H:%M")
+            h_br_obj = h_obj - timedelta(hours=3)
+            h_br = h_br_obj.strftime("%H:%M")
+
+            # FILTRO INTELIGENTE:
+            # Queremos jogos que acontecem HOJE no Brasil (das 12:00 até 23:59).
+            # Como estamos em UTC, o site vai mostrar jogos de 15:00 UTC até as 02:59 UTC do "dia seguinte".
+            # Todos esses, ao subtrair 3h, caem no nosso "hoje".
             
-            # REGEX MELHORADO: Pega horário, Time 1, Hífen, Time 2. 
-            # Para o Time 2, ele para assim que encontrar palavras como 'ESTATÍSTICAS' ou espaços duplos
-            match = re.search(r'(\d{2}:\d{2})\s+([^-(]+)\s+-\s+([^-(]+)', texto)
+            hora_br_int = h_br_obj.hour
             
-            if match:
-                h_utc = match.group(1)
-                t1 = match.group(2).strip()
-                t2 = match.group(3).strip()
-
-                # Limpeza fina para tirar resíduos de nomes de times com parênteses ou lixo do site
-                t2 = re.split(r'ESTATÍSTICAS|PREVIEW|AUDIO|venc|perdeu', t2)[0].strip()
-
-                # --- CORREÇÃO DO FUSO E TRAVA DE DATA ---
-                h_obj = datetime.strptime(h_utc, "%H:%M")
-                # Se o horário UTC for baixo (00h, 01h), é sinal que no servidor já virou o dia
-                # Mas no Brasil ainda é o jogo da noite de HOJE.
-                h_br_obj = h_obj - timedelta(hours=3)
-                h_br = h_br_obj.strftime("%H:%M")
-
-                # FILTRO PARA NÃO PEGAR AMANHÃ:
-                # 1. Se a hora de Brasília for entre 11:00 e 23:59, é jogo de HOJE.
-                # 2. Se a hora UTC for >= 03:00 e o site indicar outra data (não visível aqui mas implícito na aba),
-                #    nós ignoramos para não pegar a rodada de amanhã da Champions.
-                if 11 <= h_br_obj.hour <= 23:
-                    # Trava específica para Champions: Se for 16h (BR), mas o UTC original for de "amanhã"
-                    # Como o texto bruto às vezes traz a data antes, verificamos:
-                    if "amanhã" in texto.lower() or (h_obj.hour >= 3 and h_obj.hour < 10 and "Champions" in nome_liga):
+            # Se for Champions e o horário for 16h, mas for de "amanhã" no fuso deles,
+            # a gente filtra pela aba ou pelo contexto do texto se necessário.
+            # Mas a regra da hora mata 90% dos erros:
+            if hora_br_int >= 11:
+                # Trava para não pegar a rodada de amanhã da Champions (que seria 16h BR também)
+                # No UTC, o jogo de amanhã às 16h seria 19h UTC. 
+                # Se o bot estiver lendo a aba "Próximos" e ver um jogo de 19h UTC que já é dia 09/04,
+                # precisamos conferir se o elemento tem alguma marcação de data.
+                texto_completo = el.text
+                if "09.04." in texto_completo or "amanhã" in texto_completo.lower():
+                    # Só aceita se for madrugada (00h às 02h UTC), que é o nosso 21h-23h.
+                    if h_obj.hour >= 3: 
                         continue
-                        
-                    jogos_da_liga.append(f"🕒 `{h_br}` | *{t1} x {t2}*")
+
+                jogos_extraidos.append(f"🕒 `{h_br}` | *{t1} x {t2}*")
         except: continue
     
-    # Remove duplicados mantendo a ordem
-    return list(dict.fromkeys(jogos_da_liga))
+    return list(dict.fromkeys(jogos_extraidos))
 
 def main():
     driver = configurar_driver()
-    data_formatada = datetime.now().strftime('%d/%m')
-    mensagem_final = f"🏆 *JOGOS DE HOJE - {data_formatada}*\n\n"
+    hoje_formatado = datetime.now().strftime('%d/%m')
+    mensagem_final = f"🏆 *JOGOS DE HOJE - {hoje_formatado} (MÉTODO UTC)*\n\n"
     encontrou_algo = False
 
     try:
         for nome, url in COMPETICOES.items():
-            print(f"Analisando {nome}...")
+            print(f"Buscando {nome} em UTC...")
             jogos = processar_liga(driver, nome, url)
             
             if jogos:
                 encontrou_algo = True
-                mensagem_final += f"--- {nome} ---\n"
-                mensagem_final += "\n".join(jogos) + "\n\n"
+                mensagem_final += f"--- {nome} ---\n" + "\n".join(jogos) + "\n\n"
 
         if encontrou_algo:
             enviar_telegram(mensagem_final)
-            print("Mensagem enviada!")
         else:
-            enviar_telegram(f"⚠️ Nenhum jogo encontrado para {data_formatada}.")
+            print("Nada encontrado.")
 
     finally:
         driver.quit()
