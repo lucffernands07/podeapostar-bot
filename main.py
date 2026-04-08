@@ -33,6 +33,7 @@ def configurar_driver():
     return driver
 
 def calcular_chance_gols(n1, n2):
+    """Regra: 5/5+5/5=100%, 5/5+4/5=85%, 4/5+4/5=70%"""
     if n1 == 5 and n2 == 5: return "100%"
     if (n1 == 5 and n2 == 4) or (n1 == 4 and n2 == 5): return "85%"
     if n1 == 4 and n2 == 4: return "70%"
@@ -51,9 +52,12 @@ def analisar_detalhes_h2h(driver, url_jogo):
             for linha in linhas:
                 res_txt = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.replace("\n", "").split("-")
                 icon_title = linha.find_element(By.CSS_SELECTOR, ".wcl-icon-rect_At-43").get_attribute("title")
+                
+                # Preenche histórico: O primeiro da lista (topo) entra no índice [0]
                 if "Vitória" in icon_title: data[f"{pref}_h"].append("V")
                 elif "Empate" in icon_title: data[f"{pref}_h"].append("E")
                 else: data[f"{pref}_h"].append("D")
+                
                 gols = [int(g) for g in res_txt if g.isdigit()]
                 if sum(gols) > 1.5: data[f"{pref}_15"] += 1
                 if sum(gols) > 2.5: data[f"{pref}_25"] += 1
@@ -86,27 +90,41 @@ def main():
                     t1, t2 = times[0].text.strip(), times[1].text.strip()
                     
                     st = analisar_detalhes_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall")
+                    
+                    if not st["c_h"] or not st["f_h"]: continue
+                    
                     mercado = None
 
-                    # Regra Gols
+                    # 1. Regra Gols (Independente de V/D/E)
                     ch25 = calcular_chance_gols(st["c_25"], st["f_25"])
                     ch15 = calcular_chance_gols(st["c_15"], st["f_15"])
-                    if ch25: mercado = f"Gols +2.5 (Chance {ch25})"
-                    elif ch15: mercado = f"Gols +1.5 (Chance {ch15})"
                     
-                    # Regra 1X
-                    elif st["c_h"].count("D") <= 1 and st["c_h"][0] == "V" and st["f_h"].count("D") >= 2 and st["f_h"][0] == "D":
+                    if ch25: 
+                        mercado = f"Gols +2.5 (Chance {ch25})"
+                    elif ch15: 
+                        mercado = f"Gols +1.5 (Chance {ch15})"
+                    
+                    # 2. Regra 1X
+                    # Mandante: max 1 derrota E última vitória ([0])
+                    # Visitante: min 2 derrotas E última derrota ([0])
+                    elif st["c_h"].count("D") <= 1 and st["c_h"][0] == "V" and \
+                         st["f_h"].count("D") >= 2 and st["f_h"][0] == "D":
                         perc = ((5 - st["c_h"].count("D")) / 5) * 100
                         mercado = f"1X (Confiança {int(perc)}%)"
                     
-                    # Regra 2X
-                    elif st["f_h"].count("D") == 0 and st["c_h"].count("D") >= 2 and st["c_h"][0] == "D":
+                    # 3. Regra 2X
+                    # Visitante: 0 derrotas nos últimos 5
+                    # Mandante: min 2 derrotas E última derrota ([0])
+                    elif st["f_h"].count("D") == 0 and \
+                         st["c_h"].count("D") >= 2 and st["c_h"][0] == "D":
                         mercado = "2X (Confiança 100%)"
 
-                    if mercado: bilhete.append(f"🏟 *{t1} x {t2}* (`{h_br}`)\n🎯 {mercado}")
+                    if mercado: 
+                        bilhete.append(f"🏟 *{t1} x {t2}* (`{h_br}`)\n🎯 {mercado}")
                 except: continue
 
-        if bilhete: enviar_telegram("📝 *BILHETE GERADO*\n\n" + "\n\n".join(bilhete))
+        if bilhete: 
+            enviar_telegram("📝 *BILHETE GERADO*\n\n" + "\n\n".join(bilhete))
     finally:
         driver.quit()
 
