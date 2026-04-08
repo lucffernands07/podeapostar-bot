@@ -26,68 +26,76 @@ def configurar_driver():
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--window-size=1920,5000")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+def processar_liga(driver, nome_liga, url):
+    """Trata cada liga de forma isolada para evitar que o erro de uma afete a outra"""
+    driver.get(url)
+    time.sleep(7)
+    jogos_da_liga = []
+
+    # 1. Força a aba PRÓXIMOS
+    try:
+        abas = driver.find_elements(By.CSS_SELECTOR, ".tabs__tab")
+        for aba in abas:
+            if "PRÓXIMOS" in aba.text.upper():
+                driver.execute_script("arguments[0].click();", aba)
+                time.sleep(5)
+                break
+    except: pass
+
+    # 2. Captura todos os blocos de jogo (Independente da estrutura de mata-mata ou grupo)
+    # Buscamos tanto por IDs quanto por classes de evento
+    elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match, [id^='g_1_']")
+    
+    for el in elementos:
+        try:
+            texto = el.text.replace("\n", " ").strip()
+            # Regex flexível: Horário + Time Home + (opcional placar) + Time Away
+            # Ex: 16:00 Barcelona - Atl. Madrid
+            match = re.search(r'(\d{2}:\d{2})\s+(.+?)\s*-\s*(.+)', texto)
+            
+            if match:
+                h_utc = match.group(1)
+                t1 = match.group(2).strip()
+                t2 = match.group(3).strip()
+
+                # Remove lixos comuns do texto capturado
+                t2 = re.split(r'ESTATÍSTICAS|PREVIEW|AUDIO', t2)[0].strip()
+
+                # --- CORREÇÃO DO FUSO E DATA ---
+                h_obj = datetime.strptime(h_utc, "%H:%M")
+                h_br_obj = h_obj - timedelta(hours=3)
+                h_br = h_br_obj.strftime("%H:%M")
+
+                # Se o horário convertido para Brasília for tarde/noite (>=11h), é hoje.
+                # Isso permite que 00:30 UTC vire 21:30 Hoje sem ser bloqueado pela data.
+                if h_br_obj.hour >= 11:
+                    jogos_da_liga.append(f"🕒 `{h_br}` | *{t1} x {t2}*")
+        except: continue
+    
+    return list(dict.fromkeys(jogos_da_liga)) # Remove duplicados
 
 def main():
     driver = configurar_driver()
-    # Data de referência (Hoje no Brasil: 08/04)
-    hoje_br = datetime.now()
-    lista_final = f"🏆 *JOGOS DE HOJE - {hoje_br.strftime('%d/%m')} (COMPLETO)*\n\n"
-    
-    hoje_str = hoje_br.strftime("%d.%m.")
-    amanha_str = (hoje_br + timedelta(days=1)).strftime("%d.%m.")
+    mensagem_final = f"🏆 *JOGOS DE HOJE - {datetime.now().strftime('%d/%m')}*\n\n"
+    encontrou_algo = False
 
     try:
-        for nome_comp, url in COMPETICOES.items():
-            driver.get(url)
-            time.sleep(8)
-
-            # Força aba PRÓXIMOS
-            try:
-                driver.execute_script("var a=document.querySelectorAll('.tabs__tab');for(var t of a){if(t.innerText.includes('PRÓXIMOS'))t.click();}")
-                time.sleep(5)
-            except: pass
-
-            corpo_texto = driver.find_element(By.TAG_NAME, "body").text
-            linhas = corpo_texto.split('\n')
+        for nome, url in COMPETICOES.items():
+            print(f"Analisando {nome}...")
+            jogos = processar_liga(driver, nome, url)
             
-            secao_adicionada = False
-            for i in range(len(linhas)):
-                if re.match(r'^\d{2}:\d{2}$', linhas[i]):
-                    try:
-                        h_utc_str = linhas[i]
-                        time1 = linhas[i+1]
-                        time2 = linhas[i+2]
-                        if "PREVIEW" in time1 or len(time1) < 3: continue
+            if jogos:
+                encontrou_algo = True
+                mensagem_final += f"--- {nome} ---\n"
+                mensagem_final += "\n".join(jogos) + "\n\n"
 
-                        # Verifica se existe data explícita perto do horário
-                        texto_contexto = " ".join(linhas[max(0, i-3):i])
-                        
-                        # LOGICA DO FUSO: 
-                        # Se o site diz que é AMANHÃ, mas a hora UTC é menor que 03:00,
-                        # significa que no Brasil ainda é HOJE à noite.
-                        hora_h = int(h_utc_str.split(':')[0])
-                        
-                        eh_hoje = False
-                        if amanha_str in texto_contexto:
-                            if hora_h < 3: eh_hoje = True # Jogos das 21h, 22h, 23h do Brasil
-                        elif hoje_str in texto_contexto or re.search(r'\d{2}:\d{2}', h_utc_str):
-                            # Se não achou "amanhã", e a hora faz sentido, assume hoje
-                            if not (hoje_str not in texto_contexto and hora_h < 10): # Evita pegar jogos da manhã seguinte
-                                eh_hoje = True
-
-                        if eh_hoje:
-                            h_br = (datetime.strptime(h_utc_str, "%H:%M") - timedelta(hours=3)).strftime("%H:%M")
-                            if not secao_adicionada:
-                                lista_final += f"--- {nome_comp} ---\n"
-                                secao_adicionada = True
-                            lista_final += f"🕒 `{h_br}` | *{time1} x {time2}*\n"
-                    except: continue
-            
-            if secao_adicionada: lista_final += "\n"
-
-        enviar_telegram(lista_final if "🕒" in lista_final else "⚠️ Nenhum jogo capturado. Verifique o log.")
+        if encontrou_algo:
+            enviar_telegram(mensagem_final)
+        else:
+            enviar_telegram("⚠️ Nenhum jogo de hoje encontrado nas 3 ligas.")
 
     finally:
         driver.quit()
