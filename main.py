@@ -33,6 +33,9 @@ def processar_liga(driver, nome_liga, url):
     driver.get(url)
     time.sleep(7)
     jogos_da_liga = []
+    
+    # Data de hoje para comparação (08/04)
+    hoje_ref = datetime.now().day
 
     try:
         abas = driver.find_elements(By.CSS_SELECTOR, ".tabs__tab")
@@ -43,42 +46,70 @@ def processar_liga(driver, nome_liga, url):
                 break
     except: pass
 
-    elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+    elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match, [id^='g_1_']")
     
     for el in elementos:
         try:
-            # Captura os elementos internos para evitar erro de Regex no texto bruto
-            h_utc = el.find_element(By.CSS_SELECTOR, ".event__time").text.replace("\n", "").strip()
-            t1 = el.find_element(By.CSS_SELECTOR, ".event__participant--home").text.strip()
-            t2 = el.find_element(By.CSS_SELECTOR, ".event__participant--away").text.strip()
+            # Captura o texto e limpa espaços extras
+            texto = " ".join(el.text.split())
+            
+            # REGEX MELHORADO: Pega horário, Time 1, Hífen, Time 2. 
+            # Para o Time 2, ele para assim que encontrar palavras como 'ESTATÍSTICAS' ou espaços duplos
+            match = re.search(r'(\d{2}:\d{2})\s+([^-(]+)\s+-\s+([^-(]+)', texto)
+            
+            if match:
+                h_utc = match.group(1)
+                t1 = match.group(2).strip()
+                t2 = match.group(3).strip()
 
-            if h_utc and t1 and t2:
-                # Conversão de Fuso
+                # Limpeza fina para tirar resíduos de nomes de times com parênteses ou lixo do site
+                t2 = re.split(r'ESTATÍSTICAS|PREVIEW|AUDIO|venc|perdeu', t2)[0].strip()
+
+                # --- CORREÇÃO DO FUSO E TRAVA DE DATA ---
                 h_obj = datetime.strptime(h_utc, "%H:%M")
+                # Se o horário UTC for baixo (00h, 01h), é sinal que no servidor já virou o dia
+                # Mas no Brasil ainda é o jogo da noite de HOJE.
                 h_br_obj = h_obj - timedelta(hours=3)
                 h_br = h_br_obj.strftime("%H:%M")
 
-                # Filtro de horário para garantir que é hoje/noite de hoje
-                if h_br_obj.hour >= 11:
+                # FILTRO PARA NÃO PEGAR AMANHÃ:
+                # 1. Se a hora de Brasília for entre 11:00 e 23:59, é jogo de HOJE.
+                # 2. Se a hora UTC for >= 03:00 e o site indicar outra data (não visível aqui mas implícito na aba),
+                #    nós ignoramos para não pegar a rodada de amanhã da Champions.
+                if 11 <= h_br_obj.hour <= 23:
+                    # Trava específica para Champions: Se for 16h (BR), mas o UTC original for de "amanhã"
+                    # Como o texto bruto às vezes traz a data antes, verificamos:
+                    if "amanhã" in texto.lower() or (h_obj.hour >= 3 and h_obj.hour < 10 and "Champions" in nome_liga):
+                        continue
+                        
                     jogos_da_liga.append(f"🕒 `{h_br}` | *{t1} x {t2}*")
         except: continue
     
+    # Remove duplicados mantendo a ordem
     return list(dict.fromkeys(jogos_da_liga))
 
 def main():
     driver = configurar_driver()
-    mensagem_final = f"🏆 *LISTA DE HOJE - {datetime.now().strftime('%d/%m')}*\n\n"
+    data_formatada = datetime.now().strftime('%d/%m')
+    mensagem_final = f"🏆 *JOGOS DE HOJE - {data_formatada}*\n\n"
     encontrou_algo = False
 
     try:
         for nome, url in COMPETICOES.items():
+            print(f"Analisando {nome}...")
             jogos = processar_liga(driver, nome, url)
+            
             if jogos:
                 encontrou_algo = True
-                mensagem_final += f"--- {nome} ---\n" + "\n".join(jogos) + "\n\n"
+                mensagem_final += f"--- {nome} ---\n"
+                mensagem_final += "\n".join(jogos) + "\n\n"
 
         if encontrou_algo:
             enviar_telegram(mensagem_final)
+            print("Mensagem enviada!")
+        else:
+            enviar_telegram(f"⚠️ Nenhum jogo encontrado para {data_formatada}.")
+
     finally:
         driver.quit()
 
