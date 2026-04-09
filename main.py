@@ -26,9 +26,10 @@ def analisar_detalhes_h2h(driver, id_jogo, confronto):
     driver.switch_to.window(driver.window_handles[-1])
     
     try:
-        wait = WebDriverWait(driver, 20)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
-        time.sleep(4) 
+        # Espera robusta para garantir que a tabela carregue
+        wait = WebDriverWait(driver, 25)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
+        time.sleep(5) # Tempo de respiro para renderização dos ícones
         
         print(f"\n--- 📊 EXTRAÇÃO DE DADOS: {confronto} ---")
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
@@ -37,30 +38,42 @@ def analisar_detalhes_h2h(driver, id_jogo, confronto):
             nome_time = confronto.split(" x ")[i]
             stats = {"15": 0, "25": 0, "h": [], "placares": []}
             
+            # Busca as últimas 5 partidas
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
             for linha in linhas:
+                # 1. Captura V/E/D com fallback para o 'title' do ícone
                 try:
-                    icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']")
-                    res = icon.text.strip() or icon.get_attribute("title")[0].upper()
+                    icon_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']")
+                    res = icon_el.text.strip()
+                    if not res:
+                        title = icon_el.get_attribute("title").lower()
+                        res = "V" if "vitória" in title else "D" if "derrota" in title else "E"
                     stats["h"].append(res)
                 except: stats["h"].append("?")
 
+                # 2. Captura Placares garantindo os dois lados do gol
                 try:
                     res_el = linha.find_element(By.CSS_SELECTOR, ".h2h__result")
                     spans = res_el.find_elements(By.TAG_NAME, "span")
-                    g1, g2 = (spans[0].text.strip(), spans[1].text.strip()) if len(spans) >= 2 else res_el.text.split("-")
+                    if len(spans) >= 2:
+                        g1, g2 = spans[0].text.strip(), spans[1].text.strip()
+                    else:
+                        gols = [s for s in res_el.text.replace("\n", "-").split("-") if s.strip().isdigit()]
+                        g1, g2 = gols[0], gols[1]
                     
                     stats["placares"].append(f"{g1}-{g2}")
-                    if (int(g1) + int(g2)) > 1.5: stats["15"] += 1
-                    if (int(g1) + int(g2)) > 2.5: stats["25"] += 1
+                    soma = int(g1) + int(g2)
+                    if soma > 1.5: stats["15"] += 1
+                    if soma > 2.5: stats["25"] += 1
                 except: stats["placares"].append("?-?")
             
+            # Log detalhado para conferência das suas regras (5/5, 4/5...)
             print(f"[{nome_time}] Histórico: {'-'.join(stats['h'])}")
             print(f"[{nome_time}] Placares: {' | '.join(stats['placares'])}")
             print(f"[{nome_time}] Gols: +1.5 ({stats['15']}/5) | +2.5 ({stats['25']}/5)")
         
         print(f"Etapa 2: Coletado informações do jogo {confronto} ✅")
-    except:
+    except Exception as e:
         print(f"Etapa 2: Erro ao processar {confronto} ❌")
     
     driver.close()
@@ -70,33 +83,29 @@ def main():
     driver = configurar_driver()
     try:
         driver.get(URL_LIBERTADORES)
-        time.sleep(10)
+        time.sleep(12)
         elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
         
         for el in elementos:
             try:
-                # 1. Verifica se há placar. Se houver qualquer número, o jogo começou ou acabou.
-                scores = el.find_elements(By.CSS_SELECTOR, ".event__score")
-                if any(s.text.strip() != "" for s in scores):
+                # Filtro de segurança: pula se tiver placar (já começou/acabou)
+                if any(s.text.strip() != "" for s in el.find_elements(By.CSS_SELECTOR, ".event__score")):
                     continue
 
-                # 2. Tenta ler o horário ou status com try/except para evitar o erro NoSuchElement
+                # Pega horário e evita erros de elemento ausente
                 try:
-                    tempo_texto = el.find_element(By.CSS_SELECTOR, ".event__time, .event__stage").text.strip()
-                except:
-                    continue
+                    tempo = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
+                except: continue
 
-                # 3. Se contiver "'" (minuto), pula. Se contiver ":" (horário previsto), processa.
-                if ":" in tempo_texto and "'" not in tempo_texto:
+                if ":" in tempo and "'" not in tempo:
                     times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                     confronto = f"{times[0].text.strip()} x {times[1].text.strip()}"
                     id_jogo = el.get_attribute("id").split("_")[-1]
                     analisar_detalhes_h2h(driver, id_jogo, confronto)
-            except:
-                continue
+            except: continue
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-                    
+                        
