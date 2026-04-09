@@ -13,7 +13,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 COMPETICOES = {
     "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
-    "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/"
+    "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/",
+    "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/"
 }
 
 def enviar_telegram(mensagem):
@@ -106,10 +107,8 @@ def main():
                         s = pegar_estatisticas_h2h(driver, link_jogo)
                         
                         # REGRA DOS 5 JOGOS (Filtro 5/5 ou 4/5)
-                        # Verifica se ambos times batem a média de gols
                         if s["casa_15"] >= 4 and s["fora_15"] >= 4:
                             mercado = "+1.5 Gols"
-                            # Se for 5/5 e ainda não temos jogo 2.5, promovemos um
                             if s["casa_25"] >= 4 and s["fora_25"] >= 4 and total_jogos_25 < 1:
                                 mercado = "+2.5 Gols"
                                 total_jogos_25 += 1
