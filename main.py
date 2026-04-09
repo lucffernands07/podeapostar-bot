@@ -26,7 +26,13 @@ def enviar_telegram(mensagem):
         return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     try:
-        res = requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
+        # disable_web_page_preview=True para não poluir o bilhete com o resumo do site
+        res = requests.post(url, data={
+            "chat_id": chat_id, 
+            "text": mensagem, 
+            "parse_mode": "Markdown",
+            "disable_web_page_preview": True
+        })
         if res.status_code == 200:
             print("🚀 Bilhete enviado com sucesso!")
         else:
@@ -44,9 +50,7 @@ def configurar_driver():
     return driver
 
 def pegar_estatisticas_h2h(driver, url_jogo):
-    # LOG 1: LINK DA EXTRAÇÃO (Para conferência manual)
     print(f"    [LINK] {url_jogo}")
-    
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     stats = {"casa_15": 0, "casa_25": 0, "fora_15": 0, "fora_25": 0}
@@ -79,7 +83,9 @@ def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-    bilhete = []
+    
+    # Lista para agrupar os blocos por campeonato
+    bilhete_agrupado = []
 
     try:
         for nome_comp, url in COMPETICOES.items():
@@ -87,6 +93,9 @@ def main():
             driver.get(url)
             time.sleep(8)
             elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+            
+            jogos_do_campeonato = []
+            
             for el in elementos:
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
@@ -103,33 +112,44 @@ def main():
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         
-                        # LOG 2: JOGO SENDO BUSCADO
                         print(f"  > Buscando: {t1} x {t2}...")
-                        
                         id_jogo = el.get_attribute('id').split('_')[-1]
                         link_analise = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         
                         s = pegar_estatisticas_h2h(driver, link_analise)
-                        
-                        # LOG 3: DADOS ENCONTRADOS NO H2H
                         print(f"    [STATS] {t1}: {s['casa_15']}/5 (+1.5) | {t2}: {s['fora_15']}/5 (+1.5)")
                         
                         ch15 = calcular_chance(s["casa_15"], s["fora_15"])
                         ch25 = calcular_chance(s["casa_25"], s["fora_25"])
                         
-                        mercados = []
-                        if ch15: mercados.append(f"Gols +1.5 (Chance {ch15})")
-                        if ch25: mercados.append(f"Gols +2.5 (Chance {ch25})")
+                        mercados_bloco = []
+                        if ch15: mercados_bloco.append(f"🎯 Mercado: +1.5 Gols ({ch15})")
+                        if ch25: mercados_bloco.append(f"🎯 Mercado: +2.5 Gols ({ch25})")
                         
-                        if mercados:
-                            bilhete.append(f"✅ `{h_br}` | {t1} x {t2}\n🎯 *Mercado:* {' | '.join(mercados)}")
+                        if mercados_bloco:
+                            # Formatação visual de cada jogo
+                            item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(mercados_bloco)
+                            jogos_do_campeonato.append(item)
                             print("    !!! ADICIONADO AO BILHETE !!!")
                 except: continue
+            
+            # Se encontrou jogos nesse campeonato, cria um "pacote" dele
+            if jogos_do_campeonato:
+                bilhete_agrupado.append("\n\n".join(jogos_do_campeonato))
 
-        if bilhete:
+        if bilhete_agrupado:
             print("\nFinalizando e enviando bilhete...")
-            msg_final = f"📝 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n" + "\n\n".join(bilhete)
-            enviar_telegram(msg_final)
+            
+            cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n"
+            cabecalho += "🎯 *MERCADOS: GOLS +1.5 / +2.5 / 1X / 2X*\n\n"
+            
+            # Une os blocos de campeonatos com o separador tracejado
+            corpo = "\n\n---\n\n".join(bilhete_agrupado)
+            
+            # Rodapé com links embutidos
+            rodape = "\n\n---\n💎 *Apostar:* [Betano](https://br.betano.com/) | [Bet365](https://www.bet365.com/)"
+            
+            enviar_telegram(cabecalho + corpo + rodape)
         else:
             print("\nFim: Nenhum jogo passou pelos critérios técnicos.")
 
@@ -138,3 +158,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
