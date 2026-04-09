@@ -1,6 +1,5 @@
 import os
 import time
-from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -18,59 +17,60 @@ def configurar_driver():
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-def analisar_detalhes_h2h(driver, id_jogo, confronto):
-    url_h2h = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
-    driver.execute_script(f"window.open('{url_h2h}', '_blank');")
+def extrair_dados_h2h(driver, id_jogo, confronto):
+    # Abrimos a página principal do resumo
+    url_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
+    driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
     try:
         wait = WebDriverWait(driver, 25)
-        # Espera carregar os containers de H2H
-        wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".h2h__section")))
-        driver.execute_script("window.scrollTo(0, 1000);") # Scroll para garantir renderização
-        time.sleep(6) 
         
-        print(f"\n--- 📊 EXTRAÇÃO DE DADOS: {confronto} ---")
+        # 1. Tenta clicar no botão H2H de várias formas (Texto ou Atributo)
+        try:
+            # Espera o container das abas carregar
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".tabs__detail--anchors")))
+            # Clica no botão que contém o texto H2H
+            aba_h2h = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(., 'H2H')] | //button[contains(., 'H2H')]")))
+            driver.execute_script("arguments[0].click();", aba_h2h)
+            print(f"Clique na aba H2H realizado para: {confronto}")
+        except Exception as e:
+            print(f"Não consegui clicar no botão H2H de {confronto}. Tentando URL direta...")
+            driver.get(f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall")
+
+        # 2. Espera carregar a tabela H2H
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
+        time.sleep(5) 
+        
+        print(f"\n--- 📊 EXTRAÇÃO: {confronto} ---")
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for i, secao in enumerate(secoes[:2]):
-            nome_time = confronto.split(" x ")[i]
+            time_nome = confronto.split(" x ")[i]
             stats = {"15": 0, "25": 0, "h": [], "placares": []}
             
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")
-            contagem = 0
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
             for linha in linhas:
-                if contagem >= 5: break # Queremos apenas as últimas 5
-                
                 try:
-                    # 1. Resultado V/E/D
-                    icon_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']")
-                    res = icon_el.text.strip()
-                    if not res:
-                        res = icon_el.get_attribute("title")[0].upper()
+                    icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']")
+                    res = icon.text.strip() or icon.get_attribute("title")[0].upper()
                     
-                    # 2. Gols - Buscando os spans individuais do placar
-                    gols_elementos = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
-                    if len(gols_elementos) >= 2:
-                        g1 = int(gols_elementos[0].text.strip())
-                        g2 = int(gols_elementos[1].text.strip())
-                        soma = g1 + g2
-                        
-                        stats["h"].append(res)
-                        stats["placares"].append(f"{g1}-{g2}")
-                        if soma > 1.5: stats["15"] += 1
-                        if soma > 2.5: stats["25"] += 1
-                        contagem += 1
-                except:
-                    continue
+                    gols_spans = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                    g1 = int(gols_spans[0].text.strip())
+                    g2 = int(gols_spans[1].text.strip())
+                    
+                    stats["h"].append(res)
+                    stats["placares"].append(f"{g1}-{g2}")
+                    if (g1 + g2) > 1.5: stats["15"] += 1
+                    if (g1 + g2) > 2.5: stats["25"] += 1
+                except: continue
             
-            print(f"[{nome_time}] Histórico: {'-'.join(stats['h'])}")
-            print(f"[{nome_time}] Placares: {' | '.join(stats['placares'])}")
-            print(f"[{nome_time}] Gols: +1.5 ({stats['15']}/5) | +2.5 ({stats['25']}/5)")
-        
-        print(f"Etapa 2: Coletado informações do jogo {confronto} ✅")
+            print(f"[{time_nome}] Histórico: {'-'.join(stats['h'])}")
+            print(f"[{time_nome}] Placares: {' | '.join(stats['placares'])}")
+            print(f"[{time_nome}] Gols: +1.5 ({stats['15']}/5) | +2.5 ({stats['25']}/5)")
+
     except Exception as e:
-        print(f"Etapa 2: Erro ao processar {confronto} ❌")
+        print(f"Erro na extração de {confronto}: {str(e)}")
     
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
@@ -80,22 +80,23 @@ def main():
     try:
         driver.get("https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/")
         time.sleep(12)
+        
         elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
         for el in elementos:
-            # Ignora jogos com placar (ao vivo/encerrados)
+            # Pula se tiver placar (já começou)
             if any(s.text.strip() != "" for s in el.find_elements(By.CSS_SELECTOR, ".event__score")): continue
             
             try:
-                tempo = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
-                if ":" in tempo:
+                status_texto = el.text
+                # Se encontrar o Sporting Cristal ou qualquer jogo com horário (:)
+                if ":" in status_texto:
+                    id_jogo = el.get_attribute("id").split("_")[-1]
                     times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                     confronto = f"{times[0].text.strip()} x {times[1].text.strip()}"
-                    id_jogo = el.get_attribute("id").split("_")[-1]
-                    analisar_detalhes_h2h(driver, id_jogo, confronto)
+                    extrair_dados_h2h(driver, id_jogo, confronto)
             except: continue
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-    
