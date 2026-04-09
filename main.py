@@ -1,5 +1,6 @@
 import os
 import time
+import re
 import requests
 from datetime import datetime, timedelta
 from selenium import webdriver
@@ -27,23 +28,27 @@ def configurar_driver():
     return driver
 
 def pegar_estatisticas_h2h(driver, url_jogo):
+    # LOG 1: LINK DA EXTRAÇÃO
+    print(f"    [LINK] {url_jogo}")
+    
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     stats = {"casa_15": 0, "casa_25": 0, "fora_15": 0, "fora_25": 0}
     try:
-        h2h_tab = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
+        h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
-        time.sleep(3)
+        time.sleep(4)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         for idx, secao in enumerate(secoes[:2]):
             resultados = secao.find_elements(By.CSS_SELECTOR, ".h2h__result")[:5]
+            prefixo = "casa" if idx == 0 else "fora"
             for res in resultados:
-                placar_texto = res.text.replace('\n', ' ').split(' ')[0]
-                gols = [int(g) for g in placar_texto.split("-") if g.strip().isdigit()]
-                total = sum(gols) if gols else 0
-                prefixo = "casa" if idx == 0 else "fora"
-                if total > 1.5: stats[f"{prefixo}_15"] += 1
-                if total > 2.5: stats[f"{prefixo}_25"] += 1
+                # Extração robusta de números (ignora espaços e letras)
+                numeros = re.findall(r'\d+', res.text)
+                if len(numeros) >= 2:
+                    total = int(numeros[0]) + int(numeros[1])
+                    if total > 1.5: stats[f"{prefixo}_15"] += 1
+                    if total > 2.5: stats[f"{prefixo}_25"] += 1
     except: pass
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
@@ -63,19 +68,16 @@ def main():
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            print(f"\n--- Acessando: {nome_comp} ---")
+            print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
             time.sleep(8)
-            elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-            
-            for el in elementos_jogos:
+            elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+            for el in elementos:
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
-                    horario_utc = tempo_raw.split()[-1]
-                    h_obj = datetime.strptime(horario_utc, "%H:%M")
+                    h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    # Log de tempo para sabermos se a trava UTC está aceitando o jogo
                     aceitar = False
                     if amanha_no_site in tempo_raw:
                         if h_obj.hour <= 3: aceitar = True
@@ -85,31 +87,36 @@ def main():
                     if aceitar:
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        print(f"  > Analisando: {t1} x {t2}")
                         
-                        id_jogo = el.get_attribute("id").split("_")[-1]
-                        link_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
+                        # LOG 2: QUAL JOGO BUSCOU
+                        print(f"  > Verificando: {t1} x {t2}...")
                         
-                        s = pegar_estatisticas_h2h(driver, link_jogo)
-                        print(f"    [LOG STATS] Casa: +1.5:{s['casa_15']} +2.5:{s['casa_25']} | Fora: +1.5:{s['fora_15']} +2.5:{s['fora_25']}")
+                        id_jogo = el.get_attribute('id').split('_')[-1]
+                        link_analise = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
+                        
+                        s = pegar_estatisticas_h2h(driver, link_analise)
+                        
+                        # LOG 3: DADOS ENCONTRADOS
+                        print(f"    [STATS] {t1}: {s['casa_15']}/5 (+1.5) | {t2}: {s['fora_15']}/5 (+1.5)")
                         
                         ch15 = calcular_chance(s["casa_15"], s["fora_15"])
                         ch25 = calcular_chance(s["casa_25"], s["fora_25"])
                         
-                        mercados_jogo = []
-                        if ch15: mercados_jogo.append(f"Gols +1.5 (Chance {ch15})")
-                        if ch25: mercados_jogo.append(f"Gols +2.5 (Chance {ch25})")
+                        mercados = []
+                        if ch15: mercados.append(f"Gols +1.5 (Chance {ch15})")
+                        if ch25: mercados.append(f"Gols +2.5 (Chance {ch25})")
                         
-                        if mercados_jogo:
-                            msg_jogo = f"✅ `{h_br}` | {t1} x {t2}\n🎯 *Mercado:* {' | '.join(mercados_jogo)}"
-                            bilhete.append(msg_jogo)
-                            print(f"    !!! JOGO ADICIONADO AO BILHETE !!!")
+                        if mercados:
+                            bilhete.append(f"✅ `{h_br}` | {t1} x {t2}\n🎯 *Mercado:* {' | '.join(mercados)}")
+                            print("    !!! JOGO VÁLIDO ADICIONADO !!!")
+                except: continue
 
-                except Exception as e:
-                    continue
-
-        if not bilhete:
-            print("\nResultado Final: Nenhum jogo passou nos critérios técnicos hoje.")
+        if bilhete:
+            print("\nGerando bilhete final...")
+            # Envio para o Telegram (Certifique-se que as variáveis de ambiente estão configuradas)
+            # enviar_telegram(...)
+        else:
+            print("\nResultado: Nenhum jogo passou nos critérios de mercado.")
 
     finally:
         driver.quit()
