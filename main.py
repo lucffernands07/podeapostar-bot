@@ -18,6 +18,22 @@ COMPETICOES = {
     "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/"
 }
 
+def enviar_telegram(mensagem):
+    token = os.getenv('TELEGRAM_TOKEN')
+    chat_id = os.getenv('CHAT_ID')
+    if not token or not chat_id:
+        print("⚠️ ALERTA: Sem TELEGRAM_TOKEN ou CHAT_ID nas variáveis de ambiente.")
+        return
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    try:
+        res = requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
+        if res.status_code == 200:
+            print("🚀 Bilhete enviado com sucesso!")
+        else:
+            print(f"❌ Erro no envio: {res.text}")
+    except Exception as e:
+        print(f"❌ Falha de conexão: {e}")
+
 def configurar_driver():
     options = Options()
     options.add_argument("--headless")
@@ -28,7 +44,7 @@ def configurar_driver():
     return driver
 
 def pegar_estatisticas_h2h(driver, url_jogo):
-    # LOG 1: LINK DA EXTRAÇÃO
+    # LOG 1: LINK DA EXTRAÇÃO (Para conferência manual)
     print(f"    [LINK] {url_jogo}")
     
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
@@ -43,7 +59,6 @@ def pegar_estatisticas_h2h(driver, url_jogo):
             resultados = secao.find_elements(By.CSS_SELECTOR, ".h2h__result")[:5]
             prefixo = "casa" if idx == 0 else "fora"
             for res in resultados:
-                # Extração robusta de números (ignora espaços e letras)
                 numeros = re.findall(r'\d+', res.text)
                 if len(numeros) >= 2:
                     total = int(numeros[0]) + int(numeros[1])
@@ -88,15 +103,15 @@ def main():
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         
-                        # LOG 2: QUAL JOGO BUSCOU
-                        print(f"  > Verificando: {t1} x {t2}...")
+                        # LOG 2: JOGO SENDO BUSCADO
+                        print(f"  > Buscando: {t1} x {t2}...")
                         
                         id_jogo = el.get_attribute('id').split('_')[-1]
                         link_analise = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         
                         s = pegar_estatisticas_h2h(driver, link_analise)
                         
-                        # LOG 3: DADOS ENCONTRADOS
+                        # LOG 3: DADOS ENCONTRADOS NO H2H
                         print(f"    [STATS] {t1}: {s['casa_15']}/5 (+1.5) | {t2}: {s['fora_15']}/5 (+1.5)")
                         
                         ch15 = calcular_chance(s["casa_15"], s["fora_15"])
@@ -108,15 +123,15 @@ def main():
                         
                         if mercados:
                             bilhete.append(f"✅ `{h_br}` | {t1} x {t2}\n🎯 *Mercado:* {' | '.join(mercados)}")
-                            print("    !!! JOGO VÁLIDO ADICIONADO !!!")
+                            print("    !!! ADICIONADO AO BILHETE !!!")
                 except: continue
 
         if bilhete:
-            print("\nGerando bilhete final...")
-            # Envio para o Telegram (Certifique-se que as variáveis de ambiente estão configuradas)
-            # enviar_telegram(...)
+            print("\nFinalizando e enviando bilhete...")
+            msg_final = f"📝 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n" + "\n\n".join(bilhete)
+            enviar_telegram(msg_final)
         else:
-            print("\nResultado: Nenhum jogo passou nos critérios de mercado.")
+            print("\nFim: Nenhum jogo passou pelos critérios técnicos.")
 
     finally:
         driver.quit()
