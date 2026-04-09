@@ -13,8 +13,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 COMPETICOES = {
     "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
-    "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
-    "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/",
+    "Libertadores": "https://www.flashscore.com.br/futebol/america-dos-sul/copa-libertadores/",
+    "Sul-Americana": "https://www.flashscore.com.br/futebol/america-dos-sul/copa-sul-americana/",
     "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/"
 }
 
@@ -26,7 +26,12 @@ def enviar_telegram(mensagem):
         return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     try:
-        res = requests.post(url, data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
+        res = requests.post(url, data={
+            "chat_id": chat_id, 
+            "text": mensagem, 
+            "parse_mode": "Markdown",
+            "disable_web_page_preview": True
+        })
         if res.status_code == 200:
             print("🚀 Bilhete enviado com sucesso!")
         else:
@@ -91,49 +96,82 @@ def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-    jogos_bilhete = []
+    
+    blocos_por_campeonato = []
 
     try:
-        # Dicionário para agrupar os jogos por campeonato
-        bilhete_por_campeonato = {}
-
         for nome_comp, url in COMPETICOES.items():
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
             time.sleep(8)
             elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
             
-            jogos_da_competicao = []
+            jogos_da_liga = []
             
             for el in elementos:
                 try:
-                    # ... (todo o seu código de extração de tempo, nomes e H2H continua igual)
+                    tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
+                    h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
+                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    if mercados_detalhes:
-                        bloco_jogo = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(mercados_detalhes)
-                        jogos_da_competicao.append(bloco_jogo)
-                        print("    !!! ADICIONADO !!!")
+                    aceitar = False
+                    if amanha_no_site in tempo_raw:
+                        if h_obj.hour <= 3: aceitar = True
+                    elif "." not in tempo_raw:
+                        aceitar = True # Pega jogos de hoje (dia corrente no site)
+
+                    if aceitar:
+                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                        t1, t2 = times[0].text.strip(), times[1].text.strip()
+                        print(f"  > Buscando: {t1} x {t2}...")
+                        
+                        id_jogo = el.get_attribute('id').split('_')[-1]
+                        link_analise = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
+                        
+                        s = pegar_estatisticas_h2h(driver, link_analise)
+                        
+                        # LOGS DE DADOS MANTIDOS
+                        print(f"    [GOLS] {t1}: {s['casa_15']}/5 | {t2}: {s['fora_15']}/5")
+                        print(f"    [RES]  {t1}: {5-s['casa_derrotas']}/5 (Ult:{s['casa_ult']}) | {t2}: {5-s['fora_derrotas']}/5 (Ult:{s['fora_ult']})")
+                        
+                        mercados_detalhes = []
+                        
+                        # Regras Gols
+                        ch15 = calcular_chance_gols(s["casa_15"], s["fora_15"])
+                        ch25 = calcular_chance_gols(s["casa_25"], s["fora_25"])
+                        if ch15: mercados_detalhes.append(f"🎯 Mercado: +1.5 Gols ({ch15})")
+                        if ch25: mercados_detalhes.append(f"🎯 Mercado: +2.5 Gols ({ch25})")
+
+                        # Regras 1X / 2X
+                        if s["casa_derrotas"] <= 1 and s["casa_ult"] == "V" and s["fora_derrotas"] >= 2 and s["fora_ult"] == "D":
+                            mercados_detalhes.append("🎯 Mercado: 1x (100%)")
+                        
+                        if s["fora_derrotas"] == 0 and s["casa_derrotas"] >= 2 and s["casa_ult"] == "D":
+                            mercados_detalhes.append("🎯 Mercado: 2x (100%)")
+
+                        if mercados_detalhes:
+                            bloco_jogo = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(mercados_detalhes)
+                            jogos_da_liga.append(bloco_jogo)
+                            print("    !!! ADICIONADO AO BILHETE !!!")
                 except: continue
             
-            # Se houver jogos nessa competição, salva no dicionário
-            if jogos_da_competicao:
-                bilhete_por_campeonato[nome_comp] = "\n\n".join(jogos_da_competicao)
+            # Se a liga teve jogos, agrupa eles
+            if jogos_da_liga:
+                blocos_por_campeonato.append("\n\n".join(jogos_da_liga))
 
-        if bilhete_por_campeonato:
-            print("\nFormatando e enviando bilhete...")
-            data_formatada = hoje_ref.strftime('%d/%m')
-            
-            cabecalho = f"🎫 *BILHETE GERADO - {data_formatada}*\n"
+        if blocos_por_campeonato:
+            print("\nFormatando e enviando bilhete final...")
+            cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n"
             cabecalho += "🎯 *MERCADOS: GOLS +1.5 / +2.5 / 1X / 2X*\n\n"
             
-            # Une os grupos de jogos com o separador ---
-            corpo = "\n\n---\n\n".join(bilhete_por_campeonato.values())
+            # Une os campeonatos pelo traço ---
+            corpo = "\n\n---\n\n".join(blocos_por_campeonato)
             
-            rodape = "\n\n---\n💎 *Apostar: [Betano](https://www.betano.com) | [Bet365](https://www.bet365.com)*"
+            rodape = "\n\n---\n💎 *Apostar: [Betano](https://br.betano.com/) | [Bet365](https://www.bet365.com/)*"
             
             enviar_telegram(cabecalho + corpo + rodape)
         else:
-            print("\nFim: Nenhum jogo passou.")
+            print("\nFim: Nenhum jogo passou nos critérios.")
 
     finally:
         driver.quit()
