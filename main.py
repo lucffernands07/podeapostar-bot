@@ -13,8 +13,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 COMPETICOES = {
     "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
-    "Libertadores": "https://www.flashscore.com.br/futebol/america-dos-sul/copa-libertadores/",
-    "Sul-Americana": "https://www.flashscore.com.br/futebol/america-dos-sul/copa-sul-americana/",
+    "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
+    "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/",
     "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/"
 }
 
@@ -26,6 +26,7 @@ def enviar_telegram(mensagem):
         return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     try:
+        # disable_web_page_preview: True para o bilhete ficar limpo
         res = requests.post(url, data={
             "chat_id": chat_id, 
             "text": mensagem, 
@@ -95,8 +96,6 @@ def calcular_chance_gols(c, f):
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
-    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-    
     blocos_por_campeonato = []
 
     try:
@@ -114,67 +113,62 @@ def main():
                     h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    aceitar = False
-                    if amanha_no_site in tempo_raw:
-                        if h_obj.hour <= 3: aceitar = True
-                    elif "." not in tempo_raw:
-                        aceitar = True # Pega jogos de hoje (dia corrente no site)
+                    # Filtro simplificado: Ignora jogos que já terminaram (que possuem placar)
+                    # mas aceita todos os outros da lista de hoje/amanhã
+                    times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                    t1, t2 = times[0].text.strip(), times[1].text.strip()
+                    
+                    print(f"  > Analisando: {t1} x {t2}...")
+                    
+                    id_jogo = el.get_attribute('id').split('_')[-1]
+                    link_analise = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
+                    
+                    s = pegar_estatisticas_h2h(driver, link_analise)
+                    
+                    # LOGS MANTIDAS
+                    print(f"    [GOLS] {t1}: {s['casa_15']}/5 | {t2}: {s['fora_15']}/5")
+                    print(f"    [RES]  {t1}: {5-s['casa_derrotas']}/5 (Ult:{s['casa_ult']}) | {t2}: {5-s['fora_derrotas']}/5 (Ult:{s['fora_ult']})")
+                    
+                    mercados_detalhes = []
+                    
+                    ch15 = calcular_chance_gols(s["casa_15"], s["fora_15"])
+                    ch25 = calcular_chance_gols(s["casa_25"], s["fora_25"])
+                    if ch15: mercados_detalhes.append(f"🎯 Mercado: +1.5 Gols ({ch15})")
+                    if ch25: mercados_detalhes.append(f"🎯 Mercado: +2.5 Gols ({ch25})")
 
-                    if aceitar:
-                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
-                        t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        print(f"  > Buscando: {t1} x {t2}...")
-                        
-                        id_jogo = el.get_attribute('id').split('_')[-1]
-                        link_analise = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
-                        
-                        s = pegar_estatisticas_h2h(driver, link_analise)
-                        
-                        # LOGS DE DADOS MANTIDOS
-                        print(f"    [GOLS] {t1}: {s['casa_15']}/5 | {t2}: {s['fora_15']}/5")
-                        print(f"    [RES]  {t1}: {5-s['casa_derrotas']}/5 (Ult:{s['casa_ult']}) | {t2}: {5-s['fora_derrotas']}/5 (Ult:{s['fora_ult']})")
-                        
-                        mercados_detalhes = []
-                        
-                        # Regras Gols
-                        ch15 = calcular_chance_gols(s["casa_15"], s["fora_15"])
-                        ch25 = calcular_chance_gols(s["casa_25"], s["fora_25"])
-                        if ch15: mercados_detalhes.append(f"🎯 Mercado: +1.5 Gols ({ch15})")
-                        if ch25: mercados_detalhes.append(f"🎯 Mercado: +2.5 Gols ({ch25})")
+                    if s["casa_derrotas"] <= 1 and s["casa_ult"] == "V" and s["fora_derrotas"] >= 2 and s["fora_ult"] == "D":
+                        mercados_detalhes.append("🎯 Mercado: 1x (100%)")
+                    
+                    if s["fora_derrotas"] == 0 and s["casa_derrotas"] >= 2 and s["casa_ult"] == "D":
+                        mercados_detalhes.append("🎯 Mercado: 2x (100%)")
 
-                        # Regras 1X / 2X
-                        if s["casa_derrotas"] <= 1 and s["casa_ult"] == "V" and s["fora_derrotas"] >= 2 and s["fora_ult"] == "D":
-                            mercados_detalhes.append("🎯 Mercado: 1x (100%)")
-                        
-                        if s["fora_derrotas"] == 0 and s["casa_derrotas"] >= 2 and s["casa_ult"] == "D":
-                            mercados_detalhes.append("🎯 Mercado: 2x (100%)")
-
-                        if mercados_detalhes:
-                            bloco_jogo = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(mercados_detalhes)
-                            jogos_da_liga.append(bloco_jogo)
-                            print("    !!! ADICIONADO AO BILHETE !!!")
+                    if mercados_detalhes:
+                        # Estilo visual solicitado:
+                        bloco_jogo = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(mercados_detalhes)
+                        jogos_da_liga.append(bloco_jogo)
+                        print("    !!! ADICIONADO AO BILHETE !!!")
                 except: continue
             
-            # Se a liga teve jogos, agrupa eles
             if jogos_da_liga:
                 blocos_por_campeonato.append("\n\n".join(jogos_da_liga))
 
         if blocos_por_campeonato:
-            print("\nFormatando e enviando bilhete final...")
+            print("\nEnviando bilhete...")
             cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n"
             cabecalho += "🎯 *MERCADOS: GOLS +1.5 / +2.5 / 1X / 2X*\n\n"
             
-            # Une os campeonatos pelo traço ---
             corpo = "\n\n---\n\n".join(blocos_por_campeonato)
             
+            # Rodapé com links "por baixo"
             rodape = "\n\n---\n💎 *Apostar:* [Betano](https://br.betano.com/) | [Bet365](https://www.bet365.com/)"
             
             enviar_telegram(cabecalho + corpo + rodape)
         else:
-            print("\nFim: Nenhum jogo passou nos critérios.")
+            print("\nFim: Nenhum jogo passou nos critérios técnicos hoje.")
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
+                        
