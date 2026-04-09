@@ -44,32 +44,47 @@ def configurar_driver():
     return driver
 
 def pegar_estatisticas_h2h(driver, url_jogo):
-    # LOG 1: LINK DA EXTRAÇÃO (Para conferência manual)
     print(f"    [LINK] {url_jogo}")
-    
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
-    stats = {"casa_15": 0, "casa_25": 0, "fora_15": 0, "fora_25": 0}
+    
+    # Adicionado contagem de derrotas e último resultado
+    stats = {
+        "casa_15": 0, "casa_25": 0, "casa_derrotas": 0, "casa_ult": "",
+        "fora_15": 0, "fora_25": 0, "fora_derrotas": 0, "fora_ult": ""
+    }
+    
     try:
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
         time.sleep(4)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        
         for idx, secao in enumerate(secoes[:2]):
-            resultados = secao.find_elements(By.CSS_SELECTOR, ".h2h__result")[:5]
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
             prefixo = "casa" if idx == 0 else "fora"
-            for res in resultados:
-                numeros = re.findall(r'\d+', res.text)
+            
+            for i, linha in enumerate(linhas):
+                # Captura V, E ou D
+                try:
+                    res_icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
+                    if i == 0: stats[f"{prefixo}_ult"] = res_icon
+                    if res_icon == "D": stats[f"{prefixo}_derrotas"] += 1
+                except: pass
+
+                # Gols
+                numeros = re.findall(r'\d+', linha.text)
                 if len(numeros) >= 2:
-                    total = int(numeros[0]) + int(numeros[1])
+                    total = int(numeros[-2]) + int(numeros[-1])
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
     except: pass
+    
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
 
-def calcular_chance(c, f):
+def calcular_chance_gols(c, f):
     if c == 5 and f == 5: return "100%"
     if (c == 5 and f == 4) or (c == 4 and f == 5): return "85%"
     if c == 4 and f == 4: return "70%"
@@ -102,8 +117,6 @@ def main():
                     if aceitar:
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        
-                        # LOG 2: JOGO SENDO BUSCADO
                         print(f"  > Buscando: {t1} x {t2}...")
                         
                         id_jogo = el.get_attribute('id').split('_')[-1]
@@ -111,27 +124,37 @@ def main():
                         
                         s = pegar_estatisticas_h2h(driver, link_analise)
                         
-                        # LOG 3: DADOS ENCONTRADOS NO H2H
-                        print(f"    [STATS] {t1}: {s['casa_15']}/5 (+1.5) | {t2}: {s['fora_15']}/5 (+1.5)")
-                        
-                        ch15 = calcular_chance(s["casa_15"], s["fora_15"])
-                        ch25 = calcular_chance(s["casa_25"], s["fora_25"])
+                        # LOGS DE DADOS
+                        print(f"    [GOLS] {t1}: {s['casa_15']}/5 | {t2}: {s['fora_15']}/5")
+                        print(f"    [RES]  {t1}: {5-s['casa_derrotas']}/5 (Ult:{s['casa_ult']}) | {t2}: {5-s['fora_derrotas']}/5 (Ult:{s['fora_ult']})")
                         
                         mercados = []
+                        
+                        # Regra Gols
+                        ch15 = calcular_chance_gols(s["casa_15"], s["fora_15"])
+                        ch25 = calcular_chance_gols(s["casa_25"], s["fora_25"])
                         if ch15: mercados.append(f"Gols +1.5 (Chance {ch15})")
                         if ch25: mercados.append(f"Gols +2.5 (Chance {ch25})")
+
+                        # Regra 1X
+                        if s["casa_derrotas"] <= 1 and s["casa_ult"] == "V" and s["fora_derrotas"] >= 2 and s["fora_ult"] == "D":
+                            mercados.append("Dupla Chance 1X")
                         
+                        # Regra 2X (Cenário do Juventud x Cienciano)
+                        if s["fora_derrotas"] == 0 and s["casa_derrotas"] >= 2 and s["casa_ult"] == "D":
+                            mercados.append("Dupla Chance 2X")
+
                         if mercados:
                             bilhete.append(f"✅ `{h_br}` | {t1} x {t2}\n🎯 *Mercado:* {' | '.join(mercados)}")
                             print("    !!! ADICIONADO AO BILHETE !!!")
                 except: continue
 
         if bilhete:
-            print("\nFinalizando e enviando bilhete...")
+            print("\nEnviando bilhete final...")
             msg_final = f"📝 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n" + "\n\n".join(bilhete)
             enviar_telegram(msg_final)
         else:
-            print("\nFim: Nenhum jogo passou pelos critérios técnicos.")
+            print("\nFim: Nenhum jogo passou.")
 
     finally:
         driver.quit()
