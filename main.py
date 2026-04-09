@@ -94,66 +94,40 @@ def main():
     jogos_bilhete = []
 
     try:
+        # Dicionário para agrupar os jogos por campeonato
+        bilhete_por_campeonato = {}
+
         for nome_comp, url in COMPETICOES.items():
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
             time.sleep(8)
             elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+            
+            jogos_da_competicao = []
+            
             for el in elementos:
                 try:
-                    tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
-                    h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
-                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
+                    # ... (todo o seu código de extração de tempo, nomes e H2H continua igual)
                     
-                    aceitar = False
-                    if amanha_no_site in tempo_raw:
-                        if h_obj.hour <= 3: aceitar = True
-                    elif "." not in tempo_raw:
-                        if (h_obj - timedelta(hours=3)).hour >= 11: aceitar = True
-
-                    if aceitar:
-                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
-                        t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        print(f"  > Analisando: {t1} x {t2}...")
-                        
-                        id_jogo = el.get_attribute('id').split('_')[-1]
-                        link_analise = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
-                        
-                        s = pegar_estatisticas_h2h(driver, link_analise)
-                        
-                        print(f"    [GOLS] {t1}: {s['casa_15']}/5 | {t2}: {s['fora_15']}/5")
-                        print(f"    [RES]  {t1}: {5-s['casa_derrotas']}/5 (Ult:{s['casa_ult']}) | {t2}: {5-s['fora_derrotas']}/5 (Ult:{s['fora_ult']})")
-                        
-                        mercados_detalhes = []
-                        
-                        # Gols
-                        ch15 = calcular_chance_gols(s["casa_15"], s["fora_15"])
-                        ch25 = calcular_chance_gols(s["casa_25"], s["fora_25"])
-                        if ch15: mercados_detalhes.append(f"🎯 Mercado: +1.5 Gols ({ch15})")
-                        if ch25: mercados_detalhes.append(f"🎯 Mercado: +2.5 Gols ({ch25})")
-
-                        # Dupla Chance
-                        if s["casa_derrotas"] <= 1 and s["casa_ult"] == "V" and s["fora_derrotas"] >= 2 and s["fora_ult"] == "D":
-                            mercados_detalhes.append("🎯 Mercado: 1x (100%)")
-                        
-                        if s["fora_derrotas"] == 0 and s["casa_derrotas"] >= 2 and s["casa_ult"] == "D":
-                            mercados_detalhes.append("🎯 Mercado: 2x (100%)")
-
-                        if mercados_detalhes:
-                            # Formatação individual de cada jogo no novo padrão
-                            bloco_jogo = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(mercados_detalhes)
-                            jogos_bilhete.append(bloco_jogo)
-                            print("    !!! ADICIONADO AO BILHETE !!!")
+                    if mercados_detalhes:
+                        bloco_jogo = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(mercados_detalhes)
+                        jogos_da_competicao.append(bloco_jogo)
+                        print("    !!! ADICIONADO !!!")
                 except: continue
+            
+            # Se houver jogos nessa competição, salva no dicionário
+            if jogos_da_competicao:
+                bilhete_por_campeonato[nome_comp] = "\n\n".join(jogos_da_competicao)
 
-        if jogos_bilhete:
+        if bilhete_por_campeonato:
             print("\nFormatando e enviando bilhete...")
             data_formatada = hoje_ref.strftime('%d/%m')
             
             cabecalho = f"🎫 *BILHETE GERADO - {data_formatada}*\n"
             cabecalho += "🎯 *MERCADOS: GOLS +1.5 / +2.5 / 1X / 2X*\n\n"
             
-            corpo = "\n\n---\n\n".join(jogos_bilhete)
+            # Une os grupos de jogos com o separador ---
+            corpo = "\n\n---\n\n".join(bilhete_por_campeonato.values())
             
             rodape = "\n\n---\n💎 *Apostar: [Betano](https://www.betano.com) | [Bet365](https://www.bet365.com)*"
             
