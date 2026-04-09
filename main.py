@@ -1,4 +1,5 @@
 import time
+from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -16,86 +17,104 @@ def configurar_driver():
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
+def calcular_porcentagem_gols(casa_5, fora_5):
+    # Regra: 5/5 e 5/5 = 100% | 5/5 e 4/5 = 85% | 4/5 e 4/5 = 70%
+    soma = casa_5 + fora_5
+    if soma == 10: return "100%"
+    if soma == 9: return "85%"
+    if soma == 8: return "70%"
+    return None
+
 def extrair_dados_h2h(driver, id_jogo):
-    # Caminho oficial: Abre o resumo e clica no H2H conforme você orientou
     url_resumo = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
     driver.execute_script(f"window.open('{url_resumo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
+    analise = {"confronto": "", "mercados": []}
+    
     try:
         wait = WebDriverWait(driver, 25)
-        
-        # Localiza o nome dos times para o log
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".participant__participantName")))
+        wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, ".participant__participantName")) >= 2)
         times_el = driver.find_elements(By.CSS_SELECTOR, ".participant__participantName")
-        confronto = f"{times_el[0].text.strip()} x {times_el[1].text.strip()}"
-        
-        print(f"\n🚀 Processando: {confronto}")
+        t_casa, t_fora = times_el[0].text.strip(), times_el[1].text.strip()
+        analise["confronto"] = f"{t_casa} x {t_fora}"
 
-        # Clica na aba H2H usando o seletor exato que você passou
-        botao_h2h = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[data-testid="wcl-tab"][role="tab"]')))
-        driver.execute_script("arguments[0].click();", botao_h2h)
-        
-        # Espera a tabela carregar
+        # Clique na aba H2H
+        aba = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@data-testid='wcl-tab' and contains(., 'H2H')]")))
+        driver.execute_script("arguments[0].click();", aba)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-        time.sleep(5) 
+        time.sleep(4)
 
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        for i, secao in enumerate(secoes[:2]):
-            time_nome = confronto.split(" x ")[i]
-            stats = {"15": 0, "25": 0, "h": [], "placares": []}
-            
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
-            for linha in linhas:
-                try:
-                    icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
-                    gols = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
-                    g1, g2 = int(gols[0].text.strip()), int(gols[1].text.strip())
-                    
-                    stats["h"].append(icon or "?")
-                    stats["placares"].append(f"{g1}-{g2}")
-                    if (g1 + g2) > 1.5: stats["15"] += 1
-                    if (g1 + g2) > 2.5: stats["25"] += 1
-                except: continue
-            
-            print(f"   [{time_nome}] Histórico: {'-'.join(stats['h'])}")
-            print(f"   [{time_nome}] Gols: +1.5 ({stats['15']}/5) | +2.5 ({stats['25']}/5)")
+        stats = []
 
-    except Exception as e:
-        print(f"❌ Erro nos detalhes do jogo {id_jogo}")
-    
+        for secao in secoes[:2]:
+            v, d, g15, g25 = 0, 0, 0, 0
+            historico = []
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
+            
+            for linha in linhas:
+                res = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
+                historico.append(res)
+                if res == "V": v += 1
+                if res == "D": d += 1
+                
+                placar = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.replace("\n", "-")
+                gols = sum([int(g) for g in placar.split("-") if g.strip().isdigit()])
+                if gols > 1.5: g15 += 1
+                if gols > 2.5: g25 += 1
+            
+            stats.append({"v": v, "d": d, "g15": g15, "g25": g25, "hist": historico})
+
+        c, f = stats[0], stats[1]
+
+        # --- APLICAÇÃO DAS REGRAS ---
+        
+        # 1. Gols +1.5 e +2.5
+        p15 = calcular_porcentagem_gols(c["g15"], f["g15"])
+        if p15: analise["mercados"].append(f"🎯 Gols +1.5 (Chance {p15})")
+        
+        p25 = calcular_porcentagem_gols(c["g25"], f["g25"])
+        if p25: analise["mercados"].append(f"🎯 Gols +2.5 (Chance {p25})")
+
+        # 2. Regra 1X: Mandante max 1D (última V) | Visitante min 2D (última D)
+        # Mantendo o índice que você usa atualmente (mesmo que saibamos que está invertido)
+        if c["d"] <= 1 and c["hist"][-1] == "V" and f["d"] >= 2 and f["hist"][-1] == "D":
+            porcentagem_1x = ((5 - c["d"]) + f["d"]) * 10 # Cálculo base de força
+            analise["mercados"].append(f"🎯 Mercado 1X (Chance {porcentagem_1x}%)")
+
+        # 3. Regra 2X: Visitante 0D | Mandante min 2D (última D)
+        if f["d"] == 0 and c["d"] >= 2 and c["hist"][-1] == "D":
+            analise["mercados"].append(f"🎯 Mercado 2X (Chance Alta)")
+
+    except: pass
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
+    return analise
 
 def main():
     driver = configurar_driver()
+    # Ajuste de Horário: UTC-3
+    agora_brasil = datetime.utcnow() - timedelta(hours=3)
+    print(f"Executando bot: {agora_brasil.strftime('%d/%m/%Y %H:%M')}")
+
     try:
         driver.get("https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/")
         time.sleep(12)
         
-        # 1. Primeiro capturamos todos os IDs dos jogos agendados
         elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-        ids_para_processar = []
-        
-        for el in elementos:
-            # Pula se já tiver placar (já começou)
-            if any(s.text.strip() != "" for s in el.find_elements(By.CSS_SELECTOR, ".event__score")):
-                continue
-            
-            status = el.text
-            if ":" in status: # Filtra por horário (ex: 19:00)
-                jogo_id = el.get_attribute("id").split("_")[-1]
-                ids_para_processar.append(jogo_id)
-        
-        print(f"Encontrados {len(ids_para_processar)} jogos para análise.")
+        ids = [el.get_attribute("id").split("_")[-1] for el in elementos if ":" in el.text and not any(s.text.strip() for s in el.find_elements(By.CSS_SELECTOR, ".event__score"))]
 
-        # 2. Agora iteramos sobre os IDs (isso evita o erro de Stale Element)
-        for id_jogo in ids_para_processar:
-            extrair_dados_h2h(driver, id_jogo)
-            
+        print(f"Analisando {len(ids)} jogos agendados...")
+        for id_jogo in ids:
+            resultado = extrair_dados_h2h(driver, id_jogo)
+            if resultado["mercados"]:
+                print(f"\n✅ {resultado['confronto']}")
+                for m in resultado["mercados"]:
+                    print(m)
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-                
+        
