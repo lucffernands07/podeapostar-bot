@@ -1,6 +1,6 @@
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -74,23 +74,29 @@ def main():
         elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
         
         for el in elementos:
-            # NOVA TRAVA: Verifica se o jogo tem cronômetro (ex: 1', 32') ou placar preenchido
-            stage = el.find_element(By.CSS_SELECTOR, ".event__stage").text.strip()
-            scores = el.find_elements(By.CSS_SELECTOR, ".event__score")
-            tem_placar = any(s.text.strip() != "" for s in scores)
+            try:
+                # 1. Verifica se há placar. Se houver qualquer número, o jogo começou ou acabou.
+                scores = el.find_elements(By.CSS_SELECTOR, ".event__score")
+                if any(s.text.strip() != "" for s in scores):
+                    continue
 
-            # Se tiver minuto (ex: 1') ou placar, descarta porque já começou
-            if "'" in stage or tem_placar:
+                # 2. Tenta ler o horário ou status com try/except para evitar o erro NoSuchElement
+                try:
+                    tempo_texto = el.find_element(By.CSS_SELECTOR, ".event__time, .event__stage").text.strip()
+                except:
+                    continue
+
+                # 3. Se contiver "'" (minuto), pula. Se contiver ":" (horário previsto), processa.
+                if ":" in tempo_texto and "'" not in tempo_texto:
+                    times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                    confronto = f"{times[0].text.strip()} x {times[1].text.strip()}"
+                    id_jogo = el.get_attribute("id").split("_")[-1]
+                    analisar_detalhes_h2h(driver, id_jogo, confronto)
+            except:
                 continue
-
-            # Se o jogo for futuro (ex: 23:00)
-            if ":" in stage:
-                times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
-                confronto = f"{times[0].text.strip()} x {times[1].text.strip()}"
-                id_jogo = el.get_attribute("id").split("_")[-1]
-                analisar_detalhes_h2h(driver, id_jogo, confronto)
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
+                    
