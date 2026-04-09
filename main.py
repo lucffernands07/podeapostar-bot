@@ -167,7 +167,7 @@ def main():
             # Une os campeonatos pelo traço ---
             corpo = "\n\n---\n\n".join(blocos_por_campeonato)
             
-            rodape = "\n\n---\n💎 *Apostar: [Betano](https://br.betano.com/) | [Bet365](https://www.bet365.com/)*"
+            rodape = "\n\n---\n💎 *Apostar:* [Betano](https://br.betano.com/) | [Bet365](https://www.bet365.com/)"
             
             enviar_telegram(cabecalho + corpo + rodape)
         else:
