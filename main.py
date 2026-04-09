@@ -18,8 +18,7 @@ def configurar_driver():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    return driver
+    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 def analisar_detalhes_h2h(driver, id_jogo, confronto):
     url_h2h = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
@@ -27,84 +26,71 @@ def analisar_detalhes_h2h(driver, id_jogo, confronto):
     driver.switch_to.window(driver.window_handles[-1])
     
     try:
-        wait = WebDriverWait(driver, 15)
+        wait = WebDriverWait(driver, 20)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
-        time.sleep(2)
+        time.sleep(4) 
         
-        print(f"\n--- Analisando: {confronto} ---")
+        print(f"\n--- 📊 EXTRAÇÃO DE DADOS: {confronto} ---")
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for i, secao in enumerate(secoes[:2]):
-            time_nome = "Mandante" if i == 0 else "Visitante"
+            nome_time = confronto.split(" x ")[i]
             stats = {"15": 0, "25": 0, "h": [], "placares": []}
             
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
             for linha in linhas:
-                # Resultados V/E/D
                 try:
-                    status = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
-                    if not status:
-                        title = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").get_attribute("title").lower()
-                        status = "V" if "vitória" in title else "D" if "derrota" in title else "E"
-                    stats["h"].append(status)
+                    icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']")
+                    res = icon.text.strip() or icon.get_attribute("title")[0].upper()
+                    stats["h"].append(res)
                 except: stats["h"].append("?")
 
-                # Placares e Gols
                 try:
-                    placar = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.replace("\n", "").strip()
-                    stats["placares"].append(placar)
-                    gols = [int(g) for g in placar.split("-") if g.strip().isdigit()]
-                    if sum(gols) > 1.5: stats["15"] += 1
-                    if sum(gols) > 2.5: stats["25"] += 1
-                except: pass
+                    res_el = linha.find_element(By.CSS_SELECTOR, ".h2h__result")
+                    spans = res_el.find_elements(By.TAG_NAME, "span")
+                    g1, g2 = (spans[0].text.strip(), spans[1].text.strip()) if len(spans) >= 2 else res_el.text.split("-")
+                    
+                    stats["placares"].append(f"{g1}-{g2}")
+                    if (int(g1) + int(g2)) > 1.5: stats["15"] += 1
+                    if (int(g1) + int(g2)) > 2.5: stats["25"] += 1
+                except: stats["placares"].append("?-?")
             
-            # Print do Log para o GitHub
-            print(f"[{time_nome}] Histórico: {'-'.join(stats['h'])}")
-            print(f"[{time_nome}] Placares: {' | '.join(stats['placares'])}")
-            print(f"[{time_nome}] Gols: +1.5 ({stats['15']}/5) | +2.5 ({stats['25']}/5)")
-
-        print(f"Etapa 2: Coletado informações do jogo {confronto} ✅")
+            print(f"[{nome_time}] Histórico: {'-'.join(stats['h'])}")
+            print(f"[{nome_time}] Placares: {' | '.join(stats['placares'])}")
+            print(f"[{nome_time}] Gols: +1.5 ({stats['15']}/5) | +2.5 ({stats['25']}/5)")
         
-    except Exception as e:
-        print(f"Etapa 2: Sem informações do jogo {confronto} ❌ (Erro: {str(e)})")
+        print(f"Etapa 2: Coletado informações do jogo {confronto} ✅")
+    except:
+        print(f"Etapa 2: Erro ao processar {confronto} ❌")
     
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
 
 def main():
     driver = configurar_driver()
-    hoje_ref = datetime.now()
-    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-    
-    print("Etapa 1: Busca de jogos do dia ✅")
-    
     try:
         driver.get(URL_LIBERTADORES)
         time.sleep(10)
         elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
         
         for el in elementos:
-            try:
-                id_jogo = el.get_attribute("id").split("_")[-1]
-                tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
-                h_utc = tempo_raw.split()[-1]
-                h_obj = datetime.strptime(h_utc, "%H:%M")
-                
+            # NOVA TRAVA: Verifica se o jogo tem cronômetro (ex: 1', 32') ou placar preenchido
+            stage = el.find_element(By.CSS_SELECTOR, ".event__stage").text.strip()
+            scores = el.find_elements(By.CSS_SELECTOR, ".event__score")
+            tem_placar = any(s.text.strip() != "" for s in scores)
+
+            # Se tiver minuto (ex: 1') ou placar, descarta porque já começou
+            if "'" in stage or tem_placar:
+                continue
+
+            # Se o jogo for futuro (ex: 23:00)
+            if ":" in stage:
                 times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                 confronto = f"{times[0].text.strip()} x {times[1].text.strip()}"
-
-                aceitar = False
-                if amanha_no_site in tempo_raw:
-                    if h_obj.hour <= 3: aceitar = True
-                elif "." not in tempo_raw:
-                    if (h_obj - timedelta(hours=3)).hour >= 11: aceitar = True
-
-                if aceitar:
-                    analisar_detalhes_h2h(driver, id_jogo, confronto)
-            except: continue
+                id_jogo = el.get_attribute("id").split("_")[-1]
+                analisar_detalhes_h2h(driver, id_jogo, confronto)
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-                    
