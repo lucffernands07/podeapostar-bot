@@ -155,7 +155,7 @@ def main():
             
             corpo = "\n\n---\n\n".join(jogos_bilhete)
             
-            rodape = "\n\n---\n💎 *Apostar: Betano | Bet365*"
+            rodape = "\n\n---\n💎 *Apostar: [Betano](https://www.betano.com) | [Bet365](https://www.bet365.com)*"
             
             enviar_telegram(cabecalho + corpo + rodape)
         else:
