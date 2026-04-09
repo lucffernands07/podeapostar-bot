@@ -9,8 +9,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-URL_LIBERTADORES = "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/"
-
 def configurar_driver():
     options = Options()
     options.add_argument("--headless")
@@ -26,10 +24,11 @@ def analisar_detalhes_h2h(driver, id_jogo, confronto):
     driver.switch_to.window(driver.window_handles[-1])
     
     try:
-        # Espera robusta para garantir que a tabela carregue
         wait = WebDriverWait(driver, 25)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-        time.sleep(5) # Tempo de respiro para renderização dos ícones
+        # Espera carregar os containers de H2H
+        wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".h2h__section")))
+        driver.execute_script("window.scrollTo(0, 1000);") # Scroll para garantir renderização
+        time.sleep(6) 
         
         print(f"\n--- 📊 EXTRAÇÃO DE DADOS: {confronto} ---")
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
@@ -38,36 +37,33 @@ def analisar_detalhes_h2h(driver, id_jogo, confronto):
             nome_time = confronto.split(" x ")[i]
             stats = {"15": 0, "25": 0, "h": [], "placares": []}
             
-            # Busca as últimas 5 partidas
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")
+            contagem = 0
             for linha in linhas:
-                # 1. Captura V/E/D com fallback para o 'title' do ícone
+                if contagem >= 5: break # Queremos apenas as últimas 5
+                
                 try:
+                    # 1. Resultado V/E/D
                     icon_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']")
                     res = icon_el.text.strip()
                     if not res:
-                        title = icon_el.get_attribute("title").lower()
-                        res = "V" if "vitória" in title else "D" if "derrota" in title else "E"
-                    stats["h"].append(res)
-                except: stats["h"].append("?")
-
-                # 2. Captura Placares garantindo os dois lados do gol
-                try:
-                    res_el = linha.find_element(By.CSS_SELECTOR, ".h2h__result")
-                    spans = res_el.find_elements(By.TAG_NAME, "span")
-                    if len(spans) >= 2:
-                        g1, g2 = spans[0].text.strip(), spans[1].text.strip()
-                    else:
-                        gols = [s for s in res_el.text.replace("\n", "-").split("-") if s.strip().isdigit()]
-                        g1, g2 = gols[0], gols[1]
+                        res = icon_el.get_attribute("title")[0].upper()
                     
-                    stats["placares"].append(f"{g1}-{g2}")
-                    soma = int(g1) + int(g2)
-                    if soma > 1.5: stats["15"] += 1
-                    if soma > 2.5: stats["25"] += 1
-                except: stats["placares"].append("?-?")
+                    # 2. Gols - Buscando os spans individuais do placar
+                    gols_elementos = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                    if len(gols_elementos) >= 2:
+                        g1 = int(gols_elementos[0].text.strip())
+                        g2 = int(gols_elementos[1].text.strip())
+                        soma = g1 + g2
+                        
+                        stats["h"].append(res)
+                        stats["placares"].append(f"{g1}-{g2}")
+                        if soma > 1.5: stats["15"] += 1
+                        if soma > 2.5: stats["25"] += 1
+                        contagem += 1
+                except:
+                    continue
             
-            # Log detalhado para conferência das suas regras (5/5, 4/5...)
             print(f"[{nome_time}] Histórico: {'-'.join(stats['h'])}")
             print(f"[{nome_time}] Placares: {' | '.join(stats['placares'])}")
             print(f"[{nome_time}] Gols: +1.5 ({stats['15']}/5) | +2.5 ({stats['25']}/5)")
@@ -82,22 +78,16 @@ def analisar_detalhes_h2h(driver, id_jogo, confronto):
 def main():
     driver = configurar_driver()
     try:
-        driver.get(URL_LIBERTADORES)
+        driver.get("https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/")
         time.sleep(12)
         elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-        
         for el in elementos:
+            # Ignora jogos com placar (ao vivo/encerrados)
+            if any(s.text.strip() != "" for s in el.find_elements(By.CSS_SELECTOR, ".event__score")): continue
+            
             try:
-                # Filtro de segurança: pula se tiver placar (já começou/acabou)
-                if any(s.text.strip() != "" for s in el.find_elements(By.CSS_SELECTOR, ".event__score")):
-                    continue
-
-                # Pega horário e evita erros de elemento ausente
-                try:
-                    tempo = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
-                except: continue
-
-                if ":" in tempo and "'" not in tempo:
+                tempo = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
+                if ":" in tempo:
                     times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                     confronto = f"{times[0].text.strip()} x {times[1].text.strip()}"
                     id_jogo = el.get_attribute("id").split("_")[-1]
@@ -108,4 +98,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                        
+    
