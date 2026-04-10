@@ -12,11 +12,18 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 COMPETICOES = {
+    "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/serie-b/",
+    "LaLiga": "https://www.flashscore.com.br/futebol/espanha/laliga/",
+    "Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/",
+    "Premier League": "https://www.flashscore.com.br/futebol/inglaterra/premier-league/",
+    "Serie A (Itália)": "https://www.flashscore.com.br/futebol/italia/serie-a/",
+    "Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/bundesliga/",
     "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
     "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/",
     "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/"
 }
+
 
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
