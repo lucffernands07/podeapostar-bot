@@ -1,20 +1,16 @@
 def verificar_chance_dupla(s):
-    """
-    Mantém a lógica de análise de força baseada no histórico de 5 jogos.
-    """
     mercados = []
     
-    # Lógica 1X (Casa)
-    # Se a casa tem poucas derrotas (0 ou 1) e o visitante tem muitas (2 ou mais)
+    # Lógica 1X
     if s["casa_derrotas"] <= 1 and s["fora_derrotas"] >= 2:
-        # Reforça com a tendência do último jogo
         if s["casa_ult_res"] in ["V", "E"] and s["fora_ult_res"] == "D":
-            mercados.append("1x")
+            # Se a casa estiver invicta (0 derrotas), 100%, se tiver 1 derrota, 85%
+            pct = "100%" if s["casa_derrotas"] == 0 else "85%"
+            mercados.append(f"1x ({pct})")
     
-    # Lógica 2X (Fora)
-    # Se o visitante está invicto (0 derrotas) e a casa está perdendo (2 ou mais)
+    # Lógica 2X
     if s["fora_derrotas"] == 0 and s["casa_derrotas"] >= 2:
         if s["casa_ult_res"] == "D":
-            mercados.append("2x")
+            mercados.append("2x (100%)") # 2X só entra se o visitante estiver invicto
             
     return mercados
