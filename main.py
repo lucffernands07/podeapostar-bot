@@ -12,18 +12,50 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 COMPETICOES = {
+    # --- BRASIL E AMÉRICAS ---
     "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/serie-b/",
-    "LaLiga": "https://www.flashscore.com.br/futebol/espanha/laliga/",
-    "Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/",
-    "Premier League": "https://www.flashscore.com.br/futebol/inglaterra/premier-league/",
-    "Serie A (Itália)": "https://www.flashscore.com.br/futebol/italia/serie-a/",
-    "Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/bundesliga/",
-    "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
+    "Argentina - Superliga": "https://www.flashscore.com.br/futebol/argentina/liga-profissional/",
+    "Colômbia - Primera A": "https://www.flashscore.com.br/futebol/colombia/primeira-a/",
+    "Paraguai - Division 1": "https://www.flashscore.com.br/futebol/paraguai/primeira-divisao/",
+    "Uruguai - Primera Division": "https://www.flashscore.com.br/futebol/uruguai/primeira-divisao/",
+    "México - Liga MX": "https://www.flashscore.com.br/futebol/mexico/liga-mx/",
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
     "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/",
+
+    # --- EUROPA (ELITE) ---
+    "Premier League": "https://www.flashscore.com.br/futebol/inglaterra/premier-league/",
+    "LaLiga": "https://www.flashscore.com.br/futebol/espanha/laliga/",
+    "Serie A (Itália)": "https://www.flashscore.com.br/futebol/italia/serie-a/",
+    "Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/bundesliga/",
+    "Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/",
+    "Portugal - Primeira Liga": "https://www.flashscore.com.br/futebol/portugal/liga-portugal/",
+    "Países Baixos - Eredivisie": "https://www.flashscore.com.br/futebol/paises-baixos/eredivisie/",
+    "Bélgica - Pro League": "https://www.flashscore.com.br/futebol/belgica/liga-jupiler/",
+
+    # --- EUROPA (SECUNDÁRIAS E ACESSO) ---
+    "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/",
+    "Espanha - La Liga 2": "https://www.flashscore.com.br/futebol/espanha/laliga2/",
+    "Itália - Serie B": "https://www.flashscore.com.br/futebol/italia/serie-b/",
+    "França - Ligue 2": "https://www.flashscore.com.br/futebol/franca/ligue-2/",
+    "Países Baixos - Eerste Divisie": "https://www.flashscore.com.br/futebol/paises-baixos/eerste-divisie/",
+    "Bélgica - Challenger Pro League": "https://www.flashscore.com.br/futebol/belgica/challenger-pro-league/",
+    "Turquia - Super Lig": "https://www.flashscore.com.br/futebol/turquia/super-lig/",
+    "Escócia - Championship": "https://www.flashscore.com.br/futebol/escocia/championship/",
+    "Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/",
+    "Finlândia - Veikkausliiga": "https://www.flashscore.com.br/futebol/finlandia/veikkausliiga/",
+    "Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/",
+    "Hungria - OTP Bank Liga": "https://www.flashscore.com.br/futebol/hungria/otp-bank-liga/",
+    "Áustria - Bundesliga": "https://www.flashscore.com.br/futebol/austria/bundesliga/",
+    "Ucrânia - Premier League": "https://www.flashscore.com.br/futebol/ucrania/premier-league/",
+
+    # --- ÁSIA ---
+    "China - Super League": "https://www.flashscore.com.br/futebol/china/super-liga/",
+    "Índia - Indian Super League": "https://www.flashscore.com.br/futebol/india/super-liga-indiana/",
+
+    # --- CONTINENTAIS ---
+    "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
     "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/"
 }
-
 
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
