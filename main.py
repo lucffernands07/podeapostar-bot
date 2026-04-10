@@ -11,73 +11,22 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-COMPETICOES = {
-    # --- BRASIL E AMÉRICAS ---
-    "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/serie-b/",
-    "Argentina - Superliga": "https://www.flashscore.com.br/futebol/argentina/liga-profissional/",
-    "Colômbia - Primera A": "https://www.flashscore.com.br/futebol/colombia/primeira-a/",
-    "Paraguai - Division 1": "https://www.flashscore.com.br/futebol/paraguai/primeira-divisao/",
-    "Uruguai - Primera Division": "https://www.flashscore.com.br/futebol/uruguai/primeira-divisao/",
-    "México - Liga MX": "https://www.flashscore.com.br/futebol/mexico/liga-mx/",
-    "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/",
-    "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/",
-
-    # --- EUROPA (ELITE) ---
-    "Premier League": "https://www.flashscore.com.br/futebol/inglaterra/premier-league/",
-    "LaLiga": "https://www.flashscore.com.br/futebol/espanha/laliga/",
-    "Serie A (Itália)": "https://www.flashscore.com.br/futebol/italia/serie-a/",
-    "Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/bundesliga/",
-    "Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/",
-    "Portugal - Primeira Liga": "https://www.flashscore.com.br/futebol/portugal/liga-portugal/",
-    "Países Baixos - Eredivisie": "https://www.flashscore.com.br/futebol/paises-baixos/eredivisie/",
-    "Bélgica - Pro League": "https://www.flashscore.com.br/futebol/belgica/liga-jupiler/",
-
-    # --- EUROPA (SECUNDÁRIAS E ACESSO) ---
-    "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/",
-    "Espanha - La Liga 2": "https://www.flashscore.com.br/futebol/espanha/laliga2/",
-    "Itália - Serie B": "https://www.flashscore.com.br/futebol/italia/serie-b/",
-    "França - Ligue 2": "https://www.flashscore.com.br/futebol/franca/ligue-2/",
-    "Países Baixos - Eerste Divisie": "https://www.flashscore.com.br/futebol/paises-baixos/eerste-divisie/",
-    "Bélgica - Challenger Pro League": "https://www.flashscore.com.br/futebol/belgica/challenger-pro-league/",
-    "Turquia - Super Lig": "https://www.flashscore.com.br/futebol/turquia/super-lig/",
-    "Escócia - Championship": "https://www.flashscore.com.br/futebol/escocia/championship/",
-    "Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/",
-    "Finlândia - Veikkausliiga": "https://www.flashscore.com.br/futebol/finlandia/veikkausliiga/",
-    "Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/",
-    "Hungria - OTP Bank Liga": "https://www.flashscore.com.br/futebol/hungria/otp-bank-liga/",
-    "Áustria - Bundesliga": "https://www.flashscore.com.br/futebol/austria/bundesliga/",
-    "Ucrânia - Premier League": "https://www.flashscore.com.br/futebol/ucrania/premier-league/",
-
-    # --- ÁSIA ---
-    "China - Super League": "https://www.flashscore.com.br/futebol/china/super-liga/",
-    "Índia - Indian Super League": "https://www.flashscore.com.br/futebol/india/super-liga-indiana/",
-
-    # --- CONTINENTAIS ---
-    "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
-    "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/"
-}
+from ligas import COMPETICOES
+import mercado_gols
+import mercado_btts
+import mercado_chance_dupla
 
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
-    if not token or not chat_id:
-        print("⚠️ ALERTA: Sem TELEGRAM_TOKEN ou CHAT_ID nas variáveis de ambiente.")
-        return
+    if not token or not chat_id: return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    try:
-        # disable_web_page_preview=True para não poluir o bilhete com o resumo do site
-        res = requests.post(url, data={
-            "chat_id": chat_id, 
-            "text": mensagem, 
-            "parse_mode": "Markdown",
-            "disable_web_page_preview": True
-        })
-        if res.status_code == 200:
-            print("🚀 Bilhete enviado com sucesso!")
-        else:
-            print(f"❌ Erro no envio: {res.text}")
-    except Exception as e:
-        print(f"❌ Falha de conexão: {e}")
+    requests.post(url, data={
+        "chat_id": chat_id, 
+        "text": mensagem, 
+        "parse_mode": "Markdown",
+        "disable_web_page_preview": True
+    })
 
 def configurar_driver():
     options = Options()
@@ -89,7 +38,6 @@ def configurar_driver():
     return driver
 
 def pegar_estatisticas_h2h(driver, url_jogo):
-    print(f"    [LINK] {url_jogo}")
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     stats = {"casa_15": 0, "casa_25": 0, "fora_15": 0, "fora_25": 0}
@@ -112,27 +60,17 @@ def pegar_estatisticas_h2h(driver, url_jogo):
     driver.switch_to.window(driver.window_handles[0])
     return stats
 
-def calcular_chance(c, f):
-    if c == 5 and f == 5: return "100%"
-    if (c == 5 and f == 4) or (c == 4 and f == 5): return "85%"
-    if c == 4 and f == 4: return "70%"
-    return None
-
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-    
-    # Lista para agrupar os blocos por campeonato
     bilhete_agrupado = []
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
             time.sleep(8)
             elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-            
             jogos_do_campeonato = []
             
             for el in elementos:
@@ -150,51 +88,30 @@ def main():
                     if aceitar:
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        
-                        print(f"  > Buscando: {t1} x {t2}...")
                         id_jogo = el.get_attribute('id').split('_')[-1]
-                        link_analise = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         
-                        s = pegar_estatisticas_h2h(driver, link_analise)
-                        print(f"    [STATS] {t1}: {s['casa_15']}/5 (+1.5) | {t2}: {s['fora_15']}/5 (+1.5)")
+                        s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall")
                         
-                        ch15 = calcular_chance(s["casa_15"], s["fora_15"])
-                        ch25 = calcular_chance(s["casa_25"], s["fora_25"])
-                        
-                        mercados_bloco = []
-                        if ch15: mercados_bloco.append(f"🎯 Mercado: +1.5 Gols ({ch15})")
-                        if ch25: mercados_bloco.append(f"🎯 Mercado: +2.5 Gols ({ch25})")
+                        # Chamada dos módulos de mercado
+                        mercados_bloco = mercado_gols.verificar_gols(s)
                         
                         if mercados_bloco:
-                            # Formatação visual de cada jogo
                             item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(mercados_bloco)
                             jogos_do_campeonato.append(item)
-                            print("    !!! ADICIONADO AO BILHETE !!!")
                 except: continue
             
-            # Se encontrou jogos nesse campeonato, cria um "pacote" dele
             if jogos_do_campeonato:
                 bilhete_agrupado.append("\n\n".join(jogos_do_campeonato))
 
         if bilhete_agrupado:
-            print("\nFinalizando e enviando bilhete...")
-            
-            cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n"
-            cabecalho += "🎯 *MERCADOS: GOLS +1.5 / +2.5 / 1X / 2X*\n\n"
-            
-            # Une os blocos de campeonatos com o separador tracejado
+            cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n🎯 *MERCADOS: GOLS +1.5 / +2.5 / 1X / 2X*\n\n"
             corpo = "\n\n---\n\n".join(bilhete_agrupado)
-            
-            # Rodapé com links embutidos
             rodape = "\n\n---\n💎 *Apostar:* [Betano](https://br.betano.com/) | [Bet365](https://www.bet365.com/)"
-            
             enviar_telegram(cabecalho + corpo + rodape)
-        else:
-            print("\nFim: Nenhum jogo passou pelos critérios técnicos.")
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-    
+            
