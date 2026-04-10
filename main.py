@@ -46,7 +46,6 @@ def pegar_estatisticas_h2h(driver, url_jogo):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
-    # Dicionário completo para alimentar todos os seus arquivos de mercado
     stats = {
         "casa_15": 0, "casa_25": 0, "casa_btts": 0, "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
         "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": ""
@@ -63,22 +62,18 @@ def pegar_estatisticas_h2h(driver, url_jogo):
             prefixo = "casa" if idx == 0 else "fora"
             
             for i, linha in enumerate(linhas):
-                # 1. Extração de Resultado (V/E/D) e Derrotas
                 try:
                     res_icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
                     if i == 0: stats[f"{prefixo}_ult_res"] = res_icon
                     if res_icon == "D": stats[f"{prefixo}_derrotas"] += 1
                 except: pass
 
-                # 2. Extração de Gols e Ambas Marcam
                 numeros = re.findall(r'\d+', linha.text)
                 if len(nums := [int(n) for n in numeros]) >= 2:
-                    g1, g2 = nums[-2], nums[-1] # Pega os dois últimos números (placar)
+                    g1, g2 = nums[-2], nums[-1]
                     total = g1 + g2
-                    
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    
                     if g1 > 0 and g2 > 0:
                         stats[f"{prefixo}_btts"] += 1
                         if i == 0: stats[f"{prefixo}_ult_btts"] = True
@@ -94,9 +89,12 @@ def main():
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
     bilhete_agrupado = []
+    total_mercados = 0  # Contador para o limite de 13
 
     try:
         for nome_comp, url in COMPETICOES.items():
+            if total_mercados >= 13: break
+            
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
             time.sleep(8)
@@ -105,12 +103,13 @@ def main():
             jogos_do_campeonato = []
             
             for el in elementos:
+                if total_mercados >= 13: break
+                
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
                     h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    # Filtro de horário (mesma lógica que você já usava)
                     aceitar = False
                     if amanha_no_site in tempo_raw:
                         if h_obj.hour <= 3: aceitar = True
@@ -120,28 +119,36 @@ def main():
                     if aceitar:
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        
                         id_jogo = el.get_attribute('id').split('_')[-1]
+                        
                         s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall")
                         
                         lista_mercados = []
                         
-                        # Chamada do mercado de GOLS
+                        # 1. GOLS
                         res_gols = gols.verificar_gols(s)
-                        if res_gols: lista_mercados.extend(res_gols)
+                        for m in res_gols:
+                            if total_mercados < 13:
+                                lista_mercados.append(m)
+                                total_mercados += 1
                         
-                        # Chamada do mercado AMBAS MARCAM
+                        # 2. AMBAS MARCAM
                         res_btts = ambos_marcam.verificar_btts(s)
-                        if res_btts: lista_mercados.append(f"⚽ Ambas Marcam: Sim ({res_btts})")
+                        if res_btts and total_mercados < 13:
+                            lista_mercados.append(f"⚽ Ambas Marcam: Sim ({res_btts})")
+                            total_mercados += 1
                         
-                        # Chamada do mercado CHANCE DUPLA
+                        # 3. CHANCE DUPLA
                         res_cd = chance_dupla.verificar_chance_dupla(s)
-                        for m in res_cd: lista_mercados.append(f"🛡️ Mercado: {m}")
+                        for m in res_cd:
+                            if total_mercados < 13:
+                                lista_mercados.append(f"🛡️ Mercado: {m}")
+                                total_mercados += 1
 
                         if lista_mercados:
                             item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(lista_mercados)
                             jogos_do_campeonato.append(item)
-                            print(f"    ✅ Adicionado: {t1} x {t2}")
+                            print(f"    ✅ Adicionado: {t1} x {t2} (Total mercados: {total_mercados})")
                 except: continue
             
             if jogos_do_campeonato:
