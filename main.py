@@ -11,22 +11,27 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
+# Importação dos seus módulos
 from ligas import COMPETICOES
-import mercado_gols
-import mercado_btts
-import mercado_chance_dupla
+from mercados import gols, ambos_marcam, chance_dupla
 
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
-    if not token or not chat_id: return
+    if not token or not chat_id:
+        print("⚠️ ALERTA: Sem variáveis de ambiente para o Telegram.")
+        return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    requests.post(url, data={
-        "chat_id": chat_id, 
-        "text": mensagem, 
-        "parse_mode": "Markdown",
-        "disable_web_page_preview": True
-    })
+    try:
+        requests.post(url, data={
+            "chat_id": chat_id, 
+            "text": mensagem, 
+            "parse_mode": "Markdown",
+            "disable_web_page_preview": True
+        })
+        print("🚀 Bilhete enviado!")
+    except Exception as e:
+        print(f"❌ Falha no Telegram: {e}")
 
 def configurar_driver():
     options = Options()
@@ -40,22 +45,46 @@ def configurar_driver():
 def pegar_estatisticas_h2h(driver, url_jogo):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
-    stats = {"casa_15": 0, "casa_25": 0, "fora_15": 0, "fora_25": 0}
+    
+    # Dicionário completo para alimentar todos os seus arquivos de mercado
+    stats = {
+        "casa_15": 0, "casa_25": 0, "casa_btts": 0, "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
+        "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": ""
+    }
+    
     try:
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
         time.sleep(4)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        
         for idx, secao in enumerate(secoes[:2]):
-            resultados = secao.find_elements(By.CSS_SELECTOR, ".h2h__result")[:5]
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
             prefixo = "casa" if idx == 0 else "fora"
-            for res in resultados:
-                numeros = re.findall(r'\d+', res.text)
-                if len(numeros) >= 2:
-                    total = int(numeros[0]) + int(numeros[1])
+            
+            for i, linha in enumerate(linhas):
+                # 1. Extração de Resultado (V/E/D) e Derrotas
+                try:
+                    res_icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
+                    if i == 0: stats[f"{prefixo}_ult_res"] = res_icon
+                    if res_icon == "D": stats[f"{prefixo}_derrotas"] += 1
+                except: pass
+
+                # 2. Extração de Gols e Ambas Marcam
+                numeros = re.findall(r'\d+', linha.text)
+                if len(nums := [int(n) for n in numeros]) >= 2:
+                    g1, g2 = nums[-2], nums[-1] # Pega os dois últimos números (placar)
+                    total = g1 + g2
+                    
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
-    except: pass
+                    
+                    if g1 > 0 and g2 > 0:
+                        stats[f"{prefixo}_btts"] += 1
+                        if i == 0: stats[f"{prefixo}_ult_btts"] = True
+    except Exception as e:
+        print(f"      Err H2H: {e}")
+        
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
@@ -68,9 +97,11 @@ def main():
 
     try:
         for nome_comp, url in COMPETICOES.items():
+            print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
             time.sleep(8)
             elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+            
             jogos_do_campeonato = []
             
             for el in elementos:
@@ -79,6 +110,7 @@ def main():
                     h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
+                    # Filtro de horário (mesma lógica que você já usava)
                     aceitar = False
                     if amanha_no_site in tempo_raw:
                         if h_obj.hour <= 3: aceitar = True
@@ -88,30 +120,45 @@ def main():
                     if aceitar:
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        id_jogo = el.get_attribute('id').split('_')[-1]
                         
+                        id_jogo = el.get_attribute('id').split('_')[-1]
                         s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall")
                         
-                        # Chamada dos módulos de mercado
-                        mercados_bloco = mercado_gols.verificar_gols(s)
+                        lista_mercados = []
                         
-                        if mercados_bloco:
-                            item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(mercados_bloco)
+                        # Chamada do mercado de GOLS
+                        res_gols = gols.verificar_gols(s)
+                        if res_gols: lista_mercados.extend(res_gols)
+                        
+                        # Chamada do mercado AMBAS MARCAM
+                        res_btts = ambos_marcam.verificar_btts(s)
+                        if res_btts: lista_mercados.append(f"⚽ Ambas Marcam: Sim ({res_btts})")
+                        
+                        # Chamada do mercado CHANCE DUPLA
+                        res_cd = chance_dupla.verificar_chance_dupla(s)
+                        for m in res_cd: lista_mercados.append(f"🛡️ Mercado: {m}")
+
+                        if lista_mercados:
+                            item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(lista_mercados)
                             jogos_do_campeonato.append(item)
+                            print(f"    ✅ Adicionado: {t1} x {t2}")
                 except: continue
             
             if jogos_do_campeonato:
                 bilhete_agrupado.append("\n\n".join(jogos_do_campeonato))
 
         if bilhete_agrupado:
-            cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n🎯 *MERCADOS: GOLS +1.5 / +2.5 / 1X / 2X*\n\n"
+            cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n"
+            cabecalho += "🎯 *MERCADOS: GOLS / BTTS / 1X-2X*\n\n"
             corpo = "\n\n---\n\n".join(bilhete_agrupado)
             rodape = "\n\n---\n💎 *Apostar:* [Betano](https://br.betano.com/) | [Bet365](https://www.bet365.com/)"
             enviar_telegram(cabecalho + corpo + rodape)
+        else:
+            print("\nNenhum jogo encontrado nos critérios.")
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-            
+    
