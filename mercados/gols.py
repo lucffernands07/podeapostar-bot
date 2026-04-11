@@ -9,7 +9,7 @@ def verificar_gols(s):
     ch25 = calcular_chance(s["casa_25"], s["fora_25"])
     
     resultados = []
-    if ch15: resultados.append(f"🎯 Mercado: +1.5 Gols ({ch15})")
-    if ch25: resultados.append(f"🎯 Mercado: +2.5 Gols ({ch25})")
+    if ch15: resultados.append(f"🔶 Mercado: +1.5 Gols ({ch15})")
+    if ch25: resultados.append(f"🔶 Mercado: +2.5 Gols ({ch25})")
     return resultados
   
