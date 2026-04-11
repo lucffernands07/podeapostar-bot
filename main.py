@@ -135,14 +135,14 @@ def main():
                         # 2. AMBAS MARCAM
                         res_btts = ambos_marcam.verificar_btts(s)
                         if res_btts and total_mercados < 13:
-                            lista_mercados.append(f"⚽ Ambas Marcam: Sim ({res_btts})")
+                            lista_mercados.append(f"🔶 Ambas Marcam: Sim ({res_btts})")
                             total_mercados += 1
                         
                         # 3. CHANCE DUPLA
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         for m in res_cd:
                             if total_mercados < 13:
-                                lista_mercados.append(f"🛡️ Mercado: {m}")
+                                lista_mercados.append(f"🔶 Mercado: {m}")
                                 total_mercados += 1
 
                         if lista_mercados:
