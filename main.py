@@ -157,7 +157,7 @@ def main():
         if bilhete_agrupado:
             cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n"
             cabecalho += "🎯 *MERCADOS: GOLS / BTTS / 1X-2X*\n\n"
-            corpo = "\n\n-----------------------\n\n".join(bilhete_agrupado)
+            corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
             rodape = "\n\n---\n💎 *Apostar:* [Betano](https://br.betano.com/) | [Bet365](https://www.bet365.com/)"
             enviar_telegram(cabecalho + corpo + rodape)
         else:
