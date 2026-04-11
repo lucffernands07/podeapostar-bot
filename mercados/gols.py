@@ -9,7 +9,23 @@ def verificar_gols(s):
     ch25 = calcular_chance(s["casa_25"], s["fora_25"])
     
     resultados = []
-    if ch15: resultados.append(f"🔶 Mercado: +1.5 Gols ({ch15})")
-    if ch25: resultados.append(f"🔶 Mercado: +2.5 Gols ({ch25})")
+    
+    # Ajuste para +1.5 Gols
+    if ch15:
+        if ch15 == "70%":
+            # TRAVA: Só aceita 70% se o último jogo de um dos dois foi +1.5
+            if s.get("casa_ult_15") or s.get("fora_ult_15"):
+                resultados.append(f"🔶 Mercado: +1.5 Gols ({ch15})")
+        else:
+            # 85% e 100% passam direto
+            resultados.append(f"🔶 Mercado: +1.5 Gols ({ch15})")
+            
+    # Ajuste para +2.5 Gols (mesma lógica de segurança)
+    if ch25:
+        if ch25 == "70%":
+            if s.get("casa_ult_25") or s.get("fora_ult_25"):
+                resultados.append(f"🔶 Mercado: +2.5 Gols ({ch25})")
+        else:
+            resultados.append(f"🔶 Mercado: +2.5 Gols ({ch25})")
+            
     return resultados
-  
