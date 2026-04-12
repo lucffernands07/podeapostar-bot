@@ -10,22 +10,30 @@ def verificar_gols(s):
     
     resultados = []
     
-    # Ajuste para +1.5 Gols
+    # Validação para +1.5 Gols
     if ch15:
-        if ch15 == "70%":
-            # TRAVA: Só aceita 70% se o último jogo de um dos dois foi +1.5
-            if s.get("casa_ult_15") or s.get("fora_ult_15"):
+        if ch15 in ["70%", "85%"]:
+            # REGRA RÍGIDA: Ambos precisam de +1.5 E ter sofrido gol (sem clean sheet)
+            casa_ok = s.get("casa_ult_15") and s.get("casa_ult_sofreu")
+            fora_ok = s.get("fora_ult_15") and s.get("fora_ult_sofreu")
+            
+            if casa_ok and fora_ok:
                 resultados.append(f"🔶 Mercado: +1.5 Gols ({ch15})")
         else:
-            # 85% e 100% passam direto
+            # 100% (5/5 e 5/5) continua passando direto
             resultados.append(f"🔶 Mercado: +1.5 Gols ({ch15})")
             
-    # Ajuste para +2.5 Gols (mesma lógica de segurança)
+    # Validação para +2.5 Gols
     if ch25:
-        if ch25 == "70%":
-            if s.get("casa_ult_25") or s.get("fora_ult_25"):
+        if ch25 in ["70%", "85%"]:
+            # Mesma trava de segurança: ambos precisam ter sofrido gol e tido +1.5 no último
+            casa_ok = s.get("casa_ult_15") and s.get("casa_ult_sofreu")
+            fora_ok = s.get("fora_ult_15") and s.get("fora_ult_sofreu")
+            
+            if casa_ok and fora_ok:
                 resultados.append(f"🔶 Mercado: +2.5 Gols ({ch25})")
         else:
             resultados.append(f"🔶 Mercado: +2.5 Gols ({ch25})")
             
     return resultados
+    
