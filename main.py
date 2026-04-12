@@ -47,12 +47,10 @@ def pegar_estatisticas_h2h(driver, url_jogo):
     driver.switch_to.window(driver.window_handles[-1])
     
     stats = {
-        "casa_15": 0, "casa_25": 0, "casa_btts": 0, 
-        "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
-        "casa_ult_15": False, "casa_ult_25": False, # Novas flags de segurança
-        "fora_15": 0, "fora_25": 0, "fora_btts": 0, 
-        "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
-        "fora_ult_15": False, "fora_ult_25": False  # Novas flags de segurança
+        "casa_15": 0, "casa_25": 0, "casa_btts": 0, "casa_derrotas": 0, "casa_ult_res": "",
+        "casa_ult_15": False, "casa_ult_sofreu": False, # Trava rígida Casa
+        "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_derrotas": 0, "fora_ult_res": "",
+        "fora_ult_15": False, "fora_ult_sofreu": False  # Trava rígida Fora
     }
     
     try:
@@ -74,20 +72,22 @@ def pegar_estatisticas_h2h(driver, url_jogo):
 
                 numeros = re.findall(r'\d+', linha.text)
                 if len(nums := [int(n) for n in numeros]) >= 2:
-                    g1, g2 = nums[-2], nums[-1]
-                    total = g1 + g2
+                    g_time, g_adv = nums[-2], nums[-1] # Gols do time analisado e do adversário
+                    total = g_time + g_adv
                     
                     if total > 1.5: 
                         stats[f"{prefixo}_15"] += 1
-                        if i == 0: stats[f"{prefixo}_ult_15"] = True # Captura último jogo +1.5
+                        if i == 0: stats[f"{prefixo}_ult_15"] = True
                     
                     if total > 2.5: 
                         stats[f"{prefixo}_25"] += 1
-                        if i == 0: stats[f"{prefixo}_ult_25"] = True # Captura último jogo +2.5
                     
-                    if g1 > 0 and g2 > 0:
+                    if i == 0:
+                        # Se o adversário fez gol (> 0), nosso time sofreu gol (True)
+                        stats[f"{prefixo}_ult_sofreu"] = (g_adv > 0)
+                    
+                    if g_time > 0 and g_adv > 0:
                         stats[f"{prefixo}_btts"] += 1
-                        if i == 0: stats[f"{prefixo}_ult_btts"] = True
     except Exception as e:
         print(f"      Err H2H: {e}")
         
@@ -136,20 +136,17 @@ def main():
                         
                         lista_mercados = []
                         
-                        # 1. GOLS (Agora com suporte à trava de segurança no gols.py)
                         res_gols = gols.verificar_gols(s)
                         for m in res_gols:
                             if total_mercados < 13:
                                 lista_mercados.append(m)
                                 total_mercados += 1
                         
-                        # 2. AMBAS MARCAM
                         res_btts = ambos_marcam.verificar_btts(s)
                         if res_btts and total_mercados < 13:
                             lista_mercados.append(f"🔶 Ambas Marcam: Sim ({res_btts})")
                             total_mercados += 1
                         
-                        # 3. CHANCE DUPLA
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         for m in res_cd:
                             if total_mercados < 13:
@@ -179,4 +176,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
+                        
