@@ -48,15 +48,15 @@ def pegar_estatisticas_h2h(driver, url_jogo):
     
     stats = {
         "casa_15": 0, "casa_25": 0, "casa_btts": 0, "casa_derrotas": 0, "casa_ult_res": "",
-        "casa_ult_15": False, "casa_ult_sofreu": False, # Trava rígida Casa
+        "casa_ult_15": False, "casa_ult_sofreu": False,
         "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_derrotas": 0, "fora_ult_res": "",
-        "fora_ult_15": False, "fora_ult_sofreu": False  # Trava rígida Fora
+        "fora_ult_15": False, "fora_ult_sofreu": False
     }
     
     try:
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
-        time.sleep(4)
+        time.sleep(5) # Aumentado para 5s para garantir carga do H2H
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for idx, secao in enumerate(secoes[:2]):
@@ -64,30 +64,37 @@ def pegar_estatisticas_h2h(driver, url_jogo):
             prefixo = "casa" if idx == 0 else "fora"
             
             for i, linha in enumerate(linhas):
+                # 1. Identifica se o time analisado é Mandante ou Visitante na linha do H2H
+                # No Flashscore, o time do contexto fica com a classe 'h2h__participant--highlight'
                 try:
-                    res_icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
-                    if i == 0: stats[f"{prefixo}_ult_res"] = res_icon
-                    if res_icon == "D": stats[f"{prefixo}_derrotas"] += 1
-                except: pass
+                    is_home = "h2h__participant--highlight" in linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").get_attribute("class")
+                except:
+                    is_home = True # Fallback
 
+                # 2. Extração de Gols
                 numeros = re.findall(r'\d+', linha.text)
                 if len(nums := [int(n) for n in numeros]) >= 2:
-                    g_time, g_adv = nums[-2], nums[-1] # Gols do time analisado e do adversário
+                    # Se ele é home, g_time é o primeiro. Se é away, g_time é o segundo.
+                    g_time = nums[-2] if is_home else nums[-1]
+                    g_adv = nums[-1] if is_home else nums[-2]
                     total = g_time + g_adv
                     
-                    if total > 1.5: 
-                        stats[f"{prefixo}_15"] += 1
-                        if i == 0: stats[f"{prefixo}_ult_15"] = True
-                    
-                    if total > 2.5: 
-                        stats[f"{prefixo}_25"] += 1
-                    
+                    # Contagem para a média (4/5, 5/5, etc)
+                    if total > 1.5: stats[f"{prefixo}_15"] += 1
+                    if total > 2.5: stats[f"{prefixo}_25"] += 1
+                    if g_time > 0 and g_adv > 0: stats[f"{prefixo}_btts"] += 1
+
+                    # REGRA DO ÚLTIMO JOGO (A trava que você pediu)
                     if i == 0:
-                        # Se o adversário fez gol (> 0), nosso time sofreu gol (True)
+                        stats[f"{prefixo}_ult_15"] = (total >= 2)
                         stats[f"{prefixo}_ult_sofreu"] = (g_adv > 0)
-                    
-                    if g_time > 0 and g_adv > 0:
-                        stats[f"{prefixo}_btts"] += 1
+                        
+                        # Captura do ícone de resultado (V/E/D)
+                        try:
+                            res_icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
+                            stats[f"{prefixo}_ult_res"] = res_icon
+                            if res_icon == "D": stats[f"{prefixo}_derrotas"] += 1
+                        except: pass
     except Exception as e:
         print(f"      Err H2H: {e}")
         
