@@ -48,7 +48,9 @@ def pegar_estatisticas_h2h(driver, url_jogo):
     
     stats = {
         "casa_15": 0, "casa_25": 0, "casa_btts": 0, "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
-        "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": ""
+        "casa_ult_15": False, "casa_ult_sofreu": False, # CHAVES NOVAS
+        "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
+        "fora_ult_15": False, "fora_ult_sofreu": False  # CHAVES NOVAS
     }
     
     try:
@@ -72,11 +74,21 @@ def pegar_estatisticas_h2h(driver, url_jogo):
                 if len(nums := [int(n) for n in numeros]) >= 2:
                     g1, g2 = nums[-2], nums[-1]
                     total = g1 + g2
+                    
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
+                    
+                    # LOGICA PARA AS TRAVAS DO GOLS.PY
                     if g1 > 0 and g2 > 0:
                         stats[f"{prefixo}_btts"] += 1
                         if i == 0: stats[f"{prefixo}_ult_btts"] = True
+                    
+                    # PREENCHENDO O QUE FALTAVA PARA O VELEZ PASSAR
+                    if i == 0:
+                        stats[f"{prefixo}_ult_15"] = (total > 1.5)
+                        # Sofreu gol se: time da casa e g2 > 0 OU time de fora e g1 > 0
+                        stats[f"{prefixo}_ult_sofreu"] = (g2 > 0 if idx == 0 else g1 > 0)
+
     except Exception as e:
         print(f"      Err H2H: {e}")
         
