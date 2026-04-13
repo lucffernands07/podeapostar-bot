@@ -46,6 +46,7 @@ def pegar_estatisticas_h2h(driver, url_jogo):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
+    # Mantemos todas as chaves que o seu gols.py NOVO precisa
     stats = {
         "casa_15": 0, "casa_25": 0, "casa_btts": 0, "casa_derrotas": 0, "casa_ult_res": "",
         "casa_ult_15": False, "casa_ult_sofreu": False,
@@ -56,7 +57,7 @@ def pegar_estatisticas_h2h(driver, url_jogo):
     try:
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
-        time.sleep(6) # Aumentado para garantir carga total no GitHub
+        time.sleep(6) # Essencial para o GitHub Actions carregar os números
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for idx, secao in enumerate(secoes[:2]):
@@ -64,21 +65,20 @@ def pegar_estatisticas_h2h(driver, url_jogo):
             prefixo = "casa" if idx == 0 else "fora"
             
             for i, linha in enumerate(linhas):
+                # USANDO A LÓGICA DO BACKUP: re.findall + índices negativos
                 numeros = re.findall(r'\d+', linha.text)
                 if len(nums := [int(n) for n in numeros]) >= 2:
-                    # Lógica do BACKUP: Pega os dois últimos números da linha (gols)
-                    g1, g2 = nums[-2], nums[-1]
+                    g1, g2 = nums[-2], nums[-1] # IGUAL AO SEU BACKUP
                     total = g1 + g2
                     
-                    # Contagem para a média (4/5, 5/5)
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
                     if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
 
-                    # --- AJUSTE DA REGRA NOVA (SEM ERRO) ---
+                    # AQUI ESTÁ O PULO DO GATO:
+                    # O gols.py exige 'casa_ult_sofreu'. 
+                    # Se o jogo teve 2 gols ou mais, a gente diz que "sofreu" para liberar a trava.
                     if i == 0:
-                        # Se o último jogo teve 2 ou mais gols, ele PASSA na trava.
-                        # Isso elimina o risco do robô "não ver" quem sofreu o gol.
                         stats[f"{prefixo}_ult_15"] = (total >= 2)
                         stats[f"{prefixo}_ult_sofreu"] = (total >= 2) 
                         
