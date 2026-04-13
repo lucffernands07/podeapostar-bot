@@ -1,6 +1,6 @@
 COMPETICOES = {
     "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/serie-b/",
-    "Argentina - Superliga": "https://www.flashscore.com.br/futebol/argentina/liga-profissional/",
+    "Argentina - Superliga": "https://www.flashscore.com.br/futebol/argentina/liga-profisional/",
     "Colômbia - Primera A": "https://www.flashscore.com.br/futebol/colombia/primeira-a/",
     "Paraguai - Division 1": "https://www.flashscore.com.br/futebol/paraguai/primeira-divisao/",
     "Uruguai - Primera Division": "https://www.flashscore.com.br/futebol/uruguai/primeira-divisao/",
