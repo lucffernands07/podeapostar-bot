@@ -46,18 +46,15 @@ def pegar_estatisticas_h2h(driver, url_jogo):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
-    # Mantemos todas as chaves que o seu gols.py NOVO precisa
     stats = {
-        "casa_15": 0, "casa_25": 0, "casa_btts": 0, "casa_derrotas": 0, "casa_ult_res": "",
-        "casa_ult_15": False, "casa_ult_sofreu": False,
-        "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_derrotas": 0, "fora_ult_res": "",
-        "fora_ult_15": False, "fora_ult_sofreu": False
+        "casa_15": 0, "casa_25": 0, "casa_btts": 0, "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
+        "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": ""
     }
     
     try:
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
-        time.sleep(6) # Essencial para o GitHub Actions carregar os números
+        time.sleep(4)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for idx, secao in enumerate(secoes[:2]):
@@ -65,28 +62,21 @@ def pegar_estatisticas_h2h(driver, url_jogo):
             prefixo = "casa" if idx == 0 else "fora"
             
             for i, linha in enumerate(linhas):
-                # USANDO A LÓGICA DO BACKUP: re.findall + índices negativos
+                try:
+                    res_icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
+                    if i == 0: stats[f"{prefixo}_ult_res"] = res_icon
+                    if res_icon == "D": stats[f"{prefixo}_derrotas"] += 1
+                except: pass
+
                 numeros = re.findall(r'\d+', linha.text)
                 if len(nums := [int(n) for n in numeros]) >= 2:
-                    g1, g2 = nums[-2], nums[-1] # IGUAL AO SEU BACKUP
+                    g1, g2 = nums[-2], nums[-1]
                     total = g1 + g2
-                    
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
-
-                    # AQUI ESTÁ O PULO DO GATO:
-                    # O gols.py exige 'casa_ult_sofreu'. 
-                    # Se o jogo teve 2 gols ou mais, a gente diz que "sofreu" para liberar a trava.
-                    if i == 0:
-                        stats[f"{prefixo}_ult_15"] = (total >= 2)
-                        stats[f"{prefixo}_ult_sofreu"] = (total >= 2) 
-                        
-                        try:
-                            res_icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
-                            stats[f"{prefixo}_ult_res"] = res_icon
-                            if res_icon == "D": stats[f"{prefixo}_derrotas"] += 1
-                        except: pass
+                    if g1 > 0 and g2 > 0:
+                        stats[f"{prefixo}_btts"] += 1
+                        if i == 0: stats[f"{prefixo}_ult_btts"] = True
     except Exception as e:
         print(f"      Err H2H: {e}")
         
@@ -99,7 +89,7 @@ def main():
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
     bilhete_agrupado = []
-    total_mercados = 0 
+    total_mercados = 0  # Contador para o limite de 13
 
     try:
         for nome_comp, url in COMPETICOES.items():
@@ -135,17 +125,20 @@ def main():
                         
                         lista_mercados = []
                         
+                        # 1. GOLS
                         res_gols = gols.verificar_gols(s)
                         for m in res_gols:
                             if total_mercados < 13:
                                 lista_mercados.append(m)
                                 total_mercados += 1
                         
+                        # 2. AMBAS MARCAM
                         res_btts = ambos_marcam.verificar_btts(s)
                         if res_btts and total_mercados < 13:
                             lista_mercados.append(f"🔶 Ambas Marcam: Sim ({res_btts})")
                             total_mercados += 1
                         
+                        # 3. CHANCE DUPLA
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         for m in res_cd:
                             if total_mercados < 13:
@@ -175,4 +168,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                        
+    
