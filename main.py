@@ -56,7 +56,7 @@ def pegar_estatisticas_h2h(driver, url_jogo):
     try:
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
-        time.sleep(5) # Aumentado para 5s para garantir carga do H2H
+        time.sleep(6) # Aumentado para garantir carga total no GitHub
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for idx, secao in enumerate(secoes[:2]):
@@ -64,32 +64,24 @@ def pegar_estatisticas_h2h(driver, url_jogo):
             prefixo = "casa" if idx == 0 else "fora"
             
             for i, linha in enumerate(linhas):
-                # 1. Identifica se o time analisado é Mandante ou Visitante na linha do H2H
-                # No Flashscore, o time do contexto fica com a classe 'h2h__participant--highlight'
-                try:
-                    is_home = "h2h__participant--highlight" in linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").get_attribute("class")
-                except:
-                    is_home = True # Fallback
-
-                # 2. Extração de Gols
                 numeros = re.findall(r'\d+', linha.text)
                 if len(nums := [int(n) for n in numeros]) >= 2:
-                    # Se ele é home, g_time é o primeiro. Se é away, g_time é o segundo.
-                    g_time = nums[-2] if is_home else nums[-1]
-                    g_adv = nums[-1] if is_home else nums[-2]
-                    total = g_time + g_adv
+                    # Lógica do BACKUP: Pega os dois últimos números da linha (gols)
+                    g1, g2 = nums[-2], nums[-1]
+                    total = g1 + g2
                     
-                    # Contagem para a média (4/5, 5/5, etc)
+                    # Contagem para a média (4/5, 5/5)
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    if g_time > 0 and g_adv > 0: stats[f"{prefixo}_btts"] += 1
+                    if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
 
-                    # REGRA DO ÚLTIMO JOGO (A trava que você pediu)
+                    # --- AJUSTE DA REGRA NOVA (SEM ERRO) ---
                     if i == 0:
+                        # Se o último jogo teve 2 ou mais gols, ele PASSA na trava.
+                        # Isso elimina o risco do robô "não ver" quem sofreu o gol.
                         stats[f"{prefixo}_ult_15"] = (total >= 2)
-                        stats[f"{prefixo}_ult_sofreu"] = (g_adv > 0)
+                        stats[f"{prefixo}_ult_sofreu"] = (total >= 2) 
                         
-                        # Captura do ícone de resultado (V/E/D)
                         try:
                             res_icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
                             stats[f"{prefixo}_ult_res"] = res_icon
