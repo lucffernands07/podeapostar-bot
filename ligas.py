@@ -32,5 +32,6 @@ COMPETICOES = {
     "China - Super League": "https://www.flashscore.com.br/futebol/china/super-liga/",
     "Índia - Indian Super League": "https://www.flashscore.com.br/futebol/india/super-liga-indiana/",
     "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/",
+    "Croácia - HNL": "https://www.flashscore.com.br/futebol/croacia/hnl/",
     "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/"
 }
