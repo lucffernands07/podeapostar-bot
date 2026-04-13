@@ -54,7 +54,7 @@ def pegar_estatisticas_h2h(driver, url_jogo):
     try:
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
-        time.sleep(4)
+        time.sleep(10)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for idx, secao in enumerate(secoes[:2]):
@@ -114,7 +114,7 @@ def main():
                     if amanha_no_site in tempo_raw:
                         if h_obj.hour <= 3: aceitar = True
                     elif "." not in tempo_raw:
-                        if (h_obj - timedelta(hours=3)).hour >= 11: aceitar = True
+                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
 
                     if aceitar:
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
