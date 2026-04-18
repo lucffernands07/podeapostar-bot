@@ -5,8 +5,8 @@ on:
     paths:
       - 'main.py'
   schedule:
-    # 08:15 Horário de Brasília = 11:15 UTC
-    - cron: '15 11 * * *'
+    # 07:00 Horário de Brasília = 10:00 UTC
+    - cron: '00 10 * * *'
   workflow_dispatch: # Permite rodar manualmente pelo celular se precisar
 
 jobs:
