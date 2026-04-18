@@ -42,15 +42,16 @@ def configurar_driver():
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
 
-def pegar_estatisticas_h2h(driver, url_jogo):
+def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
     stats = {
         "casa_15": 0, "casa_25": 0, "casa_btts": 0, "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
-        "casa_ult_15": False, "casa_ult_sofreu": False, # CHAVES NOVAS
+        "casa_ult_15": False, "casa_ult_sofreu": False,
         "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
-        "fora_ult_15": False, "fora_ult_sofreu": False  # CHAVES NOVAS
+        "fora_ult_15": False, "fora_ult_sofreu": False,
+        "pular_gols": False  # Flag para descarte rápido de gols
     }
     
     try:
@@ -62,6 +63,7 @@ def pegar_estatisticas_h2h(driver, url_jogo):
         for idx, secao in enumerate(secoes[:2]):
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
             prefixo = "casa" if idx == 0 else "fora"
+            nosso_time = t1.lower() if idx == 0 else t2.lower()
             
             for i, linha in enumerate(linhas):
                 try:
@@ -75,19 +77,29 @@ def pegar_estatisticas_h2h(driver, url_jogo):
                     g1, g2 = nums[-2], nums[-1]
                     total = g1 + g2
                     
+                    # LOGICA DE VALIDAÇÃO DO ÚLTIMO JOGO (FILTRO RÁPIDO)
+                    if i == 0:
+                        nome_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__participant--home").text.strip().lower()
+                        
+                        # Se o nosso time era o Mandante (casa), ele sofreu gol se g2 > 0 e marcou se g1 > 0
+                        if nosso_time in nome_casa_h2h:
+                            sofreu, marcou = (g2 > 0), (g1 > 0)
+                        else:
+                            sofreu, marcou = (g1 > 0), (g2 > 0)
+
+                        # Se alguém teve clean sheet (marcou 0 ou sofreu 0), ativa o bloqueio de gols
+                        if not marcou or not sofreu:
+                            stats["pular_gols"] = True
+                        
+                        stats[f"{prefixo}_ult_15"] = (total > 1.5)
+                        stats[f"{prefixo}_ult_sofreu"] = sofreu
+                        if g1 > 0 and g2 > 0:
+                            stats[f"{prefixo}_ult_btts"] = True
+
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    
-                    # LOGICA PARA AS TRAVAS DO GOLS.PY
                     if g1 > 0 and g2 > 0:
                         stats[f"{prefixo}_btts"] += 1
-                        if i == 0: stats[f"{prefixo}_ult_btts"] = True
-                    
-                    # PREENCHENDO O QUE FALTAVA PARA O VELEZ PASSAR
-                    if i == 0:
-                        stats[f"{prefixo}_ult_15"] = (total > 1.5)
-                        # Sofreu gol se: time da casa e g2 > 0 OU time de fora e g1 > 0
-                        stats[f"{prefixo}_ult_sofreu"] = (g2 > 0 if idx == 0 else g1 > 0)
 
     except Exception as e:
         print(f"      Err H2H: {e}")
@@ -101,7 +113,7 @@ def main():
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
     bilhete_agrupado = []
-    total_mercados = 0  # Contador para o limite de 13
+    total_mercados = 0 
 
     try:
         for nome_comp, url in COMPETICOES.items():
@@ -133,24 +145,27 @@ def main():
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
                         
-                        s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall")
+                        s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall", t1, t2)
                         
                         lista_mercados = []
                         
-                        # 1. GOLS
-                        res_gols = gols.verificar_gols(s)
-                        for m in res_gols:
-                            if total_mercados < 13:
-                                lista_mercados.append(m)
-                                total_mercados += 1
+                        # 1. GOLS (Só entra se não houver flag de pular_gols)
+                        if not s.get("pular_gols"):
+                            res_gols = gols.verificar_gols(s)
+                            for m in res_gols:
+                                if total_mercados < 13:
+                                    lista_mercados.append(m)
+                                    total_mercados += 1
+                        else:
+                            print(f"    🚫 Gols ignorados: Clean sheet no último jogo de {t1} ou {t2}")
                         
-                        # 2. AMBAS MARCAM
+                        # 2. AMBAS MARCAM (Independente da flag de gols)
                         res_btts = ambos_marcam.verificar_btts(s)
                         if res_btts and total_mercados < 13:
                             lista_mercados.append(f"🔶 Ambas Marcam: Sim ({res_btts})")
                             total_mercados += 1
                         
-                        # 3. CHANCE DUPLA
+                        # 3. CHANCE DUPLA (Independente da flag de gols)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         for m in res_cd:
                             if total_mercados < 13:
@@ -180,4 +195,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
+                        
