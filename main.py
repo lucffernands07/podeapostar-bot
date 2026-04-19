@@ -79,30 +79,30 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     
                     # LOGICA DE VALIDAÇÃO DO ÚLTIMO JOGO (FILTRO RÁPIDO)
                     if i == 0:
-                        nome_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__participant--home").text.strip().lower()
-                        
-                        # Se o nosso time era o Mandante (casa), ele sofreu gol se g2 > 0 e marcou se g1 > 0
-                        if nosso_time in nome_casa_h2h:
-                            sofreu, marcou = (g2 > 0), (g1 > 0)
-                        else:
-                            sofreu, marcou = (g1 > 0), (g2 > 0)
+                        try:
+                            # Espera explícita para garantir que o nome do mandante carregou
+                            participante_casa = WebDriverWait(linha, 5).until(
+                                EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__participant--home"))
+                            )
+                            nome_casa_h2h = participante_casa.text.strip().lower()
+                            nosso_time = t1.lower() if idx == 0 else t2.lower()
+                            
+                            if nosso_time in nome_casa_h2h:
+                                sofreu, marcou = (g2 > 0), (g1 > 0)
+                            else:
+                                sofreu, marcou = (g1 > 0), (g2 > 0)
 
-                        # Se alguém teve clean sheet (marcou 0 ou sofreu 0), ativa o bloqueio de gols
-                        if not marcou or not sofreu:
-                            stats["pular_gols"] = True
-                        
-                        stats[f"{prefixo}_ult_15"] = (total > 1.5)
-                        stats[f"{prefixo}_ult_sofreu"] = sofreu
-                        if g1 > 0 and g2 > 0:
-                            stats[f"{prefixo}_ult_btts"] = True
-
-                    if total > 1.5: stats[f"{prefixo}_15"] += 1
-                    if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    if g1 > 0 and g2 > 0:
-                        stats[f"{prefixo}_btts"] += 1
-
-    except Exception as e:
-        print(f"      Err H2H: {e}")
+                            if not marcou or not sofreu:
+                                stats["pular_gols"] = True
+                            
+                            stats[f"{prefixo}_ult_15"] = (total > 1.5)
+                            stats[f"{prefixo}_ult_sofreu"] = sofreu
+                            if g1 > 0 and g2 > 0:
+                                stats[f"{prefixo}_ult_btts"] = True
+                        except Exception as e:
+                            print(f"      ⚠️ Erro ao ler nomes no H2H: {e}")
+                            # Se falhar a leitura do nome, por segurança, não pula os gols ainda
+                            pass
         
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
