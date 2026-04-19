@@ -67,29 +67,33 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             
             for i, linha in enumerate(linhas):
                 try:
-                    res_icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip()
-                    if i == 0: stats[f"{prefixo}_ult_res"] = res_icon
-                    if res_icon == "D": stats[f"{prefixo}_derrotas"] += 1
-                except: pass
+                    # Melhoria na captura do ícone: busca o elemento que contém a letra do resultado
+                    res_element = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
+                    
+                    # Salva o resultado do último jogo (i=0) para a regra de 1X/2X
+                    if i == 0:
+                        stats[f"{prefixo}_ult_res"] = res_element
+                    
+                    if res_element == "D":
+                        stats[f"{prefixo}_derrotas"] += 1
+                except:
+                    pass
 
                 numeros = re.findall(r'\d+', linha.text)
                 if len(nums := [int(n) for n in numeros]) >= 2:
                     g1, g2 = nums[-2], nums[-1]
                     total = g1 + g2
                     
-                    # 1. VALIDAÇÃO RÍGIDA DO ÚLTIMO JOGO (SÓ RODA NO i == 0)
                     if i == 0:
                         try:
-                            # Busca o nome do mandante para saber quem é quem
                             part_casa = linha.find_element(By.CSS_SELECTOR, ".h2h__participant--home").text.strip().lower()
-                            
                             if nosso_time in part_casa:
                                 sofreu, marcou = (g2 > 0), (g1 > 0)
                             else:
                                 sofreu, marcou = (g1 > 0), (g2 > 0)
 
                             if not marcou or not sofreu:
-                                stats["pular_gols"] = True # Ativa o bloqueio de gols
+                                stats["pular_gols"] = True
                             
                             stats[f"{prefixo}_ult_15"] = (total > 1.5)
                             stats[f"{prefixo}_ult_sofreu"] = sofreu
@@ -98,8 +102,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         except:
                             pass
                     
-                    # 2. CONTAGEM GERAL (RODA PARA TODOS OS 5 JOGOS)
-                    # Note que estas linhas estão FORA do if i == 0
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
                     if g1 > 0 and g2 > 0:
@@ -153,23 +155,21 @@ def main():
                         
                         lista_mercados = []
                         
-                        # 1. GOLS (Só entra se não houver flag de pular_gols)
+                        # 1. GOLS
                         if not s.get("pular_gols"):
                             res_gols = gols.verificar_gols(s)
                             for m in res_gols:
                                 if total_mercados < 13:
                                     lista_mercados.append(m)
                                     total_mercados += 1
-                        else:
-                            print(f"    🚫 Gols ignorados: Clean sheet no último jogo de {t1} ou {t2}")
                         
-                        # 2. AMBAS MARCAM (Independente da flag de gols)
+                        # 2. AMBAS MARCAM
                         res_btts = ambos_marcam.verificar_btts(s)
                         if res_btts and total_mercados < 13:
                             lista_mercados.append(f"🔶 Ambas Marcam: Sim ({res_btts})")
                             total_mercados += 1
                         
-                        # 3. CHANCE DUPLA (Independente da flag de gols)
+                        # 3. CHANCE DUPLA
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         for m in res_cd:
                             if total_mercados < 13:
@@ -199,4 +199,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                        
+        
