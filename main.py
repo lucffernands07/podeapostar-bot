@@ -65,47 +65,55 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             prefixo = "casa" if idx == 0 else "fora"
             nosso_time = t1.lower() if idx == 0 else t2.lower()
             
-            for i, linha in enumerate(linhas):
+                for i, linha in enumerate(linhas):
+                # 1. Captura o Resultado (V, E, D) e Derrotas
                 try:
-                    # Melhoria na captura do ícone: busca o elemento que contém a letra do resultado
                     res_element = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
-                    
-                    # Salva o resultado do último jogo (i=0) para a regra de 1X/2X
                     if i == 0:
                         stats[f"{prefixo}_ult_res"] = res_element
-                    
                     if res_element == "D":
                         stats[f"{prefixo}_derrotas"] += 1
                 except:
                     pass
 
-                numeros = re.findall(r'\d+', linha.text)
-                if len(nums := [int(n) for n in numeros]) >= 2:
-                    g1, g2 = nums[-2], nums[-1]
-                    total = g1 + g2
+                # 2. NOVA CAPTURA DE GOLS (PROTEÇÃO CONTRA CARTÕES)
+                try:
+                    # Busca a div específica do placar
+                    score_el = linha.find_element(By.CSS_SELECTOR, ".h2h__score")
+                    spans = score_el.find_elements(By.TAG_NAME, "span")
                     
-                    if i == 0:
-                        try:
-                            part_casa = linha.find_element(By.CSS_SELECTOR, ".h2h__participant--home").text.strip().lower()
-                            if nosso_time in part_casa:
-                                sofreu, marcou = (g2 > 0), (g1 > 0)
-                            else:
-                                sofreu, marcou = (g1 > 0), (g2 > 0)
+                    if len(spans) >= 2:
+                        g1 = int(spans[0].text.strip())
+                        g2 = int(spans[1].text.strip())
+                        total = g1 + g2
+                        
+                        # Validação do ÚLTIMO JOGO (Filtro Clean Sheet)
+                        if i == 0:
+                            try:
+                                part_casa = linha.find_element(By.CSS_SELECTOR, ".h2h__participant--home").text.strip().lower()
+                                # Define quem é quem no placar
+                                if nosso_time in part_casa:
+                                    marcou, sofreu = (g1 > 0), (g2 > 0)
+                                else:
+                                    marcou, sofreu = (g2 > 0), (g1 > 0)
 
-                            if not marcou or not sofreu:
-                                stats["pular_gols"] = True
-                            
-                            stats[f"{prefixo}_ult_15"] = (total > 1.5)
-                            stats[f"{prefixo}_ult_sofreu"] = sofreu
-                            if g1 > 0 and g2 > 0:
-                                stats[f"{prefixo}_ult_btts"] = True
-                        except:
-                            pass
-                    
-                    if total > 1.5: stats[f"{prefixo}_15"] += 1
-                    if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    if g1 > 0 and g2 > 0:
-                        stats[f"{prefixo}_btts"] += 1
+                                # TRAVA: Se um dos lados for 0, ativa o bloqueio de gols
+                                if not marcou or not sofreu:
+                                    stats["pular_gols"] = True
+                                
+                                stats[f"{prefixo}_ult_15"] = (total > 1.5)
+                                stats[f"{prefixo}_ult_sofreu"] = sofreu
+                                if g1 > 0 and g2 > 0:
+                                    stats[f"{prefixo}_ult_btts"] = True
+                            except:
+                                pass
+                        
+                        # Contagens para as estatísticas dos 5 jogos
+                        if total > 1.5: stats[f"{prefixo}_15"] += 1
+                        if total > 2.5: stats[f"{prefixo}_25"] += 1
+                        if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
+                except:
+                    pass
 
     except Exception as e:
         print(f"      Err H2H: {e}")
