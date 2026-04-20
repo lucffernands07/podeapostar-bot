@@ -65,56 +65,53 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             prefixo = "casa" if idx == 0 else "fora"
             nosso_time = t1.lower() if idx == 0 else t2.lower()
             
+            print(f"\n      📊 Analisando H2H: {nosso_time.upper()}")
+
             for i, linha in enumerate(linhas):
-                # 1. Captura do Resultado (V, E, D)
                 try:
                     res_element = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
-                    if i == 0:
-                        stats[f"{prefixo}_ult_res"] = res_element
-                    if res_element == "D":
-                        stats[f"{prefixo}_derrotas"] += 1
-                except:
-                    pass
+                    if i == 0: stats[f"{prefixo}_ult_res"] = res_element
+                    if res_element == "D": stats[f"{prefixo}_derrotas"] += 1
+                except: pass
 
-                # 2. CAPTURA DE GOLS (PROTEÇÃO CONTRA CARTÕES)
-                try:
-                    # Busca especificamente a div do placar para ignorar cartões e datas
-                    score_el = linha.find_element(By.CSS_SELECTOR, ".h2h__score")
-                    spans = score_el.find_elements(By.TAG_NAME, "span")
+                # --- LOG DE NÚMEROS DA LINHA ---
+                texto_linha = linha.text.replace('\n', ' ')
+                numeros = re.findall(r'\d+', texto_linha)
+                
+                if len(nums := [int(n) for n in numeros]) >= 2:
+                    # g1 e g2 aqui são os dois últimos números que o re.findall achou
+                    g1, g2 = nums[-2], nums[-1]
+                    total = g1 + g2
                     
-                    if len(spans) >= 2:
-                        g1 = int(spans[0].text.strip())
-                        g2 = int(spans[1].text.strip())
-                        total = g1 + g2
-                        
-                        # Validação do ÚLTIMO JOGO (Sua Regra Rígida de Ambos Marcarem/Sofrerem)
-                        if i == 0:
-                            try:
-                                nome_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__participant--home").text.strip().lower()
-                                
-                                # Verifica se o nosso time é o mandante ou visitante no H2H
-                                if nosso_time in nome_casa_h2h or nome_casa_h2h in nosso_time:
-                                    marcou, sofreu = (g1 > 0), (g2 > 0)
-                                else:
-                                    marcou, sofreu = (g2 > 0), (g1 > 0)
+                    # LOG DE VALIDAÇÃO NO CONSOLE
+                    log_numeros = " | ".join([f"g{k+1}:{v}" for k, v in enumerate(nums)])
+                    print(f"        [Jogo {i+1}] {log_numeros} -> Placar Identificado: {g1}x{g2}")
 
-                                # SUA REGRA: Se o time não marcou OU não sofreu, ativa a trava
-                                if not marcou or not sofreu:
-                                    stats["pular_gols"] = True
-                                
-                                stats[f"{prefixo}_ult_15"] = (total > 1.5)
-                                stats[f"{prefixo}_ult_sofreu"] = sofreu
-                                if g1 > 0 and g2 > 0:
-                                    stats[f"{prefixo}_ult_btts"] = True
-                            except:
-                                pass
-                        
-                        # Estatísticas dos 5 jogos
-                        if total > 1.5: stats[f"{prefixo}_15"] += 1
-                        if total > 2.5: stats[f"{prefixo}_25"] += 1
-                        if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
-                except:
-                    pass
+                    if i == 0:
+                        try:
+                            # Tenta identificar quem é quem para a sua regra
+                            part_casa = linha.find_element(By.CSS_SELECTOR, ".h2h__participant--home").text.strip().lower()
+                            
+                            if nosso_time in part_casa or part_casa in nosso_time:
+                                marcou, sofreu = (g1 > 0), (g2 > 0)
+                            else:
+                                marcou, sofreu = (g2 > 0), (g1 > 0)
+
+                            if not marcou or not sofreu:
+                                stats["pular_gols"] = True
+                                print(f"        ⚠️ TRAVA ATIVADA: {nosso_time} (Marcou:{marcou} / Sofreu:{sofreu})")
+                            
+                            stats[f"{prefixo}_ult_15"] = (total > 1.5)
+                            stats[f"{prefixo}_ult_sofreu"] = sofreu
+                            if g1 > 0 and g2 > 0:
+                                stats[f"{prefixo}_ult_btts"] = True
+                        except Exception as e:
+                            print(f"        ⚠️ Erro na trava: {e}")
+                    
+                    # Acumuladores para os mercados
+                    if total > 1.5: stats[f"{prefixo}_15"] += 1
+                    if total > 2.5: stats[f"{prefixo}_25"] += 1
+                    if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
 
     except Exception as e:
         print(f"      Err H2H: {e}")
