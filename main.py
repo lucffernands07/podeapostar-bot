@@ -66,7 +66,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             nosso_time = t1.lower() if idx == 0 else t2.lower()
             
             for i, linha in enumerate(linhas):
-            # 1. Captura o Resultado (V, E, D) e Derrotas
+                # 1. Captura do Resultado (V, E, D)
                 try:
                     res_element = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
                     if i == 0:
@@ -76,9 +76,9 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                 except:
                     pass
 
-                # 2. NOVA CAPTURA DE GOLS (PROTEÇÃO CONTRA CARTÕES)
+                # 2. CAPTURA DE GOLS (PROTEÇÃO CONTRA CARTÕES)
                 try:
-                    # Busca a div específica do placar
+                    # Busca especificamente a div do placar para ignorar cartões e datas
                     score_el = linha.find_element(By.CSS_SELECTOR, ".h2h__score")
                     spans = score_el.find_elements(By.TAG_NAME, "span")
                     
@@ -87,17 +87,18 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         g2 = int(spans[1].text.strip())
                         total = g1 + g2
                         
-                        # Validação do ÚLTIMO JOGO (Filtro Clean Sheet)
+                        # Validação do ÚLTIMO JOGO (Sua Regra Rígida de Ambos Marcarem/Sofrerem)
                         if i == 0:
                             try:
-                                part_casa = linha.find_element(By.CSS_SELECTOR, ".h2h__participant--home").text.strip().lower()
-                                # Define quem é quem no placar
-                                if nosso_time in part_casa:
+                                nome_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__participant--home").text.strip().lower()
+                                
+                                # Verifica se o nosso time é o mandante ou visitante no H2H
+                                if nosso_time in nome_casa_h2h or nome_casa_h2h in nosso_time:
                                     marcou, sofreu = (g1 > 0), (g2 > 0)
                                 else:
                                     marcou, sofreu = (g2 > 0), (g1 > 0)
 
-                                # TRAVA: Se um dos lados for 0, ativa o bloqueio de gols
+                                # SUA REGRA: Se o time não marcou OU não sofreu, ativa a trava
                                 if not marcou or not sofreu:
                                     stats["pular_gols"] = True
                                 
@@ -108,7 +109,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                             except:
                                 pass
                         
-                        # Contagens para as estatísticas dos 5 jogos
+                        # Estatísticas dos 5 jogos
                         if total > 1.5: stats[f"{prefixo}_15"] += 1
                         if total > 2.5: stats[f"{prefixo}_25"] += 1
                         if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
