@@ -65,8 +65,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             prefixo = "casa" if idx == 0 else "fora"
             nosso_time = t1.lower() if idx == 0 else t2.lower()
             
-                for i, linha in enumerate(linhas):
-                # 1. Captura o Resultado (V, E, D) e Derrotas
+            for i, linha in enumerate(linhas):
+            # 1. Captura o Resultado (V, E, D) e Derrotas
                 try:
                     res_element = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
                     if i == 0:
