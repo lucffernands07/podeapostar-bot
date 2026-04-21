@@ -27,3 +27,5 @@ def verificar_gols(s):
         resultados.append(f"+2.5 Gols ({ch25})")
             
     return resultados
+
+return resultados
