@@ -24,4 +24,3 @@ def verificar_btts(s):
             return "85%" # Caso um ou ambos sejam 4/5
             
     return None
-    
