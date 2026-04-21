@@ -51,7 +51,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "casa_ult_15": False, "casa_ult_sofreu": False,
         "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
         "fora_ult_15": False, "fora_ult_sofreu": False,
-        "pular_gols": False
+        "pular_gols": False # Trava de segurança
     }
     
     try:
@@ -63,50 +63,39 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         for idx, secao in enumerate(secoes[:2]):
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
             prefixo = "casa" if idx == 0 else "fora"
-            nosso_time = t1.lower() if idx == 0 else t2.lower()
             
-            print(f"\n      📊 Analisando H2H: {nosso_time.upper()}")
+            print(f"\n      📊 Analisando H2H: {prefixo.upper()}")
 
             for i, linha in enumerate(linhas):
-                try:
-                    res_element = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
-                    if i == 0: stats[f"{prefixo}_ult_res"] = res_element
-                    if res_element == "D": stats[f"{prefixo}_derrotas"] += 1
-                except: pass
-
                 texto_linha = linha.text.replace('\n', ' ')
                 numeros = re.findall(r'\d+', texto_linha)
                 
                 if len(nums := [int(n) for n in numeros]) >= 2:
+                    # g1 e g2 são os placares (ex: 2 e 0)
                     g1, g2 = nums[-2], nums[-1]
                     total = g1 + g2
                     
+                    # --- NOVA REGRA RIGIDA: SE O ULTIMO JOGO TEVE ZERO NO PLACAR ---
                     if i == 0:
-                        # Tenta identificar o mandante, se falhar, não trava o código
-                        try:
-                            # Tenta vários seletores possíveis para o nome do time
-                            part_el = linha.find_elements(By.CSS_SELECTOR, "span[class*='participant--home'], .h2h__participant--home")
-                            if part_el:
-                                part_casa = part_el[0].text.strip().lower()
-                                if nosso_time in part_casa or part_casa in nosso_time:
-                                    marcou, sofreu = (g1 > 0), (g2 > 0)
-                                else:
-                                    marcou, sofreu = (g2 > 0), (g1 > 0)
-                                
-                                if not marcou or not sofreu:
-                                    stats["pular_gols"] = True
-                            
-                            stats[f"{prefixo}_ult_15"] = (total > 1.5)
-                            stats[f"{prefixo}_ult_sofreu"] = (g2 > 0) # Simplificado para não quebrar
-                            if g1 > 0 and g2 > 0:
-                                stats[f"{prefixo}_ult_btts"] = True
-                        except:
-                            # Se der erro na trava de nome, apenas registra os gols do jogo 1
-                            stats[f"{prefixo}_ult_15"] = (total > 1.5)
+                        if g1 == 0 or g2 == 0:
+                            stats["pular_gols"] = True
+                            print(f"        🚫 TRAVA ATIVADA: Clean Sheet detectado ({g1}x{g2}). Pulando mercados de gols.")
+                        
+                        stats[f"{prefixo}_ult_15"] = (total > 1.5)
+                        if g1 > 0 and g2 > 0:
+                            stats[f"{prefixo}_ult_btts"] = True
+                    # -----------------------------------------------------------
 
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
                     if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
+
+                # Captura do resultado (V/E/D) para outros filtros
+                try:
+                    res_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
+                    if i == 0: stats[f"{prefixo}_ult_res"] = res_el
+                    if res_el == "D": stats[f"{prefixo}_derrotas"] += 1
+                except: pass
 
     except Exception as e:
         print(f"      Err H2H: {e}")
@@ -114,6 +103,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
+
 
 def main():
     driver = configurar_driver()
