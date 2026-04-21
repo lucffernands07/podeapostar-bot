@@ -1,5 +1,4 @@
-            
-    def verificar_chance_dupla(s):
+def verificar_chance_dupla(s):
     mercados = []
     
     # 1° VALIDAÇÃO: Trava unificada de Clean Sheet
@@ -24,3 +23,4 @@
             mercados.append("2X (100%)")
             
     return mercados
+            
