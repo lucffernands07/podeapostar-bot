@@ -9,31 +9,24 @@ def verificar_gols(s):
     ch25 = calcular_chance(s["casa_25"], s["fora_25"])
     
     resultados = []
+
+    # 1° VALIDAÇÃO: Clean sheet para TODOS (70, 85 ou 100%)
+    # Verifica se ambos tiveram +1.5 E sofreram gol no último jogo do H2H
+    casa_ok = s.get("casa_ult_15") and s.get("casa_ult_sofreu")
+    fora_ok = s.get("fora_ult_15") and s.get("fora_ult_sofreu")
     
-    # Validação para +1.5 Gols
+    # Se um dos dois não passou na trava, interrompe aqui e retorna lista vazia
+    if not (casa_ok and fora_ok):
+        return resultados
+
+    # 2° SELEÇÃO: Se passou na trava, verifica as chances
     if ch15:
-        if ch15 in ["70%", "85%"]:
-            # REGRA RÍGIDA: Ambos precisam de +1.5 E ter sofrido gol (sem clean sheet)
-            casa_ok = s.get("casa_ult_15") and s.get("casa_ult_sofreu")
-            fora_ok = s.get("fora_ult_15") and s.get("fora_ult_sofreu")
+        resultados.append(f"+1.5 Gols ({ch15})")
             
-            if casa_ok and fora_ok:
-                resultados.append(f"🔶 Mercado: +1.5 Gols ({ch15})")
-        else:
-            # 100% (5/5 e 5/5) continua passando direto
-            resultados.append(f"🔶 Mercado: +1.5 Gols ({ch15})")
-            
-    # Validação para +2.5 Gols
     if ch25:
-        if ch25 in ["70%", "85%"]:
-            # Mesma trava de segurança: ambos precisam ter sofrido gol e tido +1.5 no último
-            casa_ok = s.get("casa_ult_15") and s.get("casa_ult_sofreu")
-            fora_ok = s.get("fora_ult_15") and s.get("fora_ult_sofreu")
+        resultados.append(f"+2.5 Gols ({ch25})")
             
-            if casa_ok and fora_ok:
-                resultados.append(f"🔶 Mercado: +2.5 Gols ({ch25})")
-        else:
-            resultados.append(f"🔶 Mercado: +2.5 Gols ({ch25})")
-            
+    return resultados
+    
     return resultados
     
