@@ -51,7 +51,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "casa_ult_15": False, "casa_ult_sofreu": False,
         "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
         "fora_ult_15": False, "fora_ult_sofreu": False,
-        "pular_gols": False # Mantido o nome original para o seu módulo ler
+        "pular_gols": False 
     }
     
     try:
@@ -75,13 +75,18 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     total = g1 + g2
                     
                     if i == 0:
-                        # TRAVA SIMPLIFICADA: Se houve 0 no placar, sinaliza pular_gols
-                        # Isso resolve o UNAN sem quebrar o código
+                        # 1. Trava do UNAM (Sua trava visual do log)
                         if g1 == 0 or g2 == 0:
                             stats["pular_gols"] = True
                             print(f"        🚫 Clean Sheet no jogo 1 ({g1}x{g2}).")
                         
+                        # 2. ALIMENTAÇÃO PARA GOLS E DUPLA CHANCE (O que faltava)
                         stats[f"{prefixo}_ult_15"] = (total > 1.5)
+                        
+                        # g2 são os gols do ADVERSÁRIO. Se g2 > 0, nosso time SOFREU gol.
+                        # Isso preenche a chave que o mercado/gols.py e mercado/chance_dupla.py pedem.
+                        stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
+
                         if g1 > 0 and g2 > 0:
                             stats[f"{prefixo}_ult_btts"] = True
 
