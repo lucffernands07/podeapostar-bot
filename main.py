@@ -139,38 +139,43 @@ def main():
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
                         
+                        # Coleta estatísticas (Sua função def atualizada)
                         s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall", t1, t2)
                         
-                        # Módulos de mercado
+                        # Chamada individual dos módulos para evitar erros de lista
                         res_gols = gols.verificar_gols(s)
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         
-                        # MONTAGEM INTELIGENTE DAS SUGESTÕES
                         sugestoes_lista = []
 
-                        # Filtra Gols: Só adiciona se NÃO houve zero no placar do último jogo (Caso UNAN)
-                        if not s.get("ult_jogo_zero"):
-                            if res_gols:
-                                for m in res_gols: sugestoes_lista.append(f"🔶 {m}")
-                        else:
-                            print(f"        ⏭️ Mercado de Gols pulado para {t1} x {t2} devido ao Clean Sheet.")
+                        # --- LOGICA DE GOLS (Caso Real Madrid e UNAN) ---
+                        if res_gols:
+                            if not s.get("ult_jogo_zero"):
+                                for m in res_gols:
+                                    sugestoes_lista.append(f"🔶 {m}")
+                            else:
+                                print(f"        ⏭️ Mercado de Gols pulado para {t1} x {t2} (Clean Sheet detectado)")
 
-                        # Ambas Marcam: Adiciona conforme regra do módulo
+                        # --- LOGICA DE AMBAS MARCAM ---
                         if res_btts:
+                            # Adicionamos apenas se não for duplicado
                             sugestoes_lista.append(f"🔶 Ambas Marcam: Sim ({res_btts})")
                         
-                        # Chance Dupla: Adiciona conforme regra do módulo (Independente de gols)
+                        # --- LOGICA DE CHANCE DUPLA (1X / 2X) ---
                         if res_cd:
-                            for m in res_cd: sugestoes_lista.append(f"🔶 {m}")
+                            for m in res_cd:
+                                sugestoes_lista.append(f"🔶 {m}")
                         
+                        # Montagem final do jogo no bilhete
                         if sugestoes_lista:
                             item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(sugestoes_lista)
                             jogos_do_campeonato.append(item)
                             total_mercados += len(sugestoes_lista)
-                            print(f"    ✅ Adicionado: {t1} x {t2}")
+                            print(f"    ✅ Adicionado: {t1} x {t2} ({len(sugestoes_lista)} mercados)")
 
                 except Exception as e:
+                    print(f"      ❌ Erro no jogo: {e}")
                     continue
             
             if jogos_do_campeonato:
@@ -184,6 +189,7 @@ def main():
 
     finally:
         driver.quit()
+
 
 if __name__ == "__main__":
     main()
