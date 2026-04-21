@@ -51,7 +51,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "casa_ult_15": False, "casa_ult_sofreu": False,
         "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
         "fora_ult_15": False, "fora_ult_sofreu": False,
-        "ult_jogo_zero": False # Sinalizador seletivo para o mercado de gols
+        "pular_gols": False # Mantido o nome original para o seu módulo ler
     }
     
     try:
@@ -75,10 +75,11 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     total = g1 + g2
                     
                     if i == 0:
-                        # Se houver um 0 no placar do último jogo de QUALQUER um, sinaliza para o filtro de gols
+                        # TRAVA SIMPLIFICADA: Se houve 0 no placar, sinaliza pular_gols
+                        # Isso resolve o UNAN sem quebrar o código
                         if g1 == 0 or g2 == 0:
-                            stats["ult_jogo_zero"] = True
-                            print(f"        🔍 Clean Sheet detectado ({g1}x{g2}) - Sinalizando para filtro de gols.")
+                            stats["pular_gols"] = True
+                            print(f"        🚫 Clean Sheet no jogo 1 ({g1}x{g2}).")
                         
                         stats[f"{prefixo}_ult_15"] = (total > 1.5)
                         if g1 > 0 and g2 > 0:
@@ -100,7 +101,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
-
 
 def main():
     driver = configurar_driver()
@@ -139,43 +139,22 @@ def main():
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
                         
-                        # Coleta estatísticas (Sua função def atualizada)
                         s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall", t1, t2)
                         
-                        # Chamada individual dos módulos para evitar erros de lista
                         res_gols = gols.verificar_gols(s)
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         
-                        sugestoes_lista = []
-
-                        # --- LOGICA DE GOLS (Caso Real Madrid e UNAN) ---
-                        if res_gols:
-                            if not s.get("ult_jogo_zero"):
-                                for m in res_gols:
-                                    sugestoes_lista.append(f"🔶 {m}")
-                            else:
-                                print(f"        ⏭️ Mercado de Gols pulado para {t1} x {t2} (Clean Sheet detectado)")
-
-                        # --- LOGICA DE AMBAS MARCAM ---
-                        if res_btts:
-                            # Adicionamos apenas se não for duplicado
-                            sugestoes_lista.append(f"🔶 Ambas Marcam: Sim ({res_btts})")
+                        # Retornando à forma de montagem do backup que você validou
+                        sugestoes = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
                         
-                        # --- LOGICA DE CHANCE DUPLA (1X / 2X) ---
-                        if res_cd:
-                            for m in res_cd:
-                                sugestoes_lista.append(f"🔶 {m}")
-                        
-                        # Montagem final do jogo no bilhete
-                        if sugestoes_lista:
-                            item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(sugestoes_lista)
+                        if sugestoes:
+                            item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join([f"🔶 {m}" for m in sugestoes])
                             jogos_do_campeonato.append(item)
-                            total_mercados += len(sugestoes_lista)
-                            print(f"    ✅ Adicionado: {t1} x {t2} ({len(sugestoes_lista)} mercados)")
+                            total_mercados += len(sugestoes)
+                            print(f"    ✅ Adicionado: {t1} x {t2}")
 
                 except Exception as e:
-                    print(f"      ❌ Erro no jogo: {e}")
                     continue
             
             if jogos_do_campeonato:
@@ -190,7 +169,6 @@ def main():
     finally:
         driver.quit()
 
-
 if __name__ == "__main__":
     main()
-                
+            
