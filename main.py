@@ -133,9 +133,22 @@ def main():
             
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
-            time.sleep(8)
-            elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
             
+            # --- O AJUSTE ESTÁ AQUI ---
+            try:
+                # Espera o seletor dos jogos aparecer por até 15 segundos
+                WebDriverWait(driver, 15).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, ".event__match"))
+                )
+                # Garante que o conteúdo interno (horários) também carregou
+                time.sleep(3) 
+            except:
+                print(f"      ⚠️ Jogos não carregaram em {nome_comp}. Pulando...")
+                continue
+            # --------------------------
+
+            elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+
             jogos_do_campeonato = []
             
             for el in elementos:
