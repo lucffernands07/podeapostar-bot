@@ -50,7 +50,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "casa_15": 0, "casa_25": 0, "casa_btts": 0, "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
         "casa_ult_15": False, "casa_ult_sofreu": False,
         "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
-        "fora_ult_15": False, "fora_ult_sofreu": False
+        "fora_ult_15": False, "fora_ult_sofreu": False,
+        "pular_gols": False
     }
     
     try:
@@ -63,6 +64,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
             prefixo = "casa" if idx == 0 else "fora"
             nosso_time = t1.lower() if idx == 0 else t2.lower()
+            
+            print(f"\n      📊 Analisando H2H: {nosso_time.upper()}")
 
             for i, linha in enumerate(linhas):
                 try:
@@ -71,24 +74,41 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     if res_element == "D": stats[f"{prefixo}_derrotas"] += 1
                 except: pass
 
-                numeros = re.findall(r'\d+', linha.text.replace('\n', ' '))
+                texto_linha = linha.text.replace('\n', ' ')
+                numeros = re.findall(r'\d+', texto_linha)
+                
                 if len(nums := [int(n) for n in numeros]) >= 2:
                     g1, g2 = nums[-2], nums[-1]
                     total = g1 + g2
                     
+                    log_numeros = " | ".join([f"g{k+1}:{v}" for k, v in enumerate(nums)])
+                    print(f"        [Jogo {i+1}] {log_numeros} -> Placar Identificado: {g1}x{g2}")
+
                     if i == 0:
                         try:
                             part_casa = linha.find_element(By.CSS_SELECTOR, ".h2h__participant--home").text.strip().lower()
-                            marcou, sofreu = (g1 > 0, g2 > 0) if nosso_time in part_casa else (g2 > 0, g1 > 0)
+                            if nosso_time in part_casa or part_casa in nosso_time:
+                                marcou, sofreu = (g1 > 0), (g2 > 0)
+                            else:
+                                marcou, sofreu = (g2 > 0), (g1 > 0)
+
+                            if not marcou or not sofreu:
+                                stats["pular_gols"] = True
+                                print(f"        ⚠️ TRAVA ATIVADA: {nosso_time} (Marcou:{marcou} / Sofreu:{sofreu})")
+                            
                             stats[f"{prefixo}_ult_15"] = (total > 1.5)
                             stats[f"{prefixo}_ult_sofreu"] = sofreu
-                            if g1 > 0 and g2 > 0: stats[f"{prefixo}_ult_btts"] = True
-                        except: pass
+                            if g1 > 0 and g2 > 0:
+                                stats[f"{prefixo}_ult_btts"] = True
+                        except Exception as e:
+                            print(f"        ⚠️ Erro na trava: {e}")
                     
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
                     if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
-    except: pass
+
+    except Exception as e:
+        print(f"      Err H2H: {e}")
         
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
@@ -103,28 +123,20 @@ def main():
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 13: break
+            if total_mercados >= 10: break
             
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
-            
-            try:
-                WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".event__match")))
-                time.sleep(5)
-            except:
-                continue
-
+            time.sleep(8)
             elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+
             jogos_do_campeonato = []
             
             for el in elementos:
-                if total_mercados >= 13: break
+                if total_mercados >= 10: break
                 
                 try:
-                    tempos = el.find_elements(By.CSS_SELECTOR, ".event__time")
-                    if not tempos: continue
-                    
-                    tempo_raw = tempos[0].text.strip()
+                    tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
                     h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
@@ -141,40 +153,21 @@ def main():
                         
                         s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall", t1, t2)
                         
+                        # Módulos de mercado
                         res_gols = gols.verificar_gols(s)
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         
-                        jogos_mercados = []
+                        sugestoes = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
                         
-                        # --- FILTRO DE PRIORIDADE (MÁX 3 POR JOGO) ---
-                        m15 = [m for m in res_gols if "+1.5" in m]
-                        if m15: jogos_mercados.append(f"🔶 Mercado: {m15[0]}")
+                        if sugestoes:
+                            item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join([f"🔶 {m}" for m in sugestoes])
+                            jogos_do_campeonato.append(item)
+                            total_mercados += len(sugestoes)
+                            print(f"    ✅ Adicionado: {t1} x {t2}")
 
-                        m1x = [m for m in res_cd if "1X" in m]
-                        if m1x and len(jogos_mercados) < 3: jogos_mercados.append(f"🔶 Mercado: {m1x[0]}")
-
-                        if res_btts and len(jogos_mercados) < 3: jogos_mercados.append(f"🔶 Ambas Marcam: Sim ({res_btts})")
-
-                        m25 = [m for m in res_gols if "+2.5" in m]
-                        if m25 and len(jogos_mercados) < 3: jogos_mercados.append(f"🔶 Mercado: {m25[0]}")
-
-                        m2x = [m for m in res_cd if "2X" in m]
-                        if m2x and len(jogos_mercados) < 3: jogos_mercados.append(f"🔶 Mercado: {m2x[0]}")
-
-                        if jogos_mercados:
-                            validos = []
-                            for m in jogos_mercados:
-                                if total_mercados < 13:
-                                    validos.append(m)
-                                    total_mercados += 1
-                            
-                            if validos:
-                                item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(validos)
-                                jogos_do_campeonato.append(item)
-                                print(f"    ✅ Adicionado: {t1} x {t2}")
-
-                except: continue
+                except Exception as e:
+                    continue
             
             if jogos_do_campeonato:
                 bilhete_agrupado.append("\n\n".join(jogos_do_campeonato))
@@ -182,7 +175,7 @@ def main():
         if bilhete_agrupado:
             cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n"
             corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
-            rodape = f"\n\n---\n📊 Total: {total_mercados} mercados"
+            rodape = f"\n\n---\n💎 Apostar: Betano | Bet365"
             enviar_telegram(cabecalho + corpo + rodape)
 
     finally:
@@ -190,4 +183,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-                                
