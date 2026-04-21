@@ -51,7 +51,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "casa_ult_15": False, "casa_ult_sofreu": False,
         "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
         "fora_ult_15": False, "fora_ult_sofreu": False,
-        "pular_gols": False # Trava de segurança
+        "ult_jogo_zero": False # Sinalizador seletivo para o mercado de gols
     }
     
     try:
@@ -71,26 +71,23 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                 numeros = re.findall(r'\d+', texto_linha)
                 
                 if len(nums := [int(n) for n in numeros]) >= 2:
-                    # g1 e g2 são os placares (ex: 2 e 0)
                     g1, g2 = nums[-2], nums[-1]
                     total = g1 + g2
                     
-                    # --- NOVA REGRA RIGIDA: SE O ULTIMO JOGO TEVE ZERO NO PLACAR ---
                     if i == 0:
+                        # Se houver um 0 no placar do último jogo de QUALQUER um, sinaliza para o filtro de gols
                         if g1 == 0 or g2 == 0:
-                            stats["pular_gols"] = True
-                            print(f"        🚫 TRAVA ATIVADA: Clean Sheet detectado ({g1}x{g2}). Pulando mercados de gols.")
+                            stats["ult_jogo_zero"] = True
+                            print(f"        🔍 Clean Sheet detectado ({g1}x{g2}) - Sinalizando para filtro de gols.")
                         
                         stats[f"{prefixo}_ult_15"] = (total > 1.5)
                         if g1 > 0 and g2 > 0:
                             stats[f"{prefixo}_ult_btts"] = True
-                    # -----------------------------------------------------------
 
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
                     if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
 
-                # Captura do resultado (V/E/D) para outros filtros
                 try:
                     res_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
                     if i == 0: stats[f"{prefixo}_ult_res"] = res_el
@@ -149,12 +146,28 @@ def main():
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         
-                        sugestoes = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
+                        # MONTAGEM INTELIGENTE DAS SUGESTÕES
+                        sugestoes_lista = []
+
+                        # Filtra Gols: Só adiciona se NÃO houve zero no placar do último jogo (Caso UNAN)
+                        if not s.get("ult_jogo_zero"):
+                            if res_gols:
+                                for m in res_gols: sugestoes_lista.append(f"🔶 {m}")
+                        else:
+                            print(f"        ⏭️ Mercado de Gols pulado para {t1} x {t2} devido ao Clean Sheet.")
+
+                        # Ambas Marcam: Adiciona conforme regra do módulo
+                        if res_btts:
+                            sugestoes_lista.append(f"🔶 Ambas Marcam: Sim ({res_btts})")
                         
-                        if sugestoes:
-                            item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join([f"🔶 {m}" for m in sugestoes])
+                        # Chance Dupla: Adiciona conforme regra do módulo (Independente de gols)
+                        if res_cd:
+                            for m in res_cd: sugestoes_lista.append(f"🔶 {m}")
+                        
+                        if sugestoes_lista:
+                            item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(sugestoes_lista)
                             jogos_do_campeonato.append(item)
-                            total_mercados += len(sugestoes)
+                            total_mercados += len(sugestoes_lista)
                             print(f"    ✅ Adicionado: {t1} x {t2}")
 
                 except Exception as e:
@@ -174,3 +187,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+                
