@@ -205,22 +205,114 @@ def main():
                         m2x = [m for m in res_cd if "2X" in m]
                         if m2x and len(jogos_mercados) < 3:
                             jogos_mercados.append(f"🔶 Mercado: {m2x[0]}")
+def main():
+    driver = configurar_driver()
+    hoje_ref = datetime.now()
+    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
+    bilhete_agrupado = []
+    total_mercados = 0 
 
-                        # 2. Adiciona ao bilhete global respeitando o limite de 13
+    try:
+        for nome_comp, url in COMPETICOES.items():
+            if total_mercados >= 13: break
+            
+            print(f"\n--- Analisando: {nome_comp} ---")
+            driver.get(url)
+            
+            # 1. Espera robusta pela lista de jogos
+            try:
+                WebDriverWait(driver, 15).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, ".event__match"))
+                )
+                time.sleep(5) # Tempo para o JavaScript renderizar os textos
+            except:
+                print(f"      ⚠️ Sem jogos carregados em {nome_comp}.")
+                continue
+
+            elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+            jogos_do_campeonato = []
+            
+            for el in elementos:
+                if total_mercados >= 13: break
+                
+                try:
+                    # --- O ERRO ESTAVA AQUI: Agora validamos se o elemento EXISTE antes de ler ---
+                    tempos = el.find_elements(By.CSS_SELECTOR, ".event__time")
+                    if not tempos:
+                        continue # Se não tem horário, não é um jogo válido para o bilhete
+                    
+                    tempo_raw = tempos[0].text.strip()
+                    if not tempo_raw:
+                        continue
+
+                    # Conversão de horário
+                    h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
+                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
+                    
+                    aceitar = False
+                    if amanha_no_site in tempo_raw:
+                        if h_obj.hour <= 3: aceitar = True
+                    elif "." not in tempo_raw:
+                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
+
+                    if aceitar:
+                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                        if len(times) < 2: continue
+                        
+                        t1, t2 = times[0].text.strip(), times[1].text.strip()
+                        id_jogo = el.get_attribute('id').split('_')[-1]
+                        
+                        # Captura estatísticas
+                        s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall", t1, t2)
+                        
+                        # Coleta sugestões dos módulos
+                        res_gols = gols.verificar_gols(s)
+                        res_btts = ambos_marcam.verificar_btts(s)
+                        res_cd = chance_dupla.verificar_chance_dupla(s)
+                        
+                        jogos_mercados = []
+
+                        # --- PRIORIDADE RÍGIDA (MÁX 3 POR JOGO) ---
+                        # 1. +1.5 Gols
+                        m15 = [m for m in res_gols if "+1.5" in m]
+                        if m15 and len(jogos_mercados) < 3:
+                            jogos_mercados.append(f"🔶 Mercado: {m15[0]}")
+
+                        # 2. 1X
+                        m1x = [m for m in res_cd if "1X" in m]
+                        if m1x and len(jogos_mercados) < 3:
+                            jogos_mercados.append(f"🔶 Mercado: {m1x[0]}")
+
+                        # 3. BTTS
+                        if res_btts and len(jogos_mercados) < 3:
+                            jogos_mercados.append(f"🔶 Ambas Marcam: Sim ({res_btts})")
+
+                        # 4. +2.5 Gols
+                        m25 = [m for m in res_gols if "+2.5" in m]
+                        if m25 and len(jogos_mercados) < 3:
+                            jogos_mercados.append(f"🔶 Mercado: {m25[0]}")
+
+                        # 5. 2X
+                        m2x = [m for m in res_cd if "2X" in m]
+                        if m2x and len(jogos_mercados) < 3:
+                            jogos_mercados.append(f"🔶 Mercado: {m2x[0]}")
+
+                        # Adiciona ao bilhete global
                         if jogos_mercados:
-                            mercados_adicionados_neste_jogo = []
+                            adicionados_agora = []
                             for mercado in jogos_mercados:
                                 if total_mercados < 13:
-                                    mercados_adicionados_neste_jogo.append(mercado)
+                                    adicionados_agora.append(mercado)
                                     total_mercados += 1
                             
-                            if mercados_adicionados_neste_jogo:
-                                item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(mercados_adicionados_neste_jogo)
+                            if adicionados_agora:
+                                item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(adicionados_agora)
                                 jogos_do_campeonato.append(item)
-                                print(f"    ✅ Adicionado: {t1} x {t2} ({len(mercados_adicionados_neste_jogo)} mercados)")
+                                print(f"    ✅ Adicionado: {t1} x {t2} ({len(adicionados_agora)} mercados)")
 
                 except Exception as e:
-                    print(f"    ❌ Erro ao processar jogo: {e}")
+                    # Se um jogo falhar, pula ele mas não trava o campeonato
+                    print(f"    ⚠️ Erro em jogo individual: {e}")
                     continue
             
             if jogos_do_campeonato:
@@ -230,10 +322,10 @@ def main():
             cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n"
             cabecalho += "🎯 *MERCADOS: GOLS / BTTS / 1X-2X*\n\n"
             corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
-            rodape = f"\n\n---\n📊 Total de mercados: {total_mercados}\n💎 *Apostar:* [Betano](https://br.betano.com/)"
+            rodape = f"\n\n---\n📊 Total: {total_mercados} mercados\n💎 *Apostar:* [Betano](https://br.betano.com/)"
             enviar_telegram(cabecalho + corpo + rodape)
         else:
-            print("\nNenhum jogo encontrado nos critérios.")
+            print("\nNenhum jogo encontrado.")
 
     finally:
         driver.quit()
