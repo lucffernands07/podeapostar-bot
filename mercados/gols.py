@@ -5,6 +5,13 @@ def calcular_chance(c, f):
     return None
 
 def verificar_gols(s):
+    # --- NOVA TRAVA AQUI ---
+    # Se a main detectou Clean Sheet, ela marca pular_gols como True.
+    # Se estiver True, retornamos a lista vazia imediatamente.
+    if s.get("pular_gols"):
+        return []
+    # -----------------------
+
     ch15 = calcular_chance(s["casa_15"], s["fora_15"])
     ch25 = calcular_chance(s["casa_25"], s["fora_25"])
     
@@ -24,4 +31,4 @@ def verificar_gols(s):
     if ch25:
         resultados.append(f"+2.5 Gols ({ch25})")
             
-    return resultados # O código deve terminar aqui!
+    return resultados
