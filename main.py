@@ -168,7 +168,11 @@ def main():
         if bilhete_agrupado:
             cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n"
             corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
-            rodape = f"\n\n---\n💎 Apostar: Betano | Bet365"
+            rodape = (
+                f"\n\n---\n"
+                f"💎 [Apostar na Betano](https://br.betano.com/) | "
+                f"[Apostar na Bet365](https://www.bet365.com/)"
+            )
             enviar_telegram(cabecalho + corpo + rodape)
 
     finally:
