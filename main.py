@@ -75,28 +75,19 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     total = g1 + g2
                     
                     if i == 0:
-                        # TRAVA GLOBAL: Se qualquer um dos times teve 0 no placar no jogo mais recente
-                        # Usamos |= para que se um marcar True, o stats["pular_gols"] continue True até o fim
+                        # 1. Trava do UNAM (Sua trava visual do log)
                         if g1 == 0 or g2 == 0:
                             stats["pular_gols"] = True
-                            print(f"        🚫 Clean Sheet detectado no jogo 1 ({g1}x{g2})")
+                            print(f"        🚫 Clean Sheet no jogo 1 ({g1}x{g2}).")
                         
-                        # Informação de Gols
+                        # 2. ALIMENTAÇÃO PARA GOLS E DUPLA CHANCE
                         stats[f"{prefixo}_ult_15"] = (total > 1.5)
                         
-                        # Lógica Infalível: No H2H do Flashscore, o SEGUNDO número (g2) 
-                        # é SEMPRE o do adversário se o time estiver à esquerda, 
-                        # MAS para garantir, verificamos se alguém ficou com ZERO.
-                        # Para o mercado de gols, se g1 ou g2 for 0, o time NÃO sofreu e fez ao mesmo tempo.
-                        
-                        # Se g1 > 0 e g2 > 0, ambos marcaram e ambos sofreram.
+                        # g2 são os gols do ADVERSÁRIO. Se g2 > 0, nosso time SOFREU gol.
+                        stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
+
                         if g1 > 0 and g2 > 0:
                             stats[f"{prefixo}_ult_btts"] = True
-                            stats[f"{prefixo}_ult_sofreu"] = True
-                        else:
-                            # Se o placar foi 1x0 ou 0x1, precisamos saber se o NOSSO time sofreu.
-                            # Como o Flashscore alterna posição, a trava g1==0 or g2==0 já mata o mercado de Gols.
-                            stats[f"{prefixo}_ult_sofreu"] = False
 
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
@@ -114,7 +105,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
-
 
 def main():
     driver = configurar_driver()
