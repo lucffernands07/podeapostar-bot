@@ -116,7 +116,7 @@ def main():
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 10: break
+            if total_mercados >= 13: break
             
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
