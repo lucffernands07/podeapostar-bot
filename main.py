@@ -126,7 +126,7 @@ def main():
             jogos_do_campeonato = []
             
             for el in elementos:
-                if total_mercados >= 10: break
+                if total_mercados >= 13: break
                 
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
