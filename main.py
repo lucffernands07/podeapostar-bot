@@ -47,9 +47,9 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.switch_to.window(driver.window_handles[-1])
     
     stats = {
-        "casa_15": 0, "casa_25": 0, "casa_btts": 0, "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
+        "casa_15": 0, "casa_25": 0, "casa_45": 0, "casa_btts": 0, "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
         "casa_ult_15": False, "casa_ult_sofreu": False,
-        "fora_15": 0, "fora_25": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
+        "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
         "fora_ult_15": False, "fora_ult_sofreu": False,
         "pular_gols": False 
     }
@@ -89,8 +89,10 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         if g1 > 0 and g2 > 0:
                             stats[f"{prefixo}_ult_btts"] = True
 
+                    # CONTAGENS DE MERCADO
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
+                    if total <= 4: stats[f"{prefixo}_45"] += 1 # <-- NOVA CONTAGEM AQUI
                     if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
 
                 try:
