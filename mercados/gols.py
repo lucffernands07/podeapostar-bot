@@ -5,28 +5,32 @@ def calcular_chance(c, f):
     return None
 
 def verificar_gols(s):
-    # 1. Trava Mestra: Se houve Clean Sheet (0 no placar) no jogo 1, para tudo.
-    if s.get("pular_gols"):
-        return []
+    # 1. Trava Mestra (Afeta +1.5 e +2.5)
+    travado = s.get("pular_gols", False)
 
     ch15 = calcular_chance(s["casa_15"], s["fora_15"])
     ch25 = calcular_chance(s["casa_25"], s["fora_25"])
     
+    # 2. Estatística própria para o -4.5 (Sem trava de Clean Sheet conforme pedido)
+    ch45 = calcular_chance(s.get("casa_45", 0), s.get("fora_45", 0))
+    
     resultados = []
 
-    # 2. Filtro de Recorrência: Ambos devem ter sofrido gol e tido +1.5 no jogo mais recente
+    # Filtros de Recorrência para o mercado de OVER
     casa_ok = s.get("casa_ult_15") and s.get("casa_ult_sofreu")
     fora_ok = s.get("fora_ult_15") and s.get("fora_ult_sofreu")
     
-    if not (casa_ok and fora_ok):
-        return resultados
-
-    # 3. Se passou em tudo, gera o mercado com a dica
-    if ch15:
-        # O Clean Sheet protege tanto o +1.5 quanto o -4.5 de jogos 0x0 ou 1x0
-        resultados.append(f"+1.5 Gols ({ch15}) | Dica: -4.5")
+    # 3. Lógica do Bilhete
+    if ch15 and not travado and (casa_ok and fora_ok):
+        texto = f"+1.5 Gols ({ch15})"
+        
+        # Adiciona a dica apenas se o -4.5 também passar na regra de 4/5 ou 5/5
+        if ch45:
+            texto += f" | Dica: -4.5 ({ch45})"
             
-    if ch25:
+        resultados.append(texto)
+            
+    if ch25 and not travado and (casa_ok and fora_ok):
         resultados.append(f"+2.5 Gols ({ch25})")
             
     return resultados
