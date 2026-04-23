@@ -75,15 +75,12 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     total = g1 + g2
                     
                     if i == 0:
-                        # 1. Trava do UNAM (Sua trava visual do log)
-                        if g1 == 0 or g2 == 0:
+                        # AJUSTE: Trava de Clean Sheet apenas para o time da CASA (idx == 0)
+                        if idx == 0 and (g1 == 0 or g2 == 0):
                             stats["pular_gols"] = True
-                            print(f"        🚫 Clean Sheet no jogo 1 ({g1}x{g2}).")
+                            print(f"        🚫 Clean Sheet CASA no jogo 1 ({g1}x{g2}).")
                         
-                        # 2. ALIMENTAÇÃO PARA GOLS E DUPLA CHANCE
                         stats[f"{prefixo}_ult_15"] = (total > 1.5)
-                        
-                        # g2 são os gols do ADVERSÁRIO. Se g2 > 0, nosso time SOFREU gol.
                         stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
 
                         if g1 > 0 and g2 > 0:
@@ -92,7 +89,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     # CONTAGENS DE MERCADO
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    if total <= 4: stats[f"{prefixo}_45"] += 1 # <-- NOVA CONTAGEM AQUI
+                    if total <= 4: stats[f"{prefixo}_45"] += 1 
                     if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
 
                 try:
@@ -117,7 +114,7 @@ def main():
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 30: break
+            if total_mercados >= 50: break
             
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
@@ -127,7 +124,7 @@ def main():
             jogos_do_campeonato = []
             
             for el in elementos:
-                if total_mercados >= 30: break
+                if total_mercados >= 50: break
                 
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
@@ -151,8 +148,9 @@ def main():
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         
-                        # Retornando à forma de montagem do backup que você validou
-                        sugestoes = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
+                        # Junta todos e aplica a trava de MÁXIMO 5 mercados por jogo
+                        sugestoes_todas = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
+                        sugestoes = sugestoes_todas[:5] # <-- LIMITA A 5 MERCADOS POR JOGO
                         
                         if sugestoes:
                             item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join([f"🔶 {m}" for m in sugestoes])
@@ -181,4 +179,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-            
