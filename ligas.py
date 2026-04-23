@@ -34,7 +34,11 @@ COMPETICOES = {
     "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/jogos/",
     "Croácia - HNL": "https://www.flashscore.com.br/futebol/croacia/hnl/jogos/",
     "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/jogos/",
-    "Champions da Ásia": "https://www.flashscore.com.br/futebol/asia/liga-dos-campeoes-da-afc/jogos/"
+    "Champions da Ásia": "https://www.flashscore.com.br/futebol/asia/liga-dos-campeoes-da-afc/jogos/",
+    "Brasileirão Série A": "https://www.flashscore.com.br/futebol/brasil/serie-a/jogos/",
+    "Copa do Brasil": "https://www.flashscore.com.br/futebol/brasil/copa-do-brasil/jogos/",
+    "Espanha - Copa del Rey": "https://www.flashscore.com.br/futebol/espanha/copa-do-rei/jogos/",
+    "Inglaterra - FA Cup": "https://www.flashscore.com.br/futebol/inglaterra/copa-da-fpc/jogos/"
 }
 
 
