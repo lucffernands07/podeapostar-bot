@@ -75,10 +75,10 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     total = g1 + g2
                     
                     if i == 0:
-                        # AJUSTE: Trava de Clean Sheet apenas para o time da CASA (idx == 0)
-                        if idx == 0 and (g1 == 0 or g2 == 0):
+                        # AJUSTE: Trava apenas se o jogo da CASA for 0x0 ou 1x0 (total <= 1)
+                        if idx == 0 and (total <= 1):
                             stats["pular_gols"] = True
-                            print(f"        🚫 Clean Sheet CASA no jogo 1 ({g1}x{g2}).")
+                            print(f"        🚫 Jogo muito seco na CASA ({g1}x{g2}). Travando Over.")
                         
                         stats[f"{prefixo}_ult_15"] = (total > 1.5)
                         stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
@@ -114,7 +114,7 @@ def main():
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 50: break
+            if total_mercados >= 200: break # AUMENTADO PARA NÃO TRAVAR O BILHETE
             
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
@@ -124,7 +124,7 @@ def main():
             jogos_do_campeonato = []
             
             for el in elementos:
-                if total_mercados >= 50: break
+                if total_mercados >= 200: break # AUMENTADO PARA NÃO TRAVAR O BILHETE
                 
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
@@ -179,3 +179,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
