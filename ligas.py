@@ -23,6 +23,7 @@ COMPETICOES = {
     "Arábia Saudita - King Cup": "https://www.flashscore.com.br/futebol/arabia-saudita/copa-do-rei/jogos/",
 
     # --- BLOCO 4: LIGAS SECUNDÁRIAS EUROPEIAS ---
+    "Arábia Saudita - Pro League": "https://www.flashscore.com.br/futebol/arabia-saudita/liga-profissional-saudita/jogos/",
     "Portugal - Primeira Liga": "https://www.flashscore.com.br/futebol/portugal/liga-portugal/jogos/",
     "Países Baixos - Eredivisie": "https://www.flashscore.com.br/futebol/paises-baixos/eredivisie/jogos/",
     "Bélgica - Pro League": "https://www.flashscore.com.br/futebol/belgica/liga-jupiler/jogos/",
