@@ -1,7 +1,7 @@
 COMPETICOES = {
     # --- BLOCO 1: BRASIL E ELITE SUL-AMERICANA ---
-    "Brasileirão Série A": "https://www.flashscore.com.br/futebol/brasil/serie-a/jogos/",
-    "Copa do Brasil": "https://www.flashscore.com.br/futebol/brasil/copa-do-brasil/jogos/",
+    "Brasileirão Série A": "https://www.flashscore.com.br/futebol/brasil/brasileirao-betano/jogos/",
+    "Copa do Brasil": "https://www.flashscore.com.br/futebol/brasil/copa-betano-do-brasil/jogos/",
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/jogos/",
     "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/jogos/",
     "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/serie-b/jogos/",
