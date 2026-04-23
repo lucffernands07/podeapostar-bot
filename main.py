@@ -60,65 +60,20 @@ def capturar_escanteios_detalhe(driver, id_jogo_h2h):
     driver.switch_to.window(driver.window_handles[1]) # Volta para a aba H2H
     return total_cantos
 
-def pegar_estatisticas_h2h(driver, url_jogo):
-    print(f"\n[ABA H2H] Abrindo confronto: {url_jogo}")
-    driver.execute_script(f"window.open('{url_jogo}', '_blank');")
-    driver.switch_to.window(driver.window_handles[-1])
-    
-    # Dicionário completo para evitar KeyError nos seus módulos
-    stats = {
-        "casa_15": 0, "casa_25": 0, "casa_45": 0, "casa_btts": 0, "casa_ult_btts": False, 
-        "casa_ult_15": False, "casa_ult_sofreu": False, "casa_derrotas": 0, "casa_ult_res": "",
-        "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, "fora_ult_btts": False,
-        "fora_ult_15": False, "fora_ult_sofreu": False, "fora_derrotas": 0, "fora_ult_res": "",
-        "pular_gols": False, "ids_h2h": [] 
-    }
-    
-    try:
-        h2h_tab = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
-        h2h_tab.click()
-        time.sleep(8)
-        
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        for idx, secao in enumerate(secoes[:2]):
-            prefixo = "casa" if idx == 0 else "fora"
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
-            
             for i, linha in enumerate(linhas):
-                # Captura os IDs para os escanteios
+                # Captura os IDs para os escanteios (MELHORADO)
                 try:
-                    id_h = linha.get_attribute("id").split('_')[-1]
-                    stats["ids_h2h"].append(id_h)
-                except: pass
-                
-                # Captura Resultado (V/E/D) para evitar KeyError no Chance Dupla
-                try:
-                    res_icon = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
-                    if i == 0: stats[f"{prefixo}_ult_res"] = res_icon
-                    if res_icon == "D": stats[f"{prefixo}_derrotas"] += 1
-                except: pass
-
-                # Lógica de Gols e BTTS
-                texto = linha.text.replace('\n', ' ')
-                nums = [int(n) for n in re.findall(r'\d+', texto)]
-                if len(nums) >= 2:
-                    g1, g2 = nums[-2], nums[-1]
-                    total = g1 + g2
-                    if i == 0:
-                        if idx == 0 and (total <= 1): stats["pular_gols"] = True
-                        stats[f"{prefixo}_ult_15"] = (total > 1.5)
-                        stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
-                        if g1 > 0 and g2 > 0: stats[f"{prefixo}_ult_btts"] = True
-                    if total > 1.5: stats[f"{prefixo}_15"] += 1
-                    if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    if total <= 4: stats[f"{prefixo}_45"] += 1 
-                    if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
+                    # Tenta pegar do ID da linha ou do link direto do jogo
+                    id_raw = linha.get_attribute("id") 
+                    if not id_raw: # Caso o ID falhe, tenta pegar do link do clique
+                        id_raw = linha.find_element(By.TAG_NAME, "a").get_attribute("id")
                     
-        print(f"[ABA H2H] Sucesso: {len(stats['ids_h2h'])} IDs coletados.")
-    except Exception as e:
-        print(f"[ABA H2H] Erro ao processar: {e}")
-        
-    return stats
+                    id_limpo = id_raw.split('_')[-1]
+                    if id_limpo:
+                        stats["ids_h2h"].append(id_limpo)
+                        print(f"      [H2H] ID capturado: {id_limpo}") # Log para confirmar
+                except: 
+                    pass
 
 def main():
     driver = configurar_driver()
