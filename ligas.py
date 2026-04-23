@@ -38,7 +38,9 @@ COMPETICOES = {
     "Brasileirão Série A": "https://www.flashscore.com.br/futebol/brasil/serie-a/jogos/",
     "Copa do Brasil": "https://www.flashscore.com.br/futebol/brasil/copa-do-brasil/jogos/",
     "Espanha - Copa del Rey": "https://www.flashscore.com.br/futebol/espanha/copa-do-rei/jogos/",
-    "Inglaterra - FA Cup": "https://www.flashscore.com.br/futebol/inglaterra/copa-da-fpc/jogos/"
+    "Inglaterra - FA Cup": "https://www.flashscore.com.br/futebol/inglaterra/copa-da-fpc/jogos/",
+    "Alemanha - DFB Pokal": "https://www.flashscore.com.br/futebol/alemanha/copa-da-alemanha/jogos/",
+    "Arábia Saudita - King Cup": "https://www.flashscore.com.br/futebol/arabia-saudita/copa-do-rei/jogos/"
 }
 
 
