@@ -1,6 +1,6 @@
 def verificar_gols(s):
-    # 1. Trava Mestra (Afeta APENAS o +1.5 e +2.5)
-    travado = s.get("pular_gols", False)
+    # 1. Trava Mestra (Agora aplicada de forma seletiva)
+    travado_casa = s.get("pular_gols", False) # True se o jogo 1 da CASA foi 0x0 ou 1x0
 
     ch15 = calcular_chance(s["casa_15"], s["fora_15"])
     ch25 = calcular_chance(s["casa_25"], s["fora_25"])
@@ -8,20 +8,21 @@ def verificar_gols(s):
     
     resultados = []
 
-    # Filtros de Recorrência (Usados apenas para o mercado de OVER)
+    # Filtros de Recorrência (Ajustados conforme seu pedido)
+    # Note que removemos a trava do time de fora nas condições
     casa_ok = s.get("casa_ult_15") and s.get("casa_ult_sofreu")
-    fora_ok = s.get("fora_ult_15") and s.get("fora_ult_sofreu")
     
     # --- MERCADO +1.5 GOLS ---
-    if ch15 and not travado and (casa_ok and fora_ok):
+    # Agora só checa se a CASA está travada e se a CASA passou na recorrência
+    if ch15 and not travado_casa and casa_ok:
         resultados.append(f"+1.5 Gols ({ch15})")
 
     # --- LÓGICA DE EXCLUSÃO INTELIGENTE ---
-    # Primeiro checamos o +2.5
-    if ch25 and not travado and (casa_ok and fora_ok):
+    # +2.5 também só depende da trava e recorrência da CASA
+    if ch25 and not travado_casa and casa_ok:
         resultados.append(f"+2.5 Gols ({ch25})")
     
-    # O -4.5 só entra se o +2.5 NÃO tiver sido adicionado
+    # O -4.5 continua independente (entra se o +2.5 não entrar)
     elif ch45:
         resultados.append(f"-4.5 Gols ({ch45})")
             
