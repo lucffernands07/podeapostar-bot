@@ -42,6 +42,37 @@ def configurar_driver():
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
 
+def capturar_escanteios_detalhe(driver, id_jogo_h2h):
+    """
+    Abre o detalhe de um jogo específico do H2H e extrai a soma dos cantos.
+    """
+    url_detalhe = f"https://www.flashscore.com.br/jogo/{id_jogo_h2h}/#/resumo-de-jogo/estatisticas-de-jogo"
+    driver.execute_script(f"window.open('{url_detalhe}', '_blank');")
+    driver.switch_to.window(driver.window_handles[-1])
+    
+    total_cantos = 0
+    try:
+        # Espera carregar o botão de Estatísticas
+        btn_stats = WebDriverWait(driver, 7).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[contains(.,'Estatísticas')]"))
+        )
+        btn_stats.click()
+        time.sleep(1.5)
+
+        # Localiza a linha de Escanteios conforme o print enviado
+        linha_cantos = driver.find_element(By.XPATH, "//div[contains(., 'Escanteios') and contains(@class, 'stat__category')]")
+        
+        # Pega os números (ex: "9 Escanteios 3" -> [9, 3])
+        numeros = re.findall(r'\d+', linha_cantos.text)
+        if len(numeros) >= 2:
+            total_cantos = int(numeros[0]) + int(numeros[1])
+    except:
+        pass
+        
+    driver.close()
+    driver.switch_to.window(driver.window_handles[-1]) # Volta para a aba do H2H
+    return total_cantos
+
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
@@ -51,13 +82,14 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "casa_ult_15": False, "casa_ult_sofreu": False,
         "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
         "fora_ult_15": False, "fora_ult_sofreu": False,
-        "pular_gols": False 
+        "pular_gols": False,
+        "ids_h2h": [] # Armazena os IDs para o mercado de cantos
     }
     
     try:
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
-        time.sleep(10)
+        time.sleep(8)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for idx, secao in enumerate(secoes[:2]):
@@ -67,6 +99,12 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             print(f"\n      📊 Analisando H2H: {prefixo.upper()}")
 
             for i, linha in enumerate(linhas):
+                # Captura o ID do jogo para os escanteios
+                try:
+                    id_link = linha.get_attribute("id").split('_')[-1]
+                    stats["ids_h2h"].append(id_link)
+                except: pass
+
                 texto_linha = linha.text.replace('\n', ' ')
                 numeros = re.findall(r'\d+', texto_linha)
                 
@@ -75,18 +113,15 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     total = g1 + g2
                     
                     if i == 0:
-                        # AJUSTE: Trava apenas se o jogo da CASA for 0x0 ou 1x0 (total <= 1)
                         if idx == 0 and (total <= 1):
                             stats["pular_gols"] = True
                             print(f"        🚫 Jogo muito seco na CASA ({g1}x{g2}). Travando Over.")
                         
                         stats[f"{prefixo}_ult_15"] = (total > 1.5)
                         stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
-
                         if g1 > 0 and g2 > 0:
                             stats[f"{prefixo}_ult_btts"] = True
 
-                    # CONTAGENS DE MERCADO
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
                     if total <= 4: stats[f"{prefixo}_45"] += 1 
@@ -114,7 +149,7 @@ def main():
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 200: break # AUMENTADO PARA NÃO TRAVAR O BILHETE
+            if total_mercados >= 200: break
             
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
@@ -124,7 +159,7 @@ def main():
             jogos_do_campeonato = []
             
             for el in elementos:
-                if total_mercados >= 200: break # AUMENTADO PARA NÃO TRAVAR O BILHETE
+                if total_mercados >= 200: break
                 
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
@@ -148,15 +183,43 @@ def main():
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         
-                        # Junta todos e aplica a trava de MÁXIMO 5 mercados por jogo
-                        sugestoes_todas = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
-                        sugestoes = sugestoes_todas[:5] # <-- LIMITA A 5 MERCADOS POR JOGO
+                        # Lista base de sugestões
+                        sugestoes = []
+                        sugestoes.extend(res_gols)
+                        if res_btts: sugestoes.append(f"Ambas Marcam ({res_btts})")
+                        sugestoes.extend(res_cd)
+                        sugestoes = sugestoes[:5] 
                         
                         if sugestoes:
+                            # --- BUSCA DE ESCANTEIOS (APENAS PARA JOGOS APROVADOS) ---
+                            print(f"    🎯 Calculando média de cantos para {t1}...")
+                            soma_cantos = 0
+                            cont_jogos = 0
+                            
+                            # Reabre a aba H2H para ter acesso aos links/ids
+                            driver.execute_script(f"window.open('https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall', '_blank');")
+                            driver.switch_to.window(driver.window_handles[-1])
+                            
+                            for id_h2h in s.get("ids_h2h", []):
+                                c = capturar_escanteios_detalhe(driver, id_h2h)
+                                if c > 0:
+                                    soma_cantos += c
+                                    cont_jogos += 1
+                            
+                            driver.close() # Fecha a aba H2H auxiliar
+                            driver.switch_to.window(driver.window_handles[0])
+                            
+                            media_cantos = soma_cantos / cont_jogos if cont_jogos > 0 else 0
+                            
+                            # Montagem do item no bilhete
                             item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join([f"🔶 {m}" for m in sugestoes])
+                            
+                            if media_cantos > 0:
+                                item += f"\n🔶 Dica: Média Escanteios ({media_cantos:.1f})"
+                            
                             jogos_do_campeonato.append(item)
                             total_mercados += len(sugestoes)
-                            print(f"    ✅ Adicionado: {t1} x {t2}")
+                            print(f"    ✅ Adicionado: {t1} x {t2} (Média Cantos: {media_cantos:.1f})")
 
                 except Exception as e:
                     continue
@@ -167,11 +230,7 @@ def main():
         if bilhete_agrupado:
             cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n"
             corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
-            rodape = (
-                f"\n\n---\n"
-                f"💎 Apostar na [Betano](https://br.betano.com/) | "
-                f"[Bet365](https://www.bet365.com/)"
-            )
+            rodape = (f"\n\n---\n💎 Apostar na [Betano](https://br.betano.com/) | [Bet365](https://www.bet365.com/)")
             enviar_telegram(cabecalho + corpo + rodape)
 
     finally:
@@ -179,4 +238,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
+        
