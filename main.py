@@ -1,8 +1,5 @@
-import os
 import time
 import re
-import requests
-from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -11,231 +8,76 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Importação dos seus módulos
-from ligas import COMPETICOES
-from mercados import gols, ambos_marcam, chance_dupla
-
-def enviar_telegram(mensagem):
-    token = os.getenv('TELEGRAM_TOKEN')
-    chat_id = os.getenv('CHAT_ID')
-    if not token or not chat_id:
-        print("⚠️ ALERTA: Sem variáveis de ambiente para o Telegram.")
-        return
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    try:
-        requests.post(url, data={
-            "chat_id": chat_id, 
-            "text": mensagem, 
-            "parse_mode": "Markdown",
-            "disable_web_page_preview": True
-        })
-        print("🚀 Bilhete enviado!")
-    except Exception as e:
-        print(f"❌ Falha no Telegram: {e}")
-
 def configurar_driver():
     options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--window-size=1920,3000")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+    # Desativamos o headless para você ver o robô trabalhando
+    # options.add_argument("--headless") 
+    options.add_argument("--window-size=1366,768")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
 
-def capturar_escanteios_detalhe(driver, id_jogo_h2h):
-    """
-    Abre o detalhe de um jogo específico do H2H e extrai a soma dos cantos.
-    """
-    url_detalhe = f"https://www.flashscore.com.br/jogo/{id_jogo_h2h}/#/resumo-de-jogo/estatisticas-de-jogo"
-    driver.execute_script(f"window.open('{url_detalhe}', '_blank');")
+def log_diagnostico(driver, id_jogo_h2h):
+    url = f"https://www.flashscore.com.br/jogo/{id_jogo_h2h}/#/resumo-de-jogo/estatisticas-de-jogo"
+    print(f"\n--- [LOG] Abrindo detalhe do jogo: {id_jogo_h2h} ---")
+    driver.execute_script(f"window.open('{url}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
-    total_cantos = 0
     try:
-        # Espera carregar o botão de Estatísticas
-        btn_stats = WebDriverWait(driver, 7).until(
+        print("--- [LOG] Aguardando botão 'Estatísticas'...")
+        btn = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "//button[contains(.,'Estatísticas')]"))
         )
-        btn_stats.click()
-        time.sleep(1.5)
-
-        # Localiza a linha de Escanteios conforme o print enviado
-        linha_cantos = driver.find_element(By.XPATH, "//div[contains(., 'Escanteios') and contains(@class, 'stat__category')]")
+        print("--- [LOG] Botão encontrado. Clicando via JS...")
+        driver.execute_script("arguments[0].click();", btn)
         
-        # Pega os números (ex: "9 Escanteios 3" -> [9, 3])
-        numeros = re.findall(r'\d+', linha_cantos.text)
-        if len(numeros) >= 2:
-            total_cantos = int(numeros[0]) + int(numeros[1])
-    except:
-        pass
+        print("--- [LOG] Aguardando 4 segundos para renderização dos gráficos...")
+        time.sleep(4)
         
-    driver.close()
-    driver.switch_to.window(driver.window_handles[-1]) # Volta para a aba do H2H
-    return total_cantos
-
-def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
-    driver.execute_script(f"window.open('{url_jogo}', '_blank');")
-    driver.switch_to.window(driver.window_handles[-1])
-    
-    stats = {
-        "casa_15": 0, "casa_25": 0, "casa_45": 0, "casa_btts": 0, "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
-        "casa_ult_15": False, "casa_ult_sofreu": False,
-        "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
-        "fora_ult_15": False, "fora_ult_sofreu": False,
-        "pular_gols": False,
-        "ids_h2h": [] # Armazena os IDs para o mercado de cantos
-    }
-    
-    try:
-        h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
-        h2h_tab.click()
-        time.sleep(8)
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        # Diagnóstico de texto bruto
+        print("--- [LOG] Varrendo categorias de estatísticas disponíveis:")
+        categorias = driver.find_elements(By.CSS_SELECTOR, "div[data-testid='wcl-statistics-category']")
+        encontrou_escanteio = False
         
-        for idx, secao in enumerate(secoes[:2]):
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
-            prefixo = "casa" if idx == 0 else "fora"
+        for cat in categorias:
+            texto = cat.text.replace('\n', ' ')
+            print(f"    > Encontrado: {texto}")
+            if "Escanteios" in texto:
+                encontrou_escanteio = True
+                nums = re.findall(r'\d+', texto)
+                print(f"    ✅ SUCESSO: Escanteios detectados -> Casa: {nums[0]} | Fora: {nums[1]}")
+        
+        if not encontrou_escanteio:
+            print("    ❌ FALHA: A palavra 'Escanteios' não foi lida na lista acima.")
             
-            print(f"\n      📊 Analisando H2H: {prefixo.upper()}")
-
-            for i, linha in enumerate(linhas):
-                # Captura o ID do jogo para os escanteios
-                try:
-                    id_link = linha.get_attribute("id").split('_')[-1]
-                    stats["ids_h2h"].append(id_link)
-                except: pass
-
-                texto_linha = linha.text.replace('\n', ' ')
-                numeros = re.findall(r'\d+', texto_linha)
-                
-                if len(nums := [int(n) for n in numeros]) >= 2:
-                    g1, g2 = nums[-2], nums[-1]
-                    total = g1 + g2
-                    
-                    if i == 0:
-                        if idx == 0 and (total <= 1):
-                            stats["pular_gols"] = True
-                            print(f"        🚫 Jogo muito seco na CASA ({g1}x{g2}). Travando Over.")
-                        
-                        stats[f"{prefixo}_ult_15"] = (total > 1.5)
-                        stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
-                        if g1 > 0 and g2 > 0:
-                            stats[f"{prefixo}_ult_btts"] = True
-
-                    if total > 1.5: stats[f"{prefixo}_15"] += 1
-                    if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    if total <= 4: stats[f"{prefixo}_45"] += 1 
-                    if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
-
-                try:
-                    res_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
-                    if i == 0: stats[f"{prefixo}_ult_res"] = res_el
-                    if res_el == "D": stats[f"{prefixo}_derrotas"] += 1
-                except: pass
-
     except Exception as e:
-        print(f"      Err H2H: {e}")
-        
+        print(f"    ❌ ERRO CRÍTICO: {str(e)}")
+    
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
-    return stats
 
-def main():
+def main_teste():
     driver = configurar_driver()
-    hoje_ref = datetime.now()
-    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-    bilhete_agrupado = []
-    total_mercados = 0 
-
+    # ID real do jogo Defensa y Justicia x Boca Juniors (baseado no histórico recente)
+    # Nota: Se o jogo mudar de ID, você pode pegar o ID atual na URL do Flashscore
+    id_principal = "ne5y23mR" 
+    
     try:
-        for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 200: break
+        print(f"🚀 Iniciando Teste de Diagnóstico para Defensa y Justicia x Boca")
+        driver.get(f"https://www.flashscore.com.br/jogo/{id_principal}/#/h2h/overall")
+        time.sleep(5)
+        
+        print("--- [LOG] Coletando IDs dos últimos jogos no H2H...")
+        linhas = driver.find_elements(By.CSS_SELECTOR, ".h2h__row")[:3] # Testaremos apenas os 3 primeiros para ser rápido
+        ids_teste = [l.get_attribute("id").split('_')[-1] for l in linhas]
+        
+        print(f"--- [LOG] IDs encontrados para teste: {ids_teste}")
+        
+        for id_h2h in ids_teste:
+            log_diagnostico(driver, id_h2h)
             
-            print(f"\n--- Analisando: {nome_comp} ---")
-            driver.get(url)
-            time.sleep(8)
-            elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-
-            jogos_do_campeonato = []
-            
-            for el in elementos:
-                if total_mercados >= 200: break
-                
-                try:
-                    tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
-                    h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
-                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
-                    
-                    aceitar = False
-                    if amanha_no_site in tempo_raw:
-                        if h_obj.hour <= 3: aceitar = True
-                    elif "." not in tempo_raw:
-                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
-
-                    if aceitar:
-                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
-                        t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        id_jogo = el.get_attribute('id').split('_')[-1]
-                        
-                        s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall", t1, t2)
-                        
-                        res_gols = gols.verificar_gols(s)
-                        res_btts = ambos_marcam.verificar_btts(s)
-                        res_cd = chance_dupla.verificar_chance_dupla(s)
-                        
-                        # Lista base de sugestões
-                        sugestoes = []
-                        sugestoes.extend(res_gols)
-                        if res_btts: sugestoes.append(f"Ambas Marcam ({res_btts})")
-                        sugestoes.extend(res_cd)
-                        sugestoes = sugestoes[:5] 
-                        
-                        if sugestoes:
-                            # --- BUSCA DE ESCANTEIOS (APENAS PARA JOGOS APROVADOS) ---
-                            print(f"    🎯 Calculando média de cantos para {t1}...")
-                            soma_cantos = 0
-                            cont_jogos = 0
-                            
-                            # Reabre a aba H2H para ter acesso aos links/ids
-                            driver.execute_script(f"window.open('https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall', '_blank');")
-                            driver.switch_to.window(driver.window_handles[-1])
-                            
-                            for id_h2h in s.get("ids_h2h", []):
-                                c = capturar_escanteios_detalhe(driver, id_h2h)
-                                if c > 0:
-                                    soma_cantos += c
-                                    cont_jogos += 1
-                            
-                            driver.close() # Fecha a aba H2H auxiliar
-                            driver.switch_to.window(driver.window_handles[0])
-                            
-                            media_cantos = soma_cantos / cont_jogos if cont_jogos > 0 else 0
-                            
-                            # Montagem do item no bilhete
-                            item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join([f"🔶 {m}" for m in sugestoes])
-                            
-                            if media_cantos > 0:
-                                item += f"\n🔶 Dica: Média Escanteios ({media_cantos:.1f})"
-                            
-                            jogos_do_campeonato.append(item)
-                            total_mercados += len(sugestoes)
-                            print(f"    ✅ Adicionado: {t1} x {t2} (Média Cantos: {media_cantos:.1f})")
-
-                except Exception as e:
-                    continue
-            
-            if jogos_do_campeonato:
-                bilhete_agrupado.append("\n\n".join(jogos_do_campeonato))
-
-        if bilhete_agrupado:
-            cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n"
-            corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
-            rodape = (f"\n\n---\n💎 Apostar na [Betano](https://br.betano.com/) | [Bet365](https://www.bet365.com/)")
-            enviar_telegram(cabecalho + corpo + rodape)
-
     finally:
+        print("\n--- TESTE FINALIZADO ---")
         driver.quit()
 
 if __name__ == "__main__":
-    main()
-        
+    main_teste()
