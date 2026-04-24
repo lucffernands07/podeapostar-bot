@@ -149,24 +149,21 @@ def main():
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         
-                        # Junta todas as sugestões que passaram na análise técnica
                         sugestoes_tecnicas = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
                         
-                        # --- TRAVA DE ODDS 1.30 ---
+                        # --- TRAVA DE ODDS ATUALIZADA PARA 1.20 ---
                         sugestoes_validadas = []
                         if sugestoes_tecnicas:
                             print(f"    🧐 Verificando Odds para: {t1} x {t2}")
                             for mercado in sugestoes_tecnicas:
-                                # Chama a função do seu arquivo odds.py na raiz
                                 valor_odd = odds.capturar_odd(driver, id_jogo, mercado)
                                 
-                                if valor_odd >= 1.30:
-                                    # Adiciona a odd ao texto para conferência no bilhete
+                                # Ajustado para 1.20 conforme seu pedido
+                                if valor_odd >= 1.20:
                                     sugestoes_validadas.append(f"{mercado} (@{valor_odd:.2f})")
                                 else:
                                     print(f"    🛑 Descartado: {mercado} com odd {valor_odd:.2f}")
 
-                        # Aplica o limite de 5 mercados por jogo (apenas dos que passaram na odd)
                         sugestoes = sugestoes_validadas[:5]
                         
                         if sugestoes:
@@ -194,7 +191,6 @@ def main():
 
     finally:
         driver.quit()
-)
 
 if __name__ == "__main__":
     main()
