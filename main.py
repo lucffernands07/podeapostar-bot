@@ -153,10 +153,17 @@ def main():
                         sugestoes_stat = sugestoes_todas[:5] 
                         
                         if sugestoes_stat:
-                            # --- LOGS DE VALIDAÇÃO ---
+                            # --- LOGS DE VALIDAÇÃO (INSERIDOS AQUI) ---
                             print(f"\n    🔎 [DEBUG] Jogo: {t1} x {t2}")
-                            print(f"    🔎 [DEBUG] URL H2H enviada: {url_h2h_final}")
-                            print(f"    🔎 [DEBUG] ID enviado para Odds: {id_jogo}")
+                            print(f"    🔎 [DEBUG] URL ESTATÍSTICA (H2H): {url_h2h_final}")
+                            print(f"    🔎 [DEBUG] ID DO JOGO: {id_jogo}")
+                            
+                            # URLs que o odds.py tentará acessar
+                            url_debug_gols = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/acima-abaixo/tempo-regulamentar"
+                            url_debug_btts = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar"
+                            
+                            print(f"    🔗 [DEBUG] URL ODDS GOLS: {url_debug_gols}")
+                            print(f"    🔗 [DEBUG] URL ODDS BTTS: {url_debug_btts}")
                             print(f"    ✅ PASSOU NA ESTATÍSTICA: {t1} x {t2}")
                             
                             # --- BUSCA E FILTRO DE ODDS (TRAVA 1.20) ---
@@ -200,11 +207,14 @@ def main():
         if bilhete_agrupado:
             cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n"
             corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
-            rodape = f"\n\n---\n💎 Apostar na [Betano](https://br.betano.com/) | [Bet365](https://www.bet365.com/)"
+            rodape = f"\n\n---\n" \
+                     f"💎 Apostar na [Betano](https://br.betano.com/) | " \
+                     f"[Bet365](https://www.bet365.com/)"
             enviar_telegram(cabecalho + corpo + rodape)
 
     finally:
         driver.quit()
+
 
 if __name__ == "__main__":
     main()
