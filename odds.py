@@ -1,67 +1,76 @@
 import time
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-def capturar_odd(driver, id_jogo, mercado_sugerido):
-    """
-    Navega para a aba correta e captura a odd da Betano/Bet365.
-    """
-    url_base = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/comparacao-de-odds"
+def configurar_driver():
+    options = Options()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    return webdriver.Chrome(options=options)
+
+def capturar_todas_as_odds(id_jogo):
+    driver = configurar_driver()
+    res = {
+        "GOLS_15": "N/A", "GOLS_25": "N/A", "GOLS_M45": "N/A", 
+        "BTTS": "N/A", "1X": "N/A", "X2": "N/A"
+    }
     
     try:
-        # 1. IDENTIFICA A SUB-ABA CORRETA
-        if "+2.5" in mercado_sugerido or "-4.5" in mercado_sugerido:
-            driver.get(url_base + "/acima-abaixo")
-            tipo = "gols"
-        elif "Ambas Marcam" in mercado_sugerido or "btts" in mercado_sugerido.lower():
-            driver.get(url_base + "/ambos-marcam")
-            tipo = "btts"
-        elif "1X" in mercado_sugerido or "2X" in mercado_sugerido:
-            driver.get(url_base + "/dupla-chance")
-            tipo = "dc"
-        else:
-            # Caso seja o mercado principal (1X2)
-            driver.get(url_base + "/1x2-odds")
-            tipo = "1x2"
-
-        # Aguarda as odds carregarem
-        WebDriverWait(driver, 7).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
+        # --- 1. MERCADO DE GOLS (Sequencial) ---
+        print(f"🌐 [{id_jogo}] Escaneando Gols...", flush=True)
+        driver.get(f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU")
         
-        # 2. LOCALIZA A LINHA DA BETANO (ou Bet365 se Betano não houver)
-        # Usando o alt da imagem para identificar a casa de aposta conforme seus prints
         try:
-            linha_casa = driver.find_element(By.XPATH, "//img[contains(@alt, 'Betano')]/ancestor::div[contains(@class, 'ui-table__row')]")
-        except:
-            linha_casa = driver.find_element(By.XPATH, "//img[contains(@alt, 'bet365')]/ancestor::div[contains(@class, 'ui-table__row')]")
-
-        odds = linha_casa.find_elements(By.CSS_SELECTOR, ".oddsValueInner")
-
-        # 3. EXTRAI O VALOR BASEADO NA COLUNA
-        if tipo == "gols":
-            if "+2.5" in mercado_sugerido:
-                # Na linha do 2.5, coluna 'Acima' (geralmente a primeira odd da célula)
-                # O Flashscore agrupa por linhas (1.5, 2.5, 3.5...). 
-                # Se houver várias linhas, precisamos filtrar a correta:
-                linha_especifica = driver.find_element(By.XPATH, "//div[contains(text(), '2.5')]/ancestor::div[contains(@class, 'ui-table__row')]")
-                odd_val = linha_especifica.find_element(By.XPATH, ".//img[contains(@alt, 'Betano')]/../..//span").text
-                return float(odd_val.replace(',', '.'))
+            WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
+            time.sleep(6)
+            linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
             
-            elif "-4.5" in mercado_sugerido:
-                # Procura a linha 4.5 e pega a odd da direita (Abaixo)
-                return float(odds[1].text.replace(',', '.'))
+            for linha in linhas:
+                txt = linha.text
+                spans = [s.text for s in linha.find_elements(By.TAG_NAME, "span") if s.text]
+                if len(spans) < 2: continue
 
-        elif tipo == "btts":
-            # Primeira coluna é 'Sim', segunda é 'Não'
-            return float(odds[0].text.replace(',', '.'))
+                if res["GOLS_15"] == "N/A" and "1.5" in txt:
+                    for s in spans:
+                        if "." in s and s != "1.5": res["GOLS_15"] = s; break
+                
+                elif res["GOLS_15"] != "N/A" and res["GOLS_25"] == "N/A" and "2.5" in txt:
+                    for s in spans:
+                        if "." in s and s != "2.5": res["GOLS_25"] = s; break
 
-        elif tipo == "dc":
-            if "1X" in mercado_sugerido: return float(odds[0].text.replace(',', '.'))
-            if "12" in mercado_sugerido: return float(odds[1].text.replace(',', '.'))
-            if "2X" in mercado_sugerido: return float(odds[2].text.replace(',', '.'))
+                elif res["GOLS_25"] != "N/A" and res["GOLS_M45"] == "N/A" and "4.5" in txt:
+                    decimais = [s for s in spans if "." in s and s != "4.5"]
+                    if len(decimais) >= 2: res["GOLS_M45"] = decimais[1]; break
+        except Exception as e:
+            print(f"⚠️ Erro em Gols: {e}")
 
-    except Exception as e:
-        print(f"    ⚠️ Erro ao capturar odd ({mercado_sugerido}): {e}")
-        return 0.0
+        # --- 2. BTTS ---
+        driver.get(f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/?mid=lfKIYGgU")
+        time.sleep(7)
+        try:
+            linha_b = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
+            odds_b = [s.text for s in linha_b.find_elements(By.TAG_NAME, "span") if "." in s.text]
+            if odds_b: res["BTTS"] = odds_b[0]
+        except: pass
 
-    return 0.0
+        # --- 3. DUPLA CHANCE ---
+        driver.get(f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/?mid=lfKIYGgU")
+        time.sleep(7)
+        try:
+            linha_d = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
+            odds_d = [s.text for s in linha_d.find_elements(By.TAG_NAME, "span") if "." in s.text]
+            if len(odds_d) >= 3:
+                res["1X"] = odds_d[0]
+                res["X2"] = odds_d[2]
+        except: pass
+
+    finally:
+        driver.quit()
+    return res
+    
