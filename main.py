@@ -3,8 +3,6 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 def configurar_driver():
     options = Options()
@@ -15,42 +13,45 @@ def configurar_driver():
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(options=options)
 
-def testar_diagnostico_bruto():
+def capturar_15_betano():
     driver = configurar_driver()
-    # URL DIRETA DA ABA ACIMA/ABAIXO
+    # URL direta da aba de gols
     url = "https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-W8mj7MDD/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU"
     
     try:
-        print(f"🚀 Iniciando Diagnóstico Bruto: Bétis x Real Madrid", flush=True)
+        print(f"🚀 Iniciando captura Betano: Bétis x Real Madrid", flush=True)
         driver.get(url)
         
-        wait = WebDriverWait(driver, 25)
-        # Espera o container principal da tabela
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table")))
-        
-        print("⏳ Aguardando 10 segundos para carga total do JS...", flush=True)
+        # Espera generosa para garantir as centenas de linhas
         time.sleep(10) 
-        
-        # Pega todas as linhas da tabela
+
         linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-        print(f"📊 Total de linhas encontradas: {len(linhas)}", flush=True)
+        print(f"📊 Analisando as primeiras linhas...", flush=True)
 
         for i, linha in enumerate(linhas):
-            conteudo_bruto = linha.text.replace('\n', ' | ')
-            print(f"--- Linha {i} ---")
-            print(f"TEXTO: {conteudo_bruto}", flush=True)
-            
-            # Tenta buscar os spans de odds dentro dessa linha específica
+            # Pegamos os textos (Linha, Odd Acima, Odd Abaixo)
             spans = linha.find_elements(By.TAG_NAME, "span")
-            textos_span = [s.text for s in spans if s.text]
-            print(f"SPANS: {textos_span}", flush=True)
+            dados = [s.text for s in spans if s.text]
+            
+            # Tentamos pegar o nome da casa (ALT da imagem)
+            try:
+                casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
+            except:
+                casa = "Desconhecida"
 
-            # Se acharmos qualquer menção a 1.5, analisamos os atributos
-            if "1.5" in conteudo_bruto:
-                print("🎯 ENCONTRADO GATILHO 1.5 NESSA LINHA!", flush=True)
-                html_da_linha = linha.get_attribute('innerHTML')
-                # Isso vai mostrar no log se o '1.5' está num data-testid ou outra classe
-                print(f"HTML DA LINHA: {html_da_linha[:200]}...", flush=True)
+            # Log visual para conferência no GitHub
+            if i < 15: # Mostra só as 15 primeiras no log para não poluir
+                print(f"Linha {i}: [{casa}] Dados: {dados}", flush=True)
+
+            # CONDIÇÃO BINGO: Linha 1.5 e Casa Betano
+            if "1.5" in dados and "Betano" in casa:
+                odd_acima = dados[1]
+                print(f"\n✅ ENCONTRADO NA LINHA {i}!")
+                print(f"💰 Odd Betano (+1.5): {odd_acima}")
+                sys.stdout.flush()
+                return odd_acima
+
+        print("❌ Não encontramos a linha 1.5 da Betano especificamente.", flush=True)
 
     except Exception as e:
         print(f"⚠️ Erro: {e}", flush=True)
@@ -59,4 +60,4 @@ def testar_diagnostico_bruto():
         driver.quit()
 
 if __name__ == "__main__":
-    testar_diagnostico_bruto()
+    capturar_15_betano()
