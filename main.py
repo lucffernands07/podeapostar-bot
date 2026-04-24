@@ -10,74 +10,92 @@ def configurar_driver():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
+    # User-agent para ele não desconfiar que é um robô
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(options=options)
 
-def extrair_mercado(url, mercado_nome):
+def rodar_extracao_continua():
     driver = configurar_driver()
-    print(f"🌐 Verificando: {mercado_nome}...", flush=True)
+    id_jogo = "W8mj7MDD"
+    res = {"+1.5": "N/A", "BTTS": "N/A", "1X": "N/A", "X2": "N/A"}
+
     try:
-        driver.get(url)
-        # Tempo de espera generoso que você validou
-        time.sleep(15) 
+        # --- MERCADO 1: GOLS (A Lógica do seu Bingo) ---
+        url_gols = f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{id_jogo}/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU"
+        print(f"🚀 Carregando Gols: {url_gols}", flush=True)
+        driver.get(url_gols)
+        time.sleep(15) # Espera robusta para o JS montar a tabela
         
+        # Sua lógica de varredura por texto
         linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-        encontrados = {}
-
         for linha in linhas:
-            try:
-                # Busca pela imagem da Betano (Lógica dos seus prints)
-                casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-                
-                if "Betano" in casa:
-                    # Lógica específica para GOLS (Bingo - Usando Spans)
-                    if mercado_nome == "GOLS":
-                        if "1.5" in linha.text:
-                            spans = linha.find_elements(By.TAG_NAME, "span")
-                            dados = [s.text for s in spans if s.text]
-                            encontrados["+1.5"] = dados[1] if len(dados) > 1 else "N/A"
-                    
-                    # Lógica para BTTS e DC (Usando data-testid)
-                    else:
-                        spans = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
-                        odds = [s.text for s in spans if s.text]
+            if "1.5" in linha.text:
+                try:
+                    casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
+                    if "Betano" in casa:
+                        spans = linha.find_elements(By.TAG_NAME, "span")
+                        dados = [s.text for s in spans if s.text]
+                        res["+1.5"] = dados[1] if len(dados) > 1 else "N/A"
+                        break
+                except: continue
 
-                        if mercado_nome == "AMBOS MARCAM":
-                            encontrados["SIM"] = odds[0]
-                        elif mercado_nome == "DOUBLE CHANCE":
-                            encontrados["1X"] = odds[0]
-                            encontrados["X2"] = odds[2]
-                    break
-            except:
-                continue
-        return encontrados
+        # --- MERCADO 2: BTTS (Lógica DP) ---
+        # Não fechamos o driver, apenas navegamos para a próxima
+        url_btts = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/"
+        print(f"🌐 Mudando para BTTS...", flush=True)
+        driver.get(url_btts)
+        time.sleep(12)
+        
+        # Truque: Scroll para forçar o carregamento das imagens (o "alt" da Betano)
+        driver.execute_script("window.scrollTo(0, 500);")
+        time.sleep(3)
+
+        linhas_btts = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+        for linha in linhas_btts:
+            try:
+                casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
+                if "Betano" in casa:
+                    odds = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
+                    if odds:
+                        res["BTTS"] = odds[0].text
+                        break
+            except: continue
+
+        # --- MERCADO 3: DUPLA CHANCE (Lógica DP) ---
+        url_dc = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/"
+        print(f"🌐 Mudando para Dupla Chance...", flush=True)
+        driver.get(url_dc)
+        time.sleep(12)
+        
+        driver.execute_script("window.scrollTo(0, 500);")
+        time.sleep(3)
+
+        linhas_dc = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+        for linha in linhas_dc:
+            try:
+                casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
+                if "Betano" in casa:
+                    odds = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
+                    if len(odds) >= 3:
+                        res["1X"] = odds[0].text
+                        res["X2"] = odds[2].text
+                        break
+            except: continue
+
+        # --- RELATÓRIO FINAL ---
+        print("\n" + "="*35)
+        print("📊 RELATÓRIO FINAL UNIFICADO")
+        print("="*35)
+        print(f"🔥 Gols +1.5:  {res['+1.5']}")
+        print(f"🤝 BTTS Sim:   {res['BTTS']}")
+        print(f"🏠 Double 1X:  {res['1X']}")
+        print(f"🚀 Double X2:  {res['X2']}")
+        print("="*35, flush=True)
+
     finally:
+        # Agora sim, fechamos tudo no final
         driver.quit()
 
-def rodar_sequencia_invertida():
-    id_jogo = "W8mj7MDD" # Bétis x Real Madrid
-    
-    # --- 1º: BTTS (Rápido e Estável) ---
-    url_btts = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/"
-    btts = extrair_mercado(url_btts, "AMBOS MARCAM")
-    
-    # --- 2º: DOUBLE CHANCE (Rápido e Estável) ---
-    url_dc = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/"
-    dc = extrair_mercado(url_dc, "DOUBLE CHANCE")
-    
-    # --- 3º: GOLS (Pesado - Lógica Bingo por último) ---
-    url_gols = f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{id_jogo}/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU"
-    gols = extrair_mercado(url_gols, "GOLS")
-
-    print("\n" + "="*35)
-    print("📊 RELATÓRIO FINAL (ORDEM INVERTIDA)")
-    print("="*35)
-    print(f"🤝 BTTS Sim:   {btts.get('SIM', 'N/A')}")
-    print(f"🏠 Double 1X:  {dc.get('1X', 'N/A')}")
-    print(f"🚀 Double X2:  {dc.get('X2', 'N/A')}")
-    print(f"🔥 Gols +1.5:  {gols.get('+1.5', 'N/A')}")
-    print("="*35, flush=True)
-
 if __name__ == "__main__":
-    rodar_sequencia_invertida()
+    rodar_extracao_continua()
     
