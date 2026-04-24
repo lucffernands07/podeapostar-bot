@@ -28,8 +28,8 @@ def buscar_dados_completos():
     }
     
     try:
-        # 1. MERCADO DE GOLS (Varredura para 1.5, 2.5 e 4.5)
-        print("🌐 Escaneando Tabela de Gols (300+ linhas)...", flush=True)
+        # 1. MERCADO DE GOLS
+        print("🌐 Escaneando Tabela de Gols...", flush=True)
         driver.get(f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{ID}/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU")
         
         WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
@@ -39,25 +39,31 @@ def buscar_dados_completos():
         
         for linha in linhas_gols:
             txt = linha.text
-            # Se acharmos a linha, pegamos os spans de odds
-            spans = [s.text for s in linha.find_elements(By.TAG_NAME, "span") if s.text]
+            # Pegamos apenas os spans que têm as Odds reais (data-testid ajuda aqui)
+            odds_spans = [s.text for s in linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']") if s.text]
             
+            # Se não achou pelo data-testid, tenta pelo span geral mas filtrando o identificador
+            if not odds_spans:
+                all_spans = [s.text for s in linha.find_elements(By.TAG_NAME, "span") if s.text]
+                # Remove o primeiro item se ele for igual ao mercado (ex: remover o '1.5' da lista)
+                odds_spans = all_spans[1:] if len(all_spans) > 1 else []
+
             if "1.5" in txt and res["GOLS_15"] == "N/A":
-                if len(spans) >= 2: res["GOLS_15"] = spans[1]
+                if len(odds_spans) >= 1: res["GOLS_15"] = odds_spans[0]
             
             elif "2.5" in txt and res["GOLS_25"] == "N/A":
-                if len(spans) >= 2: res["GOLS_25"] = spans[1]
+                if len(odds_spans) >= 1: res["GOLS_25"] = odds_spans[0]
             
             elif "4.5" in txt and res["GOLS_M45"] == "N/A":
-                # Para o "Menos 4.5", pegamos a odd da direita (geralmente o último span)
-                if len(spans) >= 3: res["GOLS_M45"] = spans[2]
+                # Menos 4.5 é a SEGUNDA odd da linha (Acima é a 1ª, Abaixo é a 2ª)
+                if len(odds_spans) >= 2: res["GOLS_M45"] = odds_spans[1]
 
         # 2. BUSCA BTTS
         print("🌐 Buscando BTTS...", flush=True)
         driver.get(f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{ID}/odds/ambos-marcam/tempo-regulamentar/?mid=lfKIYGgU")
         time.sleep(8)
         linha_btts = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
-        odds_btts = [s.text for s in linha_btts.find_elements(By.TAG_NAME, "span") if s.text]
+        odds_btts = [s.text for s in linha_btts.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']") if s.text]
         if odds_btts: res["BTTS"] = odds_btts[0]
 
         # 3. BUSCA DUPLA CHANCE
@@ -65,7 +71,7 @@ def buscar_dados_completos():
         driver.get(f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{ID}/odds/double-chance/tempo-regulamentar/?mid=lfKIYGgU")
         time.sleep(8)
         linha_dc = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
-        odds_dc = [s.text for s in linha_dc.find_elements(By.TAG_NAME, "span") if s.text]
+        odds_dc = [s.text for s in linha_dc.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']") if s.text]
         if len(odds_dc) >= 3:
             res["1X"] = odds_dc[0]
             res["X2"] = odds_dc[2]
@@ -78,7 +84,7 @@ if __name__ == "__main__":
     resultado = buscar_dados_completos()
     
     print("\n" + "="*40)
-    print("📊 RELATÓRIO EXPANDIDO - BINGO TOTAL")
+    print("📊 RELATÓRIO FINAL AJUSTADO")
     print("="*40)
     print(f"🔥 Acima 1.5:  {resultado['GOLS_15']}")
     print(f"🔥 Acima 2.5:  {resultado['GOLS_25']}")
@@ -87,4 +93,4 @@ if __name__ == "__main__":
     print(f"🏠 Double 1X:  {resultado['1X']}")
     print(f"🚀 Double X2:  {resultado['X2']}")
     print("="*40, flush=True)
-    
+                             
