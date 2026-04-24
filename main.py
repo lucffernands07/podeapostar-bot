@@ -13,24 +13,22 @@ def configurar_driver():
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(options=options)
 
-def rodar_extracao_humana():
+def rodar_extracao_unificada():
     driver = configurar_driver()
     id_jogo = "W8mj7MDD"
     res = {"+1.5": "N/A", "BTTS": "N/A", "1X": "N/A", "X2": "N/A"}
 
     try:
-        # --- 1. LÓGICA GOLS (CÓDIGO BINGO) ---
-        # Usando a URL exata e o tempo de espera que você validou
+        # --- 1. LÓGICA GOLS (BINGO - SUCESSO) ---
         url_gols = f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{id_jogo}/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU"
-        print(f"🚀 Iniciando Gols (Lógica Bingo): {url_gols}", flush=True)
+        print(f"🚀 Iniciando Gols: {url_gols}", flush=True)
         driver.get(url_gols)
         time.sleep(10) 
         
         linhas_gols = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
         for linha in linhas_gols:
             try:
-                conteudo_bruto = linha.text
-                if "1.5" in conteudo_bruto:
+                if "1.5" in linha.text:
                     casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
                     if "Betano" in casa:
                         spans = linha.find_elements(By.TAG_NAME, "span")
@@ -39,11 +37,12 @@ def rodar_extracao_humana():
                         break
             except: continue
 
-        # --- 2. LÓGICA BTTS (SEU SEGUNDO CÓDIGO) ---
+        # --- 2. LÓGICA BTTS (SEU SEGUNDO CÓDIGO + SCROLL) ---
         url_btts = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/"
         print(f"🌐 Verificando BTTS: {url_btts}", flush=True)
         driver.get(url_btts)
         time.sleep(12)
+        driver.execute_script("window.scrollTo(0, 500);") # Scroll de segurança para carregar imagens
         
         linhas_btts = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
         for linha in linhas_btts:
@@ -56,11 +55,12 @@ def rodar_extracao_humana():
                         break
             except: continue
 
-        # --- 3. LÓGICA DUPLA CHANCE (SEU SEGUNDO CÓDIGO) ---
+        # --- 3. LÓGICA DUPLA CHANCE (SEU SEGUNDO CÓDIGO + SCROLL) ---
         url_dc = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/"
         print(f"🌐 Verificando DC: {url_dc}", flush=True)
         driver.get(url_dc)
         time.sleep(12)
+        driver.execute_script("window.scrollTo(0, 500);")
         
         linhas_dc = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
         for linha in linhas_dc:
@@ -88,5 +88,5 @@ def rodar_extracao_humana():
         driver.quit()
 
 if __name__ == "__main__":
-    rodar_extracao_humana()
-        
+    rodar_extracao_unificada()
+                        
