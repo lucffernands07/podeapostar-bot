@@ -197,7 +197,18 @@ def main():
             if jogos_do_campeonato:
                 bilhete_agrupado.append("\n\n".join(jogos_do_campeonato))
 
-        # ... (código de envio do Telegram igual) ...
+            
+        if bilhete_agrupado:
+            cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n"
+            corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
+            rodape = (
+                f"\n\n---\n"
+                f"💎 Apostar na [Betano](https://br.betano.com/) | "
+                f"[Bet365](https://www.bet365.com/)"
+            )
+            enviar_telegram(cabecalho + corpo + rodape)
+        else:
+            print("⚠️ Nenhum jogo passou nos critérios estatísticos hoje.")
 
     finally:
         driver.quit()
