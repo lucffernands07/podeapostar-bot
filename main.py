@@ -13,80 +13,73 @@ def configurar_driver():
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(options=options)
 
-def rodar_extracao_unificada():
+def extrair_dados_mercado(driver, url, mercado_nome):
+    print(f"🌐 Verificando: {mercado_nome}...", flush=True)
+    driver.get(url)
+    time.sleep(12) 
+    
+    linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+    encontrados = {}
+
+    for linha in linhas:
+        try:
+            # Pega o nome da casa (ALT da imagem)
+            casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
+            
+            # Filtra apenas a Betano
+            if "Betano" in casa:
+                # Usa a lógica de SPAN para GOLS (Bingo) e wcl-oddsValue para o resto
+                if mercado_nome == "GOLS":
+                    if "1.5" in linha.text:
+                        spans = linha.find_elements(By.TAG_NAME, "span")
+                        dados = [s.text for s in spans if s.text]
+                        encontrados["+1.5"] = dados[1] if len(dados) > 1 else "N/A"
+                        break
+                
+                else:
+                    spans = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
+                    odds = [s.text for s in spans if s.text]
+
+                    if mercado_nome == "AMBOS MARCAM":
+                        encontrados["SIM"] = odds[0]
+                        encontrados["NÃO"] = odds[1]
+                        break
+
+                    elif mercado_nome == "DOUBLE CHANCE":
+                        encontrados["1X"] = odds[0]
+                        encontrados["X2"] = odds[2]
+                        break
+        except:
+            continue
+    return encontrados
+
+def rodar_unificado_final():
     driver = configurar_driver()
     id_jogo = "W8mj7MDD"
-    res = {"+1.5": "N/A", "BTTS": "N/A", "1X": "N/A", "X2": "N/A"}
-
+    
     try:
-        # --- 1. LÓGICA GOLS (BINGO - SUCESSO) ---
-        url_gols = f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{id_jogo}/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU"
-        print(f"🚀 Iniciando Gols: {url_gols}", flush=True)
-        driver.get(url_gols)
-        time.sleep(10) 
+        # 1. Gols (Aba Bingo) - Usando a URL completa que você validou
+        url_bingo = f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{id_jogo}/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU"
+        gols = extrair_dados_mercado(driver, url_bingo, "GOLS")
         
-        linhas_gols = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-        for linha in linhas_gols:
-            try:
-                if "1.5" in linha.text:
-                    casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-                    if "Betano" in casa:
-                        spans = linha.find_elements(By.TAG_NAME, "span")
-                        textos_span = [s.text for s in spans if s.text]
-                        res["+1.5"] = textos_span[1]
-                        break
-            except: continue
-
-        # --- 2. LÓGICA BTTS (SEU SEGUNDO CÓDIGO + SCROLL) ---
-        url_btts = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/"
-        print(f"🌐 Verificando BTTS: {url_btts}", flush=True)
-        driver.get(url_btts)
-        time.sleep(12)
-        driver.execute_script("window.scrollTo(0, 500);") # Scroll de segurança para carregar imagens
+        # 2. Ambos Marcam
+        btts = extrair_dados_mercado(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/", "AMBOS MARCAM")
         
-        linhas_btts = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-        for linha in linhas_btts:
-            try:
-                casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-                if "Betano" in casa:
-                    odds = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
-                    if odds:
-                        res["BTTS"] = odds[0].text
-                        break
-            except: continue
+        # 3. Double Chance
+        dc = extrair_dados_mercado(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/", "DOUBLE CHANCE")
 
-        # --- 3. LÓGICA DUPLA CHANCE (SEU SEGUNDO CÓDIGO + SCROLL) ---
-        url_dc = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/"
-        print(f"🌐 Verificando DC: {url_dc}", flush=True)
-        driver.get(url_dc)
-        time.sleep(12)
-        driver.execute_script("window.scrollTo(0, 500);")
-        
-        linhas_dc = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-        for linha in linhas_dc:
-            try:
-                casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-                if "Betano" in casa:
-                    odds = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
-                    if len(odds) >= 3:
-                        res["1X"] = odds[0].text
-                        res["X2"] = odds[2].text
-                        break
-            except: continue
-
-        # --- RELATÓRIO FINAL ---
         print("\n" + "="*35)
         print("📊 RELATÓRIO FINAL UNIFICADO")
         print("="*35)
-        print(f"🔥 Gols +1.5:  {res['+1.5']}")
-        print(f"🤝 BTTS Sim:   {res['BTTS']}")
-        print(f"🏠 Double 1X:  {res['1X']}")
-        print(f"🚀 Double X2:  {res['X2']}")
+        print(f"🔥 Gols +1.5:  {gols.get('+1.5', 'N/A')}")
+        print(f"🤝 BTTS Sim:   {btts.get('SIM', 'N/A')}")
+        print(f"🏠 Double 1X:  {dc.get('1X', 'N/A')}")
+        print(f"🚀 Double X2:  {dc.get('X2', 'N/A')}")
         print("="*35, flush=True)
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    rodar_extracao_unificada()
-                        
+    rodar_unificado_final()
+    
