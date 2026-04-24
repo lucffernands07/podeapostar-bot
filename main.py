@@ -2,6 +2,7 @@ import os
 import time
 import re
 import requests
+import odds
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -114,7 +115,7 @@ def main():
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 200: break # AUMENTADO PARA NÃO TRAVAR O BILHETE
+            if total_mercados >= 200: break 
             
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
@@ -124,7 +125,7 @@ def main():
             jogos_do_campeonato = []
             
             for el in elementos:
-                if total_mercados >= 200: break # AUMENTADO PARA NÃO TRAVAR O BILHETE
+                if total_mercados >= 200: break 
                 
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
@@ -148,17 +149,34 @@ def main():
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         
-                        # Junta todos e aplica a trava de MÁXIMO 5 mercados por jogo
-                        sugestoes_todas = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
-                        sugestoes = sugestoes_todas[:5] # <-- LIMITA A 5 MERCADOS POR JOGO
+                        # Junta todas as sugestões que passaram na análise técnica
+                        sugestoes_tecnicas = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
+                        
+                        # --- TRAVA DE ODDS 1.30 ---
+                        sugestoes_validadas = []
+                        if sugestoes_tecnicas:
+                            print(f"    🧐 Verificando Odds para: {t1} x {t2}")
+                            for mercado in sugestoes_tecnicas:
+                                # Chama a função do seu arquivo odds.py na raiz
+                                valor_odd = odds.capturar_odd(driver, id_jogo, mercado)
+                                
+                                if valor_odd >= 1.30:
+                                    # Adiciona a odd ao texto para conferência no bilhete
+                                    sugestoes_validadas.append(f"{mercado} (@{valor_odd:.2f})")
+                                else:
+                                    print(f"    🛑 Descartado: {mercado} com odd {valor_odd:.2f}")
+
+                        # Aplica o limite de 5 mercados por jogo (apenas dos que passaram na odd)
+                        sugestoes = sugestoes_validadas[:5]
                         
                         if sugestoes:
                             item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join([f"🔶 {m}" for m in sugestoes])
                             jogos_do_campeonato.append(item)
                             total_mercados += len(sugestoes)
-                            print(f"    ✅ Adicionado: {t1} x {t2}")
+                            print(f"    ✅ Adicionado: {t1} x {t2} ({len(sugestoes)} mercados)")
 
                 except Exception as e:
+                    print(f"    ⚠️ Erro no jogo: {e}")
                     continue
             
             if jogos_do_campeonato:
@@ -176,6 +194,7 @@ def main():
 
     finally:
         driver.quit()
+)
 
 if __name__ == "__main__":
     main()
