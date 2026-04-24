@@ -25,32 +25,40 @@ def configurar_driver():
     return driver
 
 def capturar_escanteios_detalhe(driver, id_jogo_h2h):
-    """Navega para o detalhe do jogo na mesma aba para economizar memória"""
-    url_detalhe = f"https://www.flashscore.com.br/jogo/{id_jogo_h2h}/#/resumo-de-jogo/estatisticas-de-jogo"
-    print(f"    [DETALHE] Analisando ID: {id_jogo_h2h}")
+    """Navega para o jogo e extrai o texto bruto das estatísticas"""
+    url_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo_h2h}/#/resumo-de-jogo"
+    print(f"\n    --- ANALISANDO JOGO: {id_jogo_h2h} ---")
     
-    driver.get(url_detalhe)
+    driver.get(url_jogo)
     total_cantos = 0
     try:
-        # Aguarda o botão de estatísticas
-        btn_stats = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, "//button[contains(.,'Estatísticas')]"))
+        # 1. Espera o menu e clica em Estatísticas
+        btn_stats = WebDriverWait(driver, 12).until(
+            EC.element_to_be_clickable((By.XPATH, "//a[contains(.,'Estatísticas')]"))
         )
         driver.execute_script("arguments[0].click();", btn_stats)
         
-        # Tempo para carregar os gráficos
+        # 2. Aguarda o card carregar
         time.sleep(4) 
 
-        # Busca a linha de escanteios
-        xpath_cantos = "//div[contains(@class, 'stat__category') and .//div[contains(text(), 'Escanteios')]]"
-        linha = driver.find_element(By.XPATH, xpath_cantos)
+        # 3. Captura o texto bruto de todo o container de estatísticas
+        # Usamos o seletor de seção para garantir que pegamos o bloco central
+        container = driver.find_element(By.CSS_SELECTOR, "div[id*='statistics']")
+        texto_bruto = container.text.replace('\n', ' | ')
         
-        numeros = re.findall(r'\d+', linha.text)
-        if len(numeros) >= 2:
-            total_cantos = int(numeros[0]) + int(numeros[1])
-            print(f"    ✅ Cantos: {total_cantos}")
-    except:
-        print(f"    ⚠️ Sem dados de cantos.")
+        # LOG DO BRUTO (O que você pediu)
+        print(f"    [DADOS BRUTOS]: {texto_bruto}")
+
+        # 4. Extração via Regex no texto bruto para garantir os cantos
+        # Procura o padrão: Numero | Escanteios | Numero
+        match = re.search(r'(\d+) \| Escanteios \| (\d+)', texto_bruto)
+        if match:
+            c_casa = int(match.group(1))
+            c_fora = int(match.group(2))
+            total_cantos = c_casa + c_fora
+            print(f"    ✅ EXTRAÍDO COM SUCESSO: {total_cantos} cantos.")
+    except Exception as e:
+        print(f"    ⚠️ Erro ao processar dados: {str(e)[:50]}")
         
     return total_cantos
 
@@ -79,7 +87,11 @@ def pegar_estatisticas_h2h(driver, url_jogo):
             
             for i, linha in enumerate(linhas):
                 try:
+                    # Captura o ID do link ou da linha
                     id_raw = linha.get_attribute("id")
+                    if not id_raw:
+                        id_raw = linha.find_element(By.TAG_NAME, "a").get_attribute("id")
+                    
                     id_limpo = id_raw.split('_')[-1] if id_raw else ""
                     if id_limpo:
                         stats["ids_h2h"].append(id_limpo)
@@ -106,7 +118,7 @@ def pegar_estatisticas_h2h(driver, url_jogo):
                     if total <= 4: stats[f"{prefixo}_45"] += 1 
                     if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
                     
-        print(f"[ABA H2H] IDs coletados com sucesso.")
+        print(f"[ABA H2H] Sucesso na coleta.")
     except Exception as e:
         print(f"[ABA H2H] Erro: {e}")
         
@@ -114,56 +126,47 @@ def pegar_estatisticas_h2h(driver, url_jogo):
 
 def main():
     driver = configurar_driver()
-    id_teste = "ne5y23mR" # Defensa y Justicia x Boca Juniors
+    id_teste = "ne5y23mR"
     url_confronto = f"https://www.flashscore.com.br/jogo/{id_teste}/#/h2h/overall"
     
-    print(f"🚀 INICIANDO DIAGNÓSTICO - JOGO: {id_teste}")
+    print(f"🚀 INICIANDO DIAGNÓSTICO BRUTO - JOGO: {id_teste}")
     
     try:
         driver.get("https://www.flashscore.com.br/")
         time.sleep(5)
         
-        # 1. Coleta os dados no H2H
         s = pegar_estatisticas_h2h(driver, url_confronto)
         
-        # 2. Verifica os mercados
+        # Debug: Confirmar que os IDs foram salvos na lista antes de prosseguir
+        ids_finais = list(dict.fromkeys([x for x in s["ids_h2h"] if x]))
+        print(f"DEBUG: IDs encontrados: {ids_finais}")
+        
         res_gols = gols.verificar_gols(s)
-        res_btts = ambos_marcam.verificar_btts(s)
         res_cd = chance_dupla.verificar_chance_dupla(s)
+        print(f"✅ MERCADOS: {res_gols + res_cd}")
         
-        sugestoes = res_gols + ([f"Ambas Marcam ({res_btts})"] if res_btts else []) + res_cd
-        print(f"✅ MERCADOS: {sugestoes}")
-        
-        # 3. VERIFICAÇÃO DOS ESCANTEIOS (FORÇADA)
-        ids_para_busca = list(dict.fromkeys([x for x in s["ids_h2h"] if x]))
-        
-        if ids_para_busca:
-            print(f"🔍 BUSCANDO ESCANTEIOS EM {len(ids_para_busca)} JOGOS...")
+        if ids_finais:
+            print(f"\n🔍 BUSCANDO DADOS BRUTOS EM {len(ids_finais)} JOGOS...")
             soma_c, cont_j = 0, 0
             
-            # Em vez de fechar a aba, apenas voltamos para a primeira
-            # Isso evita que o driver perca a conexão
+            # Garante que volta para a primeira aba antes de navegar linearmente
             driver.switch_to.window(driver.window_handles[0])
 
-            for id_h in ids_para_busca:
+            for id_h in ids_finais:
                 c = capturar_escanteios_detalhe(driver, id_h)
                 if c > 0:
                     soma_c += c
                     cont_j += 1
             
             if cont_j > 0:
-                media = soma_c / cont_j
-                print(f"📊 MÉDIA FINAL DE ESCANTEIOS: {media:.2f}")
-            else:
-                print("⚠️ Nenhum dado de escanteio foi extraído dos jogos.")
+                print(f"\n📊 MÉDIA FINAL DE CANTOS: {soma_c / cont_j:.2f}")
         else:
-            print("❌ NENHUM ID FOI COLETADO NO H2H.")
+            print("❌ LISTA DE IDs VAZIA NO H2H.")
 
     finally:
         print("\n🏁 FIM DO TESTE.")
         driver.quit()
 
-
 if __name__ == "__main__":
     main()
-            
+          
