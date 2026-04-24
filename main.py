@@ -1,197 +1,79 @@
-import os
 import time
-import re
-import requests
-import odds
-from datetime import datetime, timedelta
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
-# Importação dos seus módulos
-from ligas import COMPETICOES
-from mercados import gols, ambos_marcam, chance_dupla
-
-def enviar_telegram(mensagem):
-    token = os.getenv('TELEGRAM_TOKEN')
-    chat_id = os.getenv('CHAT_ID')
-    if not token or not chat_id:
-        print("⚠️ ALERTA: Sem variáveis de ambiente para o Telegram.")
-        return
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    try:
-        requests.post(url, data={
-            "chat_id": chat_id, 
-            "text": mensagem, 
-            "parse_mode": "Markdown",
-            "disable_web_page_preview": True
-        })
-        print("🚀 Bilhete enviado!")
-    except Exception as e:
-        print(f"❌ Falha no Telegram: {e}")
-
-def configurar_driver():
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--window-size=1920,3000")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
-    return driver
-
-def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
-    driver.execute_script(f"window.open('{url_jogo}', '_blank');")
-    driver.switch_to.window(driver.window_handles[-1])
+def testar_odds_real():
+    # Configuração do Driver
+    options = webdriver.ChromeOptions()
+    # options.add_argument("--headless") # Descomente se quiser rodar sem ver o navegador
+    driver = webdriver.Chrome(options=options)
     
-    stats = {
-        "casa_15": 0, "casa_25": 0, "casa_45": 0, "casa_btts": 0, "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
-        "casa_ult_15": False, "casa_ult_sofreu": False,
-        "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
-        "fora_ult_15": False, "fora_ult_sofreu": False,
-        "pular_gols": False 
-    }
+    # URL que você forneceu
+    url = "https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-W8mj7MDD/?mid=lfKIYGgU"
     
     try:
-        h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
-        h2h_tab.click()
-        time.sleep(10)
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        print(f"🚀 Iniciando teste no jogo: Bétis x Real Madrid")
+        driver.get(url)
+        wait = WebDriverWait(driver, 15)
+
+        # 1. Clicar no botão 'Odds'
+        print("🖱️ Tentando clicar na aba 'Odds'...")
+        btn_odds = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Odds')]")))
+        btn_odds.click()
+
+        # 2. Clicar no botão 'Acima/Abaixo'
+        print("🖱️ Tentando clicar em 'Acima/Abaixo'...")
+        # Usando o texto para garantir, já que a classe pode mudar
+        btn_over_under = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Acima/Abaixo')]")))
+        btn_over_under.click()
         
-        for idx, secao in enumerate(secoes[:2]):
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
-            prefixo = "casa" if idx == 0 else "fora"
-            
-            print(f"\n      📊 Analisando H2H: {prefixo.upper()}")
+        # Pequena pausa para garantir que a tabela de odds carregou após o clique
+        time.sleep(3)
 
-            for i, linha in enumerate(linhas):
-                texto_linha = linha.text.replace('\n', ' ')
-                numeros = re.findall(r'\d+', texto_linha)
+        # 3. Localizar a linha do 1.5 e capturar a Odd
+        print("🔍 Buscando valor de +1.5 Gols...")
+        
+        # Aqui buscamos todas as linhas de odds
+        linhas_odds = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+        
+        encontrou = False
+        for linha in linhas_odds:
+            if "1.5" in linha.text:
+                # O seu seletor de odd 'Acima' geralmente é o primeiro valor de odd da linha
+                # Buscamos pelo data-testid que você mapeou
+                odds_da_linha = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
                 
-                if len(nums := [int(n) for n in numeros]) >= 2:
-                    g1, g2 = nums[-2], nums[-1]
-                    total = g1 + g2
+                if len(odds_da_linha) >= 2:
+                    odd_acima = odds_da_linha[0].text
+                    odd_abaixo = odds_da_linha[1].text
+                    print(f"\n✅ SUCESSO!")
+                    print(f"📊 Mercado: 1.5 Gols")
+                    print(f"📈 Odd ACIMA: {odd_acima}")
+                    print(f"📉 Odd ABAIXO: {odd_abaixo}")
                     
-                    if i == 0:
-                        # AJUSTE: Trava apenas se o jogo da CASA for 0x0 ou 1x0 (total <= 1)
-                        if idx == 0 and (total <= 1):
-                            stats["pular_gols"] = True
-                            print(f"        🚫 Jogo muito seco na CASA ({g1}x{g2}). Travando Over.")
-                        
-                        stats[f"{prefixo}_ult_15"] = (total > 1.5)
-                        stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
-
-                        if g1 > 0 and g2 > 0:
-                            stats[f"{prefixo}_ult_btts"] = True
-
-                    # CONTAGENS DE MERCADO
-                    if total > 1.5: stats[f"{prefixo}_15"] += 1
-                    if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    if total <= 4: stats[f"{prefixo}_45"] += 1 
-                    if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
-
-                try:
-                    res_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
-                    if i == 0: stats[f"{prefixo}_ult_res"] = res_el
-                    if res_el == "D": stats[f"{prefixo}_derrotas"] += 1
-                except: pass
+                    if float(odd_acima.replace(',', '.')) >= 1.20:
+                        print("💰 VALOR: Essa odd passa na sua trava!")
+                    else:
+                        print("🛑 FILTRO: Odd muito baixa para o seu critério.")
+                    
+                    encontrou = True
+                    break
+        
+        if not encontrou:
+            print("❌ Não foi possível localizar a linha '1.5' na tabela.")
 
     except Exception as e:
-        print(f"      Err H2H: {e}")
-        
-    driver.close()
-    driver.switch_to.window(driver.window_handles[0])
-    return stats
-
-def main():
-    driver = configurar_driver()
-    hoje_ref = datetime.now()
-    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-    bilhete_agrupado = []
-    total_mercados = 0 
-
-    try:
-        for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 200: break 
-            
-            print(f"\n--- Analisando: {nome_comp} ---")
-            driver.get(url)
-            time.sleep(8)
-            elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-
-            jogos_do_campeonato = []
-            
-            for el in elementos:
-                if total_mercados >= 200: break 
-                
-                try:
-                    tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
-                    h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
-                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
-                    
-                    aceitar = False
-                    if amanha_no_site in tempo_raw:
-                        if h_obj.hour <= 3: aceitar = True
-                    elif "." not in tempo_raw:
-                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
-
-                    if aceitar:
-                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
-                        t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        id_jogo = el.get_attribute('id').split('_')[-1]
-                        
-                        s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall", t1, t2)
-                        
-                        res_gols = gols.verificar_gols(s)
-                        res_btts = ambos_marcam.verificar_btts(s)
-                        res_cd = chance_dupla.verificar_chance_dupla(s)
-                        
-                        sugestoes_tecnicas = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
-                        
-                        # --- TRAVA DE ODDS ATUALIZADA PARA 1.20 ---
-                        sugestoes_validadas = []
-                        if sugestoes_tecnicas:
-                            print(f"    🧐 Verificando Odds para: {t1} x {t2}")
-                            for mercado in sugestoes_tecnicas:
-                                valor_odd = odds.capturar_odd(driver, id_jogo, mercado)
-                                
-                                # Ajustado para 1.20 conforme seu pedido
-                                if valor_odd >= 1.20:
-                                    sugestoes_validadas.append(f"{mercado} (@{valor_odd:.2f})")
-                                else:
-                                    print(f"    🛑 Descartado: {mercado} com odd {valor_odd:.2f}")
-
-                        sugestoes = sugestoes_validadas[:5]
-                        
-                        if sugestoes:
-                            item = f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join([f"🔶 {m}" for m in sugestoes])
-                            jogos_do_campeonato.append(item)
-                            total_mercados += len(sugestoes)
-                            print(f"    ✅ Adicionado: {t1} x {t2} ({len(sugestoes)} mercados)")
-
-                except Exception as e:
-                    print(f"    ⚠️ Erro no jogo: {e}")
-                    continue
-            
-            if jogos_do_campeonato:
-                bilhete_agrupado.append("\n\n".join(jogos_do_campeonato))
-
-        if bilhete_agrupado:
-            cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n"
-            corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
-            rodape = (
-                f"\n\n---\n"
-                f"💎 Apostar na [Betano](https://br.betano.com/) | "
-                f"[Bet365](https://www.bet365.com/)"
-            )
-            enviar_telegram(cabecalho + corpo + rodape)
+        print(f"⚠️ Erro durante o teste: {e}")
+        # Tira um print da tela para debug se der erro
+        driver.save_screenshot("erro_teste_real.png")
+        print("📸 Screenshot do erro salva como 'erro_teste_real.png'")
 
     finally:
+        print("\n🏁 Teste finalizado. Fechando navegador em 5 segundos...")
+        time.sleep(5)
         driver.quit()
 
 if __name__ == "__main__":
-    main()
-    
+    testar_odds_real()
