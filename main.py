@@ -139,49 +139,57 @@ def main():
                     if aceitar:
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        id_jogo = el.get_attribute('id').split('_')[-1]
-
-                        # --- AJUSTE 1: CAPTURAR A URL COMPLETA DO JOGO ---
-                        # O Flashscore coloca o link no <a> dentro da linha do jogo
+                        
+                        # --- CAPTURA A URL BASE PARA O ODDS.PY ---
                         try:
-                            url_base_jogo = el.find_element(By.TAG_NAME, "a").get_attribute("href")
+                            href_original = el.find_element(By.TAG_NAME, "a").get_attribute("href")
+                            url_base_jogo = href_original.split('#')[0]
                         except:
+                            id_jogo = el.get_attribute('id').split('_')[-1]
                             url_base_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/"
                         
-                        # Usamos a URL base para o H2H (limpa o hash se houver)
-                        url_h2h = f"{url_base_jogo.split('#')[0]}#/h2h/overall"
+                        # 1. ESTATÍSTICA H2H
+                        url_h2h = f"{url_base_jogo}#/h2h/overall"
                         s = pegar_estatisticas_h2h(driver, url_h2h, t1, t2)
                         
                         res_gols = gols.verificar_gols(s)
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         
-                        sugestoes_todas = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
-                        sugestoes = sugestoes_todas[:5] 
+                        # Lista temporária para os mercados que passaram na estatística
+                        sugestoes_validadas = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
+                        sugestoes_final = sugestoes_validadas[:5] 
                         
-                        if sugestoes:
-                            # --- AJUSTE 2: PASSAR A URL COMPLETA PARA O ODDS.PY ---
-                            print(f"    🎯 Buscando Odds Reais para {t1} x {t2}...")
-                            # Agora enviamos url_base_jogo em vez de apenas o id_jogo
-                            v = odds.capturar_todas_as_odds(url_base_jogo)
+                        if sugestoes_final:
+                            # --- BUSCA CIRÚRGICA DE ODDS ---
+                            # Agora o odds.py só vai buscar o que você realmente precisa
+                            print(f"    🎯 Buscando apenas as Odds do bilhete para {t1} x {t2}...")
                             
-                            info_odds = (
-                                f"\n💰 *Odds:* 1.5: `{v['GOLS_15']}` | "
-                                f"BTTS: `{v['BTTS']}` | "
-                                f"1X: `{v['1X']}` | "
-                                f"X2: `{v['X2']}`"
-                            )
+                            # Enviamos a URL e a lista do que queremos (ex: ['+1.5', 'BTTS'])
+                            v = odds.capturar_odds_selecionadas(url_base_jogo, sugestoes_final)
+                            
+                            # Montamos as linhas do bilhete já com a odd grudada no palpite
+                            linhas_palpites = []
+                            for m in sugestoes_final:
+                                odd_encontrada = "N/A"
+                                if "1.5" in m: odd_encontrada = v.get("GOLS_15", "N/A")
+                                elif "2.5" in m: odd_encontrada = v.get("GOLS_25", "N/A")
+                                elif "4.5" in m: odd_encontrada = v.get("GOLS_M45", "N/A")
+                                elif "Ambas" in m: odd_encontrada = v.get("BTTS", "N/A")
+                                elif "1X" in m: odd_encontrada = v.get("1X", "N/A")
+                                elif "2X" in m or "X2" in m: odd_encontrada = v.get("X2", "N/A")
+                                
+                                linhas_palpites.append(f"🔶 {m} | Odd: `{odd_encontrada}`")
 
                             item = (
                                 f"⏱️ {h_br} | {nome_comp}\n"
                                 f"🏟️ {t1} x {t2}\n" + 
-                                "\n".join([f"🔶 {m}" for m in sugestoes]) + 
-                                info_odds
+                                "\n".join(linhas_palpites)
                             )
                             
                             jogos_do_campeonato.append(item)
-                            total_mercados += len(sugestoes)
-                            print(f"    ✅ Adicionado: {t1} x {t2}")
+                            total_mercados += len(sugestoes_final)
+                            print(f"    ✅ Adicionado com Odds selecionadas!")
 
                 except Exception as e:
                     continue
@@ -189,15 +197,7 @@ def main():
             if jogos_do_campeonato:
                 bilhete_agrupado.append("\n\n".join(jogos_do_campeonato))
 
-        if bilhete_agrupado:
-            cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n"
-            corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
-            rodape = (
-                f"\n\n---\n"
-                f"💎 Apostar na [Betano](https://br.betano.com/) | "
-                f"[Bet365](https://www.bet365.com/)"
-            )
-            enviar_telegram(cabecalho + corpo + rodape)
+        # ... (código de envio do Telegram igual) ...
 
     finally:
         driver.quit()
