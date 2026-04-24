@@ -195,9 +195,100 @@ def main():
                     continue
             
             if jogos_do_campeonato:
+def main():
+    driver = configurar_driver()
+    hoje_ref = datetime.now()
+    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
+    bilhete_agrupado = []
+    total_mercados = 0 
+
+    try:
+        for nome_comp, url in COMPETICOES.items():
+            if total_mercados >= 200: break 
+            
+            print(f"\n--- Analisando: {nome_comp} ---")
+            driver.get(url)
+            time.sleep(8)
+            elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+
+            jogos_do_campeonato = []
+            
+            for el in elementos:
+                if total_mercados >= 200: break 
+                
+                try:
+                    tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
+                    h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
+                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
+                    
+                    aceitar = False
+                    if amanha_no_site in tempo_raw:
+                        if h_obj.hour <= 3: aceitar = True
+                    elif "." not in tempo_raw:
+                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
+
+                    if aceitar:
+                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                        t1, t2 = times[0].text.strip(), times[1].text.strip()
+                        id_jogo = el.get_attribute('id').split('_')[-1]
+                        
+                        # --- SUA LÓGICA ESTATÍSTICA (MANTIDA INTEGRALMENTE) ---
+                        s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall", t1, t2)
+                        
+                        res_gols = gols.verificar_gols(s)
+                        res_btts = ambos_marcam.verificar_btts(s)
+                        res_cd = chance_dupla.verificar_chance_dupla(s)
+                        
+                        sugestoes_todas = res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd
+                        sugestoes_stat = sugestoes_todas[:5] 
+                        
+                        # --- SE O JOGO PASSOU NAS REGRAS DE MERCADO ---
+                        if sugestoes_stat:
+                            print(f"    ✅ PASSOU NA ESTATÍSTICA: {t1} x {t2} ({len(sugestoes_stat)} mercados)")
+                            
+                            # --- BUSCA E FILTRO DE ODDS (A SEGUNDA PENEIRA) ---
+                            v_odds = odds.capturar_todas_as_odds(id_jogo)
+                            
+                            sugestoes_com_odd_validada = []
+                            for m in sugestoes_stat:
+                                # Identifica qual odd buscar no dicionário res do odds.py
+                                valor_odd_str = "N/A"
+                                if "+1.5" in m: valor_odd_str = v_odds.get("GOLS_15", "N/A")
+                                elif "+2.5" in m: valor_odd_str = v_odds.get("GOLS_25", "N/A")
+                                elif "-4.5" in m: valor_odd_str = v_odds.get("GOLS_M45", "N/A")
+                                elif "Ambas" in m: valor_odd_str = v_odds.get("BTTS", "N/A")
+                                elif "1X" in m: valor_odd_str = v_odds.get("1X", "N/A")
+                                elif "X2" in m or "2X" in m: valor_odd_str = v_odds.get("X2", "N/A")
+
+                                # Converte para float e aplica a trava de 1.20
+                                try:
+                                    valor_num = float(valor_odd_str.replace(',', '.'))
+                                    if valor_num >= 1.20:
+                                        sugestoes_com_odd_validada.append(f"🔶 {m} | Odd: `{valor_odd_str}`")
+                                    else:
+                                        print(f"        🚫 Mercado descartado (Odd {valor_odd_str} < 1.20)")
+                                except:
+                                    print(f"        ⚠️ Mercado sem Odd válida ({valor_odd_str})")
+
+                            # Se após o filtro de odds ainda restar algum mercado, vai para o bilhete
+                            if sugestoes_com_odd_validada:
+                                item = (
+                                    f"⏱️ {h_br} | {nome_comp}\n"
+                                    f"🏟️ {t1} x {t2}\n" + 
+                                    "\n".join(sugestoes_com_odd_validada)
+                                )
+                                jogos_do_campeonato.append(item)
+                                total_mercados += len(sugestoes_com_odd_validada)
+                                print(f"    🚀 ENVIADO PARA O BILHETE: {t1} x {t2}")
+                            else:
+                                print(f"    ❌ JOGO DESCARTADO: Nenhuma odd atingiu 1.20")
+
+                except Exception as e:
+                    continue
+            
+            if jogos_do_campeonato:
                 bilhete_agrupado.append("\n\n".join(jogos_do_campeonato))
 
-            
         if bilhete_agrupado:
             cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n"
             corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
@@ -207,11 +298,10 @@ def main():
                 f"[Bet365](https://www.bet365.com/)"
             )
             enviar_telegram(cabecalho + corpo + rodape)
-        else:
-            print("⚠️ Nenhum jogo passou nos critérios estatísticos hoje.")
 
     finally:
         driver.quit()
+
 
 if __name__ == "__main__":
     main()
