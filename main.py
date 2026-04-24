@@ -14,48 +14,49 @@ def configurar_driver():
     return webdriver.Chrome(options=options)
 
 def buscar_bloco_odds_especificas(id_jogo):
-    """Sessão B: BTTS e Dupla Chance (Agora rodando primeiro)"""
+    """Sessão 1: BTTS e Dupla Chance (Busca Betano ou bet365)"""
     driver = configurar_driver()
     print(f"🌐 [Sessão 1] Buscando BTTS e Dupla Chance...", flush=True)
     res = {"BTTS": "N/A", "1X": "N/A", "X2": "N/A"}
+    casas_alvo = ["Betano", "bet365"]
+    
     try:
-        # BTTS
+        # --- AMBOS MARCAM ---
         driver.get(f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/")
         time.sleep(15)
-        driver.execute_script("window.scrollTo(0, 600);") # Força renderização das imagens
-        time.sleep(3)
-        
-        for linha in driver.find_elements(By.CSS_SELECTOR, ".ui-table__row"):
+        linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+        for linha in linhas:
             try:
-                casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-                if "Betano" in casa:
+                nome_casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
+                if any(alvo in nome_casa for alvo in casas_alvo):
                     odds = [s.text for s in linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']") if s.text]
-                    if odds: res["BTTS"] = odds[0]
-                    break
+                    if odds:
+                        res["BTTS"] = odds[0]
+                        print(f"✅ BTTS encontrado ({nome_casa}): {res['BTTS']}", flush=True)
+                        break
             except: continue
-        
-        # DUPLA CHANCE
+
+        # --- DOUBLE CHANCE ---
         driver.get(f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/")
         time.sleep(12)
-        driver.execute_script("window.scrollTo(0, 600);")
-        time.sleep(3)
-        
-        for linha in driver.find_elements(By.CSS_SELECTOR, ".ui-table__row"):
+        linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+        for linha in linhas:
             try:
-                casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-                if "Betano" in casa:
+                nome_casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
+                if any(alvo in nome_casa for alvo in casas_alvo):
                     odds = [s.text for s in linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']") if s.text]
                     if len(odds) >= 3:
                         res["1X"] = odds[0]
                         res["X2"] = odds[2]
-                    break
+                        print(f"✅ DC encontrado ({nome_casa}): {res['1X']} / {res['X2']}", flush=True)
+                        break
             except: continue
     finally:
         driver.quit()
     return res
 
 def buscar_bloco_gols(id_jogo):
-    """Sessão A: Gols (Agora rodando por último)"""
+    """Sessão 2: Gols (Lógica Bingo)"""
     driver = configurar_driver()
     url = f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{id_jogo}/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU"
     print(f"🚀 [Sessão 2] Buscando Gols: {url}", flush=True)
@@ -67,11 +68,12 @@ def buscar_bloco_gols(id_jogo):
         for linha in linhas:
             if "1.5" in linha.text:
                 try:
-                    casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-                    if "Betano" in casa:
+                    nome_casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
+                    if "Betano" in nome_casa or "bet365" in nome_casa:
                         spans = linha.find_elements(By.TAG_NAME, "span")
                         dados = [s.text for s in spans if s.text]
                         resultado = dados[1] if len(dados) > 1 else "N/A"
+                        print(f"✅ Gols encontrado ({nome_casa}): {resultado}", flush=True)
                         break
                 except: continue
     finally:
@@ -79,18 +81,18 @@ def buscar_bloco_gols(id_jogo):
     return resultado
 
 if __name__ == "__main__":
-    ID_JOGO = "W8mj7MDD"
+    ID = "W8mj7MDD"
     
-    # INVERTIDO: Primeiro o que estava dando N/A
-    outros_mercados = buscar_bloco_odds_especificas(ID_JOGO)
-    valor_gols = buscar_bloco_gols(ID_JOGO)
+    # Executa as sessões de forma totalmente independente
+    odds_principais = buscar_bloco_odds_especificas(ID)
+    odd_gols = buscar_bloco_gols(ID)
 
-    print("\n" + "="*40)
-    print("📊 RELATÓRIO FINAL (SESSÕES LIMPAS - ORDEM INV)")
-    print("="*40)
-    print(f"🤝 BTTS Sim:   {outros_mercados['BTTS']}")
-    print(f"🏠 Double 1X:  {outros_mercados['1X']}")
-    print(f"🚀 Double X2:  {outros_mercados['X2']}")
-    print(f"🔥 Gols +1.5:  {valor_gols}")
-    print("="*40, flush=True)
-        
+    print("\n" + "="*45)
+    print("📊 RELATÓRIO FINAL - BETANO/BET365")
+    print("="*45)
+    print(f"🤝 BTTS Sim:   {odds_principais['BTTS']}")
+    print(f"🏠 Double 1X:  {odds_principais['1X']}")
+    print(f"🚀 Double X2:  {odds_principais['X2']}")
+    print(f"🔥 Gols +1.5:  {odd_gols}")
+    print("="*45, flush=True)
+    
