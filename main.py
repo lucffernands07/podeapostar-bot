@@ -142,7 +142,8 @@ def main():
                         id_jogo = el.get_attribute('id').split('_')[-1]
                         
                         # --- SUA LÓGICA ESTATÍSTICA ---
-                        s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall", t1, t2)
+                        url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
+                        s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
                         res_gols = gols.verificar_gols(s)
                         res_btts = ambos_marcam.verificar_btts(s)
@@ -152,6 +153,10 @@ def main():
                         sugestoes_stat = sugestoes_todas[:5] 
                         
                         if sugestoes_stat:
+                            # --- LOGS DE VALIDAÇÃO ---
+                            print(f"\n    🔎 [DEBUG] Jogo: {t1} x {t2}")
+                            print(f"    🔎 [DEBUG] URL H2H enviada: {url_h2h_final}")
+                            print(f"    🔎 [DEBUG] ID enviado para Odds: {id_jogo}")
                             print(f"    ✅ PASSOU NA ESTATÍSTICA: {t1} x {t2}")
                             
                             # --- BUSCA E FILTRO DE ODDS (TRAVA 1.20) ---
@@ -203,4 +208,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                            
+    
