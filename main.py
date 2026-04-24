@@ -13,30 +13,45 @@ def configurar_driver():
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(options=options)
 
-# 1. CÓDIGO DE GOLS (O que deu BINGO no +1.5)
-def buscar_gols(driver, id_jogo):
+def buscar_gols_pelas_linhas_contadas(driver, id_jogo):
     url = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/acima-abaixo/tempo-regulamentar/"
+    print(f"🌐 Acessando Gols: {url}")
     driver.get(url)
-    time.sleep(12)
+    time.sleep(15) # Tempo essencial para carregar as 400+ linhas
+    
     linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
     res = {"+1.5": "N/A", "+2.5": "N/A", "-4.5": "N/A"}
     
-    for linha in linhas:
+    # Ajuste do índice (Sua contagem - 1)
+    # Betano 1.5 (132 -> 131), 2.5 (210 -> 209), 4.5 (418 -> 417)
+    mapeamento = {
+        "+1.5": 131,
+        "+2.5": 209,
+        "-4.5": 417
+    }
+    
+    for mercado, idx in mapeamento.items():
         try:
-            casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-            if "Betano" in casa:
+            if idx < len(linhas):
+                linha = linhas[idx]
                 spans = linha.find_elements(By.TAG_NAME, "span")
                 dados = [s.text for s in spans if s.text]
-                # Lógica exata do bingo: dados[0] é o valor da linha (ex: '1.5')
-                if "1.5" in dados: res["+1.5"] = dados[1]
-                if "2.5" in dados: res["+2.5"] = dados[1]
-                if "4.5" in dados: res["-4.5"] = dados[2] # Coluna Abaixo
-        except: continue
+                
+                # Se for +1.5 ou +2.5, pegamos a odd ACIMA (dados[1])
+                # Se for -4.5, pegamos a odd ABAIXO (dados[2])
+                if "-" in mercado:
+                    res[mercado] = dados[2] if len(dados) >= 3 else "Erro Coluna"
+                else:
+                    res[mercado] = dados[1] if len(dados) >= 2 else "Erro Coluna"
+                
+                print(f"📍 Linha {idx+1} ({mercado}): {dados}")
+        except Exception as e:
+            print(f"⚠️ Erro na linha {idx+1}: {e}")
+            
     return res
 
-# 2. CÓDIGO DE BTTS (Estrutura Sim/Não)
-def buscar_btts(driver, id_jogo):
-    url = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/"
+def buscar_mercado_simples(driver, url, mercado):
+    print(f"🌐 Acessando {mercado}: {url}")
     driver.get(url)
     time.sleep(10)
     linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
@@ -45,46 +60,37 @@ def buscar_btts(driver, id_jogo):
         try:
             casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
             if "Betano" in casa:
-                # No BTTS as odds são diretas nos spans
                 odds = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
-                return odds[0].text # Retorna o SIM
+                valores = [o.text for o in odds if o.text]
+                
+                if mercado == "BTTS": return valores[0]
+                if mercado == "DC": return (valores[0], valores[2])
         except: continue
     return "N/A"
 
-# 3. CÓDIGO DE DUPLA CHANCE (Estrutura 1X - 12 - X2)
-def buscar_dc(driver, id_jogo):
-    url = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/"
-    driver.get(url)
-    time.sleep(10)
-    linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-    
-    for linha in linhas:
-        try:
-            casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-            if "Betano" in casa:
-                odds = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
-                return odds[0].text, odds[2].text # Retorna 1X e X2
-        except: continue
-    return "N/A", "N/A"
-
-def testar_tudo():
+def rodar_teste():
     driver = configurar_driver()
-    id_jogo = "W8mj7MDD"
+    id_jogo = "W8mj7MDD" # Betis x Real Madrid
     
     try:
-        print("🚀 Iniciando busca por mercados separados...", flush=True)
+        print("🚀 [TESTE] Iniciando captura por índices e lógica de spans...")
         
-        gols = buscar_gols(driver, id_jogo)
-        btts_sim = buscar_btts(driver, id_jogo)
-        dc_1x, dc_x2 = buscar_dc(driver, id_jogo)
+        # Gols
+        gols = buscar_gols_pelas_linhas_contadas(driver, id_jogo)
+        
+        # BTTS (Lógica validada pelos seus prints)
+        btts = buscar_mercado_simples(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/", "BTTS")
+        
+        # DC (Lógica validada pelos seus prints)
+        dc_1x, dc_x2 = buscar_mercado_simples(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/", "DC")
 
         print("\n" + "="*35)
-        print("📊 RELATÓRIO FINAL (LÓGICA INDIVIDUAL)")
+        print("📊 RELATÓRIO FINAL DO TESTE")
         print("="*35)
         print(f"🔥 Gols +1.5:  {gols['+1.5']}")
         print(f"🔥 Gols +2.5:  {gols['+2.5']}")
         print(f"❄️ Gols -4.5:  {gols['-4.5']}")
-        print(f"🤝 BTTS Sim:   {btts_sim}")
+        print(f"🤝 BTTS Sim:   {btts}")
         print(f"🏠 Double 1X:  {dc_1x}")
         print(f"🚀 Double X2:  {dc_x2}")
         print("="*35, flush=True)
@@ -93,4 +99,5 @@ def testar_tudo():
         driver.quit()
 
 if __name__ == "__main__":
-    testar_tudo()
+    rodar_teste()
+    
