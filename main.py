@@ -140,8 +140,17 @@ def main():
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
+
+                        # --- AJUSTE 1: CAPTURAR A URL COMPLETA DO JOGO ---
+                        # O Flashscore coloca o link no <a> dentro da linha do jogo
+                        try:
+                            url_base_jogo = el.find_element(By.TAG_NAME, "a").get_attribute("href")
+                        except:
+                            url_base_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/"
                         
-                        s = pegar_estatisticas_h2h(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall", t1, t2)
+                        # Usamos a URL base para o H2H (limpa o hash se houver)
+                        url_h2h = f"{url_base_jogo.split('#')[0]}#/h2h/overall"
+                        s = pegar_estatisticas_h2h(driver, url_h2h, t1, t2)
                         
                         res_gols = gols.verificar_gols(s)
                         res_btts = ambos_marcam.verificar_btts(s)
@@ -151,9 +160,10 @@ def main():
                         sugestoes = sugestoes_todas[:5] 
                         
                         if sugestoes:
-                            # <--- INÍCIO DA ADAPTAÇÃO: BUSCA DE ODDS APENAS PARA SELECIONADOS --->
+                            # --- AJUSTE 2: PASSAR A URL COMPLETA PARA O ODDS.PY ---
                             print(f"    🎯 Buscando Odds Reais para {t1} x {t2}...")
-                            v = odds.capturar_todas_as_odds(id_jogo)
+                            # Agora enviamos url_base_jogo em vez de apenas o id_jogo
+                            v = odds.capturar_todas_as_odds(url_base_jogo)
                             
                             info_odds = (
                                 f"\n💰 *Odds:* 1.5: `{v['GOLS_15']}` | "
@@ -161,7 +171,6 @@ def main():
                                 f"1X: `{v['1X']}` | "
                                 f"X2: `{v['X2']}`"
                             )
-                            # <--- FIM DA ADAPTAÇÃO --->
 
                             item = (
                                 f"⏱️ {h_br} | {nome_comp}\n"
