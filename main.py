@@ -83,4 +83,4 @@ def capturar_todas_as_odds(id_jogo):
         driver.quit() # Crucial para não travar o GitHub Actions
     
     return res
-                        
+                    
