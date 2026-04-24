@@ -3,6 +3,8 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 def configurar_driver():
     options = Options()
@@ -13,79 +15,75 @@ def configurar_driver():
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(options=options)
 
-def rodar_extracao_unificada():
-    driver = configurar_driver()
-    id_jogo = "W8mj7MDD" # Bétis x Real Madrid
-    resultados = {"+1.5": "N/A", "BTTS": "N/A", "1X": "N/A", "X2": "N/A"}
-
-    try:
-        # --- 1. LÓGICA DO BINGO (GOLS +1.5) ---
-        url_gols = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/acima-abaixo/tempo-regulamentar/"
-        print(f"🔍 Buscando +1.5 Gols (Lógica Bingo)...", flush=True)
-        driver.get(url_gols)
-        time.sleep(12)
-        
-        linhas_gols = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-        for linha in linhas_gols:
-            try:
-                # Varre spans exatamente como no código que deu o Bingo
-                spans = linha.find_elements(By.TAG_NAME, "span")
-                dados = [s.text for s in spans if s.text]
+def extrair_gols_bingo(driver, id_jogo):
+    # URL com o parâmetro mid que você validou no código do Bingo
+    url = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU"
+    print(f"🔍 Buscando Gols (Lógica Bingo): {url}", flush=True)
+    driver.get(url)
+    
+    wait = WebDriverWait(driver, 25)
+    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table")))
+    time.sleep(10) 
+    
+    linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+    for linha in linhas:
+        try:
+            conteudo_bruto = linha.text
+            if "1.5" in conteudo_bruto:
                 casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
+                if "Betano" in casa:
+                    spans = linha.find_elements(By.TAG_NAME, "span")
+                    textos_span = [s.text for s in spans if s.text]
+                    return textos_span[1] if len(textos_span) > 1 else "N/A"
+        except: continue
+    return "N/A"
+
+def extrair_mercado_simples(driver, url, mercado_nome):
+    print(f"🌐 Verificando: {mercado_nome}...", flush=True)
+    driver.get(url)
+    time.sleep(12) 
+    
+    linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+    for linha in linhas:
+        try:
+            casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
+            if "Betano" in casa:
+                spans = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
+                odds = [s.text for s in spans if s.text]
                 
-                if "1.5" in dados and "Betano" in casa:
-                    resultados["+1.5"] = dados[1]
-                    break # Achou o Bingo, para de procurar gols
-            except: continue
+                if mercado_nome == "BTTS":
+                    return odds[0] if odds else "N/A"
+                elif mercado_nome == "DC":
+                    return (odds[0], odds[2]) if len(odds) >= 3 else ("N/A", "N/A")
+        except: continue
+    return "N/A" if mercado_nome == "BTTS" else ("N/A", "N/A")
 
-        # --- 2. LÓGICA DOS PRINTS (BTTS) ---
-        url_btts = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/"
-        print(f"🔍 Buscando BTTS (Lógica do Print)...", flush=True)
-        driver.get(url_btts)
-        time.sleep(10)
+def rodar_unificado():
+    driver = configurar_driver()
+    id_jogo = "W8mj7MDD"
+    
+    try:
+        # 1. Gols +1.5 usando a lógica do Diagnóstico Bruto
+        odd_gols = extrair_gols_bingo(driver, id_jogo)
         
-        linhas_btts = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-        for linha in linhas_btts:
-            try:
-                casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-                if "Betano" in casa:
-                    odds = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
-                    if odds:
-                        resultados["BTTS"] = odds[0].text # SIM
-                        break
-            except: continue
-
-        # --- 3. LÓGICA DOS PRINTS (DOUBLE CHANCE) ---
-        url_dc = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/"
-        print(f"🔍 Buscando Dupla Chance (Lógica do Print)...", flush=True)
-        driver.get(url_dc)
-        time.sleep(10)
+        # 2. BTTS usando a lógica do segundo código
+        odd_btts = extrair_mercado_simples(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/", "BTTS")
         
-        linhas_dc = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-        for linha in linhas_dc:
-            try:
-                casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-                if "Betano" in casa:
-                    odds = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
-                    if len(odds) >= 3:
-                        resultados["1X"] = odds[0].text
-                        resultados["X2"] = odds[2].text
-                        break
-            except: continue
+        # 3. Double Chance usando a lógica do segundo código
+        odd_1x, odd_x2 = extrair_mercado_simples(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/", "DC")
 
-        # --- RELATÓRIO FINAL UNIFICADO ---
         print("\n" + "="*35)
-        print("📊 RELATÓRIO FINAL UNIFICADO")
+        print("📊 RELATÓRIO UNIFICADO (LÓGICAS DE SUCESSO)")
         print("="*35)
-        print(f"🔥 Gols +1.5:  {resultados['+1.5']}")
-        print(f"🤝 BTTS Sim:   {resultados['BTTS']}")
-        print(f"🏠 Double 1X:  {resultados['1X']}")
-        print(f"🚀 Double X2:  {resultados['X2']}")
+        print(f"🔥 Gols +1.5:  {odd_gols}")
+        print(f"🤝 BTTS Sim:   {odd_btts}")
+        print(f"🏠 Double 1X:  {odd_1x}")
+        print(f"🚀 Double X2:  {odd_x2}")
         print("="*35, flush=True)
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    rodar_extracao_unificada()
-        
+    rodar_unificado()
+    
