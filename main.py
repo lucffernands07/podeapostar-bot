@@ -36,14 +36,17 @@ def capturar_bruto_estatisticas(driver, id_jogo, label):
         
         # Captura o texto de todo o card de estatísticas
         container = driver.find_element(By.CSS_SELECTOR, "div[id*='statistics']")
-        print(f"CONTEUDO_BRUTO: {container.text.replace('\n', ' | ')}")
+        
+        # CORREÇÃO DA SINTAXE: Processa fora da f-string
+        texto_limpo = container.text.replace('\n', ' | ')
+        print(f"CONTEUDO_BRUTO: {texto_limpo}")
         
     except Exception as e:
-        print(f"⚠️ Não foi possível carregar estatísticas para {id_jogo}. Verifique se o jogo já terminou ou se tem dados.")
+        print(f"⚠️ Sem estatísticas para {id_jogo} ou erro: {e}")
 
 def main():
     driver = configurar_driver()
-    id_principal = "ne5y23mR" # Defensa y Justicia x Boca
+    id_principal = "ne5y23mR" 
     url_h2h = f"https://www.flashscore.com.br/jogo/{id_principal}/#/h2h/overall"
     
     print(f"🚀 INICIANDO CAPTURA ÚNICA - JOGO: {id_principal}")
@@ -52,29 +55,27 @@ def main():
         driver.get(url_h2h)
         time.sleep(8)
         
-        # Pega o primeiro jogo do Casa e o primeiro do Fora
         ids_alvo = []
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for idx, secao in enumerate(secoes[:2]):
             try:
-                # Pega apenas a primeira linha (último jogo) de cada seção
+                # Pega apenas o primeiro jogo (o mais recente)
                 primeira_linha = secao.find_element(By.CSS_SELECTOR, ".h2h__row")
                 id_raw = primeira_linha.get_attribute("id").split('_')[-1]
                 ids_alvo.append(id_raw)
             except:
                 pass
 
-        if len(ids_alvo) >= 2:
-            print(f"IDs Alvos Localizados: Casa({ids_alvo[0]}) | Fora({ids_alvo[1]})")
-            
-            # Captura o bruto do último jogo do Casa
+        if len(ids_alvo) >= 1:
+            # Captura o bruto do último jogo do Casa (Defensa)
             capturar_bruto_estatisticas(driver, ids_alvo[0], "ÚLTIMO JOGO CASA")
             
-            # Captura o bruto do último jogo do Fora
-            capturar_bruto_estatisticas(driver, ids_alvo[1], "ÚLTIMO JOGO FORA")
+            # Captura o bruto do último jogo do Fora (Boca), se existir
+            if len(ids_alvo) > 1:
+                capturar_bruto_estatisticas(driver, ids_alvo[1], "ÚLTIMO JOGO FORA")
         else:
-            print("❌ Falha ao localizar os IDs dos últimos jogos no H2H.")
+            print("❌ Falha ao localizar os IDs no H2H.")
 
     finally:
         print("\n🏁 FIM DO DIAGNÓSTICO.")
@@ -82,3 +83,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
