@@ -123,40 +123,46 @@ def main():
         driver.get("https://www.flashscore.com.br/")
         time.sleep(5)
         
+        # 1. Coleta os dados no H2H
         s = pegar_estatisticas_h2h(driver, url_confronto)
         
+        # 2. Verifica os mercados
         res_gols = gols.verificar_gols(s)
         res_btts = ambos_marcam.verificar_btts(s)
         res_cd = chance_dupla.verificar_chance_dupla(s)
         
         sugestoes = res_gols + ([f"Ambas Marcam ({res_btts})"] if res_btts else []) + res_cd
-        print(f"\n✅ MERCADOS: {sugestoes}")
+        print(f"✅ MERCADOS: {sugestoes}")
         
-        if s["ids_h2h"]:
-            print(f"\n🔍 BUSCANDO ESCANTEIOS (MODO LINEAR)...")
+        # 3. VERIFICAÇÃO DOS ESCANTEIOS (FORÇADA)
+        ids_para_busca = list(dict.fromkeys([x for x in s["ids_h2h"] if x]))
+        
+        if ids_para_busca:
+            print(f"🔍 BUSCANDO ESCANTEIOS EM {len(ids_para_busca)} JOGOS...")
             soma_c, cont_j = 0, 0
             
-            # Limpa a lista de IDs
-            lista_ids = list(dict.fromkeys([x for x in s["ids_h2h"] if x]))
-            
-            # Fecha a aba do H2H e foca na aba principal para navegação linear
-            driver.close()
+            # Em vez de fechar a aba, apenas voltamos para a primeira
+            # Isso evita que o driver perca a conexão
             driver.switch_to.window(driver.window_handles[0])
 
-            for id_h in lista_ids:
+            for id_h in ids_para_busca:
                 c = capturar_escanteios_detalhe(driver, id_h)
                 if c > 0:
                     soma_c += c
                     cont_j += 1
             
-            media = soma_c / cont_j if cont_j > 0 else 0
-            print(f"\n📊 RESULTADO FINAL:")
-            print(f"   > Jogos analisados: {cont_j}")
-            print(f"   > MÉDIA DE ESCANTEIOS: {media:.2f}")
+            if cont_j > 0:
+                media = soma_c / cont_j
+                print(f"📊 MÉDIA FINAL DE ESCANTEIOS: {media:.2f}")
+            else:
+                print("⚠️ Nenhum dado de escanteio foi extraído dos jogos.")
+        else:
+            print("❌ NENHUM ID FOI COLETADO NO H2H.")
 
     finally:
         print("\n🏁 FIM DO TESTE.")
         driver.quit()
+
 
 if __name__ == "__main__":
     main()
