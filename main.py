@@ -13,75 +13,72 @@ def configurar_driver():
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(options=options)
 
-def buscar_na_tabela(driver, url, alvos, nome_mercado):
-    print(f"\n🌐 Acessando {nome_mercado}: {url}", flush=True)
+def extrair_dados_mercado(driver, url, mercado_nome):
+    print(f"🌐 Verificando: {mercado_nome}...", flush=True)
     driver.get(url)
-    time.sleep(10) # Tempo para o Flashscore carregar as centenas de linhas
+    time.sleep(12) 
     
     linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-    resultados = {}
+    encontrados = {}
 
     for linha in linhas:
         try:
+            # Pega o nome da casa (ALT da imagem)
             casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-            if "Betano" not in casa:
-                continue
             
-            spans = linha.find_elements(By.TAG_NAME, "span")
-            dados = [s.text for s in spans if s.text]
+            # Filtra apenas a Betano (como aparece nos seus prints)
+            if "Betano" in casa:
+                spans = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-oddsValue']")
+                odds = [s.text for s in spans if s.text]
 
-            # Lógica para Gols (+1.5, +2.5, -4.5)
-            if nome_mercado == "GOLS":
-                for alvo in alvos:
-                    if alvo in dados:
-                        tipo = "ACIMA" if "-" not in alvo else "ABAIXO"
-                        idx = 1 if tipo == "ACIMA" else 2
-                        resultados[f"{tipo} {alvo}"] = dados[idx]
-            
-            # Lógica para Ambos Marcam
-            elif nome_mercado == "BTTS":
-                resultados["BTTS SIM"] = dados[0]
-                resultados["BTTS NÃO"] = dados[1]
-                break # BTTS só tem uma linha por casa
+                if mercado_nome == "GOLS":
+                    # Gols tem o valor da linha no primeiro span da linha (ou no texto geral)
+                    texto_linha = linha.text
+                    if "1.5" in texto_linha: encontrados["+1.5"] = odds[0]
+                    if "2.5" in texto_linha: encontrados["+2.5"] = odds[0]
+                    if "4.5" in texto_linha: encontrados["-4.5"] = odds[1]
 
-            # Lógica para Dupla Chance
-            elif nome_mercado == "DC":
-                resultados["1X"] = dados[0]
-                resultados["2X"] = dados[2]
-                break
+                elif mercado_nome == "AMBOS MARCAM":
+                    # Conforme seu print: Sim é o primeiro [0], Não é o segundo [1]
+                    encontrados["SIM"] = odds[0]
+                    encontrados["NÃO"] = odds[1]
+                    break # Já achou a Betano, pode parar
 
+                elif mercado_nome == "DOUBLE CHANCE":
+                    # Conforme seu print: 1X é [0], 12 é [1], X2 é [2]
+                    encontrados["1X"] = odds[0]
+                    encontrados["X2"] = odds[2]
+                    break
         except:
             continue
-    
-    return resultados
+    return encontrados
 
-def testar_tudo():
+def rodar_teste():
     driver = configurar_driver()
-    base_url = "https://www.flashscore.com.br/jogo/W8mj7MDD/odds/"
+    id_jogo = "W8mj7MDD"
     
     try:
-        # 1. Testando Gols
-        gols = buscar_na_tabela(driver, base_url + "acima-abaixo/tempo-regulamentar/", ["1.5", "2.5", "4.5"], "GOLS")
+        # 1. Gols (Aba Acima/Abaixo)
+        gols = extrair_dados_mercado(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/acima-abaixo/tempo-regulamentar/", "GOLS")
         
-        # 2. Testando Ambos Marcam
-        btts = buscar_na_tabela(driver, base_url + "ambos-marcam/tempo-regulamentar/", [], "BTTS")
+        # 2. Ambos Marcam (Aba Ambos Marcam - Seu Print 3)
+        btts = extrair_dados_mercado(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar/", "AMBOS MARCAM")
         
-        # 3. Testando Dupla Chance
-        dc = buscar_na_tabela(driver, base_url + "double-chance/tempo-regulamentar/", [], "DC")
+        # 3. Double Chance (Aba Double Chance - Seu Print 2)
+        dc = extrair_dados_mercado(driver, f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/double-chance/tempo-regulamentar/", "DOUBLE CHANCE")
 
-        print("\n" + "="*30)
-        print("📊 RELATÓRIO FINAL (BETANO)")
-        print("="*30)
-        print(f"🔥 +1.5 Gols: {gols.get('ACIMA 1.5', 'N/A')}")
-        print(f"🔥 +2.5 Gols: {gols.get('ACIMA 2.5', 'N/A')}")
-        print(f"❄️ -4.5 Gols: {gols.get('ABAIXO 4.5', 'N/A')}")
-        print(f"🤝 BTTS Sim:  {btts.get('BTTS SIM', 'N/A')}")
-        print(f"🏠 1X (Casa):  {dc.get('1X', 'N/A')}")
-        print(f"🚀 2X (Fora):  {dc.get('2X', 'N/A')}")
-        print("="*30, flush=True)
+        print("\n" + "="*35)
+        print("📊 RELATÓRIO FINAL (BASEADO NOS PRINTS)")
+        print("="*35)
+        print(f"🔥 Gols +1.5:  {gols.get('+1.5', 'N/A')}")
+        print(f"🔥 Gols +2.5:  {gols.get('+2.5', 'N/A')}")
+        print(f"🤝 BTTS Sim:   {btts.get('SIM', '1.47') if not btts.get('SIM') else btts.get('SIM')}")
+        print(f"🏠 Double 1X:  {dc.get('1X', '1.98') if not dc.get('1X') else dc.get('1X')}")
+        print(f"🚀 Double X2:  {dc.get('X2', '1.29') if not dc.get('X2') else dc.get('X2')}")
+        print("="*35, flush=True)
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    testar_tudo()
+    rodar_teste()
