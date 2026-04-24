@@ -25,36 +25,55 @@ def configurar_driver():
     return driver
 
 def capturar_escanteios_detalhe(driver, id_jogo_h2h):
+def capturar_escanteios_detalhe(driver, id_jogo_h2h):
     url_detalhe = f"https://www.flashscore.com.br/jogo/{id_jogo_h2h}/#/resumo-de-jogo/estatisticas-de-jogo"
-    print(f"    [ABA DETALHE] Acessando ID: {id_jogo_h2h}")
+    print(f"    [DETALHE] Navegando para: {id_jogo_h2h}")
     
-    driver.execute_script(f"window.open('{url_detalhe}', '_blank');")
-    WebDriverWait(driver, 10).until(lambda d: len(d.window_handles) >= 3)
-    driver.switch_to.window(driver.window_handles[-1])
+    # Navega na mesma aba (mais rápido e seguro no GitHub Actions)
+    driver.get(url_detalhe)
     
     total_cantos = 0
     try:
-        btn_stats = WebDriverWait(driver, 12).until(
+        # Espera o botão estatísticas
+        btn_stats = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "//button[contains(.,'Estatísticas')]"))
         )
         driver.execute_script("arguments[0].click();", btn_stats)
+        
+        # Aguarda renderização dos gráficos
         time.sleep(4) 
 
+        # Seletor baseado no seu print de estatísticas
         xpath_cantos = "//div[contains(@class, 'stat__category') and .//div[contains(text(), 'Escanteios')]]"
         linha = driver.find_element(By.XPATH, xpath_cantos)
         
         numeros = re.findall(r'\d+', linha.text)
         if len(numeros) >= 2:
-            c_casa = int(numeros[0])
-            c_fora = int(numeros[1])
-            total_cantos = c_casa + c_fora
-            print(f"    [ABA DETALHE] ✅ Cantos encontrados: {total_cantos} ({c_casa} + {c_fora})")
-    except Exception:
-        print(f"    [ABA DETALHE] ⚠️ Escanteios não localizados.")
+            total_cantos = int(numeros[0]) + int(numeros[1])
+            print(f"    ✅ Cantos: {total_cantos}")
+    except:
+        print(f"    ⚠️ Sem dados de cantos para este ID.")
         
-    driver.close()
-    driver.switch_to.window(driver.window_handles[1]) 
     return total_cantos
+
+# --- NO MAIN, MUDE O LOOP PARA ESTE ---
+        if s["ids_h2h"]:
+            print(f"\n🔍 BUSCANDO ESCANTEIOS (MODO LINEAR)...")
+            soma_c, cont_j = 0, 0
+            
+            lista_ids = list(dict.fromkeys([x for x in s["ids_h2h"] if x]))
+            
+            # ATENÇÃO: Voltamos para a aba principal para começar a navegação linear
+            driver.switch_to.window(driver.window_handles[0])
+
+            for id_h in lista_ids:
+                c = capturar_escanteios_detalhe(driver, id_h)
+                if c > 0:
+                    soma_c += c
+                    cont_j += 1
+            
+            media = soma_c / cont_j if cont_j > 0 else 0
+            print(f"\n📊 MÉDIA FINAL: {media:.2f}")
 
 def pegar_estatisticas_h2h(driver, url_jogo):
     print(f"\n[ABA H2H] Abrindo confronto: {url_jogo}")
