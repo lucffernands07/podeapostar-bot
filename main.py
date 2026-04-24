@@ -1,6 +1,5 @@
 import sys
 import time
-import json
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -16,69 +15,65 @@ def configurar_driver():
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     return webdriver.Chrome(options=options)
 
-def extrair_primeira_linha(driver, url, mercado_nome):
-    print(f"🌐 Acessando {mercado_nome}: {url}", flush=True)
-    driver.get(url)
-    
-    try:
-        # Espera a tabela carregar
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
-        time.sleep(5) # Delay para garantir o preenchimento dos valores
-        
-        # Pega a primeiríssima linha da tabela
-        linha = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
-        
-        # Extrai os dados
-        casa = "Desconhecida"
-        try:
-            casa = linha.find_element(By.TAG_NAME, "img").get_attribute("alt")
-        except:
-            pass
-            
-        spans = linha.find_elements(By.TAG_NAME, "span")
-        textos_span = [s.text for s in spans if s.text]
-        
-        resultado = {
-            "mercado": mercado_nome,
-            "casa": casa,
-            "odds": textos_span,
-            "texto_bruto": linha.text.replace("\n", " | ")
-        }
-        return resultado
-    except Exception as e:
-        return {"mercado": mercado_nome, "erro": str(e)}
-
-def rodar_teste_bingo_total():
+def buscar_dados():
     driver = configurar_driver()
-    id_jogo = "W8mj7MDD"
-    
-    # URLs com a lógica do Bingo (mid) aplicada
-    urls = {
-        "GOLS 1.5": f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{id_jogo}/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU",
-        "BTTS": f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{id_jogo}/odds/ambos-marcam/tempo-regulamentar/?mid=lfKIYGgU",
-        "DP": f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{id_jogo}/odds/double-chance/tempo-regulamentar/?mid=lfKIYGgU"
-    }
-    
-    relatorio = []
+    ID = "W8mj7MDD"
+    res = {"GOLS": "N/A", "BTTS": "N/A", "1X": "N/A", "X2": "N/A"}
     
     try:
-        for mercado, link in urls.items():
-            dados = extrair_primeira_linha(driver, link, mercado)
-            relatorio.append(dados)
-            print(f"✅ Capturado: {mercado}", flush=True)
-            time.sleep(2) # Pequena pausa entre abas
+        # 1. BUSCA GOLS (Varredura profunda para achar a linha 132 ou onde estiver o 1.5)
+        print("🌐 Buscando Gols 1.5 (Varredura de tabela)...", flush=True)
+        driver.get(f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{ID}/odds/acima-abaixo/tempo-regulamentar/?mid=lfKIYGgU")
+        
+        # Espera a tabela existir
+        WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
+        time.sleep(5) # Tempo para o JS carregar as centenas de linhas
+        
+        linhas_gols = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+        print(f"📊 Total de linhas detectadas: {len(linhas_gols)}", flush=True)
 
-        print("\n" + "="*50)
-        print("📊 DIAGNÓSTICO DAS PRIMEIRAS LINHAS (BINGO)")
-        print("="*50)
-        for item in relatorio:
-            print(json.dumps(item, indent=2, ensure_ascii=False))
-            print("-" * 30)
-        print("="*50, flush=True)
+        for linha in linhas_gols:
+            texto = linha.text
+            if "1.5" in texto:
+                # Achou a linha do 1.5, agora pega os spans de odds
+                spans = [s.text for s in linha.find_elements(By.TAG_NAME, "span") if s.text]
+                # No seu log, a odd de 'Acima' é o segundo valor numérico que aparece
+                # Exemplo: ["1.5", "1.14", "5.50"] -> Queremos o "1.14"
+                if len(spans) >= 2:
+                    res["GOLS"] = spans[1]
+                    print(f"🎯 1.5 Encontrado! Odd: {res['GOLS']}", flush=True)
+                    break
+
+        # 2. BUSCA BTTS (Primeira Linha - bet365/Betano)
+        print("🌐 Buscando BTTS...", flush=True)
+        driver.get(f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{ID}/odds/ambos-marcam/tempo-regulamentar/?mid=lfKIYGgU")
+        time.sleep(8)
+        linha_btts = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
+        odds_btts = [s.text for s in linha_btts.find_elements(By.TAG_NAME, "span") if s.text]
+        if odds_btts: res["BTTS"] = odds_btts[0]
+
+        # 3. BUSCA DUPLA CHANCE (Primeira Linha - bet365/Betano)
+        print("🌐 Buscando Dupla Chance...", flush=True)
+        driver.get(f"https://www.flashscore.com.br/jogo/futebol/betis-vJbTeCGP/real-madrid-{ID}/odds/double-chance/tempo-regulamentar/?mid=lfKIYGgU")
+        time.sleep(8)
+        linha_dc = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
+        odds_dc = [s.text for s in linha_dc.find_elements(By.TAG_NAME, "span") if s.text]
+        if len(odds_dc) >= 3:
+            res["1X"] = odds_dc[0]
+            res["X2"] = odds_dc[2]
 
     finally:
         driver.quit()
+    return res
 
 if __name__ == "__main__":
-    rodar_teste_bingo_total()
+    dados = buscar_dados()
+    print("\n" + "="*35)
+    print("📊 RELATÓRIO FINAL")
+    print("="*35)
+    print(f"🔥 Gols +1.5:  {dados['GOLS']}")
+    print(f"🤝 BTTS Sim:   {dados['BTTS']}")
+    print(f"🏠 Double 1X:  {dados['1X']}")
+    print(f"🚀 Double X2:  {dados['X2']}")
+    print("="*35, flush=True)
     
