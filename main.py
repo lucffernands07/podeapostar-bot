@@ -58,7 +58,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     try:
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
-        time.sleep(10)
+        time.sleep(5)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for idx, secao in enumerate(secoes[:2]):
