@@ -117,7 +117,7 @@ def main():
             
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
-            time.sleep(8)
+            time.sleep(4)
             elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
 
             jogos_do_campeonato = []
