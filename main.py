@@ -141,7 +141,16 @@ def main():
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
                         
-                        # --- SUA LÓGICA ESTATÍSTICA ---
+                        # --- 1. FUNÇÃO PARA FORMATAR URL (ADICIONADA AQUI) ---
+                        def limpar_nome_url(nome):
+                            import unicodedata
+                            n = unicodedata.normalize('NFKD', nome).encode('ASCII', 'ignore').decode('ASCII')
+                            return n.lower().replace(" ", "-").replace(".", "").replace("/", "-")
+
+                        t1_url = limpar_nome_url(t1)
+                        t2_url = limpar_nome_url(t2)
+
+                        # --- 2. LÓGICA ESTATÍSTICA ---
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
@@ -153,21 +162,15 @@ def main():
                         sugestoes_stat = sugestoes_todas[:5] 
                         
                         if sugestoes_stat:
-                            # --- LOGS DE VALIDAÇÃO (INSERIDOS AQUI) ---
+                            # --- 3. LOGS DE VALIDAÇÃO COM URL COMPLETA ---
+                            url_final_odds = f"https://www.flashscore.com.br/jogo/{t1_url}-v-{t2_url}-{id_jogo}/odds/acima-abaixo/tempo-regulamentar"
+                            
                             print(f"\n    🔎 [DEBUG] Jogo: {t1} x {t2}")
-                            print(f"    🔎 [DEBUG] URL ESTATÍSTICA (H2H): {url_h2h_final}")
-                            print(f"    🔎 [DEBUG] ID DO JOGO: {id_jogo}")
-                            
-                            # URLs que o odds.py tentará acessar
-                            url_debug_gols = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/acima-abaixo/tempo-regulamentar"
-                            url_debug_btts = f"https://www.flashscore.com.br/jogo/{id_jogo}/odds/ambos-marcam/tempo-regulamentar"
-                            
-                            print(f"    🔗 [DEBUG] URL ODDS GOLS: {url_debug_gols}")
-                            print(f"    🔗 [DEBUG] URL ODDS BTTS: {url_debug_btts}")
+                            print(f"    🔗 [DEBUG] URL ODDS CORRETA: {url_final_odds}")
                             print(f"    ✅ PASSOU NA ESTATÍSTICA: {t1} x {t2}")
                             
-                            # --- BUSCA E FILTRO DE ODDS (TRAVA 1.20) ---
-                            v_odds = odds.capturar_todas_as_odds(id_jogo)
+                            # --- 4. BUSCA DE ODDS (Passando id e nomes agora) ---
+                            v_odds = odds.capturar_todas_as_odds(id_jogo, t1_url, t2_url)
                             
                             sugestoes_com_odd_validada = []
                             for m in sugestoes_stat:
