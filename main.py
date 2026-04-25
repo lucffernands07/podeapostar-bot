@@ -155,7 +155,7 @@ def main():
                             print(f"\n    🔎 [DEBUG] Jogo: {t1} x {t2} | ID: {id_jogo}")
                             
                             # Chamada simplificada - o odds.py descobre a URL agora
-                            v_odds = odds.capturar_todas_as_odds(id_jogo)
+                            v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
                             
                             sugestoes_com_odd_validada = []
                             for m in sugestoes_stat:
