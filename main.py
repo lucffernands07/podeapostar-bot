@@ -113,7 +113,7 @@ def main():
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 5: break 
+            if total_mercados >= 200: break 
             
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
@@ -123,7 +123,7 @@ def main():
             jogos_do_campeonato = []
             
             for el in elementos:
-                if total_mercados >= 5: break 
+                if total_mercados >= 200: break 
                 
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
@@ -141,16 +141,6 @@ def main():
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
                         
-                        # --- 1. FUNÇÃO PARA FORMATAR URL (ADICIONADA AQUI) ---
-                        def limpar_nome_url(nome):
-                            import unicodedata
-                            n = unicodedata.normalize('NFKD', nome).encode('ASCII', 'ignore').decode('ASCII')
-                            return n.lower().replace(" ", "-").replace(".", "").replace("/", "-")
-
-                        t1_url = limpar_nome_url(t1)
-                        t2_url = limpar_nome_url(t2)
-
-                        # --- 2. LÓGICA ESTATÍSTICA ---
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
@@ -162,15 +152,10 @@ def main():
                         sugestoes_stat = sugestoes_todas[:5] 
                         
                         if sugestoes_stat:
-                            # --- 3. LOGS DE VALIDAÇÃO COM URL COMPLETA ---
-                            url_final_odds = f"https://www.flashscore.com.br/jogo/{t1_url}-v-{t2_url}-{id_jogo}/odds/acima-abaixo/tempo-regulamentar"
+                            print(f"\n    🔎 [DEBUG] Jogo: {t1} x {t2} | ID: {id_jogo}")
                             
-                            print(f"\n    🔎 [DEBUG] Jogo: {t1} x {t2}")
-                            print(f"    🔗 [DEBUG] URL ODDS CORRETA: {url_final_odds}")
-                            print(f"    ✅ PASSOU NA ESTATÍSTICA: {t1} x {t2}")
-                            
-                            # --- 4. BUSCA DE ODDS (Passando id e nomes agora) ---
-                            v_odds = odds.capturar_todas_as_odds(id_jogo, t1_url, t2_url)
+                            # Chamada simplificada - o odds.py descobre a URL agora
+                            v_odds = odds.capturar_todas_as_odds(id_jogo)
                             
                             sugestoes_com_odd_validada = []
                             for m in sugestoes_stat:
@@ -186,21 +171,13 @@ def main():
                                     valor_num = float(valor_odd_str.replace(',', '.'))
                                     if valor_num >= 1.20:
                                         sugestoes_com_odd_validada.append(f"🔶 {m} | Odd: `{valor_odd_str}`")
-                                    else:
-                                        print(f"        🚫 Odd {valor_odd_str} muito baixa (< 1.20)")
                                 except:
-                                    print(f"        ⚠️ Odd N/A para o mercado: {m}")
+                                    pass
 
                             if sugestoes_com_odd_validada:
-                                item = (
-                                    f"⏱️ {h_br} | {nome_comp}\n"
-                                    f"🏟️ {t1} x {t2}\n" + 
-                                    "\n".join(sugestoes_com_odd_validada)
-                                )
+                                item = (f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(sugestoes_com_odd_validada))
                                 jogos_do_campeonato.append(item)
                                 total_mercados += len(sugestoes_com_odd_validada)
-                                print(f"    🚀 ENVIADO: {t1} x {t2}")
-
                 except Exception:
                     continue
             
@@ -208,16 +185,9 @@ def main():
                 bilhete_agrupado.append("\n\n".join(jogos_do_campeonato))
 
         if bilhete_agrupado:
-            cabecalho = f"🎫 *BILHETE GERADO - {hoje_ref.strftime('%d/%m')}*\n\n"
-            corpo = "\n\n----------------------------------------------\n\n".join(bilhete_agrupado)
-            rodape = f"\n\n---\n" \
-                     f"💎 Apostar na [Betano](https://br.betano.com/) | " \
-                     f"[Bet365](https://www.bet365.com/)"
-            enviar_telegram(cabecalho + corpo + rodape)
-
+            enviar_telegram("🎫 *BILHETE GERADO*\n\n" + "\n\n---\n\n".join(bilhete_agrupado))
     finally:
         driver.quit()
-
 
 
 if __name__ == "__main__":
