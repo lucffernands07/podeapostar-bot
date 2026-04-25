@@ -15,6 +15,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from ligas import COMPETICOES
 from mercados import gols, ambos_marcam, chance_dupla
 import odds  # Importa o módulo odds.py que você enviou
+import tripla_dupla  # Importando o novo arquivo
 
 def enviar_telegram(mensagem):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -104,18 +105,20 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.switch_to.window(driver.window_handles[0])
     return stats
 
+
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-    bilhete_agrupado = []
+    
+    bilhete_agrupado_texto = [] # Para o listão do Telegram
+    lista_para_filtros = []     # Lista "bruta" para o tripla_dupla.py
     total_mercados = 0 
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 30: break 
+            if total_mercados >= 50: break 
             
-            print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
             time.sleep(4)
             elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
@@ -123,7 +126,7 @@ def main():
             jogos_do_campeonato = []
             
             for el in elementos:
-                if total_mercados >= 30: break 
+                if total_mercados >= 50: break 
                 
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
@@ -152,9 +155,6 @@ def main():
                         sugestoes_stat = sugestoes_todas[:5] 
                         
                         if sugestoes_stat:
-                            print(f"\n    🔎 [DEBUG] Jogo: {t1} x {t2} | ID: {id_jogo}")
-                            
-                            # Chamada simplificada - o odds.py descobre a URL agora
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
                             
                             sugestoes_com_odd_validada = []
@@ -170,24 +170,43 @@ def main():
                                 try:
                                     valor_num = float(valor_odd_str.replace(',', '.'))
                                     if valor_num >= 1.20:
+                                        # 1. Guarda para o texto do listão
                                         sugestoes_com_odd_validada.append(f"🔶 {m} | Odd: `{valor_odd_str}`")
-                                except:
-                                    pass
+                                        
+                                        # 2. Guarda na lista bruta para o tripla_dupla.py
+                                        lista_para_filtros.append({
+                                            "horario": h_br,
+                                            "time_casa": t1,
+                                            "time_fora": t2,
+                                            "mercado": m,
+                                            "odd": valor_odd_str,
+                                            "liga": nome_comp
+                                        })
+                                except: pass
 
                             if sugestoes_com_odd_validada:
                                 item = (f"⏱️ {h_br} | {nome_comp}\n🏟️ {t1} x {t2}\n" + "\n".join(sugestoes_com_odd_validada))
                                 jogos_do_campeonato.append(item)
                                 total_mercados += len(sugestoes_com_odd_validada)
-                except Exception:
-                    continue
+                except Exception: continue
             
             if jogos_do_campeonato:
-                bilhete_agrupado.append("\n\n".join(jogos_do_campeonato))
+                bilhete_agrupado_texto.append("\n\n".join(jogos_do_campeonato))
 
-        if bilhete_agrupado:
-            enviar_telegram("🎫 *BILHETE GERADO*\n\n" + "\n\n---\n\n".join(bilhete_agrupado))
+        # --- ENVIO FINAL ---
+        if bilhete_agrupado_texto:
+            # 1. Envia o Listão Geral
+            enviar_telegram("🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n---\n\n".join(bilhete_agrupado_texto))
+            
+            # 2. Gera e Envia os Bilhetes Estratégicos (Tripla e Dupla)
+            novos_bilhetes = tripla_dupla.montar_bilhetes_estrategicos(lista_para_filtros)
+            if novos_bilhetes:
+                texto_estrategico = tripla_dupla.formatar_para_telegram(novos_bilhetes)
+                enviar_telegram("💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_estrategico)
+
     finally:
         driver.quit()
+
 
 
 if __name__ == "__main__":
