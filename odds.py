@@ -9,13 +9,11 @@ def capturar_todas_as_odds(driver, id_jogo):
         "BTTS": "N/A", "1X": "N/A", "X2": "N/A"
     }
 
-    # Abre nova aba e foca nela
     driver.execute_script(f"window.open('https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
 
     try:
         time.sleep(3)
-        # Captura a URL base que contém o código MID correto
         try:
             elemento_aba = driver.find_element(By.XPATH, "//a[contains(@href, '/odds/')]")
             link_odds_base = elemento_aba.get_attribute('href')
@@ -24,7 +22,7 @@ def capturar_todas_as_odds(driver, id_jogo):
             driver.switch_to.window(driver.window_handles[0])
             return res
 
-        # 1. MERCADO DE GOLS (Usando a lógica de filtragem do seu teste)
+        # 1. MERCADO DE GOLS
         url_gols = link_odds_base.replace("/odds/", "/odds/acima-abaixo/tempo-regulamentar/")
         driver.get(url_gols)
         
@@ -38,24 +36,38 @@ def capturar_todas_as_odds(driver, id_jogo):
                 spans = [s.text for s in linha.find_elements(By.TAG_NAME, "span") if s.text]
                 if len(spans) < 2: continue
 
-                # Lógica Sequencial do seu Teste
+                # BUSCA 1.5
                 if res["GOLS_15"] == "N/A" and "1.5" in txt:
                     for s in spans:
                         if "." in s and s != "1.5":
                             res["GOLS_15"] = s
                             break
                 
+                # BUSCA 2.5
                 elif res["GOLS_15"] != "N/A" and res["GOLS_25"] == "N/A" and "2.5" in txt:
                     for s in spans:
                         if "." in s and s != "2.5":
                             res["GOLS_25"] = s
                             break
 
+                # BUSCA 4.5 (COM A LÓGICA DA DIREITA)
                 elif res["GOLS_25"] != "N/A" and res["GOLS_M45"] == "N/A" and "4.5" in txt:
-                    # Aplica a limpeza exata do seu código de teste
-                    decimais = [s for s in spans if ("." in s or "," in s) and s != "4.5"]
-                    if len(decimais) >= 2:
-                        res["GOLS_M45"] = decimais[1] # Pega a odd do "Abaixo"
+                    # Filtramos a lista: removemos o "4.5" (título) e garantimos que sobraram as odds
+                    odds_da_linha = []
+                    for s in spans:
+                        s_limpo = s.replace(',', '.').strip()
+                        if "." in s_limpo:
+                            try:
+                                # Se o valor for 4.5, ignoramos pois é o título do mercado
+                                if float(s_limpo) != 4.5:
+                                    odds_da_linha.append(s)
+                            except ValueError:
+                                continue
+                    
+                    # No Flashscore: [0] é Acima (esquerda), [1] é Abaixo (direita)
+                    # Como queremos o Menos de 4.5, pegamos sempre o índice 1
+                    if len(odds_da_linha) >= 2:
+                        res["GOLS_M45"] = odds_da_linha[1]
                         break
         except: pass
 
@@ -86,4 +98,4 @@ def capturar_todas_as_odds(driver, id_jogo):
         driver.switch_to.window(driver.window_handles[0])
     
     return res
-    
+            
