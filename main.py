@@ -113,7 +113,7 @@ def main():
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 200: break 
+            if total_mercados >= 30: break 
             
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
@@ -123,7 +123,7 @@ def main():
             jogos_do_campeonato = []
             
             for el in elementos:
-                if total_mercados >= 200: break 
+                if total_mercados >= 30: break 
                 
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
