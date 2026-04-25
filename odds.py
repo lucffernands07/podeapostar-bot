@@ -86,4 +86,4 @@ def capturar_todas_as_odds(driver, id_jogo):
         driver.switch_to.window(driver.window_handles[0])
     
     return res
-        
+    
