@@ -162,9 +162,16 @@ def main():
                                 elif "1X" in m: valor_odd_str = v_odds.get("1X", "N/A")
                                 elif "X2" in m or "2X" in m: valor_odd_str = v_odds.get("X2", "N/A")
 
-                                try:
-                                    # 2. ALTERADO PARA 1.25 (Piso de Qualidade)
-                                    if float(valor_odd_str.replace(',', '.')) >= 1.25:
+                                                                try:
+                                    odd_float = float(valor_odd_str.replace(',', '.'))
+                                    
+                                    # 🛡️ TRAVA DE SEGURANÇA: Descarta erro de leitura no -4.5
+                                    if "-4.5" in m and odd_float >= 4.0:
+                                        print(f"      🚫 Odd suspeita para -4.5 ({odd_float}). Ignorando...")
+                                        continue 
+
+                                    # ✅ FILTRO DE QUALIDADE (1.25)
+                                    if odd_float >= 1.25:
                                         lista_para_filtros.append({
                                             "horario": h_br, 
                                             "time_casa": t1, 
@@ -174,10 +181,11 @@ def main():
                                             "liga": nome_comp
                                         })
                                         total_mercados += 1
-                                except: pass
-                except: continue
+                                except: 
+                                    pass
 
-                # 2. ORGANIZAÇÃO E ENVIO
+
+        # 2. ORGANIZAÇÃO E ENVIO
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
 
