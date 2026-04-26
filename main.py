@@ -109,11 +109,11 @@ def main():
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
     
-    lista_para_filtros = []     # Nossa central de dados única
+    lista_para_filtros = []     # Central de dados para todos os bilhetes
     total_mercados = 0 
 
     try:
-        # Loop principal pelas ligas
+        # 1. COLETA DE DADOS
         for nome_comp, url in COMPETICOES.items():
             if total_mercados >= 100: break 
             
@@ -126,12 +126,10 @@ def main():
                 if total_mercados >= 100: break 
                 
                 try:
-                    # Extração de Horário
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
                     h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    # Filtro de Data (Hoje e Madrugada de Amanhã)
                     aceitar = False
                     if amanha_no_site in tempo_raw:
                         if h_obj.hour <= 3: aceitar = True
@@ -143,11 +141,9 @@ def main():
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
                         
-                        # Estatísticas H2H
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
-                        # Análise de Mercados
                         res_gols = gols.verificar_gols(s)
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
@@ -167,7 +163,6 @@ def main():
                                 elif "X2" in m or "2X" in m: valor_odd_str = v_odds.get("X2", "N/A")
 
                                 try:
-                                    # Filtro de Odd Mínima e Armazenamento
                                     if float(valor_odd_str.replace(',', '.')) >= 1.20:
                                         lista_para_filtros.append({
                                             "horario": h_br, 
@@ -181,12 +176,12 @@ def main():
                                 except: pass
                 except: continue
 
-        # --- SISTEMA DE ORGANIZAÇÃO E ENVIO DUPLO ---
+        # 2. ORGANIZAÇÃO E ENVIO (AQUI ESTÁ A CORREÇÃO)
         if lista_para_filtros:
-            # 1. ORDENAR TUDO: Primeiro por Horário, depois por Liga
+            # Ordena a lista mestra por Horário e Liga
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
 
-            # 2. MONTAR O LISTÃO GERAL (Limpo, sem links da Betano)
+            # MONTAGEM DO LISTÃO GERAL (O que você não recebeu)
             itens_listao = []
             for j in lista_para_filtros:
                 item = (f"⏱️ {j['horario']} | {j['liga']}\n"
@@ -194,27 +189,29 @@ def main():
                         f"🔶 {j['mercado']} | Odd: {j['odd']}")
                 itens_listao.append(item)
             
-            texto_listao = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
+            texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
 
-            # 3. GERAR BILHETES ESTRATÉGICOS (Com links da Betano dentro do tripla_dupla.py)
+            # MONTAGEM DAS SUGESTÕES ESTRATÉGICAS (Triplas, Quina e 7)
             novos_bilhetes = tripla_dupla.montar_bilhetes_estrategicos(lista_para_filtros)
             texto_estrategico = tripla_dupla.formatar_para_telegram(novos_bilhetes) if novos_bilhetes else None
 
-            # 4. DISPARO PARA OS CANAIS
+            # 3. DISPARO PARA O TELEGRAM
             destinatarios = [os.getenv('CHAT_ID'), "-1003982717570"]
             
             for cid in destinatarios:
                 if not cid: continue
                 
-                # Envia o Listão Geral (Ordem cronológica)
-                enviar_telegram(texto_listao, cid)
+                # PRIMEIRO: Envia o Listão Geral
+                enviar_telegram(texto_listao_final, cid)
                 
-                # Envia as Sugestões de Investimento (Triplas, Quina, 7 com links)
+                # SEGUNDO: Envia as Sugestões (se existirem)
                 if texto_estrategico:
-                    enviar_telegram(texto_estrategico, cid)
+                    header_sugestao = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n"
+                    enviar_telegram(header_sugestao + texto_estrategico, cid)
 
     finally:
         driver.quit()
+
 
 
 if __name__ == "__main__":
