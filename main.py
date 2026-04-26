@@ -116,7 +116,7 @@ def main():
     try:
         # Loop principal pelas ligas
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 50: break 
+            if total_mercados >= 100: break 
             
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
@@ -126,7 +126,7 @@ def main():
             jogos_do_campeonato = []
             
             for el in elementos:
-                if total_mercados >= 50: break 
+                if total_mercados >= 100: break 
                 
                 try:
                     # [Lógica de Horário e Filtro de Datas]
@@ -195,7 +195,7 @@ def main():
             destinatarios = [os.getenv('CHAT_ID'), "-1003982717570"]
             
             # Formata as mensagens uma única vez para economizar processamento
-            texto_listao = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n---\n\n".join(bilhete_agrupado_texto)
+            texto_listao = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(bilhete_agrupado_texto)
             novos_bilhetes = tripla_dupla.montar_bilhetes_estrategicos(lista_para_filtros)
             
             for cid in destinatarios:
