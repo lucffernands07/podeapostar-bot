@@ -34,6 +34,7 @@ COMPETICOES = {
 
     # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
     "México - Liga MX": "https://www.flashscore.com.br/futebol/mexico/liga-mx/jogos/",
+    "Albânia - Super Liga": "https://www.flashscore.com.br/futebol/albania/super-liga/",
     "Espanha - La Liga 2": "https://www.flashscore.com.br/futebol/espanha/laliga2/jogos/",
     "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/jogos/",
     "Itália - Serie B": "https://www.flashscore.com.br/futebol/italia/serie-b/jogos/",
