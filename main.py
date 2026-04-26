@@ -14,8 +14,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 # Importação dos seus módulos
 from ligas import COMPETICOES
 from mercados import gols, ambos_marcam, chance_dupla
-import odds  # Importa o módulo odds.py que você enviou
-import bingo357  # Importando o novo arquivo
+import odds  
+import bingo357  
+import links  # 1. NOVO IMPORT ADICIONADO
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -46,7 +47,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
-    # Dicionário de dados BRUTOS (Sem pré-julgamento)
     stats = {
         "casa_15": 0, "casa_25": 0, "casa_45": 0, "casa_btts": 0, 
         "casa_ult_btts": False, "casa_derrotas": 0, "casa_vitorias": 0, "casa_empates": 0, "casa_ult_res": "",
@@ -54,18 +54,17 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, 
         "fora_ult_btts": False, "fora_derrotas": 0, "fora_vitorias": 0, "fora_empates": 0, "fora_ult_res": "",
         "fora_ult_15": False, "fora_ult_sofreu": False,
-        "pular_gols": False # Mantemos o campo para não dar erro nos outros arquivos, mas sempre como False
+        "pular_gols": False 
     }
     
     try:
-        # Espera a aba H2H carregar
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
         time.sleep(5)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
-        for idx, secao in enumerate(secoes[:2]): # Analisa apenas Casa e Fora (Overall)
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5] # Pega os últimos 5 jogos
+        for idx, secao in enumerate(secoes[:2]): 
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5] 
             prefixo = "casa" if idx == 0 else "fora"
             
             print(f"      📊 Coletando dados: {prefixo.upper()}")
@@ -75,23 +74,20 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                 numeros = re.findall(r'\d+', texto_linha)
                 
                 if len(nums := [int(n) for n in numeros]) >= 2:
-                    g1, g2 = nums[-2], nums[-1] # Pega os dois últimos números (o placar)
+                    g1, g2 = nums[-2], nums[-1] 
                     total = g1 + g2
                     
-                    # Guarda informações do ÚLTIMO JOGO (i == 0)
                     if i == 0:
                         stats[f"{prefixo}_ult_15"] = (total > 1.5)
                         stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
                         if g1 > 0 and g2 > 0:
                             stats[f"{prefixo}_ult_btts"] = True
 
-                    # Acumula estatísticas para o cálculo de 3/5, 4/5, etc.
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
                     if total <= 4: stats[f"{prefixo}_45"] += 1 
                     if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
 
-                # Captura o Resultado (V, E, D) para a lógica de Dupla Chance
                 try:
                     res_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
                     if i == 0: stats[f"{prefixo}_ult_res"] = res_el
@@ -108,14 +104,12 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.switch_to.window(driver.window_handles[0])
     return stats
 
-    
-
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
     
-    lista_para_filtros = []     # Central de dados para todos os bilhetes
+    lista_para_filtros = []     
     total_mercados = 0 
 
     try:
@@ -169,7 +163,8 @@ def main():
                                 elif "X2" in m or "2X" in m: valor_odd_str = v_odds.get("X2", "N/A")
 
                                 try:
-                                    if float(valor_odd_str.replace(',', '.')) >= 1.20:
+                                    # 2. ALTERADO PARA 1.25 (Piso de Qualidade)
+                                    if float(valor_odd_str.replace(',', '.')) >= 1.25:
                                         lista_para_filtros.append({
                                             "horario": h_br, 
                                             "time_casa": t1, 
@@ -182,35 +177,43 @@ def main():
                                 except: pass
                 except: continue
 
-        # 2. ORGANIZAÇÃO E ENVIO (AQUI ESTÁ A CORREÇÃO)
+        # 2. ORGANIZAÇÃO E ENVIO
         if lista_para_filtros:
-            # Ordena a lista mestra por Horário e Liga
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
 
-            # MONTAGEM DO LISTÃO GERAL (O que você não recebeu)
+            # MONTAGEM DO LISTÃO GERAL (Links de busca rápidos)
             itens_listao = []
             for j in lista_para_filtros:
+                link_simples = f"https://www.google.com/search?q=betano+{j['time_casa']}+x+{j['time_fora']}".replace(" ", "+")
                 item = (f"⏱️ {j['horario']} | {j['liga']}\n"
                         f"🏟️ {j['time_casa']} x {j['time_fora']}\n"
-                        f"🔶 {j['mercado']} | Odd: {j['odd']}")
+                        f"🔶 {j['mercado']} | Odd: {j['odd']}\n"
+                        f"🌐 [Google]({link_simples})")
                 itens_listao.append(item)
             
             texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
 
-            # MONTAGEM DAS SUGESTÕES ESTRATÉGICAS (Triplas, Quina e 7)
-            novos_bilhetes = tripla_dupla.montar_bilhetes_estrategicos(lista_para_filtros)
-            texto_estrategico = tripla_dupla.formatar_para_telegram(novos_bilhetes) if novos_bilhetes else None
-
-            # 3. DISPARO PARA O TELEGRAM
-            destinatarios = [os.getenv('CHAT_ID'), "-1003982717570"]
+            # 3. MONTAGEM DAS SUGESTÕES BINGO 357 (Com Links Reais)
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
             
+            cache_links = {}
+            if novos_bilhetes:
+                print("\n🔗 Buscando links oficiais da Betano para os Bilhetes de Investimento...")
+                for b in novos_bilhetes:
+                    for j in b['jogos']:
+                        chave = f"{j['time_casa']}x{j['time_fora']}"
+                        if chave not in cache_links:
+                            # Chama a função do seu novo links.py
+                            cache_links[chave] = links.capturar_link_direto(driver, j['time_casa'], j['time_fora'])
+
+            # Formata usando os links capturados
+            texto_estrategico = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
+
+            # 4. DISPARO PARA O TELEGRAM
+            destinatarios = [os.getenv('CHAT_ID'), "-1003982717570"]
             for cid in destinatarios:
                 if not cid: continue
-                
-                # PRIMEIRO: Envia o Listão Geral
                 enviar_telegram(texto_listao_final, cid)
-                
-                # SEGUNDO: Envia as Sugestões (se existirem)
                 if texto_estrategico:
                     header_sugestao = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n"
                     enviar_telegram(header_sugestao + texto_estrategico, cid)
@@ -218,8 +221,5 @@ def main():
     finally:
         driver.quit()
 
-
-
 if __name__ == "__main__":
     main()
-    
