@@ -15,7 +15,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from ligas import COMPETICOES
 from mercados import gols, ambos_marcam, chance_dupla
 import odds  # Importa o módulo odds.py que você enviou
-import tripla_dupla  # Importando o novo arquivo
+import bingo357  # Importando o novo arquivo
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
