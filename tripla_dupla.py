@@ -9,7 +9,7 @@ def montar_bilhetes_estrategicos(lista_mercados):
         except ValueError:
             continue
 
-    # Ordenamos a fonte por maior ODD para priorizar valor na escolha
+    # 1. Ordenamos a fonte por maior ODD para que o robô escolha os melhores jogos primeiro
     mercados_validos.sort(key=lambda x: x['odd_val'], reverse=True)
 
     bilhetes_finais = []
@@ -32,8 +32,8 @@ def montar_bilhetes_estrategicos(lista_mercados):
                 jogos_globais_usados.add(f"{m['horario']}_{m['time_casa']}")
         
         if len(combinada) == quantidade:
-            # ORGANIZAÇÃO: Horário primeiro, depois Liga
-            combinada.sort(key=lambda x: (x['horario'], x['liga']))
+            # --- AJUSTE DE OURO: Ordena o bilhete pronto por HORÁRIO ---
+            combinada.sort(key=lambda x: x['horario'])
             return {
                 "tipo": nome,
                 "jogos": combinada,
@@ -41,7 +41,7 @@ def montar_bilhetes_estrategicos(lista_mercados):
             }
         return None
 
-    # Montagem seguindo a nova hierarquia
+    # Montagem das listas (Triplas, Quina e 7)
     t1 = buscar_combinada("🎯 TRIPLA SEGURANÇA (1.30 - 1.40)", 1.30, 1.40, mercados_validos, 3)
     if t1: bilhetes_finais.append(t1)
 
@@ -57,21 +57,18 @@ def montar_bilhetes_estrategicos(lista_mercados):
     return bilhetes_finais
 
 def formatar_para_telegram(bilhetes):
-    if not bilhetes:
-        return "⚠️ Não foi possível montar os bilhetes estratégicos."
-        
+    if not bilhetes: return ""
     mensagem = ""
     for b in bilhetes:
         mensagem += f"*{b['tipo']}*\n"
         for j in b['jogos']:
-            termo_busca = f"{j['time_casa']} x {j['time_fora']} Betano".replace(" ", "+")
-            link_google = f"https://www.google.com/search?q={termo_busca}"
-            
-            mensagem += f"⏱️ {j['horario']} | {j['liga']}\n" # Adicionei a liga aqui também
+            termo = f"{j['time_casa']} x {j['time_fora']} Betano".replace(" ", "+")
+            link = f"https://www.google.com/search?q={termo}"
+            # Formatação: Hora | Liga | Times
+            mensagem += f"⏱️ {j['horario']} | {j['liga']}\n"
             mensagem += f"🏟️ {j['time_casa']} x {j['time_fora']}\n"
             mensagem += f"🔶 {j['mercado']} | Odd: {j['odd']}\n"
-            mensagem += f"🌐 [Abrir na Betano]({link_google})\n\n"
-            
+            mensagem += f"🌐 [Abrir na Betano]({link})\n\n"
         mensagem += f"📈 *Odd Total: {b['total']}*\n"
         mensagem += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     return mensagem
