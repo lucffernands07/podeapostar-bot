@@ -188,12 +188,19 @@ def main():
                             cache_links[chave] = links.capturar_link_direto(driver, j['time_casa'], j['time_fora'])
                 texto_estrategico = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
 
-            destinatarios = [os.getenv('CHAT_ID'), "-1003982717570"]
+            # Aqui você define a lista de IDs (pegando das variáveis do GitHub)
+            destinatarios = [os.getenv('CHAT_ID'), os.getenv('CHANNEL_ID')]
+            
             for cid in destinatarios:
-                if not cid: continue
+                if not cid: 
+                    continue
+                
+                # O comando abaixo CHAMA a função do topo e passa o ID da vez (cid)
                 enviar_telegram(texto_listao_final, cid)
+                
                 if texto_estrategico:
                     enviar_telegram("💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_estrategico, cid)
+
     finally:
         driver.quit()
 
