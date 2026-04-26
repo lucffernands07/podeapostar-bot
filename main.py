@@ -32,11 +32,13 @@ def enviar_telegram(mensagem, chat_id_destino):
             "disable_web_page_preview": True
         })
     except Exception as e:
-        print(f"Erro: {e}")
+        print(f"Erro Telegram: {e}")
 
 def configurar_driver():
     options = Options()
     options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,3000")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
@@ -67,8 +69,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5] 
             prefixo = "casa" if idx == 0 else "fora"
             
-            print(f"      📊 Coletando dados: {prefixo.upper()}")
-
             for i, linha in enumerate(linhas):
                 texto_linha = linha.text.replace('\n', ' ')
                 numeros = re.findall(r'\d+', texto_linha)
@@ -76,13 +76,10 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                 if len(nums := [int(n) for n in numeros]) >= 2:
                     g1, g2 = nums[-2], nums[-1] 
                     total = g1 + g2
-                    
                     if i == 0:
                         stats[f"{prefixo}_ult_15"] = (total > 1.5)
                         stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
-                        if g1 > 0 and g2 > 0:
-                            stats[f"{prefixo}_ult_btts"] = True
-
+                        if g1 > 0 and g2 > 0: stats[f"{prefixo}_ult_btts"] = True
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
                     if total <= 4: stats[f"{prefixo}_45"] += 1 
@@ -91,14 +88,13 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                 try:
                     res_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
                     if i == 0: stats[f"{prefixo}_ult_res"] = res_el
-                    
                     if res_el == "V": stats[f"{prefixo}_vitorias"] += 1
                     elif res_el == "E": stats[f"{prefixo}_empates"] += 1
                     elif res_el == "D": stats[f"{prefixo}_derrotas"] += 1
                 except: pass
 
     except Exception as e:
-        print(f"      ⚠️ Erro na coleta H2H: {e}")
+        print(f"      ⚠️ Erro H2H: {e}")
         
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
@@ -108,14 +104,12 @@ def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-    
     lista_para_filtros = []     
     total_mercados = 0 
 
     try:
         for nome_comp, url in COMPETICOES.items():
             if total_mercados >= 100: break 
-            
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
             time.sleep(4)
@@ -123,7 +117,6 @@ def main():
             
             for el in elementos:
                 if total_mercados >= 100: break 
-                
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
                     h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
@@ -151,7 +144,6 @@ def main():
                         
                         if sugestoes_stat:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-
                             for m in sugestoes_stat:
                                 valor_odd_str = "N/A"
                                 if "+1.5" in m: valor_odd_str = v_odds.get("GOLS_15", "N/A")
@@ -161,71 +153,50 @@ def main():
                                 elif "1X" in m: valor_odd_str = v_odds.get("1X", "N/A")
                                 elif "X2" in m or "2X" in m: valor_odd_str = v_odds.get("X2", "N/A")
 
-                                # --- AJUSTE DE IDENTAÇÃO AQUI ---
                                 try:
                                     odd_float = float(valor_odd_str.replace(',', '.'))
-                                    
-                                    # 🛡️ TRAVA DE SEGURANÇA: Descarta erro de leitura no -4.5
                                     if "-4.5" in m and odd_float >= 4.0:
                                         print(f"      🚫 Odd suspeita para -4.5 ({odd_float}). Ignorando...")
                                         continue 
-
-                                    # ✅ FILTRO DE QUALIDADE (1.25)
                                     if odd_float >= 1.25:
                                         lista_para_filtros.append({
-                                            "horario": h_br, 
-                                            "time_casa": t1, 
-                                            "time_fora": t2,
-                                            "mercado": m, 
-                                            "odd": valor_odd_str, 
-                                            "liga": nome_comp
+                                            "horario": h_br, "time_casa": t1, "time_fora": t2,
+                                            "mercado": m, "odd": valor_odd_str, "liga": nome_comp
                                         })
                                         total_mercados += 1
-                                except: 
-                                    pass
+                                except: pass
                 except: continue
 
-        # 2. ORGANIZAÇÃO E ENVIO
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
-
-            # Listão Geral (Informação pura)
             itens_listao = []
             for j in lista_para_filtros:
-                item = (f"⏱️ {j['horario']} | {j['liga']}\n"
-                        f"🏟️ {j['time_casa']} x {j['time_fora']}\n"
-                        f"🔶 {j['mercado']} | Odd: {j['odd']}")
-                itens_listao.append(item)
+                itens_listao.append(f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}")
             
             texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
-
-            # Sugestões Bingo (Com busca de links reais)
-            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
             
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
             cache_links = {}
+            texto_estrategico = None
+            
             if novos_bilhetes:
-                print("\n🔗 Buscando links reais para os Bilhetes de Investimento...")
+                print("\n🔗 Buscando links reais para os Bilhetes Bingo...")
                 for b in novos_bilhetes:
                     for j in b['jogos']:
                         chave = f"{j['time_casa']}x{j['time_fora']}"
                         if chave not in cache_links:
                             cache_links[chave] = links.capturar_link_direto(driver, j['time_casa'], j['time_fora'])
-
                 texto_estrategico = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
-            else:
-                texto_estrategico = None
 
             destinatarios = [os.getenv('CHAT_ID'), "-1003982717570"]
             for cid in destinatarios:
                 if not cid: continue
                 enviar_telegram(texto_listao_final, cid)
                 if texto_estrategico:
-                    header_sugestao = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n"
-                    enviar_telegram(header_sugestao + texto_estrategico, cid)
-
+                    enviar_telegram("💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_estrategico, cid)
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-    
+        
