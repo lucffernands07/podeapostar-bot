@@ -16,7 +16,7 @@ from ligas import COMPETICOES
 from mercados import gols, ambos_marcam, chance_dupla
 import odds  
 import bingo357  
-import links  # 1. NOVO IMPORT ADICIONADO
+import links
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -113,7 +113,6 @@ def main():
     total_mercados = 0 
 
     try:
-        # 1. COLETA DE DADOS
         for nome_comp, url in COMPETICOES.items():
             if total_mercados >= 100: break 
             
@@ -162,7 +161,8 @@ def main():
                                 elif "1X" in m: valor_odd_str = v_odds.get("1X", "N/A")
                                 elif "X2" in m or "2X" in m: valor_odd_str = v_odds.get("X2", "N/A")
 
-                                                                try:
+                                # --- AJUSTE DE IDENTAÇÃO AQUI ---
+                                try:
                                     odd_float = float(valor_odd_str.replace(',', '.'))
                                     
                                     # 🛡️ TRAVA DE SEGURANÇA: Descarta erro de leitura no -4.5
@@ -183,13 +183,13 @@ def main():
                                         total_mercados += 1
                                 except: 
                                     pass
-
+                except: continue
 
         # 2. ORGANIZAÇÃO E ENVIO
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
 
-            # --- LISTÃO GERAL (SEM LINKS - APENAS TEXTO) ---
+            # Listão Geral (Informação pura)
             itens_listao = []
             for j in lista_para_filtros:
                 item = (f"⏱️ {j['horario']} | {j['liga']}\n"
@@ -199,42 +199,33 @@ def main():
             
             texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
 
-            # --- SUGESTÕES BINGO 357 (COM LINKS REAIS) ---
-            # Primeiro o bingo seleciona os melhores jogos
+            # Sugestões Bingo (Com busca de links reais)
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
             
             cache_links = {}
             if novos_bilhetes:
-                print("\n🔗 Buscando links reais apenas para os Bilhetes de Investimento...")
+                print("\n🔗 Buscando links reais para os Bilhetes de Investimento...")
                 for b in novos_bilhetes:
                     for j in b['jogos']:
                         chave = f"{j['time_casa']}x{j['time_fora']}"
-                        # Só busca se ainda não pesquisou esse jogo (evita duplicidade)
                         if chave not in cache_links:
                             cache_links[chave] = links.capturar_link_direto(driver, j['time_casa'], j['time_fora'])
 
-                # Formata as sugestões usando o cache de links capturados
                 texto_estrategico = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
             else:
                 texto_estrategico = None
-                print("⚠️ Nenhum bilhete Bingo (3, 5 ou 7) foi montado com as odds disponíveis.")
 
-            # 3. DISPARO PARA O TELEGRAM
             destinatarios = [os.getenv('CHAT_ID'), "-1003982717570"]
             for cid in destinatarios:
                 if not cid: continue
-                
-                # Envia o Listão (Texto simples)
                 enviar_telegram(texto_listao_final, cid)
-                
-                # Envia os Bilhetes (Com links clicáveis)
                 if texto_estrategico:
                     header_sugestao = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n"
                     enviar_telegram(header_sugestao + texto_estrategico, cid)
-
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
+    
