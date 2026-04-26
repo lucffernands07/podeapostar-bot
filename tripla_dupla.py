@@ -9,7 +9,7 @@ def montar_bilhetes_estrategicos(lista_mercados):
         except ValueError:
             continue
 
-    # Ordenar por maior odd para garantir que a Quina e o de 7 peguem os melhores valores
+    # Ordenamos a fonte por maior ODD para priorizar valor na escolha
     mercados_validos.sort(key=lambda x: x['odd_val'], reverse=True)
 
     bilhetes_finais = []
@@ -32,6 +32,8 @@ def montar_bilhetes_estrategicos(lista_mercados):
                 jogos_globais_usados.add(f"{m['horario']}_{m['time_casa']}")
         
         if len(combinada) == quantidade:
+            # ORGANIZAÇÃO: Horário primeiro, depois Liga
+            combinada.sort(key=lambda x: (x['horario'], x['liga']))
             return {
                 "tipo": nome,
                 "jogos": combinada,
@@ -39,20 +41,16 @@ def montar_bilhetes_estrategicos(lista_mercados):
             }
         return None
 
-    # 1. TRIPLA SEGURANÇA (1.30 - 1.40) - 3 jogos
+    # Montagem seguindo a nova hierarquia
     t1 = buscar_combinada("🎯 TRIPLA SEGURANÇA (1.30 - 1.40)", 1.30, 1.40, mercados_validos, 3)
     if t1: bilhetes_finais.append(t1)
 
-    # 2. TRIPLA VALOR (ACIMA DE 1.40) - 3 jogos
     t2 = buscar_combinada("🔥 TRIPLA VALOR (ACIMA 1.40)", 1.41, 2.50, mercados_validos, 3)
     if t2: bilhetes_finais.append(t2)
 
-    # 3. A QUINA DAS MELHORES (Melhores Odds que sobraram) - 5 jogos
-    # Sem filtro de teto para pegar o que há de melhor
     q1 = buscar_combinada("💰 QUINA DE OURO (5 MELHORES)", 1.20, 5.00, mercados_validos, 5)
     if q1: bilhetes_finais.append(q1)
 
-    # 4. O BILHETE DE 7 (Sorte Grande) - 7 jogos
     s7 = buscar_combinada("🚀 BILHETE DA SORTE (7 JOGOS)", 1.20, 5.00, mercados_validos, 7)
     if s7: bilhetes_finais.append(s7)
 
@@ -60,7 +58,7 @@ def montar_bilhetes_estrategicos(lista_mercados):
 
 def formatar_para_telegram(bilhetes):
     if not bilhetes:
-        return "⚠️ Não foi possível montar os bilhetes com as odds extraídas."
+        return "⚠️ Não foi possível montar os bilhetes estratégicos."
         
     mensagem = ""
     for b in bilhetes:
@@ -69,10 +67,12 @@ def formatar_para_telegram(bilhetes):
             termo_busca = f"{j['time_casa']} x {j['time_fora']} Betano".replace(" ", "+")
             link_google = f"https://www.google.com/search?q={termo_busca}"
             
-            mensagem += f"⏱️ {j['horario']} | {j['time_casa']} x {j['time_fora']}\n"
+            mensagem += f"⏱️ {j['horario']} | {j['liga']}\n" # Adicionei a liga aqui também
+            mensagem += f"🏟️ {j['time_casa']} x {j['time_fora']}\n"
             mensagem += f"🔶 {j['mercado']} | Odd: {j['odd']}\n"
             mensagem += f"🌐 [Abrir na Betano]({link_google})\n\n"
             
         mensagem += f"📈 *Odd Total: {b['total']}*\n"
         mensagem += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     return mensagem
+    
