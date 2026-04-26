@@ -46,62 +46,68 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
+    # Dicionário de dados BRUTOS (Sem pré-julgamento)
     stats = {
-        "casa_15": 0, "casa_25": 0, "casa_45": 0, "casa_btts": 0, "casa_ult_btts": False, "casa_derrotas": 0, "casa_ult_res": "",
+        "casa_15": 0, "casa_25": 0, "casa_45": 0, "casa_btts": 0, 
+        "casa_ult_btts": False, "casa_derrotas": 0, "casa_vitorias": 0, "casa_empates": 0, "casa_ult_res": "",
         "casa_ult_15": False, "casa_ult_sofreu": False,
-        "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, "fora_ult_btts": False, "fora_derrotas": 0, "fora_ult_res": "",
+        "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, 
+        "fora_ult_btts": False, "fora_derrotas": 0, "fora_vitorias": 0, "fora_empates": 0, "fora_ult_res": "",
         "fora_ult_15": False, "fora_ult_sofreu": False,
-        "pular_gols": False 
+        "pular_gols": False # Mantemos o campo para não dar erro nos outros arquivos, mas sempre como False
     }
     
     try:
+        # Espera a aba H2H carregar
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
         time.sleep(5)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
-        for idx, secao in enumerate(secoes[:2]):
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
+        for idx, secao in enumerate(secoes[:2]): # Analisa apenas Casa e Fora (Overall)
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5] # Pega os últimos 5 jogos
             prefixo = "casa" if idx == 0 else "fora"
             
-            print(f"\n      📊 Analisando H2H: {prefixo.upper()}")
+            print(f"      📊 Coletando dados: {prefixo.upper()}")
 
             for i, linha in enumerate(linhas):
                 texto_linha = linha.text.replace('\n', ' ')
                 numeros = re.findall(r'\d+', texto_linha)
                 
                 if len(nums := [int(n) for n in numeros]) >= 2:
-                    g1, g2 = nums[-2], nums[-1]
+                    g1, g2 = nums[-2], nums[-1] # Pega os dois últimos números (o placar)
                     total = g1 + g2
                     
+                    # Guarda informações do ÚLTIMO JOGO (i == 0)
                     if i == 0:
-                        if idx == 0 and (total <= 1):
-                            stats["pular_gols"] = True
-                            print(f"        🚫 Jogo muito seco na CASA ({g1}x{g2}). Travando Over.")
-                        
                         stats[f"{prefixo}_ult_15"] = (total > 1.5)
                         stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
-
                         if g1 > 0 and g2 > 0:
                             stats[f"{prefixo}_ult_btts"] = True
 
+                    # Acumula estatísticas para o cálculo de 3/5, 4/5, etc.
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
                     if total <= 4: stats[f"{prefixo}_45"] += 1 
                     if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
 
+                # Captura o Resultado (V, E, D) para a lógica de Dupla Chance
                 try:
                     res_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
                     if i == 0: stats[f"{prefixo}_ult_res"] = res_el
-                    if res_el == "D": stats[f"{prefixo}_derrotas"] += 1
+                    
+                    if res_el == "V": stats[f"{prefixo}_vitorias"] += 1
+                    elif res_el == "E": stats[f"{prefixo}_empates"] += 1
+                    elif res_el == "D": stats[f"{prefixo}_derrotas"] += 1
                 except: pass
 
     except Exception as e:
-        print(f"      Err H2H: {e}")
+        print(f"      ⚠️ Erro na coleta H2H: {e}")
         
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
+
     
 
 def main():
