@@ -21,6 +21,7 @@ COMPETICOES = {
     "Espanha - Copa del Rey": "https://www.flashscore.com.br/futebol/espanha/copa-do-rei/jogos/",
     "Alemanha - DFB Pokal": "https://www.flashscore.com.br/futebol/alemanha/copa-da-alemanha/jogos/",
     "Arábia Saudita - King Cup": "https://www.flashscore.com.br/futebol/arabia-saudita/copa-do-rei/jogos/",
+    "EUA - MLS": "https://www.flashscore.com.br/futebol/eua/mls/",
 
     # --- BLOCO 4: LIGAS SECUNDÁRIAS EUROPEIAS ---
     "Arábia Saudita - Pro League": "https://www.flashscore.com.br/futebol/arabia-saudita/liga-profissional-saudita/jogos/",
