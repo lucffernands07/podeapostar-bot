@@ -24,13 +24,16 @@ def realizar_teste_h2h_especifico():
     try:
         print(f"\n🚀 ACESSANDO: {url}")
         driver.get(url)
+        
+        # Espera carregar a tabela que a gente sabe que funciona
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
 
+        # Pega a última tabela (Confronto Direto)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         secao_direta = secoes[-1] 
         linhas = secao_direta.find_elements(By.CSS_SELECTOR, ".h2h__row")
         
-        print(f"\n--- PROCESSANDO H2H: {time_alvo} ---")
+        print(f"\n--- DADOS DA 3ª TABELA ({len(linhas)} JOGOS) ---")
 
         vitorias = 0
         empates = 0
@@ -41,51 +44,48 @@ def realizar_teste_h2h_especifico():
                 casa = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
                 fora = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
                 
-                # Pega o texto do placar (ex: "4\n-\n3") e remove quebras de linha e espaços
-                res_raw = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
-                res_clean = res_raw.replace("\n", "").replace(" ", "") # Vira "4-3"
+                # BUSCA DE GOLS POR POSIÇÃO (Mais estável que split)
+                # O Flashscore coloca o primeiro gol num span e o segundo em outro
+                gols_elementos = linha.find_element(By.CSS_SELECTOR, ".h2h__result").find_elements(By.TAG_NAME, "span")
                 
-                partes = res_clean.split("-")
-                val1 = int(partes[0])
-                val2 = int(partes[1])
+                if len(gols_elementos) >= 2:
+                    val1 = int(gols_elementos[0].text.strip())
+                    val2 = int(gols_elementos[1].text.strip())
+                else:
+                    # Fallback caso venha texto puro (ex: "4-3")
+                    txt = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.replace("\n", "")
+                    import re
+                    numeros = re.findall(r'\d+', txt)
+                    val1 = int(numeros[0])
+                    val2 = int(numeros[1])
 
                 res_final = ""
-                # A REGRA QUE VOCÊ DEFINIU:
+                # LÓGICA DE ATRIBUIÇÃO
                 if val1 == val2:
                     empates += 1
-                    res_final = "EMPATE"
-                elif val1 > val2:
-                    # Vitória do time da CASA
-                    if time_alvo.lower() in casa.lower():
-                        vitorias += 1
-                        res_final = "VITÓRIA"
-                    else:
-                        res_final = "DERROTA"
-                elif val2 > val1:
-                    # Vitória do time de FORA
-                    if time_alvo.lower() in fora.lower():
-                        vitorias += 1
-                        res_final = "VITÓRIA"
-                    else:
-                        res_final = "DERROTA"
+                    res_final = "EMPATE 🤝"
+                elif (time_alvo.lower() in casa.lower() and val1 > val2) or \
+                     (time_alvo.lower() in fora.lower() and val2 > val1):
+                    vitorias += 1
+                    res_final = "VITÓRIA ✅"
+                else:
+                    res_final = "DERROTA ❌"
 
-                print(f"[{i+1}] {casa} {val1}x{val2} {fora} -> {time_alvo}: {res_final}")
+                print(f"[{i+1}] {casa} {val1}x{val2} {fora} | {time_alvo}: {res_final}")
                 jogos_contados += 1
 
             except Exception as e:
-                print(f"⚠️ Erro ao calcular linha {i+1}")
+                print(f"⚠️ Erro ao processar linha {i+1}")
 
-        # Resumo final
         if jogos_contados > 0:
             print("\n" + "="*40)
-            print(f"📊 RESULTADO PARA {time_alvo.upper()}:")
-            print(f"Vitórias: {vitorias} | Empates: {empates}")
-            print(f"Sucessos (1X): {vitorias + empates} de {jogos_contados}")
-            print(f"Taxa: {((vitorias + empates)/jogos_contados)*100:.1f}%")
+            print(f"📊 RESUMO FINAL PARA {time_alvo.upper()}:")
+            print(f"Vitorias: {vitorias} | Empates: {empates}")
+            print(f"Sucesso (1X): {vitorias + empates} de {jogos_contados}")
             print("="*40)
 
     except Exception as e:
-        print(f"❌ ERRO: {e}")
+        print(f"❌ ERRO GERAL: {e}")
     finally:
         driver.quit()
 
