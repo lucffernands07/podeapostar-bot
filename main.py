@@ -45,6 +45,7 @@ def configurar_driver():
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
 
+    
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
@@ -56,6 +57,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, 
         "fora_ult_btts": False, "fora_derrotas": 0, "fora_vitorias": 0, "fora_empates": 0, "fora_ult_res": "",
         "fora_ult_15": False, "fora_ult_sofreu": False,
+        # NOVAS CHAVES PARA CONFRONTO DIRETO (H2H)
+        "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
         "pular_gols": False 
     }
     
@@ -65,40 +68,53 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         time.sleep(5)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
-        for idx, secao in enumerate(secoes[:2]): 
+        # Agora lemos até a 3ª seção (Índice 0, 1 e 2)
+        for idx, secao in enumerate(secoes[:3]): 
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5] 
-            prefixo = "casa" if idx == 0 else "fora"
             
             for i, linha in enumerate(linhas):
-                texto_linha = linha.text.replace('\n', ' ')
-                numeros = re.findall(r'\d+', texto_linha)
-                
-                if len(nums := [int(n) for n in numeros]) >= 2:
-                    g1, g2 = nums[-2], nums[-1] 
-                    total = g1 + g2
-                    if i == 0:
-                        stats[f"{prefixo}_ult_15"] = (total > 1.5)
-                        stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
-                        if g1 > 0 and g2 > 0: stats[f"{prefixo}_ult_btts"] = True
-                    if total > 1.5: stats[f"{prefixo}_15"] += 1
-                    if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    if total <= 4: stats[f"{prefixo}_45"] += 1 
-                    if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
+                # Processamento padrão para as seções 0 (Casa) e 1 (Fora)
+                if idx < 2:
+                    prefixo = "casa" if idx == 0 else "fora"
+                    texto_linha = linha.text.replace('\n', ' ')
+                    numeros = re.findall(r'\d+', texto_linha)
+                    if len(nums := [int(n) for n in numeros]) >= 2:
+                        g1, g2 = nums[-2], nums[-1] 
+                        total = g1 + g2
+                        if i == 0:
+                            stats[f"{prefixo}_ult_15"] = (total > 1.5)
+                            stats[f"{prefixo}_ult_sofreu"] = (g2 > 0)
+                            if g1 > 0 and g2 > 0: stats[f"{prefixo}_ult_btts"] = True
+                        if total > 1.5: stats[f"{prefixo}_15"] += 1
+                        if total > 2.5: stats[f"{prefixo}_25"] += 1
+                        if total <= 4: stats[f"{prefixo}_45"] += 1 
+                        if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
 
-                try:
-                    res_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
-                    if i == 0: stats[f"{prefixo}_ult_res"] = res_el
-                    if res_el == "V": stats[f"{prefixo}_vitorias"] += 1
-                    elif res_el == "E": stats[f"{prefixo}_empates"] += 1
-                    elif res_el == "D": stats[f"{prefixo}_derrotas"] += 1
-                except: pass
+                    try:
+                        res_el = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
+                        if i == 0: stats[f"{prefixo}_ult_res"] = res_el
+                        if res_el == "V": stats[f"{prefixo}_vitorias"] += 1
+                        elif res_el == "E": stats[f"{prefixo}_empates"] += 1
+                        elif res_el == "D": stats[f"{prefixo}_derrotas"] += 1
+                    except: pass
+                
+                # NOVO: Processamento da 3ª seção (Confrontos Diretos)
+                elif idx == 2:
+                    try:
+                        stats["h2h_jogos"] += 1
+                        res_h2h = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
+                        if res_h2h == "V": stats["h2h_vitorias_t1"] += 1
+                        elif res_h2h == "E": stats["h2h_empates"] += 1
+                        elif res_h2h == "D": stats["h2h_vitorias_t2"] += 1
+                    except: pass
 
     except Exception as e:
-        print(f"      ⚠️ Erro H2H: {e}")
+        print(f"      ⚠️ Erro H2H Completo: {e}")
         
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
+
 
 def main():
     driver = configurar_driver()
