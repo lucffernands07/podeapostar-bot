@@ -6,7 +6,7 @@ on:
       - 'main.py'
   schedule:
     # 21:00 Horário de Brasília
-    - cron: '00 00 * * *'
+    - cron: '0 0 * * *'
   workflow_dispatch: # Permite rodar manualmente pelo celular se precisar
 
 jobs:
