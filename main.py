@@ -19,7 +19,7 @@ def realizar_teste_h2h_especifico():
     wait = WebDriverWait(driver, 30)
     
     url = "https://www.flashscore.com.br/jogo/futebol/espanyol-QFfPdh1J/levante-G8FL0ShI/h2h/total/?mid=SKkThKvn"
-    time_alvo = "Espanyol" # O time que estamos analisando
+    time_alvo = "Espanyol"
 
     try:
         print(f"\n🚀 ACESSANDO: {url}")
@@ -30,51 +30,59 @@ def realizar_teste_h2h_especifico():
         secao_direta = secoes[-1] 
         linhas = secao_direta.find_elements(By.CSS_SELECTOR, ".h2h__row")
         
-        print(f"\n--- ANALISANDO CONFRONTOS DIRETOS PARA: {time_alvo} ---")
+        print(f"\n--- PROCESSANDO H2H: {time_alvo} ---")
 
         vitorias = 0
         empates = 0
-        total_jogos = 0
+        jogos_contados = 0
 
         for i, linha in enumerate(linhas[:6]):
             try:
                 casa = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
                 fora = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
-                placar_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text # Ex: "4 - 3" ou "1 - 1"
                 
-                # Limpa o placar e separa os números
-                gols = placar_texto.replace("\n", "").replace(" ", "").split("-")
-                gols_casa = int(gols[0])
-                gols_fora = int(gols[1])
+                # Pega o texto do placar (ex: "4\n-\n3") e remove quebras de linha e espaços
+                res_raw = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
+                res_clean = res_raw.replace("\n", "").replace(" ", "") # Vira "4-3"
+                
+                partes = res_clean.split("-")
+                val1 = int(partes[0])
+                val2 = int(partes[1])
 
-                resultado = ""
-                # LÓGICA DE PLACAR REAL
-                if gols_casa == gols_fora:
+                res_final = ""
+                # A REGRA QUE VOCÊ DEFINIU:
+                if val1 == val2:
                     empates += 1
-                    resultado = "EMPATE 🤝"
-                elif time_alvo in casa and gols_casa > gols_fora:
-                    vitorias += 1
-                    resultado = "VITÓRIA ✅"
-                elif time_alvo in fora and gols_fora > gols_casa:
-                    vitorias += 1
-                    resultado = "VITÓRIA ✅"
-                else:
-                    resultado = "DERROTA ❌"
+                    res_final = "EMPATE"
+                elif val1 > val2:
+                    # Vitória do time da CASA
+                    if time_alvo.lower() in casa.lower():
+                        vitorias += 1
+                        res_final = "VITÓRIA"
+                    else:
+                        res_final = "DERROTA"
+                elif val2 > val1:
+                    # Vitória do time de FORA
+                    if time_alvo.lower() in fora.lower():
+                        vitorias += 1
+                        res_final = "VITÓRIA"
+                    else:
+                        res_final = "DERROTA"
 
-                print(f"[{i+1}] {casa} {gols_casa}-{gols_fora} {fora} | Resultado para {time_alvo}: {resultado}")
-                total_jogos += 1
+                print(f"[{i+1}] {casa} {val1}x{val2} {fora} -> {time_alvo}: {res_final}")
+                jogos_contados += 1
 
             except Exception as e:
-                print(f"⚠️ Erro ao processar linha {i+1}")
+                print(f"⚠️ Erro ao calcular linha {i+1}")
 
-        # Resumo Final
-        taxa_1x = ((vitorias + empates) / total_jogos) * 100
-        print("\n" + "="*40)
-        print(f"📊 RELATÓRIO FINAL:")
-        print(f"Total de jogos: {total_jogos}")
-        print(f"Vitórias: {vitorias} | Empates: {empates}")
-        print(f"Taxa de Sucesso (1X): {taxa_1x:.1f}%")
-        print("="*40)
+        # Resumo final
+        if jogos_contados > 0:
+            print("\n" + "="*40)
+            print(f"📊 RESULTADO PARA {time_alvo.upper()}:")
+            print(f"Vitórias: {vitorias} | Empates: {empates}")
+            print(f"Sucessos (1X): {vitorias + empates} de {jogos_contados}")
+            print(f"Taxa: {((vitorias + empates)/jogos_contados)*100:.1f}%")
+            print("="*40)
 
     except Exception as e:
         print(f"❌ ERRO: {e}")
