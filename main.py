@@ -13,83 +13,74 @@ def realizar_teste_h2h_especifico():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=1920,1080")
-    # User-agent para simular navegador real e evitar bloqueio parcial
     chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     wait = WebDriverWait(driver, 30)
     
-    # URL direta que você passou
     url = "https://www.flashscore.com.br/jogo/futebol/espanyol-QFfPdh1J/levante-G8FL0ShI/h2h/total/?mid=SKkThKvn"
-    
+    time_alvo = "Espanyol" # O time que estamos analisando
+
     try:
         print(f"\n🚀 ACESSANDO: {url}")
         driver.get(url)
-
-        # 1. Esperar carregar qualquer linha de H2H para garantir que a página abriu
-        print("⏳ Aguardando carregamento dos dados...")
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
 
-        # 2. Pegar todas as seções H2H disponíveis
-        # No Flashscore, a 3ª tabela (Confrontos Diretos) é a última .h2h__section
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        print(f"📊 Tabelas detectadas: {len(secoes)}")
-
-        if len(secoes) < 3:
-            print("⚠️ Apenas uma tabela carregou. Tentando forçar scroll para liberar o restante...")
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(5)
-            secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-
-        # Selecionamos a última seção (que conforme o print e a URL é o Confronto Direto)
         secao_direta = secoes[-1] 
-        
-        # 3. Raspar os dados das linhas
         linhas = secao_direta.find_elements(By.CSS_SELECTOR, ".h2h__row")
-        print(f"\n--- DADOS DA 3ª TABELA ({len(linhas)} JOGOS) ---")
+        
+        print(f"\n--- ANALISANDO CONFRONTOS DIRETOS PARA: {time_alvo} ---")
 
-        vitorias_t1 = 0
+        vitorias = 0
         empates = 0
+        total_jogos = 0
 
-        for i, linha in enumerate(linhas[:6]): # Pega os últimos 6 confrontos
+        for i, linha in enumerate(linhas[:6]):
             try:
                 casa = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
                 fora = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
-                placar = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
+                placar_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text # Ex: "4 - 3" ou "1 - 1"
                 
-                # Identificação pela cor do ícone (Win/Draw/Loss)
-                icones = linha.find_elements(By.CSS_SELECTOR, "span[class*='h2h__icon']")
-                resultado = "N/A"
-                
-                if icones:
-                    classe = icones[0].get_attribute("class").lower()
-                    if 'win' in classe or 'w' in classe:
-                        vitorias_t1 += 1
-                        resultado = "VITÓRIA"
-                    elif 'draw' in classe or 'd' in classe:
-                        empates += 1
-                        resultado = "EMPATE"
-                    else:
-                        resultado = "DERROTA"
+                # Limpa o placar e separa os números
+                gols = placar_texto.replace("\n", "").replace(" ", "").split("-")
+                gols_casa = int(gols[0])
+                gols_fora = int(gols[1])
 
-                print(f"[{i+1}] {casa} {placar} {fora} | {resultado}")
+                resultado = ""
+                # LÓGICA DE PLACAR REAL
+                if gols_casa == gols_fora:
+                    empates += 1
+                    resultado = "EMPATE 🤝"
+                elif time_alvo in casa and gols_casa > gols_fora:
+                    vitorias += 1
+                    resultado = "VITÓRIA ✅"
+                elif time_alvo in fora and gols_fora > gols_casa:
+                    vitorias += 1
+                    resultado = "VITÓRIA ✅"
+                else:
+                    resultado = "DERROTA ❌"
+
+                print(f"[{i+1}] {casa} {gols_casa}-{gols_fora} {fora} | Resultado para {time_alvo}: {resultado}")
+                total_jogos += 1
 
             except Exception as e:
-                print(f"⚠️ Erro na linha {i+1}")
+                print(f"⚠️ Erro ao processar linha {i+1}")
 
-        # Resumo
-        total = i + 1
+        # Resumo Final
+        taxa_1x = ((vitorias + empates) / total_jogos) * 100
         print("\n" + "="*40)
-        print(f"✅ SUCESSO NA RASPAGEM")
-        print(f"Total analisado: {total}")
-        print(f"Vitórias + Empates: {vitorias_t1 + empates}")
+        print(f"📊 RELATÓRIO FINAL:")
+        print(f"Total de jogos: {total_jogos}")
+        print(f"Vitórias: {vitorias} | Empates: {empates}")
+        print(f"Taxa de Sucesso (1X): {taxa_1x:.1f}%")
         print("="*40)
 
     except Exception as e:
-        print(f"❌ ERRO CRÍTICO: {e}")
-        driver.save_screenshot("debug_h2h_github.png")
+        print(f"❌ ERRO: {e}")
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     realizar_teste_h2h_especifico()
+    
