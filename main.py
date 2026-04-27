@@ -66,18 +66,23 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         h2h_tab.click()
         time.sleep(5)
         
-        # Pega as seções (Casa, Fora e Confronto Direto)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for idx, secao in enumerate(secoes[:3]): 
-            # --- O SELETOR ESTÁ AQUI ---
-            if idx == 2: # Seção de Confronto Direto
+            # --- AJUSTE NO CLIQUE (USANDO DATA-TESTID) ---
+            if idx == 2: 
                 try:
-                    # Buscamos o botão dentro da seção de H2H
-                    botao_mais = secao.find_element(By.CSS_SELECTOR, ".h2h__showMore")
+                    # Usamos o seletor preciso que você identificou
+                    seletor_preciso = "span[data-testid='wcl-scores-caption-05']"
+                    botao_mais = secao.find_element(By.CSS_SELECTOR, seletor_preciso)
+                    
                     driver.execute_script("arguments[0].click();", botao_mais)
-                    time.sleep(2) # Espera carregar o 6º jogo
+                    print(f"      ✅ Expandindo H2H para 6 jogos: {t1} x {t2}")
+                    
+                    # Aumentei para 2.5s para dar tempo do 6º jogo "brotar" no HTML
+                    time.sleep(2.5) 
                 except:
+                    # Se não achar o botão, o histórico é curto (5 jogos ou menos)
                     pass 
 
             # Define limite de 6 jogos para H2H e 5 para os outros
@@ -109,7 +114,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         elif res_el == "D": stats[f"{prefixo}_derrotas"] += 1
                     except: pass
                 
-                elif idx == 2: # Processamento do H2H (Confronto Direto)
+                elif idx == 2: 
                     try:
                         stats["h2h_jogos"] += 1
                         res_h2h = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
