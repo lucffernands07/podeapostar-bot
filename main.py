@@ -8,117 +8,88 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 def realizar_teste_h2h_especifico():
-    # --- CONFIGURAÇÕES PARA GITHUB ACTIONS ---
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=1920,1080")
+    # User-agent para simular navegador real e evitar bloqueio parcial
     chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    wait = WebDriverWait(driver, 25)
+    wait = WebDriverWait(driver, 30)
     
-    # Link principal fornecido
-    url_principal = "https://www.flashscore.com.br/jogo/futebol/espanyol-QFfPdh1J/levante-G8FL0ShI/"
-    # Forçamos o sufixo do H2H para garantir que o Selenium tente ir direto para a aba correta
-    url_alvo = url_principal + "#/h2h/overall"
+    # URL direta que você passou
+    url = "https://www.flashscore.com.br/jogo/futebol/espanyol-QFfPdh1J/levante-G8FL0ShI/h2h/total/?mid=SKkThKvn"
     
     try:
-        print(f"\n🚀 ACESSANDO: {url_alvo}")
-        driver.get(url_alvo)
+        print(f"\n🚀 ACESSANDO: {url}")
+        driver.get(url)
 
-        # 1. Aguarda o carregamento do container H2H
-        print("⏳ Aguardando carregamento da estrutura H2H...")
-        try:
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
-        except:
-            print("⚠️ Aba H2H não carregou automaticamente. Tentando atualizar...")
-            driver.refresh()
-            time.sleep(5)
+        # 1. Esperar carregar qualquer linha de H2H para garantir que a página abriu
+        print("⏳ Aguardando carregamento dos dados...")
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
 
-        # 2. Localizar todas as seções H2H
+        # 2. Pegar todas as seções H2H disponíveis
+        # No Flashscore, a 3ª tabela (Confrontos Diretos) é a última .h2h__section
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        print(f"✅ Total de seções encontradas: {len(secoes)}")
+        print(f"📊 Tabelas detectadas: {len(secoes)}")
 
-        # 3. Identificar a seção de Confronto Direto pelo título
-        secao_direta = None
-        for s in secoes:
-            try:
-                titulo = s.find_element(By.CSS_SELECTOR, ".section__title").text.upper()
-                if "CONFRONTOS DIRETOS" in titulo or "H2H" in titulo:
-                    secao_direta = s
-                    break
-            except:
-                continue
+        if len(secoes) < 3:
+            print("⚠️ Apenas uma tabela carregou. Tentando forçar scroll para liberar o restante...")
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(5)
+            secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
 
-        if not secao_direta:
-            print("❌ ERRO: Seção 'Confrontos Diretos' não encontrada.")
-            if len(secoes) >= 3:
-                secao_direta = secoes[2]
-                print("⚠️ Usando índice [2] como alternativa.")
-            else:
-                driver.save_screenshot("erro_layout.png")
-                return
-
-        # 4. Expandir resultados se necessário
-        try:
-            btn_mais = secao_direta.find_element(By.CSS_SELECTOR, "span[class*='showMore']")
-            driver.execute_script("arguments[0].click();", btn_mais)
-            print("➕ Histórico expandido.")
-            time.sleep(2)
-        except:
-            print("ℹ️ Botão de expansão não encontrado.")
-
-        # 5. Extração dos dados
+        # Selecionamos a última seção (que conforme o print e a URL é o Confronto Direto)
+        secao_direta = secoes[-1] 
+        
+        # 3. Raspar os dados das linhas
         linhas = secao_direta.find_elements(By.CSS_SELECTOR, ".h2h__row")
-        print(f"\n--- ANALISANDO ÚLTIMOS {len(linhas)} JOGOS (H2H) ---")
+        print(f"\n--- DADOS DA 3ª TABELA ({len(linhas)} JOGOS) ---")
 
         vitorias_t1 = 0
         empates = 0
 
-        for i, linha in enumerate(linhas[:6]):
+        for i, linha in enumerate(linhas[:6]): # Pega os últimos 6 confrontos
             try:
                 casa = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
                 fora = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
                 placar = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
                 
-                # Identificação por Classe CSS (Cor do ícone)
+                # Identificação pela cor do ícone (Win/Draw/Loss)
                 icones = linha.find_elements(By.CSS_SELECTOR, "span[class*='h2h__icon']")
-                resultado = "Indefinido"
+                resultado = "N/A"
                 
                 if icones:
                     classe = icones[0].get_attribute("class").lower()
                     if 'win' in classe or 'w' in classe:
                         vitorias_t1 += 1
-                        resultado = "VITÓRIA ✅"
+                        resultado = "VITÓRIA"
                     elif 'draw' in classe or 'd' in classe:
                         empates += 1
-                        resultado = "EMPATE 🤝"
-                    elif 'loss' in classe or 'l' in classe:
-                        resultado = "DERROTA ❌"
+                        resultado = "EMPATE"
+                    else:
+                        resultado = "DERROTA"
 
-                print(f"[{i+1}] {casa} {placar} {fora} | Resultado: {resultado}")
+                print(f"[{i+1}] {casa} {placar} {fora} | {resultado}")
 
             except Exception as e:
-                print(f"⚠️ Erro na linha {i+1}: {e}")
+                print(f"⚠️ Erro na linha {i+1}")
 
-        # Resumo final
-        total_analisado = i + 1
-        taxa_sucesso_1x = ((vitorias_t1 + empates) / total_analisado) * 100
-        
+        # Resumo
+        total = i + 1
         print("\n" + "="*40)
-        print(f"📊 RELATÓRIO DE PERFORMANCE H2H:")
-        print(f"Jogos: {total_analisado} | Vitórias: {vitorias_t1} | Empates: {empates}")
-        print(f"Taxa de Sucesso (1X): {taxa_sucesso_1x:.1f}%")
+        print(f"✅ SUCESSO NA RASPAGEM")
+        print(f"Total analisado: {total}")
+        print(f"Vitórias + Empates: {vitorias_t1 + empates}")
         print("="*40)
 
     except Exception as e:
-        print(f"❌ Erro crítico durante execução: {e}")
-        driver.save_screenshot("debug_github_actions.png")
+        print(f"❌ ERRO CRÍTICO: {e}")
+        driver.save_screenshot("debug_h2h_github.png")
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     realizar_teste_h2h_especifico()
-        
