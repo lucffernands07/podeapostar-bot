@@ -57,7 +57,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, 
         "fora_ult_btts": False, "fora_derrotas": 0, "fora_vitorias": 0, "fora_empates": 0, "fora_ult_res": "",
         "fora_ult_15": False, "fora_ult_sofreu": False,
-        # NOVAS CHAVES PARA CONFRONTO DIRETO (H2H)
         "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
         "pular_gols": False 
     }
@@ -66,14 +65,26 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         h2h_tab = WebDriverWait(driver, 12).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
         time.sleep(5)
+        
+        # Pega as seções (Casa, Fora e Confronto Direto)
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
-        # Agora lemos até a 3ª seção (Índice 0, 1 e 2)
         for idx, secao in enumerate(secoes[:3]): 
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5] 
+            # --- O SELETOR ESTÁ AQUI ---
+            if idx == 2: # Seção de Confronto Direto
+                try:
+                    # Buscamos o botão dentro da seção de H2H
+                    botao_mais = secao.find_element(By.CSS_SELECTOR, ".h2h__showMore")
+                    driver.execute_script("arguments[0].click();", botao_mais)
+                    time.sleep(2) # Espera carregar o 6º jogo
+                except:
+                    pass 
+
+            # Define limite de 6 jogos para H2H e 5 para os outros
+            limite = 6 if idx == 2 else 5
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
             
             for i, linha in enumerate(linhas):
-                # Processamento padrão para as seções 0 (Casa) e 1 (Fora)
                 if idx < 2:
                     prefixo = "casa" if idx == 0 else "fora"
                     texto_linha = linha.text.replace('\n', ' ')
@@ -98,8 +109,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         elif res_el == "D": stats[f"{prefixo}_derrotas"] += 1
                     except: pass
                 
-                # NOVO: Processamento da 3ª seção (Confrontos Diretos)
-                elif idx == 2:
+                elif idx == 2: # Processamento do H2H (Confronto Direto)
                     try:
                         stats["h2h_jogos"] += 1
                         res_h2h = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
@@ -109,7 +119,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     except: pass
 
     except Exception as e:
-        print(f"      ⚠️ Erro H2H Completo: {e}")
+        print(f"      ⚠️ Erro H2H: {e}")
         
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
