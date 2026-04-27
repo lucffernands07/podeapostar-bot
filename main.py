@@ -44,7 +44,6 @@ def configurar_driver():
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
-
     
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
@@ -69,23 +68,25 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for idx, secao in enumerate(secoes[:3]): 
-            # --- AJUSTE NO CLIQUE (USANDO DATA-TESTID) ---
+            # --- EXPANSÃO DO H2H PARA 6 JOGOS ---
             if idx == 2: 
                 try:
-                    # Usamos o seletor preciso que você identificou
                     seletor_preciso = "span[data-testid='wcl-scores-caption-05']"
                     botao_mais = secao.find_element(By.CSS_SELECTOR, seletor_preciso)
                     
                     driver.execute_script("arguments[0].click();", botao_mais)
-                    print(f"      ✅ Expandindo H2H para 6 jogos: {t1} x {t2}")
                     
-                    # Aumentei para 2.5s para dar tempo do 6º jogo "brotar" no HTML
-                    time.sleep(2.5) 
+                    # TRAVA DE SEGURANÇA: Espera até que a 6ª linha exista no HTML
+                    # Isso evita coletar dados enquanto o site ainda está carregando
+                    WebDriverWait(secao, 6).until(
+                        lambda s: len(s.find_elements(By.CSS_SELECTOR, ".h2h__row")) >= 6
+                    )
+                    print(f"      ✅ H2H expandido: {t1} x {t2} (6 jogos carregados)")
                 except:
-                    # Se não achar o botão, o histórico é curto (5 jogos ou menos)
+                    # Se não houver botão ou demorar demais, segue com o que tiver (5 jogos ou menos)
                     pass 
 
-            # Define limite de 6 jogos para H2H e 5 para os outros
+            # Limite definido: 6 para H2H (idx 2) e 5 para Casa/Fora
             limite = 6 if idx == 2 else 5
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
             
@@ -129,7 +130,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
-
 
 def main():
     driver = configurar_driver()
