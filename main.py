@@ -13,7 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Importação dos seus módulos
 from ligas import COMPETICOES
-from mercados import gols, ambos_marcam, chance_dupla
+from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
 import odds  
 import bingo357  
 import links
@@ -175,8 +175,10 @@ def main():
                         res_gols = gols.verificar_gols(s)
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
-                        
-                        sugestoes_stat = (res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd)[:5]
+                        res_vc = vitoria_casa.verificar_vitoria_casa(s) # <-- 1. AJUSTE AQUI
+
+                        # 2. AJUSTE AQUI (Adicionado res_vc na soma das listas)
+                        sugestoes_stat = (res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd + res_vc)[:5]
                         
                         if sugestoes_stat:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
@@ -188,6 +190,7 @@ def main():
                                 elif "Ambas" in m: valor_odd_str = v_odds.get("BTTS", "N/A")
                                 elif "1X" in m: valor_odd_str = v_odds.get("1X", "N/A")
                                 elif "X2" in m or "2X" in m: valor_odd_str = v_odds.get("X2", "N/A")
+                                elif "Vitória Casa" in m: valor_odd_str = v_odds.get("VITORIA_CASA", "N/A") # <-- 3. AJUSTE AQUI
 
                                 try:
                                     odd_float = float(valor_odd_str.replace(',', '.'))
