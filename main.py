@@ -114,15 +114,20 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         elif res_el == "E": stats[f"{prefixo}_empates"] += 1
                         elif res_el == "D": stats[f"{prefixo}_derrotas"] += 1
                     except: pass
-                
+                        
                 elif idx == 2: 
                     try:
-                        stats["h2h_jogos"] += 1
-                        res_h2h = linha.find_element(By.CSS_SELECTOR, "span[class*='h2h__icon']").text.strip().upper()
-                        if res_h2h == "V": stats["h2h_vitorias_t1"] += 1
-                        elif res_h2h == "E": stats["h2h_empates"] += 1
-                        elif res_h2h == "D": stats["h2h_vitorias_t2"] += 1
+                        # Busca o ícone de resultado (V, E ou D)
+                        icones = linha.find_elements(By.CSS_SELECTOR, "span[class*='h2h__icon']")
+                        if icones:
+                            res_h2h = icones[0].text.strip().upper()
+                            stats["h2h_jogos"] += 1 # Só conta o jogo se achar o resultado
+                            
+                            if res_h2h == "V": stats["h2h_vitorias_t1"] += 1
+                            elif res_h2h == "E": stats["h2h_empates"] += 1
+                            elif res_h2h == "D": stats["h2h_vitorias_t2"] += 1
                     except: pass
+
 
     except Exception as e:
         print(f"      ⚠️ Erro H2H: {e}")
