@@ -1,85 +1,83 @@
-def montar_bilhetes_estrategicos(lista_mercados):
-    mercados_validos = []
-    for m in lista_mercados:
-        try:
-            odd_str = str(m.get('odd', '0')).replace(',', '.')
-            m['odd_val'] = float(odd_str)
-            if m['odd_val'] > 1.0:
-                mercados_validos.append(m)
-        except ValueError:
-            continue
-
-    # 1. Ordenamos a fonte por maior ODD para priorizar valor
-    mercados_validos.sort(key=lambda x: x['odd_val'], reverse=True)
-
-    bilhetes_finais = []
-    jogos_globais_usados = set()
-
-    def buscar_combinada(nome, filtro_min, filtro_max, lista_fonte, quantidade):
-        combinada = []
-        odd_acumulada = 1.0
-        
-        candidatos = [
-            m for m in lista_fonte 
-            if filtro_min <= m['odd_val'] <= filtro_max 
-            and f"{m['horario']}_{m['time_casa']}" not in jogos_globais_usados
-        ]
-        
-        for m in candidatos:
-            if len(combinada) < quantidade:
-                combinada.append(m)
-                odd_acumulada *= m['odd_val']
-                jogos_globais_usados.add(f"{m['horario']}_{m['time_casa']}")
-        
-        if len(combinada) == quantidade:
-            # Ordena o bilhete pronto por HORÁRIO
-            combinada.sort(key=lambda x: x['horario'])
-            return {
-                "tipo": nome,
-                "jogos": combinada,
-                "total": round(odd_acumulada, 2)
-            }
-        return None
-
-    # Montagem das listas (Ajustado para Odd mínima 1.25)
-    t1 = buscar_combinada("🎯 TRIPLA SEGURANÇA (1.25 - 1.40)", 1.25, 1.40, mercados_validos, 3)
-    if t1: bilhetes_finais.append(t1)
-
-    t2 = buscar_combinada("🔥 TRIPLA VALOR (ACIMA 1.40)", 1.41, 2.50, mercados_validos, 3)
-    if t2: bilhetes_finais.append(t2)
-
-    q1 = buscar_combinada("💰 QUINA DE OURO (5 MELHORES)", 1.25, 5.00, mercados_validos, 5)
-    if q1: bilhetes_finais.append(q1)
-
-    s7 = buscar_combinada("🚀 BILHETE DA SORTE (7 JOGOS)", 1.25, 5.00, mercados_validos, 7)
-    if s7: bilhetes_finais.append(s7)
-
-    return bilhetes_finais
-
-# AJUSTE: Agora aceita o cache_links capturado pelo main.py
-def formatar_para_telegram(bilhetes, cache_links=None):
-    if not bilhetes: return ""
-    if cache_links is None: cache_links = {}
+def montar_bilhetes_estrategicos(lista_jogos):
+    """
+    Agrupa os jogos filtrados em bilhetes temáticos.
+    """
+    bilhetes = []
     
-    mensagem = ""
+    # Separadores por categoria
+    jogos_seguranca = []  # 1X, 2X, Vitória Casa e -4.5 Gols
+    jogos_gols = []       # +1.5 e +2.5 Gols
+    jogos_btts = []       # Ambas Marcam
+    
+    for jogo in lista_jogos:
+        m = jogo['mercado']
+        
+        # --- AJUSTE: Adicionando Vitória Casa na categoria de Segurança ---
+        if "Vitória Casa" in m or "1X" in m or "2X" in m or "-4.5" in m:
+            jogos_seguranca.append(jogo)
+            
+        elif "Ambas" in m:
+            jogos_btts.append(jogo)
+            
+        elif "+1.5" in m or "+2.5" in m:
+            jogos_gols.append(jogo)
+
+    # 1. Montagem do BILHETE DE SEGURANÇA 🛡️
+    # Agrupa de 2 em 2 ou 3 em 3 para manter a odd entre 1.80 e 2.50
+    for i in range(0, len(jogos_seguranca), 3):
+        grupo = jogos_seguranca[i:i+3]
+        if len(grupo) >= 2:
+            bilhetes.append({
+                "nome": "BILHETE DE SEGURANÇA 🛡️",
+                "jogos": grupo
+            })
+
+    # 2. Montagem do BILHETE DE GOLS ⚽
+    for i in range(0, len(jogos_gols), 3):
+        grupo = jogos_gols[i:i+3]
+        if len(grupo) >= 2:
+            bilhetes.append({
+                "nome": "BILHETE DE GOLS ⚽",
+                "jogos": grupo
+            })
+
+    # 3. Montagem do BILHETE AMBAS MARCAM 🔥
+    for i in range(0, len(jogos_btts), 2):
+        grupo = jogos_btts[i:i+2]
+        if len(grupo) >= 2:
+            bilhetes.append({
+                "nome": "BILHETE AMBAS MARCAM 🔥",
+                "jogos": grupo
+            })
+
+    return bilhetes
+
+def formatar_para_telegram(bilhetes, cache_links):
+    """
+    Transforma a lista de bilhetes em texto formatado para o Telegram.
+    """
+    texto_final = ""
+    
     for b in bilhetes:
-        mensagem += f"*{b['tipo']}*\n"
+        texto_final += f"🏆 *{b['nome']}*\n"
+        odd_total = 1.0
+        
         for j in b['jogos']:
-            # Busca o link real no cache. Se não existir, gera o link de busca como reserva.
-            chave_jogo = f"{j['time_casa']}x{j['time_fora']}"
-            link = cache_links.get(chave_jogo)
+            chave = f"{j['time_casa']}x{j['time_fora']}"
+            link = cache_links.get(chave, "#")
             
-            if not link:
-                termo = f"{j['time_casa']} x {j['time_fora']} Betano".replace(" ", "+")
-                link = f"https://www.google.com/search?q={termo}"
+            # Formatação de cada linha do bilhete
+            texto_final += f"📍 [{j['time_casa']} x {j['time_fora']}]({link})\n"
+            texto_final += f"👉 {j['mercado']} | Odd: {j['odd']}\n"
             
-            # Formatação: Hora | Liga | Times
-            mensagem += f"⏱️ {j['horario']} | {j['liga']}\n"
-            mensagem += f"🏟️ {j['time_casa']} x {j['time_fora']}\n"
-            mensagem += f"🔶 {j['mercado']} | Odd: {j['odd']}\n"
-            mensagem += f"🌐 [Abrir na Betano]({link})\n\n"
-            
-        mensagem += f"📈 *Odd Total: {b['total']}*\n"
-        mensagem += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
-    return mensagem
+            # Cálculo da Odd acumulada (opcional para exibição)
+            try:
+                odd_total *= float(j['odd'].replace(',', '.'))
+            except:
+                pass
+        
+        texto_final += f"💰 *Odd Total: {odd_total:.2f}*\n"
+        texto_final += "\n------------------------------------\n\n"
+        
+    return texto_final
     
