@@ -1,5 +1,8 @@
+import os
 import time
 import re
+import requests
+from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -8,86 +11,234 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-def realizar_teste_h2h_especifico():
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+# Importação dos seus módulos
+from ligas import COMPETICOES
+from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
+import odds  
+import bingo357  
+import links
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    wait = WebDriverWait(driver, 30)
+def enviar_telegram(mensagem, chat_id_destino):
+    token = os.getenv('TELEGRAM_TOKEN')
+    if not token or not chat_id_destino:
+        return
     
-    url = "https://www.flashscore.com.br/jogo/futebol/espanyol-QFfPdh1J/levante-G8FL0ShI/h2h/total/?mid=SKkThKvn"
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    try:
+        requests.post(url, data={
+            "chat_id": chat_id_destino, 
+            "text": mensagem, 
+            "parse_mode": "Markdown",
+            "disable_web_page_preview": True
+        })
+    except Exception as e:
+        print(f"Erro Telegram: {e}")
+
+def configurar_driver():
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--window-size=1920,3000")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
+    return driver
+    
+def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
+    driver.execute_script(f"window.open('{url_jogo}', '_blank');")
+    driver.switch_to.window(driver.window_handles[-1])
+    
+    stats = {
+        "casa_15": 0, "casa_25": 0, "casa_45": 0, "casa_btts": 0, 
+        "casa_ult_btts": False, "casa_derrotas": 0, "casa_vitorias": 0, "casa_empates": 0, "casa_ult_res": "",
+        "casa_ult_15": False, "casa_ult_sofreu": False,
+        "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, 
+        "fora_ult_btts": False, "fora_derrotas": 0, "fora_vitorias": 0, "fora_empates": 0, "fora_ult_res": "",
+        "fora_ult_15": False, "fora_ult_sofreu": False,
+        "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
+        "pular_gols": False 
+    }
     
     try:
-        print(f"\n🚀 ACESSANDO: {url}")
-        driver.get(url)
+        # Espera carregar os dados (aumentei um pouco o tempo para o GitHub)
+        wait = WebDriverWait(driver, 15)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        secao_direta = secoes[-1] 
-        linhas = secao_direta.find_elements(By.CSS_SELECTOR, ".h2h__row")
         
-        # Variáveis de controle para os dois times
-        stats = {
-            "time1": {"nome": "Espanyol", "v": 0, "e": 0},
-            "time2": {"nome": "Levante", "v": 0, "e": 0}
-        }
+        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        
+        for idx, secao in enumerate(secoes[:3]): 
+            if idx == 2: 
+                try:
+                    # Tenta expandir para garantir 6 jogos no H2H
+                    botao_mais = secao.find_element(By.CSS_SELECTOR, "span[class*='showMore']")
+                    driver.execute_script("arguments[0].click();", botao_mais)
+                    time.sleep(2)
+                except: pass 
 
-        print(f"\n--- ANALISANDO IMPACTO DO H2H PARA AMBOS ---")
-
-        for i, linha in enumerate(linhas[:6]):
-            try:
-                casa = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
-                fora = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
-                txt_placar = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
+            limite = 6 if idx == 2 else 5
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
+            
+            for i, linha in enumerate(linhas):
+                # Captura dados básicos da linha
+                nome_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
+                nome_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
+                texto_placar = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
                 
-                # Extração infalível de números
-                nums = re.findall(r'\d+', txt_placar)
-                g_casa, g_fora = int(nums[0]), int(nums[1])
+                # Extração de Gols (Infallible Regex)
+                nums = re.findall(r'\d+', texto_placar)
+                if len(nums) >= 2:
+                    g_casa, g_fora = int(nums[0]), int(nums[1])
+                    total_gols = g_casa + g_fora
+                else: continue
 
-                resultado_log = ""
-                if g_casa == g_fora:
-                    stats["time1"]["e"] += 1
-                    stats["time2"]["e"] += 1
-                    resultado_log = "🤝 EMPATE (Bom para os dois)"
-                elif g_casa > g_fora:
-                    # Vitória de quem estava na esquerda (Casa)
-                    if stats["time1"]["nome"].lower() in casa.lower():
-                        stats["time1"]["v"] += 1
-                        resultado_log = f"✅ Vitória {stats['time1']['nome']}"
+                if idx < 2: # Estatísticas Individuais (Casa/Fora)
+                    prefixo = "casa" if idx == 0 else "fora"
+                    
+                    if i == 0:
+                        stats[f"{prefixo}_ult_15"] = (total_gols > 1.5)
+                        stats[f"{prefixo}_ult_sofreu"] = (g_fora > 0 if idx == 0 else g_casa > 0)
+                        if g_casa > 0 and g_fora > 0: stats[f"{prefixo}_ult_btts"] = True
+                    
+                    if total_gols > 1.5: stats[f"{prefixo}_15"] += 1
+                    if total_gols > 2.5: stats[f"{prefixo}_25"] += 1
+                    if total_gols <= 4: stats[f"{prefixo}_45"] += 1 
+                    if g_casa > 0 and g_fora > 0: stats[f"{prefixo}_btts"] += 1
+
+                    # Lógica de Vitória/Empate/Derrota para times individuais
+                    time_referencia = t1 if idx == 0 else t2
+                    if g_casa == g_fora:
+                        stats[f"{prefixo}_empates"] += 1
+                    elif (time_referencia.lower() in nome_casa_h2h.lower() and g_casa > g_fora) or \
+                         (time_referencia.lower() in nome_fora_h2h.lower() and g_fora > g_casa):
+                        stats[f"{prefixo}_vitorias"] += 1
                     else:
-                        stats["time2"]["v"] += 1
-                        resultado_log = f"✅ Vitória {stats['time2']['nome']}"
-                else:
-                    # Vitória de quem estava na direita (Fora)
-                    if stats["time1"]["nome"].lower() in fora.lower():
-                        stats["time1"]["v"] += 1
-                        resultado_log = f"✅ Vitória {stats['time1']['nome']}"
+                        stats[f"{prefixo}_derrotas"] += 1
+                        
+                elif idx == 2: # CONFRONTO DIRETO (A lógica que corrigimos)
+                    stats["h2h_jogos"] += 1
+                    if g_casa == g_fora:
+                        stats["h2h_empates"] += 1
+                    elif (t1.lower() in nome_casa_h2h.lower() and g_casa > g_fora) or \
+                         (t1.lower() in nome_fora_h2h.lower() and g_fora > g_casa):
+                        stats["h2h_vitorias_t1"] += 1
                     else:
-                        stats["time2"]["v"] += 1
-                        resultado_log = f"✅ Vitória {stats['time2']['nome']}"
-
-                print(f"[{i+1}] {casa} {g_casa}x{g_fora} {fora} | {resultado_log}")
-
-            except: continue
-
-        # RESUMO FINAL COMPARATIVO
-        print("\n" + "="*45)
-        for t in ["time1", "time2"]:
-            nome = stats[t]["nome"]
-            v, e = stats[t]["v"], stats[t]["e"]
-            sucesso_1x = v + e
-            print(f"📊 {nome.upper()}: {v}V - {e}E | Sucesso 1X: {sucesso_1x}/5")
-        print("="*45)
+                        stats["h2h_vitorias_t2"] += 1
 
     except Exception as e:
-        print(f"❌ ERRO: {e}")
+        print(f"      ⚠️ Erro H2H {t1}x{t2}: {e}")
+        
+    driver.close()
+    driver.switch_to.window(driver.window_handles[0])
+    return stats
+
+def main():
+    driver = configurar_driver()
+    hoje_ref = datetime.now()
+    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
+    lista_para_filtros = []     
+    total_mercados = 0 
+
+    try:
+        for nome_comp, url in COMPETICOES.items():
+            if total_mercados >= 100: break 
+            print(f"\n--- Analisando: {nome_comp} ---")
+            driver.get(url)
+            time.sleep(4)
+            elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+            
+            for el in elementos:
+                if total_mercados >= 100: break 
+                try:
+                    tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
+                    h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
+                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
+                    
+                    aceitar = False
+                    if amanha_no_site in tempo_raw:
+                        if h_obj.hour <= 3: aceitar = True
+                    elif "." not in tempo_raw:
+                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
+
+                    if aceitar:
+                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                        t1, t2 = times[0].text.strip(), times[1].text.strip()
+                        id_jogo = el.get_attribute('id').split('_')[-1]
+                        
+                        url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
+                        s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
+                        
+                        res_gols = gols.verificar_gols(s)
+                        res_btts = ambos_marcam.verificar_btts(s)
+                        res_cd = chance_dupla.verificar_chance_dupla(s)
+                        res_vc = vitoria_casa.verificar_vitoria_casa(s) # <-- 1. AJUSTE AQUI
+
+                        # 2. AJUSTE AQUI (Adicionado res_vc na soma das listas)
+                        sugestoes_stat = (res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd + res_vc)[:5]
+                        
+                        if sugestoes_stat:
+                            v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
+                            for m in sugestoes_stat:
+                                valor_odd_str = "N/A"
+                                if "+1.5" in m: valor_odd_str = v_odds.get("GOLS_15", "N/A")
+                                elif "+2.5" in m: valor_odd_str = v_odds.get("GOLS_25", "N/A")
+                                elif "-4.5" in m: valor_odd_str = v_odds.get("GOLS_M45", "N/A")
+                                elif "Ambas" in m: valor_odd_str = v_odds.get("BTTS", "N/A")
+                                elif "1X" in m: valor_odd_str = v_odds.get("1X", "N/A")
+                                elif "X2" in m or "2X" in m: valor_odd_str = v_odds.get("X2", "N/A")
+                                elif "Vitória Casa" in m: valor_odd_str = v_odds.get("VITORIA_CASA", "N/A") # <-- 3. AJUSTE AQUI
+
+                                try:
+                                    odd_float = float(valor_odd_str.replace(',', '.'))
+                                    if "-4.5" in m and odd_float >= 4.0:
+                                        print(f"      🚫 Odd suspeita para -4.5 ({odd_float}). Ignorando...")
+                                        continue 
+                                    if odd_float >= 1.25:
+                                        lista_para_filtros.append({
+                                            "horario": h_br, "time_casa": t1, "time_fora": t2,
+                                            "mercado": m, "odd": valor_odd_str, "liga": nome_comp
+                                        })
+                                        total_mercados += 1
+                                except: pass
+                except: continue
+
+        if lista_para_filtros:
+            lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
+            itens_listao = []
+            for j in lista_para_filtros:
+                itens_listao.append(f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}")
+            
+            texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
+            
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
+            cache_links = {}
+            texto_estrategico = None
+            
+            if novos_bilhetes:
+                print("\n🔗 Buscando links reais para os Bilhetes Bingo...")
+                for b in novos_bilhetes:
+                    for j in b['jogos']:
+                        chave = f"{j['time_casa']}x{j['time_fora']}"
+                        if chave not in cache_links:
+                            cache_links[chave] = links.capturar_link_direto(driver, j['time_casa'], j['time_fora'])
+                texto_estrategico = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
+
+            # Aqui você define a lista de IDs (pegando das variáveis do GitHub)
+            destinatarios = [os.getenv('CHAT_ID'), os.getenv('CHANNEL_ID')]
+            
+            for cid in destinatarios:
+                if not cid: 
+                    continue
+                
+                # O comando abaixo CHAMA a função do topo e passa o ID da vez (cid)
+                enviar_telegram(texto_listao_final, cid)
+                
+                if texto_estrategico:
+                    enviar_telegram("💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_estrategico, cid)
+
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    realizar_teste_h2h_especifico()
-    
+    main()
+        
