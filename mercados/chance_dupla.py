@@ -1,33 +1,27 @@
 def verificar_chance_dupla(s):
-    # --- 1. REGRA DO CONFRONTO DIRETO (H2H) ---
-    if s["h2h_jogos"] >= 6:
+    # --- REGRA EXCLUSIVA: CONFRONTO DIRETO (H2H) ---
+    # Verifica se há histórico suficiente (mínimo 5 jogos)
+    if s["h2h_jogos"] >= 5:
         sucesso_h2h_t1 = s["h2h_vitorias_t1"] + s["h2h_empates"]
         sucesso_h2h_t2 = s["h2h_vitorias_t2"] + s["h2h_empates"]
         
+        # MÍNIMO 4 SUCESSOS (Vitória ou Empate)
+        
+        # Lógica para o Time da Casa (1X)
         if sucesso_h2h_t1 >= 4:
-            pct = "100%" if sucesso_h2h_t1 == 6 else "85%" if sucesso_h2h_t1 == 5 else "70%"
+            # Porcentagem baseada em 5 ou 6 jogos
+            if sucesso_h2h_t1 >= 6: pct = "100%"
+            elif sucesso_h2h_t1 == 5: pct = "85%"
+            else: pct = "70%" # Caso seja 4/5 ou 4/6
             return [f"1X 🔥 ({pct})"]
             
+        # Lógica para o Time de Fora (2X)
         if sucesso_h2h_t2 >= 4:
-            pct = "100%" if sucesso_h2h_t2 == 6 else "85%" if sucesso_h2h_t2 == 5 else "70%"
+            if sucesso_h2h_t2 >= 6: pct = "100%"
+            elif sucesso_h2h_t2 == 5: pct = "85%"
+            else: pct = "70%" # Caso seja 4/5 ou 4/6
             return [f"2X 🔥 ({pct})"]
-        
-        # REMOVIDO: return [] (Para permitir que ele tente a regra padrão se o H2H não for fogo)
 
-    # --- 2. SEGUNDA OPÇÃO (PADRÃO INDIVIDUAL) ---
-    mercados = []
-    sucesso_casa = s["casa_vitorias"] + s["casa_empates"]
-    sucesso_fora = s["fora_vitorias"] + s["fora_empates"]
-
-    if sucesso_casa >= 4:
-        if s["fora_derrotas"] >= 2 or s["casa_ult_res"] == "V":
-            pct = "100%" if sucesso_casa == 5 else "85%"
-            mercados.append(f"1X ({pct})")
-    
-    elif sucesso_fora >= 4:
-        if s["casa_derrotas"] >= 2 or s["fora_ult_res"] == "V":
-            pct = "100%" if sucesso_fora == 5 else "90%"
-            mercados.append(f"2X ({pct})")
-            
-    return mercados
+    # Se não atingir o mínimo de 4/5 no H2H, não envia nada
+    return []
     
