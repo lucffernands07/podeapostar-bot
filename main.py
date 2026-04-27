@@ -46,6 +46,7 @@ def configurar_driver():
     return driver
     
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
+    # Mantendo a navegação do seu backup (Abre em nova aba)
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
@@ -61,69 +62,79 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     }
     
     try:
-        # Espera carregar os dados (aumentei um pouco o tempo para o GitHub)
+        # CORREÇÃO: Clique na aba H2H (Essencial para carregar as tabelas)
         wait = WebDriverWait(driver, 15)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
+        h2h_tab = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
+        h2h_tab.click()
+        time.sleep(5)
+        
+        # Scroll para garantir que o conteúdo carregue no headless
+        driver.execute_script("window.scrollTo(0, 800);")
+        time.sleep(2)
         
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         for idx, secao in enumerate(secoes[:3]): 
             if idx == 2: 
                 try:
-                    # Tenta expandir para garantir 6 jogos no H2H
-                    botao_mais = secao.find_element(By.CSS_SELECTOR, "span[class*='showMore']")
+                    # Expansão para 6 jogos (Igual ao backup)
+                    seletor_btn = "span[data-testid='wcl-scores-caption-05']"
+                    botao_mais = secao.find_element(By.CSS_SELECTOR, seletor_btn)
                     driver.execute_script("arguments[0].click();", botao_mais)
-                    time.sleep(2)
+                    WebDriverWait(secao, 6).until(lambda s: len(s.find_elements(By.CSS_SELECTOR, ".h2h__row")) >= 6)
                 except: pass 
 
             limite = 6 if idx == 2 else 5
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
             
             for i, linha in enumerate(linhas):
-                # Captura dados básicos da linha
-                nome_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
-                nome_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
-                texto_placar = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
-                
-                # Extração de Gols (Infallible Regex)
-                nums = re.findall(r'\d+', texto_placar)
-                if len(nums) >= 2:
-                    g_casa, g_fora = int(nums[0]), int(nums[1])
-                    total_gols = g_casa + g_fora
-                else: continue
-
-                if idx < 2: # Estatísticas Individuais (Casa/Fora)
-                    prefixo = "casa" if idx == 0 else "fora"
+                try:
+                    n_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
+                    n_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
+                    res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
                     
-                    if i == 0:
-                        stats[f"{prefixo}_ult_15"] = (total_gols > 1.5)
-                        stats[f"{prefixo}_ult_sofreu"] = (g_fora > 0 if idx == 0 else g_casa > 0)
-                        if g_casa > 0 and g_fora > 0: stats[f"{prefixo}_ult_btts"] = True
-                    
-                    if total_gols > 1.5: stats[f"{prefixo}_15"] += 1
-                    if total_gols > 2.5: stats[f"{prefixo}_25"] += 1
-                    if total_gols <= 4: stats[f"{prefixo}_45"] += 1 
-                    if g_casa > 0 and g_fora > 0: stats[f"{prefixo}_btts"] += 1
+                    # LOGICA DE SUCESSO DO TESTE (Regex para Gols)
+                    numeros_placar = re.findall(r'\d+', res_texto)
+                    if len(numeros_placar) < 2: continue
+                    g1, g2 = int(numeros_placar[0]), int(numeros_placar[1])
+                    total = g1 + g2
 
-                    # Lógica de Vitória/Empate/Derrota para times individuais
-                    time_referencia = t1 if idx == 0 else t2
-                    if g_casa == g_fora:
-                        stats[f"{prefixo}_empates"] += 1
-                    elif (time_referencia.lower() in nome_casa_h2h.lower() and g_casa > g_fora) or \
-                         (time_referencia.lower() in nome_fora_h2h.lower() and g_fora > g_casa):
-                        stats[f"{prefixo}_vitorias"] += 1
-                    else:
-                        stats[f"{prefixo}_derrotas"] += 1
+                    if idx < 2: # Tabelas 1 e 2
+                        prefixo = "casa" if idx == 0 else "fora"
+                        t_ref = t1 if idx == 0 else t2
                         
-                elif idx == 2: # CONFRONTO DIRETO (A lógica que corrigimos)
-                    stats["h2h_jogos"] += 1
-                    if g_casa == g_fora:
-                        stats["h2h_empates"] += 1
-                    elif (t1.lower() in nome_casa_h2h.lower() and g_casa > g_fora) or \
-                         (t1.lower() in nome_fora_h2h.lower() and g_fora > g_casa):
-                        stats["h2h_vitorias_t1"] += 1
-                    else:
-                        stats["h2h_vitorias_t2"] += 1
+                        if i == 0:
+                            stats[f"{prefixo}_ult_15"] = (total > 1.5)
+                            stats[f"{prefixo}_ult_sofreu"] = (g2 > 0 if idx == 0 else g1 > 0)
+                            if g1 > 0 and g2 > 0: stats[f"{prefixo}_ult_btts"] = True
+                        
+                        if total > 1.5: stats[f"{prefixo}_15"] += 1
+                        if total > 2.5: stats[f"{prefixo}_25"] += 1
+                        if total <= 4: stats[f"{prefixo}_45"] += 1 
+                        if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
+
+                        # Atribuição de V/E/D via Gols
+                        if g1 == g2:
+                            stats[f"{prefixo}_empates"] += 1
+                            if i == 0: stats[f"{prefixo}_ult_res"] = "E"
+                        elif (t_ref.lower() in n_casa_h2h.lower() and g1 > g2) or \
+                             (t_ref.lower() in n_fora_h2h.lower() and g2 > g1):
+                            stats[f"{prefixo}_vitorias"] += 1
+                            if i == 0: stats[f"{prefixo}_ult_res"] = "V"
+                        else:
+                            stats[f"{prefixo}_derrotas"] += 1
+                            if i == 0: stats[f"{prefixo}_ult_res"] = "D"
+                            
+                    elif idx == 2: # TABELA 3: CONFRONTO DIRETO
+                        stats["h2h_jogos"] += 1
+                        if g1 == g2:
+                            stats["h2h_empates"] += 1
+                        elif (t1.lower() in n_casa_h2h.lower() and g1 > g2) or \
+                             (t1.lower() in n_fora_h2h.lower() and g2 > g1):
+                            stats["h2h_vitorias_t1"] += 1
+                        else:
+                            stats["h2h_vitorias_t2"] += 1
+                except: continue
 
     except Exception as e:
         print(f"      ⚠️ Erro H2H {t1}x{t2}: {e}")
@@ -171,9 +182,8 @@ def main():
                         res_gols = gols.verificar_gols(s)
                         res_btts = ambos_marcam.verificar_btts(s)
                         res_cd = chance_dupla.verificar_chance_dupla(s)
-                        res_vc = vitoria_casa.verificar_vitoria_casa(s) # <-- 1. AJUSTE AQUI
+                        res_vc = vitoria_casa.verificar_vitoria_casa(s)
 
-                        # 2. AJUSTE AQUI (Adicionado res_vc na soma das listas)
                         sugestoes_stat = (res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd + res_vc)[:5]
                         
                         if sugestoes_stat:
@@ -186,12 +196,11 @@ def main():
                                 elif "Ambas" in m: valor_odd_str = v_odds.get("BTTS", "N/A")
                                 elif "1X" in m: valor_odd_str = v_odds.get("1X", "N/A")
                                 elif "X2" in m or "2X" in m: valor_odd_str = v_odds.get("X2", "N/A")
-                                elif "Vitória Casa" in m: valor_odd_str = v_odds.get("VITORIA_CASA", "N/A") # <-- 3. AJUSTE AQUI
+                                elif "Vitória Casa" in m: valor_odd_str = v_odds.get("VITORIA_CASA", "N/A")
 
                                 try:
                                     odd_float = float(valor_odd_str.replace(',', '.'))
                                     if "-4.5" in m and odd_float >= 4.0:
-                                        print(f"      🚫 Odd suspeita para -4.5 ({odd_float}). Ignorando...")
                                         continue 
                                     if odd_float >= 1.25:
                                         lista_para_filtros.append({
@@ -223,16 +232,10 @@ def main():
                             cache_links[chave] = links.capturar_link_direto(driver, j['time_casa'], j['time_fora'])
                 texto_estrategico = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
 
-            # Aqui você define a lista de IDs (pegando das variáveis do GitHub)
             destinatarios = [os.getenv('CHAT_ID'), os.getenv('CHANNEL_ID')]
-            
             for cid in destinatarios:
-                if not cid: 
-                    continue
-                
-                # O comando abaixo CHAMA a função do topo e passa o ID da vez (cid)
+                if not cid: continue
                 enviar_telegram(texto_listao_final, cid)
-                
                 if texto_estrategico:
                     enviar_telegram("💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_estrategico, cid)
 
@@ -241,4 +244,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-        
