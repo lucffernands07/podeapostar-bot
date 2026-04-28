@@ -30,12 +30,11 @@ jobs:
       - name: Instalar dependências
         run: |
           python -m pip install --upgrade pip
-          pip install requests selenium webdriver-manager undetected-chromedriver
+          pip install selenium requests webdriver-manager undetected-chromedriver
 
       - name: Executar Teste de Link
         env:
           PYTHONPATH: ${{ github.workspace }}
-        # Adicionei o display para o Chrome rodar em modo headless no Linux
         run: python testes/teste_links.py
 
       - name: Exibir Log do HTML
@@ -46,3 +45,4 @@ jobs:
           else
             echo "Arquivo de log não encontrado."
           fi
+          
