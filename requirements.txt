@@ -1,3 +1,4 @@
 selenium
 requests
 webdriver-manager
+tls-client==1.0.1
