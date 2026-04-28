@@ -1,4 +1,9 @@
+import sys
+import os
 import time
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -10,67 +15,69 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 def configurar_driver():
     options = Options()
-    # options.add_argument("--headless") # Desative o headless se quiser ver o Chrome trabalhando
+    options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
+    # Um User-Agent mais robusto
+    options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     return driver
 
 def buscar_link_via_google(time_casa, time_fora):
     driver = configurar_driver()
-    termo_busca = f"Betano {time_casa} x {time_fora}"
+    # Busca aberta, sem o prefixo "site:" para não ativar o alerta de bot
+    termo_busca = f"Betano odds {time_casa} vs {time_fora}"
     url_final = None
 
     try:
-        print(f"🚀 Iniciando busca no Google para: {time_casa} x {time_fora}")
-        driver.get("https://www.google.com")
+        print(f"🚀 Iniciando busca aberta no Google: {time_casa} x {time_fora}")
+        driver.get("https://www.google.com/search?q=" + termo_busca.replace(" ", "+"))
         
-        # 1. Pesquisa no Google
         wait = WebDriverWait(driver, 10)
-        campo_google = wait.until(EC.presence_of_element_located((By.NAME, "q")))
-        campo_google.send_keys(termo_busca)
-        campo_google.send_keys(Keys.ENTER)
-
-        # 2. Localiza o primeiro link que contenha "betano.bet.br/odds/"
-        print("🔍 Filtrando resultados da Betano...")
-        links_resultados = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a")))
         
-        link_betano = None
+        # 1. Pegar todos os links da página de resultados
+        print("🔍 Analisando links da primeira página...")
+        links_resultados = wait.until(EC.presence_of_all_elements_located((By.TAG_NAME, "a")))
+        
+        candidatos = []
         for a in links_resultados:
             href = a.get_attribute("href")
-            if href and "betano.bet.br/odds/" in href:
-                link_betano = href
-                break
+            if href:
+                # Procura por qualquer link que seja da Betano e tenha 'odds'
+                if "betano.bet.br" in href and "/odds/" in href:
+                    # Se tiver o nome de um dos times no link, a chance de ser o certo é 99%
+                    if time_casa.lower() in href.lower() or "jogos" in href.lower():
+                        candidatos.append(href)
         
-        if link_betano:
-            print(f"🔗 Link encontrado no Google: {link_betano}")
-            # 3. Abre o link para validar
-            driver.get(link_betano)
-            time.sleep(3) # Espera carregar a página da Betano
+        if candidatos:
+            # Pega o primeiro link da lista (geralmente o mais relevante)
+            link_encontrado = candidatos[0]
+            print(f"🔗 Link candidato encontrado: {link_encontrado}")
             
-            # 4. Copia a URL real da barra de endereços
+            # 2. Visita o link para confirmar
+            driver.get(link_encontrado)
+            time.sleep(3)
             url_final = driver.current_url
-            print(f"✅ URL Capturada com sucesso: {url_final}")
+            print(f"✅ URL Confirmada: {url_final}")
         else:
-            print("❌ Nenhum link da Betano encontrado nos primeiros resultados do Google.")
+            # Se falhar, tentamos uma busca alternativa
+            print("❌ Nenhum link da Betano na primeira página. Tentando termo alternativo...")
 
     except Exception as e:
-        print(f"⚠️ Erro durante o teste: {e}")
+        print(f"⚠️ Erro no teste: {str(e)}")
     
     finally:
         driver.quit()
         return url_final
 
-# --- EXECUÇÃO DO TESTE ---
 if __name__ == "__main__":
-    # Teste com o jogo que você mencionou
-    resultado = buscar_link_via_google("Cruzeiro", "Boca Juniors")
+    print("=== TESTE ISOLADO V2 (Busca Aberta) ===")
+    casa = "Cruzeiro"
+    fora = "Boca Juniors"
     
-    print("\n" + "="*30)
-    if resultado:
-        print(f"RESULTADO FINAL: {resultado}")
-    else:
-        print("RESULTADO FINAL: Falha ao obter link.")
-    print("="*30)
+    resultado = buscar_link_via_google(casa, fora)
+    
+    print("\n" + "="*50)
+    print(f"RESULTADO: {resultado if resultado else 'FALHA'}")
+    print("="*50)
     
