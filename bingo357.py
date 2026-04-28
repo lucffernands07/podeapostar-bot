@@ -51,7 +51,7 @@ def montar_bilhetes_estrategicos(lista_jogos):
 
 def formatar_para_telegram(bilhetes, cache_links):
     """
-    Transforma a lista de bilhetes no layout profissional com links e separadores.
+    Transforma a lista de bilhetes no layout profissional com links embutidos.
     """
     if not bilhetes:
         return ""
@@ -64,14 +64,15 @@ def formatar_para_telegram(bilhetes, cache_links):
 
         for j in b['jogos']:
             chave = f"{j['time_casa']}x{j['time_fora']}"
-            # Melhorei o fallback do link para substituir espaços por + para a busca da Betano
+            # Pega o link real capturado pelo links.py
             link = cache_links.get(chave, f"https://br.betano.com/search?q={j['time_casa']}".replace(" ", "%20"))
             
+            # AJUSTE AQUI: A linha agora contém apenas o texto clicável
             item = (
                 f"⏱️ {j['horario']} | {j['liga']}\n"
                 f"🏟️ {j['time_casa']} x {j['time_fora']}\n"
                 f"🔶 {j['mercado']} | Odd: {j['odd']}\n"
-                f"🌐 [Abrir na Betano]({link})"
+                f"🌐 [Abrir na Betano]({link})" 
             )
             jogos_texto.append(item)
             
@@ -85,4 +86,3 @@ def formatar_para_telegram(bilhetes, cache_links):
         blocos.append(corpo)
 
     return "\n\n".join(blocos)
-    
