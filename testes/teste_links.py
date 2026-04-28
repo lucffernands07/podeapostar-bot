@@ -1,64 +1,71 @@
 import sys
 import os
-import time
-import undetected_chromedriver as uc
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+import tls_client
 
-# Garante que encontre os módulos da raiz
+# Garante que encontre os módulos da raiz se necessário
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-def buscar_link_via_google(time_casa, time_fora):
-    options = uc.ChromeOptions()
-    options.add_argument("--headless")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    
-    # O UC já cuida da maioria dos bloqueios sozinho, mas vamos garantir:
-    termo = f"site:betano.bet.br/odds {time_casa} x {time_fora}"
-    url_final = None
+def buscar_link_betano_tls(time_casa, time_fora):
+    print(f"🚀 [TLS-CLIENT MODE] Buscando link para: {time_casa} x {time_fora}")
+
+    # Criando a sessão que simula o navegador Chrome (Lógica SofaScore)
+    # Isso evita o bloqueio de "impressão digital" (JA3) do Cloudflare
+    session = tls_client.Session(
+        client_identifier="chrome_120",
+        random_tls_extension_order=True
+    )
+
+    # API interna de busca da Betano - muito mais rápida que o Google
+    search_url = "https://www.betano.bet.br/api/search/"
+    params = {
+        "q": f"{time_casa} {time_fora}",
+        "limit": "5",
+        "languageId": "pt"
+    }
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Referer": "https://www.betano.bet.br/",
+        "X-Requested-With": "XMLHttpRequest"
+    }
 
     try:
-        print(f"🚀 [UC MODE] Iniciando busca potente: {time_casa} x {time_fora}")
+        response = session.get(search_url, params=params, headers=headers)
         
-        # O undetected_chromedriver não usa o Service do ChromeDriverManager comum
-        driver = uc.Chrome(options=options, version_main=124) # Ajuste a versão se necessário
-
-        driver.get("https://www.google.com")
-        time.sleep(3)
-
-        # 1. Pesquisa (Simulando digitação humana)
-        search_box = driver.find_element(By.NAME, "q")
-        for char in termo:
-            search_box.send_keys(char)
-            time.sleep(0.05)
-        search_box.send_keys(Keys.ENTER)
-        
-        time.sleep(5)
-
-        # 2. Captura de links
-        links = driver.find_elements(By.TAG_NAME, "a")
-        
-        for link in links:
-            href = link.get_attribute("href")
-            if href and "betano.bet.br/odds/" in href:
-                if "-" in href:
-                    print(f"✅ Link interceptado: {href}")
-                    url_final = href
-                    break
+        if response.status_code == 200:
+            dados = response.json()
+            # Navega no JSON da Betano para achar o evento
+            resultados = dados.get('data', {}).get('results', [])
+            
+            for item in resultados:
+                # Verificamos se o resultado é um evento de jogo
+                if item.get('type') == 'EVENT':
+                    url_path = item.get('url')
+                    if url_path:
+                        link_final = f"https://www.betano.bet.br{url_path}"
+                        print(f"✅ Link encontrado: {link_final}")
+                        return link_final
+            
+            print("❌ Jogo não encontrado na API da Betano.")
+        else:
+            print(f"⚠️ Bloqueio detectado! Status: {response.status_code}")
+            print(f"Resposta curta: {response.text[:100]}")
 
     except Exception as e:
-        print(f"⚠️ Erro no UC: {e}")
-    finally:
-        try:
-            driver.quit()
-        except: pass
-        return url_final
+        print(f"⚠️ Erro no TLS-Client: {e}")
+    
+    return None
 
 if __name__ == "__main__":
-    print("=== TESTE COM UNDETECTED-CHROMEDRIVER ===")
-    res = buscar_link_via_google("Cruzeiro", "Boca Juniors")
+    print("=== TESTE COM TLS-CLIENT (Lógica SofaScore) ===")
+    # Teste com os times desejados
+    casa = "Cruzeiro"
+    fora = "Boca Juniors"
+    
+    resultado = buscar_link_betano_tls(casa, fora)
+    
     print("\n" + "="*50)
-    print(f"RESULTADO FINAL: {res if res else 'BLOQUEIO TOTAL'}")
+    print(f"RESULTADO FINAL: {resultado if resultado else 'FALHA NO TLS'}")
     print("="*50)
     
