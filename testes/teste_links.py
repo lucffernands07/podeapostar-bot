@@ -1,61 +1,56 @@
-import sys
-import os
-import requests
-import re
-import urllib.parse
+import undetected_chromedriver as uc
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-def buscar_link_bing(time_casa, time_fora):
-    print(f"🚀 [ROBÔ] Tentando via BING: {time_casa} x {time_fora}")
+def capturar_link_betano_via_flashscore(url_h2h):
+    # Configuração do Driver para rodar no GitHub Actions
+    options = uc.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
     
-    # Termo de busca focado
-    termo = f"betano odds {time_casa} {time_fora}"
-    url_bing = f"https://www.bing.com/search?q={urllib.parse.quote(termo)}"
+    driver = uc.Chrome(options=options)
     
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-        "Accept-Language": "pt-BR,pt;q=0.9"
-    }
-
+    print(f"🚀 [ROBÔ] Acessando: {url_h2h}")
+    
     try:
-        response = requests.get(url_bing, headers=headers, timeout=20)
-        html = response.text
-
-        # Log para conferência
-        with open("log_html_google.txt", "w", encoding="utf-8") as f:
-            f.write(html)
-
-        if response.status_code != 200:
-            print(f"⚠️ Bing retornou status: {response.status_code}")
-            return None
-
-        # No Bing, os links da Betano costumam vir limpos no href
-        # Procuramos o padrão betano.bet.br/odds/ seguido de algo
-        padrao = r'https://www\.betano\.bet\.br/odds/[a-zA-Z0-9\-/]+'
-        links = re.findall(padrao, html)
-
-        if links:
-            # Remove duplicados
-            links = list(dict.fromkeys(links))
-            for link in links:
-                # Se tiver o nome do time no link, é vitória
-                if time_casa.lower()[:4] in link.lower() or time_fora.lower()[:4] in link.lower():
-                    print(f"✅ Link Encontrado no Bing: {link}")
-                    return link
-            
-            return links[0]
-
-        print("❌ Bing também não mostrou links da Betano.")
+        driver.get(url_h2h)
+        
+        # 1. Espera o container de odds carregar (ajuste o tempo se necessário)
+        wait = WebDriverWait(driver, 20)
+        
+        # 2. Localiza o botão da Betano usando o seu data-testid
+        # Dica: O seletor que você passou é muito bom. 
+        # Vamos buscar o elemento pai que é um link (<a>)
+        # que contém esse span dentro.
+        xpath_betano = "//div[contains(@class, 'wcl-bettingProvider')]//a[.//span[@data-testid='wcl-oddsValue']]"
+        
+        btn_betano = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_betano)))
+        
+        # 3. Clica para abrir na nova janela
+        btn_betano.click()
+        
+        # 4. Espera a nova aba abrir e troca para ela
+        time.sleep(3) # Pequena pausa para garantir que a aba carregou
+        driver.switch_to.window(driver.window_handles[-1])
+        
+        # 5. Captura a URL final
+        url_final = driver.current_url
+        print(f"✅ URL exata da Betano capturada: {url_final}")
+        return url_final
 
     except Exception as e:
-        print(f"⚠️ Erro: {e}")
-    
-    return None
+        print(f"❌ Erro ao capturar link: {e}")
+        # Opcional: salvar print para debug no GH Actions
+        driver.save_screenshot("erro_captura.png")
+    finally:
+        driver.quit()
 
 if __name__ == "__main__":
-    resultado = buscar_link_bing("Cruzeiro", "Boca Juniors")
-    print("\n" + "="*50)
-    print(f"RESULTADO: {resultado}")
-    print("="*50)
-    
+    # Exemplo: URL do confronto direto do Flashscore
+    # Substitua pela URL real do jogo que você quer testar
+    url_teste = "https://www.flashscore.com.br/jogo/tXyZ1234/resumo" 
+    resultado = capturar_link_betano_via_flashscore(url_teste)
+    print(f"\nRESULTADO FINAL: {resultado}")
