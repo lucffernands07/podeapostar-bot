@@ -39,6 +39,7 @@ COMPETICOES = {
     "México - Liga MX": "https://www.flashscore.com.br/futebol/mexico/liga-mx/jogos/",
     "Albânia - Super Liga": "https://www.flashscore.com.br/futebol/albania/super-liga/",
     "Andorra - Primeira Divisão": "https://www.flashscore.com.br/futebol/andorra/primeira-divisao/",
+    "Argélia - Liga 1": "https://www.flashscore.com.br/futebol/argelia/1-divisao/jogos/",
     "Espanha - La Liga 2": "https://www.flashscore.com.br/futebol/espanha/laliga2/jogos/",
     "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/jogos/",
     "Itália - Serie B": "https://www.flashscore.com.br/futebol/italia/serie-b/jogos/",
