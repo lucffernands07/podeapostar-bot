@@ -32,4 +32,9 @@ jobs:
           # Permite que o script em /testes importe arquivos da raiz se precisar
           PYTHONPATH: ${{ github.workspace }}
         run: python testes/teste_links.py
+
+       - name: Exibir Log do HTML
+        if: always() # Roda mesmo se o teste falhar
+        run: cat log_html_google.txt
+        
         
