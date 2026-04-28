@@ -1,4 +1,4 @@
-4import sys
+import sys
 import os
 import requests
 import re
