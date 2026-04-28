@@ -151,6 +151,7 @@ def main():
     total_mercados = 0 
 
     try:
+        # LOOP DE COMPETIÇÕES
         for nome_comp, url in COMPETICOES.items():
             if total_mercados >= 100: break 
             print(f"\n--- Analisando: {nome_comp} ---")
@@ -165,6 +166,7 @@ def main():
                     h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
+                    # Lógica de horário para aceitar jogos de hoje e amanhã
                     aceitar = False
                     if amanha_no_site in tempo_raw:
                         if h_obj.hour <= 3: aceitar = True
@@ -210,48 +212,54 @@ def main():
                                         total_mercados += 1
                                 except: pass
                 except: continue
-                    
-            if lista_para_filtros:
-                lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
+
+        # --- BLOCO DE PROCESSAMENTO E ENVIO FINAL (FORA DOS LOOPS) ---
+        if lista_para_filtros:
+            lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
-            # 1. Monta o Listão Geral (SEM LINKS)
+            # 1. Monta o Listão Geral (Apenas texto)
             itens_listao = []
             for j in lista_para_filtros:
                 itens_listao.append(f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}")
             
             texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
             
-            # 2. Monta os Bilhetes Estratégicos (COM LINKS)
+            # 2. Monta os Bilhetes Estratégicos (Com Links)
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
             cache_links = {}
             texto_estrategico = None
             
             if novos_bilhetes:
-                print("\n🔗 Buscando links reais APENAS para os Bilhetes Bingo...")
+                print("\n🔗 Buscando links reais na Betano para os bilhetes selecionados...")
                 for b in novos_bilhetes:
                     for j in b['jogos']:
                         chave = f"{j['time_casa']}x{j['time_fora']}"
-                        # Só busca o link se ele ainda não estiver no cache
                         if chave not in cache_links:
-                            # A mágica do links.py acontece aqui
                             cache_links[chave] = links.capturar_link_direto(driver, j['time_casa'], j['time_fora'])
                 
-                # Formata os bilhetes 3, 5 e 7 usando os links capturados
                 texto_estrategico = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
 
-            # 3. Envio para o Telegram
+            # 3. Envio para o Telegram (Executa uma única vez)
             destinatarios = [os.getenv('CHAT_ID'), os.getenv('CHANNEL_ID')]
             for cid in destinatarios:
                 if not cid: continue
-                # Envia o listão puro
+                
+                # Primeiro o listão geral
                 enviar_telegram(texto_listao_final, cid)
-                # Envia as sugestões com os links "Abrir na Betano"
+                
+                # Depois os bilhetes com os links "Abrir na Betano"
                 if texto_estrategico:
                     enviar_telegram("💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_estrategico, cid)
+            
+            print("✅ Processamento concluído e mensagens enviadas.")
+        else:
+            print("⚠️ Nenhuma partida encontrada nos filtros.")
 
-
+    except Exception as e:
+        print(f"❌ Erro Crítico: {e}")
     finally:
         driver.quit()
+
 
 if __name__ == "__main__":
     main()
