@@ -25,6 +25,7 @@ COMPETICOES = {
 
     # --- BLOCO 4: LIGAS SECUNDÁRIAS EUROPEIAS ---
     "Arábia Saudita - Primeira Liga": "https://www.flashscore.com.br/futebol/arabia-saudita/primeira-liga/jogos/",
+    "Arábia Saudita - Divisão 1": "https://www.flashscore.com.br/futebol/arabia-saudita/divisao-1/jogos/",
     "Portugal - Primeira Liga": "https://www.flashscore.com.br/futebol/portugal/liga-portugal/jogos/",
     "Países Baixos - Eredivisie": "https://www.flashscore.com.br/futebol/paises-baixos/eredivisie/jogos/",
     "Bélgica - Pro League": "https://www.flashscore.com.br/futebol/belgica/liga-jupiler/jogos/",
