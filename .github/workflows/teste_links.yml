@@ -1,7 +1,7 @@
 name: Teste Isolado de Links Google-Betano
 
 on:
-  workflow_dispatch: # Permite rodar manualmente pelo botão "Run workflow"
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -10,7 +10,7 @@ on:
       - '.github/workflows/teste_links.yml'
 
 jobs:
-  run-test-tls:
+  run-test-google:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,14 +27,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Executar Teste de Link (Pasta Testes)
+      - name: Executar Teste de Link
         env:
-          # Permite que o script em /testes importe arquivos da raiz se precisar
           PYTHONPATH: ${{ github.workspace }}
         run: python testes/teste_links.py
 
-       - name: Exibir Log do HTML
-        if: always() # Roda mesmo se o teste falhar
-        run: cat log_html_google.txt
-        
-        
+      - name: Exibir Log do HTML
+        if: always()
+        run: |
+          if [ -f log_html_google.txt ]; then
+            cat log_html_google.txt
+          else
+            echo "Arquivo de log não encontrado."
+          fi
+          
