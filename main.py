@@ -210,34 +210,45 @@ def main():
                                         total_mercados += 1
                                 except: pass
                 except: continue
-
-        if lista_para_filtros:
-            lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
+                    
+            if lista_para_filtros:
+                lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
+            
+            # 1. Monta o Listão Geral (SEM LINKS)
             itens_listao = []
             for j in lista_para_filtros:
                 itens_listao.append(f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}")
             
             texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
             
+            # 2. Monta os Bilhetes Estratégicos (COM LINKS)
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
             cache_links = {}
             texto_estrategico = None
             
             if novos_bilhetes:
-                print("\n🔗 Buscando links reais para os Bilhetes Bingo...")
+                print("\n🔗 Buscando links reais APENAS para os Bilhetes Bingo...")
                 for b in novos_bilhetes:
                     for j in b['jogos']:
                         chave = f"{j['time_casa']}x{j['time_fora']}"
+                        # Só busca o link se ele ainda não estiver no cache
                         if chave not in cache_links:
+                            # A mágica do links.py acontece aqui
                             cache_links[chave] = links.capturar_link_direto(driver, j['time_casa'], j['time_fora'])
+                
+                # Formata os bilhetes 3, 5 e 7 usando os links capturados
                 texto_estrategico = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
 
+            # 3. Envio para o Telegram
             destinatarios = [os.getenv('CHAT_ID'), os.getenv('CHANNEL_ID')]
             for cid in destinatarios:
                 if not cid: continue
+                # Envia o listão puro
                 enviar_telegram(texto_listao_final, cid)
+                # Envia as sugestões com os links "Abrir na Betano"
                 if texto_estrategico:
                     enviar_telegram("💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_estrategico, cid)
+
 
     finally:
         driver.quit()
