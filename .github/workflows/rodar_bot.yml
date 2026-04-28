@@ -3,7 +3,7 @@ name: Execucao Diario Bot Apostas
 on:
   push:
     paths:
-      - 'main.py'
+      - 'links.py'
   schedule:
     # 21:00 Horário de Brasília
     - cron: '0 0 * * *'
