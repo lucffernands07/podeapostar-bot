@@ -27,44 +27,39 @@ def capturar_segunda_odd_h2h(url_h2h):
         driver.get(url_h2h)
         wait = WebDriverWait(driver, 25)
         
-        # 1. Localiza o Título "Odds" como âncora
-        print("🔍 [ROBÔ] Localizando âncora 'Odds'...")
-        xpath_titulo = "//div[contains(@class, 'section__prematchOdds')]"
-        titulo_el = wait.until(EC.presence_of_element_located((By.XPATH, xpath_titulo)))
+        # 1. Localiza a linha da Betano especificamente
+        # Isso evita pegar valores da Bet365 que aparecem antes no log
+        print("🔍 [ROBÔ] Localizando linha da Betano...")
+        xpath_linha_betano = "//div[contains(@class, 'wcl-bettingProvider')]//a[.//img[@alt='Betano']]"
+        linha_betano = wait.until(EC.presence_of_element_located((By.XPATH, xpath_linha_betano)))
         
-        # 2. Busca todos os spans de odds que seguem o título
-        # O XPath abaixo pega o segundo span com data-testid='wcl-oddsValue' após o título
+        # 2. Busca a SEGUNDA odd DENTRO da linha da Betano
+        # O [2] aqui garante que pegamos o segundo valor daquela linha específica
         xpath_segunda_odd = ".//following::span[@data-testid='wcl-oddsValue'][2]"
+        segunda_odd_el = linha_betano.find_element(By.XPATH, xpath_segunda_odd)
         
-        print("🎯 [ROBÔ] Tentando clicar no SEGUNDO valor de odd...")
-        segunda_odd_el = titulo_el.find_element(By.XPATH, xpath_segunda_odd)
-        valor_detectado = segunda_odd_el.text
-        print(f"💰 Valor da Odd no alvo: {valor_detectado}")
+        print(f"🎯 [ROBÔ] Clicando na segunda odd (Valor: {segunda_odd_el.text})")
 
-        # 3. Realiza o clique no elemento (ou no link pai dele)
-        # Muitas vezes o clique precisa ser no <a> que envolve o span
-        try:
-            link_pai = segunda_odd_el.find_element(By.XPATH, "./ancestor::a")
-            driver.execute_script("arguments[0].click();", link_pai)
-        except:
-            driver.execute_script("arguments[0].click();", segunda_odd_el)
+        # 3. Realiza o clique
+        driver.execute_script("arguments[0].click();", segunda_odd_el)
 
-        print("⏳ [ROBÔ] Aguardando carregamento da Betano...")
+        # 4. Espera inteligente pela nova aba e redirecionamento
+        print("⏳ [ROBÔ] Aguardando redirecionamento para Betano...")
         
-        # 4. Espera a nova aba abrir e captura a URL
-        # A Betano pode demorar para processar o token de afiliado
-        time.sleep(10) 
+        # Espera abrir a segunda aba
+        wait.until(lambda d: len(d.window_handles) > 1)
+        driver.switch_to.window(driver.window_handles[-1])
 
-        if len(driver.window_handles) > 1:
-            # Muda para a aba mais recente
-            driver.switch_to.window(driver.window_handles[-1])
+        # ESPERA CRÍTICA: Aguarda a URL mudar de 'flashscore' para qualquer outra coisa (o destino final)
+        # Isso resolve o problema de capturar a URL do flashscore por pressa
+        wait.until(lambda d: "flashscore" not in d.current_url)
+        
+        # Dá um fôlego extra para os parâmetros de tracking da Betano carregarem
+        time.sleep(3) 
         
         url_final = driver.current_url
-        print(f"✅ [SUCESSO] URL FINAL CAPTURADA: {url_final}")
+        print(f"✅ [SUCESSO] URL FINAL: {url_final}")
         
-        if "betano" not in url_final:
-            print("⚠️ A URL capturada não parece ser da Betano. Verifique se o clique abriu a aba correta.")
-
     except Exception as e:
         print(f"❌ Erro na captura: {e}")
         driver.save_screenshot("erro_segunda_odd.png")
@@ -74,3 +69,4 @@ def capturar_segunda_odd_h2h(url_h2h):
 if __name__ == "__main__":
     url = "https://www.flashscore.com.br/jogo/futebol/boca-juniors-hMrWAFH0/cruzeiro-0SwtclaU/h2h/total/?mid=KI37ibhD"
     capturar_segunda_odd_h2h(url)
+    
