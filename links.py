@@ -5,55 +5,52 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def capturar_link_direto(driver, time_casa, time_fora):
     """
-    Pesquisa o confronto no Google, identifica o link oficial da Betano
-    e captura a URL real do evento para o bilhete.
+    Usa o sistema de busca interna da Betano para encontrar o jogo,
+    clica no evento e captura a URL final real.
     """
-    # Criamos a query focada no mercado brasileiro da Betano
-    query = f"betano apostas {time_casa} x {time_fora}"
-    url_busca = f"https://www.google.com/search?q={query.replace(' ', '+')}"
+    # Termo de busca limpo para a Betano
+    termo = f"{time_casa} {time_fora}"
+    url_busca_betano = f"https://br.betano.com/search?q={termo.replace(' ', '%20')}"
     
-    # Guarda a aba onde o robô está trabalhando (Flashscore)
-    aba_trabalho = driver.current_window_handle
+    aba_original = driver.current_window_handle
     
     try:
-        # Abre a pesquisa em uma nova aba para não perder o progresso da raspagem
-        driver.execute_script(f"window.open('{url_busca}', '_blank');")
-        
-        # Muda o foco para a aba da pesquisa
-        WebDriverWait(driver, 5).until(lambda d: len(d.window_handles) > 1)
+        # Abre a busca direta em nova aba
+        driver.execute_script(f"window.open('{url_busca_betano}', '_blank');")
+        WebDriverWait(driver, 10).until(lambda d: len(d.window_handles) > 1)
         driver.switch_to.window(driver.window_handles[-1])
         
-        # Espera carregar os resultados orgânicos do Google
-        WebDriverWait(driver, 8).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.g")))
+        # Espera o card do evento aparecer no resultado da busca
+        # O seletor '.api-event-link' ou '[data-testid="event-card"]' é o padrão da Betano
+        wait = WebDriverWait(driver, 12)
+        seletor_evento = "a[data-testid='event-card'], .api-event-link, a[class*='event-card']"
         
-        # Busca todos os links da página de resultados
-        links_encontrados = driver.find_elements(By.TAG_NAME, "a")
+        # Tenta localizar o primeiro link de evento que apareça
+        link_evento = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, seletor_evento)))
         
-        for link in links_encontrados:
-            href = link.get_attribute("href")
+        # Clica no jogo para abrir a página de mercados completa
+        driver.execute_script("arguments[0].click();", link_evento)
+        
+        # Espera a URL mudar para o padrão de jogo (contendo /futebol/ ou /match/)
+        time.sleep(3) 
+        url_final = driver.current_url
+        
+        # Se a URL capturada for a correta (não for mais a de search), retorna ela
+        if "/search" not in url_final:
+            driver.close()
+            driver.switch_to.window(aba_original)
+            return url_final
             
-            # O link real de um jogo na Betano sempre contém '/match/' ou o ID do evento
-            if href and "betano.com/match" in href:
-                # Clicamos no link para garantir que a URL final seja capturada (tratando redirects)
-                driver.get(href)
-                time.sleep(2) # Pequena pausa para o carregamento do mercado
-                
-                url_final_aposta = driver.current_url
-                
-                # Fecha a aba de busca e volta para a aba principal
-                driver.close()
-                driver.switch_to.window(aba_trabalho)
-                return url_final_aposta
-        
-        # Se não achar o link específico, fecha a aba e retorna a busca como fallback
-        driver.close()
     except Exception as e:
-        print(f"      ⚠️ Erro ao processar link de investimento: {e}")
-        try:
-            if len(driver.window_handles) > 1:
-                driver.close()
-        except: pass
+        print(f"      ⚠️ Erro ao capturar link Betano para {time_casa}: {e}")
     
-    # Retorna para a aba original do robô
-    driver.switch_to.window(aba_trabalho)
-    return url_busca
+    # Se falhar em qualquer etapa, limpa as abas e retorna o link de busca como fallback funcional
+    try:
+        if len(driver.window_handles) > 1:
+            driver.close()
+    except: pass
+    
+    driver.switch_to.window(aba_original)
+    # Fallback: Link de busca interna da Betano (melhor que link do Google)
+    return url_busca_betano
+    
