@@ -1,71 +1,68 @@
 import sys
 import os
-import tls_client
+import requests
+import re
 
-# Garante que encontre os módulos da raiz se necessário
+# Garante que o script consiga importar módulos da raiz do projeto
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-def buscar_link_betano_tls(time_casa, time_fora):
-    print(f"🚀 [TLS-CLIENT MODE] Buscando link para: {time_casa} x {time_fora}")
-
-    # Criando a sessão que simula o navegador Chrome (Lógica SofaScore)
-    # Isso evita o bloqueio de "impressão digital" (JA3) do Cloudflare
-    session = tls_client.Session(
-        client_identifier="chrome_120",
-        random_tls_extension_order=True
-    )
-
-    # API interna de busca da Betano - muito mais rápida que o Google
-    search_url = "https://www.betano.bet.br/api/search/"
-    params = {
-        "q": f"{time_casa} {time_fora}",
-        "limit": "5",
-        "languageId": "pt"
-    }
-
+def buscar_link_google_regex(time_casa, time_fora):
+    print(f"🚀 [REGEX MODE] Buscando link no HTML para: {time_casa} x {time_fora}")
+    
+    # Termo de busca simples
+    termo = f"betano odds {time_casa} vs {time_fora}".replace(" ", "+")
+    url = f"https://www.google.com/search?q={termo}&hl=pt-BR"
+    
+    # Header para o Google não bloquear de cara
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/plain, */*",
-        "Referer": "https://www.betano.bet.br/",
-        "X-Requested-With": "XMLHttpRequest"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
     try:
-        response = session.get(search_url, params=params, headers=headers)
+        response = requests.get(url, headers=headers, timeout=20)
         
         if response.status_code == 200:
-            dados = response.json()
-            # Navega no JSON da Betano para achar o evento
-            resultados = dados.get('data', {}).get('results', [])
+            html_bruto = response.text
             
-            for item in resultados:
-                # Verificamos se o resultado é um evento de jogo
-                if item.get('type') == 'EVENT':
-                    url_path = item.get('url')
-                    if url_path:
-                        link_final = f"https://www.betano.bet.br{url_path}"
-                        print(f"✅ Link encontrado: {link_final}")
-                        return link_final
+            # Regex para pescar links da Betano dentro do HTML/Scripts
+            # Procuramos o padrão de links de odds da Betano
+            padrao = r'https://www\.betano\.bet\.br/odds/[a-zA-Z0-9\-/]+'
+            links = re.findall(padrao, html_bruto)
             
-            print("❌ Jogo não encontrado na API da Betano.")
+            if links:
+                # Remove duplicados
+                links = list(dict.fromkeys(links))
+                
+                for link in links:
+                    # Filtro: tem que ter o nome de um dos times ou a palavra 'jogos'
+                    if time_casa.lower()[:4] in link.lower() or "jogos" in link.lower():
+                        print(f"✅ Link encontrado: {link}")
+                        return link
+                
+                # Se não achou com o nome, retorna o primeiro link da betano que veio
+                return links[0]
+            else:
+                print("❌ Nenhum link da Betano encontrado no HTML.")
         else:
-            print(f"⚠️ Bloqueio detectado! Status: {response.status_code}")
-            print(f"Resposta curta: {response.text[:100]}")
+            print(f"⚠️ Erro no Google: Status {response.status_code}")
 
     except Exception as e:
-        print(f"⚠️ Erro no TLS-Client: {e}")
+        print(f"⚠️ Erro na execução: {e}")
     
     return None
 
 if __name__ == "__main__":
-    print("=== TESTE COM TLS-CLIENT (Lógica SofaScore) ===")
-    # Teste com os times desejados
+    print("=== INICIANDO TESTE REGEX (Lógica Reddit) ===")
+    
+    # Times para o teste
     casa = "Cruzeiro"
     fora = "Boca Juniors"
     
-    resultado = buscar_link_betano_tls(casa, fora)
+    resultado = buscar_link_google_regex(casa, fora)
     
     print("\n" + "="*50)
-    print(f"RESULTADO FINAL: {resultado if resultado else 'FALHA NO TLS'}")
+    if resultado:
+        print(f"SUCESSO: {resultado}")
+    else:
+        print("FALHA: O link não pôde ser extraído.")
     print("="*50)
-    
