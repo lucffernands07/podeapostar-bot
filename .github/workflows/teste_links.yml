@@ -4,11 +4,11 @@ on:
   workflow_dispatch: # Permite rodar manualmente pelo botão "Run workflow"
   push:
     paths:
-      - 'testes/teste_links.py' # Roda se você editar o arquivo de teste
-      - '.github/workflows/teste_links.yml' # Roda se você editar este yml
+      - 'testes/teste_links.py'
+      - '.github/workflows/teste_links.yml'
 
 jobs:
-  run-test-google:
+  run-test-tls:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,19 +20,14 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Instalar dependências
+      - name: Instalar dependências (Lógica SofaScore)
         run: |
           python -m pip install --upgrade pip
-          pip install selenium webdriver-manager
-
-      - name: Instalar dependências
-        run: |
-          python -m pip install --upgrade pip
-          pip install undetected-chromedriver selenium
+          pip install tls-client requests
 
       - name: Executar Teste de Link (Pasta Testes)
         env:
-          # Define o diretório raiz como caminho de busca para o Python
+          # Permite que o script em /testes importe arquivos da raiz se precisar
           PYTHONPATH: ${{ github.workspace }}
         run: python testes/teste_links.py
         
