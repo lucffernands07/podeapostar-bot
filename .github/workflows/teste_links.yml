@@ -3,6 +3,8 @@ name: Teste Isolado de Links Google-Betano
 on:
   workflow_dispatch: # Permite rodar manualmente pelo botão "Run workflow"
   push:
+    branches:
+      - main
     paths:
       - 'testes/teste_links.py'
       - '.github/workflows/teste_links.yml'
