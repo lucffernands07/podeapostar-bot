@@ -34,6 +34,7 @@ COMPETICOES = {
     "Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/jogos/",
 
     # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
+    "Copa dos Campeões - CONCACAF": "https://www.flashscore.com.br/futebol/america-do-norte-e-central/copa-dos-campeoes-da-concacaf/jogos",
     "México - Liga MX": "https://www.flashscore.com.br/futebol/mexico/liga-mx/jogos/",
     "Albânia - Super Liga": "https://www.flashscore.com.br/futebol/albania/super-liga/",
     "Andorra - Primeira Divisão": "https://www.flashscore.com.br/futebol/andorra/primeira-divisao/",
