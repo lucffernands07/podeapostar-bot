@@ -15,7 +15,7 @@ def verificar_vitoria_casa(s):
             elif calculo_pct >= 80: pct = "80%"
             else: pct = f"{int(calculo_pct)}%"
                 
-            return [f"Vitória Casa 🔥 ({pct})"]
+            return [f"Vitória Casa 💎 ({pct})"]
 
     return []
     
