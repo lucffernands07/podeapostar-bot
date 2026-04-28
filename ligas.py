@@ -24,7 +24,6 @@ COMPETICOES = {
     "EUA - MLS": "https://www.flashscore.com.br/futebol/eua/mls/",
 
     # --- BLOCO 4: LIGAS SECUNDÁRIAS EUROPEIAS ---
-    "Arábia Saudita - Pro League": "https://www.flashscore.com.br/futebol/arabia-saudita/liga-profissional-saudita/jogos/",
     "Arábia Saudita - Primeira Liga": "https://www.flashscore.com.br/futebol/arabia-saudita/primeira-liga/jogos/",
     "Portugal - Primeira Liga": "https://www.flashscore.com.br/futebol/portugal/liga-portugal/jogos/",
     "Países Baixos - Eredivisie": "https://www.flashscore.com.br/futebol/paises-baixos/eredivisie/jogos/",
