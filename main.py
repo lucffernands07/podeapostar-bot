@@ -230,12 +230,12 @@ def main():
             texto_estrategico = None
             
             if novos_bilhetes:
-                print("\n🔗 Buscando links reais na Betano para os bilhetes selecionados...")
-                for b in novos_bilhetes:
-                    for j in b['jogos']:
-                        chave = f"{j['time_casa']}x{j['time_fora']}"
-                        if chave not in cache_links:
-                            cache_links[chave] = links.capturar_link_direto(driver, j['time_casa'], j['time_fora'])
+                #print("\n🔗 Buscando links reais na Betano para os bilhetes selecionados...")
+                #for b in novos_bilhetes:
+                    #for j in b['jogos']:
+                        #chave = f"{j['time_casa']}x{j['time_fora']}"
+                        #if chave not in cache_links:
+                            #cache_links[chave] = links.capturar_link_direto(driver, j['time_casa'], j['time_fora'])
                 
                 texto_estrategico = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
 
