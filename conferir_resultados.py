@@ -8,22 +8,20 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 def extrair_dados_do_print(caminho_imagem):
-    """Usa o Gemini para ler o print e devolver um JSON estruturado"""
+    """Usa o Gemini para ler o print e separar mercados de gols"""
     img = Image.open(caminho_imagem)
     
     prompt = """
-    Analise este print de apostas. Para cada jogo listado, extraia:
-    1. O nome do time (ou um dos times da partida).
-    2. O mercado apostado.
-    3. O resultado: se houver um ícone de check/visto verde ou círculo verde, use 'GREEN'. 
-       Se houver um X vermelho ou círculo vermelho, use 'RED'.
+    Analise este print de apostas da Betano. Extraia cada aposta individualmente.
     
-    Retorne APENAS um JSON puro no formato:
-    [{"time": "Nome", "mercado": "Tipo", "status": "GREEN"}]
+    REGRAS IMPORTANTES:
+    1. Identifique o mercado EXATO: Se for 'Mais de 1.5', escreva '+1.5'. Se for 'Mais de 2.5', escreva '+2.5'.
+    2. Identifique o time e o status (GREEN para ✅, RED para ❌).
+    3. Retorne APENAS um JSON puro:
+    [{"time": "Nome", "mercado": "+1.5", "status": "GREEN"}]
     """
     
     response = model.generate_content([prompt, img])
-    # Limpa possíveis marcações de markdown do Gemini
     texto_limpo = response.text.replace('```json', '').replace('```', '').strip()
     return json.loads(texto_limpo)
 
