@@ -1,73 +1,92 @@
+import re
+
+def extrair_porcentagem(texto_mercado):
+    """
+    Extrai o número de dentro dos parênteses (ex: 85) do texto do mercado.
+    Se não encontrar, retorna 0.
+    """
+    try:
+        match = re.search(r'\((\d+)%\)', texto_mercado)
+        return int(match.group(1)) if match else 0
+    except:
+        return 0
+
+def extrair_odd(odd_str):
+    """Converte a string da odd (ex: '1,44') para float."""
+    try:
+        return float(odd_str.replace(',', '.'))
+    except:
+        return 1.0
+
 def montar_bilhetes_estrategicos(lista_jogos):
     """
-    Monta os bilhetes por estratégia: Tripla Segurança, Tripla Valor, Quina de Ouro 
-    e o novo Bingo de 7 (Odds mais baixas).
+    Organiza os jogos da lista geral em 3 categorias inteligentes:
+    Bingo 3: Maiores Odds (Valor)
+    Bingo 5: Equilíbrio entre Odd e %
+    Bingo 7: Maiores % (Segurança)
     """
     bilhetes = []
     if not lista_jogos:
         return bilhetes
 
-    # 1. TRIPLA SEGURANÇA (3 Jogos) - Odds entre 1.25 e 1.40
-    jogos_seguranca = []
-    for j in lista_jogos:
-        try:
-            odd_val = float(j['odd'].replace(',', '.'))
-            if 1.25 <= odd_val <= 1.40:
-                jogos_seguranca.append(j)
-            if len(jogos_seguranca) == 3: break
-        except: continue
-    
-    if len(jogos_seguranca) == 3:
-        bilhetes.append({"id": "SEG", "nome": "🎯 TRIPLA SEGURANÇA (1.25 - 1.40)", "jogos": jogos_seguranca})
+    # --- ESTRATÉGIA 1: BINGO 3 (MELHORES ODDS) ---
+    # Foco em buscar o maior retorno financeiro dentro da lista aprovada.
+    if len(lista_jogos) >= 3:
+        # Ordena da maior Odd para a menor
+        lista_bingo3 = sorted(lista_jogos, key=lambda x: extrair_odd(x['odd']), reverse=True)
+        bilhetes.append({
+            "id": "BINGO3", 
+            "nome": "🔥 BINGO 3: MAIORES ODDS (VALOR)", 
+            "jogos": lista_bingo3[:3]
+        })
 
-    # 2. TRIPLA VALOR (3 Jogos) - Odds acima de 1.40
-    jogos_valor = []
-    for j in lista_jogos:
-        try:
-            odd_val = float(j['odd'].replace(',', '.'))
-            if odd_val > 1.40:
-                jogos_valor.append(j)
-            if len(jogos_valor) == 3: break
-        except: continue
-    
-    if len(jogos_valor) == 3:
-        bilhetes.append({"id": "VALOR", "nome": "🔥 TRIPLA VALOR (ACIMA 1.40)", "jogos": jogos_valor})
-
-    # 3. QUINA DE OURO (5 Jogos) - Os 5 primeiros da lista original (mais recentes/topo)
+    # --- ESTRATÉGIA 2: BINGO 5 (EQUILÍBRIO ODD + %) ---
+    # Busca jogos que tenham boa probabilidade mas com odds que valham a pena.
     if len(lista_jogos) >= 5:
-        bilhetes.append({"id": "QUINA", "nome": "💰 QUINA DE OURO (5 MELHORES)", "jogos": lista_jogos[:5]})
+        def score_equilibrio(j):
+            pct = extrair_porcentagem(j['mercado'])
+            odd = extrair_odd(j['odd'])
+            # Score: Dá peso 70% para a estatística e 30% para o valor da odd
+            return (pct * 0.7) + (odd * 15) 
 
-    # 4. BINGO DE 7 (Odds mais baixas da lista geral)
+        lista_bingo5 = sorted(lista_jogos, key=score_equilibrio, reverse=True)
+        bilhetes.append({
+            "id": "BINGO5", 
+            "nome": "💰 BINGO 5: MELHORES ODDS & % (EQUILÍBRIO)", 
+            "jogos": lista_bingo5[:5]
+        })
+
+    # --- ESTRATÉGIA 3: BINGO 7 (MAIORES %) ---
+    # Foco total em probabilidade de acerto. Pega os 'tanques' da lista (85%, 100%).
     if len(lista_jogos) >= 7:
-        # Ordena a lista geral por Odd (da menor para a maior) e pega as 7 primeiras
-        lista_ordenada_por_odd = sorted(
-            lista_jogos, 
-            key=lambda x: float(x['odd'].replace(',', '.'))
-        )
-        jogos_bingo_7 = lista_ordenada_por_odd[:7]
-        bilhetes.append({"id": "BINGO7", "nome": "🍀 SETE DA SORTE (MAIOR PROBABILIDADE)", "jogos": jogos_bingo_7})
+        # Ordena da maior Porcentagem para a menor
+        lista_bingo7 = sorted(lista_jogos, key=lambda x: extrair_porcentagem(x['mercado']), reverse=True)
+        bilhetes.append({
+            "id": "BINGO7", 
+            "nome": "🍀 BINGO 7: MAIORES % (SEGURANÇA)", 
+            "jogos": lista_bingo7[:7]
+        })
 
     return bilhetes
 
 def formatar_para_telegram(bilhetes, cache_links):
     """
-    Transforma a lista de bilhetes no layout profissional com links embutidos.
+    Formata os bilhetes para o Telegram com o layout profissional.
     """
     if not bilhetes:
         return ""
 
     blocos = []
     for b in bilhetes:
-        corpo = f"{b['nome']}\n"
+        corpo = f"*{b['nome']}*\n"
         jogos_texto = []
         odd_acumulada = 1.0
 
         for j in b['jogos']:
             chave = f"{j['time_casa']}x{j['time_fora']}"
-            # Pega o link real capturado pelo links.py
+            # Tenta pegar o link capturado pelo links.py, senão gera um link de busca
             link = cache_links.get(chave, f"https://br.betano.com/search?q={j['time_casa']}".replace(" ", "%20"))
             
-            # AJUSTE AQUI: A linha agora contém apenas o texto clicável
             item = (
                 f"⏱️ {j['horario']} | {j['liga']}\n"
                 f"🏟️ {j['time_casa']} x {j['time_fora']}\n"
@@ -77,12 +96,13 @@ def formatar_para_telegram(bilhetes, cache_links):
             jogos_texto.append(item)
             
             try:
-                odd_acumulada *= float(j['odd'].replace(',', '.'))
+                odd_acumulada *= extrair_odd(j['odd'])
             except: pass
 
-        corpo += "\n\n".join(jogos_texto)
-        corpo += f"\n\n📈 Odd Total: {odd_acumulada:.2f}\n"
+        corpo += "\n" + "\n\n".join(jogos_texto)
+        corpo += f"\n\n📈 *Odd Total: {odd_acumulada:.2f}*\n"
         corpo += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         blocos.append(corpo)
 
     return "\n\n".join(blocos)
+    
