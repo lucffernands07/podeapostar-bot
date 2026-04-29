@@ -84,14 +84,16 @@ def formatar_para_telegram(bilhetes, cache_links):
 
         for j in b['jogos']:
             chave = f"{j['time_casa']}x{j['time_fora']}"
-            # Tenta pegar o link capturado pelo links.py, senão gera um link de busca
-            link = cache_links.get(chave, f"https://br.betano.com/search?q={j['time_casa']}".replace(" ", "%20"))
+            # Pega o link e remove qualquer espaço em branco acidental
+            link_cru = cache_links.get(chave, f"https://br.betano.com/search?q={j['time_casa']}")
+            link_limpo = link_cru.replace(" ", "%20").strip()
             
+            # Removido o parêntese que estava sobrando no final da string original
             item = (
                 f"⏱️ {j['horario']} | {j['liga']}\n"
                 f"🏟️ {j['time_casa']} x {j['time_fora']}\n"
                 f"🔶 {j['mercado']} | Odd: {j['odd']}\n"
-                f"🌐 [Abrir na Betano]({link})" 
+                f"🌐 [Abrir na Betano]({link_limpo})" 
             )
             jogos_texto.append(item)
             
@@ -103,6 +105,7 @@ def formatar_para_telegram(bilhetes, cache_links):
         corpo += f"\n\n📈 *Odd Total: {odd_acumulada:.2f}*\n"
         corpo += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         blocos.append(corpo)
+
 
     return "\n\n".join(blocos)
     
