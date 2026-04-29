@@ -5,14 +5,12 @@ on:
     paths:
       - 'main.py'
   schedule:
-    # 21:00 Horário de Brasília (ajustado para 00:00 UTC)
     - cron: '0 0 * * *'
   workflow_dispatch: 
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    # Permissão necessária para o bot "escrever" o JSON no seu repositório
     permissions:
       contents: write
 
@@ -29,19 +27,30 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Executar bot Selenium
+      - name: 1. Conferir Resultados (Prints de Ontem)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        # Roda primeiro para limpar o que estava "Pendente" no JSON
+        run: python conferir_resultados.py
+
+      - name: 2. Executar bot Selenium (Bingos de Hoje)
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
 
-      - name: Salvar alteracoes (JSON de Bilhetes)
+      - name: 3. Limpar pasta de prints
+        # Remove os prints processados para a pasta ficar limpa para amanhã
+        run: |
+          rm -f prints/*.jpg prints/*.jpeg prints/*.png
+          # Mantém a pasta existindo para o git não removê-la
+          touch prints/.gitkeep
+
+      - name: 4. Salvar alteracoes (JSON de Bilhetes)
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git add bilhetes_salvos.json
-          # Só faz o commit se o arquivo tiver mudado, para não dar erro
-          git diff --quiet && git diff --staged --quiet || (git commit -m "📊 Histórico: Atualização diária de bilhetes" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "📊 Histórico: Resultados conferidos e novos bingos salvos" && git push)
           
