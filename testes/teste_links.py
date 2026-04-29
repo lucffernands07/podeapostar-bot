@@ -33,53 +33,62 @@ def executar_fluxo_extracao_direta(url_h2h):
         wait.until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'section__prematchOdds')]")))
         time.sleep(5) 
 
-        # PASSO 3: Extrair o link de transição (kg-br.com)
-        print("🎯 [PASSO 3] Extraindo link de transição da Betano...")
+        # PASSO 3: Extrair o link de transição
+        print("🎯 [PASSO 3] Localizando link da Betano pelo seletor de Odds...")
         
-        # Localizamos a 4ª odd (Betano)
+        # Localizamos todas as odds pelo data-testid que você confirmou
         all_odds = driver.find_elements(By.XPATH, "//span[@data-testid='wcl-oddsValue']")
         
         if len(all_odds) >= 4:
-            odd_alvo = all_odds[3]
-            print(f"📊 [LOG] Odd identificada: {odd_alvo.text}")
+            odd_alvo = all_odds[3] # 4ª odd (Betano)
+            print(f"📊 [LOG] Valor encontrado: {odd_alvo.text}")
             
-            # Buscamos o link (tag 'a') que envolve essa odd
-            elemento_link = odd_alvo.find_element(By.XPATH, "./ancestor::a")
-            link_transicao = elemento_link.get_attribute("href")
-            
+            # NOVO MÉTODO DE BUSCA: 
+            # Subimos 3 níveis (da span para a div, da div para o container e do container para o link)
+            # Ou usamos um seletor de link que contenha esta odd específica
+            try:
+                # Tentativa 1: Ancestral genérico (qualquer link acima)
+                link_transicao = odd_alvo.find_element(By.XPATH, "./ancestor::a").get_attribute("href")
+            except:
+                # Tentativa 2: Buscar o link pelo container da linha (mais robusto)
+                # No Flashscore, as odds de uma casa ficam dentro de um container de linha
+                print("⚠️ Falha no ancestral direto, tentando busca por container...")
+                pai_odds = odd_alvo.find_element(By.XPATH, "../..") # Sobe dois níveis
+                link_transicao = pai_odds.find_element(By.XPATH, ".//ancestor::a").get_attribute("href")
+
             if link_transicao:
-                print(f"🔗 [LOG] Link de transição capturado: {link_transicao[:60]}...")
+                print(f"🔗 [LOG] Link extraído com sucesso: {link_transicao[:70]}...")
                 
-                # PASSO 4: Navegar direto pelo link (sem precisar clicar)
-                print("⏳ [PASSO 4] Navegando direto para o link de transição...")
+                # PASSO 4: Navegar
+                print("⏳ [PASSO 4] Navegando para o redirecionamento...")
                 driver.get(link_transicao)
             else:
-                raise Exception("Atributo href não encontrado no elemento pai.")
+                raise Exception("Link 'href' não encontrado nos níveis superiores.")
         else:
-            raise Exception("Não foram encontradas odds suficientes.")
+            raise Exception(f"Apenas {len(all_odds)} odds encontradas. Precisamos de pelo menos 4.")
 
-        # PASSO 5: Aguardar o redirecionamento final para a Betano
-        print("📡 Aguardando redirecionamento final para Betano...")
+        # PASSO 5: Redirecionamento Final
+        print("📡 Monitorando redirecionamento para Betano...")
         url_final = ""
-        for i in range(25):
+        for i in range(30): # 30 segundos de tolerância
             url_atual = driver.current_url
-            # Se a URL mudar de kg-br.com para betano.bet.br
             if "betano.bet.br" in url_atual or ("betano.com" in url_atual and "flashscore" not in url_atual):
                 url_final = url_atual
                 print("✨ Domínio final atingido!")
                 break
             time.sleep(1)
 
-        print(f"\n✅ [PASSO 5] SUCESSO! URL FINAL:")
+        print(f"\n✅ [PASSO 5] RESULTADO FINAL:")
         print(f"🔗 {url_final if url_final else url_atual}")
 
     except Exception as e:
         print(f"❌ Erro no fluxo: {e}")
+        # Tira print do erro para debug se necessário
+        driver.save_screenshot("erro_seletor.png")
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    # URL do jogo Nacional x Universitario
     URL_ALVO = "https://www.flashscore.com.br/jogo/futebol/club-nacional-UaVu2MhA/universitario-xhw3JTnU/h2h/total/?mid=A9FCj3kT"
     executar_fluxo_extracao_direta(URL_ALVO)
     
