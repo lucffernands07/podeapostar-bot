@@ -6,6 +6,7 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 
 def get_chrome_version():
     try:
@@ -19,68 +20,74 @@ def executar_fluxo_final(url_h2h):
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,4000")
+    # Desativa bloqueio de pop-ups para permitir a abertura da Betano
+    options.add_argument("--disable-popup-blocking")
     
     driver = uc.Chrome(options=options, version_main=get_chrome_version())
     
     try:
-        # PASSO 1: Entrar na URL H2H (Usando a URL exata que você forneceu)
+        # PASSO 1
         print(f"🚀 [PASSO 1] Acessando H2H: {url_h2h}")
         driver.get(url_h2h)
         wait = WebDriverWait(driver, 30)
 
-        # PASSO 2: Localizar seção de Odds
+        # PASSO 2
         print("🔍 [PASSO 2] Localizando seção de Odds...")
         wait.until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'section__prematchOdds')]")))
         time.sleep(5) 
 
-        # PASSO 3: Clicar no primeiro decimal da Betano
+        # PASSO 3: Clicar na Odd
         print("🎯 [PASSO 3] Localizando decimal da Betano...")
-        
-        # Captura todos os valores decimais da tela (Método que deu log de 2.88 antes)
         all_odds = driver.find_elements(By.XPATH, "//span[@data-testid='wcl-oddsValue']")
         
         if len(all_odds) >= 4:
-            # Pulando as 3 odds da Bet365, a 4ª [índice 3] deve ser a da Betano
             odd_alvo = all_odds[3] 
-            print(f"📊 [LOG] Odd detectada (4ª na lista): {odd_alvo.text}")
+            print(f"📊 [LOG] Odd detectada: {odd_alvo.text}")
             
-            # Clique via JS para evitar erros de renderização
-            driver.execute_script("arguments[0].click();", odd_alvo)
+            # TENTATIVA DE CLIQUE DUPLA:
+            print("🖱️ Tentando clicar no seletor...")
+            # 1. Tenta mover o mouse e clicar (simula humano)
+            try:
+                actions = ActionChains(driver)
+                actions.move_to_element(odd_alvo).click().perform()
+            except:
+                # 2. Backup com JavaScript (força o clique se o anterior falhar)
+                driver.execute_script("arguments[0].click();", odd_alvo)
         else:
-            print(f"⚠️ Lista curta (apenas {len(all_odds)} encontradas). Tentando clicar na primeira.")
-            driver.execute_script("arguments[0].click();", all_odds[0])
+            print("❌ Não encontrou odds suficientes na lista.")
+            return
 
-        # PASSO 4: Esperar trocar o domínio da URL
-        print("⏳ [PASSO 4] Aguardando troca de domínio (Flashscore -> Betano)...")
+        # PASSO 4: Verificar Redirecionamento
+        print("⏳ [PASSO 4] Aguardando troca de domínio...")
         
-        # Aguarda a abertura da nova aba
-        wait.until(lambda d: len(d.window_handles) > 1)
-        driver.switch_to.window(driver.window_handles[-1])
-
-        url_final = ""
-        for i in range(25):
-            atual = driver.current_url
-            if i % 5 == 0: print(f"   📡 URL em transição: {atual[:50]}...")
-            
-            # Critério de sucesso: Domínio Betano presente e Flashscore ausente
-            if "betano.com" in atual and "flashscore" not in atual:
-                url_final = atual
-                print(f"   ✨ Sucesso! Redirecionamento completo.")
-                break
+        # Espera até 15 segundos para a nova aba aparecer
+        start_time = time.time()
+        while len(driver.window_handles) == 1 and (time.time() - start_time) < 15:
             time.sleep(1)
-
-        # PASSO 5: Mostrar o resultado final
-        print(f"\n✅ [PASSO 5] RESULTADO DA URL:")
-        print(f"🔗 {url_final if url_final else driver.current_url}")
+            
+        if len(driver.window_handles) > 1:
+            driver.switch_to.window(driver.window_handles[-1])
+            print(f"✅ Nova aba detectada! Monitorando URL...")
+            
+            url_final = ""
+            for i in range(20):
+                atual = driver.current_url
+                if "betano.com" in atual and "flashscore" not in atual:
+                    url_final = atual
+                    break
+                time.sleep(1)
+            
+            # PASSO 5
+            print(f"\n✅ [PASSO 5] SUCESSO: {url_final if url_final else atual}")
+        else:
+            print("❌ Erro: O clique não abriu uma nova aba (Timeout).")
 
     except Exception as e:
         print(f"❌ Erro no fluxo: {e}")
-        driver.save_screenshot("debug_erro_nacional.png")
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    # URL ATUALIZADA conforme sua solicitação
     url_teste = "https://www.flashscore.com.br/jogo/futebol/club-nacional-UaVu2MhA/universitario-xhw3JTnU/h2h/total/?mid=A9FCj3kT"
     executar_fluxo_final(url_teste)
-        
+            
