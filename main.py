@@ -217,7 +217,13 @@ def main():
             
             texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
             
+            # Montagem dos Bingos 3, 5 e 7
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
+            
+            # ETAPA 1: SALVAMENTO NO HISTÓRICO PARA RANKING
+            if novos_bilhetes:
+                exportar_bilhete.salvar_bingos_do_dia(novos_bilhetes)
+
             cache_links = {}
             for j in lista_para_filtros:
                 chave = f"{j['time_casa']}x{j['time_fora']}"
@@ -240,6 +246,7 @@ def main():
         print(f"❌ Erro Crítico: {e}")
     finally:
         driver.quit()
+
 
 if __name__ == "__main__":
     main()
