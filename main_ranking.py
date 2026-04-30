@@ -11,12 +11,10 @@ client = OpenAI(
 )
 
 def analisar_com_gemma4(caminho_img):
-    # Converte a imagem para base64 conforme exigido para entrada multimodal
     with open(caminho_img, "rb") as image_file:
         base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
     try:
-        # ID EXATO do documento: google/gemma-4-31b-it:free
         response = client.chat.completions.create(
             model="google/gemma-4-31b-it:free", 
             messages=[
@@ -36,14 +34,12 @@ def analisar_com_gemma4(caminho_img):
                     ]
                 }
             ],
-            # Opcional: Aumentar a temperatura para 0 para ser mais preciso (determinístico)
             temperature=0
         )
         
         res_text = response.choices[0].message.content
         print(f"DEBUG Gemma 4: {res_text}")
         
-        # Limpeza de possíveis formatações markdown
         json_txt = res_text.replace("```json", "").replace("```", "").strip()
         return json.loads(json_txt)
 
@@ -79,7 +75,11 @@ def main():
                     db["ranking"]["Geral"] = db["ranking"].get("Geral", 0) + 10
                     print(f"✨ GREEN Detectado!")
                 mudanca = True
-                time.sleep(1) # Respeita o limite do provedor Google AI Studio
+            
+            # --- AJUSTE AQUI ---
+            # Esperamos 20 segundos para não estourar o limite de requisições gratuitas
+            print("⏳ Aguardando 20 segundos para respeitar o Rate Limit...")
+            time.sleep(20) 
 
     if mudanca:
         with open(db_path, 'w', encoding='utf-8') as f:
@@ -88,4 +88,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-      
+  
