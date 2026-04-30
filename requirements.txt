@@ -2,6 +2,4 @@ selenium
 requests
 webdriver-manager
 undetected-chromedriver
-google-genai
-pillow
-
+openai
