@@ -30,11 +30,11 @@ def extrair_dados_do_print(caminho_imagem):
         img = Image.open(caminho_imagem)
         
         prompt = """
-        Analise este print de apostas da Betano. Extraia cada aposta individualmente.
+        Analise este print de apostas da Betano. Extraia cada aposta individualmente
         REGRAS:
-        1. Identifique o time e o status (GREEN para ✅/venceu, RED para ❌/perdeu).
-        2. Retorne um JSON neste formato:
-        [{"time": "Nome do Time", "status": "GREEN"}]
+        1. Identifique os nomes dos times envolvidos no confronto e o status final (GREEN se aparecer o check ✅ ou escrito 'Ganhou/Venceu', RED se aparecer ❌ ou 'Perdida').
+        2. Retorne um JSON estritamente neste formato:
+        [{"time": "Nome de um dos times", "status": "GREEN"}]
         """
         
         response = model.generate_content([prompt, img])
