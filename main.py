@@ -17,6 +17,7 @@ from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
 import odds  
 import bingo357  
 import links
+import exportar_bilhete
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
