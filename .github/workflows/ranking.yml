@@ -19,11 +19,10 @@ jobs:
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11' # Atualizado para evitar avisos de EOL
+          python-version: '3.11'
 
       - name: Instalar Dependências
-        run: |
-          run: pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Rodar Script de Ranking
         env:
