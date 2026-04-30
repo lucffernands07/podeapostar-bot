@@ -2,7 +2,6 @@ selenium
 requests
 webdriver-manager
 undetected-chromedriver
-google-generativeai
 google-genai
 pillow
 
