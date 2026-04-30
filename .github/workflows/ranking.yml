@@ -3,17 +3,20 @@ name: Sistema de Ranking Automático
 on:
   push:
     paths:
-      - 'prints/**'  # Só roda quando você upar prints novos
+      - 'prints/**'  # Roda automático ao subir prints
+  workflow_dispatch: # Permite rodar MANUALMENTE pelo botão no GitHub
 
 jobs:
   processar-ranking:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Permissão para salvar o JSON no repositório
+      contents: write 
 
     steps:
       - name: Checkout Código
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Garante que o histórico esteja completo para o push
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -35,5 +38,5 @@ jobs:
           git config --local user.name "RankingBot"
           git add ranking_db.json
           git commit -m "🏆 Ranking atualizado [skip ci]" || echo "Sem mudanças"
-          git push
+          git push origin main
           
