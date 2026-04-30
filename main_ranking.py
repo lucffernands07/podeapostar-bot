@@ -14,38 +14,37 @@ def analisar_com_gemma4(caminho_img):
     with open(caminho_img, "rb") as image_file:
         base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
-    try:
-        response = client.chat.completions.create(
-            model="google/gemma-4-31b-it:free", 
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text", 
-                            "text": "Analyze this betting slip image. If it has 'GANHOU' or 'PRÊMIO', return {'tipo': 'GREEN'}. If it is a Telegram screen with 'BINGO', return {'tipo': 'SUGESTAO'}. Return ONLY the JSON object, no markdown."
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
-                            }
-                        }
-                    ]
-                }
-            ],
-            temperature=0
-        )
-        
-        res_text = response.choices[0].message.content
-        print(f"DEBUG Gemma 4: {res_text}")
-        
-        json_txt = res_text.replace("```json", "").replace("```", "").strip()
-        return json.loads(json_txt)
+    # Tentaremos até 3 vezes a mesma imagem se der Rate Limit
+    for tentativa in range(3):
+        try:
+            response = client.chat.completions.create(
+                model="google/gemma-4-31b-it:free", 
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": "Analyze this betting slip. If it has 'GANHOU' return {'tipo': 'GREEN'}. If it has 'BINGO', return {'tipo': 'SUGESTAO'}. Return ONLY JSON."},
+                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                        ]
+                    }
+                ],
+                temperature=0
+            )
+            
+            res_text = response.choices[0].message.content
+            print(f"DEBUG Gemma 4: {res_text}")
+            json_txt = res_text.replace("```json", "").replace("```", "").strip()
+            return json.loads(json_txt)
 
-    except Exception as e:
-        print(f"❌ Erro no Gemma 4 para {caminho_img}: {e}")
-        return None
+        except Exception as e:
+            if "429" in str(e):
+                print(f"⚠️ Rate limit atingido na tentativa {tentativa + 1}. Aguardando 40s para tentar de novo...")
+                time.sleep(40) # Espera maior para limpar o limite
+            else:
+                print(f"❌ Erro fatal no Gemma 4: {e}")
+                return None
+    return None
+
 
 def main():
     db_path = "ranking_db.json"
