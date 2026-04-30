@@ -3,33 +3,37 @@ name: Sistema de Ranking Automático
 on:
   push:
     paths:
-      - 'prints/**' # Roda apenas se houver mudanças nesta pasta
+      - 'prints/**'  # Só roda quando você upar prints novos
 
 jobs:
-  build:
+  processar-ranking:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Permissão para salvar o JSON no repositório
 
     steps:
-    - name: Checkout do código
-      uses: actions/checkout@v3
+      - name: Checkout Código
+        uses: actions/checkout@v3
 
-    - name: Configurar Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-    - name: Instalar dependências
-      run: |
-        pip install easyocr opencv-python-headless
-        # O EasyOCR baixa modelos de IA, isso pode demorar um pouco na primeira vez
+      - name: Instalar Dependências
+        run: |
+          pip install google-generativeai
 
-    - name: Rodar Processamento de Ranking
-      run: python main_ranking.py
+      - name: Rodar Script de Ranking
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python main_ranking.py
 
-    - name: Commit dos resultados
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add ranking_db.json
-        git commit -m "🤖 Ranking atualizado via OCR [skip ci]" || echo "Sem mudanças no ranking"
-        git push
+      - name: Salvar Alterações no GitHub
+        run: |
+          git config --local user.email "bot@github.com"
+          git config --local user.name "RankingBot"
+          git add ranking_db.json
+          git commit -m "🏆 Ranking atualizado [skip ci]" || echo "Sem mudanças"
+          git push
+          
