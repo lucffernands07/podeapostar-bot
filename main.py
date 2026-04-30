@@ -37,14 +37,20 @@ def enviar_telegram(mensagem, chat_id_destino):
 
 def configurar_driver():
     options = Options()
-    options.add_argument("--headless")
+    options.add_argument("--headless=new") # Versão mais rápida do headless
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1920,3000")
+    options.add_argument("--disable-gpu") # Desliga processamento gráfico
+    options.add_argument("--blink-settings=imagesEnabled=false") # Não carrega imagens (ganha muita velocidade)
+    options.add_argument("--window-size=1920,1080")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+    
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    # Define um tempo máximo de espera para o site carregar
+    driver.set_page_load_timeout(30) 
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
+
     
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     # Navegação inicial
