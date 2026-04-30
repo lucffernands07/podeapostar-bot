@@ -34,22 +34,4 @@ jobs:
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
         run: python main.py
 
-      - name: 2. Limpar pasta de prints
-        # Como o main não confere mais, apenas garantimos que a pasta está limpa
-        run: |
-          rm -f prints/*.jpg prints/*.jpeg prints/*.png
-          touch prints/.gitkeep
-
-      - name: 3. Salvar Limpeza no Git
-        run: |
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
-          
-          # Registra apenas a limpeza dos arquivos para o repositório ficar organizado
-          git add -u prints/ || true
-          
-          # Se não houver nada para commitar, o exit 0 garante a luz verde
-          git commit -m "🧹 Limpeza de arquivos temporários: $(date +'%d/%m/%Y')" || exit 0
-          
-          git push
-          
+    
