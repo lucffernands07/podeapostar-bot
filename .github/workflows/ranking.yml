@@ -1,0 +1,35 @@
+name: Sistema de Ranking Automático
+
+on:
+  push:
+    paths:
+      - 'prints/**' # Roda apenas se houver mudanças nesta pasta
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v3
+
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Instalar dependências
+      run: |
+        pip install easyocr opencv-python-headless
+        # O EasyOCR baixa modelos de IA, isso pode demorar um pouco na primeira vez
+
+    - name: Rodar Processamento de Ranking
+      run: python main_ranking.py
+
+    - name: Commit dos resultados
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add ranking_db.json
+        git commit -m "🤖 Ranking atualizado via OCR [skip ci]" || echo "Sem mudanças no ranking"
+        git push
