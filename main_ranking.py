@@ -4,82 +4,88 @@ import base64
 import time
 from openai import OpenAI
 
-# Configuração OpenRouter
+# Configuração seguindo o padrão da documentação do Gemma 4 no OpenRouter
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
   api_key=os.getenv("OPENROUTER_API_KEY"),
 )
 
-def analisar_com_openrouter(caminho_img):
+def analisar_com_gemma4(caminho_img):
+    # Converte a imagem para base64 conforme exigido para entrada multimodal
     with open(caminho_img, "rb") as image_file:
         base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
     try:
-        # Tenta o Gemma 4 31B que é multimodal e gratuito
+        # ID EXATO do documento: google/gemma-4-31b-it:free
         response = client.chat.completions.create(
-            model="google/gemma-4-31b:free", 
+            model="google/gemma-4-31b-it:free", 
             messages=[
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": "Analise a imagem. Se for um bilhete de Telegram com 'BINGO', responda: {'tipo': 'SUGESTAO'}. Se for um print da Betano com 'GANHOU', responda: {'tipo': 'GREEN'}. Retorne apenas o JSON puro."},
+                        {
+                            "type": "text", 
+                            "text": "Analyze this betting slip image. If it has 'GANHOU' or 'PRÊMIO', return {'tipo': 'GREEN'}. If it is a Telegram screen with 'BINGO', return {'tipo': 'SUGESTAO'}. Return ONLY the JSON object, no markdown."
+                        },
                         {
                             "type": "image_url",
-                            "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{base64_image}"
+                            }
                         }
                     ]
                 }
-            ]
+            ],
+            # Opcional: Aumentar a temperatura para 0 para ser mais preciso (determinístico)
+            temperature=0
         )
         
         res_text = response.choices[0].message.content
-        print(f"DEBUG - Resposta do Modelo para {os.path.basename(caminho_img)}: {res_text}")
+        print(f"DEBUG Gemma 4: {res_text}")
         
-        # Limpa markdown caso o modelo coloque
+        # Limpeza de possíveis formatações markdown
         json_txt = res_text.replace("```json", "").replace("```", "").strip()
         return json.loads(json_txt)
+
     except Exception as e:
-        print(f"❌ Erro ao processar {caminho_img}: {e}")
+        print(f"❌ Erro no Gemma 4 para {caminho_img}: {e}")
         return None
 
 def main():
-    # Caminho correto para o repositório no GitHub Actions
     db_path = "ranking_db.json"
     pasta_prints = "prints/"
     
     if os.path.exists(db_path):
-        with open(db_path, 'r') as f:
+        with open(db_path, 'r', encoding='utf-8') as f:
             db = json.load(f)
     else:
         db = {"processados": [], "ranking": {}}
+
+    if not os.path.exists(pasta_prints):
+        os.makedirs(pasta_prints)
+        return
 
     arquivos = [f for f in os.listdir(pasta_prints) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
     mudanca = False
 
     for arquivo in arquivos:
         if arquivo not in db["processados"]:
-            print(f"🚀 Analisando ficheiro novo: {arquivo}")
-            resultado = analisar_com_openrouter(os.path.join(pasta_prints, arquivo))
+            print(f"🚀 Processando com Gemma 4 31B: {arquivo}")
+            resultado = analisar_com_gemma4(os.path.join(pasta_prints, arquivo))
             
             if resultado:
                 db["processados"].append(arquivo)
-                tipo = resultado.get("tipo")
-                
-                if tipo == "GREEN":
-                    # Adiciona 10 pontos ao ranking geral
+                if resultado.get("tipo") == "GREEN":
                     db["ranking"]["Geral"] = db["ranking"].get("Geral", 0) + 10
-                    print(f"✨ Green validado para {arquivo}!")
-                
+                    print(f"✨ GREEN Detectado!")
                 mudanca = True
-                time.sleep(2) # Evita rate limit
+                time.sleep(1) # Respeita o limite do provedor Google AI Studio
 
     if mudanca:
-        with open(db_path, 'w') as f:
-            json.dump(db, f, indent=4)
-        print("✅ ranking_db.json atualizado com novos dados!")
-    else:
-        print("ℹ️ Nenhuma alteração relevante detetada nas imagens.")
+        with open(db_path, 'w', encoding='utf-8') as f:
+            json.dump(db, f, indent=4, ensure_ascii=False)
+        print("✅ ranking_db.json atualizado!")
 
 if __name__ == "__main__":
     main()
-  
+      
