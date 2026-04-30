@@ -14,6 +14,8 @@ def extrair_porcentagem(texto_mercado):
 def extrair_odd(odd_str):
     """Converte a string da odd (ex: '1,44') para float."""
     try:
+        if not odd_str or odd_str == "N/A":
+            return 1.0
         return float(odd_str.replace(',', '.'))
     except:
         return 1.0
@@ -30,9 +32,7 @@ def montar_bilhetes_estrategicos(lista_jogos):
         return bilhetes
 
     # --- ESTRATÉGIA 1: BINGO 3 (MELHORES ODDS) ---
-    # Foco em buscar o maior retorno financeiro dentro da lista aprovada.
     if len(lista_jogos) >= 3:
-        # Ordena da maior Odd para a menor
         lista_bingo3 = sorted(lista_jogos, key=lambda x: extrair_odd(x['odd']), reverse=True)
         bilhetes.append({
             "id": "BINGO3", 
@@ -41,12 +41,10 @@ def montar_bilhetes_estrategicos(lista_jogos):
         })
 
     # --- ESTRATÉGIA 2: BINGO 5 (EQUILÍBRIO ODD + %) ---
-    # Busca jogos que tenham boa probabilidade mas com odds que valham a pena.
     if len(lista_jogos) >= 5:
         def score_equilibrio(j):
             pct = extrair_porcentagem(j['mercado'])
             odd = extrair_odd(j['odd'])
-            # Score: Dá peso 70% para a estatística e 30% para o valor da odd
             return (pct * 0.7) + (odd * 15) 
 
         lista_bingo5 = sorted(lista_jogos, key=score_equilibrio, reverse=True)
@@ -57,9 +55,7 @@ def montar_bilhetes_estrategicos(lista_jogos):
         })
 
     # --- ESTRATÉGIA 3: BINGO 7 (MAIORES %) ---
-    # Foco total em probabilidade de acerto. Pega os 'tanques' da lista (85%, 100%).
     if len(lista_jogos) >= 7:
-        # Ordena da maior Porcentagem para a menor
         lista_bingo7 = sorted(lista_jogos, key=lambda x: extrair_porcentagem(x['mercado']), reverse=True)
         bilhetes.append({
             "id": "BINGO7", 
@@ -84,28 +80,29 @@ def formatar_para_telegram(bilhetes, cache_links):
 
         for j in b['jogos']:
             chave = f"{j['time_casa']}x{j['time_fora']}"
-            # Pega o link e remove qualquer espaço em branco acidental
-            link_cru = cache_links.get(chave, f"https://br.betano.com/search?q={j['time_casa']}")
-            link_limpo = link_cru.replace(" ", "%20").strip()
             
-            # Removido o parêntese que estava sobrando no final da string original
+            # Busca o link, limpa espaços e remove parênteses residuais no final
+            link_cru = cache_links.get(chave, f"https://br.betano.com/search?q={j['time_casa']}")
+            link_limpo = link_cru.replace(" ", "%20").strip().rstrip(')')
+            
+            # Montagem do item com link exposto para evitar erros de Markdown do Telegram
             item = (
                 f"⏱️ {j['horario']} | {j['liga']}\n"
                 f"🏟️ {j['time_casa']} x {j['time_fora']}\n"
                 f"🔶 {j['mercado']} | Odd: {j['odd']}\n"
-                f"🌐 [Abrir na Betano]({link_limpo})" 
+                f"🌐 Abrir na Betano: {link_limpo}" 
             )
             jogos_texto.append(item)
             
             try:
                 odd_acumulada *= extrair_odd(j['odd'])
-            except: pass
+            except: 
+                pass
 
         corpo += "\n" + "\n\n".join(jogos_texto)
         corpo += f"\n\n📈 *Odd Total: {odd_acumulada:.2f}*\n"
         corpo += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         blocos.append(corpo)
 
-
     return "\n\n".join(blocos)
-    
+                              
