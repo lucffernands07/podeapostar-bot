@@ -17,7 +17,6 @@ from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
 import odds  
 import bingo357  
 import links
-import exportar_bilhete
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -224,12 +223,8 @@ def main():
             
             texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
             
-            # Montagem dos Bingos 3, 5 e 7
+            # Montagem dos Bingos (Apenas para o Telegram agora)
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
-            
-            # ETAPA 1: SALVAMENTO NO HISTÓRICO PARA RANKING
-            if novos_bilhetes:
-                exportar_bilhete.salvar_bingos_do_dia(novos_bilhetes)
 
             cache_links = {}
             for j in lista_para_filtros:
@@ -253,7 +248,7 @@ def main():
         print(f"❌ Erro Crítico: {e}")
     finally:
         driver.quit()
-
+                                    
 
 if __name__ == "__main__":
     main()
