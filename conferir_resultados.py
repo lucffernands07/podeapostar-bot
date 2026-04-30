@@ -4,10 +4,10 @@ import google.generativeai as genai
 from PIL import Image
 import re
 
-# 1. Configuração da API Gemini
+# Configuração da API com versão estável v1
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-# Configura o modelo para sempre responder em JSON puro
+# Forçar o uso da versão estável do modelo
 model = genai.GenerativeModel(
     model_name='gemini-1.5-flash',
     generation_config={"response_mime_type": "application/json"}
