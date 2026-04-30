@@ -1,0 +1,40 @@
+name: Conferir Resultados Agora
+
+on:
+  workflow_dispatch: # Permite que você aperte o botão no celular a qualquer momento
+
+jobs:
+  check-results:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Instalar dependencias
+        run: |
+          pip install pillow google-generativeai
+
+      - name: 🔍 Rodar Visão Gemini (OCR)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python conferir_resultados.py
+
+      - name: 🗑️ Limpar Prints Processados
+        run: |
+          rm -f prints/*.jpg prints/*.jpeg prints/*.png
+          touch prints/.gitkeep
+
+      - name: 💾 Salvar JSON Atualizado
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          git add bilhetes_salvos.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "✅ Resultados conferidos via Print" && git push)
