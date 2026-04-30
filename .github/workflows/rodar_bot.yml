@@ -12,7 +12,7 @@ jobs:
   run-bot:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Permite que o robô salve o JSON no repositório
+      contents: write
 
     steps:
       - name: Checkout do repositorio
@@ -26,40 +26,30 @@ jobs:
       - name: Instalar dependencias
         run: |
           pip install -r requirements.txt
-          pip install pillow google-generativeai # Garante bibliotecas da IA e Imagem
 
-      - name: 1. Conferir Resultados (Prints de Ontem)
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        # Processa os prints antes para atualizar o ranking
-        run: python conferir_resultados.py
-
-      - name: 2. Executar bot Selenium (Bingos de Hoje)
+      - name: 1. Executar bot Selenium (Bilhetes de Hoje)
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
         run: python main.py
 
-      - name: 3. Limpar pasta de prints
-        # Remove os arquivos físicos para a pasta não crescer infinitamente
+      - name: 2. Limpar pasta de prints
+        # Como o main não confere mais, apenas garantimos que a pasta está limpa
         run: |
           rm -f prints/*.jpg prints/*.jpeg prints/*.png
           touch prints/.gitkeep
 
-      - name: 4. Salvar alteracoes (JSON e Limpeza)
+      - name: 3. Salvar Limpeza no Git
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           
-          # Adiciona o JSON atualizado
-          git add bilhetes_salvos.json
+          # Registra apenas a limpeza dos arquivos para o repositório ficar organizado
+          git add -u prints/ || true
           
-          # Registra a remoção dos prints que foram apagados no passo anterior
-          git add -u prints/
-          
-          # Tenta o commit. O "|| exit 0" garante luz VERDE mesmo se não houver jogos hoje.
-          git commit -m "📊 Atualização: $(date +'%d/%m/%Y %H:%M')" || exit 0
+          # Se não houver nada para commitar, o exit 0 garante a luz verde
+          git commit -m "🧹 Limpeza de arquivos temporários: $(date +'%d/%m/%Y')" || exit 0
           
           git push
           
