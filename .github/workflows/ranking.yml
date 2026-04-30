@@ -3,8 +3,8 @@ name: Sistema de Ranking Automático
 on:
   push:
     paths:
-      - 'prints/**'  # Roda automático ao subir prints
-  workflow_dispatch: # Permite rodar MANUALMENTE pelo botão no GitHub
+      - 'prints/**'
+  workflow_dispatch:
 
 jobs:
   processar-ranking:
@@ -15,17 +15,15 @@ jobs:
     steps:
       - name: Checkout Código
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # Garante que o histórico esteja completo para o push
 
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.11' # Atualizado para evitar avisos de EOL
 
       - name: Instalar Dependências
         run: |
-          pip install google-generativeai
+          pip install google-genai # Nova biblioteca oficial
 
       - name: Rodar Script de Ranking
         env:
