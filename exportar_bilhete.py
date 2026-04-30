@@ -1,6 +1,10 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+
+# Subtrai 3 horas para garantir o horário de Brasília no GitHub
+data_hoje = (datetime.now() - timedelta(hours=3)).strftime("%d/%m/%Y")
+
 
 def salvar_bingos_do_dia(dicionario_bingos):
     """
