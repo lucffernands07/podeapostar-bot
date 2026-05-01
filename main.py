@@ -217,32 +217,37 @@ def main():
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
+            # 1. Montagem do LISTÃO GERAL (Texto simples para conferência)
             itens_listao = []
             for j in lista_para_filtros:
                 itens_listao.append(f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}")
             
             texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
             
-            # Montagem dos Bingos (Apenas para o Telegram agora)
+            # 2. Montagem dos BINGOS (Estratégicos: 3, 5 e 7)
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
+            cache_links = {f"{j['time_casa']}x{j['time_fora']}": j.get("link_betano") for j in lista_para_filtros if j.get("link_betano")}
+            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
 
-            cache_links = {}
-            for j in lista_para_filtros:
-                chave = f"{j['time_casa']}x{j['time_fora']}"
-                if j.get("link_betano"):
-                    cache_links[chave] = j["link_betano"]
+            # --- IDENTIFICAÇÃO DE DESTINOS ---
+            meu_chat_id = os.getenv('CHAT_ID')     # Seu pessoal
+            canal_id = os.getenv('CHANNEL_ID')     # O Canal
+
+            # ENVIO 1: Listão Geral APENAS para você
+            if meu_chat_id:
+                enviar_telegram(texto_listao_final, meu_chat_id)
+                print("📨 Listão enviado para o pessoal.")
             
-            texto_estrategico = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
+            # ENVIO 2: Bingos APENAS para o Canal
+            if texto_bingos_final and canal_id:
+                msg_bingo_formatada = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_bingos_final
+                enviar_telegram(msg_bingo_formatada, canal_id)
+                print("📢 Bingos enviados para o canal.")
 
-            destinatarios = [os.getenv('CHAT_ID'), os.getenv('CHANNEL_ID')]
-            for cid in destinatarios:
-                if not cid: continue
-                enviar_telegram(texto_listao_final, cid)
-                if texto_estrategico:
-                    enviar_telegram("💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_estrategico, cid)
-            print("✅ Processamento concluído.")
+            print("✅ Processamento e envios concluídos.")
         else:
             print("⚠️ Nenhuma partida encontrada nos filtros.")
+
 
     except Exception as e:
         print(f"❌ Erro Crítico: {e}")
