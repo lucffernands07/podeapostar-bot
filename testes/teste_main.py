@@ -70,6 +70,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "fora_ult_btts": False, "fora_derrotas": 0, "fora_vitorias": 0, "fora_empates": 0, "fora_ult_res": "",
         "fora_ult_15": False, "fora_ult_sofreu": False,
         "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
+        "h2h_ult2_derrotas_t1": 0,  # NOVO: Derrotas da Casa nos últimos 2 H2H
+        "h2h_ult2_derrotas_t2": 0,  # NOVO: Derrotas do Fora nos últimos 2 H2H
         "pular_gols": False 
     }
     
@@ -128,13 +130,22 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         else:
                             stats[f"{prefixo}_derrotas"] += 1
                             if i == 0: stats[f"{prefixo}_ult_res"] = "D"
-                    elif idx == 2:
+
+                    elif idx == 2: # SEÇÃO CONFRONTO DIRETO (H2H)
                         stats["h2h_jogos"] += 1
-                        if g1 == g2: stats["h2h_empates"] += 1
+                        if g1 == g2:
+                            stats["h2h_empates"] += 1
                         elif (t1.lower() in n_casa_h2h.lower() and g1 > g2) or \
                              (t1.lower() in n_fora_h2h.lower() and g2 > g1):
                             stats["h2h_vitorias_t1"] += 1
-                        else: stats["h2h_vitorias_t2"] += 1
+                            # Se a Casa venceu, o Fora sofreu derrota. 
+                            # Se for um dos 2 últimos jogos (i < 2), marca no contador.
+                            if i < 2: stats["h2h_ult2_derrotas_t2"] += 1
+                        else:
+                            stats["h2h_vitorias_t2"] += 1
+                            # Se o Fora venceu, a Casa sofreu derrota.
+                            # Se for um dos 2 últimos jogos (i < 2), marca no contador.
+                            if i < 2: stats["h2h_ult2_derrotas_t1"] += 1
                 except: continue
 
         stats["link_betano"] = links.extrair_url_betano(driver)
@@ -145,6 +156,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
+
 
 def main():
     driver = configurar_driver()
