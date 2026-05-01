@@ -2,4 +2,5 @@ selenium
 requests
 webdriver-manager
 undetected-chromedriver
-openai
+pytesseract
+Pillow
