@@ -20,26 +20,48 @@ def montar_bilhetes_estrategicos(lista_jogos):
     if not lista_jogos:
         return bilhetes
 
-    # --- BINGO 3 ---
+    # --- BINGO 3: MANTER MELHORES ODDS (FOCO EM VALOR ALTO) ---
     if len(lista_jogos) >= 3:
+        # Ordena puramente pela maior Odd
         lista_bingo3 = sorted(lista_jogos, key=lambda x: extrair_odd(x['odd']), reverse=True)
-        bilhetes.append({"id": "BINGO3", "nome": "🔥 BINGO 3: MAIORES ODDS (VALOR)", "jogos": lista_bingo3[:3]})
+        bilhetes.append({
+            "id": "BINGO3", 
+            "nome": "🔥 BINGO 3: MÁXIMO VALOR (MAIORES ODDS)", 
+            "jogos": lista_bingo3[:3]
+        })
 
-    # --- BINGO 5 ---
+    # --- BINGO 5: ODD ALTA + MELHORES % (EQUILÍBRIO COM VALOR) ---
     if len(lista_jogos) >= 5:
-        def score_equilibrio(j):
+        # Score prioriza Odd alta E Porcentagem alta
+        # Multiplicamos ambos para encontrar os jogos "fortes" e "rentáveis"
+        def score_bingo5(j):
+            return extrair_odd(j['odd']) * extrair_porcentagem(j['mercado'])
+            
+        lista_bingo5 = sorted(lista_jogos, key=score_bingo5, reverse=True)
+        bilhetes.append({
+            "id": "BINGO5", 
+            "nome": "💰 BINGO 5: ODDS ALTAS & ASSERTIVIDADE", 
+            "jogos": lista_bingo5[:5]
+        })
+
+    # --- BINGO 7: MENORES ODDS + MELHORES % (SEGURANÇA MÁXIMA) ---
+    if len(lista_jogos) >= 7:
+        # Queremos a MAIOR porcentagem e a MENOR odd. 
+        # Dividimos a porcentagem pela odd: quanto maior a % e menor a odd, maior o score.
+        def score_bingo7(j):
             pct = extrair_porcentagem(j['mercado'])
             odd = extrair_odd(j['odd'])
-            return (pct * 0.7) + (odd * 15) 
-        lista_bingo5 = sorted(lista_jogos, key=score_equilibrio, reverse=True)
-        bilhetes.append({"id": "BINGO5", "nome": "💰 BINGO 5: MELHORES ODDS & % (EQUILÍBRIO)", "jogos": lista_bingo5[:5]})
-
-    # --- BINGO 7 ---
-    if len(lista_jogos) >= 7:
-        lista_bingo7 = sorted(lista_jogos, key=lambda x: extrair_porcentagem(x['mercado']), reverse=True)
-        bilhetes.append({"id": "BINGO7", "nome": "🍀 BINGO 7: MAIORES % (SEGURANÇA)", "jogos": lista_bingo7[:7]})
+            return pct / odd if odd > 0 else 0
+            
+        lista_bingo7 = sorted(lista_jogos, key=score_bingo7, reverse=True)
+        bilhetes.append({
+            "id": "BINGO7", 
+            "nome": "🍀 BINGO 7: SEGURANÇA (MENORES ODDS & MAIOR %)", 
+            "jogos": lista_bingo7[:7]
+        })
 
     return bilhetes
+
 
 def formatar_para_telegram(bilhetes, cache_links):
     if not bilhetes:
