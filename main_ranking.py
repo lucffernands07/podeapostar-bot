@@ -10,38 +10,39 @@ client = OpenAI(
   api_key=os.getenv("OPENROUTER_API_KEY"),
 )
 
-def analisar_com_gemma4(caminho_img):
+def analisar_com_qwen(caminho_img):
     with open(caminho_img, "rb") as image_file:
         base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
-    # Tentaremos até 3 vezes a mesma imagem se der Rate Limit
     for tentativa in range(3):
         try:
             response = client.chat.completions.create(
-                model="google/gemma-4-31b-it:free", 
+                model="qwen/qwen-2-vl-7b-instruct:free", 
                 messages=[
                     {
                         "role": "user",
                         "content": [
-                            {"type": "text", "text": "Analyze this betting slip. If it has 'GANHOU' return {'tipo': 'GREEN'}. If it has 'BINGO', return {'tipo': 'SUGESTAO'}. Return ONLY JSON."},
+                            {"type": "text", "text": "Task: Check betting status. If 'GANHOU' or 'PRÊMIO' is found, return {'tipo': 'GREEN'}. If 'BINGO' is found on a Telegram screen, return {'tipo': 'SUGESTAO'}. Return ONLY the JSON object."},
                             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                         ]
                     }
                 ],
-                temperature=0
+                temperature=0.1
             )
             
             res_text = response.choices[0].message.content
-            print(f"DEBUG Gemma 4: {res_text}")
+            print(f"DEBUG Qwen: {res_text}")
+            
+            # Limpeza do JSON
             json_txt = res_text.replace("```json", "").replace("```", "").strip()
             return json.loads(json_txt)
 
         except Exception as e:
             if "429" in str(e):
-                print(f"⚠️ Rate limit atingido na tentativa {tentativa + 1}. Aguardando 40s para tentar de novo...")
-                time.sleep(40) # Espera maior para limpar o limite
+                print(f"⚠️ Qwen ocupado (Tentativa {tentativa+1}). Aguardando 30s...")
+                time.sleep(30)
             else:
-                print(f"❌ Erro fatal no Gemma 4: {e}")
+                print(f"❌ Erro no Qwen: {e}")
                 return None
     return None
 
