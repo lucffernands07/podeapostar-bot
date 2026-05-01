@@ -5,20 +5,19 @@ def verificar_chance_dupla(s):
     casa_ult = s.get("casa_ult_res", "") # V, E ou D
     fora_ult = s.get("fora_ult_res", "") # V, E ou D
     
-    # 2. CONFRONTO DIRETO (H2H): Pegamos os dados do H2H
-    # Para garantir a regra de "não perdeu os últimos 2", 
-    # olhamos se o oponente tem vitórias registradas no bloco H2H.
+    # 2. CONFRONTO DIRETO (H2H): Dados coletados do histórico direto
+    # h2h_vitorias_t2 são vitórias do visitante contra a casa (derrotas da casa)
+    # h2h_vitorias_t1 são vitórias da casa contra o visitante (derrotas do fora)
     h2h_derrotas_casa = s.get("h2h_vitorias_t2", 0)
     h2h_derrotas_fora = s.get("h2h_vitorias_t1", 0)
 
     # --- LÓGICA 1X ---
-    # Passo 1: Casa venceu a última E Fora perdeu a última
-    if casa_ult == "V" and fora_ult == "D":
-        # Passo 2: Nos últimos confrontos H2H, a Casa não pode ter perdido (vitórias do T2 = 0)
-        # Nota: Como o robô raspa os últimos 5/6, se h2h_vitorias_t2 for 0, 
-        # significa que não houve derrota nos últimos 5 (o que inclui os últimos 2).
+    # Passo 1: Casa Venceu OU Empatou a última E Fora perdeu a última
+    if (casa_ult == "V" or casa_ult == "E") and fora_ult == "D":
+        
+        # Passo 2: H2H - Casa não pode ter perdido os últimos confrontos diretos
         if h2h_derrotas_casa == 0:
-            # Definição da Porcentagem baseada no volume de vitórias
+            # Porcentagem: 85% se tiver histórico de vitórias no H2H, 70% se for equilibrado
             if s.get("h2h_vitorias_t1", 0) >= 2:
                 pct = "85%"
             else:
@@ -26,10 +25,12 @@ def verificar_chance_dupla(s):
             sugestoes.append(f"1X 🔥 ({pct})")
 
     # --- LÓGICA 2X ---
-    # Passo 1: Fora venceu a última E Casa perdeu a última
-    if fora_ult == "V" and casa_ult == "D":
-        # Passo 2: Nos últimos confrontos H2H, o Fora não pode ter perdido (vitórias do T1 = 0)
+    # Passo 1: Fora Venceu OU Empatou a última E Casa perdeu a última
+    if (fora_ult == "V" or fora_ult == "E") and casa_ult == "D":
+        
+        # Passo 2: H2H - Fora não pode ter perdido os últimos confrontos diretos
         if h2h_derrotas_fora == 0:
+            # Porcentagem: 85% se tiver histórico de vitórias no H2H, 70% se for equilibrado
             if s.get("h2h_vitorias_t2", 0) >= 2:
                 pct = "85%"
             else:
