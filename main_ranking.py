@@ -11,25 +11,21 @@ client = OpenAI(
 )
 
 def analisar_com_ai(caminho_img):
-    """
-    Função para analisar a imagem usando o modelo Qwen-2-VL (ótimo para OCR).
-    Tenta até 3 vezes em caso de Rate Limit (Erro 429).
-    """
     with open(caminho_img, "rb") as image_file:
         base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
     for tentativa in range(3):
         try:
-            # Modelo Qwen 2-VL 7B (Geralmente mais livre que Gemma/Llama)
+            # USANDO O MODELO QUE VOCÊ ACHOU: Baidu Qianfan OCR
             response = client.chat.completions.create(
-                model="qwen/qwen-2-vl-7b-instruct:free", 
+                model="baidu/qianfan-ocr-fast", 
                 messages=[
                     {
                         "role": "user",
                         "content": [
                             {
                                 "type": "text", 
-                                "text": "Analyze this betting slip. If it says 'GANHOU' or 'PRÊMIO', return {'tipo': 'GREEN'}. If it is a Telegram screen with 'BINGO', return {'tipo': 'SUGESTAO'}. Return ONLY the JSON object."
+                                "text": "Task: Check betting status. If 'GANHOU' or 'PRÊMIO' is found, return {'tipo': 'GREEN'}. If 'BINGO' is found, return {'tipo': 'SUGESTAO'}. Return ONLY JSON."
                             },
                             {
                                 "type": "image_url",
@@ -44,7 +40,6 @@ def analisar_com_ai(caminho_img):
             res_text = response.choices[0].message.content
             print(f"DEBUG AI ({os.path.basename(caminho_img)}): {res_text}")
             
-            # Limpeza simples de Markdown
             json_txt = res_text.replace("```json", "").replace("```", "").strip()
             return json.loads(json_txt)
 
@@ -56,6 +51,7 @@ def analisar_com_ai(caminho_img):
                 print(f"❌ Erro na análise: {e}")
                 return None
     return None
+
 
 def main():
     db_path = "ranking_db.json"
