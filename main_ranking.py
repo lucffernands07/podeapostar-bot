@@ -4,12 +4,9 @@ import time
 import pytesseract
 from PIL import Image
 
-# Não precisamos mais do cliente OpenAI/OpenRouter para o OCR
-
 def extrair_texto(caminho_img):
     try:
-        # O Tesseract processa a imagem localmente
-        # 'lang=por' ajuda a reconhecer caracteres como acentos e cedilha
+        # Extração local usando Tesseract
         texto = pytesseract.image_to_string(Image.open(caminho_img), lang='por')
         return texto.upper()
     except Exception as e:
@@ -17,26 +14,19 @@ def extrair_texto(caminho_img):
         return None
 
 def identificar_dados(texto):
-    # Identifica Status
+    # Deixamos a identificação básica por enquanto
+    # Depois que você me mandar o log, vamos "amaciar" essas regras
     status = "RED" if "PERDIDA" in texto else "GREEN" if ("GANHOU" in texto or "PRÊMIO" in texto or "VENCIDA" in texto) else "OUTRO"
     
-    # Identifica Porcentagem (70, 80, 100)
     porcentagem = ""
-    # Busca a maior porcentagem presente no texto
-    if "100%" in texto: porcentagem = "100%"
-    elif "90%" in texto: porcentagem = "90%"
-    elif "85%" in texto: porcentagem = "85%"
-    elif "80%" in texto: porcentagem = "80%"
-    elif "75%" in texto: porcentagem = "75%"
-    elif "70%" in texto: porcentagem = "70%"
+    for p in ["100%", "90%", "85%", "80%", "75%", "70%"]:
+        if p in texto:
+            porcentagem = p
+            break
     
-    # Identifica Mercado
     mercado = "OUTROS"
     if "BINGO" in texto:
-        if "BINGO 1" in texto: mercado = "BINGO 1"
-        elif "BINGO 5" in texto: mercado = "BINGO 5"
-        elif "BINGO 7" in texto: mercado = "BINGO 7"
-        else: mercado = "BINGO"
+        mercado = "BINGO 1" if "1" in texto else "BINGO 5" if "5" in texto else "BINGO 7" if "7" in texto else "BINGO"
     elif "AMBAS MARCAM" in texto or "AMBAS EQUIPES" in texto: mercado = "AMBAS MARCAM"
     elif "MAIS DE 1.5" in texto or "+1.5" in texto: mercado = "GOLS +1.5"
     elif "MAIS DE 2.5" in texto or "+2.5" in texto: mercado = "GOLS +2.5"
@@ -49,15 +39,13 @@ def identificar_dados(texto):
 
 def main():
     db_path = "ranking_db.json"
+    log_path = "ocr_debug.log"  # Onde vamos ver o que o Tesseract leu
     pasta_prints = "prints/"
     
-    # Carregamento Seguro
     if os.path.exists(db_path):
         with open(db_path, 'r', encoding='utf-8') as f:
-            try:
-                db = json.load(f)
-            except:
-                db = {"processados": [], "stats": {}}
+            try: db = json.load(f)
+            except: db = {"processados": [], "stats": {}}
     else:
         db = {"processados": [], "stats": {}}
 
@@ -71,28 +59,37 @@ def main():
     arquivos = [f for f in os.listdir(pasta_prints) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
     mudanca = False
 
-    for arquivo in arquivos:
-        if arquivo not in db["processados"]:
-            print(f"🚀 Analisando Localmente: {arquivo}")
-            texto = extrair_texto(os.path.join(pasta_prints, arquivo))
-            
-            if texto:
-                nome_mercado, status = identificar_dados(texto)
+    # Abrimos o arquivo de log para acrescentar os novos textos brutos
+    with open(log_path, "a", encoding="utf-8") as log_file:
+        for arquivo in arquivos:
+            if arquivo not in db["processados"]:
+                print(f"🚀 Analisando: {arquivo}")
+                texto_bruto = extrair_texto(os.path.join(pasta_prints, arquivo))
                 
-                if status != "OUTRO":
-                    if nome_mercado not in db["stats"]:
-                        db["stats"][nome_mercado] = {"green": 0, "red": 0}
+                if texto_bruto:
+                    # REGISTRO PARA DEBUG: Salva exatamente o que a IA leu
+                    log_file.write(f"\n===== INÍCIO: {arquivo} =====\n")
+                    log_file.write(texto_bruto)
+                    log_file.write(f"\n===== FIM: {arquivo} =====\n")
+
+                    nome_mercado, status = identificar_dados(texto_bruto)
                     
-                    chave = "green" if status == "GREEN" else "red"
-                    db["stats"][nome_mercado][chave] += 1
-                    db["processados"].append(arquivo)
-                    mudanca = True
-                    print(f"✅ {nome_mercado} -> {status}")
-                else:
-                    print(f"⚠️ Status não identificado em {arquivo}")
-            
-            # Com Tesseract não precisamos de sleep longo, mas 1s evita sobrecarga
-            time.sleep(0.5)
+                    if status != "OUTRO":
+                        if nome_mercado not in db["stats"]:
+                            db["stats"][nome_mercado] = {"green": 0, "red": 0}
+                        
+                        chave = "green" if status == "GREEN" else "red"
+                        db["stats"][nome_mercado][chave] += 1
+                        db["processados"].append(arquivo)
+                        mudanca = True
+                        print(f"✅ {nome_mercado} -> {status}")
+                    else:
+                        # Se não identificou, ainda assim marcamos como processado para não 
+                        # ficar gastando tempo no próximo run, ou removemos para tentar de novo
+                        # Por enquanto, não adicionamos ao 'processados' para podermos re-testar
+                        print(f"⚠️ Status não identificado em {arquivo}. Veja {log_path}")
+                
+                time.sleep(0.5)
 
     if mudanca:
         with open(db_path, 'w', encoding='utf-8') as f:
@@ -101,21 +98,16 @@ def main():
     # --- RELATÓRIO ORDENADO ---
     ranking_lista = []
     bingos_lista = []
-
     for m, v in db.get("stats", {}).items():
         total = v["green"] + v["red"]
         perc = (v["green"] / total * 100) if total > 0 else 0
         item = {"nome": m, "g": v["green"], "r": v["red"], "perc": perc}
-        
-        if "BINGO" in m:
-            bingos_lista.append(item)
-        else:
-            ranking_lista.append(item)
+        if "BINGO" in m: bingos_lista.append(item)
+        else: ranking_lista.append(item)
 
-    # Ordena por % de acerto (do maior para o menor)
     ranking_lista.sort(key=lambda x: x["perc"], reverse=True)
 
-    print("\n📊 --- RANKING DE ASSERTIVIDADE (LOCAL OCR) ---")
+    print("\n📊 --- RANKING DE ASSERTIVIDADE ---")
     print(f"{'MERCADO':<25} | {'GREEN':<5} | {'RED':<5} | {'% ACERTO'}")
     print("-" * 60)
     for i in ranking_lista:
@@ -127,4 +119,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-      
+        
