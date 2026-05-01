@@ -14,13 +14,15 @@ jobs:
 
     steps:
       - name: Checkout Código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Instalar Tesseract OCR no Ubuntu
         run: |
           sudo apt-get update
           sudo apt-get install -y tesseract-ocr
-          sudo apt-get install -y tesseract-ocr-por # Instala suporte ao Português
+          sudo apt-get install -y tesseract-ocr-por
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -30,8 +32,6 @@ jobs:
       - name: Instalar Dependências
         run: |
           pip install pytesseract pillow
-          # Se você ainda tiver o requirements.txt, pode manter a linha abaixo
-          # pip install -r requirements.txt
 
       - name: Rodar Script de Ranking
         run: python main_ranking.py
@@ -40,14 +40,16 @@ jobs:
         run: |
           git config --local user.email "bot@github.com"
           git config --local user.name "RankingBot"
-          git add ranking_db.json
-          git commit -m "🏆 Ranking atualizado [skip ci]" || echo "Sem mudanças"
+          # O 'git add .' é essencial para registar que as fotos foram renomeadas para _CONCLUIDO
+          git add .
+          # O '[skip ci]' impede que o commit do próprio bot dispare uma nova execução
+          git commit -m "🏆 Processamento: Imagens concluídas e Ranking atualizado [skip ci]" || echo "Sem mudanças para salvar"
           git push origin main
 
       - name: Upload OCR Debug Log
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ocr-debug-logs
           path: ocr_debug.log
-          
           
