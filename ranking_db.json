@@ -2,13 +2,24 @@
     "processados": [
         "Screenshot_2026-04-29-18-49-47-968_com.kaizengaming.betano.brazil.jpg",
         "IMG_20260430_141631.jpg",
-        "IMG_20260430_194549.jpg"
+        "IMG_20260430_194549.jpg",
+        "IMG_20260430_194514.jpg",
+        "Screenshot_2026-04-30-14-11-28-985_com.kaizengaming.betano.brazil.jpg",
+        "Screenshot_2026-04-30-14-11-51-982_com.kaizengaming.betano.brazil.jpg"
     ],
     "ranking": {},
     "stats": {
         "GOLS +1.5": {
             "green": 0,
-            "red": 1
+            "red": 2
+        },
+        "AMBAS MARCAM": {
+            "green": 1,
+            "red": 0
+        },
+        "1X": {
+            "green": 1,
+            "red": 0
         }
     }
 }
