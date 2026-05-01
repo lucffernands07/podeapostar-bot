@@ -46,8 +46,7 @@ def identificar_dados(texto):
     elif "MAIS DE 2.5" in texto or "+2.5" in texto: mercado = "GOLS +2.5"
     elif "1X" in texto: mercado = "1X"
     elif "2X" in texto: mercado = "2X"
-    elif "VASCO" in texto or "FLUMINENSE" in texto or "CASA" in texto: # Exemplo de detecção de vitória casa
-        mercado = "VITÓRIA CASA"
+    elif "CASA" in texto: mercado = "VITÓRIA CASA"
 
     nome_final = f"{mercado} {porcentagem}".strip()
     return nome_final, status
@@ -56,14 +55,29 @@ def main():
     db_path = "ranking_db.json"
     pasta_prints = "prints/"
     
+    # Carregamento Seguro
     if os.path.exists(db_path):
         with open(db_path, 'r', encoding='utf-8') as f:
-            db = json.load(f)
+            try:
+                db = json.load(f)
+            except:
+                db = {"processados": [], "stats": {}}
     else:
         db = {"processados": [], "stats": {}}
 
+    # Garante que a chave 'stats' existe (evita o KeyError)
+    if "stats" not in db:
+        db["stats"] = {}
+    if "processados" not in db:
+        db["processados"] = []
+
+    if not os.path.exists(pasta_prints):
+        print("Pasta prints/ não encontrada.")
+        return
+
     arquivos = [f for f in os.listdir(pasta_prints) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-    
+    mudanca = False
+
     for arquivo in arquivos:
         if arquivo not in db["processados"]:
             print(f"🚀 Analisando: {arquivo}")
@@ -79,18 +93,20 @@ def main():
                     chave = "green" if status == "GREEN" else "red"
                     db["stats"][nome_mercado][chave] += 1
                     db["processados"].append(arquivo)
+                    mudanca = True
                     print(f"✅ {nome_mercado} -> {status}")
             
             time.sleep(15)
 
-    with open(db_path, 'w', encoding='utf-8') as f:
-        json.dump(db, f, indent=4, ensure_ascii=False)
+    if mudanca:
+        with open(db_path, 'w', encoding='utf-8') as f:
+            json.dump(db, f, indent=4, ensure_ascii=False)
 
-    # --- GERAR RELATÓRIO ORDENADO ---
+    # --- RELATÓRIO ORDENADO ---
     ranking_lista = []
     bingos_lista = []
 
-    for m, v in db["stats"].items():
+    for m, v in db.get("stats", {}).items():
         total = v["green"] + v["red"]
         perc = (v["green"] / total * 100) if total > 0 else 0
         item = {"nome": m, "g": v["green"], "r": v["red"], "perc": perc}
@@ -100,15 +116,15 @@ def main():
         else:
             ranking_lista.append(item)
 
-    # Ordena por porcentagem de acerto
     ranking_lista.sort(key=lambda x: x["perc"], reverse=True)
 
-    print("\n📊 --- RANKING FINAL ---")
-    print(f"{'MERCADO':<20} | {'GREEN':<5} | {'RED':<5} | {'% ACERTO'}")
+    print("\n📊 --- RANKING DE ASSERTIVIDADE ---")
+    print(f"{'MERCADO':<25} | {'GREEN':<5} | {'RED':<5} | {'% ACERTO'}")
+    print("-" * 55)
     for i in ranking_lista:
-        print(f"{i['nome']:<20} | {i['g']:<5} | {i['r']:<5} | {i['perc']:.1f}%")
+        print(f"{i['nome']:<25} | {i['g']:<5} | {i['r']:<5} | {i['perc']:.1f}%")
     
-    print("\n🎯 --- BINGOS ---")
+    print("\n🎯 --- BILHETES BINGO ---")
     for b in bingos_lista:
         print(f"{b['nome']}: {b['g']} ✅ | {b['r']} ❌")
 
