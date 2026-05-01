@@ -16,17 +16,24 @@ jobs:
       - name: Checkout Código
         uses: actions/checkout@v3
 
+      - name: Instalar Tesseract OCR no Ubuntu
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr
+          sudo apt-get install -y tesseract-ocr-por # Instala suporte ao Português
+
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
       - name: Instalar Dependências
-        run: pip install -r requirements.txt
+        run: |
+          pip install pytesseract pillow
+          # Se você ainda tiver o requirements.txt, pode manter a linha abaixo
+          # pip install -r requirements.txt
 
       - name: Rodar Script de Ranking
-        env:
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python main_ranking.py
 
       - name: Salvar Alterações no GitHub
