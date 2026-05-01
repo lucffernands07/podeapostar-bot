@@ -1,30 +1,19 @@
 import os
 import json
-import base64
 import time
-from openai import OpenAI
+import pytesseract
+from PIL import Image
 
-client = OpenAI(
-  base_url="https://openrouter.ai/api/v1",
-  api_key=os.getenv("OPENROUTER_API_KEY"),
-)
+# Não precisamos mais do cliente OpenAI/OpenRouter para o OCR
 
 def extrair_texto(caminho_img):
-    with open(caminho_img, "rb") as image_file:
-        base64_image = base64.b64encode(image_file.read()).decode('utf-8')
     try:
-        response = client.chat.completions.create(
-            model="baidu/qianfan-ocr-fast:free", 
-            messages=[
-                {"role": "user", "content": [
-                    {"type": "text", "text": "Extract all text from this bet slip."},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                ]}
-            ]
-        )
-        return response.choices[0].message.content.upper()
+        # O Tesseract processa a imagem localmente
+        # 'lang=por' ajuda a reconhecer caracteres como acentos e cedilha
+        texto = pytesseract.image_to_string(Image.open(caminho_img), lang='por')
+        return texto.upper()
     except Exception as e:
-        print(f"❌ Erro OCR: {e}")
+        print(f"❌ Erro no OCR Tesseract: {e}")
         return None
 
 def identificar_dados(texto):
@@ -32,7 +21,14 @@ def identificar_dados(texto):
     status = "RED" if "PERDIDA" in texto else "GREEN" if ("GANHOU" in texto or "PRÊMIO" in texto or "VENCIDA" in texto) else "OUTRO"
     
     # Identifica Porcentagem (70, 80, 100)
-    porcentagem = "70%" if "70%" in texto else "80%" if "80%" in texto else "100%" if "100%" in texto else ""
+    porcentagem = ""
+    # Busca a maior porcentagem presente no texto
+    if "100%" in texto: porcentagem = "100%"
+    elif "90%" in texto: porcentagem = "90%"
+    elif "85%" in texto: porcentagem = "85%"
+    elif "80%" in texto: porcentagem = "80%"
+    elif "75%" in texto: porcentagem = "75%"
+    elif "70%" in texto: porcentagem = "70%"
     
     # Identifica Mercado
     mercado = "OUTROS"
@@ -65,11 +61,8 @@ def main():
     else:
         db = {"processados": [], "stats": {}}
 
-    # Garante que a chave 'stats' existe (evita o KeyError)
-    if "stats" not in db:
-        db["stats"] = {}
-    if "processados" not in db:
-        db["processados"] = []
+    if "stats" not in db: db["stats"] = {}
+    if "processados" not in db: db["processados"] = []
 
     if not os.path.exists(pasta_prints):
         print("Pasta prints/ não encontrada.")
@@ -80,7 +73,7 @@ def main():
 
     for arquivo in arquivos:
         if arquivo not in db["processados"]:
-            print(f"🚀 Analisando: {arquivo}")
+            print(f"🚀 Analisando Localmente: {arquivo}")
             texto = extrair_texto(os.path.join(pasta_prints, arquivo))
             
             if texto:
@@ -95,8 +88,11 @@ def main():
                     db["processados"].append(arquivo)
                     mudanca = True
                     print(f"✅ {nome_mercado} -> {status}")
+                else:
+                    print(f"⚠️ Status não identificado em {arquivo}")
             
-            time.sleep(15)
+            # Com Tesseract não precisamos de sleep longo, mas 1s evita sobrecarga
+            time.sleep(0.5)
 
     if mudanca:
         with open(db_path, 'w', encoding='utf-8') as f:
@@ -116,11 +112,12 @@ def main():
         else:
             ranking_lista.append(item)
 
+    # Ordena por % de acerto (do maior para o menor)
     ranking_lista.sort(key=lambda x: x["perc"], reverse=True)
 
-    print("\n📊 --- RANKING DE ASSERTIVIDADE ---")
+    print("\n📊 --- RANKING DE ASSERTIVIDADE (LOCAL OCR) ---")
     print(f"{'MERCADO':<25} | {'GREEN':<5} | {'RED':<5} | {'% ACERTO'}")
-    print("-" * 55)
+    print("-" * 60)
     for i in ranking_lista:
         print(f"{i['nome']:<25} | {i['g']:<5} | {i['r']:<5} | {i['perc']:.1f}%")
     
@@ -130,4 +127,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-  
+      
