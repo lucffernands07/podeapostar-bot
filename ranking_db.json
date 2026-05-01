@@ -1,5 +1,18 @@
 {
     "processados": [],
     "pendentes": {},
-    "stats": {}
+    "stats": {
+        "1X 85%": {
+            "green": 1,
+            "red": 0
+        },
+        "2X 85%": {
+            "green": 0,
+            "red": 1
+        },
+        "1X 70%": {
+            "green": 1,
+            "red": 0
+        }
+    }
 }
