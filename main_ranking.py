@@ -14,25 +14,51 @@ def extrair_texto(caminho_img):
         return None
 
 def identificar_dados(texto):
-    # Deixamos a identificação básica por enquanto
-    # Depois que você me mandar o log, vamos "amaciar" essas regras
-    status = "RED" if "PERDIDA" in texto else "GREEN" if ("GANHOU" in texto or "PRÊMIO" in texto or "VENCIDA" in texto) else "OUTRO"
+    # Limpeza para facilitar a busca
+    t = texto.upper()
     
+    # 1. IDENTIFICAÇÃO DE STATUS (Ajustado para o seu Log)
+    status = "OUTRO"
+    
+    # Se no texto aparecer o placar (RESULTADO) mas não tiver "GANHOU", 
+    # e for um print de conferência, precisamos de uma lógica.
+    # Por enquanto, vamos manter as palavras que o Tesseract costuma ler:
+    if any(x in t for x in ["GANH", "VENC", "PREM", "PRÊM", "PAGO"]):
+        status = "GREEN"
+    elif any(x in t for x in ["PERD", "PERO", "REO", "ERDI"]):
+        status = "RED"
+    # DICA: Se for print da Betano e tiver "RESULTADO", mas não for Green, 
+    # geralmente é porque o check de 'Ganhou' não foi lido.
+    
+    # 2. IDENTIFICAÇÃO DE PORCENTAGEM
     porcentagem = ""
-    for p in ["100%", "90%", "85%", "80%", "75%", "70%"]:
-        if p in texto:
+    for p in ["100%", "85%", "80%", "75%", "70%"]:
+        if p in t:
             porcentagem = p
             break
-    
+
+    # 3. IDENTIFICAÇÃO DE MERCADO (Baseado no seu Log)
     mercado = "OUTROS"
-    if "BINGO" in texto:
-        mercado = "BINGO 1" if "1" in texto else "BINGO 5" if "5" in texto else "BINGO 7" if "7" in texto else "BINGO"
-    elif "AMBAS MARCAM" in texto or "AMBAS EQUIPES" in texto: mercado = "AMBAS MARCAM"
-    elif "MAIS DE 1.5" in texto or "+1.5" in texto: mercado = "GOLS +1.5"
-    elif "MAIS DE 2.5" in texto or "+2.5" in texto: mercado = "GOLS +2.5"
-    elif "1X" in texto: mercado = "1X"
-    elif "2X" in texto: mercado = "2X"
-    elif "CASA" in texto: mercado = "VITÓRIA CASA"
+    
+    # Prioridade para BINGOS
+    if "BINGO 5" in t: mercado = "BINGO 5"
+    elif "BINGO 3" in t: mercado = "BINGO 3"
+    elif "BINGO 1" in t: mercado = "BINGO 1"
+    elif "BINGO 7" in t: mercado = "BINGO 7"
+    
+    # Mercados Técnicos
+    elif "AMBAS MARCAM" in t or "AMBAS EQUIPES" in t or "SIM 1." in t:
+        mercado = "AMBAS MARCAM"
+    elif "+1.5" in t or "MAIS DE 1.5" in t or "1.5 GOLS" in t:
+        mercado = "GOLS +1.5"
+    elif "+2.5" in t or "MAIS DE 2.5" in t or "2.5 GOLS" in t:
+        mercado = "GOLS +2.5"
+    elif "1X" in t or "CHANCE DUPLA 1X" in t:
+        mercado = "1X"
+    elif "2X" in t or "X2" in t or "CHANCE DUPLA X2" in t:
+        mercado = "2X"
+    elif "CASA" in t or "VENCEDOR 1" in t:
+        mercado = "VITÓRIA CASA"
 
     nome_final = f"{mercado} {porcentagem}".strip()
     return nome_final, status
