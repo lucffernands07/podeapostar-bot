@@ -1,6 +1,15 @@
 {
     "processados": [],
-    "pendentes": {},
+    "pendentes": {
+        " X OLIMPIA ASUNCION": {
+            "mercado": "GOLS +1.5",
+            "perc": "70%"
+        },
+        "4 NOTTINGHAM X ASTON VILLA": {
+            "mercado": "GOLS +1.5",
+            "perc": "70%"
+        }
+    },
     "stats": {
         "1X 85%": {
             "green": 1,
@@ -13,6 +22,10 @@
         "1X 70%": {
             "green": 1,
             "red": 0
+        },
+        "2X 70%": {
+            "green": 0,
+            "red": 1
         }
     }
 }
