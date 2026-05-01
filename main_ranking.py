@@ -15,12 +15,21 @@ def extrair_texto(caminho_img):
         return None
 
 def limpar_nome_jogo(texto):
-    """Tenta extrair nomes de times para cruzamento (ex: CARACAS X RACING)"""
-    # Regex busca: [Palavra] espaço [X] espaço [Palavra]
-    match = re.search(r'([A-Z0-9 ]+)\s*[X]\s*([A-Z0-9 ]+)', texto)
+    """Extrai nomes de times ignorando números e símbolos no início"""
+    # Procura o padrão Time A X Time B
+    match = re.search(r'([A-ZÀ-Ú ]+)\s*[X]\s*([A-ZÀ-Ú ]+)', texto)
     if match:
-        return f"{match.group(1).strip()} X {match.group(2).strip()}"
+        time1 = match.group(1).strip()
+        time2 = match.group(2).strip()
+        
+        # Remove números soltos ou caracteres especiais que o OCR confunde no início
+        time1 = re.sub(r'^[0-9€&%46 ]+', '', time1).strip()
+        
+        # Se após limpar, o nome ainda for muito curto (ex: só "X OLIMPIA"), 
+        # o cruzamento pode falhar, mas já ajuda muito.
+        return f"{time1} X {time2}"
     return None
+
 
 def conferir_resultado(mercado, g_casa, g_fora):
     """Aplica a regra matemática baseada no mercado e placar"""
