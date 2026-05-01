@@ -10,13 +10,15 @@ client = OpenAI(
   api_key=os.getenv("OPENROUTER_API_KEY"),
 )
 
-def analisar_com_ai(caminho_img):
+def extrair_texto_da_imagem(caminho_img):
+    """
+    Tenta extrair todo o texto visível na imagem usando o Baidu OCR.
+    """
     with open(caminho_img, "rb") as image_file:
         base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
     for tentativa in range(3):
         try:
-            # USANDO O MODELO QUE VOCÊ ACHOU: Baidu Qianfan OCR
             response = client.chat.completions.create(
                 model="baidu/qianfan-ocr-fast", 
                 messages=[
@@ -25,7 +27,7 @@ def analisar_com_ai(caminho_img):
                         "content": [
                             {
                                 "type": "text", 
-                                "text": "Task: Check betting status. If 'GANHOU' or 'PRÊMIO' is found, return {'tipo': 'GREEN'}. If 'BINGO' is found, return {'tipo': 'SUGESTAO'}. Return ONLY JSON."
+                                "text": "Extract all text from this image accurately. Return only the transcript."
                             },
                             {
                                 "type": "image_url",
@@ -33,78 +35,50 @@ def analisar_com_ai(caminho_img):
                             }
                         ]
                     }
-                ],
-                temperature=0
+                ]
             )
             
-            res_text = response.choices[0].message.content
-            print(f"DEBUG AI ({os.path.basename(caminho_img)}): {res_text}")
-            
-            json_txt = res_text.replace("```json", "").replace("```", "").strip()
-            return json.loads(json_txt)
+            texto_extraido = response.choices[0].message.content
+            return texto_extraido
 
         except Exception as e:
             if "429" in str(e):
-                print(f"⚠️ Servidor ocupado (Tentativa {tentativa + 1}/3). Aguardando 30s...")
-                time.sleep(30)
+                print(f"⚠️ Aguardando 40s (Rate Limit)... {tentativa+1}/3")
+                time.sleep(40)
             else:
-                print(f"❌ Erro na análise: {e}")
+                print(f"❌ Erro: {e}")
                 return None
     return None
 
-
 def main():
-    db_path = "ranking_db.json"
     pasta_prints = "prints/"
     
-    # Carrega ou cria o banco de dados local
-    if os.path.exists(db_path):
-        with open(db_path, 'r', encoding='utf-8') as f:
-            db = json.load(f)
-    else:
-        db = {"processados": [], "ranking": {}}
-
     if not os.path.exists(pasta_prints):
-        print("Pasta de prints não encontrada.")
+        print("Pasta não encontrada.")
         return
 
-    # Lista arquivos de imagem
+    # Pega apenas uma imagem para teste inicial
     arquivos = [f for f in os.listdir(pasta_prints) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-    mudanca = False
+    
+    if not arquivos:
+        print("Nenhuma imagem na pasta.")
+        return
 
-    for arquivo in arquivos:
-        if arquivo not in db["processados"]:
-            print(f"🚀 Analisando: {arquivo}")
-            caminho_completo = os.path.join(pasta_prints, arquivo)
+    for arquivo in arquivos[:3]:  # Vamos testar com as 3 primeiras
+        print(f"\n🔍 Lendo: {arquivo}")
+        caminho = os.path.join(pasta_prints, arquivo)
+        
+        texto = extrair_texto_da_imagem(caminho)
+        
+        if texto:
+            print(f"📝 TEXTO ENCONTRADO EM {arquivo}:")
+            print("-" * 30)
+            print(texto)
+            print("-" * 30)
+        else:
+            print(f"🚫 Falha ao extrair texto de {arquivo}")
             
-            # Chama a função de análise (agora com o nome genérico para evitar erros)
-            resultado = analisar_com_ai(caminho_completo)
-            
-            if resultado:
-                db["processados"].append(arquivo)
-                tipo = resultado.get("tipo")
-                
-                if tipo == "GREEN":
-                    # Adiciona 10 pontos ao ranking geral
-                    db["ranking"]["Geral"] = db["ranking"].get("Geral", 0) + 10
-                    print(f"✨ GREEN validado para {arquivo}!")
-                elif tipo == "SUGESTAO":
-                    print(f"📩 Sugestão/Bingo detectada em {arquivo}.")
-                
-                mudanca = True
-            
-            # Espera obrigatória entre imagens para não ser banido pelo Rate Limit
-            print("⏳ Aguardando 20 segundos para a próxima imagem...")
-            time.sleep(20)
-
-    # Salva se houve alguma alteração
-    if mudanca:
-        with open(db_path, 'w', encoding='utf-8') as f:
-            json.dump(db, f, indent=4, ensure_ascii=False)
-        print("✅ ranking_db.json atualizado com sucesso!")
-    else:
-        print("ℹ️ Nenhuma imagem nova processada com sucesso.")
+        time.sleep(10) # Pausa entre testes
 
 if __name__ == "__main__":
     main()
-                  
