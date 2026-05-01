@@ -43,4 +43,11 @@ jobs:
           git add ranking_db.json
           git commit -m "🏆 Ranking atualizado [skip ci]" || echo "Sem mudanças"
           git push origin main
+
+      - name: Upload OCR Debug Log
+        uses: actions/upload-artifact@v4
+        with:
+          name: ocr-debug-logs
+          path: ocr_debug.log
+          
           
