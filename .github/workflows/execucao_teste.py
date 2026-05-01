@@ -3,7 +3,7 @@ name: Execucao Teste Bot Apostas
 on:
   push:
     paths:
-      - 'testes/**'   # Dispara se você alterar qualquer arquivo na pasta testes
+      - 'testes/teste_main.py'   # Dispara se você alterar qualquer arquivo na pasta testes
   workflow_dispatch:  # Permite rodar manualmente no botão do GitHub
 
 jobs:
