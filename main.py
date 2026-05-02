@@ -220,7 +220,7 @@ def main():
                                     odd_float = float(valor_odd_str.replace(',', '.'))
                                     if "-4.5" in m and odd_float >= 4.0:
                                         continue 
-                                    if odd_float >= 1.25:
+                                    if odd_float >= 1.20:
                                         lista_para_filtros.append({
                                             "horario": h_br, "time_casa": t1, "time_fora": t2,
                                             "mercado": m, "odd": valor_odd_str, "liga": nome_comp,
