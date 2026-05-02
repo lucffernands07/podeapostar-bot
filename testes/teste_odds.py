@@ -32,47 +32,43 @@ def testar_raspagem_direta(url_exata):
         
         print(f"\n--- PASSO 2: Raspagem (Segunda Ocorrência) ---")
         
-        linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+        # Mercados que queremos buscar com XPath cirúrgico
+        alvos = {
+            "GOLS_15": {"valor": "1.5", "coluna": 0}, # Acima
+            "GOLS_25": {"valor": "2.5", "coluna": 0}, # Acima
+            "GOLS_M45": {"valor": "4.5", "coluna": 1}  # Abaixo
+        }
         
-        # Dicionário para controlar qual vez o mercado aparece
-        contadores = {"1.5": 0, "2.5": 0, "4.5": 0}
         resultados = {}
 
-        for linha in linhas:
-            texto_linha = linha.text
-            # Busca as células de odd dentro desta linha
-            celulas = linha.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
+        for chave, config in alvos.items():
+            valor = config["valor"]
+            coluna_index = config["coluna"]
             
-            if not celulas:
-                continue
+            # XPath Robusto: Busca a linha (.ui-table__row) que contém
+            # uma div descendente cuja div neta tenha o texto exato, ignorando espaços.
+            xpath_especifico = f"//div[contains(@class, 'ui-table__row')][.//div/div[normalize-space(text())='{valor}']]"
+            
+            # Tenta encontrar usando o XPath cirúrgico
+            linhas = driver.find_elements(By.XPATH, xpath_especifico)
+            
+            # Se falhar, usa a busca flexível de texto como backup (o que tínhamos antes)
+            if not linhas:
+                linhas_todas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+                linhas = [l for l in linhas_todas if valor in l.text]
 
-            # Verificação para 1.5
-            if "1.5" in texto_linha:
-                contadores["1.5"] += 1
-                if contadores["1.5"] == 2:
-                    resultados["GOLS_15"] = celulas[0].text.strip() # Acima (Esquerda)
-                    print(f"✅ Segundo 1.5 (Acima) encontrado: {resultados['GOLS_15']}")
+            if len(linhas) >= 2:
+                # Pegamos a segunda linha (índice 1)
+                segunda_linha = linhas[1]
+                odds = segunda_linha.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
+                
+                if len(odds) >= 2:
+                    odd_valor = odds[coluna_index].text.strip()
+                    resultados[chave] = odd_valor
+                    print(f"✅ Mercado {valor} encontrado na 2ª linha -> Odd: {odd_valor}")
+            else:
+                print(f"❌ Erro: Não encontrei 2 ocorrências do mercado {valor}")
 
-            # Verificação para 2.5
-            elif "2.5" in texto_linha:
-                contadores["2.5"] += 1
-                if contadores["2.5"] == 2:
-                    resultados["GOLS_25"] = celulas[0].text.strip() # Acima (Esquerda)
-                    print(f"✅ Segundo 2.5 (Acima) encontrado: {resultados['GOLS_25']}")
-
-            # Verificação para 4.5
-            elif "4.5" in texto_linha:
-                contadores["4.5"] += 1
-                if contadores["4.5"] == 2:
-                    if len(celulas) >= 2:
-                        resultados["GOLS_M45"] = celulas[1].text.strip() # Abaixo (Direita)
-                        print(f"✅ Segundo 4.5 (Abaixo) encontrado: {resultados['GOLS_M45']}")
-
-        print(f"\n--- RESULTADO FINAL ---")
-        print(resultados)
-
-    except Exception as e:
-        print(f"❌ Erro: {e}")
     finally:
         driver.quit()
 
