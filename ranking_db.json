@@ -1,16 +1,67 @@
 {
-    "processados": [],
-    "pendentes": {},
     "stats": {
-        "1X 70%": { "green": 1, "red": 0 },
-        "1X 85%": { "green": 3, "red": 0 },
-        "2X 70%": { "green": 0, "red": 1 },
-        "2X 85%": { "green": 1, "red": 2 },
-        "GOLS +1.5 70%": { "green": 1, "red": 1 },
-        "GOLS +1.5 85%": { "green": 2, "red": 0 },
-        "GOLS +2.5 70%": { "green": 1, "red": 0 },
-        "AMBAS MARCAM 85%": { "green": 0, "red": 1 },
-        "BINGO 3": { "green": 2, "red": 2 },
-        "BINGO 5": { "green": 0, "red": 2 }
-    }
+        "1X 70%": {
+            "green": 1,
+            "red": 0
+        },
+        "1X 85%": {
+            "green": 3,
+            "red": 0
+        },
+        "2X 70%": {
+            "green": 0,
+            "red": 1
+        },
+        "2X 85%": {
+            "green": 1,
+            "red": 2
+        },
+        "GOLS +1.5 70%": {
+            "green": 1,
+            "red": 1
+        },
+        "GOLS +1.5 85%": {
+            "green": 2,
+            "red": 0
+        },
+        "GOLS +2.5 70%": {
+            "green": 1,
+            "red": 0
+        },
+        "AMBAS MARCAM 85%": {
+            "green": 0,
+            "red": 1
+        },
+        "BINGO 3": {
+            "green": 2,
+            "red": 2
+        },
+        "BINGO 5": {
+            "green": 0,
+            "red": 2
+        }
+    },
+    "pendentes": {
+        "8 MORTON X AIRDRIEONIANS | GOLS +2.5": {
+            "mercado": "GOLS +2.5",
+            "perc": "85%",
+            "jogo": "8 MORTON X AIRDRIEONIANS"
+        },
+        "E AL DIRIYAH X ABHA | AMBAS MARCAM": {
+            "mercado": "AMBAS MARCAM",
+            "perc": "85%",
+            "jogo": "E AL DIRIYAH X ABHA"
+        },
+        "OKAYAMA X HIROSHIMA | GOLS +1.5": {
+            "mercado": "GOLS +1.5",
+            "perc": "85%",
+            "jogo": "OKAYAMA X HIROSHIMA"
+        },
+        "E RAITH X ROSS COUNTY | GOLS +1.5": {
+            "mercado": "GOLS +1.5",
+            "perc": "85%",
+            "jogo": "E RAITH X ROSS COUNTY"
+        }
+    },
+    "processados": []
 }
