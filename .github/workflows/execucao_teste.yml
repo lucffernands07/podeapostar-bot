@@ -1,4 +1,4 @@
-name: Execucao Teste Bot Apostas
+name: Teste main bot de aposta
 
 on:
   push:
