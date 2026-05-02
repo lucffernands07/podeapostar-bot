@@ -1,4 +1,4 @@
-name: Sistema de Ranking Automático
+name: Ranking de Green x Red
 
 on:
   push:
