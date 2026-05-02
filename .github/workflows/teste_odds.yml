@@ -1,0 +1,40 @@
+name: Teste de Raspagem de Odds
+
+on:
+  # Roda automaticamente ao fazer commit no arquivo de teste ou no de odds
+  push:
+    paths:
+      - 'testes/teste_odds.py'
+      - 'odds.py'
+  
+  # Permite rodar manualmente pela aba "Actions" do GitHub
+  workflow_dispatch:
+
+jobs:
+  executar-teste:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências do sistema (Chrome e Selenium)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Instalar bibliotecas Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install selenium webdriver-manager requests
+
+      - name: Executar Teste de Odds
+        run: python testes/teste_odds.py
+        env:
+          # Se o seu script precisar de tokens no futuro, adicione aqui
+          PYTHONPATH: . 
