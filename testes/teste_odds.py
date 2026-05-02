@@ -9,69 +9,95 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 def configurar_driver():
     options = Options()
-    options.add_argument("--headless=new") # Rode sem interface para ser mais rápido
+    options.add_argument("--headless=new")
     options.add_argument("--window-size=1920,1080")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     return driver
 
-def testar_raspagem_odds(url_alvo):
-    driver = configurar_driver()
-    
-    print(f"--- PASSO 1: Acessando URL ---")
-    print(f"URL: {url_alvo}")
-    
+def capturar_todas_as_odds_teste(driver, id_jogo):
+    res = {
+        "GOLS_15": "N/A", "GOLS_25": "N/A", "GOLS_M45": "N/A", 
+        "BTTS": "N/A", "1X": "N/A", "X2": "N/A",
+        "VITORIA_CASA": "N/A"
+    }
+
+    # Passo 1: Acessar resumo para pegar o link base
+    url_resumo = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo"
+    print(f"--- PASSO 1: Acessando {url_resumo}")
+    driver.get(url_resumo)
+
     try:
-        driver.get(url_alvo)
-        wait = WebDriverWait(driver, 15)
+        # Pega o link base de odds (ex: .../odds/acima-abaixo/...)
+        elemento_aba = WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/odds/')]"))
+        )
+        link_odds_base = elemento_aba.get_attribute('href')
+        print(f"Link base detectado: {link_odds_base}")
+
+        # --- 2. MERCADO DE GOLS (ACIMA/ABAIXO) ---
+        # Foco total aqui conforme seu pedido do segundo 1.5 e 2.5
+        url_gols = link_odds_base.replace("/odds/", "/odds/acima-abaixo/tempo-regulamentar/")
+        print(f"\n--- PASSO 2: Indo para Gols: {url_gols}")
+        driver.get(url_gols)
         
-        # Espera as linhas da tabela carregarem
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
-        time.sleep(2) # Pausa para garantir que os valores dinâmicos carregaram
-        
-        print(f"\n--- PASSO 2: Raspagem das Segundas Odds ---")
-        
-        # Mercados que queremos buscar
-        alvos = {
-            "1.5": "ACIMA",
-            "2.5": "ACIMA",
-            "4.5": "ABAIXO"
-        }
-        
-        for valor, tipo in alvos.items():
-            # XPath para encontrar as linhas que contém o valor exato (1.5, 2.5, etc)
-            # Buscamos o div que contém o texto exato dentro da linha da tabela
-            xpath_linhas = f"//div[contains(@class, 'ui-table__row')][.//div[text()='{valor}']]"
-            linhas = driver.find_elements(By.XPATH, xpath_linhas)
+        try:
+            WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
+            time.sleep(3)
+            linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
             
-            if len(linhas) >= 2:
-                # Pegamos a segunda linha (índice 1) para evitar a primeira casa de apostas
-                segunda_linha = linhas[1]
-                
-                # As odds ficam dentro de tags <a> com a classe 'oddsCell__odd'
-                odds = segunda_linha.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
-                
-                if len(odds) >= 2:
-                    if tipo == "ACIMA":
-                        # Primeiro odd da linha (Esquerda)
-                        odd_valor = odds[0].text.strip()
-                        print(f"✅ Mercado {valor} ({tipo}): Segunda linha encontrada -> Odd: {odd_valor}")
-                    else:
-                        # Segundo odd da linha (Direita)
-                        odd_valor = odds[1].text.strip()
-                        print(f"✅ Mercado {valor} ({tipo}): Segunda linha encontrada -> Odd: {odd_valor}")
-                else:
-                    print(f"⚠️ Erro: Encontrei a linha do {valor}, mas não as células de odd.")
-            else:
-                print(f"❌ Erro: Não encontrei a segunda ocorrência do mercado {valor}")
+            # Dicionários para controlar qual ocorrência estamos pegando
+            contadores = {"1.5": 0, "2.5": 0, "4.5": 0}
+
+            for linha in linhas:
+                txt = linha.text
+                odds_celulas = linha.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
+                if not odds_celulas: continue
+
+                # LÓGICA PARA 1.5 (SEGUNDA OCORRÊNCIA)
+                if "1.5" in txt:
+                    contadores["1.5"] += 1
+                    if contadores["1.5"] == 2: # <--- Pega a segunda
+                        res["GOLS_15"] = odds_celulas[0].text.strip()
+                        print(f"✅ GOLS_15 (2ª linha): {res['GOLS_15']}")
+
+                # LÓGICA PARA 2.5 (SEGUNDA OCORRÊNCIA)
+                elif "2.5" in txt:
+                    contadores["2.5"] += 1
+                    if contadores["2.5"] == 2: # <--- Pega a segunda
+                        res["GOLS_25"] = odds_celulas[0].text.strip()
+                        print(f"✅ GOLS_25 (2ª linha): {res['GOLS_25']}")
+
+                # LÓGICA PARA 4.5 (SEGUNDA OCORRÊNCIA - ABAIXO)
+                elif "4.5" in txt:
+                    contadores["4.5"] += 1
+                    if contadores["4.5"] == 2: # <--- Pega a segunda
+                        if len(odds_celulas) >= 2:
+                            res["GOLS_M45"] = odds_celulas[1].text.strip() # [1] é o Abaixo
+                            print(f"✅ GOLS_M45 (2ª linha Abaixo): {res['GOLS_M45']}")
+        except Exception as e:
+            print(f"Erro em Gols: {e}")
+
+        # --- OS OUTROS MERCADOS CONTINUAM IGUAL ---
+        # BTTS
+        try:
+            driver.get(link_odds_base.replace("/odds/", "/odds/ambos-marcam/tempo-regulamentar/"))
+            time.sleep(2)
+            linha_b = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
+            res["BTTS"] = linha_b.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")[0].text.strip()
+            print(f"✅ BTTS: {res['BTTS']}")
+        except: pass
 
     except Exception as e:
-        print(f"❌ Erro Crítico: {e}")
-    finally:
-        print("\n--- Teste Finalizado ---")
-        driver.quit()
+        print(f"❌ Erro Geral: {e}")
+    
+    return res
 
 if __name__ == "__main__":
-    # URL enviada do jogo Botafogo x Remo
-    url = "https://www.flashscore.com.br/jogo/futebol/botafogo-jXzWoWa5/remo-2i0B6Zul/odds/acima-abaixo/tempo-regulamentar/"
-    testar_raspagem_odds(url)
-          
+    driver = configurar_driver()
+    # ID Botafogo x Remo conforme sua URL
+    id_teste = "jXzWoWa5" 
+    resultado = capturar_todas_as_odds_teste(driver, id_teste)
+    print(f"\n--- RESULTADO FINAL DO TESTE ---\n{resultado}")
+    driver.quit()
+        
