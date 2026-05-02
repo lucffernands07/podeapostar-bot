@@ -1,4 +1,4 @@
-name: Execucao Diario Bot Apostas
+name: Main Bot Apostas
 
 on:
   push:
