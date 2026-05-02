@@ -1,4 +1,4 @@
-name: Teste Isolado de Links Google-Betano
+name: Teste de Links Betano
 
 on:
   workflow_dispatch:
