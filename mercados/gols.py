@@ -1,13 +1,12 @@
 """
-REGRAS DE MERCADO - GOLS (VERSÃO 2.0)
-Regra 1: Mínimo 4/5 em ambos os times (Confiança Direta).
-Regra 2 (Backup): 3/5 em ambos + Validação do último jogo individual (Soma de gols).
+REGRAS DE MERCADO - GOLS (VERSÃO FINAL)
+Regra 1: Mínimo 4/5 INDIVIDUAL em ambos os times (Aprovação Direta).
+Regra 2: Se não passar na R1, aceita 3/5 se o ÚLTIMO JOGO de ambos atingiu a meta.
 """
 
 def verificar_ultimo_jogo(gols_time, alvo):
     """
     Valida se o último jogo individual atingiu a meta do mercado.
-    Ex: Para +1.5, o último jogo precisa ter >= 2 gols.
     """
     if alvo == 1.5: return gols_time >= 2
     if alvo == 2.5: return gols_time >= 3
@@ -16,17 +15,19 @@ def verificar_ultimo_jogo(gols_time, alvo):
 
 def calcular_chance_v2(c, f, ultimo_c, ultimo_f, alvo):
     """
-    Aplica a nova regra de filtragem:
-    - Regra 1: 4/5 ou 5/5 em ambos.
-    - Regra 2: 3/5 em ambos + validação do último jogo.
+    Aplica a lógica de filtragem solicitada:
+    - Regra 1: 4/5 ou 5/5 em cada um dos times (Casa >= 4 E Fora >= 4).
+    - Regra 2: Se cair para 3/5, exige que o último jogo individual de cada um bata a meta.
     """
-    # REGRA 1: Mínimo 4/5 ambos (Independente do último jogo)
+    
+    # --- REGRA 1: 4/5 AMBOS (APROVAÇÃO DIRETA) ---
     if c >= 4 and f >= 4:
         if c == 5 and f == 5: return "100%"
         return "85%"
     
-    # REGRA 2: 3/5 em ambos + Último jogo individual batendo a meta
+    # --- REGRA 2: 3/5 AMBOS + ÚLTIMO JOGO (VALIDAÇÃO) ---
     if c >= 3 and f >= 3:
+        # Verifica se o último jogo de CADA UM bateu a meta (Ex: +1.5 gols = 2 gols no jogo)
         passou_casa = verificar_ultimo_jogo(ultimo_c, alvo)
         passou_fora = verificar_ultimo_jogo(ultimo_f, alvo)
         
@@ -37,14 +38,13 @@ def calcular_chance_v2(c, f, ultimo_c, ultimo_f, alvo):
 
 def verificar_gols(s):
     """
-    Analisa os mercados de gols com base nas estatísticas e resultados recentes.
+    Analisa os mercados de gols com base nas estatísticas brutas (Individual e H2H).
     """
-    # 1. Captura de dados (Soma de gols do ÚLTIMO JOGO de cada um)
-    # Certifique-se que o main.py envia 'ultimo_gols_casa' e 'ultimo_gols_fora'
+    # Gols dos últimos jogos individuais
     u_c = s.get("ultimo_gols_casa", 0)
     u_f = s.get("ultimo_gols_fora", 0)
 
-    # 2. Cálculos de probabilidade
+    # Probabilidades
     ch15 = calcular_chance_v2(s.get("casa_15", 0), s.get("fora_15", 0), u_c, u_f, 1.5)
     ch25 = calcular_chance_v2(s.get("casa_25", 0), s.get("fora_25", 0), u_c, u_f, 2.5)
     ch45_under = calcular_chance_v2(s.get("casa_45_under", 0), s.get("fora_45_under", 0), u_c, u_f, 4.5)
@@ -53,7 +53,7 @@ def verificar_gols(s):
 
     # --- LÓGICA DE PRIORIDADE ---
 
-    # PRIORIDADE 1: -4.5 GOLS (UNDER)
+    # 1. UNDER 4.5 (Prioridade de Segurança)
     if ch45_under and not ch15:
         resultados.append({
             "mercado": "-4.5 Gols",
@@ -62,7 +62,7 @@ def verificar_gols(s):
         })
         return resultados
 
-    # PRIORIDADE 2: +1.5 GOLS
+    # 2. OVER 1.5
     if ch15:
         resultados.append({
             "mercado": "+1.5 Gols",
@@ -70,7 +70,7 @@ def verificar_gols(s):
             "tipo": "OVER_15"
         })
     
-    # PRIORIDADE 3: +2.5 GOLS
+    # 3. OVER 2.5
     if ch25:
         resultados.append({
             "mercado": "+2.5 Gols",
