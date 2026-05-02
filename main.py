@@ -58,13 +58,12 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     
     stats = {
         "link_betano": None,
-        "casa_15": 0, "casa_25": 0, "casa_45": 0, "casa_btts": 0, 
-        "casa_ult_btts": False, "casa_derrotas": 0, "casa_vitorias": 0, "casa_empates": 0, "casa_ult_res": "",
-        "casa_ult_15": False, "casa_ult_sofreu": False,
-        "fora_15": 0, "fora_25": 0, "fora_45": 0, "fora_btts": 0, 
-        "fora_ult_btts": False, "fora_derrotas": 0, "fora_vitorias": 0, "fora_empates": 0, "fora_ult_res": "",
-        "fora_ult_15": False, "fora_ult_sofreu": False,
+        "casa_15": 0, "casa_25": 0, "casa_45_under": 0, "casa_btts": 0, 
+        "casa_vitorias_recente": 0, "ultimo_gols_casa": 0, "t1_resultado_1": "",
+        "fora_15": 0, "fora_25": 0, "fora_45_under": 0, "fora_btts": 0, 
+        "ultimo_gols_fora": 0, "t2_resultado_1": "",
         "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
+        "h2h_res_1": "", "h2h_res_2": "", # Novos campos para Vitória Casa
         "pular_gols": False 
     }
     
@@ -102,34 +101,51 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     g1, g2 = int(numeros_placar[0]), int(numeros_placar[1])
                     total = g1 + g2
 
-                    if idx < 2:
+                    if idx < 2: # --- JOGOS INDIVIDUAIS (CASA/FORA) ---
                         prefixo = "casa" if idx == 0 else "fora"
                         t_ref = t1 if idx == 0 else t2
+                        
+                        # NOVO: Salva soma de gols do último jogo para a Regra 3/5
                         if i == 0:
-                            stats[f"{prefixo}_ult_15"] = (total > 1.5)
-                            stats[f"{prefixo}_ult_sofreu"] = (g2 > 0 if idx == 0 else g1 > 0)
-                            if g1 > 0 and g2 > 0: stats[f"{prefixo}_ult_btts"] = True
+                            stats[f"ultimo_gols_{prefixo}"] = total
+                        
                         if total > 1.5: stats[f"{prefixo}_15"] += 1
                         if total > 2.5: stats[f"{prefixo}_25"] += 1
-                        if total <= 4: stats[f"{prefixo}_45"] += 1 
+                        if total <= 4: stats[f"{prefixo}_45_under"] += 1 # Ajustado nome da chave
                         if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
-                        if g1 == g2:
-                            stats[f"{prefixo}_empates"] += 1
-                            if i == 0: stats[f"{prefixo}_ult_res"] = "E"
-                        elif (t_ref.lower() in n_casa_h2h.lower() and g1 > g2) or \
-                             (t_ref.lower() in n_fora_h2h.lower() and g2 > g1):
-                            stats[f"{prefixo}_vitorias"] += 1
-                            if i == 0: stats[f"{prefixo}_ult_res"] = "V"
-                        else:
-                            stats[f"{prefixo}_derrotas"] += 1
-                            if i == 0: stats[f"{prefixo}_ult_res"] = "D"
-                    elif idx == 2:
+                        
+                        # Determina resultado V/E/D
+                        res_atual = "E"
+                        if (t_ref.lower() in n_casa_h2h.lower() and g1 > g2) or \
+                           (t_ref.lower() in n_fora_h2h.lower() and g2 > g1):
+                            res_atual = "V"
+                            stats[f"{prefixo}_vitorias_recente"] += 1
+                        elif (t_ref.lower() in n_casa_h2h.lower() and g1 < g2) or \
+                             (t_ref.lower() in n_fora_h2h.lower() and g2 < g1):
+                            res_atual = "D"
+                        
+                        # Salva o último resultado para o filtro de Vitória Casa
+                        if i == 0:
+                            stats[f"t{idx+1}_resultado_1"] = res_atual
+
+                    elif idx == 2: # --- CONFRONTO DIRETO (H2H) ---
                         stats["h2h_jogos"] += 1
-                        if g1 == g2: stats["h2h_empates"] += 1
-                        elif (t1.lower() in n_casa_h2h.lower() and g1 > g2) or \
-                             (t1.lower() in n_fora_h2h.lower() and g2 > g1):
+                        res_h2h = "E"
+                        
+                        if (t1.lower() in n_casa_h2h.lower() and g1 > g2) or \
+                           (t1.lower() in n_fora_h2h.lower() and g2 > g1):
+                            res_h2h = "V"
                             stats["h2h_vitorias_t1"] += 1
-                        else: stats["h2h_vitorias_t2"] += 1
+                        elif (t1.lower() in n_casa_h2h.lower() and g1 < g2) or \
+                             (t1.lower() in n_fora_h2h.lower() and g2 < g1):
+                            res_h2h = "D"
+                            stats["h2h_vitorias_t2"] += 1 # Mantendo contagem original
+                        
+                        # NOVO: Salva os dois últimos resultados entre eles
+                        if i == 0: stats["h2h_res_1"] = res_h2h
+                        if i == 1: stats["h2h_res_2"] = res_h2h
+                        if g1 == g2: stats["h2h_empates"] += 1 # Mantendo contagem original
+
                 except: continue
 
         # --- CAPTURA DO LINK BETANO ---
@@ -142,6 +158,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
+
 
 def main():
     driver = configurar_driver()
