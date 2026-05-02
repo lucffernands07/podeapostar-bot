@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 def capturar_todas_as_odds(driver, id_jogo):
+    # 1. Adicionamos a chave GOLS_M45 aqui no dicionário inicial
     res = {
         "GOLS_15": "N/A", "GOLS_25": "N/A", "GOLS_M45": "N/A", 
         "BTTS": "N/A", "1X": "N/A", "X2": "N/A",
@@ -27,39 +28,42 @@ def capturar_todas_as_odds(driver, id_jogo):
             return res
 
         # --- 1. VITÓRIA SECA (1X2) ---
-        # Conforme seu print, é a aba inicial '1X2'
         url_1x2 = link_odds_base.replace("/odds/", "/odds/1x2-odds/tempo-regulamentar/")
         driver.get(url_1x2)
         try:
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
             time.sleep(2)
-            # Pega a primeira linha após o título 'CASA DE APOSTAS'
             linha_1x2 = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
             odds_1x2 = linha_1x2.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
             if odds_1x2:
-                # O primeiro decimal da coluna '1'
-                res["VITORIA_CASA"] = odds_1x2[0].text.strip()
+                res["VITORIA_CASA"] = odds_1x2[0].text.replace('↑', '').replace('↓', '').strip()
         except: pass
 
-        # --- 2. MERCADO DE GOLS (ACIMA/ABAIXO) ---
+        # --- 2. MERCADO DE GOLS (ACIMA/ABAIXO) COM O NOVO FILTRO ---
         url_gols = link_odds_base.replace("/odds/", "/odds/acima-abaixo/tempo-regulamentar/")
         driver.get(url_gols)
         try:
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
+            WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
             time.sleep(2)
-            linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-            for linha in linhas:
-                txt = linha.text
-                odds_celulas = linha.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
-                if not odds_celulas: continue
+            
+            # Mapeamento para o loop
+            mercados_alvo = {
+                "1.5": {"chave": "GOLS_15", "col": 0}, # Acima
+                "2.5": {"chave": "GOLS_25", "col": 0}, # Acima
+                "4.5": {"chave": "GOLS_M45", "col": 1}  # Abaixo (O que faltava!)
+            }
 
-                if "1.5" in txt and res["GOLS_15"] == "N/A":
-                    res["GOLS_15"] = odds_celulas[0].text.strip()
-                elif "2.5" in txt and res["GOLS_25"] == "N/A":
-                    res["GOLS_25"] = odds_celulas[0].text.strip()
-                elif "4.5" in txt and res["GOLS_M45"] == "N/A":
-                    if len(odds_celulas) >= 2:
-                        res["GOLS_M45"] = odds_celulas[1].text.strip()
+            for valor, config in mercados_alvo.items():
+                # XPath usando o data-testid validado no teste
+                xpath = f"//div[contains(@class, 'ui-table__row')][.//span[@data-testid='wcl-oddsValue' and text()='{valor}']]"
+                linhas = driver.find_elements(By.XPATH, xpath)
+
+                if len(linhas) >= 2:
+                    segunda_linha = linhas[1]
+                    odds_tags = segunda_linha.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
+                    if len(odds_tags) >= 2:
+                        odd_raw = odds_tags[config["col"]].text
+                        res[config["chave"]] = odd_raw.replace('↑', '').replace('↓', '').strip()
         except: pass
 
         # --- 3. AMBOS MARCAM (BTTS) ---
@@ -68,7 +72,7 @@ def capturar_todas_as_odds(driver, id_jogo):
             time.sleep(2)
             linha_b = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
             odds_b = linha_b.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
-            if odds_b: res["BTTS"] = odds_b[0].text.strip()
+            if odds_b: res["BTTS"] = odds_b[0].text.replace('↑', '').replace('↓', '').strip()
         except: pass
 
         # --- 4. DUPLA CHANCE ---
@@ -78,8 +82,8 @@ def capturar_todas_as_odds(driver, id_jogo):
             linha_d = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
             odds_d = linha_d.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
             if len(odds_d) >= 3:
-                res["1X"] = odds_d[0].text.strip()
-                res["X2"] = odds_d[2].text.strip()
+                res["1X"] = odds_d[0].text.replace('↑', '').replace('↓', '').strip()
+                res["X2"] = odds_d[2].text.replace('↑', '').replace('↓', '').strip()
         except: pass
 
     except Exception as e:
@@ -89,4 +93,4 @@ def capturar_todas_as_odds(driver, id_jogo):
         driver.switch_to.window(driver.window_handles[0])
     
     return res
-            
+    
