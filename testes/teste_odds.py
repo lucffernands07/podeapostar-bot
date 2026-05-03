@@ -1,81 +1,50 @@
+import os
+import sys
 import time
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
-def capturar_todas_as_odds(driver, id_jogo):
-    res = {
-        "GOLS_15": "N/A", "GOLS_25": "N/A", "GOLS_M45": "N/A", 
-        "BTTS": "N/A", "1X": "N/A", "X2": "N/A",
-        "VITORIA_CASA": "N/A"
-    }
+# Ajuste para importar o odds.py que está na raiz
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-    driver.execute_script(f"window.open('https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo', '_blank');")
-    driver.switch_to.window(driver.window_handles[-1])
+from main import configurar_driver
+import odds
 
+def testar_jogo_novorizontino():
+    # ID real do jogo Novorizontino x Avaí
+    id_jogo = "8pNsVvYg" 
+    
+    print("🚀 Iniciando Teste de Odds - Segunda Linha (Betano)")
+    print(f"🏟️ Jogo: Novorizontino x Avaí | ID: {id_jogo}")
+    print("-" * 50)
+    
+    driver = configurar_driver()
+    
     try:
-        wait = WebDriverWait(driver, 12)
-        try:
-            elemento_aba = wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/odds/')]")))
-            link_odds_base = elemento_aba.get_attribute('href')
-        except:
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-            return res
-
-        # --- 1. MERCADOS DE LINHA ÚNICA (Segunda Linha da Tabela) ---
-        # Para esses mercados, a tabela só tem um tipo de aposta, então a 2ª linha é a Betano.
-        config_simples = [
-            {"chave": "VITORIA_CASA", "path": "/odds/1x2-odds/tempo-regulamentar/", "col": 0},
-            {"chave": "BTTS", "path": "/odds/ambos-marcam/tempo-regulamentar/", "col": 0},
-            {"chave": "1X", "path": "/odds/double-chance/tempo-regulamentar/", "col": 0},
-            {"chave": "X2", "path": "/odds/double-chance/tempo-regulamentar/", "col": 2}
-        ]
-
-        for item in config_simples:
-            try:
-                driver.get(link_odds_base.replace("/odds/", item["path"]))
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
-                time.sleep(1.5)
-                linhas = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
-                if len(linhas) >= 2:
-                    odds_tags = linhas[1].find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
-                    if len(odds_tags) > item["col"]:
-                        res[item["chave"]] = odds_tags[item["col"]].text.replace('↑', '').replace('↓', '').strip()
-            except: continue
-
-        # --- 2. MERCADOS DE GOLS (Sua Lógica Perfeita do Teste) ---
-        driver.get(link_odds_base.replace("/odds/", "/odds/acima-abaixo/tempo-regulamentar/"))
-        try:
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
-            time.sleep(2)
+        # Chama a função que acabamos de consolidar
+        start_time = time.time()
+        resultados = odds.capturar_todas_as_odds(driver, id_jogo)
+        end_time = time.time()
+        
+        print(f"\n📊 RESULTADOS CAPTURADOS (Tempo: {int(end_time - start_time)}s):")
+        print("-" * 50)
+        
+        for mercado, valor in resultados.items():
+            status = "✅ OK" if valor != "N/A" else "❌ FALHOU"
+            print(f"{status} | {mercado.ljust(15)} : {valor}")
             
-            alvos_gols = {
-                "GOLS_15": {"valor": "1.5", "col": 0},
-                "GOLS_25": {"valor": "2.5", "col": 0},
-                "GOLS_M45": {"valor": "4.5", "col": 1}
-            }
-
-            for chave, config in alvos_gols.items():
-                valor = config["valor"]
-                col_idx = config["col"]
-                
-                # XPath Cirúrgico que você validou
-                xpath_linha = f"//div[contains(@class, 'ui-table__row')][.//span[@data-testid='wcl-oddsValue' and text()='{valor}']]"
-                linhas_gols = driver.find_elements(By.XPATH, xpath_linha)
-
-                if len(linhas_gols) >= 2:
-                    segunda_linha_mercado = linhas_gols[1]
-                    odds_gols = segunda_linha_mercado.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
-                    if len(odds_gols) > col_idx:
-                        res[chave] = odds_gols[col_idx].text.replace('↑', '').replace('↓', '').strip()
-        except: pass
+        print("-" * 50)
+        
+        # Validação extra para o seu main.py
+        if resultados["GOLS_15"] != "N/A":
+            print("💎 Sucesso: Mercado de Gols agora está legível!")
+        else:
+            print("⚠️ Alerta: Gols ainda retornaram N/A. Verifique se as odds abriram no site.")
 
     except Exception as e:
-        print(f"    ❌ Erro no odds.py: {e}")
+        print(f"❌ Erro Crítico no Teste: {e}")
     finally:
-        driver.close()
-        driver.switch_to.window(driver.window_handles[0])
-    
-    return res
+        driver.quit()
+        print("\n🏁 Teste finalizado.")
+
+if __name__ == "__main__":
+    testar_jogo_novorizontino()
     
