@@ -159,7 +159,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.switch_to.window(driver.window_handles[0])
     return stats
 
-
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
@@ -197,65 +196,81 @@ def main():
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
-                        res_gols = gols.verificar_gols(s)
-                        res_btts = ambos_marcam.verificar_btts(s)
-                        res_cd = chance_dupla.verificar_chance_dupla(s)
-                        res_vc = vitoria_casa.verificar_vitoria_casa(s)
+                        # --- PROCESSAMENTO PADRONIZADO DE MERCADOS ---
+                        mercados_para_processar = []
 
-                        sugestoes_stat = (res_gols + ([f"Ambas Marcam: Sim ({res_btts})"] if res_btts else []) + res_cd + res_vc)[:5]
-                        
-                        if sugestoes_stat:
+                        # 1. Gols (Retorna lista de dicionários)
+                        res_gols = gols.verificar_gols(s)
+                        for rg in res_gols:
+                            mercados_para_processar.append({"texto": rg['mercado'], "chave": rg['tipo']})
+
+                        # 2. Ambas Marcam (Retorna string ou None)
+                        res_btts = ambos_marcam.verificar_btts(s)
+                        if res_btts:
+                            mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
+
+                        # 3. Chance Dupla (Retorna lista de strings)
+                        res_cd = chance_dupla.verificar_chance_dupla(s)
+                        for rc in res_cd:
+                            tipo_cd = "1X" if "1X" in rc else "X2"
+                            mercados_para_processar.append({"texto": rc, "chave": tipo_cd})
+
+                        # 4. Vitória Casa (Retorna lista de strings)
+                        res_vc = vitoria_casa.verificar_vitoria_casa(s)
+                        for rv in res_vc:
+                            mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
+
+                        # --- VALIDAÇÃO DE ODDS E FILTRAGEM ---
+                        if mercados_para_processar:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-                            for m in sugestoes_stat:
-                                valor_odd_str = "N/A"
-                                if "+1.5" in m: valor_odd_str = v_odds.get("GOLS_15", "N/A")
-                                elif "+2.5" in m: valor_odd_str = v_odds.get("GOLS_25", "N/A")
-                                elif "-4.5" in m: valor_odd_str = v_odds.get("GOLS_M45", "N/A")
-                                elif "Ambas" in m: valor_odd_str = v_odds.get("BTTS", "N/A")
-                                elif "1X" in m: valor_odd_str = v_odds.get("1X", "N/A")
-                                elif "X2" in m or "2X" in m: valor_odd_str = v_odds.get("X2", "N/A")
-                                elif "Vitória Casa" in m: valor_odd_str = v_odds.get("VITORIA_CASA", "N/A")
+                            
+                            for item in mercados_para_processar[:5]: # Limite original de 5 mercados por jogo
+                                m_texto = item["texto"]
+                                m_chave = item["chave"]
+                                
+                                valor_odd_str = v_odds.get(m_chave, "N/A")
 
                                 try:
                                     odd_float = float(valor_odd_str.replace(',', '.'))
-                                    if "-4.5" in m and odd_float >= 4.0:
+                                    
+                                    # Regra de corte para Under 4.5
+                                    if "M45" in m_chave and odd_float >= 4.0:
                                         continue 
+
                                     if odd_float >= 1.20:
                                         lista_para_filtros.append({
                                             "horario": h_br, "time_casa": t1, "time_fora": t2,
-                                            "mercado": m, "odd": valor_odd_str, "liga": nome_comp,
+                                            "mercado": m_texto, "odd": valor_odd_str, "liga": nome_comp,
                                             "link_betano": s.get("link_betano")
                                         })
                                         total_mercados += 1
-                                except: pass
+                                except: continue
                 except: continue
 
         # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
-            # 1. Montagem do LISTÃO GERAL (Texto simples para conferência)
+            # 1. Montagem do LISTÃO GERAL
             itens_listao = []
             for j in lista_para_filtros:
                 itens_listao.append(f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}")
             
             texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
             
-            # 2. Montagem dos BINGOS (Estratégicos: 3, 5 e 7)
+            # 2. Montagem dos BINGOS
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
             cache_links = {f"{j['time_casa']}x{j['time_fora']}": j.get("link_betano") for j in lista_para_filtros if j.get("link_betano")}
             texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
 
             # --- IDENTIFICAÇÃO DE DESTINOS ---
-            meu_chat_id = os.getenv('CHAT_ID')     # Seu pessoal
-            canal_id = os.getenv('CHANNEL_ID')     # O Canal
+            meu_chat_id = os.getenv('CHAT_ID')
+            canal_id = os.getenv('CHANNEL_ID')
 
-            # ENVIO 1: Listão Geral APENAS para você
             if meu_chat_id:
                 enviar_telegram(texto_listao_final, meu_chat_id)
                 print("📨 Listão enviado para o pessoal.")
             
-            # ENVIO 2: Bingos APENAS para o Canal
             if texto_bingos_final and canal_id:
                 msg_bingo_formatada = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_bingos_final
                 enviar_telegram(msg_bingo_formatada, canal_id)
@@ -264,7 +279,6 @@ def main():
             print("✅ Processamento e envios concluídos.")
         else:
             print("⚠️ Nenhuma partida encontrada nos filtros.")
-
 
     except Exception as e:
         print(f"❌ Erro Crítico: {e}")
