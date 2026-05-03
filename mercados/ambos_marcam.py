@@ -1,32 +1,46 @@
-def verificar_btts(s):
+def verificar_ambos_marcam(s):
     """
-    Regra: Mínimo 4 de 5 sucessos para ambos os times.
-    Ajuste: Adicionada a trava obrigatória de BTTS nos dois últimos jogos
-    para garantir a tendência atual de gols.
+    Nova lógica Ambos Marcam (BTTS) - Sistema de Pontuação:
+    Mínimo 2 passos para validar.
     """
-    
-    # 1. Pegamos a frequência de BTTS nos últimos 5 jogos
-    casa_frequencia = s.get("casa_btts", 0)
-    fora_frequencia = s.get("fora_btts", 0)
+    passos_concluidos = 0
 
-    # 2. Verificamos se o BTTS ocorreu nos 2 últimos jogos de cada (Trava de Forma)
-    # casa_ult_btts e fora_ult_btts geralmente guardam o resultado do ÚLTIMO jogo.
-    # Para verificar os DOIS últimos, seu main.py precisaria coletar essa info.
-    # Com base no seu main.py atual, vamos usar a trava de tendência:
-    
-    casa_em_forma = s.get("casa_ult_btts", False)
-    fora_em_forma = s.get("fora_ult_btts", False)
+    # PASSO 1: Último jogo individual da CASA teve Ambas Marcam?
+    # t1_gols_m_1 (marcou) e t1_gols_s_1 (sofreu)
+    if s.get("t1_gols_m_1", 0) > 0 and s.get("t1_gols_s_1", 0) > 0:
+        passos_concluidos += 1
 
-    # 3. Verifica a frequência mínima (4/5) E a tendência recente
-    if casa_frequencia >= 4 and fora_frequencia >= 4:
+    # PASSO 2: Último jogo individual de FORA teve Ambas Marcam?
+    # t2_gols_m_1 (marcou) e t2_gols_s_1 (sofreu)
+    if s.get("t2_gols_m_1", 0) > 0 and s.get("t2_gols_s_1", 0) > 0:
+        passos_concluidos += 1
+
+    # PASSO 3: Pelo menos um Ambas Marcam nos últimos 2 jogos de Confronto Direto (H2H)
+    btts_h2h = False
+    for i in ["1", "2"]:
+        placar = s.get(f"h2h_placar_{i}", "0:0")
+        if ":" in placar:
+            try:
+                gols = placar.split(":")
+                # Se os dois times marcaram no confronto histórico i
+                if int(gols[0]) > 0 and int(gols[1]) > 0:
+                    btts_h2h = True
+                    break
+            except:
+                continue
+    
+    if btts_h2h:
+        passos_concluidos += 1
+
+    # --- VALIDAÇÃO DO MÍNIMO DE 2 PASSOS ---
+    if passos_concluidos == 3:
+        return [f"Ambas Marcam (100%)"]
+    
+    elif passos_concluidos == 2:
+        # Aqui ele aceita QUALQUER combinação de 2 passos (1+2, 1+3 ou 2+3)
+        return [f"Ambas Marcam (80%)"]
+    
+    else:
+        # Se só bateu 1 passo ou nenhum, descarta (retorna lista vazia)
+        return []
         
-        # AQUI A TRAVA: Só passa se os últimos jogos de ambos foram BTTS
-        if casa_em_forma and fora_em_forma:
-            
-            # Retorna a porcentagem baseada na média
-            if casa_frequencia == 5 and fora_frequencia == 5:
-                return "100%"
-            else:
-                return "85%"
-            
-    return None
