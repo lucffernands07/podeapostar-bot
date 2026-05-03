@@ -77,7 +77,7 @@ def testar_jogo_especifico():
         print("\n--- RESUMO DE STATS (Dicionário enviado ao gols.py) ---")
         print(stats)
 
-        # Simula a chamada do módulo de gols
+                # Simula a chamada do módulo de gols
         print("\n--- RESULTADO DO MÓDULO GOLS.PY ---")
         res_gols = gols.verificar_gols(stats)
         
@@ -85,7 +85,9 @@ def testar_jogo_especifico():
             print("❌ Módulo GOLS.PY não aprovou este jogo.")
         else:
             for r in res_gols:
-                print(f"✅ APROVADO: {r['mercado']} | Confiança: {r['confianca']}")
+                # Mudança aqui: acessamos apenas o 'mercado', que já tem a confiança
+                print(f"✅ APROVADO: {r['mercado']}")
+
 
         # Teste de Odds (Simulado com o ID do jogo da URL)
         id_jogo = "8pNsVvYg" # Extraído manualmente para o teste
