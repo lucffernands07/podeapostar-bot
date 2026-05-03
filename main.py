@@ -50,9 +50,8 @@ def configurar_driver():
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
 
-    
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
-    # Navegação inicial
+    # Navegação inicial - Abre a aba do jogo
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
@@ -63,12 +62,13 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "fora_15": 0, "fora_25": 0, "fora_45_under": 0, "fora_btts": 0, 
         "ultimo_gols_fora": 0, "t2_resultado_1": "",
         "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
-        "h2h_res_1": "", "h2h_res_2": "", # Novos campos para Vitória Casa
+        "h2h_res_1": "", "h2h_res_2": "", 
         "pular_gols": False 
     }
     
     try:
         wait = WebDriverWait(driver, 15)
+        # 1. Vai para a aba H2H onde estão os seus links
         h2h_tab = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
         time.sleep(2)
@@ -78,6 +78,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
+        # --- TODA A SUA LÓGICA DE ESTATÍSTICAS PERMANECE IGUAL ---
         for idx, secao in enumerate(secoes[:3]): 
             if idx == 2: 
                 try:
@@ -101,20 +102,15 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     g1, g2 = int(numeros_placar[0]), int(numeros_placar[1])
                     total = g1 + g2
 
-                    if idx < 2: # --- JOGOS INDIVIDUAIS (CASA/FORA) ---
+                    if idx < 2: 
                         prefixo = "casa" if idx == 0 else "fora"
                         t_ref = t1 if idx == 0 else t2
-                        
-                        # NOVO: Salva soma de gols do último jogo para a Regra 3/5
-                        if i == 0:
-                            stats[f"ultimo_gols_{prefixo}"] = total
-                        
+                        if i == 0: stats[f"ultimo_gols_{prefixo}"] = total
                         if total > 1.5: stats[f"{prefixo}_15"] += 1
                         if total > 2.5: stats[f"{prefixo}_25"] += 1
-                        if total <= 4: stats[f"{prefixo}_45_under"] += 1 # Ajustado nome da chave
+                        if total <= 4: stats[f"{prefixo}_45_under"] += 1 
                         if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
                         
-                        # Determina resultado V/E/D
                         res_atual = "E"
                         if (t_ref.lower() in n_casa_h2h.lower() and g1 > g2) or \
                            (t_ref.lower() in n_fora_h2h.lower() and g2 > g1):
@@ -124,32 +120,27 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                              (t_ref.lower() in n_fora_h2h.lower() and g2 < g1):
                             res_atual = "D"
                         
-                        # Salva o último resultado para o filtro de Vitória Casa
-                        if i == 0:
-                            stats[f"t{idx+1}_resultado_1"] = res_atual
+                        if i == 0: stats[f"t{idx+1}_resultado_1"] = res_atual
 
-                    elif idx == 2: # --- CONFRONTO DIRETO (H2H) ---
+                    elif idx == 2: 
                         stats["h2h_jogos"] += 1
                         res_h2h = "E"
-                        
                         if (t1.lower() in n_casa_h2h.lower() and g1 > g2) or \
                            (t1.lower() in n_fora_h2h.lower() and g2 > g1):
-                            res_h2h = "V"
-                            stats["h2h_vitorias_t1"] += 1
+                            res_h2h = "V"; stats["h2h_vitorias_t1"] += 1
                         elif (t1.lower() in n_casa_h2h.lower() and g1 < g2) or \
                              (t1.lower() in n_fora_h2h.lower() and g2 < g1):
-                            res_h2h = "D"
-                            stats["h2h_vitorias_t2"] += 1 # Mantendo contagem original
+                            res_h2h = "D"; stats["h2h_vitorias_t2"] += 1
                         
-                        # NOVO: Salva os dois últimos resultados entre eles
                         if i == 0: stats["h2h_res_1"] = res_h2h
                         if i == 1: stats["h2h_res_2"] = res_h2h
-                        if g1 == g2: stats["h2h_empates"] += 1 # Mantendo contagem original
+                        if g1 == g2: stats["h2h_empates"] += 1
 
                 except: continue
 
-        # --- CAPTURA DO LINK BETANO ---
-        print(f"      🔗 Buscando link Betano para {t1} x {t2}...")
+        # --- AQUI É ONDE O LINK É CAPTURADO ---
+        # Exatamente na aba H2H, antes de fechar.
+        print(f"      🔗 Capturando link Betano para {t1} x {t2}...")
         stats["link_betano"] = links.extrair_url_betano(driver)
 
     except Exception as e:
