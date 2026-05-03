@@ -1,4 +1,4 @@
-name: Teste gols
+name: Teste de gols
 
 on:
   workflow_dispatch: # Permite que você clique em "Run Workflow" no GitHub
