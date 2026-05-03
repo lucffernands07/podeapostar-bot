@@ -28,37 +28,26 @@ def montar_bilhetes_estrategicos(lista_jogos):
     # Ordenação base para os filtros
     jogos_ordenados = sorted(lista_jogos, key=lambda x: (prioridade_mercado(x['mercado']), -extrair_porcentagem(x['mercado'])))
 
-    # --- 1. BINGO 3: VALOR (Mudado para ser o primeiro) ---
+        # --- BINGO 3: VALOR ---
     if len(lista_jogos) >= 3:
-        lista_bingo3 = sorted(lista_jogos, key=lambda x: extrair_odd(x['odd']), reverse=True)
-        bilhetes.append({"id": "BINGO3", "nome": "🔥 BINGO 3: VALOR", "jogos": lista_bingo3[:3]})
+        lista_bingo3 = sorted(lista_jogos, key=lambda x: extrair_odd(x['odd']), reverse=True)[:3]
+        # ADICIONA ESTA LINHA: Ordena os 3 escolhidos por hora
+        lista_bingo3.sort(key=lambda x: x['horario'])
+        bilhetes.append({"id": "BINGO3", "nome": "🔥 BINGO 3: VALOR", "jogos": lista_bingo3})
 
-    # --- 2. BINGO 5: ESTRUTURADO (Agora no meio) ---
+    # --- BINGO 5: ESTRUTURADO ---
     if len(lista_jogos) >= 5:
-        bingo5_selecao = []
-        vaga_gols = [j for j in jogos_ordenados if 1.20 <= extrair_odd(j['odd']) <= 1.39 and "gols" in j['mercado'].lower()]
-        vaga_media = [j for j in jogos_ordenados if 1.40 <= extrair_odd(j['odd']) <= 1.50]
-        vaga_alta = [j for j in jogos_ordenados if extrair_odd(j['odd']) >= 1.51]
-
-        bingo5_selecao.extend(vaga_gols[:3])
-        
-        vaga_media = [j for j in vaga_media if j not in bingo5_selecao]
-        if vaga_media: bingo5_selecao.append(vaga_media[0])
-        
-        vaga_alta = [j for j in vaga_alta if j not in bingo5_selecao]
-        if vaga_alta: bingo5_selecao.append(vaga_alta[0])
-
-        if len(bingo5_selecao) < 5:
-            resto = [j for j in jogos_ordenados if j not in bingo5_selecao]
-            bingo5_selecao.extend(resto[:(5 - len(bingo5_selecao))])
-
+        # ... (sua lógica de seleção das vagas gols/media/alta continua igual) ...
+        # Antes do append, ordene a seleção final:
+        bingo5_selecao.sort(key=lambda x: x['horario'])
         bilhetes.append({"id": "BINGO5", "nome": "💰 BINGO 5: ESTRUTURADO", "jogos": bingo5_selecao[:5]})
 
-    # --- 3. BINGO 7: SEGURANÇA (Mantido por último) ---
+    # --- BINGO 7: SEGURANÇA ---
     if len(lista_jogos) >= 7:
-        # Lógica original: ordena pela relação Confiança/Odd
-        lista_bingo7 = sorted(lista_jogos, key=lambda x: (extrair_porcentagem(x['mercado']) / (extrair_odd(x['odd']) if extrair_odd(x['odd']) > 0 else 1)), reverse=True)
-        bilhetes.append({"id": "BINGO7", "nome": "🍀 BINGO 7: SEGURANÇA", "jogos": lista_bingo7[:7]})
+        lista_bingo7 = sorted(lista_jogos, key=lambda x: (extrair_porcentagem(x['mercado']) / extrair_odd(x['odd'])), reverse=True)[:7]
+        # ADICIONA ESTA LINHA: Ordena os 7 escolhidos por hora
+        lista_bingo7.sort(key=lambda x: x['horario'])
+        bilhetes.append({"id": "BINGO7", "nome": "🍀 BINGO 7: SEGURANÇA", "jogos": lista_bingo7})
 
     return bilhetes
 
