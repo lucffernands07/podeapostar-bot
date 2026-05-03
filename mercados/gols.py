@@ -1,82 +1,48 @@
 """
-REGRAS DE MERCADO - GOLS (TOTALMENTE SINCRONIZADO COM MAIN.PY)
-Regra 1: Mínimo 4/5 INDIVIDUAL em ambos os times (Aprovação Direta).
-Regra 2: Se cair para 3/5, exige que o ÚLTIMO JOGO de ambos tenha atingido a meta.
+REGRAS DE MERCADO - GOLS
+1. Prioridade Máxima: -4.5 Gols se o jogo for estatisticamente "Under" (Sem tendência de Over).
+2. Over 1.5/2.5: Ativado apenas se a recorrência combinada for de 4/5 (70%) ou 5/5 (85%-100%).
+3. Filtro de Segurança: Evita sugerir Over e Under no mesmo jogo para manter a coerência do bilhete.
+4. Independência: Não utiliza travas manuais do último jogo, focando na média estatística dos últimos 5.
 """
 
-def verificar_ultimo_jogo(gols_time, alvo):
+def calcular_chance(c, f):
     """
-    Valida se o último jogo individual atingiu a meta numérica do mercado.
+    Calcula a porcentagem de confiança baseada na recorrência 
+    dos últimos 5 jogos da CASA (c) e do FORA (f).
     """
-    try:
-        if alvo == 1.5: return gols_time >= 2
-        if alvo == 2.5: return gols_time >= 3
-        if alvo == 4.5: return gols_time <= 4
-    except:
-        return False
-    return False
-
-def calcular_chance_v2(c, f, ultimo_c, ultimo_f, alvo):
-    """
-    Aplica a lógica de filtragem usando as chaves do main.py:
-    - Regra 1: 4/5 ou 5/5 em cada um dos times (Aprovação Direta).
-    - Regra 2: 3/5 exige validação do valor numérico do último jogo.
-    """
-    
-    # --- REGRA 1: 4/5 AMBOS (APROVAÇÃO DIRETA) ---
-    # Ex: Flamengo 5/5 e Vasco 4/5 -> Entra aqui com 85%
-    if c >= 4 and f >= 4:
-        if c == 5 and f == 5: return "100%"
-        return "85%"
-    
-    # --- REGRA 2: 3/5 AMBOS + ÚLTIMO JOGO (VALIDAÇÃO) ---
-    if c >= 3 and f >= 3:
-        passou_casa = verificar_ultimo_jogo(ultimo_c, alvo)
-        passou_fora = verificar_ultimo_jogo(ultimo_f, alvo)
-        
-        if passou_casa and passou_fora:
-            return "70%"
-            
+    if c == 5 and f == 5: return "100%"
+    if (c == 5 and f == 4) or (c == 4 and f == 5): return "85%"
+    if c == 4 and f == 4: return "70%"
     return None
 
 def verificar_gols(s):
     """
-    Analisa os mercados usando as chaves EXATAS do stats do main.py.
+    Analisa os mercados de gols com base nas estatísticas brutas fornecidas pelo main.py.
     """
-    # Gols numéricos extraídos na linha 106 do seu main.py
-    u_c = s.get("ultimo_gols_casa", 0)
-    u_f = s.get("ultimo_gols_fora", 0)
-
-    # Probabilidades usando chaves exatas: casa_15, casa_25, casa_45_under
-    ch15 = calcular_chance_v2(s.get("casa_15", 0), s.get("fora_15", 0), u_c, u_f, 1.5)
-    ch25 = calcular_chance_v2(s.get("casa_25", 0), s.get("fora_25", 0), u_c, u_f, 2.5)
-    ch45_under = calcular_chance_v2(s.get("casa_45_under", 0), s.get("fora_45_under", 0), u_c, u_f, 4.5)
+    # 1. Cálculos de probabilidade (Mínimo 4/5 para validar)
+    ch15 = calcular_chance(s["casa_15"], s["fora_15"])
+    ch25 = calcular_chance(s["casa_25"], s["fora_25"])
+    ch45 = calcular_chance(s.get("casa_45", 0), s.get("fora_45", 0))
     
     resultados = []
 
-    # --- LÓGICA DE PRIORIDADE E FORMATAÇÃO ---
+    # --- LÓGICA DE PRIORIDADE E EXCLUSÃO ---
 
-    # 1. OVER 1.5 (Identificado no main.py por "+1.5")
+    # 1ª PRIORIDADE: SEGURANÇA (-4.5 Gols)
+    # Se o jogo for muito seguro para Under e NÃO atingir o critério de Over
+    if ch45 and not ch15 and not ch25:
+        resultados.append(f"-4.5 Gols ({ch45})")
+        # Retorna imediatamente para o -4.5 ser a única sugestão de gols deste jogo
+        return resultados
+
+    # 2ª PRIORIDADE: TENDÊNCIA DE OVER (+1.5 Gols)
     if ch15:
-        resultados.append({
-            "mercado": f"+1.5 Gols ({ch15})",
-            "tipo": "OVER_15"
-        })
+        resultados.append(f"+1.5 Gols ({ch15})")
     
-    # 2. OVER 2.5 (Identificado no main.py por "+2.5")
+    # 3ª PRIORIDADE: TENDÊNCIA DE OVER ALTO (+2.5 Gols)
     if ch25:
-        resultados.append({
-            "mercado": f"+2.5 Gols ({ch25})",
-            "tipo": "OVER_25"
-        })
-
-    # 3. UNDER 4.5 (Identificado no main.py por "-4.5")
-    # Só entra se não houver tendência forte de muitos gols (opcional)
-    if ch45_under and not ch25:
-        resultados.append({
-            "mercado": f"-4.5 Gols ({ch45_under})",
-            "tipo": "UNDER"
-        })
+        resultados.append(f"+2.5 Gols ({ch25})")
 
     return resultados
-                          
+
