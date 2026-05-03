@@ -22,65 +22,71 @@ def executar_fluxo_final(url_h2h):
     options.add_argument("--disable-popup-blocking")
     
     driver = uc.Chrome(options=options, version_main=get_chrome_version())
+    url_final_encontrada = None
     
     try:
-        print(f"🚀 [PASSO 1] Acessando H2H: {url_h2h}")
+        print(f"\n🚀 [PASSO 1] Acessando H2H: {url_h2h}")
         driver.get(url_h2h)
-        wait = WebDriverWait(driver, 30)
+        wait = WebDriverWait(driver, 20)
 
         print("🔍 [PASSO 2] Aguardando Odds carregarem...")
-        wait.until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'wclOddsRow')]")))
-        time.sleep(5) 
+        wait.until(EC.presence_of_all_elements_located((By.XPATH, "//button[@data-testid='wcl-oddsCell']")))
+        time.sleep(3) 
 
-        print("🎯 [PASSO 3] Localizando o botão da Odd Betano...")
         botoes_odds = driver.find_elements(By.XPATH, "//button[@data-testid='wcl-oddsCell']")
-        
-        if len(botoes_odds) >= 4:
-            botao_alvo = botoes_odds[3] 
-            print(f"📊 [LOG] Valor da Odd no botão: {botao_alvo.text.splitlines()[0]}")
-            
-            print("🖱️ Disparando clique forçado no botão...")
-            driver.execute_script("arguments[0].click();", botao_alvo)
-        else:
-            print("❌ Botões de odd não encontrados.")
-            return
+        print(f"🎯 [PASSO 3] Encontrados {len(botoes_odds)} botões. Iniciando cascata de testes (Índices 3 a 6)...")
 
-        print("⏳ [PASSO 4] Aguardando abertura da aba da Betano...")
-        nova_aba = False
-        for _ in range(15):
-            if len(driver.window_handles) > 1:
-                nova_aba = True
+        # Tenta os índices 3, 4, 5 e 6 em sequência
+        for indice in range(3, 7):
+            if indice >= len(botoes_odds):
                 break
-            time.sleep(1)
-
-        if nova_aba:
-            driver.switch_to.window(driver.window_handles[-1])
-            
-            url_suja = ""
-            # Monitora até a URL conter o padrão de jogo da Betano
-            for i in range(25):
-                url_atual = driver.current_url
-                if "match-odds" in url_atual:
-                    url_suja = url_atual
-                    print("✨ URL do Jogo detectada!")
-                    break
-                time.sleep(1)
-            
-            # --- LIMPEZA DA URL ---
-            # Remove tudo o que vem depois do '?' ou '/' final se for lixo
-            if url_suja:
-                # Divide no '?' e pega a primeira parte (até o ID)
-                url_limpa = url_suja.split('?')[0]
-                # Garante que termina com uma barra
-                if not url_limpa.endswith('/'):
-                    url_limpa += '/'
                 
-                print(f"\n✅ [PASSO 5] SUCESSO! URL FINAL LIMPA:")
-                print(f"🔗 {url_limpa}")
-            else:
-                print("❌ Falha ao capturar URL de jogo válida.")
+            print(f"\n--- 🔄 Tentando Índice [{indice}] ---")
+            botao_alvo = botoes_odds[indice]
+            aba_original = driver.current_window_handle
+            
+            # Clique
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", botao_alvo)
+            time.sleep(0.5)
+            driver.execute_script("arguments[0].click();", botao_alvo)
+
+            # Espera aba abrir (timeout curto de 5s para ser rápido)
+            try:
+                WebDriverWait(driver, 5).until(lambda d: len(d.window_handles) > 1)
+                driver.switch_to.window(driver.window_handles[-1])
+                
+                # Validação da URL (máximo 8 segundos por tentativa)
+                for _ in range(8):
+                    url_atual = driver.current_url
+                    if "match-odds" in url_atual:
+                        url_final_encontrada = url_atual.split('?')[0]
+                        if not url_final_encontrada.endswith('/'):
+                            url_final_encontrada += '/'
+                        print(f"✨ Sucesso no índice [{indice}]!")
+                        break
+                    time.sleep(1)
+                
+                # Se achou a URL, fecha a aba e sai do loop de índices
+                if url_final_encontrada:
+                    driver.close()
+                    driver.switch_to.window(aba_original)
+                    break
+                else:
+                    print(f"❌ Índice [{indice}] não levou ao jogo (URL: {driver.current_url}). Tentando próximo...")
+                    driver.close()
+                    driver.switch_to.window(aba_original)
+            except:
+                print(f"⚠️ Índice [{indice}] não abriu nova aba ou travou.")
+                if len(driver.window_handles) > 1:
+                    driver.switch_to.window(driver.window_handles[-1])
+                    driver.close()
+                driver.switch_to.window(aba_original)
+
+        if url_final_encontrada:
+            print(f"\n✅ [RESULTADO] URL FINAL: {url_final_encontrada}")
         else:
-            print("❌ Erro: O clique não abriu uma nova aba.")
+            print(f"\n❌ [RESULTADO] Falha total: Nenhum índice (3-6) gerou link válido.")
+            print(f"🔗 Link de Segurança: https://www.betano.bet.br/sport/futebol/")
 
     except Exception as e:
         print(f"❌ Erro no fluxo: {e}")
@@ -88,5 +94,13 @@ def executar_fluxo_final(url_h2h):
         driver.quit()
 
 if __name__ == "__main__":
-    URL_ALVO = "https://www.flashscore.com.br/jogo/futebol/club-nacional-UaVu2MhA/universitario-xhw3JTnU/h2h/total/?mid=A9FCj3kT"
-    executar_fluxo_final(URL_ALVO)
+    # OS DOIS JOGOS PARA TESTE
+    JOGOS_TESTE = [
+        "https://www.flashscore.com.br/jogo/futebol/pachuca-QT16qrtK/toluca-8hiBr2eQ/h2h/total/?mid=jVXBsK2k",
+        "https://www.flashscore.com.br/jogo/futebol/avai-rPzY7fWt/novorizontino-4lOgZPQl/h2h/total/?mid=8pNsVvYg"
+    ]
+    
+    for url in JOGOS_TESTE:
+        executar_fluxo_final(url)
+        print("-" * 50)
+        
