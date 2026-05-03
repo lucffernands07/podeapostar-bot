@@ -33,21 +33,21 @@ def montar_bilhetes_estrategicos(lista_jogos):
         lista_bingo3 = sorted(lista_jogos, key=lambda x: extrair_odd(x['odd']), reverse=True)[:3]
         # ADICIONA ESTA LINHA: Ordena os 3 escolhidos por hora
         lista_bingo3.sort(key=lambda x: x['horario'])
-        bilhetes.append({"id": "BINGO3", "nome": "🔥 BINGO 3: VALOR", "jogos": lista_bingo3})
+        bilhetes.append({"id": "BINGO3", "nome": "🔥 BINGO 3: ODDS ARRISCADAS", "jogos": lista_bingo3})
 
     # --- BINGO 5: ESTRUTURADO ---
     if len(lista_jogos) >= 5:
         # ... (sua lógica de seleção das vagas gols/media/alta continua igual) ...
         # Antes do append, ordene a seleção final:
         bingo5_selecao.sort(key=lambda x: x['horario'])
-        bilhetes.append({"id": "BINGO5", "nome": "💰 BINGO 5: ESTRUTURADO", "jogos": bingo5_selecao[:5]})
+        bilhetes.append({"id": "BINGO5", "nome": "💰 BINGO 5: EQUILIBRADO", "jogos": bingo5_selecao[:5]})
 
     # --- BINGO 7: SEGURANÇA ---
     if len(lista_jogos) >= 7:
         lista_bingo7 = sorted(lista_jogos, key=lambda x: (extrair_porcentagem(x['mercado']) / extrair_odd(x['odd'])), reverse=True)[:7]
         # ADICIONA ESTA LINHA: Ordena os 7 escolhidos por hora
         lista_bingo7.sort(key=lambda x: x['horario'])
-        bilhetes.append({"id": "BINGO7", "nome": "🍀 BINGO 7: SEGURANÇA", "jogos": lista_bingo7})
+        bilhetes.append({"id": "BINGO7", "nome": "🍀 BINGO 7: ODDS SEGURAS", "jogos": lista_bingo7})
 
     return bilhetes
 
