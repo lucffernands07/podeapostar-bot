@@ -82,4 +82,3 @@ def formatar_para_telegram(bilhetes, cache_links):
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
-            l
