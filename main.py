@@ -169,14 +169,13 @@ def main():
     try:
         # LOOP DE COMPETIÇÕES
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 100: break 
+            if total_mercados >= 120: break # Aumentado para dar margem aos bingos
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
             time.sleep(4)
             elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
             
             for el in elementos:
-                if total_mercados >= 100: break 
                 try:
                     tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
                     h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
@@ -199,23 +198,23 @@ def main():
                         # --- PROCESSAMENTO PADRONIZADO DE MERCADOS ---
                         mercados_para_processar = []
 
-                        # 1. Gols (Retorna lista de dicionários)
+                        # 1. Gols (Sincronizado com o retorno de lista de dicts do seu gols.py)
                         res_gols = gols.verificar_gols(s)
                         for rg in res_gols:
                             mercados_para_processar.append({"texto": rg['mercado'], "chave": rg['tipo']})
 
-                        # 2. Ambas Marcam (Retorna string ou None)
+                        # 2. Ambas Marcam
                         res_btts = ambos_marcam.verificar_btts(s)
                         if res_btts:
                             mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
 
-                        # 3. Chance Dupla (Retorna lista de strings)
+                        # 3. Chance Dupla
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         for rc in res_cd:
                             tipo_cd = "1X" if "1X" in rc else "X2"
                             mercados_para_processar.append({"texto": rc, "chave": tipo_cd})
 
-                        # 4. Vitória Casa (Retorna lista de strings)
+                        # 4. Vitória Casa (Sincronizado com a chave VITORIA_CASA do seu odds.py)
                         res_vc = vitoria_casa.verificar_vitoria_casa(s)
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
@@ -224,16 +223,16 @@ def main():
                         if mercados_para_processar:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
                             
-                            for item in mercados_para_processar[:5]: # Limite original de 5 mercados por jogo
+                            for item in mercados_para_processar:
                                 m_texto = item["texto"]
-                                m_chave = item["chave"]
+                                m_chave = item["chave"] # Ex: GOLS_15, GOLS_M45, BTTS
                                 
                                 valor_odd_str = v_odds.get(m_chave, "N/A")
 
                                 try:
                                     odd_float = float(valor_odd_str.replace(',', '.'))
                                     
-                                    # Regra de corte para Under 4.5
+                                    # Ajuste na regra de corte: Chave correta GOLS_M45
                                     if "M45" in m_chave and odd_float >= 4.0:
                                         continue 
 
@@ -251,37 +250,44 @@ def main():
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
-            # 1. Montagem do LISTÃO GERAL
-            itens_listao = []
-            for j in lista_para_filtros:
-                itens_listao.append(f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}")
-            
-            texto_listao_final = "🎫 *LISTA DE MERCADOS DO DIA*\n\n" + "\n\n------------------------------------\n\n".join(itens_listao)
-            
-            # 2. Montagem dos BINGOS
+            # 1. ENVIO DO LISTÃO FATIADO (Para não travar no limite do Telegram)
+            meu_chat_id = os.getenv('CHAT_ID')
+            if meu_chat_id:
+                cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
+                corpo = ""
+                for j in lista_para_filtros:
+                    # Monta o bloco de cada jogo
+                    bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
+                    
+                    # Se a mensagem atual + novo bloco passar de 4000 caracteres, envia e começa outra
+                    if len(cabecalho + corpo + bloco) > 4000:
+                        enviar_telegram(cabecalho + corpo, meu_chat_id)
+                        cabecalho = "🎫 *LISTA (Continuação)*\n\n"
+                        corpo = bloco
+                    else:
+                        corpo += bloco
+                
+                # Envia o que sobrou
+                enviar_telegram(cabecalho + corpo, meu_chat_id)
+                print("📨 Listão enviado em partes para o pessoal.")
+
+            # 2. MONTAGEM DOS BINGOS
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
             cache_links = {f"{j['time_casa']}x{j['time_fora']}": j.get("link_betano") for j in lista_para_filtros if j.get("link_betano")}
             texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
 
-            # --- IDENTIFICAÇÃO DE DESTINOS ---
-            meu_chat_id = os.getenv('CHAT_ID')
             canal_id = os.getenv('CHANNEL_ID')
-
-            if meu_chat_id:
-                enviar_telegram(texto_listao_final, meu_chat_id)
-                print("📨 Listão enviado para o pessoal.")
-            
             if texto_bingos_final and canal_id:
                 msg_bingo_formatada = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_bingos_final
                 enviar_telegram(msg_bingo_formatada, canal_id)
                 print("📢 Bingos enviados para o canal.")
 
-            print("✅ Processamento e envios concluídos.")
+            print("✅ Processamento concluído com sucesso.")
         else:
             print("⚠️ Nenhuma partida encontrada nos filtros.")
 
     except Exception as e:
-        print(f"❌ Erro Crítico: {e}")
+        print(f"❌ Erro Crítico no Main: {e}")
     finally:
         driver.quit()
                                     
