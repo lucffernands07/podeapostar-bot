@@ -57,25 +57,13 @@ def verificar_gols(s):
     
     resultados = []
 
-    # Se o Novorizontino x Avaí (4/5 e 4/5) chegar aqui, ch15 será "85%"
-    if ch15:
-        resultados.append({
-            "mercado": f"+1.5 Gols ({ch15})",
-            "tipo": "OVER_15"
-        })
-    
     if ch25:
-        resultados.append({
-            "mercado": f"+2.5 Gols ({ch25})",
-            "tipo": "OVER_25"
-        })
-
-    # Under 4.5
+        resultados.append({"mercado": f"+2.5 Gols ({ch25})", "tipo": "GOLS_25"})
+    elif ch15:
+        resultados.append({"mercado": f"+1.5 Gols ({ch15})", "tipo": "GOLS_15"})
+    
     if ch45_under and not ch15:
-        resultados.append({
-            "mercado": f"-4.5 Gols ({ch45_under})",
-            "tipo": "UNDER"
-        })
+        # MUDE DE 'UNDER_45' PARA 'GOLS_M45'
+        resultados.append({"mercado": f"-4.5 Gols ({ch45_under})", "tipo": "GOLS_M45"}) 
 
     return resultados
-    
