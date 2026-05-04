@@ -38,6 +38,7 @@ def enviar_telegram(mensagem, chat_id_destino):
     """Lógica de envio idêntica ao seu main.py"""
     token = os.getenv('TELEGRAM_TOKEN')
     if not token or not chat_id_destino:
+        print("⚠️ Variáveis de ambiente TELEGRAM_TOKEN ou CHAT_ID não configuradas.")
         return
     
     url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -49,13 +50,14 @@ def enviar_telegram(mensagem, chat_id_destino):
             "disable_web_page_preview": True
         })
     except Exception as e:
-        print(f"Erro Telegram: {e}")
+        print(f"❌ Erro Telegram: {e}")
 
 def main():
     db_path = "ranking_db.json"
     pasta = "prints/"
     db = {"stats": {}, "pendentes": {}, "processados": []}
 
+    # Carrega o banco de dados existente
     if os.path.exists(db_path):
         try:
             with open(db_path, 'r', encoding='utf-8') as f:
@@ -64,36 +66,92 @@ def main():
                     if k in carregado:
                         if isinstance(db[k], dict): db[k].update(carregado[k])
                         else: db[k] = list(set(db[k] + carregado[k]))
-        except: pass
+        except Exception as e:
+            print(f"⚠️ Erro ao carregar JSON: {e}")
 
-    if not os.path.exists(pasta): return
-    arquivos = [f for f in os.listdir(pasta) if f.lower().endswith(('.png', '.jpg', '.jpeg')) and "_CONCLUIDO" not in f]
-    
     mudanca = False
     resultados_rodada = []
     mercados_contados = 0
 
-    for arquivo in arquivos:
-        texto = extrair_texto(os.path.join(pasta, arquivo))
-        if not texto: continue
-        blocos = texto.split('\n')
+    # Processa arquivos se a pasta existir
+    if os.path.exists(pasta):
+        arquivos = [f for f in os.listdir(pasta) if f.lower().endswith(('.png', '.jpg', '.jpeg')) and "_CONCLUIDO" not in f]
+        
+        for arquivo in arquivos:
+            caminho_arquivo = os.path.join(pasta, arquivo)
+            texto = extrair_texto(caminho_arquivo)
+            if not texto: continue
+            blocos = texto.split('\n')
 
-        for i, linha in enumerate(blocos):
-            jogo = limpar_nome_jogo(linha)
-            if not jogo: continue
-            contexto = " ".join(blocos[max(0, i-1):i+5])
-            
-            perc = re.search(r"(\d{2,3}%)", contexto)
-            if perc:
-                mercado = ""
-                if "1.5" in contexto: mercado = "GOLS +1.5"
-                elif "2.5" in contexto: mercado = "GOLS +2.5"
-                elif "AMBAS" in contexto: mercado = "AMBAS MARCAM"
-                elif "1X" in contexto: mercado = "1X"
-                elif "2X" in contexto or "X2" in contexto: mercado = "2X"
+            for i, linha in enumerate(blocos):
+                jogo = limpar_nome_jogo(linha)
+                if not jogo: continue
+                contexto = " ".join(blocos[max(0, i-1):i+5])
                 
-                if mercado:
-                    chave_m = f"{jogo} | {mercado}"
-                    db["pendentes"][chave_m] = {"mercado": mercado, "perc": perc.group(1), "jogo": jogo}
-                    mudanca = True
-    
+                perc = re.search(r"(\d{2,3}%)", contexto)
+                if perc:
+                    mercado = ""
+                    if "1.5" in contexto: mercado = "GOLS +1.5"
+                    elif "2.5" in contexto: mercado = "GOLS +2.5"
+                    elif "AMBAS" in contexto: mercado = "AMBAS MARCAM"
+                    elif "1X" in contexto: mercado = "1X"
+                    elif "2X" in contexto or "X2" in contexto: mercado = "2X"
+                    
+                    if mercado:
+                        chave_m = f"{jogo} | {mercado}"
+                        db["pendentes"][chave_m] = {"mercado": mercado, "perc": perc.group(1), "jogo": jogo}
+                        mudanca = True
+
+                placar = re.findall(r'(\d+)\s*[-X ]\s*(\d+)', contexto)
+                if placar:
+                    para_remover = []
+                    for chave_m, info in db["pendentes"].items():
+                        if info["jogo"] in jogo or jogo in info["jogo"]:
+                            res = conferir_resultado(info["mercado"], int(placar[0][0]), int(placar[0][1]))
+                            if res in ["GREEN", "RED"]:
+                                stat_key = f"{info['mercado']} {info['perc']}"
+                                if stat_key not in db["stats"]: db["stats"][stat_key] = {"green": 0, "red": 0}
+                                db["stats"][stat_key][res.lower()] += 1
+                                resultados_rodada.append(res)
+                                mercados_contados += 1
+                                para_remover.append(chave_m)
+                                mudanca = True
+                    for rm in para_remover: del db["pendentes"][rm]
+
+            os.rename(caminho_arquivo, os.path.join(pasta, f"{arquivo.split('.')[0]}_CONCLUIDO.{arquivo.split('.')[1]}"))
+
+    # Lógica de Bingo baseada nos resultados da rodada atual
+    if resultados_rodada:
+        if mercados_contados <= 3: cat = 3
+        elif mercados_contados <= 5: cat = 5
+        else: cat = 7
+        status = "red" if "RED" in resultados_rodada else "green"
+        chave_b = f"BINGO {cat}"
+        if chave_b not in db["stats"]: db["stats"][chave_b] = {"green": 0, "red": 0}
+        db["stats"][chave_b][status] += 1
+        mudanca = True
+
+    # Salva as alterações no banco de dados
+    if mudanca:
+        with open(db_path, 'w', encoding='utf-8') as f:
+            json.dump(db, f, indent=4, ensure_ascii=False)
+
+    # --- MONTAGEM E ENVIO DO RANKING ---
+    # Esta parte agora roda sempre, pegando o que estiver no db["stats"]
+    if db["stats"]:
+        resumo = "📊 *RANKING GERAL ATUALIZADO* 🏆\n\n"
+        for m, v in sorted(db["stats"].items()):
+            total = v['green'] + v['red']
+            taxa = (v['green'] / total * 100) if total > 0 else 0
+            emoji = "🟢" if taxa >= 80 else "🟡" if taxa >= 50 else "🔴"
+            resumo += f"{emoji} *{m}*\n✅ G: {v['green']} | ❌ R: {v['red']} | 📈 *{taxa:.1f}%*\n\n"
+        
+        print(resumo)
+        meu_chat_id = os.getenv('CHAT_ID')
+        enviar_telegram(resumo, meu_chat_id)
+    else:
+        print("⚠️ Nenhum dado de estatística encontrado no JSON.")
+
+if __name__ == "__main__":
+    main()
+                                
