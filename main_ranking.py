@@ -3,7 +3,7 @@ import json
 import re
 import pytesseract
 from PIL import Image
-import requests  # Adicionado para envio ao Telegram
+import requests
 
 def extrair_texto(caminho_img):
     try:
@@ -35,6 +35,7 @@ def conferir_resultado(mercado, g_casa, g_fora):
     return "OUTRO"
 
 def enviar_telegram(mensagem, chat_id_destino):
+    """Lógica de envio idêntica ao seu main.py"""
     token = os.getenv('TELEGRAM_TOKEN')
     if not token or not chat_id_destino:
         return
@@ -49,7 +50,6 @@ def enviar_telegram(mensagem, chat_id_destino):
         })
     except Exception as e:
         print(f"Erro Telegram: {e}")
-        
 
 def main():
     db_path = "ranking_db.json"
@@ -96,54 +96,4 @@ def main():
                     chave_m = f"{jogo} | {mercado}"
                     db["pendentes"][chave_m] = {"mercado": mercado, "perc": perc.group(1), "jogo": jogo}
                     mudanca = True
-
-            placar = re.findall(r'(\d+)\s*[-X ]\s*(\d+)', contexto)
-            if placar:
-                para_remover = []
-                for chave_m, info in db["pendentes"].items():
-                    if info["jogo"] in jogo or jogo in info["jogo"]:
-                        res = conferir_resultado(info["mercado"], int(placar[0][0]), int(placar[0][1]))
-                        if res in ["GREEN", "RED"]:
-                            stat_key = f"{info['mercado']} {info['perc']}"
-                            if stat_key not in db["stats"]: db["stats"][stat_key] = {"green": 0, "red": 0}
-                            db["stats"][stat_key][res.lower()] += 1
-                            resultados_rodada.append(res)
-                            mercados_contados += 1
-                            para_remover.append(chave_m)
-                            mudanca = True
-                for rm in para_remover: del db["pendentes"][rm]
-
-        os.rename(os.path.join(pasta, arquivo), os.path.join(pasta, f"{arquivo.split('.')[0]}_CONCLUIDO.{arquivo.split('.')[1]}"))
-
-    if resultados_rodada:
-        if mercados_contados <= 3: cat = 3
-        elif mercados_contados <= 5: cat = 5
-        else: cat = 7
-        status = "red" if "RED" in resultados_rodada else "green"
-        chave_b = f"BINGO {cat}"
-        if chave_b not in db["stats"]: db["stats"][chave_b] = {"green": 0, "red": 0}
-        db["stats"][chave_b][status] += 1
-
-    if mudanca:
-        with open(db_path, 'w', encoding='utf-8') as f:
-            json.dump(db, f, indent=4, ensure_ascii=False)
-
-    # Montagem do corpo do ranking
-    resumo = "📊 *RANKING GERAL ATUALIZADO* 🏆\n\n"
-    for m, v in sorted(db["stats"].items()):
-        total = v['green'] + v['red']
-        taxa = (v['green'] / total * 100) if total > 0 else 0
-        emoji = "🟢" if taxa >= 80 else "🟡" if taxa >= 50 else "🔴"
-        resumo += f"{emoji} *{m}*\n✅ G: {v['green']} | ❌ R: {v['red']} | 📈 *{taxa:.1f}%*\n\n"
-
-    print(resumo)
-
-    # Lógica de saída: Envia apenas se houver mudança ou novos resultados
-    if mudanca or resultados_rodada:
-        meu_chat_id = os.getenv('CHAT_ID')
-        enviar_telegram(resumo, meu_chat_id)
-
-
-if __name__ == "__main__":
-    main()
-                    
+    
