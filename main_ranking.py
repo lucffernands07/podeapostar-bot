@@ -55,6 +55,23 @@ def conferir_resultado(mercado, g_casa, g_fora):
     if "2X" in mercado or "X2" in mercado: return "GREEN" if g_fora >= g_casa else "RED"
     return "OUTRO"
 
+def enviar_telegram(mensagem, chat_id_destino):
+    token = os.getenv('TELEGRAM_TOKEN')
+    if not token or not chat_id_destino:
+        return
+    
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    try:
+        requests.post(url, data={
+            "chat_id": chat_id_destino, 
+            "text": mensagem, 
+            "parse_mode": "Markdown",
+            "disable_web_page_preview": True
+        })
+    except Exception as e:
+        print(f"Erro Telegram: {e}")
+        
+
 def main():
     db_path = "ranking_db.json"
     pasta = "prints/"
@@ -132,17 +149,21 @@ def main():
         with open(db_path, 'w', encoding='utf-8') as f:
             json.dump(db, f, indent=4, ensure_ascii=False)
 
-    # --- BLOCO DE ENVIO PARA TELEGRAM ---
+    # Montagem do corpo do ranking
+    resumo = "📊 *RANKING GERAL ATUALIZADO* 🏆\n\n"
+    for m, v in sorted(db["stats"].items()):
+        total = v['green'] + v['red']
+        taxa = (v['green'] / total * 100) if total > 0 else 0
+        emoji = "🟢" if taxa >= 80 else "🟡" if taxa >= 50 else "🔴"
+        resumo += f"{emoji} *{m}*\n✅ G: {v['green']} | ❌ R: {v['red']} | 📈 *{taxa:.1f}%*\n\n"
+
+    print(resumo)
+
+    # Lógica de saída: Envia apenas se houver mudança ou novos resultados
     if mudanca or resultados_rodada:
-        ranking_texto = "📊 *RANKING GERAL ATUALIZADO* 🏆\n\n"
-        for m, v in sorted(db["stats"].items()):
-            total = v['green'] + v['red']
-            taxa = (v['green']/total*100) if total > 0 else 0
-            emoji = "🟢" if taxa >= 80 else "🟡" if taxa >= 50 else "🔴"
-            ranking_texto += f"{emoji} *{m}*\n✅ G: {v['green']} | ❌ R: {v['red']} | 📈 *{taxa:.1f}%*\n\n"
-        
-        print(ranking_texto)
-        enviar_telegram(ranking_texto)
+        meu_chat_id = os.getenv('CHAT_ID')
+        enviar_telegram(resumo, meu_chat_id)
+
 
 if __name__ == "__main__":
     main()
