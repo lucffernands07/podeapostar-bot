@@ -10,11 +10,11 @@
         },
         "2X 70%": {
             "green": 0,
-            "red": 1
+            "red": 2
         },
         "2X 85%": {
             "green": 1,
-            "red": 2
+            "red": 3
         },
         "GOLS +1.5 70%": {
             "green": 1,
@@ -34,11 +34,15 @@
         },
         "BINGO 3": {
             "green": 2,
-            "red": 2
+            "red": 3
         },
         "BINGO 5": {
             "green": 0,
             "red": 2
+        },
+        "GOLS +1.5 100%": {
+            "green": 1,
+            "red": 0
         }
     },
     "pendentes": {
@@ -61,6 +65,16 @@
             "mercado": "GOLS +1.5",
             "perc": "85%",
             "jogo": "E RAITH X ROSS COUNTY"
+        },
+        "ANDERLECHT X CLUB BRUGGE | GOLS +2.5": {
+            "mercado": "GOLS +2.5",
+            "perc": "85%",
+            "jogo": "ANDERLECHT X CLUB BRUGGE"
+        },
+        "RACING CLUB X HURACÁN | GOLS +1.5": {
+            "mercado": "GOLS +1.5",
+            "perc": "100%",
+            "jogo": "RACING CLUB X HURACÁN"
         }
     },
     "processados": []
