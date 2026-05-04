@@ -1,38 +1,29 @@
 def verificar_chance_dupla(s):
-    """
-    Nova lógica de Dupla Chance baseada em:
-    Passo 1: Momento Individual (Último jogo)
-    Passo 2: Histórico Recente de Confronto Direto (Últimos 2 jogos H2H)
-    """
     mercados = []
     
-    # --- REGRA 1X (MANDANTE) ---
+    # --- REGRA 1X ---
     # Passo 1: Casa venceu a última e Fora empatou ou perdeu
-    condicao_individual_1x = (s["t1_resultado_1"] == "V" and s["t2_resultado_1"] in ["E", "D"])
+    # No seu main a chave é 'casa_ult_res' e 'fora_ult_res'
+    condicao_individual_1x = (s.get("casa_ult_res") == "V" and s.get("fora_ult_res") in ["E", "D"])
     
-    # Passo 2: Casa não perdeu nos últimos 2 jogos contra este adversário (H2H)
-    # h2h_res_1 é o mais recente, h2h_res_2 é o anterior.
-    # O resultado no H2H é sempre do ponto de vista do Time 1 (Mandante).
-    # Portanto, "V" ou "E" no H2H significa que o mandante não perdeu.
-    condicao_h2h_1x = (s["h2h_res_1"] in ["V", "E"] and s["h2h_res_2"] in ["V", "E"])
+    # Passo 2: No H2H, o mandante (t1) não perdeu (V ou E)
+    # O seu main usa h2h_vitorias_t2 para saber se o visitante venceu o mandante
+    condicao_h2h_1x = (s.get("h2h_vitorias_t2", 0) == 0)
 
     if condicao_individual_1x and condicao_h2h_1x:
-        # Define a porcentagem baseada no aproveitamento total recente
-        pct = "100%" if s["casa_vitorias_recente"] >= 4 else "85%"
+        pct = "100%" if s.get("casa_vitorias", 0) >= 4 else "85%"
         mercados.append(f"1X ({pct})")
     
-
-    # --- REGRA 2X (VISITANTE) ---
+    # --- REGRA 2X ---
     # Passo 1: Fora venceu a última e Casa empatou ou perdeu
-    condicao_individual_2x = (s["t2_resultado_1"] == "V" and s["t1_resultado_1"] in ["E", "D"])
+    condicao_individual_2x = (s.get("fora_ult_res") == "V" and s.get("casa_ult_res") in ["E", "D"])
     
-    # Passo 2: Fora não perdeu nos últimos 2 jogos contra este adversário (H2H)
-    # Como os resultados H2H no seu main são do ponto de vista do Time 1,
-    # para o Time 2 não ter derrota, o H2H deve ser "D" (vitória do T2) ou "E" (empate).
-    condicao_h2h_2x = (s["h2h_res_1"] in ["D", "E"] and s["h2h_res_2"] in ["D", "E"])
+    # Passo 2: Visitante não perdeu no H2H (t1 não venceu)
+    condicao_h2h_2x = (s.get("h2h_vitorias_t1", 0) == 0)
 
     if condicao_individual_2x and condicao_h2h_2x:
-        pct = "100%" if s["fora_vitorias"] >= 4 else "90%"
+        pct = "100%" if s.get("fora_vitorias", 0) >= 4 else "90%"
         mercados.append(f"2X ({pct})")
             
     return mercados
+    
