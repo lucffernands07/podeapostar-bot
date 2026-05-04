@@ -31,18 +31,21 @@ jobs:
 
       - name: Instalar Dependências
         run: |
-          pip install pytesseract pillow
+          # Adicionado requests para a integração com Telegram
+          pip install pytesseract pillow requests
 
       - name: Rodar Script de Ranking
+        env:
+          # Mapeia as Secrets do seu repositório para o Script Python
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
         run: python main_ranking.py
 
       - name: Salvar Alterações no GitHub
         run: |
           git config --local user.email "bot@github.com"
           git config --local user.name "RankingBot"
-          # O 'git add .' é essencial para registar que as fotos foram renomeadas para _CONCLUIDO
           git add .
-          # O '[skip ci]' impede que o commit do próprio bot dispare uma nova execução
           git commit -m "🏆 Processamento: Imagens concluídas e Ranking atualizado [skip ci]" || echo "Sem mudanças para salvar"
           git push origin main
 
