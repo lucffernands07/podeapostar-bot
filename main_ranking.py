@@ -38,7 +38,6 @@ def enviar_telegram(mensagem, chat_id_destino):
     """Lógica de envio idêntica ao seu main.py"""
     token = os.getenv('TELEGRAM_TOKEN')
     if not token or not chat_id_destino:
-        print("⚠️ Variáveis de ambiente TELEGRAM_TOKEN ou CHAT_ID não configuradas.")
         return
     
     url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -57,7 +56,6 @@ def main():
     pasta = "prints/"
     db = {"stats": {}, "pendentes": {}, "processados": []}
 
-    # Carrega o banco de dados existente
     if os.path.exists(db_path):
         try:
             with open(db_path, 'r', encoding='utf-8') as f:
@@ -66,20 +64,18 @@ def main():
                     if k in carregado:
                         if isinstance(db[k], dict): db[k].update(carregado[k])
                         else: db[k] = list(set(db[k] + carregado[k]))
-        except Exception as e:
-            print(f"⚠️ Erro ao carregar JSON: {e}")
+        except: pass
 
     mudanca = False
     resultados_rodada = []
     mercados_contados = 0
 
-    # Processa arquivos se a pasta existir
     if os.path.exists(pasta):
         arquivos = [f for f in os.listdir(pasta) if f.lower().endswith(('.png', '.jpg', '.jpeg')) and "_CONCLUIDO" not in f]
         
         for arquivo in arquivos:
-            caminho_arquivo = os.path.join(pasta, arquivo)
-            texto = extrair_texto(caminho_arquivo)
+            caminho_img = os.path.join(pasta, arquivo)
+            texto = extrair_texto(caminho_img)
             if not texto: continue
             blocos = texto.split('\n')
 
@@ -118,9 +114,8 @@ def main():
                                 mudanca = True
                     for rm in para_remover: del db["pendentes"][rm]
 
-            os.rename(caminho_arquivo, os.path.join(pasta, f"{arquivo.split('.')[0]}_CONCLUIDO.{arquivo.split('.')[1]}"))
+            os.rename(caminho_img, os.path.join(pasta, f"{arquivo.split('.')[0]}_CONCLUIDO.{arquivo.split('.')[1]}"))
 
-    # Lógica de Bingo baseada nos resultados da rodada atual
     if resultados_rodada:
         if mercados_contados <= 3: cat = 3
         elif mercados_contados <= 5: cat = 5
@@ -131,27 +126,50 @@ def main():
         db["stats"][chave_b][status] += 1
         mudanca = True
 
-    # Salva as alterações no banco de dados
     if mudanca:
         with open(db_path, 'w', encoding='utf-8') as f:
             json.dump(db, f, indent=4, ensure_ascii=False)
 
-    # --- MONTAGEM E ENVIO DO RANKING ---
-    # Esta parte agora roda sempre, pegando o que estiver no db["stats"]
+    # --- MONTAGEM DO RANKING ORDENADO ---
     if db["stats"]:
+        lista_mercados = []
+        lista_bingos = []
+
+        for nome, dados in db["stats"].items():
+            total = dados['green'] + dados['red']
+            taxa = (dados['green'] / total * 100) if total > 0 else 0
+            
+            item = {
+                "nome": nome,
+                "green": dados['green'],
+                "red": dados['red'],
+                "taxa": taxa,
+                "emoji": "🟢" if taxa >= 80 else "🟡" if taxa >= 50 else "🔴"
+            }
+            
+            if "BINGO" in nome:
+                lista_bingos.append(item)
+            else:
+                lista_mercados.append(item)
+
+        # Ordenação: 1º Taxa de acerto (desc), 2º Quantidade de Greens (desc)
+        lista_mercados.sort(key=lambda x: (x['taxa'], x['green']), reverse=True)
+        lista_bingos.sort(key=lambda x: (x['taxa'], x['green']), reverse=True)
+
         resumo = "📊 *RANKING GERAL ATUALIZADO* 🏆\n\n"
-        for m, v in sorted(db["stats"].items()):
-            total = v['green'] + v['red']
-            taxa = (v['green'] / total * 100) if total > 0 else 0
-            emoji = "🟢" if taxa >= 80 else "🟡" if taxa >= 50 else "🔴"
-            resumo += f"{emoji} *{m}*\n✅ G: {v['green']} | ❌ R: {v['red']} | 📈 *{taxa:.1f}%*\n\n"
         
+        for i in lista_mercados:
+            resumo += f"{i['emoji']} *{i['nome']}*\n✅ G: {i['green']} | ❌ R: {i['red']} | 📈 *{i['taxa']:.1f}%*\n\n"
+        
+        if lista_bingos:
+            resumo += "--------------------------\n\n"
+            for b in lista_bingos:
+                resumo += f"{b['emoji']} *{b['nome']}*\n✅ G: {b['green']} | ❌ R: {b['red']} | 📈 *{b['taxa']:.1f}%*\n\n"
+
         print(resumo)
         meu_chat_id = os.getenv('CHAT_ID')
         enviar_telegram(resumo, meu_chat_id)
-    else:
-        print("⚠️ Nenhum dado de estatística encontrado no JSON.")
 
 if __name__ == "__main__":
     main()
-                                
+                
