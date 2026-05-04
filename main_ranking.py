@@ -3,6 +3,28 @@ import json
 import re
 import pytesseract
 from PIL import Image
+import requests  # Adicionado para envio ao Telegram
+
+def enviar_telegram(mensagem):
+    """Envia o ranking para o Telegram usando as secrets do GitHub"""
+    token = os.getenv("TELEGRAM_TOKEN")
+    chat_id = os.getenv("CHAT_ID")
+    
+    if not token or not chat_id:
+        print("⚠️ Variáveis TELEGRAM_TOKEN ou CHAT_ID não encontradas.")
+        return
+
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": mensagem,
+        "parse_mode": "Markdown"
+    }
+    
+    try:
+        requests.post(url, json=payload)
+    except Exception as e:
+        print(f"❌ Erro ao enviar para o Telegram: {e}")
 
 def extrair_texto(caminho_img):
     try:
@@ -17,7 +39,6 @@ def limpar_nome_jogo(texto):
     match = re.search(r'([A-Z0-9À-Ú \(\)]+)\s*[X]\s*([A-Z0-9À-Ú \(\)]+)', texto)
     if match:
         t1, t2 = match.group(1).strip(), match.group(2).strip()
-        # Remove termos comuns que variam entre as casas
         subs = [r'\(.*\)', r' FC', r' SFC', r' RIYADH', r' SAUDI', r'^[^A-Z0-9]+', r'[^A-Z0-9]+$']
         for s in subs:
             t1 = re.sub(s, '', t1).strip()
@@ -66,7 +87,6 @@ def main():
             if not jogo: continue
             contexto = " ".join(blocos[max(0, i-1):i+5])
             
-            # --- TELEGRAM ---
             perc = re.search(r"(\d{2,3}%)", contexto)
             if perc:
                 mercado = ""
@@ -77,15 +97,12 @@ def main():
                 elif "2X" in contexto or "X2" in contexto: mercado = "2X"
                 
                 if mercado:
-                    # Chave composta para NÃO sobrescrever mercados no mesmo jogo
                     chave_m = f"{jogo} | {mercado}"
                     db["pendentes"][chave_m] = {"mercado": mercado, "perc": perc.group(1), "jogo": jogo}
                     mudanca = True
 
-            # --- BETANO ---
             placar = re.findall(r'(\d+)\s*[-X ]\s*(\d+)', contexto)
             if placar:
-                # Procura todos os pendentes desse jogo
                 para_remover = []
                 for chave_m, info in db["pendentes"].items():
                     if info["jogo"] in jogo or jogo in info["jogo"]:
@@ -102,7 +119,6 @@ def main():
 
         os.rename(os.path.join(pasta, arquivo), os.path.join(pasta, f"{arquivo.split('.')[0]}_CONCLUIDO.{arquivo.split('.')[1]}"))
 
-    # --- BINGO ESCALA 3, 5, 7 ---
     if resultados_rodada:
         if mercados_contados <= 3: cat = 3
         elif mercados_contados <= 5: cat = 5
@@ -116,11 +132,18 @@ def main():
         with open(db_path, 'w', encoding='utf-8') as f:
             json.dump(db, f, indent=4, ensure_ascii=False)
 
-    print("\n📊 --- RANKING GERAL ATUALIZADO ---")
-    for m, v in sorted(db["stats"].items()):
-        total = v['green'] + v['red']
-        print(f"{m:<25} | G: {v['green']} | R: {v['red']} | {(v['green']/total*100):.1f}%")
+    # --- BLOCO DE ENVIO PARA TELEGRAM ---
+    if mudanca or resultados_rodada:
+        ranking_texto = "📊 *RANKING GERAL ATUALIZADO* 🏆\n\n"
+        for m, v in sorted(db["stats"].items()):
+            total = v['green'] + v['red']
+            taxa = (v['green']/total*100) if total > 0 else 0
+            emoji = "🟢" if taxa >= 80 else "🟡" if taxa >= 50 else "🔴"
+            ranking_texto += f"{emoji} *{m}*\n✅ G: {v['green']} | ❌ R: {v['red']} | 📈 *{taxa:.1f}%*\n\n"
+        
+        print(ranking_texto)
+        enviar_telegram(ranking_texto)
 
 if __name__ == "__main__":
     main()
-    
+                    
