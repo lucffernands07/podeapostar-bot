@@ -5,27 +5,6 @@ import pytesseract
 from PIL import Image
 import requests  # Adicionado para envio ao Telegram
 
-def enviar_telegram(mensagem):
-    """Envia o ranking para o Telegram usando as secrets do GitHub"""
-    token = os.getenv("TELEGRAM_TOKEN")
-    chat_id = os.getenv("CHAT_ID")
-    
-    if not token or not chat_id:
-        print("⚠️ Variáveis TELEGRAM_TOKEN ou CHAT_ID não encontradas.")
-        return
-
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": mensagem,
-        "parse_mode": "Markdown"
-    }
-    
-    try:
-        requests.post(url, json=payload)
-    except Exception as e:
-        print(f"❌ Erro ao enviar para o Telegram: {e}")
-
 def extrair_texto(caminho_img):
     try:
         texto = pytesseract.image_to_string(Image.open(caminho_img), lang='por')
