@@ -45,52 +45,6 @@
             "red": 0
         }
     },
-    "pendentes": {
-        "8 MORTON X AIRDRIEONIANS | GOLS +2.5": {
-            "mercado": "GOLS +2.5",
-            "perc": "85%",
-            "jogo": "8 MORTON X AIRDRIEONIANS"
-        },
-        "E AL DIRIYAH X ABHA | AMBAS MARCAM": {
-            "mercado": "AMBAS MARCAM",
-            "perc": "85%",
-            "jogo": "E AL DIRIYAH X ABHA"
-        },
-        "OKAYAMA X HIROSHIMA | GOLS +1.5": {
-            "mercado": "GOLS +1.5",
-            "perc": "85%",
-            "jogo": "OKAYAMA X HIROSHIMA"
-        },
-        "E RAITH X ROSS COUNTY | GOLS +1.5": {
-            "mercado": "GOLS +1.5",
-            "perc": "85%",
-            "jogo": "E RAITH X ROSS COUNTY"
-        },
-        "ANDERLECHT X CLUB BRUGGE | GOLS +2.5": {
-            "mercado": "GOLS +2.5",
-            "perc": "85%",
-            "jogo": "ANDERLECHT X CLUB BRUGGE"
-        },
-        "RACING CLUB X HURACÁN | GOLS +1.5": {
-            "mercado": "GOLS +1.5",
-            "perc": "100%",
-            "jogo": "RACING CLUB X HURACÁN"
-        },
-        "ISTRA 1961 X SLAVEN BELUPO | GOLS +1.5": {
-            "mercado": "GOLS +1.5",
-            "perc": "85%",
-            "jogo": "ISTRA 1961 X SLAVEN BELUPO"
-        },
-        "GIMNASIA MENDOZA X DEFENSA Y | GOLS +1.5": {
-            "mercado": "GOLS +1.5",
-            "perc": "70%",
-            "jogo": "GIMNASIA MENDOZA X DEFENSA Y"
-        },
-        "5 VILA NOVA X ATHLETIC CLUB | GOLS +1.5": {
-            "mercado": "GOLS +1.5",
-            "perc": "70%",
-            "jogo": "5 VILA NOVA X ATHLETIC CLUB"
-        }
-    },
+    "pendentes": {},
     "processados": []
 }
