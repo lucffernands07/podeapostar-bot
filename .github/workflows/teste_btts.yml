@@ -1,0 +1,33 @@
+name: Teste Regra Ambos Marcam
+
+# Define quando o robô vai rodar
+on:
+  push:
+    paths:
+      - 'testes/teste_ambos_marcam.py'
+      - 'mercados/ambos_marcam.py'
+  workflow_dispatch: # Permite rodar manualmente no botão "Run workflow"
+
+jobs:
+  testar-regra:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Rodar Teste de Ambas Marcam
+        run: |
+          # Verifica se o arquivo existe antes de rodar para não quebrar a Action
+          if [ -f testes/teste_ambos_marcam.py ]; then
+            python testes/teste_ambos_marcam.py
+          else
+            echo "⚠️ Arquivo de teste não encontrado em testes/teste_ambos_marcam.py"
+            exit 1
+          fi
+          
