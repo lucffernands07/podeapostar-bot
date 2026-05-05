@@ -1,31 +1,47 @@
-def verificar_btts(s):
+def verificar_ambos_marcam(s):
     try:
-        passos = 0
-        # Passo 1: BTTS no último jogo da Casa
-        if s.get("t1_gols_m_1", 0) > 0 and s.get("t1_gols_s_1", 0) > 0:
-            passos += 1
-
-        # Passo 2: BTTS no último jogo de Fora
-        if s.get("t2_gols_m_1", 0) > 0 and s.get("t2_gols_s_1", 0) > 0:
-            passos += 1
-
-        # Passo 3: BTTS no H2H (Últimos 2 jogos)
-        btts_h2h = False
-        for i in ["1", "2"]:
-            placar = s.get(f"h2h_placar_{i}", "0:0")
-            if ":" in placar:
-                g = placar.split(":")
-                if int(g[0]) > 0 and int(g[1]) > 0:
-                    btts_h2h = True
-                    break
-        if btts_h2h:
-            passos += 1
-
-        # O seu main espera que retorne apenas a string da porcentagem se bater 2 passos
-        if passos == 3: return "100%"
-        if passos == 2: return "80%"
+        mercados = []
         
-        return None # Se não bater 2 passos, retorna None e o main ignora
+        # --- REGRA AMBOS MARCAM ---
+        
+        # Passo 1: Condição Individual - Ambos marcaram e sofreram no seu último jogo
+        # Casa (t1) BTTS no último jogo
+        casa_btts_1 = (s.get("t1_gols_m_1", 0) > 0 and s.get("t1_gols_s_1", 0) > 0)
+        # Fora (t2) BTTS no último jogo
+        fora_btts_1 = (s.get("t2_gols_m_1", 0) > 0 and s.get("t2_gols_s_1", 0) > 0)
+        
+        cond_individual = casa_btts_1 and fora_btts_1
+
+        # Passo 2: Condição H2H - Pelo menos um BTTS nos últimos 2 confrontos diretos
+        h2h_1_btts = False
+        placar_1 = s.get("h2h_placar_1", "0:0")
+        if ":" in placar_1:
+            g1 = placar_1.split(":")
+            if int(g1[0]) > 0 and int(g1[1]) > 0:
+                h2h_1_btts = True
+        
+        h2h_2_btts = False
+        placar_2 = s.get("h2h_placar_2", "0:0")
+        if ":" in placar_2:
+            g2 = placar_2.split(":")
+            if int(g2[0]) > 0 and int(g2[1]) > 0:
+                h2h_2_btts = True
+
+        cond_h2h = h2h_1_btts or h2h_2_btts
+
+        # --- VALIDAÇÃO FINAL ---
+        # Só entra se passar nos 3 critérios (Individual Casa + Individual Fora + H2H)
+        if cond_individual and cond_h2h:
+            # Seguindo a lógica de porcentagem baseada em frequência (ex: 4 de 5 jogos com BTTS)
+            # t1_btts_5 e t2_btts_5 devem ser extraídos pelo seu scraper
+            if s.get("t1_btts_5", 0) >= 4 and s.get("t2_btts_5", 0) >= 4:
+                pct = "100%"
+            else:
+                pct = "85%"
+                
+            mercados.append(f"AMBAS MARCAM ({pct})")
+                
+        return mercados
     except:
-        return None
+        return []
         
