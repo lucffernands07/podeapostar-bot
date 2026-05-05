@@ -26,48 +26,42 @@ def montar_bilhetes_estrategicos(lista_jogos):
     bilhetes = []
     if not lista_jogos: return bilhetes
 
-    # Ordenação base por Prioridade de Mercado e Porcentagem
-    jogos_ordenados = sorted(lista_jogos, key=lambda x: (prioridade_mercado(x['mercado']), -extrair_porcentagem(x['mercado'])))
-
-    # --- BINGO 3: VALOR (ODDS MAIS ALTAS) ---
+    # --- BINGO 3: VALOR (Mantido) ---
     if len(lista_jogos) >= 3:
         lista_bingo3 = sorted(lista_jogos, key=lambda x: extrair_odd(x['odd']), reverse=True)[:3]
-        lista_bingo3.sort(key=lambda x: x['horario']) # Ordena por hora
+        lista_bingo3.sort(key=lambda x: x['horario'])
         bilhetes.append({"id": "BINGO3", "nome": "🔥 BINGO 3: VALOR", "jogos": lista_bingo3})
 
-    # --- BINGO 5: ESTRUTURADO (3 GOLS + 2 VALOR) ---
+    # --- BINGO 5: NOVO CRITÉRIO (3 ODDS + 2 PORCENTAGENS) ---
     if len(lista_jogos) >= 5:
         bingo5_selecao = []
-        # Slots conforme sua regra original
-        vaga_gols = [j for j in jogos_ordenados if 1.20 <= extrair_odd(j['odd']) <= 1.39 and "gols" in j['mercado'].lower()]
-        vaga_media = [j for j in jogos_ordenados if 1.40 <= extrair_odd(j['odd']) <= 1.50]
-        vaga_alta = [j for j in jogos_ordenados if extrair_odd(j['odd']) >= 1.51]
-
-        # Preenche os slots
-        bingo5_selecao.extend(vaga_gols[:3])
         
-        vaga_media = [j for j in vaga_media if j not in bingo5_selecao]
-        if vaga_media: bingo5_selecao.append(vaga_media[0])
-        
-        vaga_alta = [j for j in vaga_alta if j not in bingo5_selecao]
-        if vaga_alta: bingo5_selecao.append(vaga_alta[0])
+        # 1. Seleciona os 3 jogos com as MAIORES ODDS
+        maiores_odds = sorted(lista_jogos, key=lambda x: extrair_odd(x['odd']), reverse=True)[:3]
+        bingo5_selecao.extend(maiores_odds)
 
-        # Preenchimento de segurança se faltar jogo nos critérios acima
+        # 2. Filtra o que sobrou para pegar as melhores porcentagens
+        restantes = [j for j in lista_jogos if j not in bingo5_selecao]
+        maiores_porcentagens = sorted(restantes, key=lambda x: extrair_porcentagem(x['mercado']), reverse=True)[:2]
+        bingo5_selecao.extend(maiores_porcentagens)
+
+        # Caso ainda falte jogo (segurança), pega o que vier pela frente
         if len(bingo5_selecao) < 5:
-            resto = [j for j in jogos_ordenados if j not in bingo5_selecao]
-            bingo5_selecao.extend(resto[:(5 - len(bingo5_selecao))])
+            sobra = [j for j in lista_jogos if j not in bingo5_selecao]
+            bingo5_selecao.extend(sobra[:(5 - len(bingo5_selecao))])
 
-        # ORDENAÇÃO POR HORA (Essencial para o log e visualização)
+        # Organiza por horário para o bilhete ficar em ordem cronológica
         bingo5_selecao.sort(key=lambda x: x['horario'])
         bilhetes.append({"id": "BINGO5", "nome": "💰 BINGO 5: ESTRUTURADO", "jogos": bingo5_selecao[:5]})
 
-    # --- BINGO 7: SEGURANÇA ---
+    # --- BINGO 7: SEGURANÇA (Mantido) ---
     if len(lista_jogos) >= 7:
         lista_bingo7 = sorted(lista_jogos, key=lambda x: (extrair_porcentagem(x['mercado']) / extrair_odd(x['odd'])), reverse=True)[:7]
-        lista_bingo7.sort(key=lambda x: x['horario']) # Ordena por hora
+        lista_bingo7.sort(key=lambda x: x['horario'])
         bilhetes.append({"id": "BINGO7", "nome": "🍀 BINGO 7: SEGURANÇA", "jogos": lista_bingo7})
 
     return bilhetes
+
 
 def formatar_para_telegram(bilhetes, cache_links):
     if not bilhetes: return ""
