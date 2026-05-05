@@ -1,72 +1,68 @@
 import re
 
-def extrair_btts_de_placares(lista_placares):
-    """
-    Recebe uma lista de strings ['1:1', '2:0', ...] e retorna 
-    quantas vezes deu Ambas Marcam (ambos > 0).
-    """
-    sucessos = 0
-    for placar in lista_placares:
-        nums = re.findall(r'\d+', placar)
-        if len(nums) >= 2:
-            if int(nums[0]) > 0 and int(nums[1]) > 0:
-                sucessos += 1
-    return sucessos
-
-def verificar_regra_ambos_marcam(dados):
-    """
-    Aplica a tua regra:
-    1. Mínimo 4 de 5 nos últimos jogos de cada equipa.
-    2. Pelo menos 1 Ambas Marcam nos últimos 2 do CD.
-    """
+def verificar_btts_teste(s):
     try:
-        # Calcula a taxa de sucesso baseada nos placares reais raspados
-        sucessos_casa = extrair_btts_de_placares(dados['ultimos_5_casa'])
-        sucessos_fora = extrair_btts_de_placares(dados['ultimos_5_fora'])
-        
-        # Passo 1: Regra 4 de 5
-        cond_4_de_5 = sucessos_casa >= 4 and sucessos_fora >= 4
-        
-        # Passo 2: H2H (Últimos 2 confrontos)
-        h2h_sucessos = extrair_btts_de_placares(dados['h2h_2_jogos'])
-        cond_h2h = h2h_sucessos >= 1
+        def tem_btts(placar):
+            nums = re.findall(r'\d+', placar)
+            return len(nums) >= 2 and int(nums[0]) > 0 and int(nums[1]) > 0
 
-        if cond_4_de_5 and cond_h2h:
-            # Se for 5/5 em ambos, retorna 100%, senão 85% (conforme tua preferência)
-            pct = "100%" if (sucessos_casa == 5 and sucessos_fora == 5) else "85%"
-            return f"AMBAS MARCAM ({pct})"
+        # --- CONDIÇÃO OBRIGATÓRIA (OS 3 PASSOS) ---
         
+        # 1. BTTS no último jogo individual da Casa
+        casa_ultimo_btts = tem_btts(s.get("t1_placar_1", "0:0"))
+        
+        # 2. BTTS no último jogo individual de Fora
+        fora_ultimo_btts = tem_btts(s.get("t2_placar_1", "0:0"))
+        
+        # 3. Pelo menos um BTTS nos últimos 2 do Confronto Direto (CD)
+        h2h_btts = tem_btts(s.get("h2h_placar_1", "0:0")) or tem_btts(s.get("h2h_placar_2", "0:0"))
+
+        # GATILHO DE ENTRADA: Precisa dos 3
+        if casa_ultimo_btts and fora_ultimo_btts and h2h_btts:
+            
+            # --- FILTRO DE PORCENTAGEM (SUA REGRA DE SUCESSO 4/5) ---
+            # Se além de bater o último, eles têm frequência alta nos últimos 5
+            casa_freq = s.get("casa_btts", 0)
+            fora_freq = s.get("fora_btts", 0)
+            
+            if casa_freq >= 4 and fora_freq >= 4:
+                return "100%"
+            return "85%"
+            
+        return None # Se falhar em qualquer um dos 3 passos, ignora o jogo
+    except:
         return None
-    except Exception as e:
-        return f"Erro na análise: {e}"
 
-# --- SIMULAÇÃO DA RASPAGEM DO LINK ENVIADO ---
-# Sporting Cristal x Palmeiras
-dados_raspados = {
-    "jogo": "Sporting Cristal vs Palmeiras",
-    # Simulando os 5 últimos jogos reais (Placares)
-    "ultimos_5_casa": ["2:1", "1:1", "3:2", "1:2", "2:2"], # 5 de 5 (BTTS)
-    "ultimos_5_fora": ["1:2", "0:1", "1:1", "2:1", "1:1"], # 4 de 5 (BTTS)
-    # 2 últimos Confrontos Diretos (CD)
-    "h2h_2_jogos": ["1:1", "0:2"] # Teve 1 BTTS
-}
+# --- CENÁRIOS PARA VALIDAR ---
+testes = [
+    {
+        "nome": "✅ APROVADO (Bateu os 3 passos + Frequência alta)",
+        "dados": {
+            "t1_placar_1": "2:1", "t2_placar_1": "1:1", # Últimos jogos
+            "h2h_placar_1": "0:0", "h2h_placar_2": "2:2", # H2H
+            "casa_btts": 4, "fora_btts": 4 # Frequência
+        }
+    },
+    {
+        "nome": "❌ REPROVADO (Casa não teve BTTS no último)",
+        "dados": {
+            "t1_placar_1": "2:0", "t2_placar_1": "1:1", 
+            "h2h_placar_1": "1:1", "h2h_placar_2": "1:1",
+            "casa_btts": 5, "fora_btts": 5
+        }
+    },
+    {
+        "nome": "❌ REPROVADO (H2H sem BTTS recente)",
+        "dados": {
+            "t1_placar_1": "1:1", "t2_placar_1": "1:1", 
+            "h2h_placar_1": "1:0", "h2h_placar_2": "2:0",
+            "casa_btts": 5, "fora_btts": 5
+        }
+    }
+]
 
-print(f"🧪 Testando Regra no jogo: {dados_raspados['jogo']}")
-print("-" * 40)
-
-resultado = verificar_regra_ambos_marcam(dados_raspados)
-
-if resultado:
-    print(f"✅ JOGO APROVADO: {resultado}")
-else:
-    print("❌ JOGO REPROVADO: Não atingiu os critérios de 4/5 ou H2H.")
-
-# Relatório para conferência
-c = extrair_btts_de_placares(dados_raspados['ultimos_5_casa'])
-f = extrair_btts_de_placares(dados_raspados['ultimos_5_fora'])
-h = extrair_btts_de_placares(dados_raspados['h2h_2_jogos'])
-
-print(f"\nEstatísticas calculadas:")
-print(f" - Casa BTTS: {c}/5")
-print(f" - Fora BTTS: {f}/5")
-print(f" - H2H BTTS: {h}/2")
+print("🧪 TESTANDO LOGICA: ULTIMOS + H2H\n" + "="*40)
+for t in testes:
+    res = verificar_btts_teste(t['dados'])
+    print(f"{t['nome']} -> Resultado: {res}")
+    
