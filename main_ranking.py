@@ -144,7 +144,7 @@ def main():
                 "green": dados['green'],
                 "red": dados['red'],
                 "taxa": taxa,
-                "emoji": "🟢" if taxa >= 80 else "🟡" if taxa >= 50 else "🔴"
+                "emoji": "" if taxa >= 80 else "" if taxa >= 50 else ""
             }
             
             if "BINGO" in nome:
