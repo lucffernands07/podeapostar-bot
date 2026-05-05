@@ -75,6 +75,21 @@
             "mercado": "GOLS +1.5",
             "perc": "100%",
             "jogo": "RACING CLUB X HURACÁN"
+        },
+        "ISTRA 1961 X SLAVEN BELUPO | GOLS +1.5": {
+            "mercado": "GOLS +1.5",
+            "perc": "85%",
+            "jogo": "ISTRA 1961 X SLAVEN BELUPO"
+        },
+        "GIMNASIA MENDOZA X DEFENSA Y | GOLS +1.5": {
+            "mercado": "GOLS +1.5",
+            "perc": "70%",
+            "jogo": "GIMNASIA MENDOZA X DEFENSA Y"
+        },
+        "5 VILA NOVA X ATHLETIC CLUB | GOLS +1.5": {
+            "mercado": "GOLS +1.5",
+            "perc": "70%",
+            "jogo": "5 VILA NOVA X ATHLETIC CLUB"
         }
     },
     "processados": []
