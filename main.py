@@ -63,6 +63,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "ultimo_gols_fora": 0, "t2_resultado_1": "",
         "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
         "h2h_res_1": "", "h2h_res_2": "", 
+        "t1_placar_1": None, "t2_placar_1": None,     # Captura para Ambas Marcam
+        "h2h_placar_1": None, "h2h_placar_2": None,   # Captura para Ambas Marcam
         "pular_gols": False 
     }
     
@@ -78,7 +80,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
-        # --- TODA A SUA LÓGICA DE ESTATÍSTICAS PERMANECE IGUAL ---
         for idx, secao in enumerate(secoes[:3]): 
             if idx == 2: 
                 try:
@@ -97,6 +98,13 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     n_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
                     res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
                     
+                    # --- NOVO: CAPTURA DE PLACARES PARA REGRA AMBAS MARCAM ---
+                    if idx == 0 and i == 0: stats["t1_placar_1"] = res_texto
+                    if idx == 1 and i == 0: stats["t2_placar_1"] = res_texto
+                    if idx == 2:
+                        if i == 0: stats["h2h_placar_1"] = res_texto
+                        if i == 1: stats["h2h_placar_2"] = res_texto
+
                     numeros_placar = re.findall(r'\d+', res_texto)
                     if len(numeros_placar) < 2: continue
                     g1, g2 = int(numeros_placar[0]), int(numeros_placar[1])
@@ -138,8 +146,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
 
                 except: continue
 
-        # --- AQUI É ONDE O LINK É CAPTURADO ---
-        # Exatamente na aba H2H, antes de fechar.
+        # --- CAPTURA DO LINK BETANO ---
         print(f"      🔗 Capturando link Betano para {t1} x {t2}...")
         stats["link_betano"] = links.extrair_url_betano(driver)
 
@@ -149,6 +156,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
+
 
 def main():
     driver = configurar_driver()
