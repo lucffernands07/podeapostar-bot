@@ -240,15 +240,15 @@ def main():
                                             "link_betano": s.get("link_betano")
                                         })
                                         
-                                        # NOVO: Salva para o Ranking com link direto
+                                        # NOVO: Salva para o Ranking com links                                    # NOVO: Salva para o Ranking com link direto e porcentagem
                                         jogos_para_pendentes.append({
                                             "time_casa": t1,
                                             "time_fora": t2,
                                             "mercado": m_texto,
-                                            "mercado_ranking": m_texto.split('(')[0].strip().upper(),
+                                            "mercado_ranking": m_texto.upper(),
                                             "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
                                         })
-                                        
+                                                
                                         total_mercados += 1
                                 except: continue
                 except: continue
