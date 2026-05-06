@@ -1,4 +1,6 @@
 import re
+import json
+import os
 
 def extrair_porcentagem(texto_mercado):
     try:
@@ -21,6 +23,16 @@ def prioridade_mercado(mercado_texto):
     if "vitória" in m or "vitoria" in m: return 4
     if "2x" in m or "x2" in m: return 5
     return 6
+
+def carregar_ranking_db():
+    """Lê o histórico de greens do arquivo json"""
+    caminho = 'ranking_db.json'
+    if os.path.exists(caminho):
+        try:
+            with open(caminho, 'r', encoding='utf-8') as f:
+                return json.load(f).get("stats", {})
+        except: return {}
+    return {}
 
 def montar_bilhetes_estrategicos(lista_jogos):
     bilhetes = []
@@ -52,6 +64,23 @@ def montar_bilhetes_estrategicos(lista_jogos):
         lista_bingo7.sort(key=lambda x: x['horario'])
         bilhetes.append({"id": "BINGO7", "nome": "🍀 BINGO 7: SEGURANÇA", "jogos": lista_bingo7})
 
+    # --- NOVO: BINGO PREMIUM (Elite 100% + Ranking de Greens) ---
+    # 1. Filtra apenas mercados que são 100%
+    jogos_100 = [j for j in lista_jogos if "100%" in j['mercado']]
+    
+    if len(jogos_100) >= 1:
+        stats_db = carregar_ranking_db()
+        
+        def ordenar_por_historico(jogo):
+            # Normaliza o texto (ex: "Ambas Marcam: Sim (100%)" -> "AMBAS MARCAM 100%")
+            chave = jogo['mercado'].replace(":", "").replace("(", "").replace(")", "").replace("Sim ", "").upper()
+            return stats_db.get(chave, {}).get("green", 0)
+
+        # Seleciona os 5 com mais greens no histórico do JSON
+        lista_premium = sorted(jogos_100, key=ordenar_por_historico, reverse=True)[:5]
+        lista_premium.sort(key=lambda x: x['horario'])
+        bilhetes.append({"id": "PREMIUM", "nome": "💎 BINGO PREMIUM: ELITE", "jogos": lista_premium})
+
     return bilhetes
 
 def formatar_para_telegram(bilhetes, cache_links):
@@ -62,10 +91,9 @@ def formatar_para_telegram(bilhetes, cache_links):
         corpo = f"*{b['nome']}*\n\n"
         odd_total = 1.0
         
-        # --- NOVO: Agrupamento de Mercados por Jogo ---
+        # Agrupamento de Mercados por Jogo
         agrupados = {}
         for j in b['jogos']:
-            # Criamos uma chave única baseada no horário e nos times
             chave_jogo = f"{j['horario']}_{j['time_casa']}_{j['time_fora']}"
             
             if chave_jogo not in agrupados:
@@ -74,29 +102,24 @@ def formatar_para_telegram(bilhetes, cache_links):
                     "liga": j['liga'],
                     "time_casa": j['time_casa'],
                     "time_fora": j['time_fora'],
-                    "mercados": [], # Aqui guardamos as linhas de odd
+                    "mercados": [],
                     "link": cache_links.get(f"{j['time_casa']}x{j['time_fora']}", "https://www.betano.bet.br/sport/futebol/")
                 }
             
-            # Adiciona o mercado à lista deste jogo específico
             agrupados[chave_jogo]["mercados"].append({
                 "texto": f"🔶 {j['mercado']} | Odd: {j['odd']}",
                 "prioridade": prioridade_mercado(j['mercado'])
             })
             
-            # A ODD TOTAL continua sendo multiplicada individualmente por cada mercado selecionado
             odd_total *= extrair_odd(j['odd'])
 
-        # --- MONTAGEM DO TEXTO FINAL DOS JOGOS ---
+        # Montagem do texto final
         lista_blocos_jogos = []
         for chave in agrupados:
             dados = agrupados[chave]
-            
-            # Ordena os mercados dentro do jogo pela prioridade (Gols > 1X > Ambas...)
             dados["mercados"].sort(key=lambda x: x['prioridade'])
             
             linhas_mercados = "\n".join([m['texto'] for m in dados["mercados"]])
-            
             link_limpo = dados['link'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
             
             bloco_jogo = (
