@@ -1,0 +1,40 @@
+name: Atualizar Ranking Flashscore
+
+on:
+  schedule:
+    # 05:05 UTC (02:05 AM Horário de Brasília)
+    - cron: '5 5 * * *'
+  workflow_dispatch: # Permite rodar manual quando você quiser testar os logs
+
+jobs:
+  run-ranking:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Instalar Google Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable xvfb
+
+      - name: Instalar Dependências Python
+        run: |
+          pip install undetected-chromedriver selenium requests webdriver-manager Pillow pytesseract
+
+      - name: Executar Script de Ranking
+        run: |
+          xvfb-run python ranking/ranking.py
+
+      - name: Salvar Alterações (Git Push)
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "action@github.com"
+          git add ranking/ranking_db.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Ranking atualizado automaticamente [skip ci]" && git push)
