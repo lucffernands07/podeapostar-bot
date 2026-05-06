@@ -1,107 +1,72 @@
 [
     {
-        "time_casa": "Cusco (Per)",
-        "time_fora": "Estudiantes (Arg)",
-        "mercado": "+1.5 Gols (70%)",
-        "mercado_ranking": "+1.5 GOLS",
-        "link_h2h": "https://www.flashscore.com.br/jogo/fFUSGELO/#/resumo-de-jogo"
-    },
-    {
-        "time_casa": "La Guaira (Ven)",
-        "time_fora": "Bolivar (Bol)",
-        "mercado": "+1.5 Gols (70%)",
-        "mercado_ranking": "+1.5 GOLS",
-        "link_h2h": "https://www.flashscore.com.br/jogo/QgBy7OZ9/#/resumo-de-jogo"
-    },
-    {
-        "time_casa": "La Guaira (Ven)",
-        "time_fora": "Bolivar (Bol)",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "mercado_ranking": "AMBAS MARCAM: SIM",
-        "link_h2h": "https://www.flashscore.com.br/jogo/QgBy7OZ9/#/resumo-de-jogo"
-    },
-    {
         "time_casa": "Ind. Rivadavia (Arg)",
         "time_fora": "Fluminense (Bra)",
         "mercado": "+1.5 Gols (85%)",
-        "mercado_ranking": "+1.5 GOLS",
+        "mercado_ranking": "+1.5 GOLS (85%)",
         "link_h2h": "https://www.flashscore.com.br/jogo/2ZMqZeyg/#/resumo-de-jogo"
     },
     {
         "time_casa": "Santa Fe (Col)",
         "time_fora": "Corinthians (Bra)",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "mercado_ranking": "AMBAS MARCAM: SIM",
+        "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
         "link_h2h": "https://www.flashscore.com.br/jogo/lCjXC5Kj/#/resumo-de-jogo"
     },
     {
         "time_casa": "Tolima (Col)",
         "time_fora": "Nacional (Uru)",
         "mercado": "+1.5 Gols (100%)",
-        "mercado_ranking": "+1.5 GOLS",
+        "mercado_ranking": "+1.5 GOLS (100%)",
         "link_h2h": "https://www.flashscore.com.br/jogo/YogU8p5c/#/resumo-de-jogo"
     },
     {
         "time_casa": "Tolima (Col)",
         "time_fora": "Nacional (Uru)",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "mercado_ranking": "AMBAS MARCAM: SIM",
+        "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
         "link_h2h": "https://www.flashscore.com.br/jogo/YogU8p5c/#/resumo-de-jogo"
     },
     {
         "time_casa": "Universidad Católica (Chi)",
         "time_fora": "Cruzeiro (Bra)",
         "mercado": "+1.5 Gols (70%)",
-        "mercado_ranking": "+1.5 GOLS",
+        "mercado_ranking": "+1.5 GOLS (70%)",
         "link_h2h": "https://www.flashscore.com.br/jogo/AaQiXZ55/#/resumo-de-jogo"
     },
     {
         "time_casa": "Universidad Católica (Chi)",
         "time_fora": "Cruzeiro (Bra)",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "mercado_ranking": "AMBAS MARCAM: SIM",
+        "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
         "link_h2h": "https://www.flashscore.com.br/jogo/AaQiXZ55/#/resumo-de-jogo"
-    },
-    {
-        "time_casa": "Audax Italiano (Chi)",
-        "time_fora": "Vasco (Bra)",
-        "mercado": "+1.5 Gols (85%)",
-        "mercado_ranking": "+1.5 GOLS",
-        "link_h2h": "https://www.flashscore.com.br/jogo/IwHwo85M/#/resumo-de-jogo"
-    },
-    {
-        "time_casa": "Audax Italiano (Chi)",
-        "time_fora": "Vasco (Bra)",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "mercado_ranking": "AMBAS MARCAM: SIM",
-        "link_h2h": "https://www.flashscore.com.br/jogo/IwHwo85M/#/resumo-de-jogo"
     },
     {
         "time_casa": "Barracas Central (Arg)",
         "time_fora": "Olimpia Asuncion (Par)",
         "mercado": "+1.5 Gols (70%)",
-        "mercado_ranking": "+1.5 GOLS",
+        "mercado_ranking": "+1.5 GOLS (70%)",
         "link_h2h": "https://www.flashscore.com.br/jogo/E929unTq/#/resumo-de-jogo"
     },
     {
         "time_casa": "Macara (Ecu)",
         "time_fora": "Tigre (Arg)",
         "mercado": "+1.5 Gols (70%)",
-        "mercado_ranking": "+1.5 GOLS",
+        "mercado_ranking": "+1.5 GOLS (70%)",
         "link_h2h": "https://www.flashscore.com.br/jogo/0SPdE9Up/#/resumo-de-jogo"
     },
     {
         "time_casa": "Botafogo (Bra)",
         "time_fora": "Racing Club (Arg)",
         "mercado": "+1.5 Gols (85%)",
-        "mercado_ranking": "+1.5 GOLS",
+        "mercado_ranking": "+1.5 GOLS (85%)",
         "link_h2h": "https://www.flashscore.com.br/jogo/2mANlj6c/#/resumo-de-jogo"
     },
     {
         "time_casa": "Toluca",
         "time_fora": "Los Angeles FC",
         "mercado": "-4.5 Gols (70%)",
-        "mercado_ranking": "-4.5 GOLS",
+        "mercado_ranking": "-4.5 GOLS (70%)",
         "link_h2h": "https://www.flashscore.com.br/jogo/pCuy6JJb/#/resumo-de-jogo"
     }
 ]
