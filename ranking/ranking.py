@@ -59,18 +59,34 @@ def capturar_resultados():
     resultados = {}
     try:
         driver.get("https://www.flashscore.com.br/")
-        wait = WebDriverWait(driver, 20)
+        wait = WebDriverWait(driver, 30) # Aumentado para 30s
         
-        # Clica em Encerrados
-        btn_enc = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[contains(text(), 'ENCERRADOS')]")))
-        btn_enc.click()
+        # Log de segurança para saber se o site abriu certo
+        log("INFO", f"Título da página: {driver.title}")
+
+        # Passo 1: Clicar em Encerrados (usando um seletor mais robusto)
+        log(2, "Buscando botão de jogos Encerrados...")
+        # Tenta encontrar por texto em PT e EN para garantir
+        btn_enc = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[contains(text(), 'ENCERRADOS')] | //div[contains(text(), 'FINISHED')]")))
+        driver.execute_script("arguments[0].click();", btn_enc) # Click via JS é mais garantido no Headless
+        time.sleep(3)
+        
+        # Passo 2: Abrir Calendário
+        log(3, "Abrindo seletor de data...")
+        btn_calendar = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='wcl-dayPickerButton']")))
+        driver.execute_script("arguments[0].click();", btn_calendar)
         time.sleep(2)
+
+        # Passo 3: Voltar para ontem
+        log(4, "Voltando para a data de ONTEM...")
+        # Buscamos a seta pela classe da estrutura interna
+        seta = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "path.action-navigation-arrow-left")))
+        # Clicamos no botão que contém esse SVG
+        btn_seta = seta.find_element(By.XPATH, "./..")
+        driver.execute_script("arguments[0].click();", btn_seta)
         
-        # Volta para ontem no calendário
-        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='wcl-dayPickerButton']"))).click()
-        seta = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".action-navigation-arrow-left")))
-        driver.execute_script("arguments[0].closest('button').click();", seta)
-        time.sleep(5)
+        log(5, "Aguardando carregamento dos jogos de ontem...")
+        time.sleep(8) # Tempo maior para carregar a lista pesada
 
         eventos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
         for ev in eventos:
@@ -79,10 +95,17 @@ def capturar_resultados():
                 fora = ev.find_element(By.CSS_SELECTOR, ".event__participant--away").text.strip()
                 g_c = ev.find_element(By.CSS_SELECTOR, ".event__score--home").text.strip()
                 g_f = ev.find_element(By.CSS_SELECTOR, ".event__score--away").text.strip()
+                
                 if g_c != "" and g_f != "":
                     resultados[f"{casa} x {fora}".lower()] = {"c": int(g_c), "f": int(g_f)}
             except: continue
-        log(2, f"Capturados {len(resultados)} resultados.")
+            
+        log(6, f"Sucesso! Capturados {len(resultados)} resultados.")
+        
+    except Exception as e:
+        log("ERRO", f"Falha na captura. Print do erro: {str(e)}")
+        # Opcional: tirar print da tela em caso de erro para debug (ajuda muito)
+        driver.save_screenshot("erro_captura.png")
     finally:
         driver.quit()
     return resultados
