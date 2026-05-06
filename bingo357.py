@@ -64,20 +64,28 @@ def montar_bilhetes_estrategicos(lista_jogos):
         lista_bingo7.sort(key=lambda x: x['horario'])
         bilhetes.append({"id": "BINGO7", "nome": "🍀 BINGO 7: SEGURANÇA", "jogos": lista_bingo7})
 
-    # --- NOVO: BINGO PREMIUM (Elite 100% + Ranking de Greens) ---
-    # 1. Filtra apenas mercados que são 100%
-    jogos_100 = [j for j in lista_jogos if "100%" in j['mercado']]
+    # --- NOVO: BINGO PREMIUM (Melhor Aproveitamento % -> Mais Greens) ---
+    stats_db = carregar_ranking_db()
     
-    if len(jogos_100) >= 1:
-        stats_db = carregar_ranking_db()
+    def calcular_performance_premium(jogo):
+        # Limpeza da chave para bater com o JSON
+        chave = jogo['mercado'].replace(":", "").replace("(", "").replace(")", "").replace("Sim ", "").upper()
+        stat = stats_db.get(chave, {"green": 0, "red": 0})
         
-        def ordenar_por_historico(jogo):
-            # Normaliza o texto (ex: "Ambas Marcam: Sim (100%)" -> "AMBAS MARCAM 100%")
-            chave = jogo['mercado'].replace(":", "").replace("(", "").replace(")", "").replace("Sim ", "").upper()
-            return stats_db.get(chave, {}).get("green", 0)
+        greens = stat.get("green", 0)
+        reds = stat.get("red", 0)
+        total = greens + reds
+        
+        # 1. Aproveitamento real (Taxa de acerto %)
+        aproveitamento = (greens / total) if total > 0 else 0.0
+        
+        # Retornamos uma tupla (Aproveitamento, Greens) para o sorted usar como peso
+        return (aproveitamento, greens)
 
-        # Seleciona os 5 com mais greens no histórico do JSON
-        lista_premium = sorted(jogos_100, key=ordenar_por_historico, reverse=True)[:5]
+    # Seleciona os top 5 baseados no ranking de performance
+    lista_premium = sorted(lista_jogos, key=calcular_performance_premium, reverse=True)[:5]
+    
+    if lista_premium:
         lista_premium.sort(key=lambda x: x['horario'])
         bilhetes.append({"id": "PREMIUM", "nome": "💎 BINGO PREMIUM: ELITE", "jogos": lista_premium})
 
@@ -120,7 +128,8 @@ def formatar_para_telegram(bilhetes, cache_links):
             dados["mercados"].sort(key=lambda x: x['prioridade'])
             
             linhas_mercados = "\n".join([m['texto'] for m in dados["mercados"]])
-            link_limpo = dados['link'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
+            link_cru = dados['link']
+            link_limpo = link_cru.replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
             
             bloco_jogo = (
                 f"⏱️ {dados['horario']} | {dados['liga']}\n"
@@ -135,4 +144,4 @@ def formatar_para_telegram(bilhetes, cache_links):
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
-            
+        
