@@ -1,8 +1,8 @@
 name: Atualizar Ranking Flashscore
 
 on:
- push:
-   paths:
+  push:
+    paths:
       - 'ranking/ranking.py'
   schedule:
     # 05:05 UTC (02:05 AM Horário de Brasília)
