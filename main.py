@@ -157,18 +157,18 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.switch_to.window(driver.window_handles[0])
     return stats
 
-
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
     lista_para_filtros = []     
+    jogos_para_pendentes = [] # <--- NOVO: Lista para o ranking
     total_mercados = 0 
 
     try:
         # LOOP DE COMPETIÇÕES
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 120: break # Aumentado para dar margem aos bingos
+            if total_mercados >= 120: break 
             print(f"\n--- Analisando: {nome_comp} ---")
             driver.get(url)
             time.sleep(4)
@@ -194,10 +194,9 @@ def main():
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
-                        # --- PROCESSAMENTO PADRONIZADO DE MERCADOS ---
                         mercados_para_processar = []
 
-                        # 1. Gols (Sincronizado com o retorno de lista de dicts do seu gols.py)
+                        # 1. Gols
                         res_gols = gols.verificar_gols(s)
                         for rg in res_gols:
                             mercados_para_processar.append({"texto": rg['mercado'], "chave": rg['tipo']})
@@ -213,7 +212,7 @@ def main():
                             tipo_cd = "1X" if "1X" in rc else "X2"
                             mercados_para_processar.append({"texto": rc, "chave": tipo_cd})
 
-                        # 4. Vitória Casa (Sincronizado com a chave VITORIA_CASA do seu odds.py)
+                        # 4. Vitória Casa
                         res_vc = vitoria_casa.verificar_vitoria_casa(s)
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
@@ -224,23 +223,32 @@ def main():
                             
                             for item in mercados_para_processar:
                                 m_texto = item["texto"]
-                                m_chave = item["chave"] # Ex: GOLS_15, GOLS_M45, BTTS
-                                
+                                m_chave = item["chave"]
                                 valor_odd_str = v_odds.get(m_chave, "N/A")
 
                                 try:
                                     odd_float = float(valor_odd_str.replace(',', '.'))
                                     
-                                    # Ajuste na regra de corte: Chave correta GOLS_M45
                                     if "M45" in m_chave and odd_float >= 4.0:
                                         continue 
 
                                     if odd_float >= 1.20:
+                                        # Salva para o Listão/Telegram
                                         lista_para_filtros.append({
                                             "horario": h_br, "time_casa": t1, "time_fora": t2,
                                             "mercado": m_texto, "odd": valor_odd_str, "liga": nome_comp,
                                             "link_betano": s.get("link_betano")
                                         })
+                                        
+                                        # NOVO: Salva para o Ranking com link direto
+                                        jogos_para_pendentes.append({
+                                            "time_casa": t1,
+                                            "time_fora": t2,
+                                            "mercado": m_texto,
+                                            "mercado_ranking": m_texto.split('(')[0].strip().upper(),
+                                            "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
+                                        })
+                                        
                                         total_mercados += 1
                                 except: continue
                 except: continue
@@ -249,16 +257,13 @@ def main():
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
-            # 1. ENVIO DO LISTÃO FATIADO (Para não travar no limite do Telegram)
             meu_chat_id = os.getenv('CHAT_ID')
             if meu_chat_id:
                 cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
                 corpo = ""
                 for j in lista_para_filtros:
-                    # Monta o bloco de cada jogo
                     bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
                     
-                    # Se a mensagem atual + novo bloco passar de 4000 caracteres, envia e começa outra
                     if len(cabecalho + corpo + bloco) > 4000:
                         enviar_telegram(cabecalho + corpo, meu_chat_id)
                         cabecalho = "🎫 *LISTA (Continuação)*\n\n"
@@ -266,11 +271,9 @@ def main():
                     else:
                         corpo += bloco
                 
-                # Envia o que sobrou
                 enviar_telegram(cabecalho + corpo, meu_chat_id)
-                print("📨 Listão enviado em partes para o pessoal.")
+                print("📨 Listão enviado.")
 
-            # 2. MONTAGEM DOS BINGOS
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
             cache_links = {f"{j['time_casa']}x{j['time_fora']}": j.get("link_betano") for j in lista_para_filtros if j.get("link_betano")}
             texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
@@ -279,7 +282,15 @@ def main():
             if texto_bingos_final and canal_id:
                 msg_bingo_formatada = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_bingos_final
                 enviar_telegram(msg_bingo_formatada, canal_id)
-                print("📢 Bingos enviados para o canal.")
+                print("📢 Bingos enviados.")
+
+            # --- NOVO: SALVAMENTO DO ARQUIVO PARA O RANKING ---
+            if jogos_para_pendentes:
+                import json
+                os.makedirs("ranking", exist_ok=True)
+                with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
+                    json.dump(jogos_para_pendentes, f, indent=4, ensure_ascii=False)
+                print(f"✅ {len(jogos_para_pendentes)} jogos salvos para o ranking.")
 
             print("✅ Processamento concluído com sucesso.")
         else:
@@ -289,7 +300,7 @@ def main():
         print(f"❌ Erro Crítico no Main: {e}")
     finally:
         driver.quit()
-                                    
 
+                                    
 if __name__ == "__main__":
     main()
