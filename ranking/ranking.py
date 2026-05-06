@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Configurações de Caminho
+# --- CONFIGURAÇÕES DE CAMINHO ---
 PATH_DB = "ranking/ranking_db.json"
 PATH_PENDENTES = "ranking/pendentes.json"
 
@@ -35,9 +35,10 @@ def carregar_json(caminho):
     if os.path.exists(caminho):
         with open(caminho, 'r', encoding='utf-8') as f:
             return json.load(f)
-    return [] if "pendentes" in caminho else {}
+    return [] if "pendentes" in caminho else {"stats": {}}
 
 def salvar_json(dados, caminho):
+    os.makedirs(os.path.dirname(caminho), exist_ok=True)
     with open(caminho, 'w', encoding='utf-8') as f:
         json.dump(dados, f, indent=4, ensure_ascii=False)
 
@@ -54,40 +55,31 @@ def validar_palpite(mercado_str, gols_c, gols_f):
     return False
 
 def capturar_resultados():
-    log(1, "Acessando Flashscore para capturar resultados de ontem...")
+    log(1, "Iniciando captura no Flashscore...")
     driver = configurar_driver()
     resultados = {}
     try:
         driver.get("https://www.flashscore.com.br/")
-        wait = WebDriverWait(driver, 30) # Aumentado para 30s
+        wait = WebDriverWait(driver, 30)
         
-        # Log de segurança para saber se o site abriu certo
-        log("INFO", f"Título da página: {driver.title}")
-
-        # Passo 1: Clicar em Encerrados (usando um seletor mais robusto)
-        log(2, "Buscando botão de jogos Encerrados...")
-        # Tenta encontrar por texto em PT e EN para garantir
-        btn_enc = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[contains(text(), 'ENCERRADOS')] | //div[contains(text(), 'FINISHED')]")))
-        driver.execute_script("arguments[0].click();", btn_enc) # Click via JS é mais garantido no Headless
+        # 1. Clicar em ENCERRADOS usando o container .zone__inner
+        log(2, "Buscando botão ENCERRADOS no carrossel...")
+        container = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".zone__inner")))
+        # Busca o botão dentro do carrossel ignorando maiúsculas
+        btn_enc = container.find_element(By.XPATH, ".//div[contains(translate(text(), 'encerrados', 'ENCERRADOS'), 'ENCERRADOS')]")
+        driver.execute_script("arguments[0].click();", btn_enc)
         time.sleep(3)
         
-        # Passo 2: Abrir Calendário
-        log(3, "Abrindo seletor de data...")
-        btn_calendar = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='wcl-dayPickerButton']")))
-        driver.execute_script("arguments[0].click();", btn_calendar)
-        time.sleep(2)
-
-        # Passo 3: Voltar para ontem
-        log(4, "Voltando para a data de ONTEM...")
-        # Buscamos a seta pela classe da estrutura interna
+        # 2. Abrir Calendário e voltar para ontem
+        log(3, "Acessando calendário para pegar data de ontem...")
+        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='wcl-dayPickerButton']"))).click()
         seta = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "path.action-navigation-arrow-left")))
-        # Clicamos no botão que contém esse SVG
         btn_seta = seta.find_element(By.XPATH, "./..")
         driver.execute_script("arguments[0].click();", btn_seta)
-        
-        log(5, "Aguardando carregamento dos jogos de ontem...")
-        time.sleep(8) # Tempo maior para carregar a lista pesada
+        time.sleep(7)
 
+        # 3. Extrair os placares
+        log(4, "Lendo jogos encerrados...")
         eventos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
         for ev in eventos:
             try:
@@ -95,26 +87,19 @@ def capturar_resultados():
                 fora = ev.find_element(By.CSS_SELECTOR, ".event__participant--away").text.strip()
                 g_c = ev.find_element(By.CSS_SELECTOR, ".event__score--home").text.strip()
                 g_f = ev.find_element(By.CSS_SELECTOR, ".event__score--away").text.strip()
-                
                 if g_c != "" and g_f != "":
                     resultados[f"{casa} x {fora}".lower()] = {"c": int(g_c), "f": int(g_f)}
             except: continue
-            
-        log(6, f"Sucesso! Capturados {len(resultados)} resultados.")
-        
-    except Exception as e:
-        log("ERRO", f"Falha na captura. Print do erro: {str(e)}")
-        # Opcional: tirar print da tela em caso de erro para debug (ajuda muito)
-        driver.save_screenshot("erro_captura.png")
+        log(5, f"Capturados {len(resultados)} jogos.")
     finally:
         driver.quit()
     return resultados
 
 def main():
-    log(0, "Iniciando Processamento")
+    log(0, "Iniciando Processamento de Ranking")
     pendentes = carregar_json(PATH_PENDENTES)
     if not pendentes:
-        log("FIM", "Nada para processar em pendentes.json")
+        log("AVISO", "O arquivo pendentes.json está vazio. Nada para validar.")
         return
 
     resultados_site = capturar_resultados()
@@ -122,24 +107,35 @@ def main():
     stats = db.get("stats", {})
     
     atualizados = 0
+    log(6, "Cruzando dados e atualizando estatísticas...")
+    
     for jogo in pendentes:
-        chave = f"{jogo['time_casa']} x {jogo['time_fora']}".lower()
-        res = resultados_site.get(chave)
+        # Nome do confronto no seu listão (Limpando parênteses de países se houver)
+        nome_casa = jogo['time_casa'].split('(')[0].strip().lower()
+        nome_fora = jogo['time_fora'].split('(')[0].strip().lower()
+        chave = f"{nome_casa} x {nome_fora}"
+        
+        # Procura no dicionário de resultados (busca parcial para evitar erros de nomes longos)
+        res = next((v for k, v in resultados_site.items() if nome_casa in k and nome_fora in k), None)
         
         if res:
             deu_green = validar_palpite(jogo['mercado'], res['c'], res['f'])
             m_rank = jogo['mercado_ranking']
             
-            if m_rank not in stats: stats[m_rank] = {"green": 0, "red": 0}
+            if m_rank not in stats:
+                stats[m_rank] = {"green": 0, "red": 0}
             
-            if deu_green: stats[m_rank]['green'] += 1
-            else: stats[m_rank]['red'] += 1
+            if deu_green:
+                stats[m_rank]['green'] += 1
+            else:
+                stats[m_rank]['red'] += 1
             atualizados += 1
 
     db["stats"] = stats
     salvar_json(db, PATH_DB)
-    salvar_json([], PATH_PENDENTES) # Limpa pendentes
-    log("FIM", f"Processo concluído. {atualizados} mercados validados.")
+    # Limpa a lista de pendentes após o sucesso
+    salvar_json([], PATH_PENDENTES)
+    log("FIM", f"Ranking atualizado! {atualizados} jogos processados com sucesso.")
 
 if __name__ == "__main__":
     main()
