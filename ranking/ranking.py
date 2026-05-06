@@ -47,13 +47,13 @@ def main():
         return
 
     # Pega a data que o arquivo foi modificado
-    #data_modificacao = date.fromtimestamp(os.path.getmtime(PATH_PENDENTES))
-    #hoje = date.today()
+    data_modificacao = date.fromtimestamp(os.path.getmtime(PATH_PENDENTES))
+    hoje = date.today()
 
-    #if data_modificacao >= hoje:
-        #log("TRAVA", f"O arquivo pendentes.json é de hoje ({data_modificacao}). O ranking só roda jogos de ONTEM.")
-        #log("DICA", "Aguarde até amanhã para validar os jogos que o main gerou hoje.")
-        #return
+    if data_modificacao >= hoje:
+        log("TRAVA", f"O arquivo pendentes.json é de hoje ({data_modificacao}). O ranking só roda jogos de ONTEM.")
+        log("DICA", "Aguarde até amanhã para validar os jogos que o main gerou hoje.")
+        return
 
     # --- CARREGAMENTO DE DADOS ---
     with open(PATH_PENDENTES, 'r', encoding='utf-8') as f:
