@@ -284,18 +284,21 @@ def main():
                 enviar_telegram(msg_bingo_formatada, canal_id)
                 print("📢 Bingos enviados.")
 
-            # --- NOVO: SALVAMENTO DO ARQUIVO PARA O RANKING ---
-            if jogos_para_pendentes:
-                import json
-                os.makedirs("ranking", exist_ok=True)
-                with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
-                    json.dump(jogos_para_pendentes, f, indent=4, ensure_ascii=False)
-                print(f"✅ {len(jogos_para_pendentes)} jogos salvos para o ranking.")
-
+            # --- NOVO: SALVAMENTO DO ARQUIVO PARA O RANKING COM DATA ---
+            import json
+            os.makedirs("ranking", exist_ok=True)
+            
+            dados_final = {
+                "data_geracao": hoje_ref.strftime("%Y-%m-%d"),
+                "jogos": jogos_para_pendentes
+            }
+            
+            with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
+                json.dump(dados_final, f, indent=4, ensure_ascii=False)
+            
+            print(f"✅ {len(jogos_para_pendentes)} jogos salvos para o ranking com data {dados_final['data_geracao']}.")
+            
             print("✅ Processamento concluído com sucesso.")
-        else:
-            print("⚠️ Nenhuma partida encontrada nos filtros.")
-
     except Exception as e:
         print(f"❌ Erro Crítico no Main: {e}")
     finally:
