@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 # --- CONFIGURAÇÕES DE CAMINHO ---
-PATH_DB = "ranking/ranking_db.json"
+PATH_DB = "ranking_db.json"
 PATH_PENDENTES = "ranking/pendentes.json"
 
 def log(etapa, mensagem):
@@ -21,6 +21,7 @@ def configurar_driver():
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
@@ -41,28 +42,35 @@ def validar_palpite(mercado_str, g_c, g_f):
 def main():
     log("INÍCIO", "Iniciando Processamento de Ranking")
 
-    # --- TRAVA DE SEGURANÇA: DATA DO ARQUIVO ---
     if not os.path.exists(PATH_PENDENTES):
         log("AVISO", "Arquivo pendentes.json não encontrado. Nada para processar.")
         return
 
-    # Pega a data que o arquivo foi modificado
-    data_modificacao = date.fromtimestamp(os.path.getmtime(PATH_PENDENTES))
-    hoje = date.today()
-
-    if data_modificacao >= hoje:
-        log("TRAVA", f"O arquivo pendentes.json é de hoje ({data_modificacao}). O ranking só roda jogos de ONTEM.")
-        log("DICA", "Aguarde até amanhã para validar os jogos que o main gerou hoje.")
-        return
-
-    # --- CARREGAMENTO DE DADOS ---
+    # --- CARREGAMENTO DE DADOS E VALIDAÇÃO DE DATA ---
     with open(PATH_PENDENTES, 'r', encoding='utf-8') as f:
-        pendentes = json.load(f)
+        dados_pendentes = json.load(f)
+
+    # Suporte ao novo formato (dicionário) ou antigo (lista direta)
+    if isinstance(dados_pendentes, dict):
+        data_geracao = dados_pendentes.get("data_geracao", "")
+        pendentes = dados_pendentes.get("jogos", [])
+    else:
+        data_geracao = "antigo"
+        pendentes = dados_pendentes
+
+    hoje_str = date.today().strftime("%Y-%m-%d")
+
+    # TRAVA: Só processa se a data gravada no arquivo for anterior a hoje
+    if data_geracao == hoje_str:
+        log("TRAVA", f"O arquivo pendentes.json já é de hoje ({data_geracao}).")
+        log("DICA", "O ranking só processa jogos de ONTEM. Aguarde o próximo ciclo.")
+        return
 
     if not pendentes:
-        log("AVISO", "A lista de pendentes está vazia.")
+        log("AVISO", "A lista de jogos pendentes está vazia.")
         return
 
+    # --- CARREGAMENTO DO BANCO DE DADOS ---
     if os.path.exists(PATH_DB):
         with open(PATH_DB, 'r', encoding='utf-8') as f:
             db = json.load(f)
@@ -85,8 +93,11 @@ def main():
                 wait = WebDriverWait(driver, 15)
                 
                 # Busca o placar no topo da página de resumo
-                score_casa = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".detailScore__wrapper span:nth-child(1)"))).text
-                score_fora = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".detailScore__wrapper span:nth-child(3)"))).text
+                score_casa_el = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".detailScore__wrapper span:nth-child(1)")))
+                score_fora_el = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".detailScore__wrapper span:nth-child(3)")))
+                
+                score_casa = score_casa_el.text.strip()
+                score_fora = score_fora_el.text.strip()
                 
                 if score_casa.isdigit() and score_fora.isdigit():
                     g_c, g_f = int(score_casa), int(score_fora)
@@ -101,27 +112,31 @@ def main():
                     atualizados += 1
                     log("RESULTADO", f"{'✅ GREEN' if deu_green else '❌ RED'} ({g_c}-{g_f})")
                 else:
-                    log("PULANDO", "Jogo ainda não encerrado ou placar não disponível.")
+                    log("PULANDO", f"Placar inválido ou jogo em andamento: {score_casa}-{score_fora}")
 
             except Exception as e:
-                log("ERRO", f"Não foi possível ler o jogo {jogo['time_casa']}: {e}")
+                log("ERRO", f"Erro ao ler {jogo['time_casa']}: {str(e)[:50]}...")
 
-        # --- SALVAMENTO E LIMPEZA ---
+        # --- SALVAMENTO E RESET DO ARQUIVO ---
         db["stats"] = stats
         db["ultima_atualizacao"] = datetime.now().strftime("%d/%m/%Y %H:%M")
         
         with open(PATH_DB, 'w', encoding='utf-8') as f:
             json.dump(db, f, indent=4, ensure_ascii=False)
         
-        # Limpa o arquivo para não processar os mesmos jogos de novo
+        # Limpa mantendo a data de hoje para manter a trava ativa
+        dados_reset = {
+            "data_geracao": hoje_str,
+            "jogos": []
+        }
         with open(PATH_PENDENTES, 'w', encoding='utf-8') as f:
-            json.dump([], f)
+            json.dump(dados_reset, f, indent=4, ensure_ascii=False)
             
-        log("FIM", f"Processo concluído. {atualizados} jogos contabilizados no Ranking DB.")
+        log("FIM", f"Processo concluído. {atualizados} jogos contabilizados.")
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-        
+                    
