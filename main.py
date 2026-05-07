@@ -285,20 +285,41 @@ def main():
                 print("📢 Bingos enviados.")
 
             # --- NOVO: SALVAMENTO DO ARQUIVO PARA O RANKING COM DATA ---
+            # --- TRAVA DE SEGURANÇA: ESCRITA ÚNICA POR DIA ---
             import json
             os.makedirs("ranking", exist_ok=True)
+            caminho_p = "ranking/pendentes.json"
+            data_hoje = hoje_ref.strftime("%Y-%m-%d")
             
-            dados_final = {
-                "data_geracao": hoje_ref.strftime("%Y-%m-%d"),
-                "jogos": jogos_para_pendentes
-            }
-            
-            with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
-                json.dump(dados_final, f, indent=4, ensure_ascii=False)
-            
-            print(f"✅ {len(jogos_para_pendentes)} jogos salvos para o ranking com data {dados_final['data_geracao']}.")
-            
+            ja_existe_hoje = False
+
+            # Verifica se o arquivo já foi "lacrado" hoje
+            if os.path.exists(caminho_p):
+                try:
+                    with open(caminho_p, 'r', encoding='utf-8') as f:
+                        dados_existentes = json.load(f)
+                        if isinstance(dados_existentes, dict) and dados_existentes.get("data_geracao") == data_hoje:
+                            # Se o arquivo tem a data de hoje e contém jogos, ativamos a trava
+                            if len(dados_existentes.get("jogos", [])) > 0:
+                                ja_existe_hoje = True
+                except:
+                    ja_existe_hoje = False # Em caso de erro no JSON, permite sobrescrever
+
+            if not ja_existe_hoje and jogos_para_pendentes:
+                dados_final = {
+                    "data_geracao": data_hoje,
+                    "jogos": jogos_para_pendentes
+                }
+                with open(caminho_p, "w", encoding="utf-8") as f:
+                    json.dump(dados_final, f, indent=4, ensure_ascii=False)
+                print(f"✅ Pendentes Salvos: {len(jogos_para_pendentes)} jogos guardados para o ranking.")
+            elif ja_existe_hoje:
+                print(f"🚫 BLOQUEIO DE SEGURANÇA: O arquivo de hoje ({data_hoje}) já está preenchido. Seus testes não afetarão o ranking.")
+            else:
+                print("ℹ️ Nenhum jogo encontrado para salvar.")
+
             print("✅ Processamento concluído com sucesso.")
+
     except Exception as e:
         print(f"❌ Erro Crítico no Main: {e}")
     finally:
