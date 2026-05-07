@@ -37,7 +37,6 @@ COMPETICOES = {
     # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
     "Copa dos Campeões - CONCACAF": "https://www.flashscore.com.br/futebol/america-do-norte-e-central/copa-dos-campeoes-da-concacaf/jogos",
     "México - Liga MX": "https://www.flashscore.com.br/futebol/mexico/liga-mx/jogos/",
-    "Albânia - Super Liga": "https://www.flashscore.com.br/futebol/albania/super-liga/",
     "Andorra - Primeira Divisão": "https://www.flashscore.com.br/futebol/andorra/primeira-divisao/",
     "Argélia - Liga 1": "https://www.flashscore.com.br/futebol/argelia/1-divisao/jogos/",
     "Espanha - La Liga 2": "https://www.flashscore.com.br/futebol/espanha/laliga2/jogos/",
