@@ -1,0 +1,27 @@
+name: Bot Telegram Sob Demanda
+
+on:
+  repository_dispatch:
+    types: [comando_telegram] # O nome do "sinal" que a ponte vai enviar
+
+jobs:
+  executar_bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Instalar Dependências
+        run: pip install requests
+
+      - name: Processar Pedido do Usuário
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ github.event.client_payload.chat_id }}
+          TIPO_BINGO: ${{ github.event.client_payload.tipo }}
+        run: python telegram/processador.py
