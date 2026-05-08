@@ -318,6 +318,16 @@ def main():
             else:
                 print("ℹ️ Nenhum jogo encontrado para salvar.")
 
+            # --- SALVAMENTO PARA O BOT DO TELEGRAM (SOB DEMANDA) ---
+            os.makedirs("telegram", exist_ok=True)
+            caminho_banco = f"telegram/jogos_{data_hoje}.json"
+
+            # Salvamos a lista_para_filtros (que tem todos os dados minerados)
+            with open(caminho_banco, "w", encoding="utf-8") as f:
+                json.dump(lista_para_filtros, f, indent=4, ensure_ascii=False)
+
+            print(f"📂 Banco de dados do dia salvo para o Bot: {caminho_banco}")
+
             print("✅ Processamento concluído com sucesso.")
 
     except Exception as e:
