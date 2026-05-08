@@ -99,18 +99,24 @@ def main():
                 score_casa = score_casa_el.text.strip()
                 score_fora = score_fora_el.text.strip()
                 
-                if score_casa.isdigit() and score_fora.isdigit():
+                                if score_casa.isdigit() and score_fora.isdigit():
                     g_c, g_f = int(score_casa), int(score_fora)
                     deu_green = validar_palpite(jogo['mercado'], g_c, g_f)
                     
-                    m_rank = jogo['mercado_ranking']
-                    if m_rank not in stats: stats[m_rank] = {"green": 0, "red": 0}
+                    # --- PADRONIZAÇÃO DA CHAVE (REMOVE ESPAÇOS E DEIXA TUDO IGUAL) ---
+                    m_rank = jogo['mercado_ranking'].strip().upper()
                     
-                    if deu_green: stats[m_rank]['green'] += 1
-                    else: stats[m_rank]['red'] += 1
+                    if m_rank not in stats: 
+                        stats[m_rank] = {"green": 0, "red": 0}
+                    
+                    if deu_green: 
+                        stats[m_rank]['green'] += 1
+                    else: 
+                        stats[m_rank]['red'] += 1
                     
                     atualizados += 1
                     log("RESULTADO", f"{'✅ GREEN' if deu_green else '❌ RED'} ({g_c}-{g_f})")
+
                 else:
                     log("PULANDO", f"Placar inválido ou jogo em andamento: {score_casa}-{score_fora}")
 
