@@ -39,5 +39,11 @@ jobs:
         run: |
           git config --global user.name "GitHub Action Bot"
           git config --global user.email "action@github.com"
-          git add ranking/ranking_db.json
+          
+          # Adiciona o banco de dados (ajustado para a raiz onde ele está sendo criado)
+          # E adiciona o pendentes.json que foi limpo
+          git add ranking_db.json ranking/pendentes.json
+          
+          # Tenta o commit; se não houver mudanças, não quebra o fluxo
           git diff --quiet && git diff --staged --quiet || (git commit -m "Ranking atualizado automaticamente [skip ci]" && git push)
+
