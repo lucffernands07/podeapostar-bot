@@ -17,6 +17,8 @@ from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
 import odds  
 import bingo357  
 import links
+from telegram import menus
+
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -281,8 +283,10 @@ def main():
             canal_id = os.getenv('CHANNEL_ID')
             if texto_bingos_final and canal_id:
                 msg_bingo_formatada = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_bingos_final
-                enviar_telegram(msg_bingo_formatada, canal_id)
-                print("📢 Bingos enviados.")
+                # Agora enviando com o menu de botões para o Canal
+                menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
+                print("📢 Bingos enviados com botões para o Canal.")
+
 
             # --- NOVO: SALVAMENTO DO ARQUIVO PARA O RANKING COM DATA ---
             # --- TRAVA DE SEGURANÇA: ESCRITA ÚNICA POR DIA ---
