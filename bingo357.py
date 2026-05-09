@@ -83,7 +83,7 @@ def montar_bilhetes_estrategicos(lista_jogos):
         return (aproveitamento, greens)
 
     # Seleciona os top 5 baseados no ranking de performance
-    lista_premium = sorted(lista_jogos, key=calcular_performance_premium, reverse=True)[:5]
+    lista_premium = sorted(lista_jogos, key=calcular_performance_premium, reverse=True)[:7]
     
     if lista_premium:
         lista_premium.sort(key=lambda x: x['horario'])
