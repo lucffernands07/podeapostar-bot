@@ -99,7 +99,7 @@ def main():
                 score_casa = score_casa_el.text.strip()
                 score_fora = score_fora_el.text.strip()
                 
-                                if score_casa.isdigit() and score_fora.isdigit():
+                if score_casa.isdigit() and score_fora.isdigit():
                     g_c, g_f = int(score_casa), int(score_fora)
                     deu_green = validar_palpite(jogo['mercado'], g_c, g_f)
                     
