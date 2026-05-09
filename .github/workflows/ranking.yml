@@ -35,15 +35,12 @@ jobs:
         run: |
           xvfb-run python ranking/ranking.py
 
-      - name: Salvar Alterações (Git Push)
+      - name: Commit e Push das atualizações
         run: |
           git config --global user.name "GitHub Action Bot"
-          git config --global user.email "action@github.com"
-          
-          # Adiciona o banco de dados (ajustado para a raiz onde ele está sendo criado)
-          # E adiciona o pendentes.json que foi limpo
-          git add ranking_db.json ranking/pendentes.json
-          
-          # Tenta o commit; se não houver mudanças, não quebra o fluxo
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Ranking atualizado automaticamente [skip ci]" && git push)
-
+          git config --global user.email "actions@github.com"
+          # Adiciona especificamente a pasta ranking
+          git add ranking/ranking_db.json ranking/pendentes.json || true
+          git commit -m "Ranking atualizado: $(date +'%d/%m/%Y %H:%M')" || echo "Sem mudanças"
+          git push
+        
