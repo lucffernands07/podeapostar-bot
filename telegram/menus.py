@@ -3,7 +3,8 @@ import requests
 
 def enviar_menu_bingo(chat_id, texto):
     """
-    Envia a mensagem de sugestões com botões inline para gerar novos bingos.
+    Envia a mensagem de sugestões com os botões de Bingo.
+    Ajustado de Bingo 10 para Bingo Pro.
     """
     token = os.getenv('TELEGRAM_TOKEN')
     url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -20,7 +21,7 @@ def enviar_menu_bingo(chat_id, texto):
                 ],
                 [
                     {"text": "🎰 Bingo 7", "callback_data": "bingo_7"},
-                    {"text": "🎰 Bingo 10", "callback_data": "bingo_10"}
+                    {"text": "🎰 Bingo Pro", "callback_data": "bingo_premium"} 
                 ]
             ]
         }
@@ -28,4 +29,4 @@ def enviar_menu_bingo(chat_id, texto):
 
     response = requests.post(url, json=payload)
     return response.json()
-  
+    
