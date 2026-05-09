@@ -313,20 +313,16 @@ def main():
                     print(f"⚠️ Arquivo de ranking corrompido ou ilegível, resetando: {e}")
                     pode_gravar = True
 
-            # SÓ GRAVA SE: (Não houver bloqueio) E (A lista atual não estiver vazia)
-            if pode_gravar and lista_para_filtros:
-                # Adicionamos o mercado_ranking aqui para não precisar mexer no loop
-                for j in lista_para_filtros:
-                    j["mercado_ranking"] = j.get("mercado", "").upper()
-
+            # --- SALVAMENTO COM TRAVA DE SEGURANÇA INTELIGENTE ---
+            if pode_gravar and jogos_para_pendentes: # <--- Use a lista de pendentes aqui
                 dados_final = {
                     "data_geracao": data_hoje,
-                    "jogos": lista_para_filtros 
+                    "jogos": jogos_para_pendentes # <--- E aqui também
                 }
                 
                 with open(caminho_p, "w", encoding="utf-8") as f:
                     json.dump(dados_final, f, indent=4, ensure_ascii=False)
-                print(f"✅ Ranking: Primeira execução do dia salva ({len(lista_para_filtros)} jogos).")
+                print(f"✅ Ranking: Primeira execução do dia salva ({len(jogos_para_pendentes)} jogos).")
             
             elif not pode_gravar:
                 print(f"🚫 BLOQUEIO: O Ranking de hoje ({data_hoje}) já foi consolidado na 1ª execução.")
