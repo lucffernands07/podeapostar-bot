@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 # --- CONFIGURAÇÕES DE CAMINHO ---
-PATH_DB = "ranking_db.json"
+PATH_DB = "ranking/ranking_db.json"
 PATH_PENDENTES = "ranking/pendentes.json"
 
 def log(etapa, mensagem):
