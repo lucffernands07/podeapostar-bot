@@ -288,39 +288,50 @@ def main():
                 print("📢 Bingos enviados com botões para o Canal.")
 
 
-            # --- SALVAMENTO DO ARQUIVO PARA O RANKING COM DATA ---
+            # --- SALVAMENTO COM TRAVA DE SEGURANÇA INTELIGENTE ---
             import json
             os.makedirs("ranking", exist_ok=True)
             caminho_p = "ranking/pendentes.json"
             data_hoje = hoje_ref.strftime("%Y-%m-%d")
             
-            ja_existe_hoje = False
+            pode_gravar = True # Por padrão, tentamos gravar
+
             if os.path.exists(caminho_p):
                 try:
                     with open(caminho_p, 'r', encoding='utf-8') as f:
-                        dados_existentes = json.load(f)
-                        if isinstance(dados_existentes, dict) and dados_existentes.get("data_geracao") == data_hoje:
-                            if len(dados_existentes.get("jogos", [])) > 0:
-                                ja_existe_hoje = True
-                except:
-                    ja_existe_hoje = False
+                        conteudo = f.read().strip()
+                        if not conteudo: # Arquivo existe mas está vazio (erro de escrita anterior)
+                            pode_gravar = True
+                        else:
+                            dados_existentes = json.loads(conteudo)
+                            # Se já existe gravação de HOJE e tem JOGOS, aí sim bloqueamos
+                            if dados_existentes.get("data_geracao") == data_hoje:
+                                if len(dados_existentes.get("jogos", [])) > 0:
+                                    pode_gravar = False
+                except (json.JSONDecodeError, Exception) as e:
+                    # Se o arquivo estiver corrompido, ignoramos o bloqueio e gravamos por cima
+                    print(f"⚠️ Arquivo de ranking corrompido ou ilegível, resetando: {e}")
+                    pode_gravar = True
 
-            # MANTEMOS O SEU BLOQUEIO: Só salva se for a primeira vez do dia
-            if not ja_existe_hoje and lista_para_filtros:
-                # Aqui está o segredo: salvamos a 'lista_para_filtros' 
-                # que já tem horario, liga e odd dentro!
+            # SÓ GRAVA SE: (Não houver bloqueio) E (A lista atual não estiver vazia)
+            if pode_gravar and lista_para_filtros:
+                # Adicionamos o mercado_ranking aqui para não precisar mexer no loop
+                for j in lista_para_filtros:
+                    j["mercado_ranking"] = j.get("mercado", "").upper()
+
                 dados_final = {
                     "data_geracao": data_hoje,
                     "jogos": lista_para_filtros 
                 }
+                
                 with open(caminho_p, "w", encoding="utf-8") as f:
                     json.dump(dados_final, f, indent=4, ensure_ascii=False)
-                print(f"✅ Primeira execução do dia: Pendentes salvos com dados completos ({len(lista_para_filtros)} jogos).")
+                print(f"✅ Ranking: Primeira execução do dia salva ({len(lista_para_filtros)} jogos).")
             
-            elif ja_existe_hoje:
-                print(f"🚫 BLOQUEIO ATIVO: O arquivo de hoje ({data_hoje}) já possui os jogos da primeira execução. Nada foi alterado.")
+            elif not pode_gravar:
+                print(f"🚫 BLOQUEIO: O Ranking de hoje ({data_hoje}) já foi consolidado na 1ª execução.")
             else:
-                print("ℹ️ Nenhum jogo encontrado para salvar.")
+                print("ℹ️ Nenhuma gravação feita: A varredura atual não encontrou jogos válidos.")
 
             # --- SALVAMENTO PARA O BOT DO TELEGRAM (SOB DEMANDA) ---
             os.makedirs("telegram", exist_ok=True)
