@@ -1,82 +1,341 @@
 {
-    "data_geracao": "2026-05-08",
+    "data_geracao": "2026-05-09",
     "jogos": [
         {
-            "time_casa": "Kolos Kovalivka",
-            "time_fora": "Kudrivka",
+            "time_casa": "Coritiba",
+            "time_fora": "Internacional",
             "mercado": "+1.5 Gols (70%)",
             "mercado_ranking": "+1.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/search/?q=Kolos+Kovalivka+x+Kudrivka"
+            "link_h2h": "https://www.flashscore.com.br/jogo/IBwXpQUP/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Kolos Kovalivka",
-            "time_fora": "Kudrivka",
-            "mercado": "1X (85%)",
-            "mercado_ranking": "1X (85%)",
-            "link_h2h": "https://www.flashscore.com.br/search/?q=Kolos+Kovalivka+x+Kudrivka"
-        },
-        {
-            "time_casa": "Kolos Kovalivka",
-            "time_fora": "Kudrivka",
-            "mercado": "Vitória Casa (100%)",
-            "mercado_ranking": "VITORIA CASA (100%)",
-            "link_h2h": "https://www.flashscore.com.br/search/?q=Kolos+Kovalivka+x+Kudrivka"
-        },
-        {
-            "time_casa": "Khenchela",
-            "time_fora": "El Bayadh",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/search/?q=Khenchela+x+El+Bayadh"
-        },
-        {
-            "time_casa": "Olympique Akbou",
-            "time_fora": "Belouizdad",
-            "mercado": "+1.5 Gols (70%)",
-            "mercado_ranking": "+1.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/search/?q=Olympique+Akbou+x+Belouizdad"
-        },
-        {
-            "time_casa": "Olympique Akbou",
-            "time_fora": "Belouizdad",
+            "time_casa": "Coritiba",
+            "time_fora": "Internacional",
             "mercado": "Ambas Marcam: Sim (80%)",
             "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/search/?q=Olympique+Akbou+x+Belouizdad"
+            "link_h2h": "https://www.flashscore.com.br/jogo/IBwXpQUP/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Ilves",
-            "time_fora": "Oulu",
+            "time_casa": "Fluminense",
+            "time_fora": "Vitória",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/search/?q=Ilves+x+Oulu"
+            "link_h2h": "https://www.flashscore.com.br/jogo/zJQ0Pi2k/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Rakow",
-            "time_fora": "Korona",
+            "time_casa": "Goiás",
+            "time_fora": "Vila Nova",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/search/?q=Rakow+x+Korona"
+            "link_h2h": "https://www.flashscore.com.br/jogo/MRafdHWh/#/resumo-de-jogo"
         },
         {
-            "time_casa": "MC Alger",
-            "time_fora": "Rouisset",
+            "time_casa": "Athletic Club",
+            "time_fora": "Cuiabá",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6s4VudnC/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Athletic Club",
+            "time_fora": "Cuiabá",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6s4VudnC/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "CRB",
+            "time_fora": "Operário",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AV4IjD0U/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "CRB",
+            "time_fora": "Operário",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AV4IjD0U/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "CRB",
+            "time_fora": "Operário",
+            "mercado": "1X (85%)",
+            "mercado_ranking": "1X (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AV4IjD0U/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Juventude",
+            "time_fora": "Criciúma",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vouSAGon/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Ind. Rivadavia",
+            "time_fora": "Union Santa Fe",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2oe7hmgf/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Ind. Rivadavia",
+            "time_fora": "Union Santa Fe",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2oe7hmgf/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Manchester City",
+            "time_fora": "Brentford",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4IfWN9Ha/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Atl. Madrid",
+            "time_fora": "Celta de Vigo",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2gftWHYO/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Wolfsburg",
+            "time_fora": "Bayern",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fmc5MPPP/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Lecce",
+            "time_fora": "Juventus",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vs8dmPk5/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Lecce",
+            "time_fora": "Juventus",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vs8dmPk5/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Toronto FC",
+            "time_fora": "Inter Miami",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xzD74zK8/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Toronto FC",
+            "time_fora": "Inter Miami",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xzD74zK8/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "CF Montreal",
+            "time_fora": "Orlando City",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ptQLtXR1/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Atlanta Utd",
+            "time_fora": "Los Angeles Galaxy",
             "mercado": "+1.5 Gols (100%)",
             "mercado_ranking": "+1.5 GOLS (100%)",
-            "link_h2h": "https://www.flashscore.com.br/search/?q=MC+Alger+x+Rouisset"
+            "link_h2h": "https://www.flashscore.com.br/jogo/vPlInpx2/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Dortmund",
-            "time_fora": "Frankfurt",
+            "time_casa": "Colorado Rapids",
+            "time_fora": "St. Louis City",
+            "mercado": "-4.5 Gols (70%)",
+            "mercado_ranking": "-4.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WzVunS3s/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "San Jose Earthquakes",
+            "time_fora": "Vancouver Whitecaps",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vNXlW7ph/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Al-Fayha",
+            "time_fora": "Al-Qadsiah",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vyuEhb5S/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Al-Jubail",
+            "time_fora": "Al-Ula",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bkahV5yq/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Al-Zulfi",
+            "time_fora": "Al-Raed",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/h8rekRSE/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Club Brugge",
+            "time_fora": "St. Truiden",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/pKiiYzjA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Club Brugge",
+            "time_fora": "St. Truiden",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/pKiiYzjA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Alanyaspor",
+            "time_fora": "Kayserispor",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/GWWowehe/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Basaksehir",
+            "time_fora": "Samsunspor",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/f334QH8k/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Besiktas",
+            "time_fora": "Trabzonspor",
             "mercado": "-4.5 Gols (100%)",
             "mercado_ranking": "-4.5 GOLS (100%)",
-            "link_h2h": "https://www.flashscore.com.br/search/?q=Dortmund+x+Frankfurt"
+            "link_h2h": "https://www.flashscore.com.br/jogo/AVRXVwoS/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Venezia",
-            "time_fora": "Palermo",
-            "mercado": "+1.5 Gols (100%)",
-            "mercado_ranking": "+1.5 GOLS (100%)",
-            "link_h2h": "https://www.flashscore.com.br/search/?q=Venezia+x+Palermo"
+            "time_casa": "Eyupspor",
+            "time_fora": "Rizespor",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/86TwuHNr/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Cruz Azul",
+            "time_fora": "Atlas",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Q19O3AJi/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Cruz Azul",
+            "time_fora": "Atlas",
+            "mercado": "Vitória Casa 💎 (100%)",
+            "mercado_ranking": "VITÓRIA CASA 💎 (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Q19O3AJi/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Málaga",
+            "time_fora": "Sporting Gijón",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rDc0ZqJj/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Málaga",
+            "time_fora": "Sporting Gijón",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rDc0ZqJj/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Málaga",
+            "time_fora": "Sporting Gijón",
+            "mercado": "Vitória Casa 💎 (100%)",
+            "mercado_ranking": "VITÓRIA CASA 💎 (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rDc0ZqJj/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Nurnberg",
+            "time_fora": "Schalke",
+            "mercado": "-4.5 Gols (70%)",
+            "mercado_ranking": "-4.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dj2uWqvf/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Annecy",
+            "time_fora": "Rodez",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EHVB9jAl/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Annecy",
+            "time_fora": "Rodez",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EHVB9jAl/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Grenoble",
+            "time_fora": "Troyes",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8GjXGYHE/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Nancy",
+            "time_fora": "Dunkerque",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fXluFCnR/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Nancy",
+            "time_fora": "Dunkerque",
+            "mercado": "1X (85%)",
+            "mercado_ranking": "1X (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fXluFCnR/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Nancy",
+            "time_fora": "Dunkerque",
+            "mercado": "Vitória Casa 💎 (100%)",
+            "mercado_ranking": "VITÓRIA CASA 💎 (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fXluFCnR/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Red Star",
+            "time_fora": "Montpellier",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/htfdFLtA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Red Star",
+            "time_fora": "Montpellier",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/htfdFLtA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Red Star",
+            "time_fora": "Montpellier",
+            "mercado": "1X (85%)",
+            "mercado_ranking": "1X (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/htfdFLtA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Varazdin",
+            "time_fora": "Lok. Zagreb",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AsME69Kk/#/resumo-de-jogo"
         }
     ]
 }
