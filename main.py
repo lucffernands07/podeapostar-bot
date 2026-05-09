@@ -288,14 +288,13 @@ def main():
                 print("📢 Bingos enviados com botões para o Canal.")
 
 
-            # --- NOVO: SALVAMENTO DO ARQUIVO PARA O RANKING COM DATA ---
+            # --- SALVAMENTO DO ARQUIVO PARA O RANKING COM DATA ---
             import json
             os.makedirs("ranking", exist_ok=True)
             caminho_p = "ranking/pendentes.json"
             data_hoje = hoje_ref.strftime("%Y-%m-%d")
             
             ja_existe_hoje = False
-
             if os.path.exists(caminho_p):
                 try:
                     with open(caminho_p, 'r', encoding='utf-8') as f:
@@ -306,31 +305,20 @@ def main():
                 except:
                     ja_existe_hoje = False
 
-            # CORREÇÃO AQUI: Usamos a lista_para_filtros que já sabemos que está completa
+            # MANTEMOS O SEU BLOQUEIO: Só salva se for a primeira vez do dia
             if not ja_existe_hoje and lista_para_filtros:
-                # Criamos a lista final garantindo que todos os campos do bingo estejam presentes
-                jogos_completos = []
-                for j in lista_para_filtros:
-                    jogos_completos.append({
-                        "time_casa": j.get('time_casa'),
-                        "time_fora": j.get('time_fora'),
-                        "mercado": j.get('mercado'),
-                        "mercado_ranking": j.get('mercado', '').upper(),
-                        "horario": j.get('horario', '00:00'),
-                        "liga": j.get('liga', 'Futebol'),
-                        "odd": j.get('odd', '1.00'),
-                        "link_h2h": j.get('link_h2h', '')
-                    })
-
+                # Aqui está o segredo: salvamos a 'lista_para_filtros' 
+                # que já tem horario, liga e odd dentro!
                 dados_final = {
                     "data_geracao": data_hoje,
-                    "jogos": jogos_completos
+                    "jogos": lista_para_filtros 
                 }
                 with open(caminho_p, "w", encoding="utf-8") as f:
                     json.dump(dados_final, f, indent=4, ensure_ascii=False)
-                print(f"✅ Pendentes Salvos com dados completos: {len(jogos_completos)} jogos.")
+                print(f"✅ Primeira execução do dia: Pendentes salvos com dados completos ({len(lista_para_filtros)} jogos).")
+            
             elif ja_existe_hoje:
-                print(f"🚫 BLOQUEIO DE SEGURANÇA: O arquivo de hoje ({data_hoje}) já está preenchido. Seus testes não afetarão o ranking.")
+                print(f"🚫 BLOQUEIO ATIVO: O arquivo de hoje ({data_hoje}) já possui os jogos da primeira execução. Nada foi alterado.")
             else:
                 print("ℹ️ Nenhum jogo encontrado para salvar.")
 
