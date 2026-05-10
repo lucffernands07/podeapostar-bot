@@ -1,5 +1,5 @@
 {
-    "data_geracao": "2026-05-09",
+    "data_geracao": "2026-05-10",
     "jogos": [
         {
             "time_casa": "Atlético-MG",
@@ -77,6 +77,27 @@
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
             "link_h2h": "https://www.flashscore.com.br/jogo/6yDYeMan/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Estudiantes",
+            "time_fora": "Racing Club",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/G81Nl5hJ/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Estudiantes",
+            "time_fora": "Racing Club",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/G81Nl5hJ/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Vélez Sarsfield",
+            "time_fora": "Gimnasia L.P.",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ABbFjRN6/#/resumo-de-jogo"
         },
         {
             "time_casa": "Burnley",
@@ -338,20 +359,6 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/6uXayljD/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Nordsjaelland",
-            "time_fora": "Midtjylland",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/IaM5TfG6/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Vejle",
-            "time_fora": "Fredericia",
-            "mercado": "+2.5 Gols (85%)",
-            "mercado_ranking": "+2.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/dQTnGabt/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Silkeborg",
             "time_fora": "FC Copenhagen",
             "mercado": "+2.5 Gols (85%)",
@@ -429,53 +436,11 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/Ikx3g5AM/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Dusseldorf",
-            "time_fora": "Elversberg",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/4hN0wSoK/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Hertha",
-            "time_fora": "Furth",
-            "mercado": "-4.5 Gols (85%)",
-            "mercado_ranking": "-4.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/x0AmUN86/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Munster",
-            "time_fora": "Darmstadt",
-            "mercado": "+2.5 Gols (70%)",
-            "mercado_ranking": "+2.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/AD8eS1wJ/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Munster",
-            "time_fora": "Darmstadt",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/AD8eS1wJ/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "SC Poltava",
             "time_fora": "Shakhtar",
             "mercado": "Ambas Marcam: Sim (80%)",
             "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
             "link_h2h": "https://www.flashscore.com.br/jogo/IsKr69zJ/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Piast",
-            "time_fora": "Katowice",
-            "mercado": "+1.5 Gols (100%)",
-            "mercado_ranking": "+1.5 GOLS (100%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/O8tlUTVp/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Piast",
-            "time_fora": "Katowice",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/O8tlUTVp/#/resumo-de-jogo"
         },
         {
             "time_casa": "Slaven Belupo",
