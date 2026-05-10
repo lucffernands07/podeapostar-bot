@@ -339,15 +339,29 @@ def main():
             else:
                 print("ℹ️ Nenhuma gravação feita: A varredura atual não encontrou jogos válidos.")
 
-            # --- SALVAMENTO PARA O BOT DO TELEGRAM (SOB DEMANDA) ---
+                        # --- SALVAMENTO PARA O BOT DO TELEGRAM (SOB DEMANDA) ---
             os.makedirs("telegram", exist_ok=True)
             caminho_banco = f"telegram/jogos_{data_hoje}.json"
 
-            # Salvamos a lista_para_filtros (que tem todos os dados minerados)
+            # Criamos uma estrutura limpa e otimizada para o Bot ler rápido
+            dados_para_o_bot = []
+            for j in lista_para_filtros:
+                dados_para_o_bot.append({
+                    "horario": j.get("horario"),
+                    "liga": j.get("liga"),
+                    "time_casa": j.get("time_casa"),
+                    "time_fora": j.get("time_fora"),
+                    "mercado": j.get("mercado"),
+                    "odd": j.get("odd"),
+                    "link_betano": j.get("link_betano") # <--- O SEGREDO DO BOTÃO ESTÁ AQUI
+                })
+
+            # Salvamos o arquivo que o GitHub Actions vai consultar ao clicar no botão
             with open(caminho_banco, "w", encoding="utf-8") as f:
-                json.dump(lista_para_filtros, f, indent=4, ensure_ascii=False)
+                json.dump(dados_para_o_bot, f, indent=4, ensure_ascii=False)
 
             print(f"📂 Banco de dados do dia salvo para o Bot: {caminho_banco}")
+
 
             print("✅ Processamento concluído com sucesso.")
 
