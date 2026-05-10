@@ -276,9 +276,20 @@ def main():
                 enviar_telegram(cabecalho + corpo, meu_chat_id)
                 print("📨 Listão enviado.")
 
+            # --- GERAÇÃO E FORMATAÇÃO DOS BINGOS ---
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
-            cache_links = {f"{j['time_casa']}x{j['time_fora']}": j.get("link_betano") for j in lista_para_filtros if j.get("link_betano")}
-            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_links)
+            # Criamos um cache completo com todos os dados que costumam sumir (Hora, Liga, Odd)
+            cache_dados = {}
+            for j in lista_para_filtros:
+                chave = f"{j['time_casa']}x{j['time_fora']}"
+                cache_dados[chave] = {
+                    "link": j.get("link_betano"),
+                    "liga": j.get("liga"),
+                    "horario": j.get("horario"),
+                    "odd": j.get("odd")
+                }
+            # Agora passamos o cache robusto para o formatador
+            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
 
             canal_id = os.getenv('CHANNEL_ID')
             if texto_bingos_final and canal_id:
