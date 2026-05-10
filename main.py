@@ -313,7 +313,6 @@ def main():
                     print(f"⚠️ Arquivo de ranking corrompido ou ilegível, resetando: {e}")
                     pode_gravar = True
 
-            # --- SALVAMENTO COM TRAVA DE SEGURANÇA INTELIGENTE ---
             if pode_gravar and jogos_para_pendentes: # <--- Use a lista de pendentes aqui
                 dados_final = {
                     "data_geracao": data_hoje,
