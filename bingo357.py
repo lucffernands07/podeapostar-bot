@@ -106,7 +106,7 @@ def montar_bilhetes_estrategicos(dados_entrada):
 
     return bilhetes
 
-def formatar_para_telegram(bilhetes, cache_links):
+def formatar_para_telegram(bilhetes, cache_dados):
     if not bilhetes: return ""
     blocos = []
     
@@ -116,34 +116,46 @@ def formatar_para_telegram(bilhetes, cache_links):
         agrupados = {}
         
         for j in b['jogos']:
+            # 1. Busca as informações completas no cache usando os nomes dos times
+            chave_cache = f"{j.get('time_casa')}x{j.get('time_fora')}"
+            info_extra = cache_dados.get(chave_cache, {})
+
+            # 2. RECUPERAÇÃO DE DADOS: Se o jogo vier "pelado" (sem hora/odd/liga), 
+            # ele busca no cache_dados que o main.py enviou.
+            horario = j.get('horario') or info_extra.get('horario', '00:00')
+            liga = j.get('liga') or info_extra.get('liga', 'Futebol')
+            odd_valor = j.get('odd') or info_extra.get('odd', '1.0')
+            link_final = info_extra.get('link') or "https://www.betano.bet.br/"
+
             # Chave única para agrupar mercados do mesmo jogo no bilhete
-            chave_jogo = f"{j.get('horario', '00:00')}_{j.get('time_casa', 'Casa')}_{j.get('time_fora', 'Fora')}"
+            chave_jogo = f"{horario}_{j.get('time_casa')}_{j.get('time_fora')}"
             
             if chave_jogo not in agrupados:
                 agrupados[chave_jogo] = {
-                    "horario": j.get('horario', '00:00'),
-                    "liga": j.get('liga', 'Futebol'),
+                    "horario": horario,
+                    "liga": liga,
                     "time_casa": j.get('time_casa', 'Casa'),
                     "time_fora": j.get('time_fora', 'Fora'),
                     "mercados": [],
-                    "link": cache_links.get(f"{j.get('time_casa')}x{j.get('time_fora')}", "https://www.betano.bet.br/sport/futebol/")
+                    "link": link_final
                 }
             
+            # Aqui garantimos que a Odd exibida no texto seja a do cache
             agrupados[chave_jogo]["mercados"].append({
-                "texto": f"🔶 {j.get('mercado')} | Odd: {j.get('odd', '1.0')}",
+                "texto": f"🔶 {j.get('mercado')} | Odd: {odd_valor}",
                 "prioridade": prioridade_mercado(j.get('mercado', ''))
             })
             
-            odd_total *= extrair_odd(j.get('odd', '1.0'))
+            odd_total *= extrair_odd(odd_valor)
 
+        # --- MONTAGEM DO TEXTO FINAL DO BLOCO ---
         lista_blocos_jogos = []
         for chave in agrupados:
             dados = agrupados[chave]
             dados["mercados"].sort(key=lambda x: x['prioridade'])
             
             linhas_mercados = "\n".join([m['texto'] for m in dados["mercados"]])
-            link_cru = dados['link']
-            link_limpo = link_cru.replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
+            link_limpo = dados['link'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
             
             bloco_jogo = (
                 f"⏱️ {dados['horario']} | {dados['liga']}\n"
