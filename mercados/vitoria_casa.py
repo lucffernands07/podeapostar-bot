@@ -38,7 +38,7 @@ def verificar_vitoria_casa(s):
         else:
             pct = "80%"
             
-        return [f"Vitória Casa 💎 ({pct})"]
+        return [f"Vitória Casa ({pct})"]
 
     return []
     
