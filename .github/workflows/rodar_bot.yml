@@ -35,11 +35,16 @@ jobs:
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
         run: python main.py
 
-      - name: 2. Salvar pendentes no Repositório
+      - name: 2. Salvar Dados (Ranking e Telegram) no Repositório
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Adiciona ambas as pastas para garantir que o banco de dados do dia suba
           git add ranking/pendentes.json
-          git commit -m "Auto: Atualizando lista de jogos para ranking" || echo "Sem alterações para salvar"
+          git add telegram/jogos_*.json
+          
+          git commit -m "Auto: Atualizando banco de dados e ranking [skip ci]" || echo "Sem alterações para salvar"
           git push
+
           
