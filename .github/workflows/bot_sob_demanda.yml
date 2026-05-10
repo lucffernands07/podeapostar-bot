@@ -2,7 +2,7 @@ name: Bot Telegram Sob Demanda
 
 on:
   repository_dispatch:
-    types: [comando_telegram] # O nome do "sinal" que a ponte vai enviar
+    types: [comando_telegram]
 
 jobs:
   executar_bot:
@@ -17,11 +17,17 @@ jobs:
           python-version: '3.9'
 
       - name: Instalar Dependências
-        run: pip install requests
+        run: |
+          pip install requests
+          # Se o seu bingo357 ou outros módulos usarem algo do requirements.txt, 
+          # descomente a linha abaixo para evitar erros de "ModuleNotFoundError"
+          # pip install -r requirements.txt
 
       - name: Processar Pedido do Usuário
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          # O payload do Telegram envia o chat_id e o tipo (BINGO 3, PREMIUM, etc)
           CHAT_ID: ${{ github.event.client_payload.chat_id }}
           TIPO_BINGO: ${{ github.event.client_payload.tipo }}
         run: python telegram/processador.py
+        
