@@ -1,63 +1,63 @@
-
-import os
 import json
+import os
 import requests
-import sys
+from datetime import datetime
+import bingo357  # Importa seu módulo de lógica
 
-# Importamos as funções de lógica que estão na raiz do projeto
-sys.path.append(os.getcwd())
-from bingo357 import montar_bilhetes_estrategicos, formatar_para_telegram
+def filtrar_jogos_futuros(lista_jogos):
+    """Remove jogos que já começaram baseando-se no horário atual"""
+    agora = datetime.now().strftime("%H:%M")
+    # Filtra apenas jogos cujo horário é maior que o horário de agora
+    return [j for j in lista_jogos if j['horario'] > agora]
 
-def processar_solicitacao_bingo():
-    # 1. Recupera as variáveis enviadas pelo GitHub Actions / Worker
+def executar():
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
-    tipo_solicitado = os.getenv('TIPO_BINGO') # ex: bingo_3, bingo_premium
+    tipo_bingo = os.getenv('TIPO_BINGO') # Ex: "BINGO 3", "PREMIUM"
     
-    # 2. Carrega os jogos que o bot minerou hoje (estão na pasta ranking)
-    caminho_jogos = 'ranking/pendentes.json'
-    
-    if not os.path.exists(caminho_jogos):
-        print("Arquivo pendentes.json não encontrado!")
+    data_hoje = datetime.now().strftime("%Y-%m-%d")
+    caminho_json = f"telegram/jogos_{data_hoje}.json"
+
+    # 1. Carrega o Banco de Dados do dia
+    if not os.path.exists(caminho_json):
+        requests.post(f"https://api.telegram.org/bot{token}/sendMessage", 
+                      data={"chat_id": chat_id, "text": "❌ Erro: O banco de dados de hoje ainda não foi criado."})
         return
 
-    with open(caminho_jogos, 'r', encoding='utf-8') as f:
-        lista_jogos = json.load(f)
+    with open(caminho_json, "r", encoding="utf-8") as f:
+        todos_os_jogos = json.load(f)
 
-    # 3. Monta todos os bilhetes possíveis usando a lógica do bingo357
-    # Passamos um dicionário vazio para cache_links se não tivermos os links agora
-    todos_bilhetes = montar_bilhetes_estrategicos(lista_jogos)
-    
-    # 4. Filtra apenas o bilhete que o usuário clicou
-    # Mapeamento de IDs (ajuste conforme o ID que está no seu bingo357.py)
-    mapeamento = {
-        "bingo_3": "BINGO3",
-        "bingo_5": "BINGO5",
-        "bingo_7": "BINGO7",
-        "bingo_premium": "PREMIUM" # Mude para "bingo_premium" se você já alterou no bingo357
-    }
-    
-    id_alvo = mapeamento.get(tipo_solicitado)
-    bilhete_filtrado = [b for b in todos_bilhetes if b['id'] == id_alvo]
+    # 2. FILTRO DE HORÁRIO: Só o que ainda vai acontecer
+    jogos_disponiveis = filtrar_jogos_futuros(todos_os_jogos)
 
-    if not bilhete_filtrado:
-        mensagem = f"⚠️ Não encontrei jogos suficientes para gerar o {tipo_solicitado} agora."
-    else:
-        # 5. Formata para o padrão do Telegram
-        # Como o pendentes.json já tem os links, passamos um dicionário vazio para o cache
-        mensagem = formatar_para_telegram(bilhete_filtrado, {})
+    if not jogos_disponiveis:
+        requests.post(f"https://api.telegram.org/bot{token}/sendMessage", 
+                      data={"chat_id": chat_id, "text": "⚠️ Não há mais jogos disponíveis para hoje que ainda não começaram."})
+        return
 
-    # 6. Envia para o Telegram
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": mensagem,
-        "parse_mode": "Markdown",
-        "disable_web_page_preview": False
-    }
+    # 3. RE-GERAÇÃO DO BINGO ESPECÍFICO
+    # O bingo357 vai olhar os jogos que restaram e montar o bilhete
+    bilhetes_atualizados = bingo357.montar_bilhetes_estrategicos(jogos_disponiveis)
     
-    requests.post(url, json=payload)
-    print(f"Bingo {tipo_solicitado} enviado com sucesso!")
+    # 4. BUSCA O CACHE DE LINKS/DADOS PARA O BOTÃO
+    # Usamos a mesma lógica de cache que você já tem no main
+    cache_dados = {f"{j['time_casa']}x{j['time_fora']}": {
+        "link": j.get("link_betano"),
+        "liga": j.get("liga"),
+        "horario": j.get("horario"),
+        "odd": j.get("odd")
+    } for j in jogos_disponiveis}
+
+    # 5. FORMATAÇÃO FINAL
+    texto_final = bingo357.formatar_para_telegram(bilhetes_atualizados, cache_dados)
+    
+    # Filtra o texto para enviar apenas o Bingo que o usuário pediu
+    # (Ou envia tudo se preferir)
+    if texto_final:
+        mensagem = f"✅ *{tipo_bingo} ATUALIZADO*\n(Jogos que ainda não começaram)\n\n" + texto_final
+        requests.post(f"https://api.telegram.org/bot{token}/sendMessage", 
+                      data={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
 
 if __name__ == "__main__":
-    processar_solicitacao_bingo()
+    executar()
+    
