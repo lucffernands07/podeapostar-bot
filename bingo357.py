@@ -81,29 +81,28 @@ def montar_bilhetes_estrategicos(dados_entrada):
         bilhetes.append({"id": "BINGO7", "nome": "🍀 BINGO 7: SEGURANÇA", "jogos": lista_bingo7})
 
     # --- BINGO PREMIUM: ELITE ---
-    # --- BINGO PREMIUM: ELITE ---
-stats_db = carregar_ranking_db()
+    stats_db = carregar_ranking_db()
 
-def calcular_performance_premium(jogo):
-    try:
-        mercado_raw = jogo.get('mercado', "")
-        stat = stats_db.get(mercado_raw)
-        
-        if not stat:
-            return (0.0, 0)
-        
-        greens = stat.get("green", 0)
-        reds = stat.get("red", 0)
-        total = greens + reds
-        aproveitamento = (greens / total) if total > 0 else 0.0
-        
-        # Agora retornamos: (Taxa de Acerto, Quantidade de Greens, Valor da Odd)
-        return (aproveitamento, greens, extrair_odd(jogo.get('odd', '1.0')))
-    except:
-        return (0.0, 0, 1.0)
+    def calcular_performance_premium(jogo):
+        try:
+            mercado_raw = jogo.get('mercado', "")
+            stat = stats_db.get(mercado_raw)
+            
+            if not stat:
+                return (0.0, 0, 1.0)
+            
+            greens = stat.get("green", 0)
+            reds = stat.get("red", 0)
+            total = greens + reds
+            aproveitamento = (greens / total) if total > 0 else 0.0
+            
+            # Critérios: 1. % Acerto, 2. Qtd Greens, 3. Valor da Odd
+            return (aproveitamento, greens, extrair_odd(jogo.get('odd', '1.0')))
+        except:
+            return (0.0, 0, 1.0)
 
-# O sorted vai usar os 3 critérios na ordem de importância
-lista_premium = sorted(lista_jogos, key=calcular_performance_premium, reverse=True)[:7]
+    # Seleciona os 7 melhores baseados no ranking histórico
+    lista_premium = sorted(lista_jogos, key=calcular_performance_premium, reverse=True)[:7]
     
     if lista_premium:
         lista_premium.sort(key=lambda x: x.get('horario', '00:00'))
@@ -121,18 +120,14 @@ def formatar_para_telegram(bilhetes, cache_dados):
         agrupados = {}
         
         for j in b['jogos']:
-            # 1. Busca as informações completas no cache usando os nomes dos times
             chave_cache = f"{j.get('time_casa')}x{j.get('time_fora')}"
             info_extra = cache_dados.get(chave_cache, {})
 
-            # 2. RECUPERAÇÃO DE DADOS: Se o jogo vier "pelado" (sem hora/odd/liga), 
-            # ele busca no cache_dados que o main.py enviou.
             horario = j.get('horario') or info_extra.get('horario', '00:00')
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
             odd_valor = j.get('odd') or info_extra.get('odd', '1.0')
             link_final = info_extra.get('link') or "https://www.betano.bet.br/"
 
-            # Chave única para agrupar mercados do mesmo jogo no bilhete
             chave_jogo = f"{horario}_{j.get('time_casa')}_{j.get('time_fora')}"
             
             if chave_jogo not in agrupados:
@@ -145,7 +140,6 @@ def formatar_para_telegram(bilhetes, cache_dados):
                     "link": link_final
                 }
             
-            # Aqui garantimos que a Odd exibida no texto seja a do cache
             agrupados[chave_jogo]["mercados"].append({
                 "texto": f"🔶 {j.get('mercado')} | Odd: {odd_valor}",
                 "prioridade": prioridade_mercado(j.get('mercado', ''))
@@ -153,7 +147,6 @@ def formatar_para_telegram(bilhetes, cache_dados):
             
             odd_total *= extrair_odd(odd_valor)
 
-        # --- MONTAGEM DO TEXTO FINAL DO BLOCO ---
         lista_blocos_jogos = []
         for chave in agrupados:
             dados = agrupados[chave]
@@ -175,3 +168,4 @@ def formatar_para_telegram(bilhetes, cache_dados):
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
+    
