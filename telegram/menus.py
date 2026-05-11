@@ -16,12 +16,12 @@ def enviar_menu_bingo(chat_id, texto):
         "reply_markup": {
             "inline_keyboard": [
                 [
-                    {"text": "🎫 Bingo 3", "callback_data": "bingo_3"},
-                    {"text": "🎫 Bingo 5", "callback_data": "bingo_5"}
+                    {"text": "🔥 Bingo 3", "callback_data": "bingo_3"},
+                    {"text": "🔥 Bingo 5", "callback_data": "bingo_5"}
                 ],
                 [
-                    {"text": "🎫 Bingo 7", "callback_data": "bingo_7"},
-                    {"text": "🎫 Bingo Pro", "callback_data": "bingo_premium"} 
+                    {"text": "🔥 Bingo 7", "callback_data": "bingo_7"},
+                    {"text": "💎 Bingo Pro", "callback_data": "bingo_premium"} 
                 ]
             ]
         }
