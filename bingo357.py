@@ -39,13 +39,11 @@ def carregar_ranking_db():
 def montar_bilhetes_estrategicos(dados_entrada):
     bilhetes = []
     
-    # Tratamento para o formato do pendentes.json que contém a chave "jogos"
     if isinstance(dados_entrada, dict) and 'jogos' in dados_entrada:
         lista_jogos = dados_entrada['jogos']
     else:
         lista_jogos = dados_entrada
 
-    # Filtro de segurança: garante que cada item é um dicionário válido
     lista_jogos = [j for j in lista_jogos if isinstance(j, dict) and 'mercado' in j]
 
     if not lista_jogos: 
@@ -74,13 +72,7 @@ def montar_bilhetes_estrategicos(dados_entrada):
         bingo5_selecao.sort(key=lambda x: x.get('horario', '00:00'))
         bilhetes.append({"id": "BINGO5", "nome": "💰 BINGO 5: ESTRUTURADO", "jogos": bingo5_selecao[:5]})
 
-    # --- BINGO 7: SEGURANÇA ---
-    if len(lista_jogos) >= 7:
-        lista_bingo7 = sorted(lista_jogos, key=lambda x: (extrair_porcentagem(x.get('mercado', '')) / (extrair_odd(x.get('odd', '1.0')) or 1)), reverse=True)[:7]
-        lista_bingo7.sort(key=lambda x: x.get('horario', '00:00'))
-        bilhetes.append({"id": "BINGO7", "nome": "🍀 BINGO 7: SEGURANÇA", "jogos": lista_bingo7})
-
-    # --- BINGO PREMIUM: ELITE ---
+    # --- BINGO PREMIUM (PRO): ELITE ---
     stats_db = carregar_ranking_db()
 
     def calcular_performance_premium(jogo):
@@ -96,17 +88,16 @@ def montar_bilhetes_estrategicos(dados_entrada):
             total = greens + reds
             aproveitamento = (greens / total) if total > 0 else 0.0
             
-            # Critérios: 1. % Acerto, 2. Qtd Greens, 3. Valor da Odd
+            # Critérios de Ranking: % Acerto -> Volume de Greens -> Maior Odd
             return (aproveitamento, greens, extrair_odd(jogo.get('odd', '1.0')))
         except:
             return (0.0, 0, 1.0)
 
-    # Seleciona os 7 melhores baseados no ranking histórico
     lista_premium = sorted(lista_jogos, key=calcular_performance_premium, reverse=True)[:7]
     
     if lista_premium:
         lista_premium.sort(key=lambda x: x.get('horario', '00:00'))
-        bilhetes.append({"id": "PREMIUM", "nome": "💎 BINGO PREMIUM: ELITE", "jogos": lista_premium})
+        bilhetes.append({"id": "PREMIUM", "nome": "💎 BINGO PRO: ELITE", "jogos": lista_premium})
 
     return bilhetes
 
@@ -168,4 +159,4 @@ def formatar_para_telegram(bilhetes, cache_dados):
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
-    
+                     
