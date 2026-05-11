@@ -81,24 +81,29 @@ def montar_bilhetes_estrategicos(dados_entrada):
         bilhetes.append({"id": "BINGO7", "nome": "🍀 BINGO 7: SEGURANÇA", "jogos": lista_bingo7})
 
     # --- BINGO PREMIUM: ELITE ---
-    stats_db = carregar_ranking_db()
-    
-    def calcular_performance_premium(jogo):
-        try:
-            mercado_raw = jogo.get('mercado_ranking') or jogo.get('mercado', "")
-            chave = mercado_raw.replace(":", "").replace("(", "").replace(")", "").replace("Sim ", "").upper()
-            stat = stats_db.get(chave, {"green": 0, "red": 0})
-            
-            greens = stat.get("green", 0)
-            reds = stat.get("red", 0)
-            total = greens + reds
-            aproveitamento = (greens / total) if total > 0 else 0.0
-            
-            return (aproveitamento, greens)
-        except:
-            return (0.0, 0)
+    # --- BINGO PREMIUM: ELITE ---
+stats_db = carregar_ranking_db()
 
-    lista_premium = sorted(lista_jogos, key=calcular_performance_premium, reverse=True)[:7]
+def calcular_performance_premium(jogo):
+    try:
+        mercado_raw = jogo.get('mercado', "")
+        stat = stats_db.get(mercado_raw)
+        
+        if not stat:
+            return (0.0, 0)
+        
+        greens = stat.get("green", 0)
+        reds = stat.get("red", 0)
+        total = greens + reds
+        aproveitamento = (greens / total) if total > 0 else 0.0
+        
+        # Agora retornamos: (Taxa de Acerto, Quantidade de Greens, Valor da Odd)
+        return (aproveitamento, greens, extrair_odd(jogo.get('odd', '1.0')))
+    except:
+        return (0.0, 0, 1.0)
+
+# O sorted vai usar os 3 critérios na ordem de importância
+lista_premium = sorted(lista_jogos, key=calcular_performance_premium, reverse=True)[:7]
     
     if lista_premium:
         lista_premium.sort(key=lambda x: x.get('horario', '00:00'))
