@@ -1,0 +1,137 @@
+[
+    {
+        "horario": "13:50",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Neom SC",
+        "time_fora": "Al-Shabab",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.70",
+        "link_betano": null
+    },
+    {
+        "horario": "13:50",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Neom SC",
+        "time_fora": "Al-Shabab",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.57",
+        "link_betano": null
+    },
+    {
+        "horario": "14:00",
+        "liga": "Dinamarca - Superliga",
+        "time_casa": "Randers",
+        "time_fora": "Odense",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/Randers-FC-Odense-BK/84119968/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Taawon",
+        "time_fora": "Al-Ahli",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.78",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Taawoun-FC-Al-Ahli-SFC/81316729/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Taawon",
+        "time_fora": "Al-Ahli",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.67",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Taawoun-FC-Al-Ahli-SFC/81316729/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "LaLiga",
+        "time_casa": "Rayo Vallecano",
+        "time_fora": "Girona",
+        "mercado": "1X (100%)",
+        "odd": "1.36",
+        "link_betano": "https://www.betano.bet.br/match-odds/Rayo-Vallecano-Girona-FC/84450945/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "LaLiga",
+        "time_casa": "Rayo Vallecano",
+        "time_fora": "Girona",
+        "mercado": "Vitória Casa (100%)",
+        "odd": "2.45",
+        "link_betano": "https://www.betano.bet.br/match-odds/Rayo-Vallecano-Girona-FC/84450945/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Premier League",
+        "time_casa": "Tottenham",
+        "time_fora": "Leeds",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/Tottenham-Hotspur-Leeds-United/84793028/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Premier League",
+        "time_casa": "Tottenham",
+        "time_fora": "Leeds",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.70",
+        "link_betano": "https://www.betano.bet.br/match-odds/Tottenham-Hotspur-Leeds-United/84793028/"
+    },
+    {
+        "horario": "16:15",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Benfica",
+        "time_fora": "Braga",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.67",
+        "link_betano": null
+    },
+    {
+        "horario": "16:15",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Benfica",
+        "time_fora": "Braga",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.91",
+        "link_betano": null
+    },
+    {
+        "horario": "16:15",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Estrela da Amadora",
+        "time_fora": "Famalicão",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.29",
+        "link_betano": "https://www.betano.bet.br/match-odds/CF-Estrela-FC-Famalicao/85152688/"
+    },
+    {
+        "horario": "16:15",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Estrela da Amadora",
+        "time_fora": "Famalicão",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/CF-Estrela-FC-Famalicao/85152688/"
+    },
+    {
+        "horario": "16:15",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Santa Clara",
+        "time_fora": "Nacional",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.37",
+        "link_betano": "https://www.betano.bet.br/match-odds/CD-Santa-Clara-CD-Nacional-Madeira/85125333/"
+    },
+    {
+        "horario": "16:15",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Santa Clara",
+        "time_fora": "Nacional",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.80",
+        "link_betano": "https://www.betano.bet.br/match-odds/CD-Santa-Clara-CD-Nacional-Madeira/85125333/"
+    }
+]

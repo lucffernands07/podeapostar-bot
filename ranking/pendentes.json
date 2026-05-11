@@ -1,4 +1,110 @@
 {
     "data_geracao": "2026-05-11",
-    "jogos": []
+    "jogos": [
+        {
+            "time_casa": "Tottenham",
+            "time_fora": "Leeds",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/nclkvV1t/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Tottenham",
+            "time_fora": "Leeds",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/nclkvV1t/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Rayo Vallecano",
+            "time_fora": "Girona",
+            "mercado": "1X (100%)",
+            "mercado_ranking": "1X (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WpWknUOM/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Rayo Vallecano",
+            "time_fora": "Girona",
+            "mercado": "Vitória Casa (100%)",
+            "mercado_ranking": "VITÓRIA CASA (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WpWknUOM/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Neom SC",
+            "time_fora": "Al-Shabab",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KAQ9zK0s/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Neom SC",
+            "time_fora": "Al-Shabab",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KAQ9zK0s/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Al-Taawon",
+            "time_fora": "Al-Ahli",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/COmcdt63/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Al-Taawon",
+            "time_fora": "Al-Ahli",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/COmcdt63/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Benfica",
+            "time_fora": "Braga",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KnEeHuZo/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Benfica",
+            "time_fora": "Braga",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KnEeHuZo/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Estrela da Amadora",
+            "time_fora": "Famalicão",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fVBU2tKh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Estrela da Amadora",
+            "time_fora": "Famalicão",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fVBU2tKh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Santa Clara",
+            "time_fora": "Nacional",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UNYocxlU/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Santa Clara",
+            "time_fora": "Nacional",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UNYocxlU/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Randers",
+            "time_fora": "Odense",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6cIy9riD/#/resumo-de-jogo"
+        }
+    ]
 }
