@@ -88,16 +88,28 @@ def montar_bilhetes_estrategicos(dados_entrada):
             total = greens + reds
             aproveitamento = (greens / total) if total > 0 else 0.0
             
-            # Critérios de Ranking: % Acerto -> Volume de Greens -> Maior Odd
             return (aproveitamento, greens, extrair_odd(jogo.get('odd', '1.0')))
         except:
             return (0.0, 0, 1.0)
 
-    lista_premium = sorted(lista_jogos, key=calcular_performance_premium, reverse=True)[:7]
+    # Tenta pegar os 7 melhores, mas aceita o que vier (1, 2, 3...)
+    # Filtramos para garantir que o jogo tenha pelo menos algum histórico ou aproveitamento > 0
+    lista_candidatos = [j for j in lista_jogos if calcular_performance_premium(j)[0] > 0]
+    lista_premium = sorted(lista_candidatos, key=calcular_performance_premium, reverse=True)[:7]
     
     if lista_premium:
         lista_premium.sort(key=lambda x: x.get('horario', '00:00'))
-        bilhetes.append({"id": "PREMIUM", "nome": "💎 BINGO PRO: ELITE", "jogos": lista_premium})
+        
+        # Define o nome com o aviso se tiver menos de 7 jogos
+        nome_bilhete = "💎 BINGO PRO: ELITE"
+        if len(lista_premium) < 7:
+            nome_bilhete += "\n⚠️ _Encontrados somente esses jogos nesse intervalo_"
+
+        bilhetes.append({
+            "id": "PREMIUM", 
+            "nome": nome_bilhete, 
+            "jogos": lista_premium
+        })
 
     return bilhetes
 
