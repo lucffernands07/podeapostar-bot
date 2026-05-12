@@ -27,25 +27,26 @@ def gerar_tabela_ranking():
         total = g + r
         taxa = (g / total * 100) if total > 0 else 0
         lista_ranking.append({
-            "mercado": mercado.replace(" (", "\n   ("), # Quebra linha no detalhe
+            "mercado": mercado.strip(), # Mantém o nome original com a (%)
             "taxa": taxa,
             "green": g,
             "red": r
         })
 
-    # Ordenação: Taxa -> Greens -> Menos Reds
+    # Ordenação: Taxa -> Greens
     lista_ranking.sort(key=lambda x: (x['taxa'], x['green']), reverse=True)
 
     msg = "🏆 *RANKING DE ASSERTIVIDADE*\n"
     msg += f"📅 _Atualizado: {db.get('ultima_atualizacao', '---')}_\n\n"
 
-    for i, item in enumerate(lista_ranking[:10], 1): # Top 10 para ficar limpo
+    for i, item in enumerate(lista_ranking[:10], 1):
         medalha = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else "🔹"
         barra = get_barra_progresso(item['taxa'])
         
-        # Formatação Visual
+        # Mercado e (%) na mesma linha em negrito
         msg += f"{medalha} *{item['mercado']}*\n"
-        msg += f"{barra} *{int(item['taxa'])}%* (✅ {item['green']}  ❌ {item['red']})\n"
+        # Barra e stats na linha de baixo
+        msg += f"{barra} *{int(item['taxa'])}%* (✅ {item['green']} ❌ {item['red']})\n"
         msg += "--------------------------------\n"
 
     msg += "\n🔥 _Dados baseados no histórico real do bot._"
