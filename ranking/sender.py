@@ -5,9 +5,12 @@ import requests
 PATH_DB = "ranking/ranking_db.json"
 
 def get_barra_progresso(percentual):
-    """Cria uma barrinha visual de 5 blocos baseada no percentual"""
+    """Usa apenas um tipo de quadrado para evitar variação de cor"""
     blocos = int(percentual / 20)
-    return "🟩" * blocos + "⬜" * (5 - blocos)
+    # Use o quadrado verde padrão (U+1F7E9)
+    quadrado_cheio = "🟩" 
+    quadrado_vazio = "⬜"
+    return quadrado_cheio * blocos + quadrado_vazio * (5 - blocos)
 
 def gerar_tabela_ranking():
     if not os.path.exists(PATH_DB):
