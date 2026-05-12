@@ -1,0 +1,28 @@
+name: Ranking Manual (Telegram)
+
+on:
+  repository_dispatch:
+    types: [solicitar_ranking]
+
+jobs:
+  enviar-ranking:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Instalar Requests
+        run: pip install requests
+
+      - name: Executar Envio do Ranking
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        run: |
+          # Executa a função do sender.py passando o chat_id enviado pelo Worker
+          python -c "from ranking.sender import enviar_ranking_telegram; enviar_ranking_telegram('${{ github.event.client_payload.chat_id }}')"
