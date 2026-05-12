@@ -1,0 +1,128 @@
+[
+    {
+        "horario": "07:00",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Oleksandriya",
+        "time_fora": "Zorya",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Oleksandriya-FC-Zorya-Luhansk/85020763/"
+    },
+    {
+        "horario": "07:00",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Oleksandriya",
+        "time_fora": "Zorya",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Oleksandriya-FC-Zorya-Luhansk/85020763/"
+    },
+    {
+        "horario": "09:30",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Epitsentr",
+        "time_fora": "Polissya Zhytomyr",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/Epicentr-Dunaivtsi-Polissya-Zhytomyr/85020758/"
+    },
+    {
+        "horario": "09:30",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Epitsentr",
+        "time_fora": "Polissya Zhytomyr",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.07",
+        "link_betano": "https://www.betano.bet.br/match-odds/Epicentr-Dunaivtsi-Polissya-Zhytomyr/85020758/"
+    },
+    {
+        "horario": "13:20",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Kholood",
+        "time_fora": "Al Okhdood",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.24",
+        "link_betano": null
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al Nassr Riyadh",
+        "time_fora": "Al-Hilal",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.47",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Nassr-FC-Al-Hilal-SFC/84209985/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al Nassr Riyadh",
+        "time_fora": "Al-Hilal",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Nassr-FC-Al-Hilal-SFC/84209985/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "LaLiga",
+        "time_casa": "Bétis",
+        "time_fora": "Elche",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/Real-Betis-Balompie-Elche-CF/81204718/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "LaLiga",
+        "time_casa": "Bétis",
+        "time_fora": "Elche",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.70",
+        "link_betano": "https://www.betano.bet.br/match-odds/Real-Betis-Balompie-Elche-CF/81204718/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Ligue 1",
+        "time_casa": "Red Star",
+        "time_fora": "Rodez",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.85",
+        "link_betano": "https://www.betano.bet.br/match-odds/Red-Star-Paris-Rodez-AF/85495020/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Ligue 1",
+        "time_casa": "Red Star",
+        "time_fora": "Rodez",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.67",
+        "link_betano": "https://www.betano.bet.br/match-odds/Red-Star-Paris-Rodez-AF/85495020/"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Londrina",
+        "time_fora": "São Bernardo",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.39",
+        "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Sao-Bernardo-SP/85200246/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Argentinos Juniors",
+        "time_fora": "Huracán",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentinos-Juniors-CA-Huracan/85539522/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Fluminense",
+        "time_fora": "Operário",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fluminense-RJ-Operario-PR/84646575/"
+    }
+]
