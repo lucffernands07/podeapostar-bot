@@ -3,10 +3,8 @@ import requests
 
 def enviar_menu_bingo(chat_id, texto):
     """
-    Envia a mensagem de sugestões com os botões de Bingo e Ranking.
-    Layout: 
-    🔥 Bingo 3   | 🔥 Bingo 5
-    💎 Bingo Pro | 📊 Ranking
+    Envia o menu FIXO no rodapé do Telegram.
+    Diferença: Agora os botões ficam no lugar do teclado.
     """
     token = os.getenv('TELEGRAM_TOKEN')
     url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -16,16 +14,19 @@ def enviar_menu_bingo(chat_id, texto):
         "text": texto,
         "parse_mode": "Markdown",
         "reply_markup": {
-            "inline_keyboard": [
+            "keyboard": [
                 [
-                    {"text": "🔥 Bingo 3", "callback_data": "bingo_3"},
-                    {"text": "🔥 Bingo 5", "callback_data": "bingo_5"}
+                    {"text": "🔥 Bingo 3"},
+                    {"text": "🔥 Bingo 5"}
                 ],
                 [
-                    {"text": "💎 Bingo Pro", "callback_data": "bingo_premium"},
-                    {"text": "📊 Ranking", "callback_data": "exibir_ranking"} 
+                    {"text": "💎 Bingo Pro"},
+                    {"text": "📊 Ranking"} 
                 ]
-            ]
+            ],
+            "resize_keyboard": True,   # Deixa os botões em tamanho pequeno/médio
+            "persistent": True,        # Mantém o menu visível sempre
+            "one_time_keyboard": False # Não esconde o menu após clicar
         }
     }
 
