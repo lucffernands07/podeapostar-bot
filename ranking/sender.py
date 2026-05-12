@@ -5,11 +5,8 @@ import requests
 PATH_DB = "ranking/ranking_db.json"
 
 def get_barra_progresso(percentual):
-    """Padroniza o emoji para evitar variações de tom no Telegram"""
     blocos = int(percentual / 20)
-    quadrado_cheio = "🟩" 
-    quadrado_vazio = "⬜" 
-    return (quadrado_cheio * blocos) + (quadrado_vazio * (5 - blocos))
+    return ("🟩" * blocos) + ("⬜" * (5 - blocos))
 
 def gerar_tabela_ranking():
     if not os.path.exists(PATH_DB):
@@ -28,8 +25,12 @@ def gerar_tabela_ranking():
         r = dados.get('red', 0)
         total = g + r
         taxa = (g / total * 100) if total > 0 else 0
+        
+        # Limpando o nome do mercado para não quebrar o Markdown
+        m_limpo = mercado.replace("_", " ").strip()
+        
         lista_ranking.append({
-            "mercado": mercado.strip(),
+            "mercado": m_limpo,
             "taxa": taxa,
             "green": g,
             "red": r
@@ -56,20 +57,28 @@ def enviar_ranking_telegram(chat_id):
     
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     
-    # DEFINIÇÃO DO MENU FIXO AQUI
     payload = {
         "chat_id": chat_id,
         "text": texto,
         "parse_mode": "Markdown",
         "reply_markup": {
-            "keyboard": [
-                [{"text": "🔥 Bingo 3"}, {"text": "🔥 Bingo 5"}],
-                [{"text": "💎 Bingo Pro"}, {"text": "📊 Ranking"}]
-            ],
-            "resize_keyboard": True,
-            "persistent": True
+            "inline_keyboard": [
+                [{"text": "🔥 Bingo 3", "callback_data": "🔥 Bingo 3"}, {"text": "🔥 Bingo 5", "callback_data": "🔥 Bingo 5"}],
+                [{"text": "💎 Bingo Pro", "callback_data": "💎 Bingo Pro"}, {"text": "📊 Ranking", "callback_data": "📊 Ranking"}]
+            ]
         }
     }
     
-    return requests.post(url, json=payload).json()
-        
+    response = requests.post(url, json=payload)
+    res_json = response.json()
+    
+    # ISSO VAI APARECER NO LOG SE DER ERRO
+    if not res_json.get("ok"):
+        print(f"❌ ERRO TELEGRAM RANKING: {res_json.get('description')}")
+        # Segunda tentativa sem Markdown caso tenha caracteres inválidos
+        payload["parse_mode"] = None
+        requests.post(url, json=payload)
+    else:
+        print(f"✅ Ranking enviado com sucesso para {chat_id}")
+    
+    return res_json
