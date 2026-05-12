@@ -4,18 +4,22 @@ import requests
 
 PATH_DB = "ranking/ranking_db.json"
 
+def get_barra_progresso(percentual):
+    """Cria uma barrinha visual de 5 blocos baseada no percentual"""
+    blocos = int(percentual / 20)
+    return "🟩" * blocos + "⬜" * (5 - blocos)
+
 def gerar_tabela_ranking():
     if not os.path.exists(PATH_DB):
-        return "📊 O ranking ainda está sendo processado. Tente novamente mais tarde!"
+        return "📊 O ranking ainda está sendo processado..."
 
     with open(PATH_DB, 'r', encoding='utf-8') as f:
         db = json.load(f)
     
     stats = db.get("stats", {})
     if not stats:
-        return "📭 Nenhuma estatística disponível no momento."
+        return "📭 Nenhuma estatística disponível."
 
-    # 1. Preparar os dados para ordenação
     lista_ranking = []
     for mercado, dados in stats.items():
         g = dados.get('green', 0)
@@ -23,29 +27,28 @@ def gerar_tabela_ranking():
         total = g + r
         taxa = (g / total * 100) if total > 0 else 0
         lista_ranking.append({
-            "mercado": mercado,
+            "mercado": mercado.replace(" (", "\n   ("), # Quebra linha no detalhe
             "taxa": taxa,
             "green": g,
-            "red": r,
-            "total": total
+            "red": r
         })
 
-    # 2. Ordenar por % de acerto e depois por quantidade de Green
+    # Ordenação: Taxa -> Greens -> Menos Reds
     lista_ranking.sort(key=lambda x: (x['taxa'], x['green']), reverse=True)
 
-    # 3. Montar a mensagem em Markdown (Tabela Simplificada)
     msg = "🏆 *RANKING DE ASSERTIVIDADE*\n"
-    msg += f"📅 Atualizado em: {db.get('ultima_atualizacao', '---')}\n\n"
-    msg += "`MERCADO         | %    | G | R `\n"
-    msg += "--------------------------------\n"
+    msg += f"📅 _Atualizado: {db.get('ultima_atualizacao', '---')}_\n\n"
 
-    for i, item in enumerate(lista_ranking[:15], 1): # Top 15 para não cortar o texto
-        # Ajusta o nome do mercado para caber na tabela (max 15 caracteres)
-        nome = (item['mercado'][:13] + "..") if len(item['mercado']) > 15 else item['mercado'].ljust(15)
-        taxa_str = f"{int(item['taxa'])}%".ljust(4)
-        msg += f"`{nome} | {taxa_str} | {item['green']} | {item['red']}`\n"
+    for i, item in enumerate(lista_ranking[:10], 1): # Top 10 para ficar limpo
+        medalha = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else "🔹"
+        barra = get_barra_progresso(item['taxa'])
+        
+        # Formatação Visual
+        msg += f"{medalha} *{item['mercado']}*\n"
+        msg += f"{barra} *{int(item['taxa'])}%* (✅ {item['green']}  ❌ {item['red']})\n"
+        msg += "--------------------------------\n"
 
-    msg += "\n🔥 _Dados baseados nos últimos jogos processados._"
+    msg += "\n🔥 _Dados baseados no histórico real do bot._"
     return msg
 
 def enviar_ranking_telegram(chat_id):
@@ -60,4 +63,4 @@ def enviar_ranking_telegram(chat_id):
     }
     
     return requests.post(url, json=payload).json()
-  
+        
