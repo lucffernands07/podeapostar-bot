@@ -3,29 +3,30 @@ import requests
 
 def enviar_menu_bingo(chat_id, texto):
     """
-    Envia o menu FIXO no rodapé. 
-    Corrigido para garantir que o Telegram aceite como ReplyKeyboardMarkup.
+    Volta para botões INLINE (dentro da mensagem) para resolver o erro 
+    de 'inline keyboard expected'.
     """
     token = os.getenv('TELEGRAM_TOKEN')
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
-    # Criando a estrutura do teclado fixo (Reply Keyboard)
-    teclado = {
-        "keyboard": [
-            [{"text": "🔥 Bingo 3"}, {"text": "🔥 Bingo 5"}],
-            [{"text": "💎 Bingo Pro"}, {"text": "📊 Ranking"}]
-        ],
-        "resize_keyboard": True,
-        "persistent": True,
-        "one_time_keyboard": False
-    }
-
+    # Estrutura INLINE (a que o seu bot espera)
     payload = {
         "chat_id": chat_id,
         "text": texto,
         "parse_mode": "Markdown",
         "disable_web_page_preview": True,
-        "reply_markup": teclado  # Enviando como objeto puro
+        "reply_markup": {
+            "inline_keyboard": [
+                [
+                    {"text": "🔥 Bingo 3", "callback_data": "bingo_3"},
+                    {"text": "🔥 Bingo 5", "callback_data": "bingo_5"}
+                ],
+                [
+                    {"text": "💎 Bingo Pro", "callback_data": "bingo_pro"},
+                    {"text": "📊 Ranking", "callback_data": "ranking"}
+                ]
+            ]
+        }
     }
 
     try:
@@ -33,10 +34,8 @@ def enviar_menu_bingo(chat_id, texto):
         res_json = response.json()
         
         if not res_json.get("ok"):
-            # Se ele ainda reclamar de "inline keyboard", vamos tentar remover o parse_mode
-            # ou verificar se há algum conflito com mensagens anteriores.
             print(f"❌ ERRO TELEGRAM: {res_json.get('description')}")
-            
+            # Se o problema for o Markdown do bingo357, tenta sem formatação
             if "can't parse entities" in res_json.get("description", "").lower():
                 payload["parse_mode"] = None
                 response = requests.post(url, json=payload)
