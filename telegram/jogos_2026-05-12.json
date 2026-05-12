@@ -1,23 +1,5 @@
 [
     {
-        "horario": "15:30",
-        "liga": "Ligue 1",
-        "time_casa": "Red Star",
-        "time_fora": "Rodez",
-        "mercado": "+2.5 Gols (85%)",
-        "odd": "1.98",
-        "link_betano": "https://www.betano.bet.br/match-odds/Red-Star-Paris-Rodez-AF/85495020/"
-    },
-    {
-        "horario": "15:30",
-        "liga": "Ligue 1",
-        "time_casa": "Red Star",
-        "time_fora": "Rodez",
-        "mercado": "Ambas Marcam: Sim (100%)",
-        "odd": "1.73",
-        "link_betano": "https://www.betano.bet.br/match-odds/Red-Star-Paris-Rodez-AF/85495020/"
-    },
-    {
         "horario": "19:30",
         "liga": "Brasileirão Série B",
         "time_casa": "Londrina",
@@ -42,6 +24,6 @@
         "time_fora": "Operário",
         "mercado": "+1.5 Gols (85%)",
         "odd": "1.33",
-        "link_betano": null
+        "link_betano": "https://www.betano.bet.br/match-odds/Fluminense-RJ-Operario-PR/84646575/"
     }
 ]
