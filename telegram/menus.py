@@ -5,11 +5,12 @@ def enviar_menu_bingo(chat_id, texto):
     """
     Volta para botões INLINE (dentro da mensagem) para resolver o erro 
     de 'inline keyboard expected'.
+    Ajustado callback_data para bater com os comandos do Worker.
     """
     token = os.getenv('TELEGRAM_TOKEN')
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
-    # Estrutura INLINE (a que o seu bot espera)
+    # Estrutura INLINE com os textos exatos que o seu bot já processa
     payload = {
         "chat_id": chat_id,
         "text": texto,
@@ -18,12 +19,12 @@ def enviar_menu_bingo(chat_id, texto):
         "reply_markup": {
             "inline_keyboard": [
                 [
-                    {"text": "🔥 Bingo 3", "callback_data": "bingo_3"},
-                    {"text": "🔥 Bingo 5", "callback_data": "bingo_5"}
+                    {"text": "🔥 Bingo 3", "callback_data": "🔥 Bingo 3"},
+                    {"text": "🔥 Bingo 5", "callback_data": "🔥 Bingo 5"}
                 ],
                 [
-                    {"text": "💎 Bingo Pro", "callback_data": "bingo_pro"},
-                    {"text": "📊 Ranking", "callback_data": "ranking"}
+                    {"text": "💎 Bingo Pro", "callback_data": "💎 Bingo Pro"},
+                    {"text": "📊 Ranking", "callback_data": "📊 Ranking"}
                 ]
             ]
         }
