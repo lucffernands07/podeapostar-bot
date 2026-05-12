@@ -3,14 +3,12 @@ import requests
 
 def enviar_menu_bingo(chat_id, texto):
     """
-    Volta para botões INLINE (dentro da mensagem) para resolver o erro 
-    de 'inline keyboard expected'.
-    Ajustado callback_data para bater com os comandos do Worker.
+    Envia o Bingo com os botões INLINE grudados na mensagem.
     """
     token = os.getenv('TELEGRAM_TOKEN')
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
-    # Estrutura INLINE com os textos exatos que o seu bot já processa
+    # Criando os botões no formato INLINE (igual ao que funcionou no Ranking)
     payload = {
         "chat_id": chat_id,
         "text": texto,
@@ -36,14 +34,12 @@ def enviar_menu_bingo(chat_id, texto):
         
         if not res_json.get("ok"):
             print(f"❌ ERRO TELEGRAM: {res_json.get('description')}")
-            # Se o problema for o Markdown do bingo357, tenta sem formatação
+            # Se der erro de Markdown (comum nos bingos pelos nomes dos times), envia sem formatacao
             if "can't parse entities" in res_json.get("description", "").lower():
                 payload["parse_mode"] = None
-                response = requests.post(url, json=payload)
-                res_json = response.json()
+                requests.post(url, json=payload)
                 
         return res_json
     except Exception as e:
         print(f"❌ Erro na requisição: {e}")
         return {"ok": False}
-        
