@@ -8,8 +8,8 @@ def get_barra_progresso(percentual):
     """Padroniza o emoji para evitar variações de tom no Telegram"""
     blocos = int(percentual / 20)
     # Copie exatamente estes caracteres:
-    quadrado_cheio = "🟩" # U+1F7E9
-    quadrado_vazio = "⬜️" # U+2B1C
+    quadrado_cheio = "🟩 " # U+1F7E9
+    quadrado_vazio = "⬜️ " # U+2B1C
     return (quadrado_cheio * blocos) + (quadrado_vazio * (5 - blocos))
 
 def gerar_tabela_ranking():
