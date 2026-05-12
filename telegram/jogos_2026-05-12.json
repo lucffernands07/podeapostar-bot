@@ -5,8 +5,8 @@
         "time_casa": "USM Alger",
         "time_fora": "Mostaganem",
         "mercado": "-4.5 Gols (70%)",
-        "odd": "1.23",
-        "link_betano": null
+        "odd": "1.21",
+        "link_betano": "https://www.betano.bet.br/match-odds/Usm-Alger-ES-Mostaganem/85290370/"
     },
     {
         "horario": "15:00",
@@ -32,7 +32,7 @@
         "time_casa": "Bétis",
         "time_fora": "Elche",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.22",
+        "odd": "1.21",
         "link_betano": "https://www.betano.bet.br/match-odds/Real-Betis-Balompie-Elche-CF/81204718/"
     },
     {
@@ -68,8 +68,8 @@
         "time_casa": "Londrina",
         "time_fora": "São Bernardo",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.44",
-        "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Sao-Bernardo-SP/85200246/"
+        "odd": "1.47",
+        "link_betano": null
     },
     {
         "horario": "21:30",
@@ -87,6 +87,6 @@
         "time_fora": "Operário",
         "mercado": "+1.5 Gols (85%)",
         "odd": "1.28",
-        "link_betano": null
+        "link_betano": "https://www.betano.bet.br/match-odds/Fluminense-RJ-Operario-PR/84646575/"
     }
 ]
