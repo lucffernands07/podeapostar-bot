@@ -5,12 +5,12 @@ import requests
 PATH_DB = "ranking/ranking_db.json"
 
 def get_barra_progresso(percentual):
-    """Usa apenas um tipo de quadrado para evitar variação de cor"""
+    """Padroniza o emoji para evitar variações de tom no Telegram"""
     blocos = int(percentual / 20)
-    # Use o quadrado verde padrão (U+1F7E9)
-    quadrado_cheio = "🟩" 
-    quadrado_vazio = "⬜"
-    return quadrado_cheio * blocos + quadrado_vazio * (5 - blocos)
+    # Copie exatamente estes caracteres:
+    quadrado_cheio = "🟩" # U+1F7E9
+    quadrado_vazio = "⬜" # U+2B1C
+    return (quadrado_cheio * blocos) + (quadrado_vazio * (5 - blocos))
 
 def gerar_tabela_ranking():
     if not os.path.exists(PATH_DB):
