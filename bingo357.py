@@ -49,6 +49,32 @@ def montar_bilhetes_estrategicos(dados_entrada):
     if not lista_jogos: 
         return bilhetes
 
+    # --- NOVA TRAVA: DUPLA CHANCE > VITÓRIA (MESMO JOGO) ---
+    jogos_agrupados = {}
+    for jogo in lista_jogos:
+        chave = f"{jogo['time_casa']}x{jogo['time_fora']}".lower().strip()
+        if chave not in jogos_agrupados:
+            jogos_agrupados[chave] = []
+        jogos_agrupados[chave].append(jogo)
+
+    lista_filtrada = []
+    for chave, mercados in jogos_agrupados.items():
+        # Verifica se existe algum mercado de Dupla Chance para este jogo
+        tem_dupla = any(re.search(r'\b(1x|x2|2x)\b', m['mercado'].lower()) for m in mercados)
+        
+        if tem_dupla:
+            # Se tem Dupla Chance, filtramos e removemos qualquer um que seja "Vitória"
+            for m in mercados:
+                mercado_nome = m['mercado'].lower()
+                if "vitória" not in mercado_nome and "vitoria" not in mercado_nome:
+                    lista_filtrada.append(m)
+        else:
+            # Se não tem conflito, adiciona todos os mercados do jogo normalmente
+            lista_filtrada.extend(mercados)
+
+    lista_jogos = lista_filtrada
+    # -------------------------------------------------------
+
     # --- BINGO 3: VALOR ---
     if len(lista_jogos) >= 3:
         lista_bingo3 = sorted(lista_jogos, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)[:3]
@@ -79,37 +105,26 @@ def montar_bilhetes_estrategicos(dados_entrada):
         try:
             mercado_raw = jogo.get('mercado', "")
             stat = stats_db.get(mercado_raw)
-            
-            if not stat:
-                return (0.0, 0, 1.0)
+            if not stat: return (0.0, 0, 1.0)
             
             greens = stat.get("green", 0)
             reds = stat.get("red", 0)
             total = greens + reds
             aproveitamento = (greens / total) if total > 0 else 0.0
-            
             return (aproveitamento, greens, extrair_odd(jogo.get('odd', '1.0')))
         except:
             return (0.0, 0, 1.0)
 
-    # Tenta pegar os 7 melhores, mas aceita o que vier (1, 2, 3...)
-    # Filtramos para garantir que o jogo tenha pelo menos algum histórico ou aproveitamento > 0
     lista_candidatos = [j for j in lista_jogos if calcular_performance_premium(j)[0] > 0]
     lista_premium = sorted(lista_candidatos, key=calcular_performance_premium, reverse=True)[:7]
     
     if lista_premium:
         lista_premium.sort(key=lambda x: x.get('horario', '00:00'))
-        
-        # Define o nome com o aviso se tiver menos de 7 jogos
         nome_bilhete = "💎 BINGO PRO: ELITE"
         if len(lista_premium) < 7:
             nome_bilhete += "\n⚠️ _Encontrados somente esses jogos nesse intervalo_"
 
-        bilhetes.append({
-            "id": "PREMIUM", 
-            "nome": nome_bilhete, 
-            "jogos": lista_premium
-        })
+        bilhetes.append({"id": "PREMIUM", "nome": nome_bilhete, "jogos": lista_premium})
 
     return bilhetes
 
@@ -135,26 +150,22 @@ def formatar_para_telegram(bilhetes, cache_dados):
             
             if chave_jogo not in agrupados:
                 agrupados[chave_jogo] = {
-                    "horario": horario,
-                    "liga": liga,
+                    "horario": horario, "liga": liga,
                     "time_casa": j.get('time_casa', 'Casa'),
                     "time_fora": j.get('time_fora', 'Fora'),
-                    "mercados": [],
-                    "link": link_final
+                    "mercados": [], "link": link_final
                 }
             
             agrupados[chave_jogo]["mercados"].append({
                 "texto": f"🔶 {j.get('mercado')} | Odd: {odd_valor}",
                 "prioridade": prioridade_mercado(j.get('mercado', ''))
             })
-            
             odd_total *= extrair_odd(odd_valor)
 
         lista_blocos_jogos = []
         for chave in agrupados:
             dados = agrupados[chave]
             dados["mercados"].sort(key=lambda x: x['prioridade'])
-            
             linhas_mercados = "\n".join([m['texto'] for m in dados["mercados"]])
             link_limpo = dados['link'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
             
@@ -171,4 +182,4 @@ def formatar_para_telegram(bilhetes, cache_dados):
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
-                     
+        
