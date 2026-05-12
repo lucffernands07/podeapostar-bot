@@ -1,7 +1,6 @@
 import re
 import json
 import os
-import requests
 
 def extrair_porcentagem(texto_mercado):
     try:
@@ -28,6 +27,7 @@ def prioridade_mercado(mercado_texto):
     return 6
 
 def carregar_ranking_db():
+    # Ajuste o caminho conforme sua estrutura (na raiz ou dentro de pasta)
     caminho = 'ranking/ranking_db.json'
     if os.path.exists(caminho):
         try:
@@ -46,33 +46,34 @@ def montar_bilhetes_estrategicos(dados_entrada):
 
     if not lista_jogos: return bilhetes
 
-    # --- TRAVA DE SEGURANÇA: DUPLA CHANCE > VITÓRIA ---
+    # --- TRAVA DE SEGURANÇA: DUPLA CHANCE > VITÓRIA (MESMO JOGO) ---
     jogos_agrupados = {}
     for jogo in lista_jogos:
         chave = f"{jogo['time_casa']}x{jogo['time_fora']}".lower().strip()
-        if chave not in jogos_agrupados: jogos_agrupados[chave] = []
+        if chave not in jogos_agrupados:
+            jogos_agrupados[chave] = []
         jogos_agrupados[chave].append(jogo)
 
     lista_filtrada = []
-    for mercados in jogos_agrupados.values():
+    for chave, mercados in jogos_agrupados.items():
         tem_dupla = any(re.search(r'\b(1x|x2|2x)\b', m['mercado'].lower()) for m in mercados)
         if tem_dupla:
             for m in mercados:
-                if "vitória" not in m['mercado'].lower() and "vitoria" not in m['mercado'].lower():
+                mercado_nome = m['mercado'].lower()
+                if "vitória" not in mercado_nome and "vitoria" not in mercado_nome:
                     lista_filtrada.append(m)
         else:
             lista_filtrada.extend(mercados)
-    
+
     lista_jogos = lista_filtrada
 
-    # --- LÓGICA DE SELEÇÃO (BINGO 3, 5 e PRO) ---
-    # Bingo 3
+    # BINGO 3
     if len(lista_jogos) >= 3:
         l3 = sorted(lista_jogos, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)[:3]
         l3.sort(key=lambda x: x.get('horario', '00:00'))
         bilhetes.append({"id": "BINGO3", "nome": "🔥 BINGO 3: VALOR", "jogos": l3})
 
-    # Bingo 5
+    # BINGO 5
     if len(lista_jogos) >= 5:
         b5 = sorted(lista_jogos, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)[:3]
         sobra = [j for j in lista_jogos if j not in b5]
@@ -80,56 +81,80 @@ def montar_bilhetes_estrategicos(dados_entrada):
         b5.sort(key=lambda x: x.get('horario', '00:00'))
         bilhetes.append({"id": "BINGO5", "nome": "💰 BINGO 5: ESTRUTURADO", "jogos": b5[:5]})
 
-    # Bingo Pro
+    # BINGO PRO
     stats_db = carregar_ranking_db()
-    def calc_premium(j):
-        stat = stats_db.get(j.get('mercado', ""))
-        if not stat: return (0.0, 0)
-        total = stat.get("green", 0) + stat.get("red", 0)
-        return (stat.get("green", 0) / total if total > 0 else 0.0, stat.get("green", 0))
+    def calcular_performance_premium(jogo):
+        stat = stats_db.get(jogo.get('mercado', ""))
+        if not stat: return (0.0, 0, 1.0)
+        greens = stat.get("green", 0)
+        reds = stat.get("red", 0)
+        total = greens + reds
+        aproveitamento = (greens / total) if total > 0 else 0.0
+        return (aproveitamento, greens, extrair_odd(jogo.get('odd', '1.0')))
 
-    lista_pro = sorted([j for j in lista_jogos if calc_premium(j)[0] > 0], key=calc_premium, reverse=True)[:7]
-    if lista_pro:
-        lista_pro.sort(key=lambda x: x.get('horario', '00:00'))
-        bilhetes.append({"id": "PREMIUM", "nome": "💎 BINGO PRO: ELITE", "jogos": lista_pro})
+    lista_candidatos = [j for j in lista_jogos if calcular_performance_premium(j)[0] > 0]
+    lista_premium = sorted(lista_candidatos, key=calcular_performance_premium, reverse=True)[:7]
+    
+    if lista_premium:
+        lista_premium.sort(key=lambda x: x.get('horario', '00:00'))
+        bilhetes.append({"id": "PREMIUM", "nome": "💎 BINGO PRO: ELITE", "jogos": lista_premium})
 
     return bilhetes
 
-def enviar_bingo_telegram(chat_id, bilhetes, cache_dados):
-    token = os.getenv('TELEGRAM_TOKEN')
-    if not bilhetes: return
-
+# NOME RESTAURADO PARA NÃO DAR ERRO NO MAIN.PY
+def formatar_para_telegram(bilhetes, cache_dados):
+    if not bilhetes: return ""
+    blocos = []
+    
     for b in bilhetes:
         corpo = f"*{b['nome']}*\n\n"
         odd_total = 1.0
-        
-        # Agrupamento visual por jogo
         agrupados = {}
-        for j in b['jogos']:
-            chave = f"{j['horario']}_{j['time_casa']}_{j['time_fora']}"
-            if chave not in agrupados:
-                agrupados[chave] = {"h": j['horario'], "c": j['time_casa'], "f": j['time_fora'], "m": []}
-            agrupados[chave]["m"].append(f"🔶 {j['mercado']} | Odd: {j['odd']}")
-            odd_total *= extrair_odd(j['odd'])
-
-        for j in agrupados.values():
-            corpo += f"⏱️ {j['h']} | 🏟️ {j['c']} x {j['f']}\n" + "\n".join(j['m']) + "\n\n"
         
-        corpo += f"📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        for j in b['jogos']:
+            # Usando .get() para evitar KeyErrors se o cache estiver incompleto
+            chave_cache = f"{j.get('time_casa')}x{j.get('time_fora')}"
+            info_extra = cache_dados.get(chave_cache, {})
 
-        payload = {
-            "chat_id": chat_id,
-            "text": corpo,
-            "parse_mode": "Markdown",
-            "disable_web_page_preview": True,
-            "reply_markup": {
-                "keyboard": [
-                    [{"text": "🔥 Bingo 3"}, {"text": "🔥 Bingo 5"}],
-                    [{"text": "💎 Bingo Pro"}, {"text": "📊 Ranking"}]
-                ],
-                "resize_keyboard": True,
-                "persistent": True
-            }
-        }
-        requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json=payload)
-                                  
+            horario = j.get('horario') or info_extra.get('horario', '00:00')
+            liga = j.get('liga') or info_extra.get('liga', 'Futebol')
+            odd_valor = j.get('odd') or info_extra.get('odd', '1.0')
+            link_final = info_extra.get('link') or "https://www.betano.bet.br/"
+
+            chave_jogo = f"{horario}_{j.get('time_casa')}_{j.get('time_fora')}"
+            if chave_jogo not in agrupados:
+                agrupados[chave_jogo] = {
+                    "horario": horario, "liga": liga,
+                    "time_casa": j.get('time_casa', 'Casa'),
+                    "time_fora": j.get('time_fora', 'Fora'),
+                    "mercados": [], "link": link_final
+                }
+            
+            agrupados[chave_jogo]["mercados"].append({
+                "texto": f"🔶 {j.get('mercado')} | Odd: {odd_valor}",
+                "prioridade": prioridade_mercado(j.get('mercado', ''))
+            })
+            odd_total *= extrair_odd(odd_valor)
+
+        # Montagem do texto final do bilhete
+        lista_blocos_jogos = []
+        for chave in agrupados:
+            dados = agrupados[chave]
+            dados["mercados"].sort(key=lambda x: x['prioridade'])
+            linhas_mercados = "\n".join([m['texto'] for m in dados["mercados"]])
+            link_limpo = dados['link'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
+            
+            bloco_jogo = (
+                f"⏱️ {dados['horario']} | {dados['liga']}\n"
+                f"🏟️ {dados['time_casa']} x {dados['time_fora']}\n"
+                f"{linhas_mercados}\n"
+                f"🌐 [Abrir na Betano]({link_limpo})"
+            )
+            lista_blocos_jogos.append(bloco_jogo)
+
+        corpo += "\n\n".join(lista_blocos_jogos)
+        corpo += f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        blocos.append(corpo)
+    
+    return "\n\n".join(blocos)
+    
