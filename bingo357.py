@@ -100,22 +100,34 @@ def montar_bilhetes_estrategicos(dados_entrada):
 
     def calcular_performance_premium(jogo):
         try:
-            # Converte o mercado do jogo para MAIÚSCULO para bater com o ranking
-            mercado_raw = str(jogo.get('mercado', "")).upper()
+            # 1. Padroniza o mercado do jogo para bater com o ranking
+            # Isso faz "+1.5 Gols (85%)" virar "+1.5 GOLS (85%)"
+            mercado_raw = str(jogo.get('mercado', "")).upper().strip()
+            
+            # 2. Busca direta
             stat = stats_db.get(mercado_raw)
+            
+            # 3. Busca secundária (caso tenha diamante 💎 ou espaços duplos no ranking)
+            if not stat:
+                mercado_limpo = mercado_raw.replace("💎", "").replace("  ", " ").strip()
+                stat = stats_db.get(mercado_limpo)
             
             if not stat: return (0.0, 0, 1.0)
             
             greens = stat.get("green", 0)
             reds = stat.get("red", 0)
             total = greens + reds
+            
             aproveitamento = (greens / total) if total > 0 else 0.0
+            # Retorna (Assertividade, Greens, Odd) para o critério de desempate
             return (aproveitamento, greens, extrair_odd(jogo.get('odd', '1.0')))
         except:
             return (0.0, 0, 1.0)
 
-    # Aceita jogos que tenham pelo menos 1 Green ou que tenham porcentagem alta no mercado
+    # Filtro: Entra na lista se tiver histórico de Green OU se a análise do dia for >= 80%
     lista_candidatos = [j for j in lista_jogos if calcular_performance_premium(j)[1] > 0 or extrair_porcentagem(j.get('mercado')) >= 80]
+    
+    # Ordena: 1º por Assertividade, 2º por volume de Greens
     lista_premium = sorted(lista_candidatos, key=calcular_performance_premium, reverse=True)[:7]
     
     if lista_premium:
