@@ -2,50 +2,50 @@ import json
 import os
 import requests
 
-PATH_DB = "ranking/ranking_db.json"
+# --- AGORA APONTAMOS PARA O ARQUIVO PRÉ-MONTADO ---
+PATH_RANKING_DIARIO = "ranking/ranking_diario.json"
+PATH_DB = "ranking/ranking_db.json" # Mantido apenas para pegar a data de atualização
 
 def get_barra_progresso(percentual):
     blocos = int(percentual / 20)
     return ("🟩" * blocos) + ("⬜" * (5 - blocos))
 
 def gerar_tabela_ranking():
-    if not os.path.exists(PATH_DB):
-        return "📊 O ranking ainda está sendo processado..."
+    # 1. Verifica se o ranking diário existe
+    if not os.path.exists(PATH_RANKING_DIARIO):
+        return "📊 O ranking diário ainda está sendo gerado pela madrugada..."
 
-    with open(PATH_DB, 'r', encoding='utf-8') as f:
-        db = json.load(f)
+    # 2. Carrega o ranking já ordenado
+    with open(PATH_RANKING_DIARIO, 'r', encoding='utf-8') as f:
+        lista_ranking = json.load(f)
     
-    stats = db.get("stats", {})
-    if not stats:
-        return "📭 Nenhuma estatística disponível."
+    if not lista_ranking:
+        return "📭 Nenhuma estatística disponível no momento."
 
-    lista_ranking = []
-    for mercado, dados in stats.items():
-        g = dados.get('green', 0)
-        r = dados.get('red', 0)
-        total = g + r
-        taxa = (g / total * 100) if total > 0 else 0
-        
-        # Limpando o nome do mercado para não quebrar o Markdown
-        m_limpo = mercado.replace("_", " ").strip()
-        
-        lista_ranking.append({
-            "mercado": m_limpo,
-            "taxa": taxa,
-            "green": g,
-            "red": r
-        })
+    # 3. Busca a data de atualização no banco principal (apenas para o cabeçalho)
+    data_att = "---"
+    if os.path.exists(PATH_DB):
+        with open(PATH_DB, 'r', encoding='utf-8') as f:
+            db_main = json.load(f)
+            data_att = db_main.get('ultima_atualizacao', '---')
 
-    lista_ranking.sort(key=lambda x: (x['taxa'], x['green']), reverse=True)
-
+    # 4. Monta a Mensagem (A lógica de exibição permanece a mesma)
     msg = "🏆 *RANKING DE ASSERTIVIDADE*\n"
-    msg += f"📅 _Atualizado: {db.get('ultima_atualizacao', '---')}_\n\n"
+    msg += f"📅 _Atualizado: {data_att}_\n\n"
 
+    # Pegamos os top 10 do arquivo que o ranking.py já ordenou
     for i, item in enumerate(lista_ranking[:10], 1):
         medalha = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else "🔹"
-        barra = get_barra_progresso(item['taxa'])
-        msg += f"{medalha} *{item['mercado']}*\n"
-        msg += f"{barra} *{int(item['taxa'])}%* (✅ {item['green']} ❌ {item['red']})\n"
+        
+        # O ranking_diario já tem a taxa (assertividade) calculada como decimal (ex: 1.0)
+        taxa_cem = item['assertividade'] * 100
+        barra = get_barra_progresso(taxa_cem)
+        
+        # Limpa o nome do mercado
+        m_limpo = item['mercado'].replace("_", " ").strip()
+        
+        msg += f"{medalha} *{m_limpo}*\n"
+        msg += f"{barra} *{int(taxa_cem)}%* (✅ {item['green']} ❌ {item['red']})\n"
         msg += "--------------------------------\n"
 
     msg += "\n🔥 _Dados baseados no histórico real do bot._"
@@ -72,13 +72,12 @@ def enviar_ranking_telegram(chat_id):
     response = requests.post(url, json=payload)
     res_json = response.json()
     
-    # ISSO VAI APARECER NO LOG SE DER ERRO
     if not res_json.get("ok"):
         print(f"❌ ERRO TELEGRAM RANKING: {res_json.get('description')}")
-        # Segunda tentativa sem Markdown caso tenha caracteres inválidos
         payload["parse_mode"] = None
         requests.post(url, json=payload)
     else:
         print(f"✅ Ranking enviado com sucesso para {chat_id}")
     
     return res_json
+    
