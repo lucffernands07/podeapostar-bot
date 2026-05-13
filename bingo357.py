@@ -32,7 +32,9 @@ def carregar_ranking_db():
     if os.path.exists(caminho):
         try:
             with open(caminho, 'r', encoding='utf-8') as f:
-                return json.load(f).get("stats", {})
+                stats = json.load(f).get("stats", {})
+                # Padroniza todas as chaves do ranking para MAIÚSCULO
+                return {str(k).upper(): v for k, v in stats.items()}
         except: return {}
     return {}
 
@@ -96,10 +98,12 @@ def montar_bilhetes_estrategicos(dados_entrada):
     # --- BINGO PREMIUM (PRO): ELITE ---
     stats_db = carregar_ranking_db()
 
-    def calcular_performance_premium(jogo):
+        def calcular_performance_premium(jogo):
         try:
-            mercado_raw = jogo.get('mercado', "")
+            # Converte o mercado do jogo para MAIÚSCULO para bater com o ranking
+            mercado_raw = str(jogo.get('mercado', "")).upper()
             stat = stats_db.get(mercado_raw)
+            
             if not stat: return (0.0, 0, 1.0)
             
             greens = stat.get("green", 0)
@@ -109,6 +113,7 @@ def montar_bilhetes_estrategicos(dados_entrada):
             return (aproveitamento, greens, extrair_odd(jogo.get('odd', '1.0')))
         except:
             return (0.0, 0, 1.0)
+
 
     lista_candidatos = [j for j in lista_jogos if calcular_performance_premium(j)[0] > 0]
     lista_premium = sorted(lista_candidatos, key=calcular_performance_premium, reverse=True)[:7]
