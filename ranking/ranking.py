@@ -13,6 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 # --- CONFIGURAÇÕES DE CAMINHO ---
 PATH_DB = "ranking/ranking_db.json"
 PATH_PENDENTES = "ranking/pendentes.json"
+PATH_RANKING_DIARIO = "ranking/ranking_diario.json" # <--- NOVO ARQUIVO PADRONIZADO
 
 def log(etapa, mensagem):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] 🚀 {etapa}: {mensagem}")
@@ -39,6 +40,32 @@ def validar_palpite(mercado_str, g_c, g_f):
     if "vitoria casa" in m: return g_c > g_f
     return False
 
+# --- NOVA FUNÇÃO: GERA O RANKING JÁ SEPARADO PARA SENDER E BINGO357 ---
+def gerar_ranking_diario(stats):
+    log("RANKING", "Gerando ranking_diario.json ordenado por elite...")
+    lista_ordenada = []
+    
+    for mercado, dados in stats.items():
+        g = dados.get('green', 0)
+        r = dados.get('red', 0)
+        total = g + r
+        
+        if total > 0:
+            assertividade = g / total
+            lista_ordenada.append({
+                "mercado": mercado,
+                "green": g,
+                "red": r,
+                "assertividade": assertividade
+            })
+    
+    # Ordena por Assertividade (100% no topo) e depois por volume de Greens
+    lista_ordenada.sort(key=lambda x: (x['assertividade'], x['green']), reverse=True)
+    
+    with open(PATH_RANKING_DIARIO, 'w', encoding='utf-8') as f:
+        json.dump(lista_ordenada, f, indent=4, ensure_ascii=False)
+    log("RANKING", "Arquivo ranking_diario.json pronto para uso.")
+
 def main():
     log("INÍCIO", "Iniciando Processamento de Ranking")
 
@@ -46,11 +73,9 @@ def main():
         log("AVISO", "Arquivo pendentes.json não encontrado. Nada para processar.")
         return
 
-    # --- CARREGAMENTO DE DADOS E VALIDAÇÃO DE DATA ---
     with open(PATH_PENDENTES, 'r', encoding='utf-8') as f:
         dados_pendentes = json.load(f)
 
-    # Suporte ao novo formato (dicionário) ou antigo (lista direta)
     if isinstance(dados_pendentes, dict):
         data_geracao = dados_pendentes.get("data_geracao", "")
         pendentes = dados_pendentes.get("jogos", [])
@@ -60,17 +85,14 @@ def main():
 
     hoje_str = date.today().strftime("%Y-%m-%d")
 
-    # TRAVA: Só processa se a data gravada no arquivo for anterior a hoje
     if data_geracao == hoje_str:
         log("TRAVA", f"O arquivo pendentes.json já é de hoje ({data_geracao}).")
-        log("DICA", "O ranking só processa jogos de ONTEM. Aguarde o próximo ciclo.")
         return
 
     if not pendentes:
         log("AVISO", "A lista de jogos pendentes está vazia.")
         return
 
-    # --- CARREGAMENTO DO BANCO DE DADOS ---
     if os.path.exists(PATH_DB):
         with open(PATH_DB, 'r', encoding='utf-8') as f:
             db = json.load(f)
@@ -92,7 +114,6 @@ def main():
                 driver.get(url)
                 wait = WebDriverWait(driver, 15)
                 
-                # Busca o placar no topo da página de resumo
                 score_casa_el = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".detailScore__wrapper span:nth-child(1)")))
                 score_fora_el = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".detailScore__wrapper span:nth-child(3)")))
                 
@@ -103,7 +124,6 @@ def main():
                     g_c, g_f = int(score_casa), int(score_fora)
                     deu_green = validar_palpite(jogo['mercado'], g_c, g_f)
                     
-                    # --- PADRONIZAÇÃO DA CHAVE (REMOVE ESPAÇOS E DEIXA TUDO IGUAL) ---
                     m_rank = jogo['mercado_ranking'].strip().upper()
                     
                     if m_rank not in stats: 
@@ -117,20 +137,19 @@ def main():
                     atualizados += 1
                     log("RESULTADO", f"{'✅ GREEN' if deu_green else '❌ RED'} ({g_c}-{g_f})")
 
-                else:
-                    log("PULANDO", f"Placar inválido ou jogo em andamento: {score_casa}-{score_fora}")
-
             except Exception as e:
                 log("ERRO", f"Erro ao ler {jogo['time_casa']}: {str(e)[:50]}...")
 
-        # --- SALVAMENTO E RESET DO ARQUIVO ---
+        # --- SALVAMENTO E GERAÇÃO DO RANKING DIÁRIO ---
         db["stats"] = stats
         db["ultima_atualizacao"] = datetime.now().strftime("%d/%m/%Y %H:%M")
         
         with open(PATH_DB, 'w', encoding='utf-8') as f:
             json.dump(db, f, indent=4, ensure_ascii=False)
         
-        # Limpa mantendo a data de hoje para manter a trava ativa
+        # CHAMA A NOVA FUNÇÃO AQUI PARA SEPARAR OS MELHORES
+        gerar_ranking_diario(stats)
+        
         dados_reset = {
             "data_geracao": hoje_str,
             "jogos": []
@@ -145,4 +164,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                    
+                
