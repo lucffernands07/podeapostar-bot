@@ -114,7 +114,8 @@ def montar_bilhetes_estrategicos(dados_entrada):
         except:
             return (0.0, 0, 1.0)
 
-    lista_candidatos = [j for j in lista_jogos if calcular_performance_premium(j)[0] > 0]
+    # Aceita jogos que tenham pelo menos 1 Green ou que tenham porcentagem alta no mercado
+    lista_candidatos = [j for j in lista_jogos if calcular_performance_premium(j)[1] > 0 or extrair_porcentagem(j.get('mercado')) >= 80]
     lista_premium = sorted(lista_candidatos, key=calcular_performance_premium, reverse=True)[:7]
     
     if lista_premium:
