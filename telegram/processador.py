@@ -31,7 +31,7 @@ def executar():
 
     if not jogos_filtrados:
         texto_erro = f"⚠️ Não há mais jogos disponíveis para gerar bilhetes agora ({agora_br})."
-        menus.enviar_menu_bingo(chat_id, texto_erro) # Usa menus para manter os botões
+        menus.enviar_menu_bingo(chat_id, texto_erro)
         return
 
     bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(jogos_filtrados)
@@ -42,15 +42,17 @@ def executar():
         "horario": j.get("horario"),
         "odd": j.get("odd")
     } for j in jogos_filtrados}
-
-    tipo_alvo = tipo_bruto.upper().replace("_", "").replace(" ", "")
     
-    bilhete_solicitado = []
+    # --- BUSCA DO BILHETE (CORRIGIDA) ---
+    tipo_alvo = tipo_bruto.upper().replace("_", "").replace(" ", "")
+    bilhete_solicitado = [] # <--- IMPORTANTE: Inicializar a lista aqui
+
     for b in bilhetes_gerados:
-        nome_limpo = b['nome'].upper().replace("_", "").replace(" ", "").replace(":", "")
+        nome_limpo = b['nome'].upper().replace("_", "").replace(" ", "").replace(":", "").replace("💎", "")
         id_limpo = b.get('id', '').upper()
-        
-        if tipo_alvo in nome_limpo or tipo_alvo == id_limpo:
+
+        # Se o que foi clicado bater com o nome ou com o ID (PREMIUM, BINGO3, BINGO5)
+        if tipo_alvo in nome_limpo or tipo_alvo == id_limpo or (tipo_alvo == "BINGOPRO" and id_limpo == "PREMIUM"):
             bilhete_solicitado.append(b)
             break
 
@@ -59,10 +61,8 @@ def executar():
         texto_gerado = bingo357.formatar_para_telegram(bilhete_solicitado, cache_dados)
         
         if texto_gerado:
-            # Em vez de requests.post, usamos sua função que anexa os botões!
             titulo = f"✅ *{tipo_bruto.upper().replace('_', ' ')} ATUALIZADO*\n_(Baseado em jogos após às {agora_br})_\n\n"
             texto_final = titulo + texto_gerado
-            
             menus.enviar_menu_bingo(chat_id, texto_final)
     else:
         texto_vazio = f"ℹ️ Não há jogos futuros suficientes para montar o *{tipo_bruto}* neste momento."
