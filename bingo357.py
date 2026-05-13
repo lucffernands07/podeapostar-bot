@@ -101,15 +101,14 @@ def montar_bilhetes_estrategicos(dados_entrada):
         # --- BINGO PREMIUM (PRO): ELITE ---
     stats_db = carregar_ranking_db()
 
+        # --- BINGO PREMIUM (PRO): ELITE ---
+    stats_db = carregar_ranking_db()
+
     def calcular_performance_premium(jogo):
         try:
-            # Padroniza o mercado para bater com o Ranking (Maiúsculo e sem espaços extras)
             mercado_raw = str(jogo.get('mercado', "")).upper().strip()
-            
-            # Busca no ranking_db.json
             stat = stats_db.get(mercado_raw)
             
-            # Se não achar direto, tenta remover emojis (como o 💎 que você tem no ranking)
             if not stat:
                 mercado_limpo = mercado_raw.replace("💎", "").replace("  ", " ").strip()
                 stat = stats_db.get(mercado_limpo)
@@ -118,45 +117,35 @@ def montar_bilhetes_estrategicos(dados_entrada):
                 greens = stat.get("green", 0)
                 reds = stat.get("red", 0)
                 total = greens + reds
-                
-                # Regra 1: Assertividade (Ex: 100%, 85%, 74%)
                 assertividade = (greens / total) if total > 0 else 0.0
-                
-                # Regra 2: Volume de Greens (Critério de desempate para o Ranking)
-                # Retorna (Assertividade, Greens, Odd)
                 return (assertividade, greens, extrair_odd(jogo.get('odd', '1.0')))
             
-            # Se o jogo NÃO está no ranking, ele ganha uma nota baseada na probabilidade do dia
-            # Mas fica abaixo de qualquer um que tenha histórico real de acerto (Greens > 0)
-            nota_probabilidade = extrair_porcentagem(mercado_raw) / 1000 # Nota bem baixa
-            return (nota_probabilidade, 0, extrair_odd(jogo.get('odd', '1.0')))
-
+            # Se não tem no ranking, dá nota baseada na % do dia para não travar o bilhete
+            return (extrair_porcentagem(mercado_raw) / 1000, 0, extrair_odd(jogo.get('odd', '1.0')))
         except:
             return (0.0, 0, 1.0)
 
-    # 1. Ordena todos os jogos pela performance do Ranking (Elite no topo)
+    # 1. Ordena todos os jogos (Elite no topo pelo Ranking)
     lista_candidatos = sorted(lista_jogos, key=calcular_performance_premium, reverse=True)
     
-    # 2. Monta o bilhete com o que tiver disponível (mínimo 3, máximo 7)
+    # 2. Monta o bilhete se houver pelo menos 3 jogos (até o limite de 7)
     if len(lista_candidatos) >= 3:
         lista_premium = lista_candidatos[:7]
-        # Ordena por horário apenas para exibição no bilhete
         lista_premium.sort(key=lambda x: x.get('horario', '00:00'))
         
         qtd = len(lista_premium)
         nome_bilhete = f"💎 BINGO PRO: ELITE (TOP {qtd})"
         
-        # Se os melhores jogos já passaram, ele completa com os próximos melhores
-        if calcular_performance_premium(lista_premium[0])[1] == 0:
-            nome_bilhete += "\n⚠️ _Filtro: Probabilidade Diária_"
-        else:
+        # Identifica se o bilhete é baseado em Ranking Real ou Probabilidade
+        if calcular_performance_premium(lista_premium[0])[1] > 0:
             nome_bilhete += "\n🔥 _Filtro: Ranking de Assertividade_"
+        else:
+            nome_bilhete += "\n⚠️ _Filtro: Probabilidade Diária_"
 
         bilhetes.append({"id": "PREMIUM", "nome": nome_bilhete, "jogos": lista_premium})
 
     return bilhetes
-
-
+    
 def formatar_para_telegram(bilhetes, cache_dados):
     if not bilhetes: return ""
     blocos = []
