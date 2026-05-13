@@ -98,47 +98,64 @@ def montar_bilhetes_estrategicos(dados_entrada):
     # --- BINGO PREMIUM (PRO): ELITE ---
     stats_db = carregar_ranking_db()
 
+        # --- BINGO PREMIUM (PRO): ELITE ---
+    stats_db = carregar_ranking_db()
+
     def calcular_performance_premium(jogo):
         try:
-            # 1. Padroniza o mercado do jogo para bater com o ranking
-            # Isso faz "+1.5 Gols (85%)" virar "+1.5 GOLS (85%)"
+            # Padroniza o mercado para bater com o Ranking (Maiúsculo e sem espaços extras)
             mercado_raw = str(jogo.get('mercado', "")).upper().strip()
             
-            # 2. Busca direta
+            # Busca no ranking_db.json
             stat = stats_db.get(mercado_raw)
             
-            # 3. Busca secundária (caso tenha diamante 💎 ou espaços duplos no ranking)
+            # Se não achar direto, tenta remover emojis (como o 💎 que você tem no ranking)
             if not stat:
                 mercado_limpo = mercado_raw.replace("💎", "").replace("  ", " ").strip()
                 stat = stats_db.get(mercado_limpo)
             
-            if not stat: return (0.0, 0, 1.0)
+            if stat:
+                greens = stat.get("green", 0)
+                reds = stat.get("red", 0)
+                total = greens + reds
+                
+                # Regra 1: Assertividade (Ex: 100%, 85%, 74%)
+                assertividade = (greens / total) if total > 0 else 0.0
+                
+                # Regra 2: Volume de Greens (Critério de desempate para o Ranking)
+                # Retorna (Assertividade, Greens, Odd)
+                return (assertividade, greens, extrair_odd(jogo.get('odd', '1.0')))
             
-            greens = stat.get("green", 0)
-            reds = stat.get("red", 0)
-            total = greens + reds
-            
-            aproveitamento = (greens / total) if total > 0 else 0.0
-            # Retorna (Assertividade, Greens, Odd) para o critério de desempate
-            return (aproveitamento, greens, extrair_odd(jogo.get('odd', '1.0')))
+            # Se o jogo NÃO está no ranking, ele ganha uma nota baseada na probabilidade do dia
+            # Mas fica abaixo de qualquer um que tenha histórico real de acerto (Greens > 0)
+            nota_probabilidade = extrair_porcentagem(mercado_raw) / 1000 # Nota bem baixa
+            return (nota_probabilidade, 0, extrair_odd(jogo.get('odd', '1.0')))
+
         except:
             return (0.0, 0, 1.0)
 
-    # Filtro: Entra na lista se tiver histórico de Green OU se a análise do dia for >= 80%
-    lista_candidatos = [j for j in lista_jogos if calcular_performance_premium(j)[1] > 0 or extrair_porcentagem(j.get('mercado')) >= 80]
+    # 1. Ordena todos os jogos pela performance do Ranking (Elite no topo)
+    lista_candidatos = sorted(lista_jogos, key=calcular_performance_premium, reverse=True)
     
-    # Ordena: 1º por Assertividade, 2º por volume de Greens
-    lista_premium = sorted(lista_candidatos, key=calcular_performance_premium, reverse=True)[:7]
-    
-    if lista_premium:
+    # 2. Monta o bilhete com o que tiver disponível (mínimo 3, máximo 7)
+    if len(lista_candidatos) >= 3:
+        lista_premium = lista_candidatos[:7]
+        # Ordena por horário apenas para exibição no bilhete
         lista_premium.sort(key=lambda x: x.get('horario', '00:00'))
-        nome_bilhete = "💎 BINGO PRO: ELITE"
-        if len(lista_premium) < 7:
-            nome_bilhete += "\n⚠️ _Encontrados somente esses jogos nesse intervalo_"
+        
+        qtd = len(lista_premium)
+        nome_bilhete = f"💎 BINGO PRO: ELITE (TOP {qtd})"
+        
+        # Se os melhores jogos já passaram, ele completa com os próximos melhores
+        if calcular_performance_premium(lista_premium[0])[1] == 0:
+            nome_bilhete += "\n⚠️ _Filtro: Probabilidade Diária_"
+        else:
+            nome_bilhete += "\n🔥 _Filtro: Ranking de Assertividade_"
 
         bilhetes.append({"id": "PREMIUM", "nome": nome_bilhete, "jogos": lista_premium})
 
     return bilhetes
+
 
 def formatar_para_telegram(bilhetes, cache_dados):
     if not bilhetes: return ""
