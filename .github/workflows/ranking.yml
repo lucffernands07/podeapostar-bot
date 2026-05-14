@@ -39,8 +39,9 @@ jobs:
         run: |
           git config --global user.name "GitHub Action Bot"
           git config --global user.email "actions@github.com"
-          # Adiciona especificamente a pasta ranking
-          git add ranking/ranking_db.json ranking/pendentes.json || true
+          # ADICIONADO O RANKING_DIARIO NO SEU GIT ADD:
+          git add ranking/ranking_db.json ranking/pendentes.json ranking/ranking_diario.json || true
           git commit -m "Ranking atualizado: $(date +'%d/%m/%Y %H:%M')" || echo "Sem mudanças"
           git push
+
         
