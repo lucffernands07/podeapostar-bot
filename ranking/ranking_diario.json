@@ -1,0 +1,140 @@
+[
+    {
+        "mercado": "-4.5 GOLS (100%)",
+        "green": 5,
+        "red": 0,
+        "assertividade": 1.0
+    },
+    {
+        "mercado": "-4.5 GOLS (85%)",
+        "green": 4,
+        "red": 0,
+        "assertividade": 1.0
+    },
+    {
+        "mercado": "-4.5 GOLS (70%)",
+        "green": 3,
+        "red": 0,
+        "assertividade": 1.0
+    },
+    {
+        "mercado": "VITORIA CASA (100%)",
+        "green": 2,
+        "red": 0,
+        "assertividade": 1.0
+    },
+    {
+        "mercado": "1X (100%)",
+        "green": 2,
+        "red": 0,
+        "assertividade": 1.0
+    },
+    {
+        "mercado": "1X (70%)",
+        "green": 1,
+        "red": 0,
+        "assertividade": 1.0
+    },
+    {
+        "mercado": "1X (85%)",
+        "green": 9,
+        "red": 1,
+        "assertividade": 0.9
+    },
+    {
+        "mercado": "+2.5 GOLS (70%)",
+        "green": 20,
+        "red": 6,
+        "assertividade": 0.7692307692307693
+    },
+    {
+        "mercado": "+1.5 GOLS (85%)",
+        "green": 28,
+        "red": 10,
+        "assertividade": 0.7368421052631579
+    },
+    {
+        "mercado": "AMBAS MARCAM: SIM (100%)",
+        "green": 18,
+        "red": 8,
+        "assertividade": 0.6923076923076923
+    },
+    {
+        "mercado": "+1.5 GOLS (100%)",
+        "green": 4,
+        "red": 2,
+        "assertividade": 0.6666666666666666
+    },
+    {
+        "mercado": "+1.5 GOLS (70%)",
+        "green": 14,
+        "red": 11,
+        "assertividade": 0.56
+    },
+    {
+        "mercado": "+2.5 GOLS (85%)",
+        "green": 9,
+        "red": 8,
+        "assertividade": 0.5294117647058824
+    },
+    {
+        "mercado": "AMBAS MARCAM: SIM (80%)",
+        "green": 14,
+        "red": 18,
+        "assertividade": 0.4375
+    },
+    {
+        "mercado": "BINGO 3",
+        "green": 2,
+        "red": 4,
+        "assertividade": 0.3333333333333333
+    },
+    {
+        "mercado": "X2 (85%)",
+        "green": 1,
+        "red": 3,
+        "assertividade": 0.25
+    },
+    {
+        "mercado": "VITORIA CASA (80%)",
+        "green": 0,
+        "red": 1,
+        "assertividade": 0.0
+    },
+    {
+        "mercado": "X2 (70%)",
+        "green": 0,
+        "red": 2,
+        "assertividade": 0.0
+    },
+    {
+        "mercado": "BINGO 5",
+        "green": 0,
+        "red": 4,
+        "assertividade": 0.0
+    },
+    {
+        "mercado": "VITÓRIA CASA 💎 (100%)",
+        "green": 0,
+        "red": 3,
+        "assertividade": 0.0
+    },
+    {
+        "mercado": "VITÓRIA CASA 💎 (80%)",
+        "green": 0,
+        "red": 2,
+        "assertividade": 0.0
+    },
+    {
+        "mercado": "VITÓRIA CASA (100%)",
+        "green": 0,
+        "red": 2,
+        "assertividade": 0.0
+    },
+    {
+        "mercado": "VITÓRIA CASA (80%)",
+        "green": 0,
+        "red": 2,
+        "assertividade": 0.0
+    }
+]
