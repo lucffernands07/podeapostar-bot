@@ -1,4 +1,96 @@
 {
     "data_geracao": "2026-05-15",
-    "jogos": []
+    "jogos": [
+        {
+            "time_casa": "Aston Villa",
+            "time_fora": "Liverpool",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AyZEYQVH/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Aston Villa",
+            "time_fora": "Liverpool",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AyZEYQVH/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "St. Etienne",
+            "time_fora": "Rodez",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lUe93UEb/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Damac",
+            "time_fora": "Al-Fayha",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WYZGsgEO/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Damac",
+            "time_fora": "Al-Fayha",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WYZGsgEO/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Al-Taawon",
+            "time_fora": "Al-Riyadh",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ljIQWy06/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Leuven",
+            "time_fora": "Antwerp",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EekNIA8D/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Castellón",
+            "time_fora": "Cádiz",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/U3CHb0n2/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Córdoba",
+            "time_fora": "Albacete",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EVAp6rfS/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Bari",
+            "time_fora": "Sudtirol",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QFKcZIxh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Bari",
+            "time_fora": "Sudtirol",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QFKcZIxh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Korona",
+            "time_fora": "Widzew Lodz",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/h06R0S6M/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Vukovar 1991",
+            "time_fora": "Varazdin",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KlHiSsmQ/#/resumo-de-jogo"
+        }
+    ]
 }
