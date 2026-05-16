@@ -234,7 +234,7 @@ def main():
                                     if "M45" in m_chave and odd_float >= 4.0:
                                         continue 
 
-                                    if odd_float >= 1.20:
+                                    if odd_float >= 1.30:
                                         # Salva para o Listão/Telegram
                                         lista_para_filtros.append({
                                             "horario": h_br, "time_casa": t1, "time_fora": t2,
