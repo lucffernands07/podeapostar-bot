@@ -1,0 +1,641 @@
+[
+    {
+        "horario": "07:00",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Metalist 1925",
+        "time_fora": "Epitsentr",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/Metalist-1925-Kharkiv-Epicentr-Dunaivtsi/85345538/"
+    },
+    {
+        "horario": "07:00",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Metalist 1925",
+        "time_fora": "Epitsentr",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.87",
+        "link_betano": "https://www.betano.bet.br/match-odds/Metalist-1925-Kharkiv-Epicentr-Dunaivtsi/85345538/"
+    },
+    {
+        "horario": "10:30",
+        "liga": "Bundesliga",
+        "time_casa": "Bremen",
+        "time_fora": "Dortmund",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.37",
+        "link_betano": "https://www.betano.bet.br/match-odds/Werder-Bremen-Borussia-Dortmund/83630334/"
+    },
+    {
+        "horario": "10:30",
+        "liga": "Bundesliga",
+        "time_casa": "Frankfurt",
+        "time_fora": "Stuttgart",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/Eintracht-Frankfurt-VfB-Stuttgart/83630332/"
+    },
+    {
+        "horario": "10:30",
+        "liga": "Bundesliga",
+        "time_casa": "Frankfurt",
+        "time_fora": "Stuttgart",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Eintracht-Frankfurt-VfB-Stuttgart/83630332/"
+    },
+    {
+        "horario": "10:30",
+        "liga": "Bundesliga",
+        "time_casa": "Freiburg",
+        "time_fora": "RB Leipzig",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.47",
+        "link_betano": "https://www.betano.bet.br/match-odds/SC-Freiburg-RB-Leipzig/83630340/"
+    },
+    {
+        "horario": "10:30",
+        "liga": "Bundesliga",
+        "time_casa": "Heidenheim",
+        "time_fora": "Mainz",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/1-FC-Heidenheim-FSV-Mainz-05/85247475/"
+    },
+    {
+        "horario": "10:30",
+        "liga": "Bundesliga",
+        "time_casa": "Heidenheim",
+        "time_fora": "Mainz",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.40",
+        "link_betano": "https://www.betano.bet.br/match-odds/1-FC-Heidenheim-FSV-Mainz-05/85247475/"
+    },
+    {
+        "horario": "10:30",
+        "liga": "Bundesliga",
+        "time_casa": "Leverkusen",
+        "time_fora": "Hamburger SV",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/Bayer-04-Leverkusen-Hamburger-SV/83630330/"
+    },
+    {
+        "horario": "10:30",
+        "liga": "Bundesliga",
+        "time_casa": "Leverkusen",
+        "time_fora": "Hamburger SV",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/Bayer-04-Leverkusen-Hamburger-SV/83630330/"
+    },
+    {
+        "horario": "10:30",
+        "liga": "Bundesliga",
+        "time_casa": "Monchengladbach",
+        "time_fora": "Hoffenheim",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Borussia-Monchengladbach-TSG-1899-Hoffenheim/83630333/"
+    },
+    {
+        "horario": "10:30",
+        "liga": "Bundesliga",
+        "time_casa": "Union Berlin",
+        "time_fora": "Augsburg",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/1-FC-Union-Berlin-FC-Augsburg/85236955/"
+    },
+    {
+        "horario": "10:30",
+        "liga": "Bundesliga",
+        "time_casa": "Union Berlin",
+        "time_fora": "Augsburg",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/1-FC-Union-Berlin-FC-Augsburg/85236955/"
+    },
+    {
+        "horario": "11:00",
+        "liga": "Andorra - Primeira Divisão",
+        "time_casa": "Carroi",
+        "time_fora": "Inter Escaldes",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/CE-Carroi-Inter-Club-de-Escaldes/85504376/"
+    },
+    {
+        "horario": "11:00",
+        "liga": "Andorra - Primeira Divisão",
+        "time_casa": "Ordino",
+        "time_fora": "Esperanca",
+        "mercado": "Vitória Casa (80%)",
+        "odd": "1.47",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Ordino-Esperanca-D-Andorra/85557233/"
+    },
+    {
+        "horario": "11:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "Mariehamn",
+        "time_fora": "KuPS",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.23",
+        "link_betano": "https://www.betano.bet.br/match-odds/IFK-Mariehamn-Kuopio-PS/83636686/"
+    },
+    {
+        "horario": "11:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "SJK",
+        "time_fora": "Inter Turku",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.31",
+        "link_betano": "https://www.betano.bet.br/match-odds/Seinajoen-JK-FC-Inter-Turku/83636685/"
+    },
+    {
+        "horario": "11:15",
+        "liga": "Espanha - La Liga 2",
+        "time_casa": "Ceuta",
+        "time_fora": "Málaga",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.21",
+        "link_betano": null
+    },
+    {
+        "horario": "11:15",
+        "liga": "Espanha - La Liga 2",
+        "time_casa": "Ceuta",
+        "time_fora": "Málaga",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.62",
+        "link_betano": null
+    },
+    {
+        "horario": "11:30",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Moreirense",
+        "time_fora": "AFS",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/Moreirense-FC-AVS-Futebol-SAD/85504577/"
+    },
+    {
+        "horario": "11:30",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Porto",
+        "time_fora": "Santa Clara",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.24",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Porto-CD-Santa-Clara/85504122/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Áustria - Bundesliga",
+        "time_casa": "BW Linz",
+        "time_fora": "Grazer",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.33",
+        "link_betano": null
+    },
+    {
+        "horario": "12:00",
+        "liga": "Áustria - Bundesliga",
+        "time_casa": "BW Linz",
+        "time_fora": "Grazer",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.80",
+        "link_betano": null
+    },
+    {
+        "horario": "13:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "Gnistan",
+        "time_fora": "Jaro",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/IF-Gnistan-FF-Jaro/83636688/"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "Gnistan",
+        "time_fora": "Jaro",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/IF-Gnistan-FF-Jaro/83636688/"
+    },
+    {
+        "horario": "13:05",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Hilal",
+        "time_fora": "Neom SC",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.80",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Hilal-SFC-Neom-SC/84220257/"
+    },
+    {
+        "horario": "13:15",
+        "liga": "Bélgica - Pro League",
+        "time_casa": "St. Liege",
+        "time_fora": "Genk",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Standard-Li-ge-KRC-Genk/83636642/"
+    },
+    {
+        "horario": "13:15",
+        "liga": "Croácia - HNL",
+        "time_casa": "Lok. Zagreb",
+        "time_fora": "Hajduk Split",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.24",
+        "link_betano": null
+    },
+    {
+        "horario": "13:30",
+        "liga": "Escócia - Championship",
+        "time_casa": "Stenhousemuir",
+        "time_fora": "Alloa",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/Stenhousemuir-Alloa-Athletic/85504562/"
+    },
+    {
+        "horario": "13:30",
+        "liga": "Escócia - Championship",
+        "time_casa": "Stenhousemuir",
+        "time_fora": "Alloa",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.73",
+        "link_betano": "https://www.betano.bet.br/match-odds/Stenhousemuir-Alloa-Athletic/85504562/"
+    },
+    {
+        "horario": "13:30",
+        "liga": "Escócia - Championship",
+        "time_casa": "Stenhousemuir",
+        "time_fora": "Alloa",
+        "mercado": "1X (100%)",
+        "odd": "1.40",
+        "link_betano": "https://www.betano.bet.br/match-odds/Stenhousemuir-Alloa-Athletic/85504562/"
+    },
+    {
+        "horario": "13:30",
+        "liga": "Escócia - Championship",
+        "time_casa": "Stenhousemuir",
+        "time_fora": "Alloa",
+        "mercado": "Vitória Casa (100%)",
+        "odd": "2.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/Stenhousemuir-Alloa-Athletic/85504562/"
+    },
+    {
+        "horario": "13:30",
+        "liga": "Espanha - La Liga 2",
+        "time_casa": "Almería",
+        "time_fora": "Las Palmas",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.24",
+        "link_betano": null
+    },
+    {
+        "horario": "13:30",
+        "liga": "Espanha - La Liga 2",
+        "time_casa": "Racing Santander",
+        "time_fora": "Valladolid",
+        "mercado": "-4.5 Gols (70%)",
+        "odd": "1.24",
+        "link_betano": "https://www.betano.bet.br/match-odds/Racing-Santander-Real-Valladolid/84923994/"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Arouca",
+        "time_fora": "Tondela",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.29",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Arouca-CD-Tondela/85504022/"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Turquia - Super Lig",
+        "time_casa": "Gaziantep",
+        "time_fora": "Basaksehir",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gaziantep-FK-Istanbul-Basaksehir-FK/85305386/"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Turquia - Super Lig",
+        "time_casa": "Samsunspor",
+        "time_fora": "Goztepe",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Samsunspor-Goztepe-SK/85305420/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Ahli",
+        "time_fora": "Al-Kholood",
+        "mercado": "-4.5 Gols (100%)",
+        "odd": "1.30",
+        "link_betano": null
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Ahli",
+        "time_fora": "Al-Kholood",
+        "mercado": "Vitória Casa (100%)",
+        "odd": "1.27",
+        "link_betano": null
+    },
+    {
+        "horario": "15:15",
+        "liga": "Polônia - Ekstraklasa",
+        "time_casa": "Radomiak Radom",
+        "time_fora": "Lech",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.24",
+        "link_betano": "https://www.betano.bet.br/match-odds/Radomiak-Radom-Lech-Poznan/84387640/"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Bélgica - Pro League",
+        "time_casa": "St. Truiden",
+        "time_fora": "Gent",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.21",
+        "link_betano": "https://www.betano.bet.br/match-odds/Sint-Truidense-VV-KAA-Gent/83636644/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Operário",
+        "time_fora": "Náutico",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Operario-PR-Nautico-PE/85543738/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "São Bernardo",
+        "time_fora": "América-MG",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "2.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Sao-Bernardo-SP-America-MG/85689346/"
+    },
+    {
+        "horario": "16:30",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Estoril",
+        "time_fora": "Benfica",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.70",
+        "link_betano": "https://www.betano.bet.br/match-odds/GD-Estoril-Praia-SL-Benfica/85504258/"
+    },
+    {
+        "horario": "16:30",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Sporting",
+        "time_fora": "Gil Vicente",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.47",
+        "link_betano": "https://www.betano.bet.br/match-odds/Sporting-CP-Gil-Vicente-FC/85504133/"
+    },
+    {
+        "horario": "16:30",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Sporting",
+        "time_fora": "Gil Vicente",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.95",
+        "link_betano": "https://www.betano.bet.br/match-odds/Sporting-CP-Gil-Vicente-FC/85504133/"
+    },
+    {
+        "horario": "17:30",
+        "liga": "EUA - MLS",
+        "time_casa": "CF Montreal",
+        "time_fora": "Chicago Fire",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/CF-Montreal-Chicago-Fire-FC/81375483/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Atlético-MG",
+        "time_fora": "Mirassol",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.40",
+        "link_betano": "https://www.betano.bet.br/match-odds/Clube-Atletico-MG-Mirassol-SP/85153538/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Atlético-MG",
+        "time_fora": "Mirassol",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.95",
+        "link_betano": "https://www.betano.bet.br/match-odds/Clube-Atletico-MG-Mirassol-SP/85153538/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Internacional",
+        "time_fora": "Vasco",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "2.07",
+        "link_betano": "https://www.betano.bet.br/match-odds/Internacional-RS-Vasco-da-Gama-RJ/85153539/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Internacional",
+        "time_fora": "Vasco",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/Internacional-RS-Vasco-da-Gama-RJ/85153539/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Fluminense",
+        "time_fora": "São Paulo",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.36",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fluminense-RJ-Sao-Paulo-SP/85153540/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Fluminense",
+        "time_fora": "São Paulo",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.95",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fluminense-RJ-Sao-Paulo-SP/85153540/"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "River Plate",
+        "time_fora": "Rosario Central",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/River-Plate-CA-Rosario-Central/85712538/"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - MLS",
+        "time_casa": "DC United",
+        "time_fora": "St. Louis City",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.78",
+        "link_betano": "https://www.betano.bet.br/match-odds/D-C-United-St-Louis-City-SC/81375476/"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - MLS",
+        "time_casa": "DC United",
+        "time_fora": "St. Louis City",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/D-C-United-St-Louis-City-SC/81375476/"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - MLS",
+        "time_casa": "New York Red Bulls",
+        "time_fora": "New York City",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/New-York-Red-Bulls-New-York-City-FC/81375469/"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - MLS",
+        "time_casa": "Orlando City",
+        "time_fora": "Atlanta Utd",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.52",
+        "link_betano": "https://www.betano.bet.br/match-odds/Orlando-City-SC-Atlanta-United-FC/81375486/"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - MLS",
+        "time_casa": "Orlando City",
+        "time_fora": "Atlanta Utd",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/Orlando-City-SC-Atlanta-United-FC/81375486/"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - MLS",
+        "time_casa": "Philadelphia Union",
+        "time_fora": "Columbus Crew",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.75",
+        "link_betano": null
+    },
+    {
+        "horario": "21:30",
+        "liga": "EUA - MLS",
+        "time_casa": "Austin FC",
+        "time_fora": "Sporting Kansas City",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.52",
+        "link_betano": "https://www.betano.bet.br/match-odds/Austin-FC-Sporting-Kansas-City/81377655/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "EUA - MLS",
+        "time_casa": "Houston Dynamo",
+        "time_fora": "Vancouver Whitecaps",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.67",
+        "link_betano": "https://www.betano.bet.br/match-odds/Houston-Dynamo-FC-Vancouver-Whitecaps-FC/81377656/"
+    },
+    {
+        "horario": "22:07",
+        "liga": "México - Liga MX",
+        "time_casa": "Guadalajara",
+        "time_fora": "Cruz Azul",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.29",
+        "link_betano": "https://www.betano.bet.br/match-odds/Guadalajara-Chivas-Cruz-Azul/85610239/"
+    },
+    {
+        "horario": "22:07",
+        "liga": "México - Liga MX",
+        "time_casa": "Guadalajara",
+        "time_fora": "Cruz Azul",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.67",
+        "link_betano": "https://www.betano.bet.br/match-odds/Guadalajara-Chivas-Cruz-Azul/85610239/"
+    },
+    {
+        "horario": "22:15",
+        "liga": "EUA - MLS",
+        "time_casa": "Seattle Sounders",
+        "time_fora": "Los Angeles Galaxy",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.55",
+        "link_betano": "https://www.betano.bet.br/match-odds/Seattle-Sounders-FC-Los-Angeles-Galaxy/81380286/"
+    },
+    {
+        "horario": "22:15",
+        "liga": "EUA - MLS",
+        "time_casa": "Seattle Sounders",
+        "time_fora": "Los Angeles Galaxy",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/Seattle-Sounders-FC-Los-Angeles-Galaxy/81380286/"
+    },
+    {
+        "horario": "22:15",
+        "liga": "EUA - MLS",
+        "time_casa": "Seattle Sounders",
+        "time_fora": "Los Angeles Galaxy",
+        "mercado": "Vitória Casa (80%)",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/Seattle-Sounders-FC-Los-Angeles-Galaxy/81380286/"
+    },
+    {
+        "horario": "22:30",
+        "liga": "EUA - MLS",
+        "time_casa": "Real Salt Lake",
+        "time_fora": "Colorado Rapids",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.29",
+        "link_betano": "https://www.betano.bet.br/match-odds/Real-Salt-Lake-Colorado-Rapids/81381172/"
+    },
+    {
+        "horario": "22:30",
+        "liga": "EUA - MLS",
+        "time_casa": "San Diego FC",
+        "time_fora": "Cincinnati",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.35",
+        "link_betano": "https://www.betano.bet.br/match-odds/San-Diego-FC-FC-Cincinnati/81383743/"
+    },
+    {
+        "horario": "23:30",
+        "liga": "EUA - MLS",
+        "time_casa": "San Jose Earthquakes",
+        "time_fora": "FC Dallas",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/San-Jose-Earthquakes-FC-Dallas/81383739/"
+    },
+    {
+        "horario": "23:30",
+        "liga": "EUA - MLS",
+        "time_casa": "San Jose Earthquakes",
+        "time_fora": "FC Dallas",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/San-Jose-Earthquakes-FC-Dallas/81383739/"
+    }
+]
