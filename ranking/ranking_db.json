@@ -25,12 +25,12 @@
             "red": 3
         },
         "+1.5 GOLS (70%)": {
-            "green": 14,
-            "red": 11
+            "green": 15,
+            "red": 12
         },
         "+1.5 GOLS (85%)": {
-            "green": 28,
-            "red": 10
+            "green": 31,
+            "red": 11
         },
         "+1.5 GOLS (100%)": {
             "green": 4,
@@ -41,12 +41,12 @@
             "red": 6
         },
         "AMBAS MARCAM: SIM (80%)": {
-            "green": 14,
-            "red": 18
+            "green": 15,
+            "red": 19
         },
         "AMBAS MARCAM: SIM (100%)": {
             "green": 18,
-            "red": 8
+            "red": 9
         },
         "-4.5 GOLS (100%)": {
             "green": 5,
@@ -66,10 +66,10 @@
         },
         "+2.5 GOLS (85%)": {
             "green": 9,
-            "red": 8
+            "red": 10
         },
         "-4.5 GOLS (85%)": {
-            "green": 4,
+            "green": 6,
             "red": 0
         },
         "VITÓRIA CASA 💎 (100%)": {
@@ -95,5 +95,5 @@
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "15/05/2026 06:38"
+    "ultima_atualizacao": "16/05/2026 06:04"
 }
