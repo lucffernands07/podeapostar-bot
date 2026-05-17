@@ -25,36 +25,36 @@
             "red": 3
         },
         "+1.5 GOLS (70%)": {
-            "green": 15,
-            "red": 12
+            "green": 23,
+            "red": 15
         },
         "+1.5 GOLS (85%)": {
-            "green": 31,
-            "red": 11
+            "green": 36,
+            "red": 12
         },
         "+1.5 GOLS (100%)": {
-            "green": 4,
-            "red": 2
+            "green": 5,
+            "red": 3
         },
         "+2.5 GOLS (70%)": {
-            "green": 20,
-            "red": 6
+            "green": 24,
+            "red": 12
         },
         "AMBAS MARCAM: SIM (80%)": {
-            "green": 15,
-            "red": 19
+            "green": 22,
+            "red": 23
         },
         "AMBAS MARCAM: SIM (100%)": {
-            "green": 18,
-            "red": 9
+            "green": 23,
+            "red": 13
         },
         "-4.5 GOLS (100%)": {
-            "green": 5,
+            "green": 6,
             "red": 0
         },
         "-4.5 GOLS (70%)": {
             "green": 3,
-            "red": 0
+            "red": 1
         },
         "BINGO 3": {
             "green": 2,
@@ -65,11 +65,11 @@
             "red": 4
         },
         "+2.5 GOLS (85%)": {
-            "green": 9,
-            "red": 10
+            "green": 15,
+            "red": 13
         },
         "-4.5 GOLS (85%)": {
-            "green": 6,
+            "green": 12,
             "red": 0
         },
         "VITÓRIA CASA 💎 (100%)": {
@@ -82,18 +82,18 @@
         },
         "1X (100%)": {
             "green": 2,
-            "red": 0
+            "red": 1
         },
         "VITÓRIA CASA (100%)": {
             "green": 0,
-            "red": 2
+            "red": 4
         },
         "VITÓRIA CASA (80%)": {
             "green": 0,
-            "red": 2
+            "red": 4
         }
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "16/05/2026 06:04"
+    "ultima_atualizacao": "17/05/2026 06:29"
 }

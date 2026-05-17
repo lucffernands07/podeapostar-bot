@@ -1,30 +1,18 @@
 [
     {
         "mercado": "-4.5 GOLS (85%)",
-        "green": 6,
+        "green": 12,
         "red": 0,
         "assertividade": 1.0
     },
     {
         "mercado": "-4.5 GOLS (100%)",
-        "green": 5,
-        "red": 0,
-        "assertividade": 1.0
-    },
-    {
-        "mercado": "-4.5 GOLS (70%)",
-        "green": 3,
+        "green": 6,
         "red": 0,
         "assertividade": 1.0
     },
     {
         "mercado": "VITORIA CASA (100%)",
-        "green": 2,
-        "red": 0,
-        "assertividade": 1.0
-    },
-    {
-        "mercado": "1X (100%)",
         "green": 2,
         "red": 0,
         "assertividade": 1.0
@@ -42,46 +30,58 @@
         "assertividade": 0.9
     },
     {
-        "mercado": "+2.5 GOLS (70%)",
-        "green": 20,
-        "red": 6,
-        "assertividade": 0.7692307692307693
+        "mercado": "+1.5 GOLS (85%)",
+        "green": 36,
+        "red": 12,
+        "assertividade": 0.75
     },
     {
-        "mercado": "+1.5 GOLS (85%)",
-        "green": 31,
-        "red": 11,
-        "assertividade": 0.7380952380952381
+        "mercado": "-4.5 GOLS (70%)",
+        "green": 3,
+        "red": 1,
+        "assertividade": 0.75
+    },
+    {
+        "mercado": "+2.5 GOLS (70%)",
+        "green": 24,
+        "red": 12,
+        "assertividade": 0.6666666666666666
+    },
+    {
+        "mercado": "1X (100%)",
+        "green": 2,
+        "red": 1,
+        "assertividade": 0.6666666666666666
     },
     {
         "mercado": "AMBAS MARCAM: SIM (100%)",
-        "green": 18,
-        "red": 9,
-        "assertividade": 0.6666666666666666
+        "green": 23,
+        "red": 13,
+        "assertividade": 0.6388888888888888
     },
     {
         "mercado": "+1.5 GOLS (100%)",
-        "green": 4,
-        "red": 2,
-        "assertividade": 0.6666666666666666
+        "green": 5,
+        "red": 3,
+        "assertividade": 0.625
     },
     {
         "mercado": "+1.5 GOLS (70%)",
-        "green": 15,
-        "red": 12,
-        "assertividade": 0.5555555555555556
+        "green": 23,
+        "red": 15,
+        "assertividade": 0.6052631578947368
     },
     {
         "mercado": "+2.5 GOLS (85%)",
-        "green": 9,
-        "red": 10,
-        "assertividade": 0.47368421052631576
+        "green": 15,
+        "red": 13,
+        "assertividade": 0.5357142857142857
     },
     {
         "mercado": "AMBAS MARCAM: SIM (80%)",
-        "green": 15,
-        "red": 19,
-        "assertividade": 0.4411764705882353
+        "green": 22,
+        "red": 23,
+        "assertividade": 0.4888888888888889
     },
     {
         "mercado": "BINGO 3",
@@ -128,13 +128,13 @@
     {
         "mercado": "VITÓRIA CASA (100%)",
         "green": 0,
-        "red": 2,
+        "red": 4,
         "assertividade": 0.0
     },
     {
         "mercado": "VITÓRIA CASA (80%)",
         "green": 0,
-        "red": 2,
+        "red": 4,
         "assertividade": 0.0
     }
 ]
