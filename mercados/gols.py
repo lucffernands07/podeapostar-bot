@@ -1,9 +1,9 @@
 """
 REGRAS DE MERCADO - GOLS
 1. Prioridade Máxima: -4.5 Gols se o jogo for estatisticamente "Under" (Sem tendência de Over).
-2. Over 1.5/2.5: Ativado apenas se a recorrência combinada for de 4/5 (70%) ou 5/5 (85%-100%).
-3. Filtro de Segurança: Evita sugerir Over e Under no mesmo jogo para manter a coerência do bilhete.
-4. Independência: Não utiliza travas manuais do último jogo, focando na média estatística dos últimos 5.
+2. Over 1.5/2.5 (100% / 85%): Ativado por aprovação direta se ambos os times tiverem recorrência mínima de 4/5 nos últimos 5 jogos.
+3. Over 1.5/2.5 (70%): Ativado apenas se um dos times tiver exatamente 3/5 e o outro tiver no mínimo 4/5, exigindo validação de Over no último jogo de ambos.
+4. Filtro de Segurança: Evita sugerir Over e Under no mesmo jogo para manter a coerência do bilhete.
 """
 """
 REGRAS DE MERCADO - GOLS (CORREÇÃO: STRING INDICES ERROR)
