@@ -27,13 +27,16 @@ def calcular_chance_v2(c, f, ultimo_c, ultimo_f, alvo):
     except:
         return None
 
-    # --- REGRA 1: 4/5 AMBOS (APROVAÇÃO DIRETA) ---
+    # --- REGRA 1: AMBOS COM NO MÍNIMO 4/5 (APROVAÇÃO DIRETA) ---
     if c >= 4 and f >= 4:
         if c == 5 and f == 5: return "100%"
         return "85%"
     
-    # --- REGRA 2: 3/5 AMBOS + ÚLTIMO JOGO ---
-    if c >= 3 and f >= 3:
+    # --- REGRA 2: UM TIME COM 3/5 E O OUTRO COM NO MÍNIMO 4/5 + ÚLTIMO JOGO ---
+    # Traduzindo: (Casa tem 3 E Fora >= 4) OU (Fora tem 3 E Casa >= 4)
+    combinacao_valida = (c == 3 and f >= 4) or (f == 3 and c >= 4)
+    
+    if combinacao_valida:
         if verificar_ultimo_jogo(ultimo_c, alvo) and verificar_ultimo_jogo(ultimo_f, alvo):
             return "70%"
             
