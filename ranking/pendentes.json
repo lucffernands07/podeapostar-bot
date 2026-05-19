@@ -1,4 +1,117 @@
 {
     "data_geracao": "2026-05-19",
-    "jogos": []
+    "jogos": [
+        {
+            "time_casa": "Boca Juniors (Arg)",
+            "time_fora": "Cruzeiro (Bra)",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/GGJw0Pu9/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Audax Italiano (Chi)",
+            "time_fora": "Barracas Central (Arg)",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lr5PDcuQ/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Montevideo City (Uru)",
+            "time_fora": "Dep. Riestra (Arg)",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xUj1DER0/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "São Paulo (Bra)",
+            "time_fora": "Millonarios (Col)",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Oz0lhPCk/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "América de Cali (Col)",
+            "time_fora": "Tigre (Arg)",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jiNDZ4r3/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Bournemouth",
+            "time_fora": "Manchester City",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rkXMW40U/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Westerlo",
+            "time_fora": "St. Liege",
+            "mercado": "1X (85%)",
+            "mercado_ranking": "1X (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/OOBs6XO7/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Westerlo",
+            "time_fora": "St. Liege",
+            "mercado": "Vitória Casa (80%)",
+            "mercado_ranking": "VITÓRIA CASA (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/OOBs6XO7/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Ben Aknoun",
+            "time_fora": "Mostaganem",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tUOXLp9d/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Rouisset",
+            "time_fora": "Paradou",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tj08YNh2/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Constantine",
+            "time_fora": "Khenchela",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8dhfdRp9/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Constantine",
+            "time_fora": "Khenchela",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8dhfdRp9/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Monza",
+            "time_fora": "Juve Stabia",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/baL9pA9C/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Monza",
+            "time_fora": "Juve Stabia",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/baL9pA9C/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Rouen",
+            "time_fora": "Laval",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/re3ORmLE/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Rouen",
+            "time_fora": "Laval",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/re3ORmLE/#/resumo-de-jogo"
+        }
+    ]
 }

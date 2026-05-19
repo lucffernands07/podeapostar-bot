@@ -1,0 +1,146 @@
+[
+    {
+        "horario": "12:00",
+        "liga": "Argélia - Liga 1",
+        "time_casa": "Ben Aknoun",
+        "time_fora": "Mostaganem",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.85",
+        "link_betano": "https://www.betano.bet.br/match-odds/ES-Ben-Aknoun-ES-Mostaganem/85663757/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Argélia - Liga 1",
+        "time_casa": "Rouisset",
+        "time_fora": "Paradou",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.30",
+        "link_betano": null
+    },
+    {
+        "horario": "13:45",
+        "liga": "Argélia - Liga 1",
+        "time_casa": "Constantine",
+        "time_fora": "Khenchela",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.84",
+        "link_betano": "https://www.betano.bet.br/match-odds/CS-Constantine-USM-Khenchela/85353785/"
+    },
+    {
+        "horario": "13:45",
+        "liga": "Argélia - Liga 1",
+        "time_casa": "Constantine",
+        "time_fora": "Khenchela",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.12",
+        "link_betano": "https://www.betano.bet.br/match-odds/CS-Constantine-USM-Khenchela/85353785/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Itália - Serie B",
+        "time_casa": "Monza",
+        "time_fora": "Juve Stabia",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.40",
+        "link_betano": "https://www.betano.bet.br/match-odds/AC-Monza-Juve-Stabia/85667026/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Itália - Serie B",
+        "time_casa": "Monza",
+        "time_fora": "Juve Stabia",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "2.00",
+        "link_betano": "https://www.betano.bet.br/match-odds/AC-Monza-Juve-Stabia/85667026/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Bélgica - Pro League",
+        "time_casa": "Westerlo",
+        "time_fora": "St. Liege",
+        "mercado": "1X (85%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/KVC-Westerlo-Standard-Li-ge/83797143/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Bélgica - Pro League",
+        "time_casa": "Westerlo",
+        "time_fora": "St. Liege",
+        "mercado": "Vitória Casa (80%)",
+        "odd": "2.10",
+        "link_betano": "https://www.betano.bet.br/match-odds/KVC-Westerlo-Standard-Li-ge/83797143/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "França - Ligue 2",
+        "time_casa": "Rouen",
+        "time_fora": "Laval",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Rouen-Stade-Lavallois-MFC/85833134/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "França - Ligue 2",
+        "time_casa": "Rouen",
+        "time_fora": "Laval",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.83",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Rouen-Stade-Lavallois-MFC/85833134/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Premier League",
+        "time_casa": "Bournemouth",
+        "time_fora": "Manchester City",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.45",
+        "link_betano": "https://www.betano.bet.br/match-odds/AFC-Bournemouth-Manchester-City/85187748/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Audax Italiano (Chi)",
+        "time_fora": "Barracas Central (Arg)",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/Audax-Italiano-Barracas-Central/82820456/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Montevideo City (Uru)",
+        "time_fora": "Dep. Riestra (Arg)",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/Montevideo-City-Torque-Deportivo-Riestra/82820400/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Boca Juniors (Arg)",
+        "time_fora": "Cruzeiro (Bra)",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.20",
+        "link_betano": "https://www.betano.bet.br/match-odds/Boca-Juniors-Cruzeiro-MG/82766911/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "São Paulo (Bra)",
+        "time_fora": "Millonarios (Col)",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "2.18",
+        "link_betano": "https://www.betano.bet.br/match-odds/Sao-Paulo-SP-Millonarios-FC/82820305/"
+    },
+    {
+        "horario": "23:00",
+        "liga": "Sul-Americana",
+        "time_casa": "América de Cali (Col)",
+        "time_fora": "Tigre (Arg)",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.45",
+        "link_betano": "https://www.betano.bet.br/match-odds/America-de-Cali-CA-Tigre/82820121/"
+    }
+]
