@@ -26,4 +26,5 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-        run: python testes/testar_trava_dc.py
+        run: python testes/teste_chance_dupla.py
+        
