@@ -37,12 +37,12 @@
             "red": 3
         },
         "+2.5 GOLS (70%)": {
-            "green": 27,
-            "red": 13
+            "green": 29,
+            "red": 16
         },
         "AMBAS MARCAM: SIM (80%)": {
-            "green": 27,
-            "red": 28
+            "green": 28,
+            "red": 29
         },
         "AMBAS MARCAM: SIM (100%)": {
             "green": 25,
@@ -69,7 +69,7 @@
             "red": 13
         },
         "-4.5 GOLS (85%)": {
-            "green": 13,
+            "green": 14,
             "red": 1
         },
         "VITÓRIA CASA 💎 (100%)": {
@@ -99,5 +99,5 @@
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "18/05/2026 07:03"
+    "ultima_atualizacao": "19/05/2026 06:53"
 }
