@@ -1,0 +1,29 @@
+name: Teste de Dupla Chance
+
+on:
+  workflow_dispatch: # Permite rodar manualmente clicando no botão do GitHub Actions
+
+jobs:
+  run-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install selenium webdriver-manager requests
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Rodar Teste de Dupla Chance
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: python testes/testar_trava_dc.py
