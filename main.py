@@ -208,11 +208,23 @@ def main():
                         if res_btts:
                             mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
 
-                        # 3. Chance Dupla
+                        # -----------------------------------------------------------------
+                        # 3. Chance Dupla (Injetando a Lógica de Porcentagem com Segurança)
+                        # -----------------------------------------------------------------
+                        # Verificamos a consistência de vitórias para estipular a % do painel
+                        # Se vitórias recentes >= 4 -> 100%, senão segue a escada de segurança
+                        if s.get("casa_vitorias_recente", 0) >= 4 or s.get("fora_vitorias_recente", 0) >= 4:
+                            s["chance_dupla_pct"] = "100%"
+                        elif s.get("casa_vitorias_recente", 0) == 3 or s.get("fora_vitorias_recente", 0) == 3:
+                            s["chance_dupla_pct"] = "90%"
+                        else:
+                            s["chance_dupla_pct"] = "80%"
+
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         for rc in res_cd:
                             tipo_cd = "1X" if "1X" in rc else "X2"
                             mercados_para_processar.append({"texto": rc, "chave": tipo_cd})
+                        # -----------------------------------------------------------------
 
                         # 4. Vitória Casa
                         res_vc = vitoria_casa.verificar_vitoria_casa(s)
@@ -299,7 +311,7 @@ def main():
                 print("📢 Bingos enviados com botões para o Canal.")
 
 
-            # --- SALVAMENTO COM TRAVA DE SEGURANÇA INTELIGENTE ---
+            # --- SALVAMENTO WITH TRAVA DE SEGURANÇA INTELIGENTE ---
             import json
             os.makedirs("ranking", exist_ok=True)
             caminho_p = "ranking/pendentes.json"
@@ -339,7 +351,7 @@ def main():
             else:
                 print("ℹ️ Nenhuma gravação feita: A varredura atual não encontrou jogos válidos.")
 
-                        # --- SALVAMENTO PARA O BOT DO TELEGRAM (SOB DEMANDA) ---
+            # --- SALVAMENTO PARA O BOT DO TELEGRAM (SOB DEMANDA) ---
             os.makedirs("telegram", exist_ok=True)
             caminho_banco = f"telegram/jogos_{data_hoje}.json"
 
@@ -373,3 +385,4 @@ def main():
                                     
 if __name__ == "__main__":
     main()
+            
