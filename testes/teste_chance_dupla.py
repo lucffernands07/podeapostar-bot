@@ -26,104 +26,110 @@ def configurar_driver():
     return driver
 
 def testar_trava_dupla_chance():
-    # ID e nomes corrigidos para o teste do jogo Al-Hazm x Al-Taawon
+    # Mantendo o jogo de teste Al-Hazm x Al-Taawon
     id_jogo = "YZFeqj3D" 
     t1, t2 = "Al Hazm", "Al-Taawon"
     
     driver = configurar_driver()
-    print(f"\n🚀 Iniciando Teste Baseado em Seletores de Mando: {t1} x {t2}")
+    print(f"\n🚀 Iniciando Teste por Posição de Elementos: {t1} x {t2}")
     
     try:
         driver.get(f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall")
         wait = WebDriverWait(driver, 15)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
         time.sleep(4)
         
         stats = {
-            "t1_resultado_1": "", # Último jogo do Al Hazm EM CASA
-            "t2_resultado_1": "", # Último jogo do Al-Taawon FORA
+            "t1_resultado_1": "", # Último do Al Hazm em Casa
+            "t2_resultado_1": "", # Último do Al-Taawon Fora
             "h2h_res_1": ""        # Último H2H com mando do Al Hazm
         }
         
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         # ---------------------------------------------------------------------
-        # SEÇÃO 0: ÚLTIMOS JOGOS DO TIME DA CASA (Al Hazm)
+        # SEÇÃO 0: ÚLTIMOS JOGOS DO MANDANTE (Al Hazm) -> Filtrar por jogo EM CASA
         # ---------------------------------------------------------------------
         if len(secoes) > 0:
             linhas = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")
             for linha in linhas:
-                # Localiza mandante e visitante usando as classes da estrutura
-                casa_el = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
-                fora_el = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
-                
-                n_casa = casa_el.text.strip()
-                n_fora = fora_el.text.strip()
-                
-                # Regra: Queremos o primeiro jogo onde o Al Hazm jogou de fato EM CASA (Mandante)
-                if t1.lower() in n_casa.lower():
-                    res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.strip()
-                    gols = re.findall(r'\d+', res_texto)
-                    if len(gols) < 2: continue
-                    g1, g2 = int(gols[0]), int(gols[1])
+                try:
+                    times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
+                    if len(times_linha) < 2: continue
                     
-                    if g1 > g2: stats["t1_resultado_1"] = "V"
-                    elif g1 < g2: stats["t1_resultado_1"] = "D"
-                    else: stats["t1_resultado_1"] = "E"
+                    n_casa = times_linha[0].text.strip() # Time de cima (1º span)
+                    n_fora = times_linha[1].text.strip() # Time de baixo (2º span)
                     
-                    print(f"   🏠 [PASSO 1] Confirmado jogo em CASA do {t1}: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {stats['t1_resultado_1']}")
-                    break
+                    # Validação: t1 (Al Hazm) precisa ser o time de cima (Mandante)
+                    if t1.lower() in n_casa.lower():
+                        gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                        if len(gols_el) < 2: continue
+                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                        
+                        if g1 > g2: stats["t1_resultado_1"] = "V"
+                        elif g1 < g2: stats["t1_resultado_1"] = "D"
+                        else: stats["t1_resultado_1"] = "E"
+                        
+                        print(f"   🏠 [PASSO 1] Casa em Casa: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {stats['t1_resultado_1']}")
+                        break
+                except Exception:
+                    continue
 
         # ---------------------------------------------------------------------
-        # SEÇÃO 1: ÚLTIMOS JOGOS DO TIME DE FORA (Al-Taawon)
+        # SEÇÃO 1: ÚLTIMOS JOGOS DO VISITANTE (Al-Taawon) -> Filtrar por jogo FORA
         # ---------------------------------------------------------------------
         if len(secoes) > 1:
             linhas = secoes[1].find_elements(By.CSS_SELECTOR, ".h2h__row")
             for linha in linhas:
-                casa_el = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
-                fora_el = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
-                
-                n_casa = casa_el.text.strip()
-                n_fora = fora_el.text.strip()
-                
-                # Regra: Queremos o primeiro jogo onde o Al-Taawon jogou de fato FORA (Visitante)
-                if t2.lower() in n_fora.lower():
-                    res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.strip()
-                    gols = re.findall(r'\d+', res_texto)
-                    if len(gols) < 2: continue
-                    g1, g2 = int(gols[0]), int(gols[1])
+                try:
+                    times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
+                    if len(times_linha) < 2: continue
                     
-                    if g2 > g1: stats["t2_resultado_1"] = "V"
-                    elif g2 < g1: stats["t2_resultado_1"] = "D"
-                    else: stats["t2_resultado_1"] = "E"
+                    n_casa = times_linha[0].text.strip() 
+                    n_fora = times_linha[1].text.strip() 
                     
-                    print(f"   🚀 [PASSO 2] Confirmado jogo FORA do {t2}: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {stats['t2_resultado_1']}")
-                    break
+                    # Validação: t2 (Al-Taawon) precisa ser o time de baixo (Visitante)
+                    if t2.lower() in n_fora.lower():
+                        gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                        if len(gols_el) < 2: continue
+                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                        
+                        if g2 > g1: stats["t2_resultado_1"] = "V"
+                        elif g2 < g1: stats["t2_resultado_1"] = "D"
+                        else: stats["t2_resultado_1"] = "E"
+                        
+                        print(f"   🚀 [PASSO 2] Fora Fora: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {stats['t2_resultado_1']}")
+                        break
+                except Exception:
+                    continue
 
         # ---------------------------------------------------------------------
-        # SEÇÃO 2: CONFRONTOS DIRETOS (H2H)
+        # SEÇÃO 2: CONFRONTOS DIRETOS (H2H) -> Mando do time da casa principal
         # ---------------------------------------------------------------------
         if len(secoes) > 2:
             linhas = secoes[2].find_elements(By.CSS_SELECTOR, ".h2h__row")
             for linha in linhas:
-                casa_el = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
-                fora_el = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
-                
-                n_casa = casa_el.text.strip()
-                n_fora = fora_el.text.strip()
-                
-                # Regra: H2H com mando do time de casa principal (Al Hazm como mandante)
-                if t1.lower() in n_casa.lower():
-                    res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.strip()
-                    gols = re.findall(r'\d+', res_texto)
-                    if len(gols) < 2: continue
-                    g1, g2 = int(gols[0]), int(gols[1])
+                try:
+                    times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
+                    if len(times_linha) < 2: continue
                     
-                    if g1 > g2: stats["h2h_res_1"] = "V"
-                    elif g1 < g2: stats["h2h_res_1"] = "D"
-                    else: stats["h2h_res_1"] = "E"
+                    n_casa = times_linha[0].text.strip()
+                    n_fora = times_linha[1].text.strip()
                     
-                    print(f"   ⚔️ [PASSO 3] Confirmado H2H com mando do {t1}: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {stats['h2h_res_1']}")
-                    break
+                    # Validação: O H2H precisa ter o Al Hazm (t1) jogando em cima (Mandante)
+                    if t1.lower() in n_casa.lower():
+                        gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                        if len(gols_el) < 2: continue
+                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                        
+                        if g1 > g2: stats["h2h_res_1"] = "V"
+                        elif g1 < g2: stats["h2h_res_1"] = "D"
+                        else: stats["h2h_res_1"] = "E"
+                        
+                        print(f"   ⚔️ [PASSO 3] H2H na Casa: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {stats['h2h_res_1']}")
+                        break
+                except Exception:
+                    continue
 
         ucc = stats["t1_resultado_1"]
         uff = stats["t2_resultado_1"]
@@ -131,7 +137,6 @@ def testar_trava_dupla_chance():
         
         dados_ok = (ucc != "" and uff != "" and uh2h != "")
 
-        # --- PROCESSAMENTO LOGICO DAS TRAVAS ---
         trava_1x = ucc in ["V", "E"] and uff in ["D", "E"] and uh2h in ["V", "E"] and dados_ok
         trava_x2 = uff in ["V", "E"] and ucc in ["D", "E"] and uh2h in ["D", "E"] and dados_ok
 
@@ -152,11 +157,11 @@ def testar_trava_dupla_chance():
         print("="*75 + "\n")
 
     except Exception as e:
-        print(f"❌ Erro Crítico: {e}")
+        print(f"❌ Erro Crítico no processamento: {e}")
     finally:
         driver.quit()
         print("🏁 Teste finalizado.")
 
 if __name__ == "__main__":
     testar_trava_dupla_chance()
-            
+        
