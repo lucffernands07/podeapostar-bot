@@ -111,7 +111,7 @@ def testar_nova_logica_posicional():
             # -----------------------------------------------------------------
             elif idx == 2:
                 print("🔎 Analisando Tabela 3 (Confrontos Diretos)...")
-                for i, Secret do H2H in enumerate(linhas):
+                for i, linha in enumerate(linhas):
                     el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
                     el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
                     
@@ -150,4 +150,4 @@ def testar_nova_logica_posicional():
 
 if __name__ == "__main__":
     testar_nova_logica_posicional()
-                
+        
