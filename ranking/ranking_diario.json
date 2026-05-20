@@ -30,16 +30,16 @@
         "assertividade": 0.9333333333333333
     },
     {
-        "mercado": "1X (85%)",
-        "green": 10,
-        "red": 2,
-        "assertividade": 0.8333333333333334
+        "mercado": "+1.5 GOLS (85%)",
+        "green": 48,
+        "red": 13,
+        "assertividade": 0.7868852459016393
     },
     {
-        "mercado": "+1.5 GOLS (85%)",
-        "green": 45,
-        "red": 13,
-        "assertividade": 0.7758620689655172
+        "mercado": "1X (85%)",
+        "green": 10,
+        "red": 3,
+        "assertividade": 0.7692307692307693
     },
     {
         "mercado": "+1.5 GOLS (100%)",
@@ -54,22 +54,22 @@
         "assertividade": 0.6666666666666666
     },
     {
-        "mercado": "+2.5 GOLS (70%)",
-        "green": 29,
-        "red": 16,
-        "assertividade": 0.6444444444444445
-    },
-    {
         "mercado": "AMBAS MARCAM: SIM (100%)",
-        "green": 25,
+        "green": 27,
         "red": 14,
-        "assertividade": 0.6410256410256411
+        "assertividade": 0.6585365853658537
     },
     {
         "mercado": "+1.5 GOLS (70%)",
-        "green": 28,
+        "green": 31,
         "red": 17,
-        "assertividade": 0.6222222222222222
+        "assertividade": 0.6458333333333334
+    },
+    {
+        "mercado": "+2.5 GOLS (70%)",
+        "green": 30,
+        "red": 17,
+        "assertividade": 0.6382978723404256
     },
     {
         "mercado": "-4.5 GOLS (70%)",
@@ -79,15 +79,15 @@
     },
     {
         "mercado": "+2.5 GOLS (85%)",
-        "green": 19,
-        "red": 13,
-        "assertividade": 0.59375
+        "green": 20,
+        "red": 14,
+        "assertividade": 0.5882352941176471
     },
     {
         "mercado": "AMBAS MARCAM: SIM (80%)",
-        "green": 28,
+        "green": 30,
         "red": 29,
-        "assertividade": 0.49122807017543857
+        "assertividade": 0.5084745762711864
     },
     {
         "mercado": "BINGO 3",
@@ -140,7 +140,7 @@
     {
         "mercado": "VITÓRIA CASA (80%)",
         "green": 0,
-        "red": 9,
+        "red": 10,
         "assertividade": 0.0
     }
 ]
