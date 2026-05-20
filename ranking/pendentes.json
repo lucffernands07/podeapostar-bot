@@ -1,4 +1,96 @@
 {
     "data_geracao": "2026-05-20",
-    "jogos": []
+    "jogos": [
+        {
+            "time_casa": "Palmeiras (Bra)",
+            "time_fora": "Cerro Porteno (Par)",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Q9BPjL2e/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Junior (Col)",
+            "time_fora": "Sporting Cristal (Per)",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/GQlHJ1JF/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Olimpia Asuncion (Par)",
+            "time_fora": "Vasco (Bra)",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dlIwjfmJ/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Santos (Bra)",
+            "time_fora": "San Lorenzo (Arg)",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/OfjrE6Z8/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Independiente (Bol)",
+            "time_fora": "Botafogo (Bra)",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/27GNgxlf/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Freiburg",
+            "time_fora": "Aston Villa",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/IefockNE/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Al-Khaleej",
+            "time_fora": "Al-Ahli",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AuNrdhTH/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Torreense",
+            "time_fora": "Casa Pia",
+            "mercado": "1X (100%)",
+            "mercado_ranking": "1X (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ppL3zFyq/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Torreense",
+            "time_fora": "Casa Pia",
+            "mercado": "Vitória Casa (80%)",
+            "mercado_ranking": "VITÓRIA CASA (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ppL3zFyq/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "El Bayadh",
+            "time_fora": "Saoura",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2eo3f5FL/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Setif",
+            "time_fora": "MC Alger",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KzCazpOk/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Setif",
+            "time_fora": "MC Alger",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KzCazpOk/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Ilves",
+            "time_fora": "Inter Turku",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/d4a2jWw0/#/resumo-de-jogo"
+        }
+    ]
 }
