@@ -25,11 +25,11 @@ def configurar_driver():
     driver.set_page_load_timeout(30)
     return driver
 
-def testar_nova_logica_posicional_pura():
+def testar_nova_logica_nomes():
     url_teste = "https://www.flashscore.com.br/jogo/futebol/al-hazm-YZFeqj3D/al-taawon-WjJkJilj/h2h/total/"
     
     driver = configurar_driver()
-    print(f"\n🚀 Executando Lógica Posicional Pura (À prova de erros de tradução)")
+    print(f"\n🚀 Executando Validação: Strings de Nomes + Posição de Mando")
     print(f"🔗 Link: {url_teste}")
     
     try:
@@ -52,53 +52,44 @@ def testar_nova_logica_posicional_pura():
             if not linhas: continue
             
             # -----------------------------------------------------------------
-            # TABELA 1 (idx == 0): ÚLTIMOS JOGOS DO MANDANTE
-            # Alvo: Primeiro jogo onde o Dono da Tabela jogou em CASA (cima)
+            # TABELA 1 (idx == 0): ÚLTIMOS JOGOS DO TIME DA CASA
+            # Alvo: Achar a primeira linha onde "hazm" ou "hazem" esteja em CIMA
             # -----------------------------------------------------------------
             if idx == 0:
-                print("🔎 Vasculhando Tabela 1...")
+                print("🔎 Analisando Tabela 1 (Últimos jogos do Casa)...")
                 for i, linha in enumerate(linhas):
                     el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
-                    el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
+                    nome_cima = el_cima.text.lower()
                     
-                    # O Flashscore coloca a classe '--highlight' ou verifica se o link interno (tag 'a') existe no participante focado
-                    # Jeito definitivo: se o elemento de cima tem a classe de destaque, ele é o mandante legítimo
-                    html_cima = el_cima.get_attribute("innerHTML")
-                    
-                    if "highlight" in html_cima or "h2h__participantInner" in html_cima:
-                        # Para garantir mando legítimo, checamos se o de baixo NÃO é o destacado
-                        html_baixo = el_baixo.get_attribute("innerHTML")
-                        if "highlight" in html_baixo: continue # Se o de baixo tá destacado, o dono jogou fora. Pula!
-                        
+                    if "hazm" in nome_cima or "hazem" in nome_cima:
+                        el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
                         
+                        # V/D/E baseado no time de CIMA (Mandante)
                         res = "V" if g1 > g2 else ("D" if g1 < g2 else "E")
                         stats["t1_resultado_1"] = res
                         print(f"   🏠 [TABELA 1 MATCH] Linha {i+1}: {el_cima.text.strip()} {g1}-{g2} {el_baixo.text.strip()} ➔ Letra: {res}")
                         break
 
             # -----------------------------------------------------------------
-            # TABELA 2 (idx == 1): ÚLTIMOS JOGOS DO VISITANTE
-            # Alvo: Primeiro jogo onde o Dono da Tabela jogou FORA (baixo)
+            # TABELA 2 (idx == 1): ÚLTIMOS JOGOS DO TIME DE FORA
+            # Alvo: Achar a primeira linha onde "taawon" esteja em BAIXO
             # -----------------------------------------------------------------
             elif idx == 1:
-                print("🔎 Vasculhando Tabela 2...")
+                print("🔎 Analisando Tabela 2 (Últimos jogos do Fora)...")
                 for i, linha in enumerate(linhas):
-                    el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
                     el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
+                    nome_baixo = el_baixo.text.lower()
                     
-                    html_baixo = el_baixo.get_attribute("innerHTML")
-                    
-                    if "highlight" in html_baixo or "h2h__participantInner" in html_baixo:
-                        html_cima = el_cima.get_attribute("innerHTML")
-                        if "highlight" in html_cima: continue # Dono jogou em casa. Pula!
-                        
+                    if "taawon" in nome_baixo:
+                        el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
                         
+                        # V/D/E baseado no time de BAIXO (Visitante)
                         res = "V" if g2 > g1 else ("D" if g2 < g1 else "E")
                         stats["t2_resultado_1"] = res
                         print(f"   🚀 [TABELA 2 MATCH] Linha {i+1}: {el_cima.text.strip()} {g1}-{g2} {el_baixo.text.strip()} ➔ Letra: {res}")
@@ -106,17 +97,16 @@ def testar_nova_logica_posicional_pura():
 
             # -----------------------------------------------------------------
             # TABELA 3 (idx == 2): CONFRONTOS DIRETOS (H2H HISTÓRICO)
-            # Alvo: Primeiro jogo onde o time 1 jogou em CASA (cima)
+            # Alvo: Achar o último H2H com "hazm" ou "hazem" em CIMA
             # -----------------------------------------------------------------
             elif idx == 2:
-                print("🔎 Vasculhando Tabela 3...")
-                # Como no H2H não tem destaque de dono fixo, usamos uma checagem simples de caractere para a Tabela 3
+                print("🔎 Analisando Tabela 3 (Confrontos Diretos)...")
                 for i, linha in enumerate(linhas):
-                    el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
-                    el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
+                    el_cima = Web_el = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
+                    nome_cima = el_cima.text.lower()
                     
-                    # Usamos apenas as 3 primeiras letras do link de teste ("al-hazm" -> "haz")
-                    if "haz" in el_cima.text.lower():
+                    if "hazm" in nome_cima or "hazem" in nome_cima:
+                        el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
@@ -134,11 +124,11 @@ def testar_nova_logica_posicional_pura():
         trava_1x = ucc in ["V", "E"] and uff in ["D", "E"] and uh2h in ["V", "E"] and dados_ok
 
         print("\n" + "="*75)
-        print(f"🔬 CONSOLIDADO POSICIONAL PURO - MERCADO: 1X")
+        print(f"🔬 CONSOLIDADO FINAL DA REGRA - MERCADO: 1X")
         print(f"   [TABELA 1] Último Casa em Casa   ➔ Letra: ({ucc if ucc else 'NULO'})")
         print(f"   [TABELA 2] Último Fora Fora     ➔ Letra: ({uff if uff else 'NULO'})")
         print(f"   [TABELA 3] Último H2H Mando Casa ➔ Letra: ({uh2h if uh2h else 'NULO'})")
-        print(f"   ➔ RESULTADO: {'🟩 GREEN LIGHT' if trava_1x else '🟥 BLOQUEADO'}")
+        print(f"   ➔ TRAVA DE FERRO 1X: {'🟩 APROVADO' if trava_1x else '🟥 BLOQUEADO'}")
         print("="*75 + "\n")
 
     except Exception as e:
@@ -148,5 +138,5 @@ def testar_nova_logica_posicional_pura():
         print("🏁 Teste finalizado.")
 
 if __name__ == "__main__":
-    testar_nova_logica_posicional_pura()
-    
+    testar_nova_logica_nomes()
+                        
