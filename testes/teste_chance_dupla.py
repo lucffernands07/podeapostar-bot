@@ -10,7 +10,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Ajuste para importar módulos da pasta raiz (caso precise futuramente)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 def configurar_driver():
@@ -18,127 +17,127 @@ def configurar_driver():
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--blink-settings=imagesEnabled=false")
     options.add_argument("--window-size=1920,1080")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     driver.set_page_load_timeout(30)
+    driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
 
 def testar_trava_dupla_chance():
-    # 📝 LINK CONFIGURADO COM O SEU JOGO DE TESTE (X2)
+    # Jogo configurado para teste de X2
     url_teste = "https://www.flashscore.com.br/jogo/WjJkJilj/#/h2h/overall"
-    t1_nome, t2_nome = "Al-Hazm", "Al-Taawon"
+    t1, t2 = "Al-Hazm", "Al-Taawon"
     
     driver = configurar_driver()
-    print(f"\n🚀 Iniciando Teste de Dupla Chance: {t1_nome} x {t2_nome}")
+    print(f"\n🚀 Iniciando Teste com a Lógica Real do Main: {t1} x {t2}")
     
     try:
         driver.get(url_teste)
         wait = WebDriverWait(driver, 15)
+        
+        # CLIQUE IDÊNTICO AO SEU MAIN.PY
+        h2h_tab = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
+        h2h_tab.click()
         time.sleep(3)
         
-        # Estrutura para espelhar a lógica do seu main
-        stats = {
-            "t1_resultado_1": "",  # Último jogo em casa do Casa
-            "t2_resultado_1": "",  # Último jogo fora do Fora
-            "h2h_res_1": ""        # Último H2H na casa do Casa
-        }
-
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        driver.execute_script("window.scrollTo(0, 800);")
+        time.sleep(1)
         
-        # LOOP PELAS 3 SEÇÕES (0: Casa, 1: Fora, 2: H2H)
-        for idx, secao in enumerate(secoes[:3]):
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")
-            if not linhas: continue
+        # Dicionário idêntico ao do seu main.py, mas focado em capturar a letra do primeiro jogo (res_1)
+        stats = {
+            "t1_resultado_1": "",
+            "t2_resultado_1": "",
+            "h2h_res_1": ""
+        }
+        
+        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        print(f"📦 Seções H2H encontradas na página: {len(secoes)}")
+        
+        for idx, secao in enumerate(secoes[:3]): 
+            # Captura o limite exatamente igual ao seu main.py
+            limite = 6 if idx == 2 else 5
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
             
-            linha = linhas[0] # Precisamos apenas do ÚLTIMO (L1) para a trava de ferro
-            
-            try:
-                n_casa = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
-                n_fora = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
-                res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
-                
-                numeros = re.findall(r'\d+', res_texto)
-                if len(numeros) < 2: continue
-                g1, g2 = int(numeros[0]), int(numeros[1])
-                
-                # --- PROCESSA SEÇÃO 0: CASA EM CASA ---
-                if idx == 0:
-                    res_atual = "E"
-                    if g1 > g2: res_atual = "V"
-                    elif g1 < g2: res_atual = "D"
-                    stats["t1_resultado_1"] = res_atual
-                    print(f"📊 [CASA] Último em Casa: {n_casa} {g1}-{g2} {n_fora} ➔ Mapeado: {res_atual}")
-                
-                # --- PROCESSA SEÇÃO 1: FORA FORA ---
-                elif idx == 1:
-                    res_atual = "E"
-                    # Visão sob a ótica do time de fora (t2_nome)
-                    if (t2_nome.lower() in n_casa.lower() and g1 > g2) or (t2_nome.lower() in n_fora.lower() and g2 > g1):
-                        res_atual = "V"
-                    elif (t2_nome.lower() in n_casa.lower() and g1 < g2) or (t2_nome.lower() in n_fora.lower() and g2 < g1):
-                        res_atual = "D"
-                    stats["t2_resultado_1"] = res_atual
-                    print(f"📊 [FORA] Último Fora: {n_casa} {g1}-{g2} {n_fora} ➔ Mapeado (para o Fora): {res_atual}")
-                
-                # --- PROCESSA SEÇÃO 2: H2H NA CASA ---
-                elif idx == 2:
-                    res_h2h = "E"
-                    # Visão sob a ótica do time da casa (t1_nome)
-                    if (t1_nome.lower() in n_casa.lower() and g1 > g2) or (t1_nome.lower() in n_fora.lower() and g2 > g1):
-                        res_h2h = "V"
-                    elif (t1_nome.lower() in n_casa.lower() and g1 < g2) or (t1_nome.lower() in n_fora.lower() and g2 < g1):
-                        res_h2h = "D"
-                    stats["h2h_res_1"] = res_h2h
-                    print(f"📊 [H2H] Último Confronto: {n_casa} {g1}-{g2} {n_fora} ➔ Mapeado (para o Casa): {res_h2h}")
+            for i, linha in enumerate(linhas):
+                try:
+                    n_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
+                    n_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
+                    res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
                     
-            except Exception as e:
-                print(f"⚠️ Erro na captura da seção {idx}: {e}")
+                    numeros_placar = re.findall(r'\d+', res_texto)
+                    if len(numeros_placar) < 2: continue
+                    g1, g2 = int(numeros_placar[0]), int(numeros_placar[1])
+                    
+                    if idx < 2: 
+                        t_ref = t1 if idx == 0 else t2
+                        
+                        # LOGICA DE DESCOBRIR VITÓRIA/EMPATE/DERROTA DO SEU MAIN.PY
+                        res_atual = "E"
+                        if (t_ref.lower() in n_casa_h2h.lower() and g1 > g2) or \
+                           (t_ref.lower() in n_fora_h2h.lower() and g2 > g1):
+                            res_atual = "V"
+                        elif (t_ref.lower() in n_casa_h2h.lower() and g1 < g2) or \
+                             (t_ref.lower() in n_fora_h2h.lower() and g2 < g1):
+                            res_atual = "D"
+                        
+                        # Salva o resultado do primeiro jogo (i == 0)
+                        if i == 0: 
+                            stats[f"t{idx+1}_resultado_1"] = res_atual
+                            print(f"   🔹 Seção {idx} (L1) capturada: {n_casa_h2h} {g1}-{g2} {n_fora_h2h} ➔ Letra: {res_atual}")
 
-        # Recorta os dados salvos para os testes lógicos
+                    elif idx == 2: 
+                        # LOGICA DE DESCOBRIR H2H DO SEU MAIN.PY
+                        res_h2h = "E"
+                        if (t1.lower() in n_casa_h2h.lower() and g1 > g2) or \
+                           (t1.lower() in n_fora_h2h.lower() and g2 > g1):
+                            res_h2h = "V"
+                        elif (t1.lower() in n_casa_h2h.lower() and g1 < g2) or \
+                             (t1.lower() in n_fora_h2h.lower() and g2 < g1):
+                            res_h2h = "D"
+                        
+                        if i == 0: 
+                            stats["h2h_res_1"] = res_h2h
+                            print(f"   🔹 Seção {idx} (H2H L1) capturada: {n_casa_h2h} {g1}-{g2} {n_fora_h2h} ➔ Letra: {res_h2h}")
+
+                except Exception as e: 
+                    continue
+
+        # Extração das variáveis pós-loop
         ucc = stats["t1_resultado_1"]
         uff = stats["t2_resultado_1"]
         uh2h = stats["h2h_res_1"]
+        
+        dados_presentes = (ucc != "" and uff != "" and uh2h != "")
 
-        # =========================================================================
-        # 🧪 APLICAÇÃO DA TRAVA DE FERRO: 1X
-        # =========================================================================
-        c1_1x = ucc in ["V", "E"]
-        c2_1x = uff in ["D", "E"] # Fora empatou ou perdeu
-        c3_1x = uh2h in ["V", "E"]
-        trava_1x = c1_1x and c2_1x and c3_1x
+        # --- PROCESSAMENTO LOGICO DAS DUAS TRAVAS DE FERRO ---
+        trava_1x = ucc in ["V", "E"] and uff in ["D", "E"] and uh2h in ["V", "E"] and dados_presentes
+        trava_x2 = uff in ["V", "E"] and ucc in ["D", "E"] and uh2h in ["D", "E"] and dados_presentes
 
         print("\n" + "="*75)
         print(f"🔬 AUDITORIA DA TRAVA DE FERRO - MERCADO: 1X")
-        print(f"   [PASSO 1] Casa em Casa ({ucc}) ➔ {'✅ OK' if c1_1x else '❌ FALHOU (Exige V ou E)'}")
-        print(f"   [PASSO 2] Fora Fora    ({uff}) ➔ {'✅ OK' if c2_1x else '❌ FALHOU (Exige D ou E)'}")
-        print(f"   [PASSO 3] H2H na Casa  ({uh2h}) ➔ {'✅ OK' if c3_1x else '❌ FALHOU (Exige V ou E)'}")
+        print(f"   [PASSO 1] Casa em Casa ({ucc if ucc else 'VAZIO'})")
+        print(f"   [PASSO 2] Fora Fora    ({uff if uff else 'VAZIO'})")
+        print(f"   [PASSO 3] H2H na Casa  ({uh2h if uh2h else 'VAZIO'})")
         print(f"   ➔ RESULTADO 1X: {'🟩 GREEN LIGHT (Aprovado)' if trava_1x else '🟥 BLOQUEADO'}")
         print("="*75)
 
-        # =========================================================================
-        # 🧪 APLICAÇÃO DA TRAVA DE FERRO: X2 (Lógica Espelhada)
-        # =========================================================================
-        c1_x2 = uff in ["V", "E"]  # Fora ganhou ou empatou jogando fora
-        c2_x2 = ucc in ["D", "E"]  # Casa perdeu ou empatou jogando em casa
-        c3_x2 = uh2h in ["D", "E"] # No H2H o Casa perdeu ou empatou (ou seja, Fora pontuou)
-        trava_x2 = c1_x2 and c2_x2 and c3_x2
-
         print("\n" + "="*75)
         print(f"🔬 AUDITORIA DA TRAVA DE FERRO - MERCADO: X2")
-        print(f"   [PASSO 1] Fora Fora    ({uff}) ➔ {'✅ OK' if c1_x2 else '❌ FALHOU (Exige V ou E)'}")
-        print(f"   [PASSO 2] Casa em Casa ({ucc}) ➔ {'✅ OK' if c2_x2 else '❌ FALHOU (Exige D ou E)'}")
-        print(f"   [PASSO 3] H2H na Casa  ({uh2h}) ➔ {'✅ OK' if c3_x2 else '❌ FALHOU (Exige D ou E do ponto de vista do Casa)'}")
+        print(f"   [PASSO 1] Fora Fora    ({uff if uff else 'VAZIO'})")
+        print(f"   [PASSO 2] Casa em Casa ({ucc if ucc else 'VAZIO'})")
+        print(f"   [PASSO 3] H2H na Casa  ({uh2h if uh2h else 'VAZIO'})")
         print(f"   ➔ RESULTADO X2: {'🟩 GREEN LIGHT (Aprovado)' if trava_x2 else '🟥 BLOQUEADO'}")
         print("="*75 + "\n")
 
     except Exception as e:
-        print(f"❌ Erro durante a varredura: {e}")
+        print(f"❌ Erro Crítico: {e}")
     finally:
         driver.quit()
         print("🏁 Teste finalizado.")
 
 if __name__ == "__main__":
     testar_trava_dupla_chance()
-                    
