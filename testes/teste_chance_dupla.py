@@ -26,13 +26,14 @@ def configurar_driver():
     driver.set_page_load_timeout(30)
     return driver
 
-def testar_nova_logica_mando():
+def testar_nova_logica_posicional():
+    # O link de teste que possui a mesma estrutura/layout de tabelas do main
     url_teste = "https://www.flashscore.com.br/jogo/futebol/al-hazm-YZFeqj3D/al-taawon-WjJkJilj/h2h/total/"
     t1, t2 = "Al Hazm", "Al-Taawon"
     
     driver = configurar_driver()
-    print(f"\n🚀 Validando Nova Regra de Mando por Títulos de Seção: {t1} x {t2}")
-    print(f"🔗 Link Alvo: {url_teste}")
+    print(f"\n🚀 Iniciando Varredura Posicional Estrita: {t1} x {t2}")
+    print(f"🔗 Link: {url_teste}")
     
     t1_limpo = t1.lower().replace("-", " ").strip()
     t2_limpo = t2.lower().replace("-", " ").strip()
@@ -44,89 +45,105 @@ def testar_nova_logica_mando():
         time.sleep(3)
         
         stats = {
-            "t1_resultado_1": "", 
-            "t2_resultado_1": "", 
-            "h2h_res_1": ""        
+            "t1_resultado_1": "", # Último jogo do Casa jogando EM CASA (cima)
+            "t2_resultado_1": "", # Último jogo do Fora jogando FORA (baixo)
+            "h2h_res_1": ""        # Último H2H com mando do Casa (t1 em cima)
         }
         
+        # Igual ao seu main: pega todas as seções brutas da tela
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        print(f"📦 Total de blocos .h2h__section detectados: {len(secoes)}")
+        print(f"📦 Blocos H2H detectados na página: {len(secoes)}")
         
-        for secao in secoes:
-            try:
-                # Pega o título da seção para saber de quem são os jogos
-                titulo_el = secao.find_element(By.CSS_SELECTOR, ".section__title, .h2h__sectionHeader")
-                titulo_txt = titulo_el.text.lower()
-            except:
-                continue
-                
+        # LOOP IGUAL AO DO SEU MAIN (Usa os índices fixos das tabelas)
+        for idx, secao in enumerate(secoes[:3]):
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")
             if not linhas: continue
+            
+            # -----------------------------------------------------------------
+            # TABELA 1 (idx == 0): ÚLTIMOS JOGOS DO TIME DA CASA
+            # Objetivo: Achar o primeiro jogo onde o t1 jogou EM CIMA (Mandante)
+            # -----------------------------------------------------------------
+            if idx == 0:
+                for i, linha in enumerate(linhas):
+                    try:
+                        times_linha = linha.find_elements(By.CSS_SELECTOR, "span[class*='Participant']")
+                        # Se não achar com a classe genérica, tenta pela estrutural inner
+                        if len(times_linha) < 2:
+                            times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
+                            
+                        if len(times_linha) < 2: continue
+                        
+                        n_cima = times_linha[0].text.strip().lower().replace("-", " ")
+                        n_baixo = times_linha[1].text.strip().lower().replace("-", " ")
+                        
+                        # Validamos se o time da casa está de fato na posição de CIMA
+                        if t1_limpo in n_cima:
+                            gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                            if len(gols_el) < 2: continue
+                            g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                            
+                            # Computa o resultado sob a ótica do time de CIMA (Mandante)
+                            res = "V" if g1 > g2 else ("D" if g1 < g2 else "E")
+                            stats["t1_resultado_1"] = res
+                            print(f"   🏠 [TABELA 1 - Linha {i+1}] Achou {times_linha[0].text} (Cima) x {times_linha[1].text} (Baixo) Placar: {g1}-{g2} ➔ Letra: {res}")
+                            break # Achamos o objetivo, para o loop dessa tabela
+                    except: continue
 
             # -----------------------------------------------------------------
-            # CASO A: Seção de últimos jogos do TIME DA CASA (Al Hazm)
+            # TABELA 2 (idx == 1): ÚLTIMOS JOGOS DO TIME DE FORA
+            # Objetivo: Achar o primeiro jogo onde o t2 jogou EM BAIXO (Visitante)
             # -----------------------------------------------------------------
-            if t1_limpo in titulo_txt and "confrontos" not in titulo_txt:
-                print(f"🔎 Varrendo a seção identificada do Mandante: '{titulo_el.text}'")
-                for linha in linhas:
-                    times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
-                    if len(times_linha) < 2: continue
-                    
-                    n_casa = times_linha[0].text.strip().lower().replace("-", " ")
-                    n_fora = times_linha[1].text.strip().lower().replace("-", " ")
-                    
-                    if t1_limpo in n_casa: # Al Hazm como mandante legítimo (cima)
-                        gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
-                        if len(gols_el) < 2: continue
-                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+            elif idx == 1:
+                for i, linha in enumerate(linhas):
+                    try:
+                        times_linha = linha.find_elements(By.CSS_SELECTOR, "span[class*='Participant']")
+                        if len(times_linha) < 2:
+                            times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
+                            
+                        if len(times_linha) < 2: continue
                         
-                        res = "V" if g1 > g2 else ("D" if g1 < g2 else "E")
-                        stats["t1_resultado_1"] = res
-                        print(f"   🏠 [PASSO 1] Encontrado: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
-                        break
+                        n_cima = times_linha[0].text.strip().lower().replace("-", " ")
+                        n_baixo = times_linha[1].text.strip().lower().replace("-", " ")
+                        
+                        # Validamos se o time de fora está de fato na posição de BAIXO
+                        if t2_limpo in n_baixo:
+                            gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                            if len(gols_el) < 2: continue
+                            g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                            
+                            # Computa o resultado sob a ótica do time de BAIXO (Visitante)
+                            res = "V" if g2 > g1 else ("D" if g2 < g1 else "E")
+                            stats["t2_resultado_1"] = res
+                            print(f"   🚀 [TABELA 2 - Linha {i+1}] Achou {times_linha[0].text} (Cima) x {times_linha[1].text} (Baixo) Placar: {g1}-{g2} ➔ Letra: {res}")
+                            break # Achamos o objetivo, para o loop dessa tabela
+                    except: continue
 
             # -----------------------------------------------------------------
-            # CASO B: Seção de últimos jogos do TIME DE FORA (Al-Taawon)
+            # TABELA 3 (idx == 2): CONFRONTOS DIRETOS (H2H HISTÓRICO)
+            # Objetivo: Achar o último jogo com mando igual ao de hoje (t1 em cima)
             # -----------------------------------------------------------------
-            elif t2_limpo in titulo_txt and "confrontos" not in titulo_txt:
-                print(f"🔎 Varrendo a seção identificada do Visitante: '{titulo_el.text}'")
-                for linha in linhas:
-                    times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
-                    if len(times_linha) < 2: continue
-                    
-                    n_casa = times_linha[0].text.strip().lower().replace("-", " ")
-                    n_fora = times_linha[1].text.strip().lower().replace("-", " ")
-                    
-                    if t2_limpo in n_fora: # Al-Taawon como visitante legítimo (baixo)
-                        gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
-                        if len(gols_el) < 2: continue
-                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+            elif idx == 2:
+                for i, linha in enumerate(linhas):
+                    try:
+                        times_linha = linha.find_elements(By.CSS_SELECTOR, "span[class*='Participant']")
+                        if len(times_linha) < 2:
+                            times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
+                            
+                        if len(times_linha) < 2: continue
                         
-                        res = "V" if g2 > g1 else ("D" if g2 < g1 else "E")
-                        stats["t2_resultado_1"] = res
-                        print(f"   🚀 [PASSO 2] Encontrado: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
-                        break
-
-            # -----------------------------------------------------------------
-            # CASO C: Seção de CONFRONTOS DIRETOS (H2H)
-            # -----------------------------------------------------------------
-            elif "confrontos" in titulo_txt or "h2h" in titulo_txt:
-                print(f"🔎 Varrendo a seção identificada de Confrontos Diretos: '{titulo_el.text}'")
-                for linha in linhas:
-                    times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
-                    if len(times_linha) < 2: continue
-                    
-                    n_casa = times_linha[0].text.strip().lower().replace("-", " ")
-                    
-                    if t1_limpo in n_casa: # Al Hazm jogando na casa dele contra o Al-Taawon
-                        gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
-                        if len(gols_el) < 2: continue
-                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                        n_cima = times_linha[0].text.strip().lower().replace("-", " ")
                         
-                        res = "V" if g1 > g2 else ("D" if g1 < g2 else "E")
-                        stats["h2h_res_1"] = res
-                        print(f"   ⚔️ [PASSO 3] Encontrado: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
-                        break
+                        # Queremos o confronto direto onde o t1 (Al Hazm) comandou em CIMA
+                        if t1_limpo in n_cima:
+                            gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                            if len(gols_el) < 2: continue
+                            g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                            
+                            res = "V" if g1 > g2 else ("D" if g1 < g2 else "E")
+                            stats["h2h_res_1"] = res
+                            print(f"   ⚔️ [TABELA 3 - Linha {i+1}] Achou {times_linha[0].text} (Cima) x {times_linha[1].text} (Baixo) Placar: {g1}-{g2} ➔ Letra: {res}")
+                            break
+                    except: continue
 
         ucc = stats["t1_resultado_1"]
         uff = stats["t2_resultado_1"]
@@ -136,19 +153,19 @@ def testar_nova_logica_mando():
         trava_1x = ucc in ["V", "E"] and uff in ["D", "E"] and uh2h in ["V", "E"] and dados_ok
 
         print("\n" + "="*75)
-        print(f"🔬 AUDITORIA DA TRAVA DINÂMICA - MERCADO: 1X")
-        print(f"   [PASSO 1] Casa em Casa ({ucc if ucc else 'NULO'})")
-        print(f"   [PASSO 2] Fora Fora    ({uff if uff else 'NULO'})")
-        print(f"   [PASSO 3] H2H na Casa  ({uh2h if uh2h else 'NULO'})")
-        print(f"   ➔ RESULTADO 1X: {'🟩 GREEN LIGHT (Aprovado)' if trava_1x else '🟥 BLOQUEADO'}")
+        print(f"🔬 CONSOLIDADO DA NOVA REGRA DE DUPLA CHANCE")
+        print(f"   [TABELA 1] Último Casa em Casa   ➔ Letra: ({ucc if ucc else 'NULO'})")
+        print(f"   [TABELA 2] Último Fora Fora     ➔ Letra: ({uff if uff else 'NULO'})")
+        print(f"   [TABELA 3] Último H2H Mando Casa ➔ Letra: ({uh2h if uh2h else 'NULO'})")
+        print(f"   ➔ TRAVA DE FERRO 1X: {'🟩 APROVADO (GREEN LIGHT)' if trava_1x else '🟥 BLOQUEADO'}")
         print("="*75 + "\n")
 
     except Exception as e:
-        print(f"❌ Erro Crítico: {e}")
+        print(f"❌ Erro na execução posicional: {e}")
     finally:
         driver.quit()
         print("🏁 Teste finalizado.")
 
 if __name__ == "__main__":
-    testar_nova_logica_mando()
-                        
+    testar_nova_logica_posicional()
+                            
