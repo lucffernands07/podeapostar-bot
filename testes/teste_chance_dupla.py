@@ -26,8 +26,11 @@ def configurar_driver():
     driver.set_page_load_timeout(30)
     return driver
 
+# Função agressiva para limpar qualquer variação de escrita do Flashscore
+def normalizar(texto):
+    return re.sub(r'[^a-zA-Z0-9]', '', texto.lower().strip())
+
 def testar_nova_logica_posicional():
-    # URL de teste e times correspondentes
     url_teste = "https://www.flashscore.com.br/jogo/futebol/al-hazm-YZFeqj3D/al-taawon-WjJkJilj/h2h/total/"
     t1, t2 = "Al Hazm", "Al-Taawon"
     
@@ -35,9 +38,9 @@ def testar_nova_logica_posicional():
     print(f"\n🚀 Iniciando Varredura Posicional Estrita: {t1} x {t2}")
     print(f"🔗 Link: {url_teste}")
     
-    # Tratamento básico para evitar problemas com hífens ou maiúsculas nas validações
-    t1_limpo = t1.lower().replace("-", " ").strip()
-    t2_limpo = t2.lower().replace("-", " ").strip()
+    # "al hazm" vira "alhazm" | "al-taawon" vira "altaawon"
+    t1_alvo = normalizar(t1)
+    t2_alvo = normalizar(t2)
     
     try:
         driver.get(url_teste)
@@ -46,22 +49,20 @@ def testar_nova_logica_posicional():
         time.sleep(3)
         
         stats = {
-            "t1_resultado_1": "", # Último jogo do Casa jogando EM CASA (cima)
-            "t2_resultado_1": "", # Último jogo do Fora jogando FORA (baixo)
-            "h2h_res_1": ""        # Último H2H com mando do Casa (t1 em cima)
+            "t1_resultado_1": "", 
+            "t2_resultado_1": "", 
+            "h2h_res_1": ""        
         }
         
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         print(f"📦 Blocos H2H detectados na página: {len(secoes)}")
         
-        # Percorre as seções utilizando a lógica posicional idêntica do main principal
         for idx, secao in enumerate(secoes[:3]):
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")
             if not linhas: continue
             
             # -----------------------------------------------------------------
             # TABELA 1 (idx == 0): ÚLTIMOS JOGOS DO TIME DA CASA (Al Hazm)
-            # Objetivo: Primeiro jogo onde o t1 jogou EM CIMA (Mandante)
             # -----------------------------------------------------------------
             if idx == 0:
                 print("🔎 Analisando Tabela 1 (Últimos jogos do Casa)...")
@@ -69,10 +70,12 @@ def testar_nova_logica_posicional():
                     el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
                     el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
                     
-                    n_cima = el_cima.text.strip().lower().replace("-", " ")
-                    n_baixo = el_baixo.text.strip().lower().replace("-", " ")
+                    n_cima_norm = normalizar(el_cima.text)
                     
-                    if t1_limpo in n_cima:
+                    # Debug temporário para ver exatamente o que o robô está comparando na Tabela 1
+                    print(f"   [Linha {i+1}] Comparando se alvo '{t1_alvo}' está em '{n_cima_norm}' ({el_cima.text})")
+                    
+                    if t1_alvo in n_cima_norm:
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
@@ -84,7 +87,6 @@ def testar_nova_logica_posicional():
 
             # -----------------------------------------------------------------
             # TABELA 2 (idx == 1): ÚLTIMOS JOGOS DO TIME DE FORA (Al-Taawon)
-            # Objetivo: Primeiro jogo onde o t2 jogou EM BAIXO (Visitante)
             # -----------------------------------------------------------------
             elif idx == 1:
                 print("🔎 Analisando Tabela 2 (Últimos jogos do Fora)...")
@@ -92,10 +94,9 @@ def testar_nova_logica_posicional():
                     el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
                     el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
                     
-                    n_cima = el_cima.text.strip().lower().replace("-", " ")
-                    n_baixo = el_baixo.text.strip().lower().replace("-", " ")
+                    n_baixo_norm = normalizar(el_baixo.text)
                     
-                    if t2_limpo in n_baixo:
+                    if t2_alvo in n_baixo_norm:
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
@@ -107,17 +108,16 @@ def testar_nova_logica_posicional():
 
             # -----------------------------------------------------------------
             # TABELA 3 (idx == 2): CONFRONTOS DIRETOS (H2H HISTÓRICO)
-            # Objetivo: Primeiro jogo onde o t1 jogou EM CIMA (Mando de hoje)
             # -----------------------------------------------------------------
             elif idx == 2:
                 print("🔎 Analisando Tabela 3 (Confrontos Diretos)...")
-                for i, linha in enumerate(linhas):
+                for i, Secret do H2H in enumerate(linhas):
                     el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
                     el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
                     
-                    n_cima = el_cima.text.strip().lower().replace("-", " ")
+                    n_cima_norm = normalizar(el_cima.text)
                     
-                    if t1_limpo in n_cima:
+                    if t1_alvo in n_cima_norm:
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
@@ -143,11 +143,11 @@ def testar_nova_logica_posicional():
         print("="*75 + "\n")
 
     except Exception as e:
-        print(f"❌ Erro Crítico durante a execução do teste: {e}")
+        print(f"❌ Erro Crítico: {e}")
     finally:
         driver.quit()
         print("🏁 Teste finalizado.")
 
 if __name__ == "__main__":
     testar_nova_logica_posicional()
-        
+                
