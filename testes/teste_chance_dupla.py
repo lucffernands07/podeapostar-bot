@@ -27,7 +27,6 @@ def configurar_driver():
     return driver
 
 def testar_nova_logica_mando():
-    # Usando o link exato e os nomes reais para a validação da regra
     url_teste = "https://www.flashscore.com.br/jogo/futebol/al-hazm-YZFeqj3D/al-taawon-WjJkJilj/h2h/total/"
     t1, t2 = "Al Hazm", "Al-Taawon"
     
@@ -42,96 +41,105 @@ def testar_nova_logica_mando():
         time.sleep(3)
         
         stats = {
-            "t1_resultado_1": "", # Último jogo do Casa jogando EM CASA
-            "t2_resultado_1": "", # Último jogo do Fora jogando FORA
-            "h2h_res_1": ""        # Último H2H na casa do Casa
+            "t1_resultado_1": "", 
+            "t2_resultado_1": "", 
+            "h2h_res_1": ""        
         }
         
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         # ---------------------------------------------------------------------
-        # SEÇÃO 0: JOGOS DO CASA -> Queremos apenas quando ele foi o time de CIMA (Mandante)
+        # SEÇÃO 0: JOGOS DO CASA -> Al Hazm precisa ser MANDANTE (Time de Cima)
         # ---------------------------------------------------------------------
         if len(secoes) > 0:
             linhas = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")
             for linha in linhas:
-                times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
-                if len(times_linha) < 2: continue
-                
-                n_casa = times_linha[0].text.strip() # Time de cima
-                n_fora = times_linha[1].text.strip() # Time de baixo
-                
-                # Regra: t1 precisa ser o Mandante (time de cima)
-                if t1.lower() in n_casa.lower():
-                    gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
-                    if len(gols_el) < 2: continue
-                    g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                try:
+                    times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
+                    if len(times_linha) < 2: continue
                     
-                    if g1 > g2: stats["t1_resultado_1"] = "V"
-                    elif g1 < g2: stats["t1_resultado_1"] = "D"
-                    else: stats["t1_resultado_1"] = "E"
+                    n_casa = times_linha[0].text.strip()
+                    n_fora = times_linha[1].text.strip()
                     
-                    print(f"   🏠 [PASSO 1] Casa em Casa Encontrado: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {stats['t1_resultado_1']}")
-                    break
+                    # Se o Al Hazm for o time de cima, achamos o jogo de casa legítimo!
+                    if t1.lower() in n_casa.lower():
+                        gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                        if len(gols_el) < 2: continue
+                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                        
+                        if g1 > g2: res = "V"
+                        elif g1 < g2: res = "D"
+                        else: res = "E"
+                        
+                        stats["t1_resultado_1"] = res
+                        print(f"   🏠 [PASSO 1] Casa em Casa Encontrado: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {res}")
+                        break # Só para se gravar o resultado com sucesso
+                except Exception:
+                    continue
 
         # ---------------------------------------------------------------------
-        # SEÇÃO 1: JOGOS DO FORA -> Queremos apenas quando ele foi o time de BAIXO (Visitante)
+        # SEÇÃO 1: JOGOS DO FORA -> Al-Taawon precisa ser VISITANTE (Time de Baixo)
         # ---------------------------------------------------------------------
         if len(secoes) > 1:
             linhas = secoes[1].find_elements(By.CSS_SELECTOR, ".h2h__row")
             for linha in linhas:
-                times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
-                if len(times_linha) < 2: continue
-                
-                n_casa = times_linha[0].text.strip() # Time de cima
-                n_fora = times_linha[1].text.strip() # Time de baixo
-                
-                # Regra: t2 precisa ser o Visitante (time de baixo)
-                if t2.lower() in n_fora.lower():
-                    gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
-                    if len(gols_el) < 2: continue
-                    g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                try:
+                    times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
+                    if len(times_linha) < 2: continue
                     
-                    if g2 > g1: stats["t2_resultado_1"] = "V"
-                    elif g2 < g1: stats["t2_resultado_1"] = "D"
-                    else: stats["t2_resultado_1"] = "E"
+                    n_casa = times_linha[0].text.strip()
+                    n_fora = times_linha[1].text.strip()
                     
-                    print(f"   🚀 [PASSO 2] Fora Fora Encontrado: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {stats['t2_resultado_1']}")
-                    break
+                    # Se o Al-Taawon for o time de baixo, achamos o jogo fora legítimo!
+                    if t2.lower() in n_fora.lower():
+                        gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                        if len(gols_el) < 2: continue
+                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                        
+                        if g2 > g1: res = "V"
+                        elif g2 < g1: res = "D"
+                        else: res = "E"
+                        
+                        stats["t2_resultado_1"] = res
+                        print(f"   🚀 [PASSO 2] Fora Fora Encontrado: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {res}")
+                        break # Só para se gravar o resultado com sucesso
+                except Exception:
+                    continue
 
         # ---------------------------------------------------------------------
-        # SEÇÃO 2: CONFRONTOS DIRETOS -> Queremos o t1 jogando em CIMA (Mandante)
+        # SEÇÃO 2: CONFRONTOS DIRETOS (H2H) -> Al Hazm em CIMA (Mandante)
         # ---------------------------------------------------------------------
         if len(secoes) > 2:
             linhas = secoes[2].find_elements(By.CSS_SELECTOR, ".h2h__row")
             for linha in linhas:
-                times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
-                if len(times_linha) < 2: continue
-                
-                n_casa = times_linha[0].text.strip() # Time de cima
-                n_fora = times_linha[1].text.strip() # Time de baixo
-                
-                # Regra: No H2H, o nosso t1 (Al Hazm) tem que ser o Mandante (time de cima)
-                if t1.lower() in n_casa.lower():
-                    gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
-                    if len(gols_el) < 2: continue
-                    g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                try:
+                    times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
+                    if len(times_linha) < 2: continue
                     
-                    if g1 > g2: stats["h2h_res_1"] = "V"
-                    elif g1 < g2: stats["h2h_res_1"] = "D"
-                    else: stats["h2h_res_1"] = "E"
+                    n_casa = times_linha[0].text.strip()
+                    n_fora = times_linha[1].text.strip()
                     
-                    print(f"   ⚔️ [PASSO 3] H2H na Casa do {t1}: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {stats['h2h_res_1']}")
-                    break
+                    if t1.lower() in n_casa.lower():
+                        gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                        if len(gols_el) < 2: continue
+                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                        
+                        if g1 > g2: res = "V"
+                        elif g1 < g2: res = "D"
+                        else: res = "E"
+                        
+                        stats["h2h_res_1"] = res
+                        print(f"   ⚔️ [PASSO 3] H2H na Casa: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {res}")
+                        break
+                except Exception:
+                    continue
 
         ucc = stats["t1_resultado_1"]
         uff = stats["t2_resultado_1"]
         uh2h = stats["h2h_res_1"]
         dados_ok = (ucc != "" and uff != "" and uh2h != "")
 
-        # Validação das Travas de Ferro baseadas na nova regra estrita de mando
         trava_1x = ucc in ["V", "E"] and uff in ["D", "E"] and uh2h in ["V", "E"] and dados_ok
-        trava_x2 = uff in ["V", "E"] and ucc in ["D", "E"] and uh2h in ["D", "E"] and dados_ok
 
         print("\n" + "="*75)
         print(f"🔬 AUDITORIA DA TRAVA NOVA - MERCADO: 1X")
@@ -139,7 +147,7 @@ def testar_nova_logica_mando():
         print(f"   [PASSO 2] Fora Fora    ({uff if uff else 'NULO'})")
         print(f"   [PASSO 3] H2H na Casa  ({uh2h if uh2h else 'NULO'})")
         print(f"   ➔ RESULTADO 1X: {'🟩 GREEN LIGHT (Aprovado)' if trava_1x else '🟥 BLOQUEADO'}")
-        print("="*75)
+        print("="*75 + "\n")
 
     except Exception as e:
         print(f"❌ Erro Crítico: {e}")
@@ -149,4 +157,4 @@ def testar_nova_logica_mando():
 
 if __name__ == "__main__":
     testar_nova_logica_mando()
-                        
+        
