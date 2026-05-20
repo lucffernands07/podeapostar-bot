@@ -34,6 +34,10 @@ def testar_nova_logica_mando():
     print(f"\n🚀 Validando Nova Regra de Mando de Campo: {t1} x {t2}")
     print(f"🔗 Link Alvo: {url_teste}")
     
+    # Normaliza os nomes de referência removendo hífens para comparação limpa
+    t1_limpo = t1.lower().replace("-", " ").strip()
+    t2_limpo = t2.lower().replace("-", " ").strip()
+    
     try:
         driver.get(url_teste)
         wait = WebDriverWait(driver, 15)
@@ -49,7 +53,7 @@ def testar_nova_logica_mando():
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
         # ---------------------------------------------------------------------
-        # SEÇÃO 0: JOGOS DO CASA -> Al Hazm precisa ser MANDANTE (Time de Cima)
+        # SEÇÃO 0: JOGOS DO CASA -> t1 precisa ser MANDANTE (Time de Cima)
         # ---------------------------------------------------------------------
         if len(secoes) > 0:
             linhas = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")
@@ -58,11 +62,10 @@ def testar_nova_logica_mando():
                     times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
                     if len(times_linha) < 2: continue
                     
-                    n_casa = times_linha[0].text.strip()
-                    n_fora = times_linha[1].text.strip()
+                    n_casa = times_linha[0].text.strip().lower().replace("-", " ")
+                    n_fora = times_linha[1].text.strip().lower().replace("-", " ")
                     
-                    # Se o Al Hazm for o time de cima, achamos o jogo de casa legítimo!
-                    if t1.lower() in n_casa.lower():
+                    if t1_limpo in n_casa:
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
@@ -72,26 +75,25 @@ def testar_nova_logica_mando():
                         else: res = "E"
                         
                         stats["t1_resultado_1"] = res
-                        print(f"   🏠 [PASSO 1] Casa em Casa Encontrado: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {res}")
-                        break # Só para se gravar o resultado com sucesso
+                        print(f"   🏠 [PASSO 1] Casa em Casa Encontrado: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
+                        break 
                 except Exception:
                     continue
 
         # ---------------------------------------------------------------------
-        # SEÇÃO 1: JOGOS DO FORA -> Al-Taawon precisa ser VISITANTE (Time de Baixo)
+        # SEÇÃO 1: JOGOS DO FORA -> t2 precisa ser VISITANTE (Time de Baixo)
         # ---------------------------------------------------------------------
         if len(secoes) > 1:
             linhas = secoes[1].find_elements(By.CSS_SELECTOR, ".h2h__row")
             for linha in linhas:
                 try:
-                    times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
+                    times_linha = inline = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
                     if len(times_linha) < 2: continue
                     
-                    n_casa = times_linha[0].text.strip()
-                    n_fora = times_linha[1].text.strip()
+                    n_casa = times_linha[0].text.strip().lower().replace("-", " ")
+                    n_fora = times_linha[1].text.strip().lower().replace("-", " ")
                     
-                    # Se o Al-Taawon for o time de baixo, achamos o jogo fora legítimo!
-                    if t2.lower() in n_fora.lower():
+                    if t2_limpo in n_fora:
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
@@ -101,13 +103,13 @@ def testar_nova_logica_mando():
                         else: res = "E"
                         
                         stats["t2_resultado_1"] = res
-                        print(f"   🚀 [PASSO 2] Fora Fora Encontrado: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {res}")
-                        break # Só para se gravar o resultado com sucesso
+                        print(f"   🚀 [PASSO 2] Fora Fora Encontrado: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
+                        break 
                 except Exception:
                     continue
 
         # ---------------------------------------------------------------------
-        # SEÇÃO 2: CONFRONTOS DIRETOS (H2H) -> Al Hazm em CIMA (Mandante)
+        # SEÇÃO 2: CONFRONTOS DIRETOS (H2H) -> t1 em CIMA (Mandante)
         # ---------------------------------------------------------------------
         if len(secoes) > 2:
             linhas = secoes[2].find_elements(By.CSS_SELECTOR, ".h2h__row")
@@ -116,10 +118,9 @@ def testar_nova_logica_mando():
                     times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
                     if len(times_linha) < 2: continue
                     
-                    n_casa = times_linha[0].text.strip()
-                    n_fora = times_linha[1].text.strip()
+                    n_casa = times_linha[0].text.strip().lower().replace("-", " ")
                     
-                    if t1.lower() in n_casa.lower():
+                    if t1_limpo in n_casa:
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
@@ -129,7 +130,7 @@ def testar_nova_logica_mando():
                         else: res = "E"
                         
                         stats["h2h_res_1"] = res
-                        print(f"   ⚔️ [PASSO 3] H2H na Casa: {n_casa} {g1}-{g2} {n_fora} ➔ Letra: {res}")
+                        print(f"   ⚔️ [PASSO 3] H2H na Casa: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
                         break
                 except Exception:
                     continue
@@ -157,4 +158,4 @@ def testar_nova_logica_mando():
 
 if __name__ == "__main__":
     testar_nova_logica_mando()
-        
+            
