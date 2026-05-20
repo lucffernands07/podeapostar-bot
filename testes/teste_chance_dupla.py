@@ -31,10 +31,9 @@ def testar_nova_logica_mando():
     t1, t2 = "Al Hazm", "Al-Taawon"
     
     driver = configurar_driver()
-    print(f"\n🚀 Validando Nova Regra de Mando de Campo: {t1} x {t2}")
+    print(f"\n🚀 Validando Nova Regra de Mando por Títulos de Seção: {t1} x {t2}")
     print(f"🔗 Link Alvo: {url_teste}")
     
-    # Normaliza os nomes de referência removendo hífens para comparação limpa
     t1_limpo = t1.lower().replace("-", " ").strip()
     t2_limpo = t2.lower().replace("-", " ").strip()
     
@@ -51,89 +50,83 @@ def testar_nova_logica_mando():
         }
         
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        print(f"📦 Total de blocos .h2h__section detectados: {len(secoes)}")
         
-        # ---------------------------------------------------------------------
-        # SEÇÃO 0: JOGOS DO CASA -> t1 precisa ser MANDANTE (Time de Cima)
-        # ---------------------------------------------------------------------
-        if len(secoes) > 0:
-            linhas = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")
-            for linha in linhas:
-                try:
+        for secao in secoes:
+            try:
+                # Pega o título da seção para saber de quem são os jogos
+                titulo_el = secao.find_element(By.CSS_SELECTOR, ".section__title, .h2h__sectionHeader")
+                titulo_txt = titulo_el.text.lower()
+            except:
+                continue
+                
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")
+            if not linhas: continue
+
+            # -----------------------------------------------------------------
+            # CASO A: Seção de últimos jogos do TIME DA CASA (Al Hazm)
+            # -----------------------------------------------------------------
+            if t1_limpo in titulo_txt and "confrontos" not in titulo_txt:
+                print(f"🔎 Varrendo a seção identificada do Mandante: '{titulo_el.text}'")
+                for linha in linhas:
                     times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
                     if len(times_linha) < 2: continue
                     
                     n_casa = times_linha[0].text.strip().lower().replace("-", " ")
                     n_fora = times_linha[1].text.strip().lower().replace("-", " ")
                     
-                    if t1_limpo in n_casa:
+                    if t1_limpo in n_casa: # Al Hazm como mandante legítimo (cima)
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
                         
-                        if g1 > g2: res = "V"
-                        elif g1 < g2: res = "D"
-                        else: res = "E"
-                        
+                        res = "V" if g1 > g2 else ("D" if g1 < g2 else "E")
                         stats["t1_resultado_1"] = res
-                        print(f"   🏠 [PASSO 1] Casa em Casa Encontrado: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
-                        break 
-                except Exception:
-                    continue
+                        print(f"   🏠 [PASSO 1] Encontrado: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
+                        break
 
-        # ---------------------------------------------------------------------
-        # SEÇÃO 1: JOGOS DO FORA -> t2 precisa ser VISITANTE (Time de Baixo)
-        # ---------------------------------------------------------------------
-        if len(secoes) > 1:
-            linhas = secoes[1].find_elements(By.CSS_SELECTOR, ".h2h__row")
-            for linha in linhas:
-                try:
-                    times_linha = inline = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
+            # -----------------------------------------------------------------
+            # CASO B: Seção de últimos jogos do TIME DE FORA (Al-Taawon)
+            # -----------------------------------------------------------------
+            elif t2_limpo in titulo_txt and "confrontos" not in titulo_txt:
+                print(f"🔎 Varrendo a seção identificada do Visitante: '{titulo_el.text}'")
+                for linha in linhas:
+                    times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
                     if len(times_linha) < 2: continue
                     
                     n_casa = times_linha[0].text.strip().lower().replace("-", " ")
                     n_fora = times_linha[1].text.strip().lower().replace("-", " ")
                     
-                    if t2_limpo in n_fora:
+                    if t2_limpo in n_fora: # Al-Taawon como visitante legítimo (baixo)
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
                         
-                        if g2 > g1: res = "V"
-                        elif g2 < g1: res = "D"
-                        else: res = "E"
-                        
+                        res = "V" if g2 > g1 else ("D" if g2 < g1 else "E")
                         stats["t2_resultado_1"] = res
-                        print(f"   🚀 [PASSO 2] Fora Fora Encontrado: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
-                        break 
-                except Exception:
-                    continue
+                        print(f"   🚀 [PASSO 2] Encontrado: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
+                        break
 
-        # ---------------------------------------------------------------------
-        # SEÇÃO 2: CONFRONTOS DIRETOS (H2H) -> t1 em CIMA (Mandante)
-        # ---------------------------------------------------------------------
-        if len(secoes) > 2:
-            linhas = secoes[2].find_elements(By.CSS_SELECTOR, ".h2h__row")
-            for linha in linhas:
-                try:
+            # -----------------------------------------------------------------
+            # CASO C: Seção de CONFRONTOS DIRETOS (H2H)
+            # -----------------------------------------------------------------
+            elif "confrontos" in titulo_txt or "h2h" in titulo_txt:
+                print(f"🔎 Varrendo a seção identificada de Confrontos Diretos: '{titulo_el.text}'")
+                for linha in linhas:
                     times_linha = linha.find_elements(By.CSS_SELECTOR, ".h2h__participantInner")
                     if len(times_linha) < 2: continue
                     
                     n_casa = times_linha[0].text.strip().lower().replace("-", " ")
                     
-                    if t1_limpo in n_casa:
+                    if t1_limpo in n_casa: # Al Hazm jogando na casa dele contra o Al-Taawon
                         gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
                         if len(gols_el) < 2: continue
                         g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
                         
-                        if g1 > g2: res = "V"
-                        elif g1 < g2: res = "D"
-                        else: res = "E"
-                        
+                        res = "V" if g1 > g2 else ("D" if g1 < g2 else "E")
                         stats["h2h_res_1"] = res
-                        print(f"   ⚔️ [PASSO 3] H2H na Casa: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
+                        print(f"   ⚔️ [PASSO 3] Encontrado: {times_linha[0].text.strip()} {g1}-{g2} {times_linha[1].text.strip()} ➔ Letra: {res}")
                         break
-                except Exception:
-                    continue
 
         ucc = stats["t1_resultado_1"]
         uff = stats["t2_resultado_1"]
@@ -143,7 +136,7 @@ def testar_nova_logica_mando():
         trava_1x = ucc in ["V", "E"] and uff in ["D", "E"] and uh2h in ["V", "E"] and dados_ok
 
         print("\n" + "="*75)
-        print(f"🔬 AUDITORIA DA TRAVA NOVA - MERCADO: 1X")
+        print(f"🔬 AUDITORIA DA TRAVA DINÂMICA - MERCADO: 1X")
         print(f"   [PASSO 1] Casa em Casa ({ucc if ucc else 'NULO'})")
         print(f"   [PASSO 2] Fora Fora    ({uff if uff else 'NULO'})")
         print(f"   [PASSO 3] H2H na Casa  ({uh2h if uh2h else 'NULO'})")
@@ -158,4 +151,4 @@ def testar_nova_logica_mando():
 
 if __name__ == "__main__":
     testar_nova_logica_mando()
-            
+                        
