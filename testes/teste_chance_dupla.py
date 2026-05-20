@@ -26,9 +26,9 @@ def configurar_driver():
     return driver
 
 def testar_trava_dupla_chance():
-    # 📝 LINK CONFIGURADO COM O JOGO DOS SEUS PRINTS
-    url_teste = "https://www.flashscore.com.br/jogo/UanWW9fq/#/h2h/overall"
-    t1_nome, t2_nome = "Al-Khaleej", "Al-Ahli"
+    # 📝 LINK CONFIGURADO COM O SEU JOGO DE TESTE (X2)
+    url_teste = "https://www.flashscore.com.br/jogo/WjJkJilj/#/h2h/overall"
+    t1_nome, t2_nome = "Al-Hazm", "Al-Taawon"
     
     driver = configurar_driver()
     print(f"\n🚀 Iniciando Teste de Dupla Chance: {t1_nome} x {t2_nome}")
