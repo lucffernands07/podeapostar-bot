@@ -131,20 +131,27 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                             res_atual = "D"
                         
                         if i == 0: stats[f"t{idx+1}_resultado_1"] = res_atual
-
-                    elif idx == 2: 
+                 
+                        elif idx == 2: 
                         stats["h2h_jogos"] += 1
+                        
+                        # Se o mando de campo estiver invertido (Mandante de hoje jogando fora no H2H),
+                        # nós ignoramos a linha para não pegar um resultado falso!
+                        if t1.lower() in n_fora_h2h.lower():
+                            continue # Pula para a próxima linha do H2H até achar o mando certo!
+
                         res_h2h = "E"
-                        if (t1.lower() in n_casa_h2h.lower() and g1 > g2) or \
-                           (t1.lower() in n_fora_h2h.lower() and g2 > g1):
-                            res_h2h = "V"; stats["h2h_vitorias_t1"] += 1
-                        elif (t1.lower() in n_casa_h2h.lower() and g1 < g2) or \
-                             (t1.lower() in n_fora_h2h.lower() and g2 < g1):
-                            res_h2h = "D"; stats["h2h_vitorias_t2"] += 1
+                        if g1 > g2:
+                            res_h2h = "V"
+                            stats["h2h_vitorias_t1"] += 1
+                        elif g1 < g2:
+                            res_h2h = "D"
+                            stats["h2h_vitorias_t2"] += 1
                         
                         if i == 0: stats["h2h_res_1"] = res_h2h
                         if i == 1: stats["h2h_res_2"] = res_h2h
                         if g1 == g2: stats["h2h_empates"] += 1
+
 
                 except: continue
 
