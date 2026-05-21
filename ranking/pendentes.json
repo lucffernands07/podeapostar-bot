@@ -1,4 +1,75 @@
 {
     "data_geracao": "2026-05-21",
-    "jogos": []
+    "jogos": [
+        {
+            "time_casa": "La Guaira (Ven)",
+            "time_fora": "Ind. Rivadavia (Arg)",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xG3NcKdd/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Peñarol (Uru)",
+            "time_fora": "Corinthians (Bra)",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KC8HhsYr/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Universidad Católica (Chi)",
+            "time_fora": "Barcelona (Ecu)",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lUHob3AL/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Puerto Cabello (Ven)",
+            "time_fora": "Juventud (Uru)",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/O4LLXrDF/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Racing Club (Arg)",
+            "time_fora": "Caracas (Ven)",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/U3mgFzcl/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Blooming (Bol)",
+            "time_fora": "Carabobo (Ven)",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Ask9BhdD/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Al-Riyadh",
+            "time_fora": "Al Okhdood",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Ag2HAirB/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Anderlecht",
+            "time_fora": "St. Truiden",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lG0CQql1/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Gent",
+            "time_fora": "Royale Union SG",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Ao9IaGqo/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "KV Mechelen",
+            "time_fora": "Club Brugge",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hpeaWEKM/#/resumo-de-jogo"
+        }
+    ]
 }
