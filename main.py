@@ -133,13 +133,12 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         if i == 0: stats[f"t{idx+1}_resultado_1"] = res_atual
                  
                         elif idx == 2: 
-                        stats["h2h_jogos"] += 1
-                        
                         # Se o mando de campo estiver invertido (Mandante de hoje jogando fora no H2H),
-                        # nós ignoramos a linha para não pegar um resultado falso!
+                        # nós ignoramos a linha para buscar o próximo jogo real em casa.
                         if t1.lower() in n_fora_h2h.lower():
-                            continue # Pula para a próxima linha do H2H até achar o mando certo!
+                            continue 
 
+                        stats["h2h_jogos"] += 1
                         res_h2h = "E"
                         if g1 > g2:
                             res_h2h = "V"
@@ -148,10 +147,15 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                             res_h2h = "D"
                             stats["h2h_vitorias_t2"] += 1
                         
-                        if i == 0: stats["h2h_res_1"] = res_h2h
-                        if i == 1: stats["h2h_res_2"] = res_h2h
-                        if g1 == g2: stats["h2h_empates"] += 1
+                        # Salva o primeiro H2H válido com mando correto que encontrar
+                        if stats["h2h_res_1"] == "":
+                            stats["h2h_res_1"] = res_h2h
+                        # Salva o segundo H2H válido com mando correto
+                        elif stats["h2h_res_2"] == "":
+                            stats["h2h_res_2"] = res_h2h
+                            break # Já achou os dois com mando certo, pode parar a tabela!
 
+                        if g1 == g2: stats["h2h_empates"] += 1
 
                 except: continue
 
