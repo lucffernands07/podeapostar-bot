@@ -2,24 +2,29 @@ def verificar_chance_dupla(s):
     try:
         mercados = []
         
-        # --- REGRA 1X ---
-        # Passo 1: Casa (t1) venceu a última e Fora (t2) empatou ou perdeu
-        # O main extrai exatamente 't1_resultado_1' e 't2_resultado_1'
-        cond_ind_1x = (s.get("t1_resultado_1") == "V" and s.get("t2_resultado_1") in ["E", "D"])
+        # Pega exatamente as variáveis que vêm das tabelas posicionais
+        ucc = s.get("t1_resultado_1", "")  # Tabela 1: Último do Casa
+        uff = s.get("t2_resultado_1", "")  # Tabela 2: Último do Fora
+        uh2h = s.get("h2h_res_1", "")      # Tabela 3: Último H2H do Mando
         
-        # Passo 2: Mandante não perdeu os últimos 2 H2H (V ou E)
-        cond_h2h_1x = (s.get("h2h_res_1") in ["V", "E"] and s.get("h2h_res_2") in ["V", "E"])
+        dados_ok = (ucc != "" and uff != "" and uh2h != "")
+        if not dados_ok:
+            return []
 
-        if cond_ind_1x and cond_h2h_1x:
-            pct = "100%" if s.get("casa_vitorias_recente", 0) >= 4 else "85%"
+        # --- REGRA 1X (Idêntica ao seu texto e teste) ---
+        # Tabela 1: V ou E | Tabela 2: D ou E | Tabela 3: V ou E
+        cond_1x = (ucc in ["V", "E"] and uff in ["D", "E"] and uh2h in ["V", "E"])
+        
+        if cond_1x:
+            pct = s.get("chance_dupla_pct", "85%")
             mercados.append(f"1X ({pct})")
         
-        # --- REGRA 2X ---
-        cond_ind_2x = (s.get("t2_resultado_1") == "V" and s.get("t1_resultado_1") in ["E", "D"])
-        cond_h2h_2x = (s.get("h2h_res_1") in ["D", "E"] and s.get("h2h_res_2") in ["D", "E"])
-
-        if cond_ind_2x and cond_h2h_2x:
-            pct = "100%" if s.get("fora_vitorias", 0) >= 4 else "90%"
+        # --- REGRA 2X (Idêntica ao seu texto atual) ---
+        # Tabela 1: D | Tabela 2: V | Tabela 3: D
+        cond_2x = (ucc == "D" and uff == "V" and uh2h == "D")
+        
+        if cond_2x:
+            pct = s.get("chance_dupla_pct", "90%")
             mercados.append(f"2X ({pct})")
                 
         return mercados
