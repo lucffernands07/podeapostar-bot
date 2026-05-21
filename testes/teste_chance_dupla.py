@@ -26,7 +26,7 @@ def configurar_driver():
     return driver
 
 def testar_nova_logica_nomes():
-    url_teste = "https://www.flashscore.com.br/jogo/futebol/al-hazm-YZFeqj3D/al-taawon-WjJkJilj/h2h/total/"
+    url_teste = "https://www.flashscore.com.br/jogo/futebol/corinthians-QBGfQbSe/penarol-r1hkKQek/h2h/total/"
     
     driver = configurar_driver()
     print(f"\n🚀 Executando Validação: Strings de Nomes + Posição de Mando")
