@@ -26,11 +26,17 @@ def configurar_driver():
     return driver
 
 def testar_nova_logica_nomes():
+    # URL do confronto no FlashScore (com mando de hoje: Peñarol x Corinthians)
     url_teste = "https://www.flashscore.com.br/jogo/futebol/corinthians-QBGfQbSe/penarol-r1hkKQek/h2h/total/"
     
+    # Referência correta de mando (Simulando o que o seu main.py faz dinamicamente)
+    t1 = "Peñarol"
+    t2 = "Corinthians"
+    
     driver = configurar_driver()
-    print(f"\n🚀 Executando Validação: Strings de Nomes + Posição de Mando")
-    print(f"🔗 Link: {url_teste}")
+    print(f"\n🚀 Executando Validação Isolada Estrita (Simulando o Fluxo do Main)")
+    print(f"🏟️ Mando de Hoje -> Mandante (t1): {t1} | Visitante (t2): {t2}")
+    print(f"🔗 Link de Análise: {url_teste}")
     
     try:
         driver.get(url_teste)
@@ -52,71 +58,82 @@ def testar_nova_logica_nomes():
             if not linhas: continue
             
             # -----------------------------------------------------------------
-            # TABELA 1 (idx == 0): ÚLTIMOS JOGOS DO TIME DA CASA
+            # TABELA 1: ÚLTIMOS JOGOS DO TIME DA CASA (Buscando Peñarol em Casa)
             # -----------------------------------------------------------------
             if idx == 0:
                 print("🔎 Analisando Tabela 1 (Últimos jogos do Casa)...")
                 for i, linha in enumerate(linhas):
-                    el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
-                    nome_cima = el_cima.text.lower()
-                    
-                    if "hazm" in nome_cima or "hazem" in nome_cima:
-                        el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
-                        gols_el = Web_gols = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
-                        if len(gols_el) < 2: continue
-                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                    try:
+                        el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
+                        nome_cima = el_cima.text.lower()
                         
-                        res = "V" if g1 > g2 else ("D" if g1 < g2 else "E")
-                        stats["t1_resultado_1"] = res
-                        print(f"   🏠 [TABELA 1 MATCH] Linha {i+1}: {el_cima.text.strip()} {g1}-{g2} {el_baixo.text.strip()} ➔ Letra: {res}")
-                        break
+                        # Verifica se o Peñarol jogou EM CIMA (mandante) nesta linha
+                        if "peñarol" in nome_cima or "penarol" in nome_cima:
+                            el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
+                            gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                            if len(gols_el) < 2: continue
+                            g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                            
+                            res = "V" if g1 > g2 else ("D" if g1 < g2 else "E")
+                            stats["t1_resultado_1"] = res
+                            print(f"   🏠 [TABELA 1 MATCH] Linha {i+1}: {el_cima.text.strip()} {g1}-{g2} {el_baixo.text.strip()} ➔ Letra: {res}")
+                            break
+                    except:
+                        continue
 
             # -----------------------------------------------------------------
-            # TABELA 2 (idx == 1): ÚLTIMOS JOGOS DO TIME DE FORA
+            # TABELA 2: ÚLTIMOS JOGOS DO TIME DE FORA (Buscando Corinthians Fora)
             # -----------------------------------------------------------------
             elif idx == 1:
                 print("🔎 Analisando Tabela 2 (Últimos jogos do Fora)...")
                 for i, linha in enumerate(linhas):
-                    el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
-                    nome_baixo = el_baixo.text.lower()
-                    
-                    if "taawon" in nome_baixo:
-                        el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
-                        gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
-                        if len(gols_el) < 2: continue
-                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                    try:
+                        el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
+                        nome_baixo = el_baixo.text.lower()
                         
-                        res = "V" if g2 > g1 else ("D" if g2 < g1 else "E")
-                        stats["t2_resultado_1"] = res
-                        print(f"   🚀 [TABELA 2 MATCH] Linha {i+1}: {el_cima.text.strip()} {g1}-{g2} {el_baixo.text.strip()} ➔ Letra: {res}")
-                        break
+                        # Verifica se o Corinthians jogou EM BAIXO (visitante) nesta linha
+                        if "corinthians" in nome_baixo:
+                            el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
+                            gols_el = Web_gols = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                            if len(gols_el) < 2: continue
+                            g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                            
+                            res = "V" if g2 > g1 else ("D" if g2 < g1 else "E")
+                            stats["t2_resultado_1"] = res
+                            print(f"   🚀 [TABELA 2 MATCH] Linha {i+1}: {el_cima.text.strip()} {g1}-{g2} {el_baixo.text.strip()} ➔ Letra: {res}")
+                            break
+                    except:
+                        continue
 
             # -----------------------------------------------------------------
-            # TABELA 3 (idx == 2): CONFRONTOS DIRETOS (H2H HISTÓRICO)
+            # TABELA 3: CONFRONTOS DIRETOS (H2H com o Peñarol jogando em casa)
             # -----------------------------------------------------------------
             elif idx == 2:
                 print("🔎 Analisando Tabela 3 (Confrontos Diretos)...")
                 for i, linha in enumerate(linhas):
-                    el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
-                    nome_cima = el_cima.text.lower()
-                    
-                    if "hazm" in nome_cima or "hazem" in nome_cima:
-                        el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
-                        gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
-                        if len(gols_el) < 2: continue
-                        g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                    try:
+                        el_cima = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant")
+                        nome_cima = el_cima.text.lower()
                         
-                        res = "V" if g1 > g2 else ("D" if g1 < g2 else "E")
-                        stats["h2h_res_1"] = res
-                        print(f"   ⚔️ [TABELA 3 MATCH] Linha {i+1}: {el_cima.text.strip()} {g1}-{g2} {el_baixo.text.strip()} ➔ Letra: {res}")
-                        break
+                        # Garante que estamos pegando o confronto histórico onde o Peñarol jogou EM CIMA
+                        if "peñarol" in nome_cima or "penarol" in nome_cima:
+                            el_baixo = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant")
+                            gols_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result span")
+                            if len(gols_el) < 2: continue
+                            g1, g2 = int(gols_el[0].text.strip()), int(gols_el[1].text.strip())
+                            
+                            res = "V" if g1 > g2 else ("D" if g1 < g2 else "E")
+                            stats["h2h_res_1"] = res
+                            print(f"   ⚔️ [TABELA 3 MATCH] Linha {i+1}: {el_cima.text.strip()} {g1}-{g2} {el_baixo.text.strip()} ➔ Letra: {res}")
+                            break
+                    except:
+                        continue
 
         ucc = stats["t1_resultado_1"]
         uff = stats["t2_resultado_1"]
         uh2h = stats["h2h_res_1"]
         dados_ok = (ucc != "" and uff != "" and uh2h != "")
 
-        # Validação das Travas 1X e 2X baseada nos seus critérios estritos
         trava_1x = ucc in ["V", "E"] and uff in ["D", "E"] and uh2h in ["V", "E"] and dados_ok
         trava_2x = uff == "V" and ucc == "D" and uh2h in ["D", "E"] and dados_ok
 
@@ -138,4 +155,4 @@ def testar_nova_logica_nomes():
 
 if __name__ == "__main__":
     testar_nova_logica_nomes()
-            
+                            
