@@ -5,7 +5,7 @@
         "time_casa": "Al-Riyadh",
         "time_fora": "Al Okhdood",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.73",
+        "odd": "1.62",
         "link_betano": "https://www.betano.bet.br/match-odds/Al-Riyadh-SC-Al-Okhdood-Club/84220315/"
     },
     {
@@ -14,7 +14,7 @@
         "time_casa": "Anderlecht",
         "time_fora": "St. Truiden",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.53",
+        "odd": "1.57",
         "link_betano": "https://www.betano.bet.br/match-odds/RSC-Anderlecht-Sint-Truidense-VV/83904095/"
     },
     {
@@ -29,10 +29,19 @@
     {
         "horario": "15:30",
         "liga": "Bélgica - Pro League",
+        "time_casa": "Gent",
+        "time_fora": "Royale Union SG",
+        "mercado": "1X (80%)",
+        "odd": "1.95",
+        "link_betano": "https://www.betano.bet.br/match-odds/KAA-Gent-Union-Saint-Gilloise/83904093/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Bélgica - Pro League",
         "time_casa": "KV Mechelen",
         "time_fora": "Club Brugge",
         "mercado": "+2.5 Gols (70%)",
-        "odd": "1.42",
+        "odd": "1.40",
         "link_betano": "https://www.betano.bet.br/match-odds/KV-Mechelen-Club-Brugge-KV/83904094/"
     },
     {
@@ -41,7 +50,16 @@
         "time_casa": "La Guaira (Ven)",
         "time_fora": "Ind. Rivadavia (Arg)",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.50",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-La-Guaira-Independiente-Rivadavia-de-Mendoza/82766872/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Libertadores",
+        "time_casa": "La Guaira (Ven)",
+        "time_fora": "Ind. Rivadavia (Arg)",
+        "mercado": "1X (80%)",
+        "odd": "1.80",
         "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-La-Guaira-Independiente-Rivadavia-de-Mendoza/82766872/"
     },
     {
@@ -50,7 +68,16 @@
         "time_casa": "Puerto Cabello (Ven)",
         "time_fora": "Juventud (Uru)",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.42",
+        "odd": "1.39",
+        "link_betano": "https://www.betano.bet.br/match-odds/Academia-Puerto-Cabello-Juventud-de-Las-Piedras/82820161/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Puerto Cabello (Ven)",
+        "time_fora": "Juventud (Uru)",
+        "mercado": "1X (80%)",
+        "odd": "1.30",
         "link_betano": "https://www.betano.bet.br/match-odds/Academia-Puerto-Cabello-Juventud-de-Las-Piedras/82820161/"
     },
     {
@@ -68,7 +95,16 @@
         "time_casa": "Peñarol (Uru)",
         "time_fora": "Corinthians (Bra)",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.52",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Penarol-Montevideo-Corinthians-SP/82766260/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Peñarol (Uru)",
+        "time_fora": "Corinthians (Bra)",
+        "mercado": "1X (80%)",
+        "odd": "1.40",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Penarol-Montevideo-Corinthians-SP/82766260/"
     },
     {
@@ -77,7 +113,7 @@
         "time_casa": "Universidad Católica (Chi)",
         "time_fora": "Barcelona (Ecu)",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.40",
+        "odd": "1.42",
         "link_betano": "https://www.betano.bet.br/match-odds/Universidad-Catolica-Barcelona-Guayaquil/82766936/"
     },
     {
@@ -86,7 +122,16 @@
         "time_casa": "Blooming (Bol)",
         "time_fora": "Carabobo (Ven)",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.39",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Blooming-Santa-Cruz-Carabobo-FC/82820595/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "Blooming (Bol)",
+        "time_fora": "Carabobo (Ven)",
+        "mercado": "1X (80%)",
+        "odd": "1.57",
         "link_betano": "https://www.betano.bet.br/match-odds/Blooming-Santa-Cruz-Carabobo-FC/82820595/"
     }
 ]
