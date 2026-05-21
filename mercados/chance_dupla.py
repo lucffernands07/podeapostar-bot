@@ -7,21 +7,24 @@ def verificar_chance_dupla(s):
         uff = s.get("t2_resultado_1", "")  # Tabela 2: Último do Fora
         uh2h = s.get("h2h_res_1", "")      # Tabela 3: Último H2H do Mando
         
-        dados_ok = (ucc != "" and uff != "" and uh2h != "")
+        # --- AJUSTE NA TRAVA ---
+        # O uh2h OBRIGATORIAMENTE precisa ser uma dessas três letras.
+        # Se for "" (vazio por causa do continue), o jogo é barrado aqui.
+        dados_ok = (ucc != "" and uff != "" and uh2h in ["V", "E", "D"])
         if not dados_ok:
             return []
 
-        # --- REGRA 1X (Idêntica ao seu texto e teste) ---
-        # Tabela 1: V ou E | Tabela 2: D ou E | Tabela 3: V ou E
-        cond_1x = (ucc in ["V", "E"] and uff in ["D", "E"] and uh2h in ["V", "E"])
+        # --- REGRA 1X ---
+        # Incluído o 'and dados_ok' para garantir a trava de ferro
+        cond_1x = (ucc in ["V", "E"] and uff in ["D", "E"] and uh2h in ["V", "E"] and dados_ok)
         
         if cond_1x:
             pct = s.get("chance_dupla_pct", "85%")
             mercados.append(f"1X ({pct})")
         
-        # --- REGRA 2X (Idêntica ao seu texto atual) ---
-        # Tabela 1: D | Tabela 2: V | Tabela 3: D
-        cond_2x = (ucc == "D" and uff == "V" and uh2h == "D")
+        # --- REGRA 2X ---
+        # Incluído o 'and dados_ok' para garantir a trava de ferro
+        cond_2x = (ucc == "D" and uff == "V" and uh2h == "D" and dados_ok)
         
         if cond_2x:
             pct = s.get("chance_dupla_pct", "90%")
