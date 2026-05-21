@@ -132,7 +132,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         
                         if i == 0: stats[f"t{idx+1}_resultado_1"] = res_atual
                  
-                        elif idx == 2: 
+                    elif idx == 2: 
                         # Se o mando de campo estiver invertido (Mandante de hoje jogando fora no H2H),
                         # nós ignoramos a linha para buscar o próximo jogo real em casa.
                         if t1.lower() in n_fora_h2h.lower():
