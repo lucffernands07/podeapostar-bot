@@ -30,16 +30,16 @@
         "assertividade": 0.9333333333333333
     },
     {
+        "mercado": "+1.5 GOLS (85%)",
+        "green": 51,
+        "red": 15,
+        "assertividade": 0.7727272727272727
+    },
+    {
         "mercado": "1X (85%)",
         "green": 10,
         "red": 3,
         "assertividade": 0.7692307692307693
-    },
-    {
-        "mercado": "+1.5 GOLS (85%)",
-        "green": 48,
-        "red": 15,
-        "assertividade": 0.7619047619047619
     },
     {
         "mercado": "1X (100%)",
@@ -61,15 +61,15 @@
     },
     {
         "mercado": "+1.5 GOLS (70%)",
-        "green": 33,
-        "red": 17,
-        "assertividade": 0.66
+        "green": 35,
+        "red": 18,
+        "assertividade": 0.660377358490566
     },
     {
         "mercado": "+2.5 GOLS (70%)",
-        "green": 32,
+        "green": 33,
         "red": 17,
-        "assertividade": 0.6530612244897959
+        "assertividade": 0.66
     },
     {
         "mercado": "+2.5 GOLS (85%)",
@@ -85,9 +85,9 @@
     },
     {
         "mercado": "AMBAS MARCAM: SIM (80%)",
-        "green": 30,
-        "red": 31,
-        "assertividade": 0.4918032786885246
+        "green": 32,
+        "red": 32,
+        "assertividade": 0.5
     },
     {
         "mercado": "BINGO 3",
