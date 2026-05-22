@@ -1,0 +1,74 @@
+[
+    {
+        "horario": "13:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "VPS",
+        "time_fora": "HJK",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.80",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vaasa-PS-HJK-Helsinki/83958058/"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Áustria - Bundesliga",
+        "time_casa": "Ried",
+        "time_fora": "SK Rapid",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/SV-Ried-Rapid-Vienna/86029471/"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Áustria - Bundesliga",
+        "time_casa": "Ried",
+        "time_fora": "SK Rapid",
+        "mercado": "1X (80%)",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/SV-Ried-Rapid-Vienna/86029471/"
+    },
+    {
+        "horario": "14:45",
+        "liga": "Copa da Turquia",
+        "time_casa": "Trabzonspor",
+        "time_fora": "Konyaspor",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.87",
+        "link_betano": "https://www.betano.bet.br/match-odds/Trabzonspor-Konyaspor/86023262/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Alemanha - 2. Bundesliga",
+        "time_casa": "RW Essen",
+        "time_fora": "Furth",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/Rot-Weiss-Essen-SpVgg-Greuther-Furth/85904168/"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Serie A (Itália)",
+        "time_casa": "Fiorentina",
+        "time_fora": "Atalanta",
+        "mercado": "1X (80%)",
+        "odd": "1.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/AC-Fiorentina-Atalanta/85934981/"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Serie A (Itália)",
+        "time_casa": "Fiorentina",
+        "time_fora": "Atalanta",
+        "mercado": "Vitória Casa (100%)",
+        "odd": "2.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/AC-Fiorentina-Atalanta/85934981/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Náutico",
+        "time_fora": "Cuiabá",
+        "mercado": "Vitória Casa (100%)",
+        "odd": "1.86",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nautico-PE-Cuiaba-MT/85925970/"
+    }
+]

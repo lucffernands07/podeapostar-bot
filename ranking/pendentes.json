@@ -1,4 +1,61 @@
 {
     "data_geracao": "2026-05-22",
-    "jogos": []
+    "jogos": [
+        {
+            "time_casa": "Náutico",
+            "time_fora": "Cuiabá",
+            "mercado": "Vitória Casa (100%)",
+            "mercado_ranking": "VITÓRIA CASA (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zZRFQJs1/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Fiorentina",
+            "time_fora": "Atalanta",
+            "mercado": "1X (80%)",
+            "mercado_ranking": "1X (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ln2VQVwR/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Fiorentina",
+            "time_fora": "Atalanta",
+            "mercado": "Vitória Casa (100%)",
+            "mercado_ranking": "VITÓRIA CASA (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ln2VQVwR/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Trabzonspor",
+            "time_fora": "Konyaspor",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Sl8m59Wo/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Ried",
+            "time_fora": "SK Rapid",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/GAOyTi0e/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Ried",
+            "time_fora": "SK Rapid",
+            "mercado": "1X (80%)",
+            "mercado_ranking": "1X (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/GAOyTi0e/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "RW Essen",
+            "time_fora": "Furth",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/IcsAL55m/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "VPS",
+            "time_fora": "HJK",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QqiJnlwP/#/resumo-de-jogo"
+        }
+    ]
 }
