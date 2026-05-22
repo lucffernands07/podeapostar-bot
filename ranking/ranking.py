@@ -13,7 +13,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 # --- CONFIGURAÇÕES DE CAMINHO ---
 PATH_DB = "ranking/ranking_db.json"
 PATH_PENDENTES = "ranking/pendentes.json"
-PATH_RANKING_DIARIO = "ranking/ranking_diario.json" # <--- NOVO ARQUIVO PADRONIZADO
+PATH_RANKING_DIARIO = "ranking/ranking_diario.json" 
+PATH_BINGOS_DO_DIA = "ranking/bingos_do_dia.json"  # <--- Arquivo gerado pelo bingo357.py
 
 def log(etapa, mensagem):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] 🚀 {etapa}: {mensagem}")
@@ -40,31 +41,97 @@ def validar_palpite(mercado_str, g_c, g_f):
     if "vitoria casa" in m: return g_c > g_f
     return False
 
-# --- NOVA FUNÇÃO: GERA O RANKING JÁ SEPARADO PARA SENDER E BINGO357 ---
-def gerar_ranking_diario(stats):
-    log("RANKING", "Gerando ranking_diario.json ordenado por elite...")
-    lista_ordenada = []
+# --- NOVA FUNÇÃO: CONFERE OS BINGOS DA MADRUGADA ANTERIOR ---
+def conferir_bingos_do_dia(resultados_jogos, stats_bingos):
+    log("BINGOS", "Iniciando conferência dos Bingos do dia anterior (Regra Tudo ou Nada)...")
     
-    for mercado, dados in stats.items():
+    if not os.path.exists(PATH_BINGOS_DO_DIA):
+        log("AVISO BINGOS", "Arquivo bingos_do_dia.json não encontrado para checagem.")
+        return stats_bingos
+
+    try:
+        with open(PATH_BINGOS_DO_DIA, 'r', encoding='utf-8') as f:
+            bingos_salvos = json.load(f)
+            
+        for nome_bingo, jogos_do_bingo in bingos_salvos.items():
+            if not jogos_do_bingo: continue
+            
+            # Inicializa a estrutura no banco de dados se não existir
+            if nome_bingo not in stats_bingos:
+                stats_bingos[nome_bingo] = {"green": 0, "red": 0}
+                
+            bingo_deu_red = False
+            jogos_computados = 0
+            
+            for j in jogos_do_bingo:
+                chave_jogo = f"{j['time_casa'].strip().lower()}x{j['time_fora'].strip().lower()}"
+                
+                # Verifica se o robô conseguiu colher o placar desse jogo específico hoje
+                if chave_jogo in resultados_jogos:
+                    jogos_computados += 1
+                    g_c, g_f = resultados_jogos[chave_jogo]
+                    # Roda a mesma validação oficial de mercado
+                    palpite_correto = validar_palpite(j['mercado'], g_c, g_f)
+                    
+                    if not palpite_correto:
+                        bingo_deu_red = True  # Um único erro derruba o bilhete completo
+            
+            # Só atualiza se todos os jogos do bilhete foram encontrados e checados
+            if jogos_computados == len(jogos_do_bingo):
+                if bingo_deu_red:
+                    stats_bingos[nome_bingo]["red"] += 1
+                    log("RESULTADO BINGO", f"🟥 {nome_bingo} acumulou RED ontem.")
+                else:
+                    stats_bingos[nome_bingo]["green"] += 1
+                    log("RESULTADO BINGO", f"🟩 {nome_bingo} acumulou GREEN (100% de acertos)!")
+            else:
+                log("AVISO BINGO", f"⚠️ {nome_bingo} não foi computado pois nem todos os placares foram encontrados.")
+                
+    except Exception as e:
+        log("ERRO BINGOS", f"Falha ao conferir os bingos acumulados: {e}")
+        
+    return stats_bingos
+
+# --- FUNÇÃO ATUALIZADA: GERA O ARQUIVO EM DUAS CATEGORIAS SEPARADAS ---
+def gerar_ranking_diario(stats_mercados, stats_bingos):
+    log("RANKING", "Gerando novo ranking_diario.json categorizado por chaves...")
+    
+    ranking_final = {
+        "mercados": [],
+        "bingos": []
+    }
+    
+    # 1. Monta e ordena a lista de Mercados Simples
+    for mercado, dados in stats_mercados.items():
         g = dados.get('green', 0)
         r = dados.get('red', 0)
         total = g + r
-        
         if total > 0:
-            assertividade = g / total
-            lista_ordenada.append({
+            ranking_final["mercados"].append({
                 "mercado": mercado,
                 "green": g,
                 "red": r,
-                "assertividade": assertividade
+                "assertividade": g / total
             })
+    ranking_final["mercados"].sort(key=lambda x: (x['assertividade'], x['green']), reverse=True)
     
-    # Ordena por Assertividade (100% no topo) e depois por volume de Greens
-    lista_ordenada.sort(key=lambda x: (x['assertividade'], x['green']), reverse=True)
+    # 2. Monta e ordena os Bingos (Fica de forma estática por último)
+    for bingo, dados in stats_bingos.items():
+        g = dados.get('green', 0)
+        r = dados.get('red', 0)
+        total = g + r
+        ranking_final["bingos"].append({
+            "mercado": bingo,
+            "green": g,
+            "red": r,
+            "assertividade": (g / total) if total > 0 else 0.0
+        })
+    # Mantém os bingos ordenados de forma fixa pelo tipo (Bingo 3, Bingo 5, Premium)
+    ranking_final["bingos"].sort(key=lambda x: x['mercado'])
     
     with open(PATH_RANKING_DIARIO, 'w', encoding='utf-8') as f:
-        json.dump(lista_ordenada, f, indent=4, ensure_ascii=False)
-    log("RANKING", "Arquivo ranking_diario.json pronto para uso.")
+        json.dump(ranking_final, f, indent=4, ensure_ascii=False)
+    log("RANKING", "Arquivo ranking_diario.json gravado com sucesso em dois blocos.")
 
 def main():
     log("INÍCIO", "Iniciando Processamento de Ranking")
@@ -93,15 +160,19 @@ def main():
         log("AVISO", "A lista de jogos pendentes está vazia.")
         return
 
+    # Garante o carregamento correto das chaves do banco de dados relacional
     if os.path.exists(PATH_DB):
         with open(PATH_DB, 'r', encoding='utf-8') as f:
             db = json.load(f)
     else:
-        db = {"stats": {}}
+        db = {"stats": {}, "stats_bingos": {}}
 
     stats = db.get("stats", {})
+    stats_bingos = db.get("stats_bingos", {}) # <--- Gaveta exclusiva dos Bingos no Banco
+    
     driver = configurar_driver()
     atualizados = 0
+    resultados_reais_dia = {} # Dicionário auxiliar para capturar { "time_casaxtime_fora": (gols_c, gols_f) }
 
     try:
         for jogo in pendentes:
@@ -122,8 +193,12 @@ def main():
                 
                 if score_casa.isdigit() and score_fora.isdigit():
                     g_c, g_f = int(score_casa), int(score_fora)
-                    deu_green = validar_palpite(jogo['mercado'], g_c, g_f)
                     
+                    # Alimenta o mapa temporário de gols para a checagem paralela de Bingos
+                    chave_mapa = f"{jogo['time_casa'].strip().lower()}x{jogo['time_fora'].strip().lower()}"
+                    resultados_reais_dia[chave_mapa] = (g_c, g_f)
+                    
+                    deu_green = validar_palpite(jogo['mercado'], g_c, g_f)
                     m_rank = jogo['mercado_ranking'].strip().upper()
                     
                     if m_rank not in stats: 
@@ -140,15 +215,19 @@ def main():
             except Exception as e:
                 log("ERRO", f"Erro ao ler {jogo['time_casa']}: {str(e)[:50]}...")
 
-        # --- SALVAMENTO E GERAÇÃO DO RANKING DIÁRIO ---
+        # --- PROCESSAMENTO EXCLUSIVO DOS BINGOS ACUMULADOS ---
+        stats_bingos = conferir_bingos_do_dia(resultados_reais_dia, stats_bingos)
+
+        # --- SALVAMENTO FINAL NO BANCO DE DADOS ---
         db["stats"] = stats
+        db["stats_bingos"] = stats_bingos
         db["ultima_atualizacao"] = datetime.now().strftime("%d/%m/%Y %H:%M")
         
         with open(PATH_DB, 'w', encoding='utf-8') as f:
             json.dump(db, f, indent=4, ensure_ascii=False)
         
-        # CHAMA A NOVA FUNÇÃO AQUI PARA SEPARAR OS MELHORES
-        gerar_ranking_diario(stats)
+        # GERA O NOVO RANKING DIÁRIO DIVIDIDO
+        gerar_ranking_diario(stats, stats_bingos)
         
         dados_reset = {
             "data_geracao": hoje_str,
@@ -157,11 +236,11 @@ def main():
         with open(PATH_PENDENTES, 'w', encoding='utf-8') as f:
             json.dump(dados_reset, f, indent=4, ensure_ascii=False)
             
-        log("FIM", f"Processo concluído. {atualizados} jogos contabilizados.")
+        log("FIM", f"Processo concluído. {atualizados} jogos e bilhetes contabilizados.")
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     main()
-                
+                                
