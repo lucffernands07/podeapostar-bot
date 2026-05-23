@@ -6,41 +6,33 @@ from datetime import datetime
 # Ajuste os caminhos de acordo com as pastas do seu repositório
 PASTA_TELEGRAM = "telegram"
 
-def extrair_markup_filtros(escolhas):
+def extrair_markup_filtros(escolhas=None):
     """
-    Desenha a matriz de botões inline com o layout exato solicitado.
-    Usa prefixos nos callback_data para sabermos o que o usuário clicou.
+    Painel simplificado solicitado pelo Luciano: Sem gerenciamento de cores.
+    Cada botão envia seu comando direto para processamento sob demanda.
     """
-    b = escolhas.get("bingo", "5")
-    h = escolhas.get("horario", "DIA")
-    t = escolhas.get("bilhete", "ACERTOS")
-
     return {
         "inline_keyboard": [
             # --- SEÇÃO 1: BINGOS ---
             [{"text": "🎲 --- QUANTIDADE DE BINGOS ---", "callback_data": "ignore"}],
             [
-                {"text": f"{'🟢' if b=='3' else '🔘'} [3]", "callback_data": "cb_bingo_3"},
-                {"text": f"{'🟢' if b=='5' else '🔘'} [5]", "callback_data": "cb_bingo_5"},
-                {"text": f"{'🟢' if b=='7' else '🔘'} [7]", "callback_data": "cb_bingo_7"}
+                {"text": "🎯 Bingo 3", "callback_data": "cb_bingo_3"},
+                {"text": "🎯 Bingo 5", "callback_data": "cb_bingo_5"},
+                {"text": "🎯 Bingo 7", "callback_data": "cb_bingo_7"}
             ],
             # --- SEÇÃO 2: HORÁRIOS ---
             [{"text": "⏱️ --- FILTRO DE HORÁRIO ---", "callback_data": "ignore"}],
             [
-                {"text": f"{'🟢' if h=='3H' else '🔘'} [3H]", "callback_data": "cb_hora_3H"},
-                {"text": f"{'🟢' if h=='5H' else '🔘'} [5H]", "callback_data": "cb_hora_5H"},
-                {"text": f"{'🟢' if h=='DIA' else '🔘'} [DIA]", "callback_data": "cb_hora_DIA"}
+                {"text": "⏳ Janela 3H", "callback_data": "cb_hora_3H"},
+                {"text": "⏳ Janela 5H", "callback_data": "cb_hora_5H"},
+                {"text": "📅 Todo o Dia", "callback_data": "cb_hora_DIA"}
             ],
-            # --- SEÇÃO 3: TIPO DE BILHETE ---
+            # --- SEÇÃO 3: ESTRATÉGIA ---
             [{"text": "📊 --- ESTRATÉGIA DO BILHETE ---", "callback_data": "ignore"}],
             [
-                {"text": f"{'🟢' if t=='ODDS' else '🔘'} [ODDS]", "callback_data": "cb_tipo_ODDS"},
-                {"text": f"{'🟢' if t=='ACERTOS' else '🔘'} [ACERTOS]", "callback_data": "cb_tipo_ACERTOS"},
-                {"text": f"{'🟢' if t=='AMBAS' else '🔘'} [AMBAS]", "callback_data": "cb_tipo_AMBAS"}
-            ],
-            # --- SEÇÃO 4: BOTÃO DE ENVIO (O GATILHO) ---
-            [
-                {"text": "🚀 GERAR E ENVIAR BILHETE", "callback_data": "cb_acao_gerar"}
+                {"text": "💰 Maiores Odds", "callback_data": "cb_tipo_ODDS"},
+                {"text": "📈 Mais Acertos", "callback_data": "cb_tipo_ACERTOS"},
+                {"text": "🔥 Modo Ambas", "callback_data": "cb_tipo_AMBAS"}
             ]
         ]
     }
