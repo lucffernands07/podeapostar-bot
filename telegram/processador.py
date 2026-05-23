@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import bingo357 
-from telegram import menus 
+from telegram import menus # <--- IMPORTANTE: Importar o seu arquivo de menus
 
 def decodificar_parametros(tipo_bruto):
     """
@@ -61,19 +61,42 @@ def executar():
     with open(caminho_json, "r", encoding="utf-8") as f:
         jogos_banco = json.load(f)
 
+    agora = datetime.now()
     agora_br = hoje_ref.strftime("%H:%M") 
     
-    # --- PASSO 1: FILTRAGEM DE HORÁRIO DINÂMICA ---
+    # --- PASSO 1: FILTRAGEM DE HORÁRIO DINÂMICA (CORRIGIDA) ---
     jogos_filtrados = []
     limite_tempo = None
-    if filtro_hora == "3H": limite_tempo = (hoje_ref + timedelta(hours=3)).strftime("%H:%M")
-    if filtro_hora == "5H": limite_tempo = (hoje_ref + timedelta(hours=5)).strftime("%H:%M")
+    if filtro_hora == "3H": limite_tempo = agora + timedelta(hours=3)
+    if filtro_hora == "5H": limite_tempo = agora + timedelta(hours=5)
 
     for j in jogos_banco:
-        if j['horario'] >= agora_br:
-            if limite_tempo and j['horario'] > limite_tempo:
+        try:
+            # Transforma a string "Horário" em um objeto datetime do dia atual
+            h_partes = j['horario'].split(":")
+            hora_jogo = agora.replace(hour=int(h_partes[0]), minute=int(h_partes[1]), second=0, microsecond=0)
+            
+            # Se o horário convertido for menor que 04:00 da manhã, 
+            # pertence à madrugada seguinte (joga o dia para a frente na linha do tempo)
+            if int(h_partes[0]) < 4:
+                hora_jogo += timedelta(days=1)
+            
+            # Trava 1: O jogo já começou ou passou? (Margem de segurança de 15 minutos)
+            if hora_jogo < agora - timedelta(minutes=15):
                 continue
+                
+            # Trava 2: Se tiver filtro de 3h ou 5h, o jogo passa do limite da janela?
+            if limite_tempo and hora_jogo > limite_tempo:
+                continue
+                
+            # Guarda o objeto datetime real para usar na ordenação cronológica depois se necessário
+            j["datetime_real"] = hora_jogo
             jogos_filtrados.append(j)
+            
+        except Exception as e:
+            # Fallback de segurança caso falte algum dado no parse
+            if filtro_hora == "DIA": 
+                jogos_filtrados.append(j)
 
     if not jogos_filtrados:
         texto_erro = f"⚠️ Não há jogos disponíveis para os filtros selecionados agora ({agora_br})."
@@ -88,7 +111,7 @@ def executar():
                 ranking_db = json.load(f)
         except: pass
 
-    # --- PASSO 2: APLICAÇÃO DOS PESOS MATEMÁTICOS NAS ODDEE/RANKING ---
+    # --- PASSO 2: APLICAÇÃO DOS PESOS MATEMÁTICOS NAS ODDS/RANKING ---
     for j in jogos_filtrados:
         try:
             odd_val = float(j.get("odd", "1.0").replace(",", "."))
@@ -97,35 +120,39 @@ def executar():
             
         mercado_nome = j.get("mercado", "").upper().strip()
         
-        assertividade = 0.50  # Neutro
+        assertividade = 0.50  # Neutro por padrão
         if ranking_db and "stats" in ranking_db:
             if mercado_nome in ranking_db["stats"]:
                 dados_m = ranking_db["stats"][mercado_nome]
                 tot = dados_m.get("green", 0) + dados_m.get("red", 0)
                 if tot > 0: assertividade = dados_m["green"] / tot
 
-        # Regras de Score baseadas nas chaves solicitadas:
+        # Regras de Score baseadas nas escolhas do painel:
         if estrategia == "ODDS":
             j["score_filtro"] = odd_val
         elif estrategia == "ACERTOS":
             j["score_filtro"] = assertividade
         elif estrategia == "AMBAS":
-            # Sua Regra de Ouro: 60% peso do ranking + 40% peso do valor da Odd
+            # Regra Híbrida: 60% peso do ranking de acertos + 40% peso do valor da Odd
             j["score_filtro"] = (assertividade * 0.60) + (odd_val * 0.40)
 
-    # Ordena do melhor score para o pior
+    # Ordena do melhor score (maior pontuação) para o pior
     jogos_filtrados.sort(key=lambda x: x.get("score_filtro", 0), reverse=True)
 
     if len(jogos_filtrados) < qtd_alvo:
-        texto_insuficiente = f"ℹ️ O listão possui apenas {len(jogos_filtrados)} jogos futuros nesta janela ({filtro_hora}). Não foi possível fechar um Bingo {qtd_alvo}."
+        texto_insuficiente = f"ℹ️ O listão possui apenas {len(jogos_filtrados)} jogos futuros nesta janela ({filtro_hora}). Não há partidas suficientes para montar um Bingo {qtd_alvo}."
         menus.enviar_menu_bingo(chat_id, texto_insuficiente)
         return
 
     # --- PASSO 3: MONTAGEM DO BILHETE ESTRUTURADO NO PADRÃO DO BINGO357 ---
-    # Pegamos os top N melhores jogos baseados no score calculado
+    # Pegamos os top N melhores jogos baseados na estratégia selecionada
     jogos_selecionados = jogos_filtrados[:qtd_alvo]
 
-    # Simulamos a embalagem da estrutura que o seu formatador do bingo357 espera ler
+    # Reordena os jogos finais por horário cronológico real para o bilhete ficar bonito na tela
+    if "datetime_real" in jogos_selecionados[0]:
+        jogos_selecionados.sort(key=lambda x: x["datetime_real"])
+
+    # Embala o dicionário exatamente no formato esperado pelo seu formatador bingo357
     bilhete_solicitado = [{
         "nome": f"🎯 BILHETE PERSONALIZADO: {estrategia}",
         "id": f"BINGO_{qtd_alvo}",
@@ -143,17 +170,17 @@ def executar():
         "odd": j.get("odd")
     } for j in jogos_selecionados}
 
-    # --- PASSO 4: ENVIO FORMATADO ---
+    # --- PASSO 4: ENVIO FORMATADO PELO MOTOR DO BINGO357 ---
     if bilhete_solicitado:
         texto_gerado = bingo357.formatar_para_telegram(bilhete_solicitado, cache_dados)
         
         if texto_gerado:
             titulo = f"🎫 *BILHETE PERSONALIZADO GERADO*\n"
             titulo += f"🔥 Configuração: *Bingo {qtd_alvo}* | Modo: *{estrategia}*\n"
-            titulo += f"⏱️ Janela de Horário: *{filtro_hora}* (Filtro: > {agora_br})\n\n"
+            titulo += f"⏱️ Janela de Horário: *{filtro_hora}* (Filtrado após às {agora_br})\n\n"
             
             texto_final = titulo + texto_gerado
-            # Envia o bilhete e recoloca o painel embaixo para caso queira gerar outro
+            # Envia o bilhete e cola o painel interativo de volta embaixo
             menus.enviar_menu_bingo(chat_id, texto_final)
     else:
         texto_vazio = f"ℹ️ Erro inesperado ao processar a estratégia *{estrategia}*."
@@ -161,4 +188,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-                                                                 
+        
