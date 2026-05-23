@@ -9,177 +9,6 @@
         "link_betano": "https://www.betano.bet.br/match-odds/Fagiano-Okayama-Cerezo-Osaka/83390220/"
     },
     {
-        "horario": "07:00",
-        "liga": "Japão - Liga J1",
-        "time_casa": "Kyoto",
-        "time_fora": "V-Varen Nagasaki",
-        "mercado": "+2.5 Gols (85%)",
-        "odd": "1.91",
-        "link_betano": "https://www.betano.bet.br/match-odds/Kyoto-Sanga-FC-V-Varen-Nagasaki/83390214/"
-    },
-    {
-        "horario": "07:00",
-        "liga": "Ucrânia - Premier League",
-        "time_casa": "Oleksandriya",
-        "time_fora": "Kryvbas",
-        "mercado": "+2.5 Gols (85%)",
-        "odd": "1.69",
-        "link_betano": "https://www.betano.bet.br/match-odds/FC-Oleksandriya-Kryvbas-Kryvyi-Rih/85345547/"
-    },
-    {
-        "horario": "07:00",
-        "liga": "Ucrânia - Premier League",
-        "time_casa": "Oleksandriya",
-        "time_fora": "Kryvbas",
-        "mercado": "1X (80%)",
-        "odd": "1.65",
-        "link_betano": "https://www.betano.bet.br/match-odds/FC-Oleksandriya-Kryvbas-Kryvyi-Rih/85345547/"
-    },
-    {
-        "horario": "07:00",
-        "liga": "Ucrânia - Premier League",
-        "time_casa": "Oleksandriya",
-        "time_fora": "Kryvbas",
-        "mercado": "Vitória Casa (85%)",
-        "odd": "2.95",
-        "link_betano": "https://www.betano.bet.br/match-odds/FC-Oleksandriya-Kryvbas-Kryvyi-Rih/85345547/"
-    },
-    {
-        "horario": "08:00",
-        "liga": "Finlândia - Veikkausliiga",
-        "time_casa": "Inter Turku",
-        "time_fora": "TPS Turku",
-        "mercado": "Vitória Casa (85%)",
-        "odd": "1.50",
-        "link_betano": "https://www.betano.bet.br/match-odds/FC-Inter-Turku-TPS/84012624/"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Finlândia - Veikkausliiga",
-        "time_casa": "Jaro",
-        "time_fora": "Mariehamn",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.33",
-        "link_betano": "https://www.betano.bet.br/match-odds/FF-Jaro-IFK-Mariehamn/84012622/"
-    },
-    {
-        "horario": "12:30",
-        "liga": "Polônia - Ekstraklasa",
-        "time_casa": "Gornik Zabrze",
-        "time_fora": "Radomiak Radom",
-        "mercado": "Vitória Casa (85%)",
-        "odd": "1.48",
-        "link_betano": "https://www.betano.bet.br/match-odds/Gornik-Zabrze-Radomiak-Radom/84332797/"
-    },
-    {
-        "horario": "12:30",
-        "liga": "Polônia - Ekstraklasa",
-        "time_casa": "Lech",
-        "time_fora": "Plock",
-        "mercado": "-4.5 Gols (100%)",
-        "odd": "1.34",
-        "link_betano": "https://www.betano.bet.br/match-odds/Lech-Poznan-Wisla-Plock/84332824/"
-    },
-    {
-        "horario": "12:30",
-        "liga": "Polônia - Ekstraklasa",
-        "time_casa": "Legia",
-        "time_fora": "Motor Lublin",
-        "mercado": "Ambas Marcam: Sim (100%)",
-        "odd": "1.67",
-        "link_betano": "https://www.betano.bet.br/match-odds/Legia-Warszawa-Motor-Lublin/84332798/"
-    },
-    {
-        "horario": "12:30",
-        "liga": "Polônia - Ekstraklasa",
-        "time_casa": "Pogon Szczecin",
-        "time_fora": "Katowice",
-        "mercado": "1X (80%)",
-        "odd": "1.67",
-        "link_betano": "https://www.betano.bet.br/match-odds/MKS-Pogon-Szczecin-Katowice/84332802/"
-    },
-    {
-        "horario": "12:30",
-        "liga": "Polônia - Ekstraklasa",
-        "time_casa": "Rakow",
-        "time_fora": "Arka",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.95",
-        "link_betano": "https://www.betano.bet.br/match-odds/Rakow-Czestochowa-Arka-Gdynia/84332799/"
-    },
-    {
-        "horario": "12:30",
-        "liga": "Polônia - Ekstraklasa",
-        "time_casa": "Rakow",
-        "time_fora": "Arka",
-        "mercado": "Vitória Casa (85%)",
-        "odd": "1.30",
-        "link_betano": "https://www.betano.bet.br/match-odds/Rakow-Czestochowa-Arka-Gdynia/84332799/"
-    },
-    {
-        "horario": "12:30",
-        "liga": "Polônia - Ekstraklasa",
-        "time_casa": "Termalica B-B.",
-        "time_fora": "Lechia",
-        "mercado": "+2.5 Gols (85%)",
-        "odd": "1.42",
-        "link_betano": "https://www.betano.bet.br/match-odds/Termalica-Bruk-Bet-Nieciecza-Lechia-Gdansk/84332803/"
-    },
-    {
-        "horario": "12:30",
-        "liga": "Polônia - Ekstraklasa",
-        "time_casa": "Termalica B-B.",
-        "time_fora": "Lechia",
-        "mercado": "Ambas Marcam: Sim (100%)",
-        "odd": "1.44",
-        "link_betano": "https://www.betano.bet.br/match-odds/Termalica-Bruk-Bet-Nieciecza-Lechia-Gdansk/84332803/"
-    },
-    {
-        "horario": "12:30",
-        "liga": "Polônia - Ekstraklasa",
-        "time_casa": "Termalica B-B.",
-        "time_fora": "Lechia",
-        "mercado": "1X (80%)",
-        "odd": "2.05",
-        "link_betano": "https://www.betano.bet.br/match-odds/Termalica-Bruk-Bet-Nieciecza-Lechia-Gdansk/84332803/"
-    },
-    {
-        "horario": "13:00",
-        "liga": "Serie A (Itália)",
-        "time_casa": "Bologna",
-        "time_fora": "Inter",
-        "mercado": "1X (80%)",
-        "odd": "1.80",
-        "link_betano": "https://www.betano.bet.br/match-odds/Bologna-FC-Inter-Milan/85935089/"
-    },
-    {
-        "horario": "13:10",
-        "liga": "Arábia Saudita - Divisão 1",
-        "time_casa": "Al Diriyah",
-        "time_fora": "Al-Ula",
-        "mercado": "+2.5 Gols (85%)",
-        "odd": "1.58",
-        "link_betano": "https://www.betano.bet.br/match-odds/Al-Draih-Al-Ula/85987545/"
-    },
-    {
-        "horario": "13:15",
-        "liga": "Bélgica - Pro League",
-        "time_casa": "Dender",
-        "time_fora": "Lommel SK",
-        "mercado": "+2.5 Gols (100%)",
-        "odd": "1.78",
-        "link_betano": "https://www.betano.bet.br/match-odds/FCV-Dender-EH-Lommel-SK/85779429/"
-    },
-    {
-        "horario": "13:15",
-        "liga": "Bélgica - Pro League",
-        "time_casa": "Dender",
-        "time_fora": "Lommel SK",
-        "mercado": "Ambas Marcam: Sim (100%)",
-        "odd": "1.62",
-        "link_betano": "https://www.betano.bet.br/match-odds/FCV-Dender-EH-Lommel-SK/85779429/"
-    },
-    {
         "horario": "15:45",
         "liga": "Bélgica - Pro League",
         "time_casa": "St. Liege",
@@ -203,7 +32,7 @@
         "time_casa": "St. Liege",
         "time_fora": "Charleroi",
         "mercado": "1X (90%)",
-        "odd": "1.36",
+        "odd": "1.30",
         "link_betano": "https://www.betano.bet.br/match-odds/Standard-Li-ge-Royal-Charleroi-SC/84012619/"
     },
     {
@@ -216,6 +45,15 @@
         "link_betano": "https://www.betano.bet.br/match-odds/St-Louis-City-SC-Austin-FC/81745296/"
     },
     {
+        "horario": "15:45",
+        "liga": "Serie A (Itália)",
+        "time_casa": "Lazio",
+        "time_fora": "Pisa",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.31",
+        "link_betano": "https://www.betano.bet.br/match-odds/SS-Lazio-AC-Pisa-1909/85934949/"
+    },
+    {
         "horario": "16:00",
         "liga": "LaLiga",
         "time_casa": "Espanyol",
@@ -223,15 +61,6 @@
         "mercado": "Ambas Marcam: Sim (100%)",
         "odd": "1.62",
         "link_betano": "https://www.betano.bet.br/match-odds/RCD-Espanyol-Real-Sociedad/85305493/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Brasileirão Série A",
-        "time_casa": "São Paulo",
-        "time_fora": "Botafogo",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.30",
-        "link_betano": "https://www.betano.bet.br/match-odds/Sao-Paulo-SP-Botafogo-RJ/85597728/"
     },
     {
         "horario": "17:00",
@@ -248,7 +77,7 @@
         "time_casa": "Minnesota",
         "time_fora": "Real Salt Lake",
         "mercado": "+2.5 Gols (85%)",
-        "odd": "1.65",
+        "odd": "1.67",
         "link_betano": "https://www.betano.bet.br/match-odds/Minnesota-United-FC-Real-Salt-Lake/81758472/"
     },
     {
@@ -275,7 +104,7 @@
         "time_casa": "Grêmio",
         "time_fora": "Santos",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.42",
+        "odd": "1.39",
         "link_betano": "https://www.betano.bet.br/match-odds/Gremio-RS-Santos-SP/85597730/"
     },
     {
@@ -284,7 +113,7 @@
         "time_casa": "Mirassol",
         "time_fora": "Fluminense",
         "mercado": "+2.5 Gols (70%)",
-        "odd": "2.20",
+        "odd": "2.32",
         "link_betano": "https://www.betano.bet.br/match-odds/Mirassol-SP-Fluminense-RJ/85597731/"
     },
     {
@@ -293,7 +122,7 @@
         "time_casa": "Mirassol",
         "time_fora": "Fluminense",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.91",
+        "odd": "1.95",
         "link_betano": "https://www.betano.bet.br/match-odds/Mirassol-SP-Fluminense-RJ/85597731/"
     },
     {
@@ -319,6 +148,15 @@
         "liga": "EUA - MLS",
         "time_casa": "Cincinnati",
         "time_fora": "Orlando City",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Cincinnati-Orlando-City-SC/81756462/"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - MLS",
+        "time_casa": "Cincinnati",
+        "time_fora": "Orlando City",
         "mercado": "Ambas Marcam: Sim (100%)",
         "odd": "1.30",
         "link_betano": "https://www.betano.bet.br/match-odds/FC-Cincinnati-Orlando-City-SC/81756462/"
@@ -338,7 +176,7 @@
         "time_casa": "Flamengo",
         "time_fora": "Palmeiras",
         "mercado": "Vitória Casa (85%)",
-        "odd": "1.79",
+        "odd": "1.76",
         "link_betano": "https://www.betano.bet.br/match-odds/Flamengo-RJ-Palmeiras-SP/85597732/"
     },
     {
@@ -358,5 +196,14 @@
         "mercado": "Ambas Marcam: Sim (80%)",
         "odd": "1.36",
         "link_betano": "https://www.betano.bet.br/match-odds/Sporting-Kansas-City-New-York-Red-Bulls/81758624/"
+    },
+    {
+        "horario": "23:30",
+        "liga": "EUA - MLS",
+        "time_casa": "Los Angeles Galaxy",
+        "time_fora": "Houston Dynamo",
+        "mercado": "1X (90%)",
+        "odd": "1.36",
+        "link_betano": "https://www.betano.bet.br/match-odds/Los-Angeles-Galaxy-Houston-Dynamo-FC/81763238/"
     }
 ]
