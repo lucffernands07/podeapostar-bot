@@ -36,12 +36,18 @@ jobs:
           xvfb-run python ranking/ranking.py
 
       - name: Commit e Push das atualizações
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "GitHub Action Bot"
           git config --global user.email "actions@github.com"
-          # ADICIONADO O RANKING_DIARIO NO SEU GIT ADD:
-          git add ranking/ranking_db.json ranking/pendentes.json ranking/ranking_diario.json || true
+          
+          # Garante a autenticação segura utilizando o token nativo do próprio GitHub Actions
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          
+          # ADICIONADO APENAS O bingos_do_dia.json JUNTO COM OS OUTROS QUE VOCÊ JÁ TINHA:
+          git add ranking/ranking_db.json ranking/pendentes.json ranking/ranking_diario.json ranking/bingos_do_dia.json || true
+          
           git commit -m "Ranking atualizado: $(date +'%d/%m/%Y %H:%M')" || echo "Sem mudanças"
-          git push
-
-        
+          git push origin main
+          
