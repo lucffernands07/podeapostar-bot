@@ -40,11 +40,16 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Adiciona ambas as pastas para garantir que o banco de dados do dia suba
+          # Adiciona as pastas para garantir que os arquivos do dia subam
           git add ranking/pendentes.json
           git add telegram/jogos_*.json
           
+          # O commit com condicional evita travar o pipeline se o JSON não mudar
           git commit -m "Auto: Atualizando banco de dados e ranking [skip ci]" || echo "Sem alterações para salvar"
-          git push
-
+          
+          # --- CORREÇÃO CIRÚRGICA DO ERRO DE LOCK REF ---
+          # Puxa o repositório atualizado (com os menus novos) e empilha o JSON no topo
+          git pull --rebase origin main
+          
+          git push origin main
           
