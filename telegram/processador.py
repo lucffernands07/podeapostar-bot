@@ -12,27 +12,49 @@ from telegram import menus
 
 def processar_comando_direto(tipo_bruto):
     """
-    Lê o clique bruto enviado pelo Worker e define as variáveis.
-    Aplica valores padrão de segurança para o que não foi clicado.
+    Lê a string unificada do novo Worker ("BINGO:3|HORA:3H|TIPO:ACERTOS")
+    e separa os 3 filtros reais para montar o bilhete exato.
     """
-    # Valores padrão iniciais estáveis
+    # Valores padrão iniciais caso algo falhe
     config = {"bingo": 5, "horario": "DIA", "bilhete": "ACERTOS", "aviso": ""}
     
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
-    # Intercepta cliques de BINGO
+    # --- NOVO BLOCO: SEPARA OS 3 FILTROS COMBINADOS ---
+    if "BINGO:" in tipo_limpo and "HORA:" in tipo_limpo:
+        try:
+            # Transforma a string em uma lista: ['BINGO:3', 'HORA:3H', 'TIPO:ACERTOS']
+            partes = tipo_limpo.split("|")
+            
+            for parte in partes:
+                if parte.startswith("BINGO:"):
+                    config["bingo"] = int(parte.split(":")[1])
+                elif parte.startswith("HORA:"):
+                    config["horario"] = parte.split(":")[1]
+                elif parte.startswith("TIPO:"):
+                    config["bilhete"] = parte.split(":")[1]
+            
+            # Monta o aviso bonito que vai aparecer no Telegram enquanto o usuário espera
+            txt_janela = f"{config['horario']} Horas" if config['horario'] != "DIA" else "Todo o Dia"
+            config["aviso"] = (
+                f"🎲 Bingo: *{config['bingo']}*\n"
+                f"⏱️ Janela: *{txt_janela}*\n"
+                f"📊 Modo: *{config['bilhete']}*"
+            )
+            return config
+        except Exception as e:
+            print(f"⚠️ Erro ao processar string composta ({e}), usando fallbacks...")
+
+    # --- COMPATIBILIDADE COM CLIQUES ANTIGOS OU DIRETOS ---
     if "cb_bingo_" in tipo_limpo:
         config["bingo"] = int(tipo_limpo.split("_")[-1])
         config["aviso"] = f"🎲 Você escolheu: *Bingo {config['bingo']}*"
-    # Intercepta cliques de HORÁRIO
     elif "cb_hora_" in tipo_limpo:
         config["horario"] = tipo_limpo.split("_")[-1]
         config["aviso"] = f"⏱️ Você escolheu a janela: *{config['horario']}*"
-    # Intercepta cliques de ESTRATÉGIA
     elif "cb_tipo_" in tipo_limpo:
         config["bilhete"] = tipo_limpo.split("_")[-1]
         config["aviso"] = f"📊 Você escolheu a estratégia: *{config['bilhete']}*"
-    # Fallback para o robô ou cliques legados
     else:
         if "3" in tipo_limpo: config["bingo"] = 3
         if "7" in tipo_limpo or "PRO" in tipo_limpo: config["bingo"] = 7
@@ -40,6 +62,7 @@ def processar_comando_direto(tipo_bruto):
         config["aviso"] = f"🚀 Processando comando recebido: *{tipo_limpo}*"
 
     return config
+
 
 def executar():
     token = os.getenv('TELEGRAM_TOKEN')
