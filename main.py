@@ -179,13 +179,28 @@ def main():
     total_mercados = 0 
 
     try:
-        # LOOP DE COMPETIÇÕES
+        # --- LOOP DE COMPETIÇÕES PROTEGIDO ---
         for nome_comp, url in COMPETICOES.items():
             if total_mercados >= 120: break 
             print(f"\n--- Analisando: {nome_comp} ---")
-            driver.get(url)
-            time.sleep(4)
-            elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+            
+            try:
+                driver.get(url)
+                time.sleep(4)
+                elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+            except Exception as e:
+                # SE A SESSÃO MORREU, REINICIA O DRIVER NA HORA E CONTINUA O LOOP
+                if "invalid session id" in str(e).lower() or "session" in str(e).lower():
+                    print("⚠️ Sessão do Chrome caiu! Reiniciando o navegador para continuar...")
+                    try: driver.quit()
+                    except: pass
+                    driver = configurar_driver() # Abre um Chrome novinho em folha
+                    driver.get(url)
+                    time.sleep(4)
+                    elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+                else:
+                    print(f"⚠️ Erro ao carregar liga {nome_comp}: {e}")
+                    continue
             
             for el in elementos:
                 try:
@@ -222,8 +237,6 @@ def main():
                         # -----------------------------------------------------------------
                         # 3. Chance Dupla (Injetando a Lógica de Porcentagem com Segurança)
                         # -----------------------------------------------------------------
-                        # Verificamos a consistência de vitórias para estipular a % do painel
-                        # Se vitórias recentes >= 4 -> 100%, senão segue a escada de segurança
                         if s.get("casa_vitorias_recente", 0) >= 4 or s.get("fora_vitorias_recente", 0) >= 4:
                             s["chance_dupla_pct"] = "100%"
                         elif s.get("casa_vitorias_recente", 0) == 3 or s.get("fora_vitorias_recente", 0) == 3:
@@ -265,7 +278,7 @@ def main():
                                             "link_betano": s.get("link_betano")
                                         })
                                         
-                                        # NOVO: Salva para o Ranking com links                                    # NOVO: Salva para o Ranking com link direto e porcentagem
+                                        # NOVO: Salva para o Ranking com link direto e porcentagem
                                         jogos_para_pendentes.append({
                                             "time_casa": t1,
                                             "time_fora": t2,
@@ -277,6 +290,7 @@ def main():
                                         total_mercados += 1
                                 except: continue
                 except: continue
+
 
         # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
