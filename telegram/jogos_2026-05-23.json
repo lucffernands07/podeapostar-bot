@@ -9,51 +9,6 @@
         "link_betano": "https://www.betano.bet.br/match-odds/Fagiano-Okayama-Cerezo-Osaka/83390220/"
     },
     {
-        "horario": "15:45",
-        "liga": "Bélgica - Pro League",
-        "time_casa": "St. Liege",
-        "time_fora": "Charleroi",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.32",
-        "link_betano": "https://www.betano.bet.br/match-odds/Standard-Li-ge-Royal-Charleroi-SC/84012619/"
-    },
-    {
-        "horario": "15:45",
-        "liga": "Bélgica - Pro League",
-        "time_casa": "St. Liege",
-        "time_fora": "Charleroi",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.75",
-        "link_betano": "https://www.betano.bet.br/match-odds/Standard-Li-ge-Royal-Charleroi-SC/84012619/"
-    },
-    {
-        "horario": "15:45",
-        "liga": "Bélgica - Pro League",
-        "time_casa": "St. Liege",
-        "time_fora": "Charleroi",
-        "mercado": "1X (90%)",
-        "odd": "1.30",
-        "link_betano": "https://www.betano.bet.br/match-odds/Standard-Li-ge-Royal-Charleroi-SC/84012619/"
-    },
-    {
-        "horario": "15:45",
-        "liga": "EUA - MLS",
-        "time_casa": "St. Louis City",
-        "time_fora": "Austin FC",
-        "mercado": "Vitória Casa (85%)",
-        "odd": "1.62",
-        "link_betano": "https://www.betano.bet.br/match-odds/St-Louis-City-SC-Austin-FC/81745296/"
-    },
-    {
-        "horario": "15:45",
-        "liga": "Serie A (Itália)",
-        "time_casa": "Lazio",
-        "time_fora": "Pisa",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.31",
-        "link_betano": "https://www.betano.bet.br/match-odds/SS-Lazio-AC-Pisa-1909/85934949/"
-    },
-    {
         "horario": "16:00",
         "liga": "LaLiga",
         "time_casa": "Espanyol",
@@ -113,7 +68,7 @@
         "time_casa": "Mirassol",
         "time_fora": "Fluminense",
         "mercado": "+2.5 Gols (70%)",
-        "odd": "2.35",
+        "odd": "2.32",
         "link_betano": "https://www.betano.bet.br/match-odds/Mirassol-SP-Fluminense-RJ/85597731/"
     },
     {
@@ -148,15 +103,6 @@
         "liga": "EUA - MLS",
         "time_casa": "Cincinnati",
         "time_fora": "Orlando City",
-        "mercado": "+2.5 Gols (70%)",
-        "odd": "1.30",
-        "link_betano": "https://www.betano.bet.br/match-odds/FC-Cincinnati-Orlando-City-SC/81756462/"
-    },
-    {
-        "horario": "20:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Cincinnati",
-        "time_fora": "Orlando City",
         "mercado": "Ambas Marcam: Sim (100%)",
         "odd": "1.30",
         "link_betano": "https://www.betano.bet.br/match-odds/FC-Cincinnati-Orlando-City-SC/81756462/"
@@ -185,7 +131,7 @@
         "time_casa": "Chicago Fire",
         "time_fora": "Toronto FC",
         "mercado": "+2.5 Gols (85%)",
-        "odd": "1.50",
+        "odd": "1.52",
         "link_betano": "https://www.betano.bet.br/match-odds/Chicago-Fire-FC-Toronto-FC/81758716/"
     },
     {
