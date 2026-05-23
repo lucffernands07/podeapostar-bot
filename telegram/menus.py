@@ -16,23 +16,23 @@ def extrair_markup_filtros(escolhas=None):
             # --- SEÇÃO 1: BINGOS ---
             [{"text": "✅ Escolha um bingo:", "callback_data": "ignore"}],
             [
-                {"text": "🎯 Bingo 3", "callback_data": "cb_bingo_3"},
-                {"text": "🎯 Bingo 5", "callback_data": "cb_bingo_5"},
-                {"text": "🎯 Bingo 7", "callback_data": "cb_bingo_7"}
+                {"text": "Bingo 3", "callback_data": "cb_bingo_3"},
+                {"text": "Bingo 5", "callback_data": "cb_bingo_5"},
+                {"text": "Bingo 7", "callback_data": "cb_bingo_7"}
             ],
             # --- SEÇÃO 2: HORÁRIOS ---
             [{"text": "✅ Escolha uma janela:", "callback_data": "ignore"}],
             [
-                {"text": "⏳ Janela 3H", "callback_data": "cb_hora_3H"},
-                {"text": "⏳ Janela 5H", "callback_data": "cb_hora_5H"},
-                {"text": "📅 Todo o Dia", "callback_data": "cb_hora_DIA"}
+                {"text": "Janela 3H", "callback_data": "cb_hora_3H"},
+                {"text": "Janela 5H", "callback_data": "cb_hora_5H"},
+                {"text": "Do Dia", "callback_data": "cb_hora_DIA"}
             ],
             # --- SEÇÃO 3: ESTRATÉGIA ---
             [{"text": "✅ Escolha um modo:", "callback_data": "ignore"}],
             [
-                {"text": "💰 Maiores Odds", "callback_data": "cb_tipo_ODDS"},
-                {"text": "📈 Mais Acertos", "callback_data": "cb_tipo_ACERTOS"},
-                {"text": "🔥 Modo Ambas", "callback_data": "cb_tipo_AMBAS"}
+                {"text": "Maiores Odds", "callback_data": "cb_tipo_ODDS"},
+                {"text": "Mais acertos", "callback_data": "cb_tipo_ACERTOS"},
+                {"text": "Equilibrado", "callback_data": "cb_tipo_AMBAS"}
             ],
             # --- BOTÃO DE DISPARO DEFINITIVO ---
             [
