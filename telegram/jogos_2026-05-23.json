@@ -9,48 +9,12 @@
         "link_betano": "https://www.betano.bet.br/match-odds/Fagiano-Okayama-Cerezo-Osaka/83390220/"
     },
     {
-        "horario": "16:00",
-        "liga": "LaLiga",
-        "time_casa": "Espanyol",
-        "time_fora": "Real Sociedad",
-        "mercado": "Ambas Marcam: Sim (100%)",
-        "odd": "1.62",
-        "link_betano": "https://www.betano.bet.br/match-odds/RCD-Espanyol-Real-Sociedad/85305493/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Brasileirão Série A",
-        "time_casa": "Vitória",
-        "time_fora": "Internacional",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.40",
-        "link_betano": "https://www.betano.bet.br/match-odds/Vitoria-BA-Internacional-RS/85597729/"
-    },
-    {
-        "horario": "17:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Minnesota",
-        "time_fora": "Real Salt Lake",
-        "mercado": "+2.5 Gols (85%)",
-        "odd": "1.67",
-        "link_betano": "https://www.betano.bet.br/match-odds/Minnesota-United-FC-Real-Salt-Lake/81758472/"
-    },
-    {
-        "horario": "17:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Minnesota",
-        "time_fora": "Real Salt Lake",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.53",
-        "link_betano": "https://www.betano.bet.br/match-odds/Minnesota-United-FC-Real-Salt-Lake/81758472/"
-    },
-    {
         "horario": "18:30",
         "liga": "Brasileirão Série B",
         "time_casa": "Fortaleza",
         "time_fora": "Londrina",
         "mercado": "Ambas Marcam: Sim (100%)",
-        "odd": "2.20",
+        "odd": "2.10",
         "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Londrina-PR/85958409/"
     },
     {
@@ -113,7 +77,7 @@
         "time_casa": "DC United",
         "time_fora": "CF Montreal",
         "mercado": "1X (80%)",
-        "odd": "1.33",
+        "odd": "1.36",
         "link_betano": "https://www.betano.bet.br/match-odds/D-C-United-CF-Montreal/81756464/"
     },
     {
@@ -131,7 +95,7 @@
         "time_casa": "Chicago Fire",
         "time_fora": "Toronto FC",
         "mercado": "+2.5 Gols (85%)",
-        "odd": "1.52",
+        "odd": "1.50",
         "link_betano": "https://www.betano.bet.br/match-odds/Chicago-Fire-FC-Toronto-FC/81758716/"
     },
     {
