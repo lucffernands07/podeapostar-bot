@@ -34,12 +34,19 @@ def processar_comando_direto(tipo_bruto):
                 elif parte.startswith("TIPO:"):
                     config["bilhete"] = parte.split(":")[1]
             
-            # Monta o aviso bonito que vai aparecer no Telegram enquanto o usuário espera
-            txt_janela = f"{config['horario']} Horas" if config['horario'] != "DIA" else "Todo o Dia"
+            # Ajuste de nomes visuais para o aviso de carregamento no Telegram
+            txt_janela = f"{config['horario']}" if config['horario'] != "DIA" else "Do Dia"
+            
+            txt_modo = "Mais acertos"
+            if config['bilhete'] == "ODDS":
+                txt_modo = "Maiores Odds"
+            elif config['bilhete'] == "AMBAS":
+                txt_modo = "Equilibrado"
+
             config["aviso"] = (
                 f"🎲 Bingo: *{config['bingo']}*\n"
                 f"⏱️ Janela: *{txt_janela}*\n"
-                f"📊 Modo: *{config['bilhete']}*"
+                f"📊 Modo: *{txt_modo}*"
             )
             return config
         except Exception as e:
@@ -51,10 +58,14 @@ def processar_comando_direto(tipo_bruto):
         config["aviso"] = f"🎲 Você escolheu: *Bingo {config['bingo']}*"
     elif "cb_hora_" in tipo_limpo:
         config["horario"] = tipo_limpo.split("_")[-1]
-        config["aviso"] = f"⏱️ Você escolheu a janela: *{config['horario']}*"
+        txt_h = config["horario"] if config["horario"] != "DIA" else "Do Dia"
+        config["aviso"] = f"⏱️ Você escolheu a janela: *{txt_h}*"
     elif "cb_tipo_" in tipo_limpo:
         config["bilhete"] = tipo_limpo.split("_")[-1]
-        config["aviso"] = f"📊 Você escolheu a estratégia: *{config['bilhete']}*"
+        txt_m = "Mais acertos"
+        if config["bilhete"] == "ODDS": txt_m = "Maiores Odds"
+        elif config["bilhete"] == "AMBAS": txt_m = "Equilibrado"
+        config["aviso"] = f"📊 Você escolheu a estratégia: *{txt_m}*"
     else:
         if "3" in tipo_limpo: config["bingo"] = 3
         if "7" in tipo_limpo or "PRO" in tipo_limpo: config["bingo"] = 7
@@ -64,7 +75,7 @@ def processar_comando_direto(tipo_bruto):
     return config
 
 
-def executar():
+def ejecutar():
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
     tipo_bruto = os.getenv('TIPO_BINGO', '')
@@ -188,11 +199,20 @@ def executar():
     if bilhete_solicitado:
         texto_gerado = bingo357.formatar_para_telegram(bilhete_solicitado, cache_dados)
         if texto_gerado:
+            # --- CONVERSÃO PARA OS NOMES VISUAIS EXATOS DO MENUS.PY ---
+            nome_hora_visual = "Do Dia" if filtro_hora == "DIA" else filtro_hora
+            
+            nome_modo_visual = "Mais acertos"
+            if estrategia == "ODDS":
+                nome_modo_visual = "Maiores Odds"
+            elif estrategia == "AMBAS":
+                nome_modo_visual = "Equilibrado"
+
             titulo = f"🎫 *SEU BILHETE FICOU PRONTO!*\n"
-            titulo += f"⚙️ Filtros aplicados: *Bingo {qtd_alvo}* | *{filtro_hora}* | Modo *{estrategia}*\n"
+            titulo += f"⚙️ Filtros aplicados: *Bingo {qtd_alvo}* | *{nome_hora_visual}* | Modo *{nome_modo_visual}*\n"
             titulo += f"📊 Processado às {agora_br}\n\n"
             menus.enviar_menu_bingo(chat_id, titulo + texto_gerado)
 
 if __name__ == "__main__":
     executar()
-    
+            
