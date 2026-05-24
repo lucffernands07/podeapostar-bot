@@ -2,13 +2,16 @@ import json
 import os
 import requests
 
+# Importa o módulo de menus para pegar o painel padronizado
+from telegram import menus
+
 # --- AGORA APONTAMOS PARA O ARQUIVO PRÉ-MONTADO ---
 PATH_RANKING_DIARIO = "ranking/ranking_diario.json"
 PATH_DB = "ranking/ranking_db.json" # Mantido apenas para pegar a data de atualização
 
 def get_barra_progresso(percentual):
     blocos = int(percentual / 20)
-    return ("🟩" * blocos) + ("⬜" * (5 - blocos))
+    return ("🟩" * blocos) + ("⬜" * (5 - blocks))
 
 def gerar_tabela_ranking():
     # 1. Verifica se o ranking diário existe
@@ -57,16 +60,16 @@ def enviar_ranking_telegram(chat_id):
     
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     
+    # Gera o painel de botões no padrão do Luciano (5, DIA, ACERTOS) para acompanhar o ranking
+    escolhas_padrao = {"bingo": "5", "horario": "DIA", "bilhete": "ACERTOS"}
+    markup_atualizado = menus.extrair_markup_filtros(escolhas_padrao)
+    
     payload = {
         "chat_id": chat_id,
         "text": texto,
         "parse_mode": "Markdown",
-        "reply_markup": {
-            "inline_keyboard": [
-                [{"text": "🔥 Bingo 3", "callback_data": "🔥 Bingo 3"}, {"text": "🔥 Bingo 5", "callback_data": "🔥 Bingo 5"}],
-                [{"text": "💎 Bingo Pro", "callback_data": "💎 Bingo Pro"}, {"text": "📊 Ranking", "callback_data": "📊 Ranking"}]
-            ]
-        }
+        "disable_web_page_preview": True,
+        "reply_markup": markup_atualizado  # <--- AJUSTADO AQUI!
     }
     
     response = requests.post(url, json=payload)
