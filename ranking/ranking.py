@@ -94,44 +94,31 @@ def conferir_bingos_do_dia(resultados_jogos, stats_bingos):
 
 # --- FUNÇÃO ATUALIZADA: GERA O ARQUIVO EM DUAS CATEGORIAS SEPARADAS ---
 def gerar_ranking_diario(stats_mercados, stats_bingos):
-    log("RANKING", "Gerando novo ranking_diario.json categorizado por chaves...")
+    log("RANKING", "Gerando novo ranking_diario.json plano ordenado por assertividade...")
     
-    ranking_final = {
-        "mercados": [],
-        "bingos": []
-    }
+    ranking_final = []
     
-    # 1. Monta e ordena a lista de Mercados Simples
+    # 1. Monta e ordena a lista de Mercados Simples diretamente na lista principal
     for mercado, dados in stats_mercados.items():
         g = dados.get('green', 0)
         r = dados.get('red', 0)
         total = g + r
         if total > 0:
-            ranking_final["mercados"].append({
+            ranking_final.append({
                 "mercado": mercado,
                 "green": g,
                 "red": r,
                 "assertividade": g / total
             })
-    ranking_final["mercados"].sort(key=lambda x: (x['assertividade'], x['green']), reverse=True)
+            
+    # Ordena pelo maior aproveitamento (e usa o número de greens como critério de desempate)
+    ranking_final.sort(key=lambda x: (x['assertividade'], x['green']), reverse=True)
     
-    # 2. Monta e ordena os Bingos (Fica de forma estática por último)
-    for bingo, dados in stats_bingos.items():
-        g = dados.get('green', 0)
-        r = dados.get('red', 0)
-        total = g + r
-        ranking_final["bingos"].append({
-            "mercado": bingo,
-            "green": g,
-            "red": r,
-            "assertividade": (g / total) if total > 0 else 0.0
-        })
-    # Mantém os bingos ordenados de forma fixa pelo tipo (Bingo 3, Bingo 5, Premium)
-    ranking_final["bingos"].sort(key=lambda x: x['mercado'])
-    
+    # Grava como uma lista pura, exatamente como o seu sender.py espera ler
     with open(PATH_RANKING_DIARIO, 'w', encoding='utf-8') as f:
         json.dump(ranking_final, f, indent=4, ensure_ascii=False)
-    log("RANKING", "Arquivo ranking_diario.json gravado com sucesso em dois blocos.")
+        
+    log("RANKING", "Arquivo ranking_diario.json gravado com sucesso em formato de lista plano.")
 
 def main():
     log("INÍCIO", "Iniciando Processamento de Ranking")
