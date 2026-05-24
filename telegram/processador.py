@@ -90,9 +90,9 @@ def executar():
     msg_aguarde = f"{config['aviso']}\n\n⏳ *Buscando os melhores jogos no banco de dados, aguarde um instante...*"
     menus.enviar_menu_bingo(chat_id, msg_aguarde)
 
-    # 2. Inicia a busca cronológica inteligente no JSON de hoje
-    hoje_ref = datetime.now() - timedelta(hours=3)
-    data_hoje = hoje_ref.strftime("%Y-%m-%d")
+    # 2. Inicia a busca cronológica inteligente no JSON de hoje (Corrigido fuso UTC)
+    agora_br = datetime.now() - timedelta(hours=3)
+    data_hoje = agora_br.strftime("%Y-%m-%d")
     caminho_json = f"telegram/jogos_{data_hoje}.json"
     caminho_ranking = "ranking/ranking_db.json"
 
@@ -103,26 +103,28 @@ def executar():
     with open(caminho_json, "r", encoding="utf-8") as f:
         jogos_banco = json.load(f)
 
-    agora = datetime.now()
-    agora_br = hoje_ref.strftime("%H:%M") 
+    agora_texto = agora_br.strftime("%H:%M") 
     
     jogos_filtrados = []
     limite_tempo = None
-    if filtro_hora == "3H": limite_tempo = agora + timedelta(hours=3)
-    if filtro_hora == "5H": limite_tempo = agora + timedelta(hours=5)
+    if filtro_hora == "3H": limite_tempo = agora_br + timedelta(hours=3)
+    if filtro_hora == "5H": limite_tempo = agora_br + timedelta(hours=5)
 
     for j in jogos_banco:
         try:
             h_partes = j['horario'].split(":")
-            hora_jogo = agora.replace(hour=int(h_partes[0]), minute=int(h_partes[1]), second=0, microsecond=0)
+            # Monta o datetime do jogo usando a referência de Brasília
+            hora_jogo = agora_br.replace(hour=int(h_partes[0]), minute=int(h_partes[1]), second=0, microsecond=0)
             
-            # Ajuste de fuso da madrugada (ex: 00:55 roda depois das 23h)
-            if int(h_partes[0]) < 4:
+            # Ajuste de fuso da madrugada (ex: jogo à 00:55 roda depois das 23h)
+            if int(h_partes[0]) < 4 and agora_br.hour > 20:
                 hora_jogo += timedelta(days=1)
             
-            if hora_jogo < agora - timedelta(minutes=15):
+            # Remove jogos que já começaram há mais de 15 minutos (baseado em Brasília)
+            if hora_jogo < agora_br - timedelta(minutes=15):
                 continue
                 
+            # Filtra pela janela limite (3H ou 5H)
             if limite_tempo and hora_jogo > limite_tempo:
                 continue
                 
@@ -132,7 +134,7 @@ def executar():
             if filtro_hora == "DIA": jogos_filtrados.append(j)
 
     if not jogos_filtrados:
-        texto_erro = f"⚠️ Não há jogos disponíveis para os filtros selecionados agora ({agora_br})."
+        texto_erro = f"⚠️ Não há jogos disponíveis para os filtros selecionados agora ({agora_texto})."
         menus.enviar_menu_bingo(chat_id, texto_erro)
         return
 
@@ -210,9 +212,9 @@ def executar():
 
             titulo = f"🎫 *SEU BILHETE FICOU PRONTO!*\n"
             titulo += f"⚙️ Filtros aplicados: *Bingo {qtd_alvo}* | *{nome_hora_visual}* | Modo *{nome_modo_visual}*\n"
-            titulo += f"📊 Processado às {agora_br}\n\n"
+            titulo += f"📊 Processado às {agora_texto}\n\n"
             menus.enviar_menu_bingo(chat_id, titulo + texto_gerado)
 
 if __name__ == "__main__":
     executar()
-        
+            
