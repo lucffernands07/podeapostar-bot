@@ -9,11 +9,15 @@ PASTA_TELEGRAM = "telegram"
 
 def extrair_markup_filtros(escolhas=None):
     """
-    Retorna o menu estático com os novos cabeçalhos solicitados pelo Luciano
-    e o botão definitivo para disparo unificado.
+    Retorna o menu estático com os novos cabeçalhos solicitados pelo Luciano,
+    o botão de Ranking no topo e o botão definitivo para disparo unificado.
     """
     return {
         "inline_keyboard": [
+            # --- NOVO BOTÃO NO TOPO ---
+            [
+                {"text": "📊 RANKING DE MERCADOS ✅⛔", "callback_data": "cb_ver_ranking"}
+            ],
             # --- SEÇÃO 1: BINGOS ---
             [{"text": "✅ Escolha um bingo:", "callback_data": "ignore"}],
             [
@@ -99,3 +103,4 @@ def atualizar_menu_inline(chat_id, message_id, texto, escolhas_atuais):
         requests.post(url, json=payload)
     except Exception as e:
         print(f"❌ Erro ao atualizar os botões dinâmicos: {e}")
+        
