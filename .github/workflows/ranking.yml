@@ -45,9 +45,13 @@ jobs:
           # Garante a autenticação segura utilizando o token nativo do próprio GitHub Actions
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           
-          # ADICIONADO APENAS O bingos_do_dia.json JUNTO COM OS OUTROS QUE VOCÊ JÁ TINHA:
-          git add ranking/ranking_db.json ranking/pendentes.json ranking/ranking_diario.json ranking/bingos_do_dia.json || true
+          # Adiciona apenas os arquivos que realmente importam e existem
+          [ -f ranking/ranking_db.json ] && git add ranking/ranking_db.json
+          [ -f ranking/pendentes.json ] && git add ranking/pendentes.json
+          [ -f ranking/ranking_diario.json ] && git add ranking/ranking_diario.json
           
-          git commit -m "Ranking atualizado: $(date +'%d/%m/%Y %H:%M')" || echo "Sem mudanças"
+          # Só faz o commit se houver alguma modificação real nos arquivos adicionados
+          git diff-index --quiet HEAD || git commit -m "Ranking atualizado: $(date +'%d/%m/%Y %H:%M')"
+          
           git push origin main
           
