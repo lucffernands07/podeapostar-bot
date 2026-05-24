@@ -4,8 +4,6 @@ import os
 
 # --- NOVOS CAMINHOS PADRONIZADOS ---
 PATH_RANKING_DIARIO = 'ranking/ranking_diario.json'
-# Caminho para salvar os bingos selecionados hoje para conferir amanhã
-PATH_BINGOS_DO_DIA = 'ranking/bingos_do_dia.json'
 
 def extrair_porcentagem(texto_mercado):
     try:
@@ -121,28 +119,6 @@ def montar_bilhetes_estrategicos(dados_entrada):
             "jogos": lista_premium
         })
 
-    # --- NOVO BLOCK: SALVAMENTO PARA CONFERÊNCIA AUTOMÁTICA DE RANKING ---
-    try:
-        dados_salvamento = {}
-        for b in bilhetes:
-            # Padroniza as chaves para baterem com o arquivo json final
-            chave_nome = "BINGO 3" if "BINGO3" in b["id"] else "BINGO 5" if "BINGO5" in b["id"] else "BINGO PREMIUM"
-            dados_salvamento[chave_nome] = []
-            for j in b["jogos"]:
-                dados_salvamento[chave_nome].append({
-                    "time_casa": j.get("time_casa"),
-                    "time_fora": j.get("time_fora"),
-                    "mercado": j.get("mercado")
-                })
-        
-        # Garante que a pasta 'ranking' exista
-        os.makedirs(os.path.dirname(PATH_BINGOS_DO_DIA), exist_ok=True)
-        with open(PATH_BINGOS_DO_DIA, 'w', encoding='utf-8') as f:
-            json.dump(dados_salvamento, f, ensure_ascii=False, indent=4)
-        print("📥 Histórico dos Bingos salvo com sucesso para conferência futura!")
-    except Exception as e:
-        print(f"⚠️ Falha ao salvar histórico para o ranking dos bingos: {e}")
-
     return bilhetes
 
 def formatar_para_telegram(bilhetes, cache_dados):
@@ -197,4 +173,4 @@ def formatar_para_telegram(bilhetes, cache_dados):
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
-                       
+        
