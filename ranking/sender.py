@@ -11,7 +11,7 @@ PATH_DB = "ranking/ranking_db.json" # Mantido apenas para pegar a data de atuali
 
 def get_barra_progresso(percentual):
     blocos = int(percentual / 20)
-    return ("🟩" * blocos) + ("⬜" * (5 - blocks))
+    return ("🟩" * blocos) + ("⬜" * (5 - blocos))
 
 def gerar_tabela_ranking():
     # 1. Verifica se o ranking diário existe
