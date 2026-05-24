@@ -86,9 +86,18 @@ def executar():
     filtro_hora = config["horario"]
     estrategia = config["bilhete"]
 
-    # 1. Envia o feedback instantâneo de "Aguarde" para o usuário no Telegram
+    # 1. ENVIA O AVISO DE "AGUARDE" TOTALMENTE LIMPO (SEM BOTÕES)
     msg_aguarde = f"{config['aviso']}\n\n⏳ *Buscando os melhores jogos no banco de dados, aguarde um instante...*"
-    menus.enviar_menu_bingo(chat_id, msg_aguarde)
+    url_msg = f"https://api.telegram.org/bot{token}/sendMessage"
+    try:
+        requests.post(url_msg, json={
+            "chat_id": chat_id,
+            "text": msg_aguarde,
+            "parse_mode": "Markdown",
+            "disable_web_page_preview": True
+        })
+    except Exception as e:
+        print(f"⚠️ Erro ao enviar aviso de aguarde silencioso: {e}")
 
     # 2. Inicia a busca cronológica inteligente no JSON de hoje (Corrigido fuso UTC)
     agora_br = datetime.now() - timedelta(hours=3)
@@ -197,7 +206,7 @@ def executar():
         "odd": j.get("odd")
     } for j in jogos_selecionados}
 
-    # Entrega o bilhete final formatado
+    # Entrega o bilhete final formatado com o painel de botões acoplado
     if bilhete_solicitado:
         texto_gerado = bingo357.formatar_para_telegram(bilhete_solicitado, cache_dados)
         if texto_gerado:
@@ -217,4 +226,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-            
+        
