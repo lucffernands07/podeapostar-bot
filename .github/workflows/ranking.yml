@@ -6,7 +6,7 @@ on:
       - 'ranking/ranking.py'
   schedule:
     # 03:05 UTC (00:05 AM Horário de Brasília)
-    - cron: '5 3 * * *'
+    - cron: '5 1 * * *'
   workflow_dispatch: # Permite rodar manual quando você quiser testar os logs
 
 jobs:
