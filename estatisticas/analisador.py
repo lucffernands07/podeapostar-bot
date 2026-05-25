@@ -2,8 +2,7 @@ import os
 import sys
 import time
 import json
-import argparse
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -12,19 +11,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Adiciona o diretório pai ao path para conseguir importar o ligas.py caso o script rode de dentro da pasta
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-try:
-    from ligas import COMPETICOES
-except ImportError:
-    print("⚠️ Não foi possível importar 'COMPETICOES' do arquivo ligas.py. Verifique se ele está na raiz do projeto.")
-    sys.exit(1)
-
 # --- CONFIGURAÇÕES DE CAMINHO ---
 PATH_DIR = "estatisticas"
-PATH_TEMP_ODDS = os.path.join(PATH_DIR, "odds_temporarias.json")
 PATH_PADROES_DB = os.path.join(PATH_DIR, "padroes_db.json")
+DIR_TELEGRAM = "telegram"
 
 def log(etapa, mensagem):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] 📊 {etapa}: {mensagem}")
@@ -65,95 +55,49 @@ def checar_mercados_ocorridos(g_c, g_f):
         "-4.5": total <= 4
     }
 
-# ==========================================
-# 🕒 TURNO 08:00 AM - CAPTURAR ODDS DE HOJE
-# ==========================================
-def turno_capturar_odds():
-    log("INÍCIO", "Iniciando Turno das 08:00 - Captura de Odds Iniciais (ligas.py)")
+def processar_estatisticas():
+    # Calcula a data de ontem para buscar o arquivo correto (ex: se hoje é 26, busca o de dia 25)
+    data_ontem_str = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+    nome_arquivo_ontem = f"jogos_{data_ontem_str}.json"
+    caminho_json_ontem = os.path.join(DIR_TELEGRAM, nome_arquivo_ontem)
+    
+    log("INÍCIO", f"Buscando arquivo de ontem: {caminho_json_ontem}")
+    
+    if not os.path.exists(caminho_json_ontem):
+        log("ERRO", f"Arquivo {caminho_json_ontem} não foi encontrado para processamento.")
+        return
+
+    with open(caminho_json_ontem, 'r', encoding='utf-8') as f:
+        dados_jogos = json.load(f)
+
+    if not dados_jogos:
+        log("AVISO", f"O arquivo {nome_arquivo_ontem} está vazio.")
+        return
+
+    # --- AGRUPAR POR JOGO UNICÓ ---
+    jogos_unicos = {}
+    for p in dados_jogos:
+        url = p.get("link_betano") or p.get("link")
+        if not url:
+            continue
+        chave = f"{p['time_casa'].strip().lower()}x{p['time_fora'].strip().lower()}"
+        if chave not in jogos_unicos:
+            jogos_unicos[chave] = {
+                "time_casa": p["time_casa"],
+                "time_fora": p["time_fora"],
+                "url": url
+            }
+
+    # Iniciar ou carregar Banco Histórico de Padrões
     os.makedirs(PATH_DIR, exist_ok=True)
-    
-    driver = configurar_driver()
-    hoje_str = date.today().strftime("%Y-%m-%d")
-    
-    jogos_mapeados = {}
-
-    try:
-        for nome_liga, url in COMPETICOES.items():
-            log("SCRAPER", f"Acessando liga: {nome_liga}")
-            try:
-                driver.get(url)
-                time.sleep(3) # Aguarda renderização básica dos cards
-                
-                # Coleta as linhas dos jogos agendados/em andamento
-                linhas_jogos = driver.find_elements(By.CSS_SELECTOR, ".sportName .event__match")
-                
-                for linha in linhas_jogos:
-                    try:
-                        id_jogo = linha.get_attribute("id").split("_")[-1]
-                        link_h2h = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
-                        
-                        time_casa = linha.find_element(By.CSS_SELECTOR, ".event__participant--home").text.strip()
-                        time_fora = linha.find_element(By.CSS_SELECTOR, ".event__participant--away").text.strip()
-                        
-                        # Captura as 3 colunas de odds fixas expostas na listagem principal (.event__odd)
-                        odds_elements = linha.find_elements(By.CSS_SELECTOR, ".event__odd")
-                        if len(odds_elements) >= 3:
-                            odd_casa = odds_elements[0].text.strip()
-                            odd_fora = odds_elements[2].text.strip()
-                            
-                            if odd_casa and odd_fora and odd_casa != "-" and odd_fora != "-":
-                                chave_jogo = f"{time_casa.lower()}x{time_fora.lower()}".strip()
-                                jogos_mapeados[chave_jogo] = {
-                                    "time_casa": time_casa,
-                                    "time_fora": time_fora,
-                                    "odd_casa": odd_casa,
-                                    "odd_fora": odd_fora,
-                                    "link_h2h": link_h2h
-                                }
-                    except Exception as e:
-                        continue
-            except Exception as e:
-                log("ERRO LIGA", f"Falha ao processar liga {nome_liga}: {str(e)[:50]}")
-
-        # Salva o arquivo temporário de trabalho
-        dados_salvamento = {"data": hoje_str, "jogos": jogos_mapeados}
-        with open(PATH_TEMP_ODDS, 'w', encoding='utf-8') as f:
-            json.dump(dados_salvamento, f, indent=4, ensure_ascii=False)
-            
-        log("SUCESSO", f"Mapeamento concluído. {len(jogos_mapeados)} jogos guardados para amanhã.")
-
-    finally:
-        driver.quit()
-
-# ==========================================
-# 🕒 TURNO 05:00 AM - PROCESSAR RESULTADOS
-# ==========================================
-def turno_processar_resultados():
-    log("INÍCIO", "Iniciando Turno das 05:00 - Processamento Engenharia Reversa")
-    
-    if not os.path.exists(PATH_TEMP_ODDS):
-        log("ERRO", "Arquivo temporário de odds não encontrado. Execute o turno das 08:00 primeiro.")
-        return
-
-    with open(PATH_TEMP_ODDS, 'r', encoding='utf-8') as f:
-        dados_temporarios = json.load(f)
-
-    data_jogos = dados_temporarios.get("data", "")
-    jogos_salvos = dados_temporarios.get("jogos", {})
-
-    if not jogos_salvos:
-        log("AVISO", "Nenhum jogo salvo na lista temporária para analisar.")
-        return
-
-    # Carrega ou inicializa o banco consolidado histórico de padrões
     if os.path.exists(PATH_PADROES_DB):
         with open(PATH_PADROES_DB, 'r', encoding='utf-8') as f:
             db_padroes = json.load(f)
     else:
         db_padroes = {}
 
-    if data_jogos not in db_padroes:
-        db_padroes[data_jogos] = {
+    if data_ontem_str not in db_padroes:
+        db_padroes[data_ontem_str] = {
             "FAVORITO_CASA": {"total_jogos": 0, "greens": {"1X": 0, "VITORIA_CASA": 0, "2X": 0, "BTTS": 0, "+1.5": 0, "+2.5": 0, "-4.5": 0}},
             "EQUILIBRADO": {"total_jogos": 0, "greens": {"1X": 0, "VITORIA_CASA": 0, "2X": 0, "BTTS": 0, "+1.5": 0, "+2.5": 0, "-4.5": 0}},
             "FAVORITO_FORA": {"total_jogos": 0, "greens": {"1X": 0, "VITORIA_CASA": 0, "2X": 0, "BTTS": 0, "+1.5": 0, "+2.5": 0, "-4.5": 0}}
@@ -163,64 +107,49 @@ def turno_processar_resultados():
     consolidados = 0
 
     try:
-        for chave, jogo in jogos_salvos.items():
-            url = jogo.get("link_h2h")
-            log("VALIDANDO", f"Buscando resultado de: {jogo['time_casa']} x {jogo['time_fora']}")
-            
+        for chave, jogo in jogos_unicos.items():
+            log("SCRAPER", f"Analisando: {jogo['time_casa']} x {jogo['time_fora']}")
             try:
-                driver.get(url)
-                wait = WebDriverWait(driver, 12)
+                driver.get(jogo["url"])
+                wait = WebDriverWait(driver, 15)
                 
-                # Seletor idêntico ao do seu ranking.py para ler os placares encerrados
-                score_casa_el = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".detailScore__wrapper span:nth-child(1)")))
-                score_fora_el = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".detailScore__wrapper span:nth-child(3)")))
+                # Captura do placar encerrado na Betano
+                score_elements = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".gcr-game-score, .score, .match-score")))
                 
-                score_casa = score_casa_el.text.strip()
-                score_fora = score_fora_el.text.strip()
-                
-                if score_casa.isdigit() and score_fora.isdigit():
-                    g_c, g_f = int(score_casa), int(score_fora)
+                if len(score_elements) >= 2:
+                    g_c = int(score_elements[0].text.strip())
+                    g_f = int(score_elements[1].text.strip())
                     
-                    # Decide a prateleira com base nas odds coletadas às 08:00 do dia anterior
-                    perfil = definir_perfil_jogo(jogo["odd_casa"], jogo["odd_fora"])
+                    # Captura de odds pré-jogo no histórico da página
+                    odds_elements = driver.find_elements(By.CSS_SELECTOR, ".odd, .gcr-odd-value")
+                    
+                    odd_casa, odd_fora = 2.50, 2.50 
+                    if len(odds_elements) >= 3:
+                        odd_casa = odds_elements[0].text.strip()
+                        odd_fora = odds_elements[2].text.strip()
+
+                    # Processamento de Regras Reversas
+                    perfil = definir_perfil_jogo(odd_casa, odd_fora)
                     status_mercados = checar_mercados_ocorridos(g_c, g_f)
                     
-                    # Contabiliza no banco
-                    db_padroes[data_jogos][perfil]["total_jogos"] += 1
+                    db_padroes[data_ontem_str][perfil]["total_jogos"] += 1
                     for mercado, deu_green in status_mercados.items():
                         if deu_green:
-                            db_padroes[data_jogos][perfil]["greens"][mercado] += 1
+                            db_padroes[data_ontem_str][perfil]["greens"][mercado] += 1
                             
                     consolidados += 1
-                    log("CONSOLIDADO", f"Perfil: {perfil} | Placar: {g_c}-{g_f}")
+                    log("CONSOLIDADO", f"Sucesso -> {jogo['time_casa']} ({g_c}x{g_f}) | Perfil: {perfil}")
             except Exception as e:
-                log("ERRO JOGO", f"Não foi possível extrair placar para {jogo['time_casa']}: {str(e)[:50]}")
+                log("ERRO JOGO", f"Falha ao extrair dados para {jogo['time_casa']}: {str(e)[:50]}")
 
-        # Grava as métricas consolidadas de volta no banco de dados
         with open(PATH_PADROES_DB, 'w', encoding='utf-8') as f:
             json.dump(db_padroes, f, indent=4, ensure_ascii=False)
-
-        # Remove o arquivo de odds temporárias de trabalho após concluir o processamento com sucesso
-        if os.path.exists(PATH_TEMP_ODDS):
-            os.remove(PATH_TEMP_ODDS)
             
-        log("FIM", f"Processamento finalizado. {consolidados} partidas injetadas no histórico de padrões!")
+        log("SUCESSO", f"Mapeamento encerrado. {consolidados} jogos catalogados na data {data_ontem_str}!")
 
     finally:
         driver.quit()
 
-# --- CONTROLADOR CENTRAL DE ARGUMENTOS ---
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Robô de Engenharia Reversa - Padrões de Greens")
-    parser.add_argument("--capturar", action="store_true", help="Executa o bloco das 08:00 para guardar as odds de hoje")
-    parser.add_argument("--processar", action="store_true", help="Executa o bloco das 05:00 para processar placares e somar greens")
-    
-    args = parser.parse_args()
-    
-    if args.capturar:
-        turno_capturar_odds()
-    elif args.processar:
-        turno_processar_resultados()
-    else:
-        print("⚠️ Use um argumento válido: python estatisticas/analisador.py --capturar OU --processar")
-                        
+    processar_estatisticas()
+                  
