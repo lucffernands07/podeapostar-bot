@@ -1,0 +1,47 @@
+[
+    {
+        "horario": "12:00",
+        "liga": "Argélia - Liga 1",
+        "time_casa": "Khenchela",
+        "time_fora": "USM Alger",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.40",
+        "link_betano": "https://www.betano.bet.br/match-odds/USM-Khenchela-Usm-Alger/86054095/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Argélia - Liga 1",
+        "time_casa": "Khenchela",
+        "time_fora": "USM Alger",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.88",
+        "link_betano": "https://www.betano.bet.br/match-odds/USM-Khenchela-Usm-Alger/86054095/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Áustria - Bundesliga",
+        "time_casa": "SK Rapid",
+        "time_fora": "Ried",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/Rapid-Vienna-SV-Ried/86042160/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Áustria - Bundesliga",
+        "time_casa": "SK Rapid",
+        "time_fora": "Ried",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/Rapid-Vienna-SV-Ried/86042160/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Coritiba",
+        "time_fora": "Bahia",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Coritiba-PR-EC-Bahia-BA/85597737/"
+    }
+]
