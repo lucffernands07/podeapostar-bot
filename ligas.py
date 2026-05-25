@@ -5,6 +5,7 @@ COMPETICOES = {
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/jogos/",
     "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/jogos/",
     "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/serie-b/jogos/",
+    "Brasileirão Série C": "https://www.flashscore.com.br/futebol/brasil/serie-c/jogos/",  # <-- INCLUÍDO AQUI
     "Argentina - Liga Profesional": "https://www.flashscore.com.br/futebol/argentina/liga-profesional/jogos/",
     
     # --- BLOCO 2: ELITE EUROPEIA (BIG 5 + CHAMPIONS) ---
@@ -40,13 +41,15 @@ COMPETICOES = {
     "Andorra - Primeira Divisão": "https://www.flashscore.com.br/futebol/andorra/primeira-divisao/",
     "Argélia - Liga 1": "https://www.flashscore.com.br/futebol/argelia/1-divisao/jogos/",
     "Espanha - La Liga 2": "https://www.flashscore.com.br/futebol/espanha/laliga2/jogos/",
-    "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/jogos/",
+    "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/jogos/",  # JÁ ESTAVA AQUI!
     "Itália - Serie B": "https://www.flashscore.com.br/futebol/italia/serie-b/jogos/",
     "França - Ligue 2": "https://www.flashscore.com.br/futebol/franca/ligue-2/jogos/",
     "Países Baixos - Eerste Divisie": "https://www.flashscore.com.br/futebol/paises-baixos/eerste-divisie/jogos/",
     "Ucrânia - Premier League": "https://www.flashscore.com.br/futebol/ucrania/premier-league/jogos/",
     "Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/jogos/",
+    "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",  # <-- INCLUÍDO AQUI
     "Colômbia - Primera A": "https://www.flashscore.com.br/futebol/colombia/primeira-a/jogos/",
+    "Argentina Primera B": "https://www.flashscore.com.br/futebol/argentina/primera-b/jogos/",  # <-- INCLUÍDO AQUI
     "Paraguai - Division 1": "https://www.flashscore.com.br/futebol/paraguai/primeira-divisao/jogos/",
     "Uruguai - Primera Division": "https://www.flashscore.com.br/futebol/uruguai/primeira-divisao/jogos/",
     "Bélgica - Challenger Pro League": "https://www.flashscore.com.br/futebol/belgica/challenger-pro-league/jogos/",
