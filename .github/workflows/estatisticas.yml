@@ -1,0 +1,61 @@
+name: Gerador de Estatísticas e Padrões
+
+on:
+  schedule:
+    # 11:00 UTC (08:00 AM Horário de Brasília) - Captura as Odds do Dia
+    - cron: '0 11 * * *'
+    # 08:00 UTC (05:00 AM Horário de Brasília) - Processa os Resultados de Ontem
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Permite que você clique em "Run workflow" para testar manualmente
+
+jobs:
+  rodar-estatisticas:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Instalar Google Chrome e Xvfb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable xvfb
+
+      - name: Instalar Dependências
+        run: |
+          pip install selenium webdriver-manager
+
+      # CONDICIONAL: Se for 8h da manhã de Brasília (11:00 UTC), roda a captura
+      - name: Turno 08:00 AM - Capturar Odds de Hoje
+        if: github.event.schedule == '0 11 * * *' || github.event_name == 'workflow_dispatch'
+        run: |
+          xvfb-run python estatisticas/analisador.py --capturar
+
+      # CONDICIONAL: Se for 5h da manhã de Brasília (08:00 UTC), roda o processamento
+      - name: Turno 05:00 AM - Processar Resultados de Ontem
+        if: github.event.schedule == '0 8 * * *'
+        run: |
+          xvfb-run python estatisticas/analisador.py --processar
+
+      # SALVAMENTO SEGURO: Salva as alterações de volta no seu repositório
+      - name: Commit e Push das atualizações
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "actions@github.com"
+          
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          
+          # Adiciona de forma segura apenas os arquivos da pasta de estatísticas se existirem
+          [ -f estatisticas/odds_temporarias.json ] && git add estatisticas/odds_temporarias.json
+          [ -f estatisticas/padroes_db.json ] && git add estatisticas/padroes_db.json
+          
+          # Só commita se houver mudanças reais para não quebrar a esteira
+          git diff-index --quiet HEAD || git commit -m "Estatísticas atualizadas: $(date +'%d/%m/%Y %H:%M')"
+          git push origin main
