@@ -12,27 +12,19 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# --- CONFIGURAÇÕES DE CAMINHO NA NOVA PASTA ---
+# Adiciona o diretório pai ao path para conseguir importar o ligas.py caso o script rode de dentro da pasta
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+try:
+    from ligas import COMPETICOES
+except ImportError:
+    print("⚠️ Não foi possível importar 'COMPETICOES' do arquivo ligas.py. Verifique se ele está na raiz do projeto.")
+    sys.exit(1)
+
+# --- CONFIGURAÇÕES DE CAMINHO ---
 PATH_DIR = "estatisticas"
 PATH_TEMP_ODDS = os.path.join(PATH_DIR, "odds_temporarias.json")
 PATH_PADROES_DB = os.path.join(PATH_DIR, "padroes_db.json")
-
-# Dicionário de Competições herdado do seu projeto principal
-COMPETICOES = {
-    "Brasileirão Série A": "https://www.flashscore.com.br/futebol/brasil/brasileirao-betano/jogos/",
-    "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/serie-b/jogos/",
-    "Brasileirão Série C": "https://www.flashscore.com.br/futebol/brasil/serie-c/jogos/",
-    "Argentina - Liga Profesional": "https://www.flashscore.com.br/futebol/argentina/liga-profesional/jogos/",
-    "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/jogos/",
-    "Premier League": "https://www.flashscore.com.br/futebol/inglaterra/premier-league/jogos/",
-    "LaLiga": "https://www.flashscore.com.br/futebol/espanha/laliga/jogos/",
-    "Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/bundesliga/jogos/",
-    "Serie A (Itália)": "https://www.flashscore.com.br/futebol/italia/serie-a/jogos/",
-    "Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
-    "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/jogos/",
-    "Argentina Primera B": "https://www.flashscore.com.br/futebol/argentina/primera-b/jogos/",
-    "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/"
-}
 
 def log(etapa, mensagem):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] 📊 {etapa}: {mensagem}")
@@ -77,7 +69,7 @@ def checar_mercados_ocorridos(g_c, g_f):
 # 🕒 TURNO 08:00 AM - CAPTURAR ODDS DE HOJE
 # ==========================================
 def turno_capturar_odds():
-    log("INÍCIO", "Iniciando Turno das 08:00 - Captura de Odds Iniciais")
+    log("INÍCIO", "Iniciando Turno das 08:00 - Captura de Odds Iniciais (ligas.py)")
     os.makedirs(PATH_DIR, exist_ok=True)
     
     driver = configurar_driver()
@@ -231,3 +223,4 @@ if __name__ == "__main__":
         turno_processar_resultados()
     else:
         print("⚠️ Use um argumento válido: python estatisticas/analisador.py --capturar OU --processar")
+                        
