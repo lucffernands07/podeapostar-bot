@@ -56,7 +56,7 @@ def checar_mercados_ocorridos(g_c, g_f):
     }
 
 def processar_estatisticas():
-    # Calcula a data de ontem para buscar o arquivo correto (ex: se hoje é 26, busca o de dia 25)
+    # Calcula a data de ontem para buscar o arquivo JSON correto
     data_ontem_str = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
     nome_arquivo_ontem = f"jogos_{data_ontem_str}.json"
     caminho_json_ontem = os.path.join(DIR_TELEGRAM, nome_arquivo_ontem)
@@ -74,7 +74,7 @@ def processar_estatisticas():
         log("AVISO", f"O arquivo {nome_arquivo_ontem} está vazio.")
         return
 
-    # --- AGRUPAR POR JOGO UNICÓ ---
+    # --- AGRUPAR POR JOGO ÚNICO ---
     jogos_unicos = {}
     for p in dados_jogos:
         url = p.get("link_betano") or p.get("link")
@@ -85,7 +85,8 @@ def processar_estatisticas():
             jogos_unicos[chave] = {
                 "time_casa": p["time_casa"],
                 "time_fora": p["time_fora"],
-                "url": url
+                "url": url,
+                "odd_palpite": p.get("odd", "2.50")  # Salva a odd do palpite caso precise
             }
 
     # Iniciar ou carregar Banco Histórico de Padrões
@@ -111,22 +112,37 @@ def processar_estatisticas():
             log("SCRAPER", f"Analisando: {jogo['time_casa']} x {jogo['time_fora']}")
             try:
                 driver.get(jogo["url"])
-                wait = WebDriverWait(driver, 15)
+                wait = WebDriverWait(driver, 12)
                 
-                # Captura do placar encerrado na Betano
-                score_elements = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".gcr-game-score, .score, .match-score")))
-                
-                if len(score_elements) >= 2:
-                    g_c = int(score_elements[0].text.strip())
-                    g_f = int(score_elements[1].text.strip())
+                # --- SELETORES ATUALIZADOS DA BETANO PARA EVENTO ENCERRADO ---
+                # 1. Tenta encontrar pelo novo padrão de score-container ou classes alternativas
+                try:
+                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='score-container'], .sc-fbNXWD, .match-score")))
+                    score_casa_el = driver.find_element(By.CSS_SELECTOR, "[data-testid='home-team-score'], .score-home")
+                    score_fora_el = driver.find_element(By.CSS_SELECTOR, "[data-testid='away-team-score'], .score-away")
+                    score_casa = score_casa_el.text.strip()
+                    score_fora = score_fora_el.text.strip()
+                except:
+                    # Seletor alternativo caso a página mude muito rápido
+                    scores = driver.find_elements(By.CSS_SELECTOR, ".gcr-game-score, .score")
+                    if len(scores) >= 2:
+                        score_casa, score_fora = scores[0].text.strip(), scores[1].text.strip()
+                    else:
+                        raise Exception("Placar não localizado na página.")
+
+                if score_casa.isdigit() and score_fora.isdigit():
+                    g_c = int(score_casa)
+                    g_f = int(score_fora)
                     
-                    # Captura de odds pré-jogo no histórico da página
-                    odds_elements = driver.find_elements(By.CSS_SELECTOR, ".odd, .gcr-odd-value")
-                    
-                    odd_casa, odd_fora = 2.50, 2.50 
-                    if len(odds_elements) >= 3:
-                        odd_casa = odds_elements[0].text.strip()
-                        odd_fora = odds_elements[2].text.strip()
+                    # --- CAPTURA DE ODDS PRÉ-JOGO DA BETANO ---
+                    odd_casa, odd_fora = 2.50, 2.50  # Valor padrão equilibrado caso as odds sumam após o término
+                    try:
+                        odds_botoes = driver.find_elements(By.CSS_SELECTOR, "[data-testid='odd-button'] .odd-value, .gcr-odd-value")
+                        if len(odds_botoes) >= 3:
+                            odd_casa = odds_botoes[0].text.strip()
+                            odd_fora = odds_botoes[2].text.strip()
+                    except:
+                        pass
 
                     # Processamento de Regras Reversas
                     perfil = definir_perfil_jogo(odd_casa, odd_fora)
@@ -139,17 +155,20 @@ def processar_estatisticas():
                             
                     consolidados += 1
                     log("CONSOLIDADO", f"Sucesso -> {jogo['time_casa']} ({g_c}x{g_f}) | Perfil: {perfil}")
+                
+                time.sleep(1.5) # Delay de segurança
+                
             except Exception as e:
-                log("ERRO JOGO", f"Falha ao extrair dados para {jogo['time_casa']}: {str(e)[:50]}")
+                log("ERRO JOGO", f"Falha ao extrair dados para {jogo['time_casa']}: {str(e)[:45]}")
 
         with open(PATH_PADROES_DB, 'w', encoding='utf-8') as f:
             json.dump(db_padroes, f, indent=4, ensure_ascii=False)
             
-        log("SUCESSO", f"Mapeamento encerrado. {consolidados} jogos catalogados na data {data_ontem_str}!")
+        log("SUCESSO", f"Mapeamento encerrado. {consolidados} jogos catalogados com sucesso!")
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     processar_estatisticas()
-                  
+            
