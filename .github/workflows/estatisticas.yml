@@ -2,11 +2,9 @@ name: Gerador de Estatísticas e Padrões
 
 on:
   schedule:
-    # 11:00 UTC (08:00 AM Horário de Brasília) - Captura as Odds do Dia
-    - cron: '0 11 * * *'
     # 08:00 UTC (05:00 AM Horário de Brasília) - Processa os Resultados de Ontem
     - cron: '0 8 * * *'
-  workflow_dispatch: # Permite que você clique em "Run workflow" para testar manualmente
+  workflow_dispatch: # Permite que você clique em "Run workflow" para testar manualmente agora
 
 jobs:
   rodar-estatisticas:
@@ -30,17 +28,10 @@ jobs:
         run: |
           pip install selenium webdriver-manager
 
-      # CONDICIONAL: Se for 8h da manhã de Brasília (11:00 UTC), roda a captura
-      - name: Turno 08:00 AM - Capturar Odds de Hoje
-        if: github.event.schedule == '0 11 * * *' || github.event_name == 'workflow_dispatch'
+      # Executa o script direto. Ele sozinho já calcula a data de ontem e busca o JSON na pasta telegram/
+      - name: Processar Resultados de Ontem
         run: |
-          xvfb-run python estatisticas/analisador.py --capturar
-
-      # CONDICIONAL: Se for 5h da manhã de Brasília (08:00 UTC), roda o processamento
-      - name: Turno 05:00 AM - Processar Resultados de Ontem
-        if: github.event.schedule == '0 8 * * *'
-        run: |
-          xvfb-run python estatisticas/analisador.py --processar
+          xvfb-run python estatisticas/analisador.py
 
       # SALVAMENTO SEGURO: Salva as alterações de volta no seu repositório
       - name: Commit e Push das atualizações
@@ -52,10 +43,10 @@ jobs:
           
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           
-          # Adiciona de forma segura apenas os arquivos da pasta de estatísticas se existirem
-          [ -f estatisticas/odds_temporarias.json ] && git add estatisticas/odds_temporarias.json
+          # Adiciona o novo banco histórico de padrões gerado
           [ -f estatisticas/padroes_db.json ] && git add estatisticas/padroes_db.json
           
           # Só commita se houver mudanças reais para não quebrar a esteira
           git diff-index --quiet HEAD || git commit -m "Estatísticas atualizadas: $(date +'%d/%m/%Y %H:%M')"
           git push origin main
+          
