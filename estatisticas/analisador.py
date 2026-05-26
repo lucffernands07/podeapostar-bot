@@ -106,16 +106,21 @@ def processar_estatisticas():
 
     # Daqui para baixo o código só roda se passar pela trava (ou seja, a partir de amanhã)
     with open(path_links_ontem, 'r', encoding='utf-8') as f:
-        jogos_ontem = json.load(f)
+        dados_json_ontem = json.load(f)
+
+    # Como os jogos estão dentro da chave "jogos", pegamos ela. 
+    # Se não existir (por segurança), vira uma lista vazia.
+    jogos_ontem = dados_json_ontem.get("jogos", [])
 
     if not jogos_ontem:
-        log("AVISO", "O arquivo de links de ontem está vazio. Encerrando execução.")
+        log("AVISO", "O arquivo de links de ontem está vazio ou sem a chave 'jogos'. Encerrando execução.")
         return
 
     # Organiza em jogos únicos para não repetir requisições
     jogos_unicos = {}
     for p in jogos_ontem:
-        url = p.get("link") or p.get("link_betano")
+        # AJUSTE: Mudado de 'link' para 'link_h2h' que é o nome real no seu JSON
+        url = p.get("link_h2h") or p.get("link_betano") or p.get("link")
         if not url:
             continue
         chave = f"{p['time_casa'].strip().lower()}x{p['time_fora'].strip().lower()}"
