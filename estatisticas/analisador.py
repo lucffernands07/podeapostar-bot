@@ -64,9 +64,11 @@ def processar_estatisticas():
     path_links_hoje = os.path.join(PATH_DIR, f"links_{data_hoje_str}.json")
     path_links_ontem = os.path.join(PATH_DIR, f"links_{data_ontem_str}.json")
     
+    # =========================================================================
+    # FASE 1: CAPTURA E VALIDAÇÃO DOS LINKS DE HOJE (PARA USAR AMANHÃ)
+    # =========================================================================
     log("FASE 1", "Verificando o arquivo pendentes.json da madrugada atual...")
     
-    # 1. VERIFICAÇÃO E CÓPIA DOS LINKS DE HOJE PARA USAR AMANHÃ
     if not os.path.exists(PATH_PENDENTES):
         log("AVISO", "O arquivo ranking/pendentes.json não existe. Falta os pendentes de hoje favor tentar amanhã.")
         return
@@ -75,7 +77,6 @@ def processar_estatisticas():
         with open(PATH_PENDENTES, 'r', encoding='utf-8') as f:
             dados_pendentes = json.load(f)
             
-        # Pega a data de modificação ou os dados internos para validar se é de hoje
         timestamp_mod = os.path.getmtime(PATH_PENDENTES)
         data_mod_pendentes = datetime.fromtimestamp(timestamp_mod).strftime("%Y-%m-%d")
         
@@ -87,18 +88,23 @@ def processar_estatisticas():
         log("ERRO", f"Não foi possível ler o arquivo pendentes.json: {e}")
         return
 
-    # Se passou na validação, salva uma cópia limpa dos links H2H de hoje para o amanhã
+    # Salva a ponte de dados de hoje
     with open(path_links_hoje, 'w', encoding='utf-8') as f:
         json.dump(dados_pendentes, f, indent=4, ensure_ascii=False)
     log("SALVAMENTO", f"Links de hoje guardados com sucesso em: {path_links_hoje}")
 
-    # 2. PROCESSAMENTO E RASPAGEM DOS RESULTADOS DE ONTEM
-    log("FASE 2", f"Buscando o arquivo de links de ontem: {path_links_ontem}")
+    # =========================================================================
+    # FASE 2: TRAVA DE SEGURANÇA E PROCESSAMENTO DOS RESULTADOS DE ONTEM
+    # =========================================================================
+    log("FASE 2", f"Verificando existência do arquivo de ontem: {path_links_ontem}")
     
+    # 🛑 TRAVA SEGURO: Se o arquivo de ontem não existir, avisa e encerra imediatamente
     if not os.path.exists(path_links_ontem):
-        log("AVISO", f"Arquivo de links de ontem ({path_links_ontem}) não foi encontrado. A atualização da tabela será tentada amanhã.")
+        log("TRAVA ATIVADA", f"Arquivo {path_links_ontem} não encontrado. Como este é o primeiro ciclo ou os links de ontem foram perdidos, a atualização da tabela de padrões começará automaticamente amanhã.")
+        log("FIM", "Fase 1 concluída com sucesso. Fase 2 adiada para o próximo ciclo de amanhã.")
         return
 
+    # Daqui para baixo o código só roda se passar pela trava (ou seja, a partir de amanhã)
     with open(path_links_ontem, 'r', encoding='utf-8') as f:
         jogos_ontem = json.load(f)
 
@@ -109,7 +115,7 @@ def processar_estatisticas():
     # Organiza em jogos únicos para não repetir requisições
     jogos_unicos = {}
     for p in jogos_ontem:
-        url = p.get("link") or p.get("link_betano") # Prioridade para o H2H do Flashscore
+        url = p.get("link") or p.get("link_betano")
         if not url:
             continue
         chave = f"{p['time_casa'].strip().lower()}x{p['time_fora'].strip().lower()}"
@@ -144,15 +150,13 @@ def processar_estatisticas():
                 driver.get(jogo["url"])
                 wait = WebDriverWait(driver, 10)
                 
-                # Seletores do Flashscore para pegar o placar direto na página de H2H/Sumário
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".detailScore__wrapper, .event__score")))
                 
                 scores = driver.find_elements(By.CSS_SELECTOR, ".detailScore__wrapper span")
                 if len(scores) >= 2:
                     score_casa = scores[0].text.strip()
-                    score_fora = scores[2].text.strip() # O índice 1 costuma ser o hífen "-"
+                    score_fora = scores[2].text.strip()
                 else:
-                    # Seletor alternativo clássico do Flashscore
                     score_casa = driver.find_element(By.CSS_SELECTOR, ".event__score--home").text.strip()
                     score_fora = driver.find_element(By.CSS_SELECTOR, ".event__score--away").text.strip()
 
@@ -160,8 +164,6 @@ def processar_estatisticas():
                     g_c = int(score_casa)
                     g_f = int(score_fora)
                     
-                    # Como o Flashscore esconde as odds pré-jogo em outra aba após o término,
-                    # usamos o padrão de referência 2.50 ou mantemos o equilíbrio.
                     odd_casa, odd_fora = 2.50, 2.50
 
                     perfil = definir_perfil_jogo(odd_casa, odd_fora)
@@ -190,4 +192,4 @@ def processar_estatisticas():
 
 if __name__ == "__main__":
     processar_estatisticas()
-    
+        
