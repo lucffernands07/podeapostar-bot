@@ -14,7 +14,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 # --- CONFIGURAÇÕES DE CAMINHO ---
 PATH_DIR = "estatisticas"
 PATH_PADROES_DB = os.path.join(PATH_DIR, "padroes_db.json")
-DIR_TELEGRAM = "telegram"
+PATH_PENDENTES = os.path.join("ranking", "pendentes.json")
 
 def log(etapa, mensagem):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] 📊 {etapa}: {mensagem}")
@@ -56,28 +56,60 @@ def checar_mercados_ocorridos(g_c, g_f):
     }
 
 def processar_estatisticas():
-    # Calcula a data de ontem para buscar o arquivo JSON correto
+    os.makedirs(PATH_DIR, exist_ok=True)
+    
+    data_hoje_str = date.today().strftime("%Y-%m-%d")
     data_ontem_str = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
-    nome_arquivo_ontem = f"jogos_{data_ontem_str}.json"
-    caminho_json_ontem = os.path.join(DIR_TELEGRAM, nome_arquivo_ontem)
     
-    log("INÍCIO", f"Buscando arquivo de ontem: {caminho_json_ontem}")
+    path_links_hoje = os.path.join(PATH_DIR, f"links_{data_hoje_str}.json")
+    path_links_ontem = os.path.join(PATH_DIR, f"links_{data_ontem_str}.json")
     
-    if not os.path.exists(caminho_json_ontem):
-        log("ERRO", f"Arquivo {caminho_json_ontem} não foi encontrado para processamento.")
+    log("FASE 1", "Verificando o arquivo pendentes.json da madrugada atual...")
+    
+    # 1. VERIFICAÇÃO E CÓPIA DOS LINKS DE HOJE PARA USAR AMANHÃ
+    if not os.path.exists(PATH_PENDENTES):
+        log("AVISO", "O arquivo ranking/pendentes.json não existe. Falta os pendentes de hoje favor tentar amanhã.")
         return
 
-    with open(caminho_json_ontem, 'r', encoding='utf-8') as f:
-        dados_jogos = json.load(f)
-
-    if not dados_jogos:
-        log("AVISO", f"O arquivo {nome_arquivo_ontem} está vazio.")
+    try:
+        with open(PATH_PENDENTES, 'r', encoding='utf-8') as f:
+            dados_pendentes = json.load(f)
+            
+        # Pega a data de modificação ou os dados internos para validar se é de hoje
+        timestamp_mod = os.path.getmtime(PATH_PENDENTES)
+        data_mod_pendentes = datetime.fromtimestamp(timestamp_mod).strftime("%Y-%m-%d")
+        
+        if data_mod_pendentes != data_hoje_str:
+            log("AVISO", f"O pendentes.json encontrado é antigo ({data_mod_pendentes}). Falta os pendentes de hoje favor tentar amanhã.")
+            return
+            
+    except Exception as e:
+        log("ERRO", f"Não foi possível ler o arquivo pendentes.json: {e}")
         return
 
-    # --- AGRUPAR POR JOGO ÚNICO ---
+    # Se passou na validação, salva uma cópia limpa dos links H2H de hoje para o amanhã
+    with open(path_links_hoje, 'w', encoding='utf-8') as f:
+        json.dump(dados_pendentes, f, indent=4, ensure_ascii=False)
+    log("SALVAMENTO", f"Links de hoje guardados com sucesso em: {path_links_hoje}")
+
+    # 2. PROCESSAMENTO E RASPAGEM DOS RESULTADOS DE ONTEM
+    log("FASE 2", f"Buscando o arquivo de links de ontem: {path_links_ontem}")
+    
+    if not os.path.exists(path_links_ontem):
+        log("AVISO", f"Arquivo de links de ontem ({path_links_ontem}) não foi encontrado. A atualização da tabela será tentada amanhã.")
+        return
+
+    with open(path_links_ontem, 'r', encoding='utf-8') as f:
+        jogos_ontem = json.load(f)
+
+    if not jogos_ontem:
+        log("AVISO", "O arquivo de links de ontem está vazio. Encerrando execução.")
+        return
+
+    # Organiza em jogos únicos para não repetir requisições
     jogos_unicos = {}
-    for p in dados_jogos:
-        url = p.get("link_betano") or p.get("link")
+    for p in jogos_ontem:
+        url = p.get("link") or p.get("link_betano") # Prioridade para o H2H do Flashscore
         if not url:
             continue
         chave = f"{p['time_casa'].strip().lower()}x{p['time_fora'].strip().lower()}"
@@ -85,12 +117,10 @@ def processar_estatisticas():
             jogos_unicos[chave] = {
                 "time_casa": p["time_casa"],
                 "time_fora": p["time_fora"],
-                "url": url,
-                "odd_palpite": p.get("odd", "2.50")  # Salva a odd do palpite caso precise
+                "url": url
             }
 
-    # Iniciar ou carregar Banco Histórico de Padrões
-    os.makedirs(PATH_DIR, exist_ok=True)
+    # Carrega ou inicia o banco histórico de padrões
     if os.path.exists(PATH_PADROES_DB):
         with open(PATH_PADROES_DB, 'r', encoding='utf-8') as f:
             db_padroes = json.load(f)
@@ -104,47 +134,36 @@ def processar_estatisticas():
             "FAVORITO_FORA": {"total_jogos": 0, "greens": {"1X": 0, "VITORIA_CASA": 0, "2X": 0, "BTTS": 0, "+1.5": 0, "+2.5": 0, "-4.5": 0}}
         }
 
-    driver = configurar_driver()
+    driver = configurador_driver()
     consolidados = 0
 
     try:
         for chave, jogo in jogos_unicos.items():
-            log("SCRAPER", f"Analisando: {jogo['time_casa']} x {jogo['time_fora']}")
+            log("SCRAPER", f"Conferindo placar de: {jogo['time_casa']} x {jogo['time_fora']}")
             try:
                 driver.get(jogo["url"])
-                wait = WebDriverWait(driver, 12)
+                wait = WebDriverWait(driver, 10)
                 
-                # --- SELETORES ATUALIZADOS DA BETANO PARA EVENTO ENCERRADO ---
-                # 1. Tenta encontrar pelo novo padrão de score-container ou classes alternativas
-                try:
-                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='score-container'], .sc-fbNXWD, .match-score")))
-                    score_casa_el = driver.find_element(By.CSS_SELECTOR, "[data-testid='home-team-score'], .score-home")
-                    score_fora_el = driver.find_element(By.CSS_SELECTOR, "[data-testid='away-team-score'], .score-away")
-                    score_casa = score_casa_el.text.strip()
-                    score_fora = score_fora_el.text.strip()
-                except:
-                    # Seletor alternativo caso a página mude muito rápido
-                    scores = driver.find_elements(By.CSS_SELECTOR, ".gcr-game-score, .score")
-                    if len(scores) >= 2:
-                        score_casa, score_fora = scores[0].text.strip(), scores[1].text.strip()
-                    else:
-                        raise Exception("Placar não localizado na página.")
+                # Seletores do Flashscore para pegar o placar direto na página de H2H/Sumário
+                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".detailScore__wrapper, .event__score")))
+                
+                scores = driver.find_elements(By.CSS_SELECTOR, ".detailScore__wrapper span")
+                if len(scores) >= 2:
+                    score_casa = scores[0].text.strip()
+                    score_fora = scores[2].text.strip() # O índice 1 costuma ser o hífen "-"
+                else:
+                    # Seletor alternativo clássico do Flashscore
+                    score_casa = driver.find_element(By.CSS_SELECTOR, ".event__score--home").text.strip()
+                    score_fora = driver.find_element(By.CSS_SELECTOR, ".event__score--away").text.strip()
 
                 if score_casa.isdigit() and score_fora.isdigit():
                     g_c = int(score_casa)
                     g_f = int(score_fora)
                     
-                    # --- CAPTURA DE ODDS PRÉ-JOGO DA BETANO ---
-                    odd_casa, odd_fora = 2.50, 2.50  # Valor padrão equilibrado caso as odds sumam após o término
-                    try:
-                        odds_botoes = driver.find_elements(By.CSS_SELECTOR, "[data-testid='odd-button'] .odd-value, .gcr-odd-value")
-                        if len(odds_botoes) >= 3:
-                            odd_casa = odds_botoes[0].text.strip()
-                            odd_fora = odds_botoes[2].text.strip()
-                    except:
-                        pass
+                    # Como o Flashscore esconde as odds pré-jogo em outra aba após o término,
+                    # usamos o padrão de referência 2.50 ou mantemos o equilíbrio.
+                    odd_casa, odd_fora = 2.50, 2.50
 
-                    # Processamento de Regras Reversas
                     perfil = definir_perfil_jogo(odd_casa, odd_fora)
                     status_mercados = checar_mercados_ocorridos(g_c, g_f)
                     
@@ -156,19 +175,19 @@ def processar_estatisticas():
                     consolidados += 1
                     log("CONSOLIDADO", f"Sucesso -> {jogo['time_casa']} ({g_c}x{g_f}) | Perfil: {perfil}")
                 
-                time.sleep(1.5) # Delay de segurança
+                time.sleep(1.2)
                 
             except Exception as e:
-                log("ERRO JOGO", f"Falha ao extrair dados para {jogo['time_casa']}: {str(e)[:45]}")
+                log("ERRO JOGO", f"Não conseguiu ler o placar de {jogo['time_casa']}: {str(e)[:45]}")
 
         with open(PATH_PADROES_DB, 'w', encoding='utf-8') as f:
             json.dump(db_padroes, f, indent=4, ensure_ascii=False)
             
-        log("SUCESSO", f"Mapeamento encerrado. {consolidados} jogos catalogados com sucesso!")
+        log("SUCESSO", f"Varredura de ontem concluída! {consolidados} jogos integrados no padroes_db.json.")
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     processar_estatisticas()
-            
+    
