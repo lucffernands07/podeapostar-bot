@@ -2,8 +2,9 @@ name: Gerador de Estatísticas e Padrões
 
 on:
   schedule:
-    # 08:00 UTC (05:00 AM Horário de Brasília) - Processa os Resultados de Ontem
-    - cron: '0 8 * * *'
+    # 08:14 UTC (05:14 AM Horário de Brasília) - Processa os Resultados de Ontem
+    # Mudança para minuto quebrado evita o congestionamento de servidores do GitHub
+    - cron: '14 8 * * *'
   workflow_dispatch: # Permite que você clique em "Run workflow" para testar manualmente agora
 
 jobs:
@@ -47,6 +48,6 @@ jobs:
           [ -f estatisticas/padroes_db.json ] && git add estatisticas/padroes_db.json
           
           # Só commita se houver mudanças reais para não quebrar a esteira
-          git diff-index --quiet HEAD || git commit -m "Estatísticas atualizadas: $(date +'%d/%m/%Y %H:%M')"
+          git diff-index --quiet HEAD || git commit -m "Estatísticas updated: $(date +'%d/%m/%Y %H:%M')"
           git push origin main
           
