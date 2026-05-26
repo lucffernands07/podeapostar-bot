@@ -16,10 +16,10 @@ PATH_DIR = "estatisticas"
 PATH_PADROES_DB = os.path.join(PATH_DIR, "padroes_db.json")
 PATH_PENDENTES = os.path.join("ranking", "pendentes.json")
 
-def log(etapa, mensagem):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] 📊 {etapa}: {mensagem}")
+def log(etapa, message):
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] 📊 {etapa}: {message}")
 
-def configurar_driver():
+def configuring_driver():
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
@@ -104,12 +104,11 @@ def processar_estatisticas():
         log("FIM", "Fase 1 concluída com sucesso. Fase 2 adiada para o próximo ciclo de amanhã.")
         return
 
-    # Daqui para baixo o código só roda se passar pela trava (ou seja, a partir de amanhã)
+    # --- CORREÇÃO DO BLOCO DE LEITURA NA FASE 2 ---
     with open(path_links_ontem, 'r', encoding='utf-8') as f:
         dados_json_ontem = json.load(f)
 
-    # Como os jogos estão dentro da chave "jogos", pegamos ela. 
-    # Se não existir (por segurança), vira uma lista vazia.
+    # AJUSTE 1: Entra na chave "jogos" conforme a estrutura do seu print do repositório
     jogos_ontem = dados_json_ontem.get("jogos", [])
 
     if not jogos_ontem:
@@ -119,7 +118,7 @@ def processar_estatisticas():
     # Organiza em jogos únicos para não repetir requisições
     jogos_unicos = {}
     for p in jogos_ontem:
-        # AJUSTE: Mudado de 'link' para 'link_h2h' que é o nome real no seu JSON
+        # AJUSTE 2: Mapeia para 'link_h2h' (que é o padrão gerado pelo seu robô principal)
         url = p.get("link_h2h") or p.get("link_betano") or p.get("link")
         if not url:
             continue
@@ -145,7 +144,7 @@ def processar_estatisticas():
             "FAVORITO_FORA": {"total_jogos": 0, "greens": {"1X": 0, "VITORIA_CASA": 0, "2X": 0, "BTTS": 0, "+1.5": 0, "+2.5": 0, "-4.5": 0}}
         }
 
-    driver = configurador_driver()
+    driver = configuring_driver()
     consolidados = 0
 
     try:
@@ -197,4 +196,4 @@ def processar_estatisticas():
 
 if __name__ == "__main__":
     processar_estatisticas()
-        
+    
