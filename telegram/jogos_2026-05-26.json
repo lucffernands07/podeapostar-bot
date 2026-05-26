@@ -1,0 +1,119 @@
+[
+    {
+        "horario": "12:00",
+        "liga": "Armênia Premier League",
+        "time_casa": "Ararat",
+        "time_fora": "BKMA",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.63",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Ararat-Yerevan-BKMA-Yerevan/86043188/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Argentina Primera B",
+        "time_casa": "Deportivo Armenio",
+        "time_fora": "Argentino de Merlo",
+        "mercado": "1X (80%)",
+        "odd": "1.60",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Armenio-Argentino-Merlo/85882869/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Argentina Primera B",
+        "time_casa": "Dock Sud",
+        "time_fora": "Real Pilar",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.55",
+        "link_betano": "https://www.betano.bet.br/match-odds/CS-Dock-Sud-Real-Pilar/85882931/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Argentina Primera B",
+        "time_casa": "Dock Sud",
+        "time_fora": "Real Pilar",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.45",
+        "link_betano": "https://www.betano.bet.br/match-odds/CS-Dock-Sud-Real-Pilar/85882931/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Libertadores",
+        "time_casa": "LDU Quito (Ecu)",
+        "time_fora": "Always Ready (Bol)",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.95",
+        "link_betano": "https://www.betano.bet.br/match-odds/LDU-Quito-Always-Ready/82767823/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Grêmio (Bra)",
+        "time_fora": "Montevideo City (Uru)",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.34",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gremio-RS-Montevideo-City-Torque/82820430/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Millonarios (Col)",
+        "time_fora": "O'Higgins (Chi)",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.35",
+        "link_betano": "https://www.betano.bet.br/match-odds/Millonarios-FC-O-Higgins/82820297/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Palestino (Chi)",
+        "time_fora": "Dep. Riestra (Arg)",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/Palestino-Deportivo-Riestra/82820397/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Palestino (Chi)",
+        "time_fora": "Dep. Riestra (Arg)",
+        "mercado": "1X (80%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Palestino-Deportivo-Riestra/82820397/"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Argentina Primera B",
+        "time_casa": "Ituzaingo",
+        "time_fora": "Laferrere",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.41",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Ituzaingo-Deportivo-Laferrere/85882871/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Flamengo (Bra)",
+        "time_fora": "Cusco (Per)",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.35",
+        "link_betano": "https://www.betano.bet.br/match-odds/Flamengo-RJ-Cusco-FC/82766397/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "San Lorenzo (Arg)",
+        "time_fora": "Recoleta (Par)",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "2.18",
+        "link_betano": "https://www.betano.bet.br/match-odds/San-Lorenzo-Deportivo-Recoleta/82820343/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "San Lorenzo (Arg)",
+        "time_fora": "Recoleta (Par)",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.63",
+        "link_betano": "https://www.betano.bet.br/match-odds/San-Lorenzo-Deportivo-Recoleta/82820343/"
+    }
+]
