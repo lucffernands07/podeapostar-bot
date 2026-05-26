@@ -75,7 +75,7 @@ def processar_comando_direto(tipo_bruto):
     return config
 
 
-def executar():
+def ejecutar():
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
     tipo_bruto = os.getenv('TIPO_BINGO', '')
@@ -114,11 +114,8 @@ def executar():
 
     agora_texto = agora_br.strftime("%H:%M") 
     
-    jogos_filtrados = []
-    limite_tempo = None
-    if filtro_hora == "3H": limite_tempo = agora_br + timedelta(hours=3)
-    if filtro_hora == "5H": limite_tempo = agora_br + timedelta(hours=5)
-
+    # --- NOVO BLOCO: CAPTURA CRONOLÓGICA DAS PARTIDAS ---
+    jogos_validos_horario = []
     for j in jogos_banco:
         try:
             h_partes = j['horario'].split(":")
@@ -133,14 +130,40 @@ def executar():
             if hora_jogo < agora_br - timedelta(minutes=15):
                 continue
                 
-            # Filtra pela janela limite (3H ou 5H)
-            if limite_tempo and hora_jogo > limite_tempo:
-                continue
-                
             j["datetime_real"] = hora_jogo
-            jogos_filtrados.append(j)
+            jogos_validos_horario.append(j)
         except:
-            if filtro_hora == "DIA": jogos_filtrados.append(j)
+            if filtro_hora == "DIA": 
+                jogos_validos_horario.append(j)
+
+    # Ordena cronologicamente para poder agrupar as janelas sem furos
+    jogos_validos_horario.sort(key=lambda x: x.get("datetime_real", agora_br))
+
+    # --- NOVA LÓGICA DE JANELA DINÂMICA (CARROSSEL) ---
+    jogos_filtrados = []
+
+    if filtro_hora == "DIA":
+        jogos_filtrados = jogos_validos_horario
+    else:
+        # Define o limite em horas baseado no filtro
+        tamanho_janela_horas = 3 if filtro_hora == "3H" else 5
+        
+        # Carrossel: testa cada jogo futuro como ponto de partida
+        for jogo_base in jogos_validos_horario:
+            inicio_janela = jogo_base["datetime_real"]
+            fim_janela = inicio_janela + timedelta(hours=tamanho_janela_horas)
+            
+            # Agrupa os confrontos que cabem no intervalo desta janela
+            janela_atual = [j for j in jogos_validos_horario if inicio_janela <= j["datetime_real"] <= fim_janela]
+            
+            # Se essa janela possuir o mínimo de partidas para fechar o Bingo, seleciona ela
+            if len(janela_atual) >= qtd_alvo:
+                jogos_filtrados = janela_atual
+                break
+        
+        # Fallback de segurança: se nenhuma sub-janela fechou o mínimo, usa a lista de futuros geral
+        if not jogos_filtrados:
+            jogos_filtrados = jogos_validos_horario
 
     if not jogos_filtrados:
         texto_erro = f"⚠️ Não há jogos disponíveis para os filtros selecionados agora ({agora_texto})."
