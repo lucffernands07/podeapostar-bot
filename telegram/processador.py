@@ -75,7 +75,7 @@ def processar_comando_direto(tipo_bruto):
     return config
 
 
-def ejecutar():
+def executar():
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
     tipo_bruto = os.getenv('TIPO_BINGO', '')
