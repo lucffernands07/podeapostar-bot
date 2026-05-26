@@ -37,15 +37,15 @@
     },
     {
         "mercado": "+1.5 GOLS (85%)",
-        "green": 55,
+        "green": 57,
         "red": 18,
-        "assertividade": 0.7534246575342466
+        "assertividade": 0.76
     },
     {
         "mercado": "+1.5 GOLS (70%)",
-        "green": 37,
+        "green": 38,
         "red": 18,
-        "assertividade": 0.6727272727272727
+        "assertividade": 0.6785714285714286
     },
     {
         "mercado": "+1.5 GOLS (100%)",
@@ -79,8 +79,8 @@
     },
     {
         "mercado": "AMBAS MARCAM: SIM (80%)",
-        "green": 37,
-        "red": 37,
+        "green": 38,
+        "red": 38,
         "assertividade": 0.5
     },
     {
