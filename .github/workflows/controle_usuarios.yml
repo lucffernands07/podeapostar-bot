@@ -1,64 +1,78 @@
 name: Controle de Usuarios e Banca
 
+# 📡 O Workflow agora só acorda quando o seu Worker mandar um sinal via API
 on:
-  # Permite que você ative o fluxo manualmente pelo botão do GitHub se quiser
-  workflow_dispatch:
+  repository_dispatch:
+    types: [clique_apostado, novo_registro]
   
-  # Roda o script de forma agendada (ex: a cada 5 minutos para checar novos registros)
-  # Ou você pode integrar isso dentro do disparo do seu robô principal pós-jogos
-  schedule:
-    - cron: '*/5 * * * *'
+  # Mantém este botão ativo só para caso você queira rodar um teste manual pelo painel do GitHub
+  workflow_dispatch:
 
 jobs:
-  run-bot-and-sync:
+  run-banca-sync:
     runs-on: ubuntu-latest
     
-    # Dá permissão para o Workflow conseguir escrever de volta no seu repositório privado
     permissions:
       contents: write
 
     steps:
-    # 1. Faz o Checkout do seu código privado
+    # 1. Traz o seu código privado atualizado para a máquina virtual
     - name: Checkout do Repositório
       uses: actions/checkout@v4
       with:
         persist-credentials: true
 
-    # 2. Configura o Python na máquina virtual
+    # 2. Prepara o Python
     - name: Configurar Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
-    # 3. Instala as dependências (telebot, etc)
+    # 3. Instala a biblioteca do Telegram
     - name: Instalar Dependências
       run: |
         pip install pyTelegramBotAPI
 
-    # 4. Executa a rotina do seu ecossistema passando suas Repository Secrets
-    - name: Executar Rotina de Banca e Registro
+    # 4. Executa a lógica baseado no tipo de evento enviado pelo seu Worker
+    # O GitHub Actions consegue ler as variáveis que o seu Worker embutiu no clique!
+    - name: Processar Movimentação de Banca
       env:
         TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-        CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
-        CHAT_ID: ${{ secrets.CHAT_ID }}
-        BSD_TOKEN: ${{ secrets.BSD_TOKEN }}
+        # Captura os dados que o seu Worker enviou no payload do clique
+        USER_ID_ALVO: ${{ github.event.client_payload.user_id }}
+        USER_NOME_ALVO: ${{ github.event.client_payload.user_name }}
+        ACAO_EVENTO: ${{ github.event.action }}
       run: |
-        # Aqui roda o script que processa as atualizações ou mantém o ciclo de checagem
-        python users/painel_admin.py
+        python -c "
+        import os
+        from users.painel_admin import registrar_clique_apostado
+        from users.controle_banca import registrar_novo_usuario
+        
+        user_id = os.environ.get('USER_ID_ALVO')
+        nome = os.environ.get('USER_NOME_ALVO')
+        acao = os.environ.get('ACAO_EVENTO')
+        
+        if acao == 'clique_apostado' and user_id:
+            print(f'Processando clique Apostado para o ID: {user_id}')
+            registrar_clique_apostado(user_id)
+            
+        elif acao == 'novo_registro' and user_id and nome:
+            print(f'Processando novo registro para: {nome} ({user_id})')
+            registrar_novo_usuario(user_id, nome)
+        "
 
-    # 5. 🌟 A MÁGICA DO SALVAMENTO AUTOMÁTICO 🌟
-    # Se o arquivo usuarios_db.json foi criado ou alterado, este passo salva ele de volta no GitHub
+    # 5. Salva o JSON atualizado de volta no seu repositório privado
     - name: Salvar e Commitar Alterações no Banco JSON
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         
-        # Verifica se houve mudanças na pasta users
         if [ -n "$(git status --porcelain users/usuarios_db.json)" ]; then
-          echo "Detectadas mudanças no banco de dados. Salvando..."
+          echo "Mudanças detectadas no arquivo de usuários. Salvando..."
           git add users/usuarios_db.json
-          git commit -m "Auto-update: usuarios_db.json atualizado [skip ci]"
+          git commit -m "Auto-update: usuarios_db.json [skip ci]"
           git push origin main
         else
-          echo "Nenhuma alteração nas bancas dos usuários."
+          echo "Nenhuma alteração de saldo necessária."
         fi
+        
