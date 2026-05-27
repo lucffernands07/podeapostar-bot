@@ -25,9 +25,15 @@
     },
     {
         "mercado": "-4.5 GOLS (85%)",
-        "green": 14,
+        "green": 15,
         "red": 2,
-        "assertividade": 0.875
+        "assertividade": 0.8823529411764706
+    },
+    {
+        "mercado": "+1.5 GOLS (85%)",
+        "green": 60,
+        "red": 18,
+        "assertividade": 0.7692307692307693
     },
     {
         "mercado": "1X (85%)",
@@ -36,16 +42,10 @@
         "assertividade": 0.7692307692307693
     },
     {
-        "mercado": "+1.5 GOLS (85%)",
-        "green": 57,
-        "red": 18,
-        "assertividade": 0.76
-    },
-    {
         "mercado": "+1.5 GOLS (70%)",
-        "green": 38,
+        "green": 40,
         "red": 18,
-        "assertividade": 0.6785714285714286
+        "assertividade": 0.6896551724137931
     },
     {
         "mercado": "+1.5 GOLS (100%)",
@@ -54,19 +54,25 @@
         "assertividade": 0.6666666666666666
     },
     {
-        "mercado": "+2.5 GOLS (70%)",
-        "green": 35,
-        "red": 18,
-        "assertividade": 0.660377358490566
-    },
-    {
         "mercado": "AMBAS MARCAM: SIM (100%)",
         "green": 32,
         "red": 17,
         "assertividade": 0.6530612244897959
     },
     {
+        "mercado": "+2.5 GOLS (70%)",
+        "green": 35,
+        "red": 19,
+        "assertividade": 0.6481481481481481
+    },
+    {
         "mercado": "1X (100%)",
+        "green": 3,
+        "red": 2,
+        "assertividade": 0.6
+    },
+    {
+        "mercado": "1X (80%)",
         "green": 3,
         "red": 2,
         "assertividade": 0.6
@@ -79,8 +85,8 @@
     },
     {
         "mercado": "AMBAS MARCAM: SIM (80%)",
-        "green": 38,
-        "red": 38,
+        "green": 40,
+        "red": 40,
         "assertividade": 0.5
     },
     {
@@ -88,12 +94,6 @@
         "green": 3,
         "red": 3,
         "assertividade": 0.5
-    },
-    {
-        "mercado": "1X (80%)",
-        "green": 1,
-        "red": 2,
-        "assertividade": 0.3333333333333333
     },
     {
         "mercado": "X2 (85%)",
