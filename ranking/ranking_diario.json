@@ -30,16 +30,16 @@
         "assertividade": 0.8823529411764706
     },
     {
-        "mercado": "+1.5 GOLS (85%)",
-        "green": 60,
-        "red": 18,
-        "assertividade": 0.7692307692307693
-    },
-    {
         "mercado": "1X (85%)",
         "green": 10,
         "red": 3,
         "assertividade": 0.7692307692307693
+    },
+    {
+        "mercado": "+1.5 GOLS (85%)",
+        "green": 60,
+        "red": 19,
+        "assertividade": 0.759493670886076
     },
     {
         "mercado": "+1.5 GOLS (70%)",
@@ -48,9 +48,9 @@
         "assertividade": 0.6896551724137931
     },
     {
-        "mercado": "+1.5 GOLS (100%)",
-        "green": 6,
-        "red": 3,
+        "mercado": "1X (80%)",
+        "green": 4,
+        "red": 2,
         "assertividade": 0.6666666666666666
     },
     {
@@ -62,8 +62,14 @@
     {
         "mercado": "+2.5 GOLS (70%)",
         "green": 35,
-        "red": 19,
-        "assertividade": 0.6481481481481481
+        "red": 21,
+        "assertividade": 0.625
+    },
+    {
+        "mercado": "+1.5 GOLS (100%)",
+        "green": 6,
+        "red": 4,
+        "assertividade": 0.6
     },
     {
         "mercado": "1X (100%)",
@@ -72,28 +78,22 @@
         "assertividade": 0.6
     },
     {
-        "mercado": "1X (80%)",
-        "green": 3,
-        "red": 2,
-        "assertividade": 0.6
-    },
-    {
         "mercado": "+2.5 GOLS (85%)",
         "green": 25,
-        "red": 18,
-        "assertividade": 0.5813953488372093
-    },
-    {
-        "mercado": "AMBAS MARCAM: SIM (80%)",
-        "green": 40,
-        "red": 40,
-        "assertividade": 0.5
+        "red": 19,
+        "assertividade": 0.5681818181818182
     },
     {
         "mercado": "-4.5 GOLS (70%)",
         "green": 3,
         "red": 3,
         "assertividade": 0.5
+    },
+    {
+        "mercado": "AMBAS MARCAM: SIM (80%)",
+        "green": 40,
+        "red": 43,
+        "assertividade": 0.4819277108433735
     },
     {
         "mercado": "X2 (85%)",
