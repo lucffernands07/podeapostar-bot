@@ -1,0 +1,64 @@
+name: Controle de Usuarios e Banca
+
+on:
+  # Permite que você ative o fluxo manualmente pelo botão do GitHub se quiser
+  workflow_dispatch:
+  
+  # Roda o script de forma agendada (ex: a cada 5 minutos para checar novos registros)
+  # Ou você pode integrar isso dentro do disparo do seu robô principal pós-jogos
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+  run-bot-and-sync:
+    runs-on: ubuntu-latest
+    
+    # Dá permissão para o Workflow conseguir escrever de volta no seu repositório privado
+    permissions:
+      contents: write
+
+    steps:
+    # 1. Faz o Checkout do seu código privado
+    - name: Checkout do Repositório
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: true
+
+    # 2. Configura o Python na máquina virtual
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    # 3. Instala as dependências (telebot, etc)
+    - name: Instalar Dependências
+      run: |
+        pip install pyTelegramBotAPI
+
+    # 4. Executa a rotina do seu ecossistema passando suas Repository Secrets
+    - name: Executar Rotina de Banca e Registro
+      env:
+        TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+        CHAT_ID: ${{ secrets.CHAT_ID }}
+        BSD_TOKEN: ${{ secrets.BSD_TOKEN }}
+      run: |
+        # Aqui roda o script que processa as atualizações ou mantém o ciclo de checagem
+        python users/painel_admin.py
+
+    # 5. 🌟 A MÁGICA DO SALVAMENTO AUTOMÁTICO 🌟
+    # Se o arquivo usuarios_db.json foi criado ou alterado, este passo salva ele de volta no GitHub
+    - name: Salvar e Commitar Alterações no Banco JSON
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        
+        # Verifica se houve mudanças na pasta users
+        if [ -n "$(git status --porcelain users/usuarios_db.json)" ]; then
+          echo "Detectadas mudanças no banco de dados. Salvando..."
+          git add users/usuarios_db.json
+          git commit -m "Auto-update: usuarios_db.json atualizado [skip ci]"
+          git push origin main
+        else
+          echo "Nenhuma alteração nas bancas dos usuários."
+        fi
