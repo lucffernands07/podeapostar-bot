@@ -2,9 +2,8 @@ name: Gerador de Estatísticas e Padrões
 
 on:
   schedule:
-    # 08:14 UTC (05:14 AM Horário de Brasília) - Processa os Resultados de Ontem
-    # Mudança para minuto quebrado evita o congestionamento de servidores do GitHub
-    - cron: '14 8 * * *'
+    # 23:05 UTC (02:05 AM Horário de Brasília) - Processa os Resultados de Ontem
+    - cron: '5 23 * * *'
   workflow_dispatch: # Permite que você clique em "Run workflow" para testar manualmente agora
 
 jobs:
