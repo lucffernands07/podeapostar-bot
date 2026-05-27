@@ -1,86 +1,5 @@
 [
     {
-        "horario": "19:00",
-        "liga": "Libertadores",
-        "time_casa": "Ind. del Valle (Ecu)",
-        "time_fora": "Rosario Central (Arg)",
-        "mercado": "+2.5 Gols (70%)",
-        "odd": "2.18",
-        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-del-Valle-CA-Rosario-Central/82768101/"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Libertadores",
-        "time_casa": "Libertad (Par)",
-        "time_fora": "Universidad Central (Ven)",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.95",
-        "link_betano": "https://www.betano.bet.br/match-odds/Libertad-Asuncion-UCV-FC/82768123/"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Sul-Americana",
-        "time_casa": "Atlético-MG (Bra)",
-        "time_fora": "Puerto Cabello (Ven)",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.31",
-        "link_betano": "https://www.betano.bet.br/match-odds/Clube-Atletico-MG-Academia-Puerto-Cabello/82820159/"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Sul-Americana",
-        "time_casa": "Caracas (Ven)",
-        "time_fora": "Botafogo (Bra)",
-        "mercado": "+1.5 Gols (100%)",
-        "odd": "1.45",
-        "link_betano": "https://www.betano.bet.br/match-odds/Caracas-FC-Botafogo-RJ/82820370/"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Sul-Americana",
-        "time_casa": "Caracas (Ven)",
-        "time_fora": "Botafogo (Bra)",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "2.00",
-        "link_betano": "https://www.betano.bet.br/match-odds/Caracas-FC-Botafogo-RJ/82820370/"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Sul-Americana",
-        "time_casa": "Caracas (Ven)",
-        "time_fora": "Botafogo (Bra)",
-        "mercado": "1X (80%)",
-        "odd": "1.67",
-        "link_betano": "https://www.betano.bet.br/match-odds/Caracas-FC-Botafogo-RJ/82820370/"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Sul-Americana",
-        "time_casa": "Cienciano (Per)",
-        "time_fora": "Juventud (Uru)",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.83",
-        "link_betano": "https://www.betano.bet.br/match-odds/Club-Cienciano-Juventud-de-Las-Piedras/82820166/"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Sul-Americana",
-        "time_casa": "Olimpia Asuncion (Par)",
-        "time_fora": "Audax Italiano (Chi)",
-        "mercado": "+2.5 Gols (85%)",
-        "odd": "1.82",
-        "link_betano": "https://www.betano.bet.br/match-odds/Olimpia-Asuncion-Audax-Italiano/82820455/"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Sul-Americana",
-        "time_casa": "Racing Club (Arg)",
-        "time_fora": "Independiente (Bol)",
-        "mercado": "+2.5 Gols (70%)",
-        "odd": "1.36",
-        "link_betano": "https://www.betano.bet.br/match-odds/Racing-Club-Independiente-Petrolero/82820375/"
-    },
-    {
         "horario": "21:30",
         "liga": "Libertadores",
         "time_casa": "Bolivar (Bol)",
@@ -95,7 +14,7 @@
         "time_casa": "Peñarol (Uru)",
         "time_fora": "Santa Fe (Col)",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.47",
+        "odd": "1.42",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Penarol-Montevideo-Independiente-Santa-Fe/82766261/"
     },
     {
@@ -104,7 +23,7 @@
         "time_casa": "Red Bull Bragantino (Bra)",
         "time_fora": "Carabobo (Ven)",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.31",
+        "odd": "1.33",
         "link_betano": "https://www.betano.bet.br/match-odds/Bragantino-SP-Carabobo-FC/82820601/"
     }
 ]
