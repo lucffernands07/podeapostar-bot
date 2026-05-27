@@ -29,6 +29,56 @@ def configuring_driver():
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     return driver
 
+# --- LÓGICA DIRETA DO SEU ODDS.PY (PRIMEIRA LINHA DISPONÍVEL) ---
+def capturar_odds_1x2_reais(driver, id_jogo):
+    odds_capturadas = {"odd_casa": "2.50", "odd_fora": "2.50"}
+    
+    # Abre a aba de resumo para pegar o link base
+    driver.execute_script(f"window.open('https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo', '_blank');")
+    original_window = driver.window_handles[0]
+    driver.switch_to.window(driver.window_handles[-1])
+
+    try:
+        time.sleep(2)
+        try:
+            elemento_aba = WebDriverWait(driver, 7).until(
+                EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/odds/')]"))
+            )
+            link_odds_base = elemento_aba.get_attribute('href')
+        except:
+            driver.close()
+            driver.switch_to.window(original_window)
+            return odds_capturadas
+
+        # --- VITÓRIA SECA (1X2) ---
+        url_1x2 = link_odds_base.replace("/odds/", "/odds/1x2-odds/tempo-regulamentar/")
+        driver.get(url_1x2)
+        try:
+            WebDriverWait(driver, 7).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
+            time.sleep(1.5)
+            
+            # Pega a primeira linha de odds disponível na tabela (independente de ser 365 ou Betano)
+            linha_1x2 = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
+            odds_1x2 = linha_1x2.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
+            
+            if len(odds_1x2) >= 3:
+                # Conforme as colunas reais: Índice 0 é Casa | Índice 2 é Fora
+                odd_c = odds_1x2[0].text.replace('↑', '').replace('↓', '').strip()
+                odd_f = odds_1x2[2].text.replace('↑', '').replace('↓', '').strip()
+                
+                if odd_c: odds_capturadas["odd_casa"] = odd_c
+                if odd_f: odds_capturadas["odd_fora"] = odd_f
+        except: 
+            pass
+
+    except Exception as e:
+        log("ERRO ODDS", f"Falha ao raspar odds do jogo {id_jogo}: {e}")
+    finally:
+        driver.close()
+        driver.switch_to.window(original_window)
+    
+    return odds_capturadas
+
 def definir_perfil_jogo(odd_casa, odd_fora):
     try:
         o_c = float(str(odd_casa).replace(',', '.'))
@@ -65,7 +115,7 @@ def processar_estatisticas():
     path_links_ontem = os.path.join(PATH_DIR, f"links_{data_ontem_str}.json")
     
     # =========================================================================
-    # FASE 1: CAPTURA E VALIDAÇÃO DOS LINKS DE HOJE (PARA USAR AMANHÃ)
+    # FASE 1: CAPTURA, BUSCA DE ODDS REAIS E SALVAMENTO DOS LINKS DE HOJE
     # =========================================================================
     log("FASE 1", "Verificando o arquivo pendentes.json da madrugada atual...")
     
@@ -88,27 +138,49 @@ def processar_estatisticas():
         log("ERRO", f"Não foi possível ler o arquivo pendentes.json: {e}")
         return
 
-    # Salva a ponte de dados de hoje
+    # Varredura de odds reais antes de consolidar o arquivo do dia de hoje
+    jogos_hoje = dados_pendentes.get("jogos", [])
+    if jogos_hoje:
+        log("ODDS REAIS", f"Iniciando varredura de odds 1X2 para {len(jogos_hoje)} partidas de hoje...")
+        driver_odds = configuring_driver()
+        
+        for jogo in jogos_hoje:
+            url_h2h = jogo.get("link_h2h") or ""
+            if "/jogo/" in url_h2h:
+                try:
+                    id_jogo = url_h2h.split("/jogo/")[1].split("/")[0]
+                    odds_reais = capturar_odds_1x2_reais(driver_odds, id_jogo)
+                    
+                    jogo["odd_casa"] = odds_reais["odd_casa"]
+                    jogo["odd_fora"] = odds_reais["odd_fora"]
+                    log("ODDS CAPTURADAS", f"{jogo['time_casa']} x {jogo['time_fora']} -> Casa: {jogo['odd_casa']} | Fora: {jogo['odd_fora']}")
+                except:
+                    jogo["odd_casa"] = "2.50"
+                    jogo["odd_fora"] = "2.50"
+            else:
+                jogo["odd_casa"] = "2.50"
+                jogo["odd_fora"] = "2.50"
+                
+        driver_odds.quit()
+
+    # Salva o arquivo de hoje completo e enriquecido com as odds de referência
     with open(path_links_hoje, 'w', encoding='utf-8') as f:
         json.dump(dados_pendentes, f, indent=4, ensure_ascii=False)
-    log("SALVAMENTO", f"Links de hoje guardados com sucesso em: {path_links_hoje}")
+    log("SALVAMENTO", f"Links e Odds de hoje guardados com sucesso em: {path_links_hoje}")
 
     # =========================================================================
     # FASE 2: TRAVA DE SEGURANÇA E PROCESSAMENTO DOS RESULTADOS DE ONTEM
     # =========================================================================
     log("FASE 2", f"Verificando existência do arquivo de ontem: {path_links_ontem}")
     
-    # 🛑 TRAVA SEGURO: Se o arquivo de ontem não existir, avisa e encerra imediatamente
     if not os.path.exists(path_links_ontem):
         log("TRAVA ATIVADA", f"Arquivo {path_links_ontem} não encontrado. Como este é o primeiro ciclo ou os links de ontem foram perdidos, a atualização da tabela de padrões começará automaticamente amanhã.")
         log("FIM", "Fase 1 concluída com sucesso. Fase 2 adiada para o próximo ciclo de amanhã.")
         return
 
-    # --- CORREÇÃO DO BLOCO DE LEITURA NA FASE 2 ---
     with open(path_links_ontem, 'r', encoding='utf-8') as f:
         dados_json_ontem = json.load(f)
 
-    # AJUSTE 1: Entra na chave "jogos" conforme a estrutura do seu print do repositório
     jogos_ontem = dados_json_ontem.get("jogos", [])
 
     if not jogos_ontem:
@@ -118,7 +190,6 @@ def processar_estatisticas():
     # Organiza em jogos únicos para não repetir requisições
     jogos_unicos = {}
     for p in jogos_ontem:
-        # AJUSTE 2: Mapeia para 'link_h2h' (que é o padrão gerado pelo seu robô principal)
         url = p.get("link_h2h") or p.get("link_betano") or p.get("link")
         if not url:
             continue
@@ -127,7 +198,10 @@ def processar_estatisticas():
             jogos_unicos[chave] = {
                 "time_casa": p["time_casa"],
                 "time_fora": p["time_fora"],
-                "url": url
+                "url": url,
+                # Recupera as odds salvas no dia anterior
+                "odd_casa": p.get("odd_casa", "2.50"),
+                "odd_fora": p.get("odd_fora", "2.50")
             }
 
     # Carrega ou inicia o banco histórico de padrões
@@ -168,9 +242,8 @@ def processar_estatisticas():
                     g_c = int(score_casa)
                     g_f = int(score_fora)
                     
-                    odd_casa, odd_fora = 2.50, 2.50
-
-                    perfil = definir_perfil_jogo(odd_casa, odd_fora)
+                    # Agora utiliza as odds reais capturadas no dia anterior
+                    perfil = definir_perfil_jogo(jogo["odd_casa"], jogo["odd_fora"])
                     status_mercados = checar_mercados_ocorridos(g_c, g_f)
                     
                     db_padroes[data_ontem_str][perfil]["total_jogos"] += 1
@@ -179,7 +252,7 @@ def processar_estatisticas():
                             db_padroes[data_ontem_str][perfil]["greens"][mercado] += 1
                             
                     consolidados += 1
-                    log("CONSOLIDADO", f"Sucesso -> {jogo['time_casa']} ({g_c}x{g_f}) | Perfil: {perfil}")
+                    log("CONSOLIDADO", f"Sucesso -> {jogo['time_casa']} ({g_c}x{g_f}) | Perfil: {perfil} (C: {jogo['odd_casa']} vs F: {jogo['odd_fora']})")
                 
                 time.sleep(1.2)
                 
@@ -196,4 +269,4 @@ def processar_estatisticas():
 
 if __name__ == "__main__":
     processar_estatisticas()
-    
+                   
