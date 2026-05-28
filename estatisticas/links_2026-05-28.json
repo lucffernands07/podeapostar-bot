@@ -1,0 +1,32 @@
+{
+    "data_geracao": "2026-05-27",
+    "jogos": [
+        {
+            "time_casa": "Bolivar (Bol)",
+            "time_fora": "Ind. Rivadavia (Arg)",
+            "mercado": "1X (80%)",
+            "mercado_ranking": "1X (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Sns3Act2/#/resumo-de-jogo",
+            "odd_casa": "2.63",
+            "odd_fora": "2.55"
+        },
+        {
+            "time_casa": "Peñarol (Uru)",
+            "time_fora": "Santa Fe (Col)",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hQYlY0Y8/#/resumo-de-jogo",
+            "odd_casa": "1.70",
+            "odd_fora": "5.25"
+        },
+        {
+            "time_casa": "Red Bull Bragantino (Bra)",
+            "time_fora": "Carabobo (Ven)",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/pl3oWaCi/#/resumo-de-jogo",
+            "odd_casa": "1.33",
+            "odd_fora": "9.00"
+        }
+    ]
+}
