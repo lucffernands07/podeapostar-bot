@@ -29,8 +29,8 @@
             "red": 18
         },
         "+1.5 GOLS (85%)": {
-            "green": 60,
-            "red": 19
+            "green": 61,
+            "red": 20
         },
         "+1.5 GOLS (100%)": {
             "green": 6,
@@ -86,10 +86,10 @@
         },
         "1X (80%)": {
             "green": 4,
-            "red": 2
+            "red": 3
         }
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "27/05/2026 22:49"
+    "ultima_atualizacao": "28/05/2026 06:58"
 }
