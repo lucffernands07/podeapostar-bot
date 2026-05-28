@@ -1,32 +1,50 @@
 {
-    "data_geracao": "2026-05-27",
+    "data_geracao": "2026-05-28",
     "jogos": [
         {
-            "time_casa": "Bolivar (Bol)",
-            "time_fora": "Ind. Rivadavia (Arg)",
-            "mercado": "1X (80%)",
-            "mercado_ranking": "1X (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Sns3Act2/#/resumo-de-jogo",
-            "odd_casa": "2.63",
-            "odd_fora": "2.55"
+            "time_casa": "Boca Juniors (Arg)",
+            "time_fora": "Universidad Católica (Chi)",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Ma7W6Xhg/#/resumo-de-jogo",
+            "odd_casa": "1.42",
+            "odd_fora": "7.50"
         },
         {
-            "time_casa": "Peñarol (Uru)",
-            "time_fora": "Santa Fe (Col)",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/hQYlY0Y8/#/resumo-de-jogo",
-            "odd_casa": "1.70",
-            "odd_fora": "5.25"
+            "time_casa": "Boca Juniors (Arg)",
+            "time_fora": "Universidad Católica (Chi)",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Ma7W6Xhg/#/resumo-de-jogo",
+            "odd_casa": "1.42",
+            "odd_fora": "7.50"
         },
         {
-            "time_casa": "Red Bull Bragantino (Bra)",
-            "time_fora": "Carabobo (Ven)",
+            "time_casa": "América de Cali (Col)",
+            "time_fora": "Macara (Ecu)",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QNb36FXa/#/resumo-de-jogo",
+            "odd_casa": "1.67",
+            "odd_fora": "5.75"
+        },
+        {
+            "time_casa": "Tigre (Arg)",
+            "time_fora": "Alianza Atl. (Per)",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/pl3oWaCi/#/resumo-de-jogo",
-            "odd_casa": "1.33",
-            "odd_fora": "9.00"
+            "link_h2h": "https://www.flashscore.com.br/jogo/bycB4g2C/#/resumo-de-jogo",
+            "odd_casa": "1.30",
+            "odd_fora": "12.00"
+        },
+        {
+            "time_casa": "Tigre (Arg)",
+            "time_fora": "Alianza Atl. (Per)",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bycB4g2C/#/resumo-de-jogo",
+            "odd_casa": "1.30",
+            "odd_fora": "12.00"
         }
     ]
 }

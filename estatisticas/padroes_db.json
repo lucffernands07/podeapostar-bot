@@ -89,15 +89,15 @@
             }
         },
         "EQUILIBRADO": {
-            "total_jogos": 7,
+            "total_jogos": 17,
             "greens": {
-                "1X": 5,
-                "VITORIA_CASA": 4,
-                "2X": 3,
-                "BTTS": 3,
-                "+1.5": 4,
-                "+2.5": 2,
-                "-4.5": 7
+                "1X": 11,
+                "VITORIA_CASA": 9,
+                "2X": 8,
+                "BTTS": 7,
+                "+1.5": 10,
+                "+2.5": 5,
+                "-4.5": 17
             }
         },
         "FAVORITO_FORA": {
