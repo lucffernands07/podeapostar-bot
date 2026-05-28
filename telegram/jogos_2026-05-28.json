@@ -1,0 +1,47 @@
+[
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Boca Juniors (Arg)",
+        "time_fora": "Universidad Católica (Chi)",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Boca-Juniors-Universidad-Catolica/82766912/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Boca Juniors (Arg)",
+        "time_fora": "Universidad Católica (Chi)",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Boca-Juniors-Universidad-Catolica/82766912/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "América de Cali (Col)",
+        "time_fora": "Macara (Ecu)",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/America-de-Cali-CSD-Macara/82820125/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "Tigre (Arg)",
+        "time_fora": "Alianza Atl. (Per)",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Tigre-Alianza-Atletico/82820095/"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "Tigre (Arg)",
+        "time_fora": "Alianza Atl. (Per)",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.63",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Tigre-Alianza-Atletico/82820095/"
+    }
+]
