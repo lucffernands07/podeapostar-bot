@@ -2,8 +2,8 @@ name: Gerador de Estatísticas e Padrões
 
 on:
   schedule:
-    # 05:05 UTC (02:05 AM Horário de Brasília) - Processa os Resultados de Ontem
-    - cron: '5 5 * * *'
+    # 03:05 UTC (00:05 AM Horário de Brasília) - Processa os Resultados de Ontem
+    - cron: '5 3 * * *'
   workflow_dispatch: # Permite que você clique em "Run workflow" para testar manualmente agora
 
 jobs:
