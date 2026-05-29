@@ -26,10 +26,10 @@
         },
         "+1.5 GOLS (70%)": {
             "green": 40,
-            "red": 18
+            "red": 20
         },
         "+1.5 GOLS (85%)": {
-            "green": 61,
+            "green": 62,
             "red": 20
         },
         "+1.5 GOLS (100%)": {
@@ -42,7 +42,7 @@
         },
         "AMBAS MARCAM: SIM (80%)": {
             "green": 40,
-            "red": 43
+            "red": 45
         },
         "AMBAS MARCAM: SIM (100%)": {
             "green": 32,
@@ -91,5 +91,5 @@
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "28/05/2026 06:58"
+    "ultima_atualizacao": "29/05/2026 05:20"
 }
