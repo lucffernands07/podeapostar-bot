@@ -4,8 +4,8 @@ COMPETICOES = {
     "Copa do Brasil": "https://www.flashscore.com.br/futebol/brasil/copa-betano-do-brasil/jogos/",
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/jogos/",
     "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/jogos/",
-    "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/serie-b/jogos/",
-    "Brasileirão Série C": "https://www.flashscore.com.br/futebol/brasil/serie-c/jogos/",  # <-- INCLUÍDO AQUI
+    "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/brasileirao-serie-b/jogos/",
+    "Brasileirão Série C": "https://www.flashscore.com.br/futebol/brasil/brasileirao-serie-c/jogos/",
     "Argentina - Liga Profesional": "https://www.flashscore.com.br/futebol/argentina/liga-profesional/jogos/",
     
     # --- BLOCO 2: ELITE EUROPEIA (BIG 5 + CHAMPIONS) ---
