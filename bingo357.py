@@ -34,10 +34,9 @@ def carregar_ranking_pro():
         try:
             with open(PATH_RANKING_DIARIO, 'r', encoding='utf-8') as f:
                 conteudo = json.load(f)
-                # Mantém compatibilidade caso o arquivo mude para o formato de dicionário separado
                 if isinstance(conteudo, dict):
                     return conteudo.get("mercados", [])
-                return conteudo # Retorna a lista original se ainda não foi convertido
+                return conteudo 
         except: return []
     return []
 
@@ -81,29 +80,25 @@ def montar_bilhetes_estrategicos(dados_entrada):
         bingo5_selecao.sort(key=lambda x: x.get('horario', '00:00'))
         bilhetes.append({"id": "BINGO5", "nome": "💰 BINGO 5: ESTRUTURADO", "jogos": bingo5_selecao[:5]})
 
-    # --- BINGO PREMIUM (PRO): ELITE (A NOVA LÓGICA DE SEPARAÇÃO) ---
+    # --- BINGO PREMIUM (PRO): ELITE ---
     ranking_pro = carregar_ranking_pro()
     lista_premium = []
     jogos_disponiveis = lista_jogos.copy()
 
-    # PESCARIA ATIVA: Percorre o ranking da elite e busca os jogos correspondentes
     for elite in ranking_pro:
         mercado_elite = elite['mercado'].upper().strip()
         
-        # Procura nos jogos do dia se alguém tem esse mercado
         for i in range(len(jogos_disponiveis) - 1, -1, -1):
             jogo = jogos_disponiveis[i]
             mercado_jogo = str(jogo.get('mercado', "")).upper().strip()
             
-            # Se o mercado do ranking estiver no jogo (ex: "1X (85%)" está em "DUPLA CHANCE: 1X (85%)")
             if mercado_elite in mercado_jogo:
                 lista_premium.append(jogo)
-                jogos_disponiveis.pop(i) # Remove para não repetir o mesmo jogo
+                jogos_disponiveis.pop(i) 
                 
             if len(lista_premium) >= 7: break
         if len(lista_premium) >= 7: break
 
-    # Se o ranking não completou 7, pega os melhores por probabilidade do dia
     if len(lista_premium) < 7:
         sobra = sorted(jogos_disponiveis, key=lambda x: extrair_porcentagem(x.get('mercado', '')), reverse=True)
         for s in sobra:
@@ -137,6 +132,9 @@ def formatar_para_telegram(bilhetes, cache_dados):
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
             odd_valor = j.get('odd') or info_extra.get('odd', '1.0')
             link_final = info_extra.get('link') or "https://www.betano.bet.br/"
+            
+            # 🚀 CAPTURA O LINK H2H DO CACHE (SE EXISTIR)
+            link_h2h = info_extra.get('link_h2h', None)
 
             chave_jogo = f"{horario}_{j.get('time_casa')}_{j.get('time_fora')}"
             if chave_jogo not in agrupados:
@@ -144,7 +142,8 @@ def formatar_para_telegram(bilhetes, cache_dados):
                     "horario": horario, "liga": liga,
                     "time_casa": j.get('time_casa', 'Casa'),
                     "time_fora": j.get('time_fora', 'Fora'),
-                    "mercados": [], "link": link_final
+                    "mercados": [], "link": link_final,
+                    "link_h2h": link_h2h  # Armazena no agrupamento do confronto
                 }
             
             agrupados[chave_jogo]["mercados"].append({
@@ -158,14 +157,23 @@ def formatar_para_telegram(bilhetes, cache_dados):
             dados = agrupados[chave]
             dados["mercados"].sort(key=lambda x: x['prioridade'])
             linhas_mercados = "\n".join([m['texto'] for m in dados["mercados"]])
-            link_limpo = dados['link'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
             
+            # Limpeza e encode básico para evitar links quebrados no Telegram
+            link_betano_limpo = dados['link'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
+            
+            # --- MONTAGEM DO BLOCO DO JOGO COM PARSE CONDICIONAL ---
             bloco_jogo = (
                 f"⏱️ {dados['horario']} | {dados['liga']}\n"
                 f"🏟️ {dados['time_casa']} x {dados['time_fora']}\n"
                 f"{linhas_mercados}\n"
-                f"🌐 [Abrir na Betano]({link_limpo})"
+                f"🌐 [Abrir na Betano]({link_betano_limpo})"
             )
+            
+            # 🚀 SE HOUVER O LINK H2H, ADICIONA ABAIXO DO LINK DA BETANO
+            if dados.get("link_h2h"):
+                link_h2h_limpo = dados['link_h2h'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
+                bloco_jogo += f"\n📊 [Estatísticas]({link_h2h_limpo})"
+
             lista_blocos_jogos.append(bloco_jogo)
 
         corpo += "\n\n".join(lista_blocos_jogos)
@@ -173,4 +181,4 @@ def formatar_para_telegram(bilhetes, cache_dados):
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
-        
+    
