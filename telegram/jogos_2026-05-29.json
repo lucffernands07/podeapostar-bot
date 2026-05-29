@@ -1,11 +1,56 @@
 [
     {
+        "horario": "14:00",
+        "liga": "Noruega - Serie de Elite",
+        "time_casa": "Brann",
+        "time_fora": "Sarpsborg 08",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.45",
+        "link_betano": "https://www.betano.bet.br/match-odds/SK-Brann-Sarpsborg-08/84333925/"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Noruega - Serie de Elite",
+        "time_casa": "Brann",
+        "time_fora": "Sarpsborg 08",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/SK-Brann-Sarpsborg-08/84333925/"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Noruega - Serie de Elite",
+        "time_casa": "KFUM Oslo",
+        "time_fora": "Tromsö",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/KFUM-Oslo-Tromso-IL/84333996/"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Noruega - Serie de Elite",
+        "time_casa": "KFUM Oslo",
+        "time_fora": "Tromsö",
+        "mercado": "1X (80%)",
+        "odd": "1.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/KFUM-Oslo-Tromso-IL/84333996/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Itália - Serie B",
+        "time_casa": "Monza",
+        "time_fora": "Catanzaro",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.31",
+        "link_betano": "https://www.betano.bet.br/match-odds/AC-Monza-Catanzaro/86166978/"
+    },
+    {
         "horario": "15:00",
         "liga": "Itália - Serie B",
         "time_casa": "Monza",
         "time_fora": "Catanzaro",
         "mercado": "Vitória Casa (85%)",
-        "odd": "1.91",
+        "odd": "1.96",
         "link_betano": "https://www.betano.bet.br/match-odds/AC-Monza-Catanzaro/86166978/"
     }
 ]

@@ -1,6 +1,41 @@
 {
-    "data_geracao": "2026-05-28",
+    "data_geracao": "2026-05-29",
     "jogos": [
+        {
+            "time_casa": "Brann",
+            "time_fora": "Sarpsborg 08",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QFJ0JKyp/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Brann",
+            "time_fora": "Sarpsborg 08",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QFJ0JKyp/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "KFUM Oslo",
+            "time_fora": "Tromsö",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Ey0eu2b3/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "KFUM Oslo",
+            "time_fora": "Tromsö",
+            "mercado": "1X (80%)",
+            "mercado_ranking": "1X (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Ey0eu2b3/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Monza",
+            "time_fora": "Catanzaro",
+            "mercado": "+1.5 Gols (100%)",
+            "mercado_ranking": "+1.5 GOLS (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EyZLy78j/#/resumo-de-jogo"
+        },
         {
             "time_casa": "Monza",
             "time_fora": "Catanzaro",
