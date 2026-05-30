@@ -2,33 +2,36 @@ def verificar_chance_dupla(s):
     try:
         mercados = []
         
-        # Pega exatamente as variáveis que vêm das tabelas posicionais
-        ucc = s.get("t1_resultado_1", "")  # Tabela 1: Último do Casa
-        uff = s.get("t2_resultado_1", "")  # Tabela 2: Último do Fora
-        uh2h = s.get("h2h_res_1", "")      # Tabela 3: Último H2H do Mando
+        vitorias_casa = 0
+        vitorias_fora = 0
         
-        # --- AJUSTE NA TRAVA ---
-        # O uh2h OBRIGATORIAMENTE precisa ser uma dessas três letras.
-        # Se for "" (vazio por causa do continue), o jogo é barrado aqui.
-        dados_ok = (ucc != "" and uff != "" and uh2h in ["V", "E", "D"])
-        if not dados_ok:
-            return []
+        # 📊 Lê o canal exclusivo mapeado pelo main.py (as 5 partidas gerais sem travas)
+        for i in range(1, 6):
+            res_h2h = s.get(f"h2h_geral_res_{i}", "").strip().upper()
+            if res_h2h == "CASA":
+                vitorias_casa += 1
+            elif res_h2h == "FORA":
+                vitorias_fora += 1
 
-        # --- REGRA 1X ---
-        # Incluído o 'and dados_ok' para garantir a trava de ferro
-        cond_1x = (ucc in ["V", "E"] and uff in ["D", "E"] and uh2h in ["V", "E"] and dados_ok)
+        # -----------------------------------------------------------------
+        # 🟩 FILTRAGEM DO MERCADO BASEADA NA SUA TAXA DE SUCESSO (Últimos 5 jogos)
+        # -----------------------------------------------------------------
         
-        if cond_1x:
-            pct = s.get("chance_dupla_pct", "85%")
-            mercados.append(f"1X ({pct})")
+        # --- REGRA 1X (MANDANTE DE HOJE) ---
+        if vitorias_casa == 3:
+            mercados.append("1X (70%)")
+        elif vitorias_casa == 4:
+            mercados.append("1X (85%)")
+        elif vitorias_casa == 5:
+            mercados.append("1X (100%)")
         
-        # --- REGRA 2X ---
-        # Incluído o 'and dados_ok' para garantir a trava de ferro
-        cond_2x = (ucc == "D" and uff == "V" and uh2h == "D" and dados_ok)
-        
-        if cond_2x:
-            pct = s.get("chance_dupla_pct", "90%")
-            mercados.append(f"2X ({pct})")
+        # --- REGRA 2X (VISITANTE DE HOJE) ---
+        if vitorias_fora == 3:
+            mercados.append("2X (70%)")
+        elif vitorias_fora == 4:
+            mercados.append("2X (85%)")
+        elif vitorias_fora == 5:
+            mercados.append("2X (100%)")
                 
         return mercados
     except:
