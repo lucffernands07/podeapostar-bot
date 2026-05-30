@@ -1,0 +1,140 @@
+{
+    "data_geracao": "2026-05-30",
+    "jogos": [
+        {
+            "time_casa": "Bahia",
+            "time_fora": "Botafogo",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ptnOMDbs/#/resumo-de-jogo",
+            "odd_casa": "1.86",
+            "odd_fora": "3.75"
+        },
+        {
+            "time_casa": "Bahia",
+            "time_fora": "Botafogo",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ptnOMDbs/#/resumo-de-jogo",
+            "odd_casa": "1.86",
+            "odd_fora": "3.75"
+        },
+        {
+            "time_casa": "Grêmio",
+            "time_fora": "Corinthians",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Yo4FKNHD/#/resumo-de-jogo",
+            "odd_casa": "2.65",
+            "odd_fora": "2.75"
+        },
+        {
+            "time_casa": "Grêmio",
+            "time_fora": "Corinthians",
+            "mercado": "1X (90%)",
+            "mercado_ranking": "1X (90%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Yo4FKNHD/#/resumo-de-jogo",
+            "odd_casa": "2.57",
+            "odd_fora": "2.82"
+        },
+        {
+            "time_casa": "Santos",
+            "time_fora": "Vitória",
+            "mercado": "+1.5 Gols (100%)",
+            "mercado_ranking": "+1.5 GOLS (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/C8XJVmQE/#/resumo-de-jogo",
+            "odd_casa": "1.66",
+            "odd_fora": "5.00"
+        },
+        {
+            "time_casa": "Avaí",
+            "time_fora": "Criciúma",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lG4Sidt0/#/resumo-de-jogo",
+            "odd_casa": "2.40",
+            "odd_fora": "3.10"
+        },
+        {
+            "time_casa": "Avaí",
+            "time_fora": "Criciúma",
+            "mercado": "1X (80%)",
+            "mercado_ranking": "1X (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lG4Sidt0/#/resumo-de-jogo",
+            "odd_casa": "2.40",
+            "odd_fora": "3.10"
+        },
+        {
+            "time_casa": "Athletic Club",
+            "time_fora": "Fortaleza",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WdPfwcR6/#/resumo-de-jogo",
+            "odd_casa": "3.00",
+            "odd_fora": "2.50"
+        },
+        {
+            "time_casa": "PSG",
+            "time_fora": "Arsenal",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EJZRaQ15/#/resumo-de-jogo",
+            "odd_casa": "2.40",
+            "odd_fora": "3.00"
+        },
+        {
+            "time_casa": "Molde",
+            "time_fora": "Sandefjord",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vwrUKXCl/#/resumo-de-jogo",
+            "odd_casa": "1.57",
+            "odd_fora": "5.25"
+        },
+        {
+            "time_casa": "Rouisset",
+            "time_fora": "USM Alger",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/faJYKk6C/#/resumo-de-jogo",
+            "odd_casa": "2.77",
+            "odd_fora": "2.62"
+        },
+        {
+            "time_casa": "Granada",
+            "time_fora": "Sporting Gijón",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/n1zsOyXA/#/resumo-de-jogo",
+            "odd_casa": "2.35",
+            "odd_fora": "2.75"
+        },
+        {
+            "time_casa": "Comunicaciones",
+            "time_fora": "Deportivo Armenio",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/I9IGgj53/#/resumo-de-jogo",
+            "odd_casa": "2.00",
+            "odd_fora": "4.15"
+        },
+        {
+            "time_casa": "KuPS",
+            "time_fora": "Inter Turku",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/48NKgm0b/#/resumo-de-jogo",
+            "odd_casa": "2.45",
+            "odd_fora": "2.70"
+        },
+        {
+            "time_casa": "Lahti",
+            "time_fora": "Ilves",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/j5e8pqNp/#/resumo-de-jogo",
+            "odd_casa": "2.30",
+            "odd_fora": "2.70"
+        }
+    ]
+}
