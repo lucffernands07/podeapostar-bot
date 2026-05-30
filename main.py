@@ -65,6 +65,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "ultimo_gols_fora": 0, "t2_resultado_1": "",
         "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
         "h2h_res_1": "", "h2h_res_2": "", 
+        # 🚀 NOVAS CHAVES: Guardam as 5 partidas gerais sem filtro de mando para a Dupla Chance
+        "h2h_geral_res_1": "", "h2h_geral_res_2": "", "h2h_geral_res_3": "", "h2h_geral_res_4": "", "h2h_geral_res_5": "",
         "t1_placar_1": None, "t2_placar_1": None,     # Captura para Ambas Marcam
         "h2h_placar_1": None, "h2h_placar_2": None,   # Captura para Ambas Marcam
         "pular_gols": False 
@@ -133,8 +135,24 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         if i == 0: stats[f"t{idx+1}_resultado_1"] = res_atual
                  
                     elif idx == 2: 
-                        # Se o mando de campo estiver invertido (Mandante de hoje jogando fora no H2H),
-                        # nós ignoramos a linha para buscar o próximo jogo real em casa.
+                        # -----------------------------------------------------------------
+                        # 🟩 CANAL EXCLUSIVO DUPLA CHANCE: Captura Geral (Independente de mando)
+                        # Executa ANTES da trava original para ler as 5 linhas completas
+                        # -----------------------------------------------------------------
+                        if i < 5:
+                            res_geral = "EMPATE"
+                            if g1 > g2:
+                                if t1.lower() in n_casa_h2h.lower(): res_geral = "CASA"
+                                elif t2.lower() in n_casa_h2h.lower(): res_geral = "FORA"
+                            elif g1 < g2:
+                                if t1.lower() in n_fora_h2h.lower(): res_geral = "CASA"
+                                elif t2.lower() in n_fora_h2h.lower(): res_geral = "FORA"
+                            
+                            stats[f"h2h_geral_res_{i+1}"] = res_geral
+
+                        # -----------------------------------------------------------------
+                        # 🔒 TRAVA ORIGINAL INTACTA: Mantém a segurança dos outros mercados
+                        # -----------------------------------------------------------------
                         if t1.lower() in n_fora_h2h.lower():
                             continue 
 
@@ -153,7 +171,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         # Salva o segundo H2H válido com mando correto
                         elif stats["h2h_res_2"] == "":
                             stats["h2h_res_2"] = res_h2h
-                            break # Já achou os dois com mando certo, pode parar a tabela!
+                            # REMOVIDO o 'break' aqui para permitir o Selenium varrer as 5 linhas gerais
 
                         if g1 == g2: stats["h2h_empates"] += 1
 
@@ -169,6 +187,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
+
 
 def main():
     driver = configurar_driver()
