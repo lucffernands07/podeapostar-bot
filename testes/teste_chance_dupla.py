@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -26,19 +27,11 @@ def configurar_driver():
     return driver
 
 def verificar_chance_dupla(s):
-    """ Nova Regra: Baseada estritamente na contagem de vitórias do Confronto Direto """
+    """ Nova Regra Interna Baseada estritamente na Contagem do H2H """
     mercados = []
     
-    vitorias_casa = 0
-    vitorias_fora = 0
-    
-    # Varre as 5 variáveis capturadas do H2H
-    for i in range(1, 6):
-        res_h2h = s.get(f"h2h_res_{i}", "").strip().upper()
-        if res_h2h == "CASA":
-            vitorias_casa += 1
-        elif res_h2h == "FORA":
-            vitorias_fora += 1
+    vitorias_casa = s.get("h2h_vitorias_t1", 0)
+    vitorias_fora = s.get("h2h_vitorias_t2", 0)
 
     # --- REGRA 1X (MANDANTE) ---
     if vitorias_casa == 3:
@@ -59,16 +52,16 @@ def verificar_chance_dupla(s):
     return mercados, vitorias_casa, vitorias_fora
 
 def testar_nova_logica_h2h():
-    # 📌 NOVA URL DE TESTE ATUALIZADA
+    # URL estável do confronto direto para análise
     url_teste = "https://www.flashscore.com.br/jogo/futebol/chapecoense-jcQV3XP6/palmeiras-hMn9FTbH/h2h/total/"
     
-    # Definição dos nomes baseados no mando de campo atual
+    # Definição estrita dos times conforme o mando de hoje
     t1_casa = "Chapecoense"
     t2_fora = "Palmeiras"
     
     driver = configurar_driver()
-    print(f"\n🚀 Executando Validação H2H Baseada em Vencedores")
-    print(f"🏟️ Jogo Atual: {t1_casa} (Casa) x {t2_fora} (Fora)")
+    print(f"\n🚀 Executando Validação H2H Inteligente (Baseada em Gols e Nomes)")
+    print(f"🏟️ Jogo de Hoje -> Casa (t1): {t1_casa} | Visitante (t2): {t2_fora}")
     print(f"🔗 Link de Análise: {url_teste}\n")
     
     try:
@@ -77,77 +70,87 @@ def testar_nova_logica_h2h():
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
         time.sleep(3)
         
-        # Dicionário de estatísticas simulando o main do seu bot
+        # Dicionário mapeando os contadores que seu bot usa
         stats = {
-            "h2h_res_1": "",
-            "h2h_res_2": "",
-            "h2h_res_3": "",
-            "h2h_res_4": "",
-            "h2h_res_5": ""
+            "h2h_vitorias_t1": 0,  # Vitórias do Mandante de hoje (Chapecoense)
+            "h2h_vitorias_t2": 0,  # Vitórias do Visitante de hoje (Palmeiras)
+            "h2h_empates": 0,
+            "h2h_res_1": "", "h2h_res_2": "", "h2h_res_3": "", "h2h_res_4": "", "h2h_res_5": ""
         }
         
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
-        # A terceira tabela (índice 2) é sempre o Confronto Direto (H2H) Geral
         if len(secoes) >= 3:
-            secao_h2h = secoes[2]
+            secao_h2h = secoes[2]  # Terceira tabela: Confronto Direto Geral
             linhas = secao_h2h.find_elements(By.CSS_SELECTOR, ".h2h__row")
             print(f"🔎 Analisando Tabela 3 (Últimos {len(linhas[:5])} Confrontos Diretos)...")
             
-            # Varre no máximo as últimas 5 partidas diretas
             for i, linha in enumerate(linhas[:5]):
                 try:
-                    time_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text.strip()
-                    time_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text.strip()
+                    n_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text.strip()
+                    n_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text.strip()
+                    res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.strip()
                     
-                    # 🚀 Captura o elemento do resultado que possui a classe de vencedor (--winner)
-                    # Caso seja um empate, nenhum dos dois terá a classe winner
-                    vencedor_elemento = linha.find_elements(By.CSS_SELECTOR, ".h2h__participant.--winner")
+                    # Extração matemática dos gols via Regex
+                    numeros_placar = re.findall(r'\d+', res_texto)
+                    if len(numeros_placar) < 2: continue
+                    g1, g2 = int(numeros_placar[0]), int(numeros_placar[1])
                     
-                    if vencedor_elemento:
-                        nome_vencedor = vencedor_elemento[0].text.strip().lower()
-                        
-                        # Compara quem venceu o jogo com as equipes do confronto de hoje
-                        if t1_casa.lower() in nome_vencedor:
-                            stats[f"h2h_res_{i+1}"] = "CASA"
-                            print(f"   ⚔️ Linha {i+1}: {time_casa_h2h} vs {time_fora_h2h} ➔ Vencedor: {t1_casa} (Marcar CASA)")
-                        elif t2_fora.lower() in nome_vencedor:
-                            stats[f"h2h_res_{i+1}"] = "FORA"
-                            print(f"   ⚔️ Linha {i+1}: {time_casa_h2h} vs {time_fora_h2h} ➔ Vencedor: {t2_fora} (Marcar FORA)")
-                        else:
-                            stats[f"h2h_res_{i+1}"] = "OUTRO"
-                            print(f"   ⚔️ Linha {i+1}: {time_casa_h2h} vs {time_fora_h2h} ➔ Vencedor: {vencedor_elemento[0].text} (Outro time)")
+                    res_h2h = "EMPATE"
+                    
+                    # Lógica cega de mando: descobre quem ganhou por gols e cruza com os nomes
+                    if g1 > g2:
+                        if t1_casa.lower() in n_casa_h2h.lower():
+                            res_h2h = "CASA"
+                        elif t2_fora.lower() in n_casa_h2h.lower():
+                            res_h2h = "FORA"
+                    elif g1 < g2:
+                        if t1_casa.lower() in n_fora_h2h.lower():
+                            res_h2h = "CASA"
+                        elif t2_fora.lower() in n_fora_h2h.lower():
+                            res_h2h = "FORA"
+
+                    # Alimenta os contadores matemáticos
+                    if res_h2h == "CASA":
+                        stats["h2h_vitorias_t1"] += 1
+                        print(f"   ⚔️ Linha {i+1}: {n_casa_h2h} {g1}-{g2} {n_fora_h2h} ➔ Ganhou: {t1_casa}")
+                    elif res_h2h == "FORA":
+                        stats["h2h_vitorias_t2"] += 1
+                        print(f"   ⚔️ Linha {i+1}: {n_casa_h2h} {g1}-{g2} {n_fora_h2h} ➔ Ganhou: {t2_fora}")
                     else:
-                        stats[f"h2h_res_{i+1}"] = "EMPATE"
-                        print(f"   ⚔️ Linha {i+1}: {time_casa_h2h} vs {time_fora_h2h} ➔ Resultado: EMPATE")
+                        stats["h2h_empates"] += 1
+                        print(f"   ⚔️ Linha {i+1}: {n_casa_h2h} {g1}-{g2} {n_fora_h2h} ➔ Resultado: EMPATE")
+                        
+                    # Salva nas variáveis sequenciais h2h_res_X
+                    stats[f"h2h_res_{i+1}"] = res_h2h
+
                 except Exception as line_err:
-                    print(f"   ⚠️ Erro ao processar linha {i+1}: {line_err}")
-                    stats[f"h2h_res_{i+1}"] = "ERRO"
+                    print(f"   ⚠️ Erro na linha {i+1}: {line_err}")
         else:
-            print("🟥 Erro: Tabela 3 de Confrontos Diretos não encontrada na página.")
+            print("🟥 Erro: Tabela 3 não carregou.")
             return
 
-        # Executa a nova regra matemática passando o dicionário preenchido
+        # Executa a nova regra matemática
         mercados_aprovados, v_c, v_f = verificar_chance_dupla(stats)
 
         print("\n" + "="*75)
         print(f"🔬 CONSOLIDADO FINAL DA NOVA REGRA H2H")
-        print(f"   [DADOS RASPADOS]: {list(stats.values())}")
+        print(f"   [MATEAMENTO SEQUENCIAL]: {[stats[f'h2h_res_{x}'] for x in range(1,6)]}")
         print(f"   📊 Total Vitórias Mandante Atual ({t1_casa}): {v_c}")
         print(f"   📊 Total Vitórias Visitante Atual ({t2_fora}): {v_f}")
         print("-"*75)
         if mercados_aprovados:
             print(f"   🟩 PROPOSTA EMITIDA: {mercados_aprovados}")
         else:
-            print(f"   🟥 BLOQUEADO: Nenhum time atingiu o critério mínimo (3, 4 ou 5 Vitórias).")
+            print(f"   🟥 BLOQUEADO: Nenhum atingiu as 3 vitórias mínimas.")
         print("="*75 + "\n")
 
     except Exception as e:
-        print(f"❌ Erro Crítico no Teste: {e}")
+        print(f"❌ Erro Crítico: {e}")
     finally:
         driver.quit()
         print("🏁 Teste finalizado.")
 
 if __name__ == "__main__":
     testar_nova_logica_h2h()
-        
+                    
