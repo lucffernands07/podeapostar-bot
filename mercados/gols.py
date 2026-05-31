@@ -1,14 +1,13 @@
 """
-REGRAS DE MERCADO - GOLS (ATUALIZADO)
-1. Prioridade Máxima: -4.5 Gols se o jogo for estatisticamente "Under" (Sem tendência de Over).
-2. Over 1.5/2.5 (100% / 85%): Requer recorrência mínima de 4/5 nos últimos 5 jogos E obrigatoriamente +1.5/+2.5 no último jogo do H2H.
-3. Over 1.5/2.5 (70%): Ativado se um dos times tiver exatamente 3/5 e o outro no mínimo 4/5, exigindo validação de Over no último jogo de ambos E no último H2H.
-4. Filtro de Segurança: Evita sugerir Over e Under no mesmo jogo para manter a coerência do bilhete.
+REGRAS DE MERCADO - GOLS (REESTRUTURAÇÃO COMPLETA)
+1. Filtro Inicial de Recorrência: Exige no mínimo 4/5 para todos os mercados (+1.5, +2.5 e -4.5).
+2. Trava de H2H Mandatória: O último jogo do confronto direto DEVE bater o mercado escolhido.
+3. Decisão por Maior Confiança: Ganha o mercado que atingir a maior porcentagem (%).
+4. Critério de Desempate Estrito: Se houver empate na %, a prioridade de saída é: -4.5 ➔ +1.5 ➔ +2.5.
 """
 
 def verificar_ultimo_jogo(gols_placar_texto, alvo):
     try:
-        # Usa regex para extrair os números do texto do placar (ex: "3-1" -> [3, 1])
         import re
         numeros = re.findall(r'\d+', str(gols_placar_texto))
         if len(numeros) < 2: return False
@@ -22,68 +21,61 @@ def verificar_ultimo_jogo(gols_placar_texto, alvo):
         return False
     return False
 
-def calcular_chance_v3(c, f, ultimo_c, ultimo_f, ultimo_h2h, alvo):
+def calcular_porcentagem_gols(c, f, ultimo_h2h, alvo):
     try:
         c, f = int(c), int(f)
     except:
-        return None
+        return 0
 
-    # 🔒 TRAVA MANDATÓRIA: Independente da porcentagem (100%, 85% ou 70%), 
-    # o último jogo do H2H TEM que bater o alvo de gols.
-    if alvo in [1.5, 2.5]:
-        if not verificar_ultimo_jogo(ultimo_h2h, alvo):
-            return None
+    # ➔ PASSO 1: Exige no mínimo 4/5 para ambos os times
+    if c < 4 or f < 4:
+        return 0
 
-    # --- REGRA 1: AMBOS COM NO MÍNIMO 4/5 (APROVAÇÃO DIRETA) ---
-    if c >= 4 and f >= 4:
-        if c == 5 and f == 5: return "100%"
-        return "85%"
-    
-    # --- REGRA 2: UM TIME COM 3/5 E O OUTRO COM NO MÍNIMO 4/5 + ÚLTIMO JOGO ---
-    combinacao_valida = (c == 3 and f >= 4) or (f == 3 and c >= 4)
-    
-    if combinacao_valida:
-        # Valida o último jogo isolado de cada time
-        if verificar_ultimo_jogo(str(ultimo_c), alvo) and verificar_ultimo_jogo(str(ultimo_f), alvo):
-            return "70%"
-            
-    return None
+    # ➔ PASSO 2: O último confronto direto (H2H) DEVE bater o mercado
+    if not verificar_ultimo_jogo(ultimo_h2h, alvo):
+        return 0
+
+    # Se passou nas travas, calcula o peso da % (5/5 e 5/5 = 100%, mistos ou 4/5 = 85%)
+    if c == 5 and f == 5:
+        return 100
+    return 85
 
 def verificar_gols(s):
     """
-    Recebe o dicionário 's' do main.py
+    Recebe o dicionário 's' do main.py e processa a hierarquia exata solicitada
     """
     if not isinstance(s, dict):
         return []
 
-    # Extração segura dos dados de gols dos últimos jogos isolados
-    u_c = s.get("ultimo_gols_casa", 0)
-    u_f = s.get("ultimo_gols_fora", 0)
-    
-    # Extração do placar em texto do último confronto direto (H2H)
+    # Extração segura do placar em texto do último confronto direto (H2H)
     u_h2h = s.get("h2h_placar_1", "")
 
-    # Cálculo das chances passando o u_h2h como novo critério
-    ch15 = calcular_chance_v3(s.get("casa_15", 0), s.get("fora_15", 0), u_c, u_f, u_h2h, 1.5)
-    ch25 = calcular_chance_v3(s.get("casa_25", 0), s.get("fora_25", 0), u_c, u_f, u_h2h, 2.5)
-    
-    # Para o Under 4.5, mantemos a lógica anterior (não exige a trava de Over do H2H)
-    try:
-        c_45 = int(s.get("casa_45_under", 0))
-        f_45 = int(s.get("fora_45_under", 0))
-        ch45_under = "85%" if (c_45 >= 4 and f_45 >= 4) else None
-    except:
-        ch45_under = None
-    
-    resultados = []
+    # Mapeamento e cálculo das porcentagens de cada mercado seguindo os Passos 1 e 2
+    pct_m45 = calcular_porcentagem_gols(s.get("casa_45_under", 0), s.get("fora_45_under", 0), u_h2h, 4.5)
+    pct_15  = calcular_porcentagem_gols(s.get("casa_15", 0), s.get("fora_15", 0), u_h2h, 1.5)
+    pct_25  = calcular_porcentagem_gols(s.get("casa_25", 0), s.get("fora_25", 0), u_h2h, 2.5)
 
-    if ch25:
-        resultados.append({"mercado": f"+2.5 Gols ({ch25})", "tipo": "GOLS_25"})
-    elif ch15:
-        resultados.append({"mercado": f"+1.5 Gols ({ch15})", "tipo": "GOLS_15"})
-    
-    if ch45_under and not ch15:
-        resultados.append({"mercado": f"-4.5 Gols ({ch45_under})", "tipo": "GOLS_M45"}) 
+    # ➔ PASSO 3 & 4: Escolha baseada em Maior Porcentagem com Desempate por Prioridade
+    # Criamos uma lista ordenada estritamente pela sua regra de desempate (-4.5 > +1.5 > +2.5)
+    candidatos = [
+        {"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45", "pct": pct_m45, "prioridade": 3},
+        {"mercado": f"+1.5 Gols ({pct_15}%)",  "tipo": "GOLS_15",  "pct": pct_15,  "prioridade": 2},
+        {"mercado": f"+2.5 Gols ({pct_25}%)",  "tipo": "GOLS_25",  "pct": pct_25,  "prioridade": 1}
+    ]
 
-    return resultados
+    # Filtra apenas quem passou nos critérios (porcentagem maior que zero)
+    aprovados = [c for c in candidatos if c["pct"] > 0]
+
+    if not aprovados:
+        return []
+
+    # Ordena primeiro pela maior Porcentagem (Passo 3) e depois pela Prioridade (Passo 4)
+    # O Python ordena de forma crescente, então invertemos com reverse=True
+    aprovados.sort(key=lambda x: (x["pct"], x["prioridade"]), reverse=True)
+
+    # Pega o vencedor absoluto do topo da esteira
+    vencedor = aprovados[0]
+
+    # Retorna o formato correto exigido pelo seu robô
+    return [{"mercado": vencedor["mercado"], "tipo": vencedor["tipo"]}]
     
