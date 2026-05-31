@@ -10,19 +10,20 @@ COMPETICOES = {
     
     # --- BLOCO 2: ELITE EUROPEIA (BIG 5 + CHAMPIONS) ---
     "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/jogos/",
-    "Premier League": "https://www.flashscore.com.br/futebol/inglaterra/premier-league/jogos/",
-    "LaLiga": "https://www.flashscore.com.br/futebol/espanha/laliga/jogos/",
-    "Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/bundesliga/jogos/",
-    "Serie A (Itália)": "https://www.flashscore.com.br/futebol/italia/serie-a/jogos/",
-    "Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
-    "Europa League": "https://www.flashscore.com.br/futebol/europa/liga-europa/jogos/",
+    "Inglaterra - Premier League": "https://www.flashscore.com.br/futebol/inglaterra/premier-league/jogos/",
+    "Espanha - LaLiga": "https://www.flashscore.com.br/futebol/espanha/laliga/jogos/",
+    "Alemanha - Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/bundesliga/jogos/",
+    "Italia - Serie A": "https://www.flashscore.com.br/futebol/italia/serie-a/jogos/",
+    "França - Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
+    "Europa - League": "https://www.flashscore.com.br/futebol/europa/liga-europa/jogos/",
 
     # --- BLOCO 3: COPAS NACIONAIS ---
     "Inglaterra - FA Cup": "https://www.flashscore.com.br/futebol/inglaterra/copa-da-fpc/jogos/",
     "Espanha - Copa del Rey": "https://www.flashscore.com.br/futebol/espanha/copa-do-rei/jogos/",
     "Alemanha - DFB Pokal": "https://www.flashscore.com.br/futebol/alemanha/copa-da-alemanha/jogos/",
     "Arábia Saudita - King Cup": "https://www.flashscore.com.br/futebol/arabia-saudita/copa-do-rei/jogos/",
-    "EUA - MLS": "https://www.flashscore.com.br/futebol/eua/mls/",
+    "EUA - MLS": "https://www.flashscore.com.br/futebol/eua/mls/jogos",
+    "Argentina - Copa": "https://www.flashscore.com.br/futebol/argentina/copa-argentina/jogos",
 
     # --- BLOCO 4: LIGAS SECUNDÁRIAS EUROPEIAS ---
     "Arábia Saudita - Primeira Liga": "https://www.flashscore.com.br/futebol/arabia-saudita/primeira-liga/jogos/",
@@ -45,7 +46,7 @@ COMPETICOES = {
     "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",
     "Copa dos Campeões - CONCACAF": "https://www.flashscore.com.br/futebol/america-do-norte-e-central/copa-dos-campeoes-da-concacaf/jogos",
     "México - Liga MX": "https://www.flashscore.com.br/futebol/mexico/liga-mx/jogos/",
-    "Andorra - Primeira Divisão": "https://www.flashscore.com.br/futebol/andorra/primeira-divisao/",
+    "Andorra - Primeira Divisão": "https://www.flashscore.com.br/futebol/andorra/primeira-divisao/jogos/",
     "Argélia - Liga 1": "https://www.flashscore.com.br/futebol/argelia/1-divisao/jogos/",
     "Espanha - La Liga 2": "https://www.flashscore.com.br/futebol/espanha/laliga2/jogos/",
     "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/jogos/",  # JÁ ESTAVA AQUI!
