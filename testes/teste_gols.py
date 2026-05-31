@@ -14,7 +14,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from mercados import gols
-import odds
 
 def configurar_driver():
     options = Options()
@@ -29,30 +28,32 @@ def configurar_driver():
     return driver
 
 def testar_jogo_especifico():
-    url_teste = "https://www.flashscore.com.br/jogo/futebol/avai-rPzY7fWt/novorizontino-4lOgZPQl/h2h/total/?mid=8pNsVvYg"
-    t1_nome, t2_nome = "Novorizontino", "Avai"
+    # URL real do jogo Cruzeiro x Fluminense enviada por você
+    url_teste = "https://www.flashscore.com.br/jogo/futebol/cruzeiro-0SwtclaU/fluminense-EV9L3kU4/h2h/total/"
+    t1_nome, t2_nome = "Cruzeiro", "Fluminense"
     
     driver = configurar_driver()
-    print(f"\n🚀 Iniciando teste: {t1_nome} x {t2_nome}")
+    print(f"\n🚀 Iniciando teste real: {t1_nome} x {t2_nome}")
     
     try:
         driver.get(url_teste)
         wait = WebDriverWait(driver, 15)
-        
-        # Garante que estamos na aba H2H
-        time.sleep(3)
+        time.sleep(4) # Tempo de segurança para renderização das tabelas
         
         stats = {
             "casa_15": 0, "casa_25": 0, "casa_45_under": 0,
             "fora_15": 0, "fora_25": 0, "fora_45_under": 0,
-            "ultimo_gols_casa": 0, "ultimo_gols_fora": 0
+            "ultimo_gols_casa": 0, "ultimo_gols_fora": 0,
+            "h2h_placar_1": "" # Nova chave essencial para a regra
         }
 
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         
-        for idx, secao in enumerate(secoes[:2]): # Apenas Casa e Fora
+        # --- PARTE 1: RASPAR ÚLTIMOS JOGOS ISOLADOS (CASA E FORA) ---
+        for idx, secao in enumerate(secoes[:2]): 
             prefixo = "casa" if idx == 0 else "fora"
-            print(f"\n📊 Analisando {prefixo.upper()} ({t1_nome if idx == 0 else t2_nome}):")
+            nome_time = t1_nome if idx == 0 else t2_nome
+            print(f"\n📊 Analisando jogos isolados de {prefixo.upper()} ({nome_time}):")
             
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
             
@@ -63,9 +64,7 @@ def testar_jogo_especifico():
                 if len(numeros) >= 2:
                     g1, g2 = int(numeros[0]), int(numeros[1])
                     total = g1 + g2
-                    
-                    # Log individual para conferência
-                    print(f"   L{i+1}: Placar {g1}-{g2} | Total: {total} gols")
+                    print(f"   Jogo {i+1}: Placar {g1}-{g2} | Total: {total} gols")
                     
                     if i == 0:
                         stats[f"ultimo_gols_{prefixo}"] = total
@@ -74,26 +73,55 @@ def testar_jogo_especifico():
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
                     if total <= 4: stats[f"{prefixo}_45_under"] += 1
 
-        print("\n--- RESUMO DE STATS (Dicionário enviado ao gols.py) ---")
+        # --- PARTE 2: RASPAR O ÚLTIMO CONFRONTO DIRETO (H2H TABELA 3) ---
+        if len(secoes) >= 3:
+            print("\n⚔️ Analisando o histórico de Confronto Direto (H2H):")
+            linhas_h2h = secoes[2].find_elements(By.CSS_SELECTOR, ".h2h__row")
+            if linhas_h2h:
+                ultimo_confronto_placar = linhas_h2h[0].find_element(By.CSS_SELECTOR, ".h2h__result").text
+                stats["h2h_placar_1"] = ultimo_confronto_placar
+                print(f"   ➔ Último jogo do H2H capturado: '{ultimo_confronto_placar}'")
+            else:
+                print("   ⚠️ Nenhuma linha de H2H encontrada na Tabela 3.")
+        else:
+            print("   ⚠️ Tabela 3 de H2H não está disponível na página.")
+
+        print("\n--- RESUMO DO DICIONÁRIO ENVIADO ---")
         print(stats)
 
-                # Simula a chamada do módulo de gols
-        print("\n--- RESULTADO DO MÓDULO GOLS.PY ---")
+        # --- PARTE 3: SIMULAÇÃO E LOGS DE VALIDAÇÃO DOS 3 MERCADOS ---
+        print("\n--- LOGS DETALHADOS DE VALIDAÇÃO (PASSO A PASSO) ---")
+        u_h2h = stats["h2h_placar_1"]
+        
+        # Simulação manual para gerar logs visuais no terminal antes do veredito
+        for alvo, nome_m in [(4.5, "-4.5 Under"), (1.5, "+1.5 Over"), (2.5, "+2.5 Over")]:
+            pref_c = "casa_45_under" if alvo == 4.5 else f"casa_{str(alvo).replace('.','')}"
+            pref_f = "fora_45_under" if alvo == 4.5 else f"fora_{str(alvo).replace('.','')}"
+            
+            c_val = stats.get(pref_c, 0)
+            f_val = stats.get(pref_f, 0)
+            
+            # Validação do passo 1 (Mínimo 4/5)
+            p1_passou = c_val >= 4 and f_val >= 4
+            
+            # Validação do passo 2 (H2H bate mercado)
+            p2_passou = gols.verificar_ultimo_jogo(u_h2h, alvo)
+            
+            status_p1 = "✅ PASSOU" if p1_passou else "❌ REPROVOU"
+            status_p2 = "✅ PASSOU" if p2_passou else "❌ REPROVOU"
+            
+            print(f"📌 Mercado {nome_m}:")
+            print(f"   -> Passo 1 (Min 4/5?): {status_p1} | Casa: {c_val}/5, Fora: {f_val}/5")
+            print(f"   -> Passo 2 (H2H válido?): {status_p2} | Placar H2H: '{u_h2h}'")
+
+        print("\n--- RESULTADO FINAL DO MÓDULO GOLS.PY ---")
         res_gols = gols.verificar_gols(stats)
         
         if not res_gols:
-            print("❌ Módulo GOLS.PY não aprovou este jogo.")
+            print("❌ Módulo GOLS.PY não aprovou nenhuma entrada para este jogo.")
         else:
             for r in res_gols:
-                # Mudança aqui: acessamos apenas o 'mercado', que já tem a confiança
-                print(f"✅ APROVADO: {r['mercado']}")
-
-
-        # Teste de Odds (Simulado com o ID do jogo da URL)
-        id_jogo = "8pNsVvYg" # Extraído manualmente para o teste
-        print(f"\n🔍 Buscando Odds para ID: {id_jogo}...")
-        v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-        print(f"Odds capturadas: {v_odds}")
+                print(f"💰 PALPITE EMITIDO PARA O BILHETE: {r['mercado']} [Tipo: {r['tipo']}]")
 
     except Exception as e:
         print(f"❌ Erro durante o teste: {e}")
@@ -103,3 +131,4 @@ def testar_jogo_especifico():
 
 if __name__ == "__main__":
     testar_jogo_especifico()
+            
