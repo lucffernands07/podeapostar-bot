@@ -200,7 +200,7 @@ def main():
     try:
         # --- LOOP DE COMPETIÇÕES PROTEGIDO ---
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 120: break 
+            if total_mercados >= 200: break 
             print(f"\n--- Analisando: {nome_comp} ---")
             
             try:
@@ -289,7 +289,7 @@ def main():
                                     if "M45" in m_chave and odd_float >= 4.0:
                                         continue 
 
-                                    if odd_float >= 1.30:
+                                    if odd_float >= 1.25:
                                         # Salva para o Listão/Telegram
                                         lista_para_filtros.append({
                                             "horario": h_br, "time_casa": t1, "time_fora": t2,
