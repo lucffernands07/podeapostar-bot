@@ -36,6 +36,10 @@ COMPETICOES = {
     "Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/jogos/",
 
     # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
+    "Alemanha - Oberliga Westfalen": "https://www.flashscore.com.br/futebol/alemanha/oberliga-westfalen/jogos/",
+    "Alemanha - Oberliga Mittelrhein": "https://www.flashscore.com.br/futebol/alemanha/oberliga-mittelrhein/jogos/",
+    "Alemanha - Oberliga Niederrhein":"https://www.flashscore.com.br/futebol/alemanha/oberliga-niederrhein/jogos/",
+    "Albânia - Superliga": "https://www.flashscore.com.br/futebol/albania/super-liga/jogos/",
     "Noruega - Serie de Elite": "https://www.flashscore.com.br/futebol/noruega/serie-de-elite/jogos/",
     "França - Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
     "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",
@@ -52,7 +56,8 @@ COMPETICOES = {
     "Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/jogos/",
     "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",  # <-- INCLUÍDO AQUI
     "Colômbia - Primera A": "https://www.flashscore.com.br/futebol/colombia/primeira-a/jogos/",
-    "Argentina Primera B": "https://www.flashscore.com.br/futebol/argentina/primera-b/jogos/",  # <-- INCLUÍDO AQUI
+    "Argentina Primera B": "https://www.flashscore.com.br/futebol/argentina/primera-b/jogos/", # <-- INCLUÍDO AQUI
+    "Argentina Primeira Nacional": "https://www.flashscore.com.br/futebol/argentina/primera-nacional/jogos/",
     "Paraguai - Division 1": "https://www.flashscore.com.br/futebol/paraguai/primeira-divisao/jogos/",
     "Uruguai - Primera Division": "https://www.flashscore.com.br/futebol/uruguai/primeira-divisao/jogos/",
     "Bélgica - Challenger Pro League": "https://www.flashscore.com.br/futebol/belgica/challenger-pro-league/jogos/",
