@@ -47,15 +47,6 @@
     {
         "horario": "13:30",
         "liga": "Espanha - La Liga 2",
-        "time_casa": "La Coruña",
-        "time_fora": "Las Palmas",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.33",
-        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-La-Coruna-UD-Las-Palmas/85305550/"
-    },
-    {
-        "horario": "13:30",
-        "liga": "Espanha - La Liga 2",
         "time_casa": "Racing Santander",
         "time_fora": "Cádiz",
         "mercado": "2X (70%)",
@@ -68,7 +59,7 @@
         "time_casa": "Zaragoza",
         "time_fora": "Málaga",
         "mercado": "Ambas Marcam: Sim (100%)",
-        "odd": "1.83",
+        "odd": "1.91",
         "link_betano": "https://www.betano.bet.br/match-odds/Real-Zaragoza-Malaga-CF/83772366/"
     },
     {
@@ -104,7 +95,7 @@
         "time_casa": "Ceará",
         "time_fora": "Operário",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "2.10",
+        "odd": "2.00",
         "link_betano": "https://www.betano.bet.br/match-odds/Ceara-SC-CE-Operario-PR/86388409/"
     },
     {
@@ -113,7 +104,7 @@
         "time_casa": "Córdoba",
         "time_fora": "Huesca",
         "mercado": "2X (85%)",
-        "odd": "2.05",
+        "odd": "2.15",
         "link_betano": "https://www.betano.bet.br/match-odds/Cordoba-CF-SD-Huesca/85305564/"
     },
     {
