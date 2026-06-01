@@ -67,5 +67,6 @@ COMPETICOES = {
     "China - Super League": "https://www.flashscore.com.br/futebol/china/super-liga/jogos/",
     "Índia - Indian Super League": "https://www.flashscore.com.br/futebol/india/super-liga-indiana/jogos/",
     "Japão - Liga J1": "https://www.flashscore.com.br/futebol/japao/liga-j1/jogos/",
-    "Champions da Ásia": "https://www.flashscore.com.br/futebol/asia/liga-dos-campeoes-da-afc/jogos/"
+    "Champions da Ásia": "https://www.flashscore.com.br/futebol/asia/liga-dos-campeoes-da-afc/jogos/",
+    "Mundo - Amistoso Internacional": "https://www.flashscore.com.br/futebol/mundo/amistoso-internacional/jogos/"
 }
