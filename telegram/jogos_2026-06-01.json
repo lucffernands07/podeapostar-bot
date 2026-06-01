@@ -1,0 +1,38 @@
+[
+    {
+        "horario": "13:00",
+        "liga": "Mundo - Amistoso Internacional",
+        "time_casa": "Bulgária",
+        "time_fora": "Montenegro",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Bulgaria-Montenegro/86434782/"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Mundo - Amistoso Internacional",
+        "time_casa": "Maldivas",
+        "time_fora": "Afeganistão",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "2.02",
+        "link_betano": "https://www.betano.bet.br/match-odds/Maldives-Afghanistan/86646529/"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Mundo - Amistoso Internacional",
+        "time_casa": "Maldivas",
+        "time_fora": "Afeganistão",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "2.63",
+        "link_betano": "https://www.betano.bet.br/match-odds/Maldives-Afghanistan/86646529/"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Mundo - Amistoso Internacional",
+        "time_casa": "Noruega",
+        "time_fora": "Suécia",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.28",
+        "link_betano": "https://www.betano.bet.br/match-odds/Norway-Sweden/86435177/"
+    }
+]
