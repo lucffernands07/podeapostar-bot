@@ -37,9 +37,6 @@ COMPETICOES = {
     "Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/jogos/",
 
     # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
-    "Alemanha - Oberliga Westfalen": "https://www.flashscore.com.br/futebol/alemanha/oberliga-westfalen/jogos/",
-    "Alemanha - Oberliga Mittelrhein": "https://www.flashscore.com.br/futebol/alemanha/oberliga-mittelrhein/jogos/",
-    "Alemanha - Oberliga Niederrhein":"https://www.flashscore.com.br/futebol/alemanha/oberliga-niederrhein/jogos/",
     "Albânia - Superliga": "https://www.flashscore.com.br/futebol/albania/super-liga/jogos/",
     "Noruega - Serie de Elite": "https://www.flashscore.com.br/futebol/noruega/serie-de-elite/jogos/",
     "França - Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
