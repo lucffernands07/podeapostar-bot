@@ -37,9 +37,12 @@ COMPETICOES = {
     "Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/jogos/",
 
     # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
+    "Colombia - Copa": "https://www.flashscore.com.br/futebol/colombia/copa-da-colombia/jogos/",
+    "Colombia - Primeira A": "https://www.flashscore.com.br/futebol/colombia/primera-a/jogos/",
+    "Mundo - Amistoso Internacional": "https://www.flashscore.com.br/futebol/mundo/amistoso-internacional/jogos/",
     "Alemanha - Liga Playoffs": "https://www.flashscore.com.br/futebol/alemanha/playoffs-da-liga-regional/jogos/",
     "Albânia - Superliga": "https://www.flashscore.com.br/futebol/albania/super-liga/jogos/",
-    "Noruega - Serie de Elite": "https://www.flashscore.com.br/futebol/noruega/serie-de-elite/jogos/",
+    "Noruega - Serie de Elite": "https://www.flashscore.com.br/futebol/noruega/serie-de-el:ite/jogos/",
     "França - Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
     "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",
     "Copa dos Campeões - CONCACAF": "https://www.flashscore.com.br/futebol/america-do-norte-e-central/copa-dos-campeoes-da-concacaf/jogos",
@@ -68,5 +71,5 @@ COMPETICOES = {
     "Índia - Indian Super League": "https://www.flashscore.com.br/futebol/india/super-liga-indiana/jogos/",
     "Japão - Liga J1": "https://www.flashscore.com.br/futebol/japao/liga-j1/jogos/",
     "Champions da Ásia": "https://www.flashscore.com.br/futebol/asia/liga-dos-campeoes-da-afc/jogos/",
-    "Mundo - Amistoso Internacional": "https://www.flashscore.com.br/futebol/mundo/amistoso-internacional/jogos/"
+    "Eua - Liga 2: "https://www.flashscore.com.br/futebol/eua/usl-liga-dois/jogos/"
 }
