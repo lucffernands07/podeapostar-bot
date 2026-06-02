@@ -1,4 +1,19 @@
 {
     "data_geracao": "2026-06-02",
-    "jogos": []
+    "jogos": [
+        {
+            "time_casa": "Junior",
+            "time_fora": "Atl. Nacional",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/IRrLGlCj/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Junior",
+            "time_fora": "Atl. Nacional",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/IRrLGlCj/#/resumo-de-jogo"
+        }
+    ]
 }
