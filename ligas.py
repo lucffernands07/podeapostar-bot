@@ -71,5 +71,5 @@ COMPETICOES = {
     "Índia - Indian Super League": "https://www.flashscore.com.br/futebol/india/super-liga-indiana/jogos/",
     "Japão - Liga J1": "https://www.flashscore.com.br/futebol/japao/liga-j1/jogos/",
     "Champions da Ásia": "https://www.flashscore.com.br/futebol/asia/liga-dos-campeoes-da-afc/jogos/",
-    "Eua - Liga 2: "https://www.flashscore.com.br/futebol/eua/usl-liga-dois/jogos/"
+    "Eua - USL Liga 2": "https://www.flashscore.com.br/futebol/eua/usl-liga-dois/jogos/"
 }
