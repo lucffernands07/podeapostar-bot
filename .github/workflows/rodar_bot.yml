@@ -5,8 +5,8 @@ on:
     paths:
       - 'main.py'
   schedule:
-    # 01:11 UTC corresponde às 22:11 de Brasília (GMT-3)
-    - cron: '11 1 * * *'
+    # 00:11 UTC corresponde às 21:11 de Brasília (GMT-3)
+    - cron: '11 0 * * *'
   workflow_dispatch: 
 
 jobs:
