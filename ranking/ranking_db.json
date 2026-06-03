@@ -9,7 +9,7 @@
             "red": 0
         },
         "1X (70%)": {
-            "green": 2,
+            "green": 3,
             "red": 0
         },
         "1X (85%)": {
@@ -42,7 +42,7 @@
         },
         "AMBAS MARCAM: SIM (80%)": {
             "green": 46,
-            "red": 46
+            "red": 47
         },
         "AMBAS MARCAM: SIM (100%)": {
             "green": 33,
@@ -103,5 +103,5 @@
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "02/06/2026 04:59"
+    "ultima_atualizacao": "03/06/2026 01:46"
 }
