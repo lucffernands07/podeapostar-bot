@@ -19,6 +19,32 @@ jobs:
       - name: Checkout do repositorio
         uses: actions/checkout@v3
 
+      # 🛠️ PASSO ADICIONADO ABAIXO PARA IMPLEMENTAR A SUA LÓGICA:
+      - name: 🔒 Verificar se o bot já rodou hoje (Apenas para Automático)
+        id: check_run
+        # Só ativa a trava se o gatilho gerador for o Cron (schedule)
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          HOJE=$(date +'%Y-%m-%d')
+          ARQUIVO="ranking/pendentes.json"
+          
+          if [ -f "$ARQUIVO" ]; then
+            echo "🔍 Rodada Automática detectada. Verificando data do JSON..."
+            DATA_ARQUIVO=$(jq -r '.data_geracao' "$ARQUIVO")
+            echo "📅 Data no arquivo: $DATA_ARQUIVO | Data de hoje (UTC): $HOJE"
+            
+            if [ "$DATA_ARQUIVO" = "$HOJE" ]; then
+              echo "🚨 O bot já consolidou os dados hoje ($HOJE) na rodada manual anterior. Cancelando automação."
+              gh run cancel ${{ github.run_id }}
+              sleep 20
+              exit 0
+            fi
+          else
+            echo "ℹ️ Arquivo $ARQUIVO não encontrado. Seguindo com a automação."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
