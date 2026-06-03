@@ -5,7 +5,7 @@ on:
     paths:
       - 'ranking/ranking.py'
   schedule:
-    # 23:11 UTC (20:11 AM Horário de Brasília)
+    # 23:11 UTC (20:11 Horário de Brasília)
     - cron: '11 23 * * *'
   workflow_dispatch: # Permite rodar manual quando você quiser testar os logs
 
@@ -16,6 +16,31 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
+
+      # 🔒 TRAVA ADICIONADA: Protege contra duplicidade apenas na execução automática do Cron
+      - name: 🔒 Verificar se o ranking já rodou hoje (Apenas para Automático)
+        id: check_run
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          HOJE=$(date +'%Y-%m-%d')
+          ARQUIVO="ranking/pendentes.json"
+          
+          if [ -f "$ARQUIVO" ]; then
+            echo "🔍 Rodada Automática de Ranking detectada. Verificando data..."
+            DATA_ARQUIVO=$(jq -r '.data_geracao' "$ARQUIVO")
+            echo "📅 Data no arquivo: $DATA_ARQUIVO | Data de hoje (UTC): $HOJE"
+            
+            if [ "$DATA_ARQUIVO" = "$HOJE" ]; then
+              echo "🚨 O ranking já foi atualizado hoje ($HOJE) na rodada manual anterior. Cancelando automação."
+              gh run cancel ${{ github.run_id }}
+              sleep 20
+              exit 0
+            fi
+          else
+            echo "ℹ️ Arquivo $ARQUIVO não encontrado. Seguindo com a automação."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configurar Python
         uses: actions/setup-python@v5
