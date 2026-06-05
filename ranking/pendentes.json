@@ -1,19 +1,4 @@
 {
-    "data_geracao": "2026-06-04",
-    "jogos": [
-        {
-            "time_casa": "Maldivas",
-            "time_fora": "Paquistão",
-            "mercado": "1X (70%)",
-            "mercado_ranking": "1X (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/h8ettYeJ/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Ben Aknoun",
-            "time_fora": "USM Alger",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Y3LPN6vp/#/resumo-de-jogo"
-        }
-    ]
+    "data_geracao": "2026-06-05",
+    "jogos": []
 }
