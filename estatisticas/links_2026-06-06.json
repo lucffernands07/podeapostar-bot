@@ -1,0 +1,50 @@
+{
+    "data_geracao": "2026-06-06",
+    "jogos": [
+        {
+            "time_casa": "Criciúma",
+            "time_fora": "Londrina",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/n78nlZdM/#/resumo-de-jogo",
+            "odd_casa": "1.57",
+            "odd_fora": "5.75"
+        },
+        {
+            "time_casa": "Oran",
+            "time_fora": "USM Alger",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/A7oMq9I0/#/resumo-de-jogo",
+            "odd_casa": "1.90",
+            "odd_fora": "4.05"
+        },
+        {
+            "time_casa": "Atletico Atlanta",
+            "time_fora": "Gimnasia Jujuy",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QuNVk7x9/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.50"
+        },
+        {
+            "time_casa": "San Martin",
+            "time_fora": "Nueva Chicago",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0tIftf5C/#/resumo-de-jogo",
+            "odd_casa": "1.71",
+            "odd_fora": "5.25"
+        },
+        {
+            "time_casa": "Kawasaki",
+            "time_fora": "Hiroshima",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/YBbRW02l/#/resumo-de-jogo",
+            "odd_casa": "3.25",
+            "odd_fora": "2.01"
+        }
+    ]
+}
