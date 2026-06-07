@@ -1,40 +1,4 @@
 {
-    "data_geracao": "2026-06-06",
-    "jogos": [
-        {
-            "time_casa": "Criciúma",
-            "time_fora": "Londrina",
-            "mercado": "Vitória Casa (85%)",
-            "mercado_ranking": "VITÓRIA CASA (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/n78nlZdM/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Oran",
-            "time_fora": "USM Alger",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/A7oMq9I0/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Atletico Atlanta",
-            "time_fora": "Gimnasia Jujuy",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/QuNVk7x9/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "San Martin",
-            "time_fora": "Nueva Chicago",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/0tIftf5C/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Kawasaki",
-            "time_fora": "Hiroshima",
-            "mercado": "Ambas Marcam: Sim (100%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/YBbRW02l/#/resumo-de-jogo"
-        }
-    ]
+    "data_geracao": "2026-06-07",
+    "jogos": []
 }
