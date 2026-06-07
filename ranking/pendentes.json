@@ -1,4 +1,33 @@
 {
     "data_geracao": "2026-06-07",
-    "jogos": []
+    "jogos": [
+        {
+            "time_casa": "Marrocos",
+            "time_fora": "Noruega",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/OAt8UvFb/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Las Palmas",
+            "time_fora": "Málaga",
+            "mercado": "+1.5 Gols (100%)",
+            "mercado_ranking": "+1.5 GOLS (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/v3U0XwO7/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Deportivo Moron",
+            "time_fora": "Almirante Brown",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0IkPRFdU/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Club A. Guemes",
+            "time_fora": "Deportivo Maipu",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/W0Qwpx6m/#/resumo-de-jogo"
+        }
+    ]
 }
