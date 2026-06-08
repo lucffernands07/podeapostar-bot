@@ -152,20 +152,14 @@ def main():
         with open(PATH_DB, 'w', encoding='utf-8') as f:
             json.dump(db, f, indent=4, ensure_ascii=False)
         
-        # GERA O NOVO RANKING DIÁRIO PLANO
+                # GERA O NOVO RANKING DIÁRIO PLANO
         gerar_ranking_diario(stats)
-        
-        dados_reset = {
-            "data_geracao": hoje_str,
-            "jogos": []
-        }
-        with open(PATH_PENDENTES, 'w', encoding='utf-8') as f:
-            json.dump(dados_reset, f, indent=4, ensure_ascii=False)
             
         log("FIM", f"Processo concluído. {atualizados} mercados contabilizados com sucesso.")
 
     finally:
         driver.quit()
+
 
 if __name__ == "__main__":
     main()
