@@ -1,4 +1,47 @@
 {
     "data_geracao": "2026-06-08",
-    "jogos": []
+    "jogos": [
+        {
+            "time_casa": "Letônia U19",
+            "time_fora": "Estônia U19",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dGhOXPo9/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Belarus U21",
+            "time_fora": "Cazaquistão U21",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/APPmFuWr/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Túnisia U20",
+            "time_fora": "Argélia U20",
+            "mercado": "1X (85%)",
+            "mercado_ranking": "1X (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KpOAcrCj/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Túnisia U20",
+            "time_fora": "Argélia U20",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KpOAcrCj/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "França",
+            "time_fora": "Irlanda do Norte",
+            "mercado": "-4.5 Gols (100%)",
+            "mercado_ranking": "-4.5 GOLS (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/h6AZ5xIP/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Peru",
+            "time_fora": "Espanha",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ph1aAT9e/#/resumo-de-jogo"
+        }
+    ]
 }
