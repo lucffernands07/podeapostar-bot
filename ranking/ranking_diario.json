@@ -1,7 +1,7 @@
 [
     {
         "mercado": "-4.5 GOLS (100%)",
-        "green": 6,
+        "green": 7,
         "red": 0,
         "assertividade": 1.0
     },
@@ -24,16 +24,16 @@
         "assertividade": 0.8823529411764706
     },
     {
-        "mercado": "1X (85%)",
-        "green": 10,
-        "red": 3,
-        "assertividade": 0.7692307692307693
+        "mercado": "1X (70%)",
+        "green": 4,
+        "red": 1,
+        "assertividade": 0.8
     },
     {
-        "mercado": "1X (70%)",
-        "green": 3,
-        "red": 1,
-        "assertividade": 0.75
+        "mercado": "1X (85%)",
+        "green": 11,
+        "red": 3,
+        "assertividade": 0.7857142857142857
     },
     {
         "mercado": "+1.5 GOLS (85%)",
@@ -61,9 +61,9 @@
     },
     {
         "mercado": "AMBAS MARCAM: SIM (100%)",
-        "green": 33,
+        "green": 34,
         "red": 20,
-        "assertividade": 0.6226415094339622
+        "assertividade": 0.6296296296296297
     },
     {
         "mercado": "1X (100%)",
@@ -128,7 +128,7 @@
     {
         "mercado": "VITÓRIA CASA (85%)",
         "green": 0,
-        "red": 4,
+        "red": 6,
         "assertividade": 0.0
     },
     {
