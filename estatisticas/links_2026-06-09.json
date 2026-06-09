@@ -1,0 +1,32 @@
+{
+    "data_geracao": "2026-06-09",
+    "jogos": [
+        {
+            "time_casa": "Almería",
+            "time_fora": "Castellón",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ANdRzDUa/#/resumo-de-jogo",
+            "odd_casa": "2.25",
+            "odd_fora": "2.75"
+        },
+        {
+            "time_casa": "Livyi Bereg",
+            "time_fora": "Oleksandriya",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Sn1Ga3lD/#/resumo-de-jogo",
+            "odd_casa": "2.18",
+            "odd_fora": "3.20"
+        },
+        {
+            "time_casa": "Delaware",
+            "time_fora": "West Chester Utd",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UcOHZpad/#/resumo-de-jogo",
+            "odd_casa": "3.35",
+            "odd_fora": "1.83"
+        }
+    ]
+}
