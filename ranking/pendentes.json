@@ -1,26 +1,26 @@
 {
-    "data_geracao": "2026-06-09",
+    "data_geracao": "2026-06-10",
     "jogos": [
         {
-            "time_casa": "Almería",
-            "time_fora": "Castellón",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/ANdRzDUa/#/resumo-de-jogo"
+            "time_casa": "Inglaterra",
+            "time_fora": "Costa Rica",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KjB2DklK/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Livyi Bereg",
-            "time_fora": "Oleksandriya",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Sn1Ga3lD/#/resumo-de-jogo"
+            "time_casa": "Málaga",
+            "time_fora": "Las Palmas",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WAWoesGE/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Delaware",
-            "time_fora": "West Chester Utd",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/UcOHZpad/#/resumo-de-jogo"
+            "time_casa": "Málaga",
+            "time_fora": "Las Palmas",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WAWoesGE/#/resumo-de-jogo"
         }
     ]
 }

@@ -1,0 +1,29 @@
+[
+    {
+        "horario": "16:00",
+        "liga": "Espanha - La Liga 2",
+        "time_casa": "Málaga",
+        "time_fora": "Las Palmas",
+        "mercado": "1X (70%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Malaga-CF-UD-Las-Palmas/86695641/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Espanha - La Liga 2",
+        "time_casa": "Málaga",
+        "time_fora": "Las Palmas",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "2.10",
+        "link_betano": "https://www.betano.bet.br/match-odds/Malaga-CF-UD-Las-Palmas/86695641/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Mundo - Amistoso Internacional",
+        "time_casa": "Inglaterra",
+        "time_fora": "Costa Rica",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/England-Costa-Rica/86736375/"
+    }
+]
