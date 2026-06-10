@@ -1,0 +1,32 @@
+{
+    "data_geracao": "2026-06-10",
+    "jogos": [
+        {
+            "time_casa": "Inglaterra",
+            "time_fora": "Costa Rica",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KjB2DklK/#/resumo-de-jogo",
+            "odd_casa": "1.14",
+            "odd_fora": "17.00"
+        },
+        {
+            "time_casa": "Málaga",
+            "time_fora": "Las Palmas",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WAWoesGE/#/resumo-de-jogo",
+            "odd_casa": "2.10",
+            "odd_fora": "3.30"
+        },
+        {
+            "time_casa": "Málaga",
+            "time_fora": "Las Palmas",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WAWoesGE/#/resumo-de-jogo",
+            "odd_casa": "2.10",
+            "odd_fora": "3.30"
+        }
+    ]
+}
