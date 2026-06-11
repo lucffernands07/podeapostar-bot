@@ -1,0 +1,23 @@
+{
+    "data_geracao": "2026-06-11",
+    "jogos": [
+        {
+            "time_casa": "Zanzibar",
+            "time_fora": "Uganda",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zFuKKPLN/#/resumo-de-jogo",
+            "odd_casa": "2.30",
+            "odd_fora": "2.70"
+        },
+        {
+            "time_casa": "San Juan",
+            "time_fora": "Project 51O",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rD8DCZEc/#/resumo-de-jogo",
+            "odd_casa": "3.10",
+            "odd_fora": "1.95"
+        }
+    ]
+}
