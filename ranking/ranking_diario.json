@@ -19,15 +19,15 @@
     },
     {
         "mercado": "-4.5 GOLS (85%)",
-        "green": 15,
+        "green": 16,
         "red": 2,
-        "assertividade": 0.8823529411764706
+        "assertividade": 0.8888888888888888
     },
     {
         "mercado": "1X (70%)",
-        "green": 4,
+        "green": 5,
         "red": 1,
-        "assertividade": 0.8
+        "assertividade": 0.8333333333333334
     },
     {
         "mercado": "1X (85%)",
@@ -128,7 +128,7 @@
     {
         "mercado": "VITÓRIA CASA (85%)",
         "green": 0,
-        "red": 6,
+        "red": 7,
         "assertividade": 0.0
     },
     {
