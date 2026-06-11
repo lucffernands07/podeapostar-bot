@@ -1,26 +1,19 @@
 {
-    "data_geracao": "2026-06-10",
+    "data_geracao": "2026-06-11",
     "jogos": [
         {
-            "time_casa": "Inglaterra",
-            "time_fora": "Costa Rica",
-            "mercado": "-4.5 Gols (85%)",
-            "mercado_ranking": "-4.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/KjB2DklK/#/resumo-de-jogo"
+            "time_casa": "Zanzibar",
+            "time_fora": "Uganda",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zFuKKPLN/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Málaga",
-            "time_fora": "Las Palmas",
-            "mercado": "1X (70%)",
-            "mercado_ranking": "1X (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/WAWoesGE/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Málaga",
-            "time_fora": "Las Palmas",
-            "mercado": "Vitória Casa (85%)",
-            "mercado_ranking": "VITÓRIA CASA (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/WAWoesGE/#/resumo-de-jogo"
+            "time_casa": "San Juan",
+            "time_fora": "Project 51O",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rD8DCZEc/#/resumo-de-jogo"
         }
     ]
 }

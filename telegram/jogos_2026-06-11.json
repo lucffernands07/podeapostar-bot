@@ -1,0 +1,20 @@
+[
+    {
+        "horario": "14:15",
+        "liga": "Mundo - Amistoso Internacional",
+        "time_casa": "Zanzibar",
+        "time_fora": "Uganda",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.83",
+        "link_betano": null
+    },
+    {
+        "horario": "23:00",
+        "liga": "Eua - USL Liga 2",
+        "time_casa": "San Juan",
+        "time_fora": "Project 51O",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.40",
+        "link_betano": "https://www.betano.bet.br/match-odds/San-Juan-FC-Project-51O/86965484/"
+    }
+]
