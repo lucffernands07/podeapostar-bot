@@ -1,19 +1,47 @@
 {
-    "data_geracao": "2026-06-11",
+    "data_geracao": "2026-06-12",
     "jogos": [
         {
-            "time_casa": "Zanzibar",
-            "time_fora": "Uganda",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/zFuKKPLN/#/resumo-de-jogo"
+            "time_casa": "Atlético-GO",
+            "time_fora": "CRB",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EwWaFBeL/#/resumo-de-jogo"
         },
         {
-            "time_casa": "San Juan",
-            "time_fora": "Project 51O",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/rD8DCZEc/#/resumo-de-jogo"
+            "time_casa": "Atlético-GO",
+            "time_fora": "CRB",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EwWaFBeL/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "San Martin Burzaco",
+            "time_fora": "Villa Dalmine",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2H6JIIeT/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Long Island",
+            "time_fora": "Motown 2",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Kf1hPCb3/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Long Island",
+            "time_fora": "Motown 2",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Kf1hPCb3/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Midlakes United",
+            "time_fora": "West Seattle Junction",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lhKS8iEM/#/resumo-de-jogo"
         }
     ]
 }

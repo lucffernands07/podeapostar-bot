@@ -1,0 +1,56 @@
+[
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Atlético-GO",
+        "time_fora": "CRB",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.83",
+        "link_betano": "https://www.betano.bet.br/match-odds/Atletico-GO-CRB-AL/87070212/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Atlético-GO",
+        "time_fora": "CRB",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "2.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/Atletico-GO-CRB-AL/87070212/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Argentina Primera B",
+        "time_casa": "San Martin Burzaco",
+        "time_fora": "Villa Dalmine",
+        "mercado": "1X (70%)",
+        "odd": "1.47",
+        "link_betano": "https://www.betano.bet.br/match-odds/San-Martin-de-Burzaco-Villa-Dalmine/86116714/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Eua - USL Liga 2",
+        "time_casa": "Long Island",
+        "time_fora": "Motown 2",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Long-Island-Rough-Riders-FC-Motown-II/86805772/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Eua - USL Liga 2",
+        "time_casa": "Long Island",
+        "time_fora": "Motown 2",
+        "mercado": "1X (70%)",
+        "odd": "1.70",
+        "link_betano": "https://www.betano.bet.br/match-odds/Long-Island-Rough-Riders-FC-Motown-II/86805772/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Eua - USL Liga 2",
+        "time_casa": "Midlakes United",
+        "time_fora": "West Seattle Junction",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Midlakes-United-West-Seattle-Junction/86490243/"
+    }
+]
