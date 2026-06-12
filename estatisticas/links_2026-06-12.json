@@ -1,0 +1,59 @@
+{
+    "data_geracao": "2026-06-12",
+    "jogos": [
+        {
+            "time_casa": "Atlético-GO",
+            "time_fora": "CRB",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EwWaFBeL/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.50"
+        },
+        {
+            "time_casa": "Atlético-GO",
+            "time_fora": "CRB",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EwWaFBeL/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.50"
+        },
+        {
+            "time_casa": "San Martin Burzaco",
+            "time_fora": "Villa Dalmine",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2H6JIIeT/#/resumo-de-jogo",
+            "odd_casa": "2.82",
+            "odd_fora": "2.60"
+        },
+        {
+            "time_casa": "Long Island",
+            "time_fora": "Motown 2",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Kf1hPCb3/#/resumo-de-jogo",
+            "odd_casa": "3.15",
+            "odd_fora": "1.93"
+        },
+        {
+            "time_casa": "Long Island",
+            "time_fora": "Motown 2",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Kf1hPCb3/#/resumo-de-jogo",
+            "odd_casa": "3.15",
+            "odd_fora": "1.93"
+        },
+        {
+            "time_casa": "Midlakes United",
+            "time_fora": "West Seattle Junction",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lhKS8iEM/#/resumo-de-jogo",
+            "odd_casa": "2.45",
+            "odd_fora": "2.40"
+        }
+    ]
+}
