@@ -37,6 +37,7 @@ COMPETICOES = {
     "Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/jogos/",
 
     # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
+    "Irlanda - Premier": "https://www.flashscore.com.br/futebol/irlanda/divisao-premier/jogos/",
     "Colombia - Copa": "https://www.flashscore.com.br/futebol/colombia/copa-da-colombia/jogos/",
     "Colombia - Primeira A": "https://www.flashscore.com.br/futebol/colombia/primera-a/jogos/",
     "Mundo - Amistoso Internacional": "https://www.flashscore.com.br/futebol/mundo/amistoso-internacional/jogos/",
