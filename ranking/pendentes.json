@@ -1,5 +1,5 @@
 {
-    "data_geracao": "2026-06-11",
+    "data_geracao": "2026-06-12",
     "jogos": [
         {
             "time_casa": "Atlético-GO",
@@ -14,6 +14,27 @@
             "mercado": "Vitória Casa (85%)",
             "mercado_ranking": "VITÓRIA CASA (85%)",
             "link_h2h": "https://www.flashscore.com.br/jogo/EwWaFBeL/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Derry City",
+            "time_fora": "Bohemians",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6V27l58c/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Galway",
+            "time_fora": "Dundalk",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SWHtWSHk/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Waterford",
+            "time_fora": "Sligo Rovers",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AgG9Z1Os/#/resumo-de-jogo"
         },
         {
             "time_casa": "San Martin Burzaco",

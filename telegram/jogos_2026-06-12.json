@@ -1,5 +1,32 @@
 [
     {
+        "horario": "15:45",
+        "liga": "Irlanda - Premier",
+        "time_casa": "Derry City",
+        "time_fora": "Bohemians",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/Derry-City-Bohemians-FC/85076226/"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Irlanda - Premier",
+        "time_casa": "Galway",
+        "time_fora": "Dundalk",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/Galway-United-Dundalk-FC/86324541/"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Irlanda - Premier",
+        "time_casa": "Waterford",
+        "time_fora": "Sligo Rovers",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Waterford-FC-Sligo-Rovers-FC/86324545/"
+    },
+    {
         "horario": "19:00",
         "liga": "Brasileirão Série B",
         "time_casa": "Atlético-GO",
@@ -14,7 +41,7 @@
         "time_casa": "Atlético-GO",
         "time_fora": "CRB",
         "mercado": "Vitória Casa (85%)",
-        "odd": "2.15",
+        "odd": "2.10",
         "link_betano": "https://www.betano.bet.br/match-odds/Atletico-GO-CRB-AL/87070212/"
     },
     {
