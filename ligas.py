@@ -6,6 +6,8 @@ COMPETICOES = {
     "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/jogos/",
     "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/brasileirao-serie-b/jogos/",
     "Brasileirão Série C": "https://www.flashscore.com.br/futebol/brasil/brasileirao-serie-c/jogos/",
+    "Brasileiro Serie C": "https://www.flashscore.com.br/futebol/brasil/serie-c/jogos/",
+    "Brasileiro Serie D": "https://www.flashscore.com.br/futebol/brasil/serie-d/jogos/",
     "Argentina - Liga Profesional": "https://www.flashscore.com.br/futebol/argentina/liga-profesional/jogos/",
     
     # --- BLOCO 2: ELITE EUROPEIA (BIG 5 + CHAMPIONS) ---
@@ -36,6 +38,7 @@ COMPETICOES = {
     "Copa da Turquia": "https://www.flashscore.com.br/futebol/turquia/copa-da-turquia/jogos/",
     "Áustria - Bundesliga": "https://www.flashscore.com.br/futebol/austria/bundesliga/jogos/",
     "Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/jogos/",
+    "Cazaquistão - Primeira Liga": "https://www.flashscore.com.br/futebol/cazaquistao/primeira-liga/jogos"
 
     # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
     "Irlanda - Premier": "https://www.flashscore.com.br/futebol/irlanda/divisao-premier/jogos/",
@@ -60,7 +63,8 @@ COMPETICOES = {
     "Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/jogos/",
     "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",  # <-- INCLUÍDO AQUI
     "Colômbia - Primera A": "https://www.flashscore.com.br/futebol/colombia/primeira-a/jogos/",
-    "Argentina Primera B": "https://www.flashscore.com.br/futebol/argentina/primera-b/jogos/", # <-- INCLUÍDO AQUI
+    "Argentina Primera B": "https://www.flashscore.com.br/futebol/argentina/primera-b/jogos/", 
+    "Argentina - Primeira C": "https://www.flashscore.com.br/futebol/argentina/primeira-c/jogos/",
     "Argentina Primeira Nacional": "https://www.flashscore.com.br/futebol/argentina/primera-nacional/jogos/",
     "Paraguai - Division 1": "https://www.flashscore.com.br/futebol/paraguai/primeira-divisao/jogos/",
     "Uruguai - Primera Division": "https://www.flashscore.com.br/futebol/uruguai/primeira-divisao/jogos/",
@@ -70,8 +74,11 @@ COMPETICOES = {
     "Hungria - OTP Bank Liga": "https://www.flashscore.com.br/futebol/hungria/otp-bank-liga/jogos/",
     "Croácia - HNL": "https://www.flashscore.com.br/futebol/croacia/hnl/jogos/",
     "China - Super League": "https://www.flashscore.com.br/futebol/china/super-liga/jogos/",
+    "China - Liga 1": "https://www.flashscore.com.br/futebol/china/liga-1/jogos/",
+    "China - Liga 2": "https://www.flashscore.com.br/futebol/china/liga-2/jogos/",
     "Índia - Indian Super League": "https://www.flashscore.com.br/futebol/india/super-liga-indiana/jogos/",
     "Japão - Liga J1": "https://www.flashscore.com.br/futebol/japao/liga-j1/jogos/",
     "Champions da Ásia": "https://www.flashscore.com.br/futebol/asia/liga-dos-campeoes-da-afc/jogos/",
-    "Eua - USL Liga 2": "https://www.flashscore.com.br/futebol/eua/usl-liga-dois/jogos/"
+    "Eua - USL Liga 2": "https://www.flashscore.com.br/futebol/eua/usl-liga-dois/jogos/",
+    "Chile - Liga Primeira": "https://www.flashscore.com.br/futebol/chile/liga-de-primera/jogos/"
 }
