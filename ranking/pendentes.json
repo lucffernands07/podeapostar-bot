@@ -1,68 +1,47 @@
 {
-    "data_geracao": "2026-06-12",
+    "data_geracao": "2026-06-13",
     "jogos": [
         {
-            "time_casa": "Atlético-GO",
-            "time_fora": "CRB",
-            "mercado": "Ambas Marcam: Sim (100%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/EwWaFBeL/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Atlético-GO",
-            "time_fora": "CRB",
-            "mercado": "Vitória Casa (85%)",
-            "mercado_ranking": "VITÓRIA CASA (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/EwWaFBeL/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Derry City",
-            "time_fora": "Bohemians",
+            "time_casa": "Comunicaciones",
+            "time_fora": "Laferrere",
             "mercado": "Ambas Marcam: Sim (80%)",
             "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/6V27l58c/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/zsmx6uCN/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Galway",
-            "time_fora": "Dundalk",
+            "time_casa": "Def. de Belgrano",
+            "time_fora": "Colón",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WvT5zpu2/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Inter Turku",
+            "time_fora": "Oulu",
             "mercado": "Ambas Marcam: Sim (100%)",
             "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/SWHtWSHk/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/niuB44EG/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Waterford",
-            "time_fora": "Sligo Rovers",
+            "time_casa": "Jaro",
+            "time_fora": "HJK",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6uhqndbk/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Lahti",
+            "time_fora": "SJK",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/AgG9Z1Os/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/fFmw8wL8/#/resumo-de-jogo"
         },
         {
-            "time_casa": "San Martin Burzaco",
-            "time_fora": "Villa Dalmine",
-            "mercado": "1X (70%)",
-            "mercado_ranking": "1X (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/2H6JIIeT/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Long Island",
-            "time_fora": "Motown 2",
-            "mercado": "Ambas Marcam: Sim (100%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Kf1hPCb3/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Long Island",
-            "time_fora": "Motown 2",
-            "mercado": "1X (70%)",
-            "mercado_ranking": "1X (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Kf1hPCb3/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Midlakes United",
-            "time_fora": "West Seattle Junction",
-            "mercado": "-4.5 Gols (85%)",
-            "mercado_ranking": "-4.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lhKS8iEM/#/resumo-de-jogo"
+            "time_casa": "Lahti",
+            "time_fora": "SJK",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fFmw8wL8/#/resumo-de-jogo"
         }
     ]
 }

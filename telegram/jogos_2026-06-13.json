@@ -1,0 +1,56 @@
+[
+    {
+        "horario": "09:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "Inter Turku",
+        "time_fora": "Oulu",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Inter-Turku-AC-Oulu/85130785/"
+    },
+    {
+        "horario": "11:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "Jaro",
+        "time_fora": "HJK",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.70",
+        "link_betano": "https://www.betano.bet.br/match-odds/FF-Jaro-HJK-Helsinki/85130798/"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "Lahti",
+        "time_fora": "SJK",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.29",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Lahti-Seinajoen-JK/85130805/"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "Lahti",
+        "time_fora": "SJK",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.70",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Lahti-Seinajoen-JK/85130805/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Argentina Primeira Nacional",
+        "time_casa": "Def. de Belgrano",
+        "time_fora": "Colón",
+        "mercado": "1X (70%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Defensores-De-Belgrano-Colon-de-Santa-Fe/86116658/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Argentina Primera B",
+        "time_casa": "Comunicaciones",
+        "time_fora": "Laferrere",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.10",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Comunicaciones-Deportivo-Laferrere/86116718/"
+    }
+]
