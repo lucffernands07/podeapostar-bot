@@ -1,0 +1,59 @@
+{
+    "data_geracao": "2026-06-13",
+    "jogos": [
+        {
+            "time_casa": "Comunicaciones",
+            "time_fora": "Laferrere",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zsmx6uCN/#/resumo-de-jogo",
+            "odd_casa": "1.93",
+            "odd_fora": "4.20"
+        },
+        {
+            "time_casa": "Def. de Belgrano",
+            "time_fora": "Colón",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WvT5zpu2/#/resumo-de-jogo",
+            "odd_casa": "2.55",
+            "odd_fora": "3.25"
+        },
+        {
+            "time_casa": "Inter Turku",
+            "time_fora": "Oulu",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/niuB44EG/#/resumo-de-jogo",
+            "odd_casa": "1.67",
+            "odd_fora": "4.75"
+        },
+        {
+            "time_casa": "Jaro",
+            "time_fora": "HJK",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6uhqndbk/#/resumo-de-jogo",
+            "odd_casa": "4.33",
+            "odd_fora": "1.70"
+        },
+        {
+            "time_casa": "Lahti",
+            "time_fora": "SJK",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fFmw8wL8/#/resumo-de-jogo",
+            "odd_casa": "2.20",
+            "odd_fora": "3.00"
+        },
+        {
+            "time_casa": "Lahti",
+            "time_fora": "SJK",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fFmw8wL8/#/resumo-de-jogo",
+            "odd_casa": "2.20",
+            "odd_fora": "3.00"
+        }
+    ]
+}
