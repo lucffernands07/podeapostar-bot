@@ -9,6 +9,7 @@ COMPETICOES = {
     "Argentina - Liga Profesional": "https://www.flashscore.com.br/futebol/argentina/liga-profesional/jogos/",
     
     # --- BLOCO 2: ELITE EUROPEIA (BIG 5 + CHAMPIONS) ---
+    "Mundo - Copa do Mundo": "https://www.flashscore.com.br/futebol/mundo/campeonato-do-mundo/jogos/",
     "Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/jogos/",
     "Inglaterra - Premier League": "https://www.flashscore.com.br/futebol/inglaterra/premier-league/jogos/",
     "Espanha - LaLiga": "https://www.flashscore.com.br/futebol/espanha/laliga/jogos/",
