@@ -80,5 +80,6 @@ COMPETICOES = {
     "Japão - Liga J1": "https://www.flashscore.com.br/futebol/japao/liga-j1/jogos/",
     "Champions da Ásia": "https://www.flashscore.com.br/futebol/asia/liga-dos-campeoes-da-afc/jogos/",
     "Eua - USL Liga 2": "https://www.flashscore.com.br/futebol/eua/usl-liga-dois/jogos/",
-    "Chile - Liga Primeira": "https://www.flashscore.com.br/futebol/chile/liga-de-primera/jogos/"
+    "Chile - Liga Primeira": "https://www.flashscore.com.br/futebol/chile/liga-de-primera/jogos/",
+    "Marrocos - Botola Pro": "https://www.flashscore.com.br/futebol/marrocos/botola-pro/jogos/"
 }
