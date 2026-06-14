@@ -1,0 +1,155 @@
+[
+    {
+        "horario": "11:00",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Brusque",
+        "time_fora": "Santa Cruz",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.20",
+        "link_betano": "https://www.betano.bet.br/match-odds/Brusque-SC-Santa-Cruz-PE/86359462/"
+    },
+    {
+        "horario": "11:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Yelimay Semey",
+        "time_fora": "Ordabasy",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.65",
+        "link_betano": "https://www.betano.bet.br/match-odds/Elimai-FC-Ordabasy/86982384/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Aktobe",
+        "time_fora": "Altai",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.95",
+        "link_betano": "https://www.betano.bet.br/match-odds/FK-Aktobe-Altay-Oskemen/86982392/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Marrocos - Botola Pro",
+        "time_casa": "FAR Rabat",
+        "time_fora": "Wydad AC",
+        "mercado": "1X (70%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/Far-Rabat-WAC-Casablanca/87129013/"
+    },
+    {
+        "horario": "13:30",
+        "liga": "Chile - Liga Primeira",
+        "time_casa": "Dep. Concepción",
+        "time_fora": "Limache",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Concepcion-Deportes-Limache/85408817/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Argentina - Primeira C",
+        "time_casa": "Club Lujan",
+        "time_fora": "Yupanqui",
+        "mercado": "1X (85%)",
+        "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/Lujan-SC-Yupanqui/86860053/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Argentina Primera B",
+        "time_casa": "Liniers",
+        "time_fora": "Real Pilar",
+        "mercado": "1X (85%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/CSYD-Liniers-Real-Pilar/86116732/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Argentina Primeira Nacional",
+        "time_casa": "Racing Cordoba",
+        "time_fora": "Chaco For Ever",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.63",
+        "link_betano": "https://www.betano.bet.br/match-odds/Racing-de-Cordoba-Chaco-For-Ever/86112948/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Lagarto",
+        "time_fora": "Decisão",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.85",
+        "link_betano": "https://www.betano.bet.br/match-odds/Lagarto-SE-Decisao-PE/86267133/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Espanha - La Liga 2",
+        "time_casa": "Málaga",
+        "time_fora": "Almería",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.28",
+        "link_betano": "https://www.betano.bet.br/match-odds/Malaga-CF-UD-Almeria/87242757/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Espanha - La Liga 2",
+        "time_casa": "Málaga",
+        "time_fora": "Almería",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.67",
+        "link_betano": "https://www.betano.bet.br/match-odds/Malaga-CF-UD-Almeria/87242757/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Real Noroeste",
+        "time_fora": "Democrata-GV",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.93",
+        "link_betano": "https://www.betano.bet.br/match-odds/Real-Noroeste-ES-Esporte-Clube-Democrata-MG/87075158/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Rio Branco-ES",
+        "time_fora": "Porto-BA",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Rio-Branco-ES-Porto-Sport-Club-BA/86467947/"
+    },
+    {
+        "horario": "18:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Araguaína",
+        "time_fora": "Galvez",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.88",
+        "link_betano": "https://www.betano.bet.br/match-odds/Araguaina-TO-Galvez/87075428/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Chile - Liga Primeira",
+        "time_casa": "Universidad Católica",
+        "time_fora": "Universidad de Concepción",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.80",
+        "link_betano": "https://www.betano.bet.br/match-odds/Universidad-Catolica-Universidad-de-Concepcion/85408846/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Chile - Liga Primeira",
+        "time_casa": "Universidad Católica",
+        "time_fora": "Universidad de Concepción",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "1.51",
+        "link_betano": "https://www.betano.bet.br/match-odds/Universidad-Catolica-Universidad-de-Concepcion/85408846/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Novorizontino",
+        "time_fora": "Náutico",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "2.05",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gremio-Novorizontino-Nautico-PE/87070207/"
+    }
+]
