@@ -6,25 +6,7 @@
         "assertividade": 1.0
     },
     {
-        "mercado": "VITORIA CASA (100%)",
-        "green": 2,
-        "red": 0,
-        "assertividade": 1.0
-    },
-    {
         "mercado": "+2.5 GOLS (100%)",
-        "green": 1,
-        "red": 0,
-        "assertividade": 1.0
-    },
-    {
-        "mercado": "+1.5 GOLS",
-        "green": 1,
-        "red": 0,
-        "assertividade": 1.0
-    },
-    {
-        "mercado": "1X",
         "green": 1,
         "red": 0,
         "assertividade": 1.0
@@ -108,43 +90,31 @@
         "assertividade": 0.5
     },
     {
-        "mercado": "AMBAS MARCAM: SIM",
-        "green": 1,
-        "red": 2,
-        "assertividade": 0.3333333333333333
+        "mercado": "VITORIA CASA (100%)",
+        "green": 2,
+        "red": 7,
+        "assertividade": 0.2222222222222222
     },
     {
         "mercado": "X2 (85%)",
         "green": 1,
-        "red": 3,
-        "assertividade": 0.25
+        "red": 7,
+        "assertividade": 0.125
     },
     {
         "mercado": "VITORIA CASA (80%)",
         "green": 0,
-        "red": 1,
+        "red": 12,
         "assertividade": 0.0
     },
     {
         "mercado": "X2 (70%)",
         "green": 0,
-        "red": 2,
-        "assertividade": 0.0
-    },
-    {
-        "mercado": "VITÓRIA CASA (100%)",
-        "green": 0,
         "red": 7,
         "assertividade": 0.0
     },
     {
-        "mercado": "VITÓRIA CASA (80%)",
-        "green": 0,
-        "red": 11,
-        "assertividade": 0.0
-    },
-    {
-        "mercado": "VITÓRIA CASA (85%)",
+        "mercado": "VITORIA CASA (85%)",
         "green": 0,
         "red": 8,
         "assertividade": 0.0
@@ -153,18 +123,6 @@
         "mercado": "1X (90%)",
         "green": 0,
         "red": 1,
-        "assertividade": 0.0
-    },
-    {
-        "mercado": "2X (85%)",
-        "green": 0,
-        "red": 4,
-        "assertividade": 0.0
-    },
-    {
-        "mercado": "2X (70%)",
-        "green": 0,
-        "red": 5,
         "assertividade": 0.0
     }
 ]
