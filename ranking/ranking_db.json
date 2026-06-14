@@ -10,7 +10,7 @@
         },
         "1X (70%)": {
             "green": 6,
-            "red": 2
+            "red": 3
         },
         "1X (85%)": {
             "green": 11,
@@ -29,7 +29,7 @@
             "red": 20
         },
         "+1.5 GOLS (85%)": {
-            "green": 69,
+            "green": 70,
             "red": 27
         },
         "+1.5 GOLS (100%)": {
@@ -41,12 +41,12 @@
             "red": 21
         },
         "AMBAS MARCAM: SIM (80%)": {
-            "green": 52,
+            "green": 55,
             "red": 51
         },
         "AMBAS MARCAM: SIM (100%)": {
             "green": 35,
-            "red": 22
+            "red": 23
         },
         "-4.5 GOLS (100%)": {
             "green": 7,
@@ -103,5 +103,5 @@
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "13/06/2026 07:04"
+    "ultima_atualizacao": "14/06/2026 03:11"
 }
