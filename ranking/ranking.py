@@ -1,7 +1,6 @@
 import os
 import time
 import json
-import re  # 💡 Adicionado para usar Expressões Regulares na limpeza do nome
 from datetime import datetime, date
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -126,17 +125,12 @@ def main():
                     g_c, g_f = int(score_casa), int(score_fora)
                     
                     deu_green = validar_palpite(jogo['mercado'], g_c, g_f)
-                    
-                    # 🛠️ --- TRATAMENTO INTELIGENTE DA STRING DO MERCADO ---
                     m_rank = jogo['mercado_ranking'].strip().upper()
                     
-                    # 1. Padroniza termos e acentuação para evitar duplicados no banco
+                    # 🛠️ --- PADRONIZAÇÃO EXCLUSIVA DE ESCRITA ---
                     m_rank = m_rank.replace("VITÓRIA", "VITORIA")
                     m_rank = m_rank.replace("2X", "X2")
-                    
-                    # 2. Remove as porcentagens antigas (ex: "1X (85%)" vira apenas "1X")
-                    m_rank = re.sub(r'\s*\(\d+%\)', '', m_rank)
-                    # ------------------------------------------------------
+                    # --------------------------------------------
                     
                     if m_rank not in stats: 
                         stats[m_rank] = {"green": 0, "red": 0}
@@ -171,6 +165,6 @@ def main():
     finally:
         driver.quit()
 
+
 if __name__ == "__main__":
     main()
-            
