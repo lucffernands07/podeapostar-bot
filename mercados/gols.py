@@ -2,8 +2,7 @@
 REGRAS DE MERCADO - GOLS (REESTRUTURAÇÃO COMPLETA)
 1. Filtro Inicial de Recorrência: Exige no mínimo 4/5 para todos os mercados (+1.5, +2.5 e -4.5).
 2. Trava de H2H Mandatória: O último jogo do confronto direto DEVE bater o mercado escolhido.
-3. Decisão por Maior Confiança: Ganha o mercado que atingir a maior porcentagem (%).
-4. Critério de Desempate Estrito: Se houver empate na %, a prioridade de saída é: -4.5 ➔ +1.5 ➔ +2.5.
+3. Multi-Mercado: Retorna todos os mercados que passarem nos filtros simultaneamente.
 """
 
 def verificar_ultimo_jogo(gols_placar_texto, alvo):
@@ -42,7 +41,8 @@ def calcular_porcentagem_gols(c, f, ultimo_h2h, alvo):
 
 def verificar_gols(s):
     """
-    Recebe o dicionário 's' do main.py e processa a hierarquia exata solicitada
+    Recebe o dicionário 's' do main.py e retorna TODOS os mercados de gols 
+    que passarem simultaneamente no filtro de recorrência (mínimo 4/5).
     """
     if not isinstance(s, dict):
         return []
@@ -55,27 +55,18 @@ def verificar_gols(s):
     pct_15  = calcular_porcentagem_gols(s.get("casa_15", 0), s.get("fora_15", 0), u_h2h, 1.5)
     pct_25  = calcular_porcentagem_gols(s.get("casa_25", 0), s.get("fora_25", 0), u_h2h, 2.5)
 
-    # ➔ PASSO 3 & 4: Escolha baseada em Maior Porcentagem com Desempate por Prioridade
-    # Criamos uma lista ordenada estritamente pela sua regra de desempate (-4.5 > +1.5 > +2.5)
-    candidatos = [
-        {"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45", "pct": pct_m45, "prioridade": 3},
-        {"mercado": f"+1.5 Gols ({pct_15}%)",  "tipo": "GOLS_15",  "pct": pct_15,  "prioridade": 2},
-        {"mercado": f"+2.5 Gols ({pct_25}%)",  "tipo": "GOLS_25",  "pct": pct_25,  "prioridade": 1}
-    ]
+    mercados_aprovados = []
 
-    # Filtra apenas quem passou nos critérios (porcentagem maior que zero)
-    aprovados = [c for c in candidatos if c["pct"] > 0]
+    # ➔ Em vez de escolher um vencedor e descartar os outros, adiciona todos os válidos (> 0)
+    if pct_m45 > 0:
+        mercados_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
+        
+    if pct_15 > 0:
+        mercados_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
+        
+    if pct_25 > 0:
+        mercados_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
-    if not aprovados:
-        return []
-
-    # Ordena primeiro pela maior Porcentagem (Passo 3) e depois pela Prioridade (Passo 4)
-    # O Python ordena de forma crescente, então invertemos com reverse=True
-    aprovados.sort(key=lambda x: (x["pct"], x["prioridade"]), reverse=True)
-
-    # Pega o vencedor absoluto do topo da esteira
-    vencedor = aprovados[0]
-
-    # Retorna o formato correto exigido pelo seu robô
-    return [{"mercado": vencedor["mercado"], "tipo": vencedor["tipo"]}]
+    # Retorna a lista contendo de 0 a 3 mercados aprovados para o mesmo jogo
+    return mercados_aprovados
     
