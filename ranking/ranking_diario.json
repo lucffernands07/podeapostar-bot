@@ -18,6 +18,18 @@
         "assertividade": 1.0
     },
     {
+        "mercado": "+1.5 GOLS",
+        "green": 1,
+        "red": 0,
+        "assertividade": 1.0
+    },
+    {
+        "mercado": "1X",
+        "green": 1,
+        "red": 0,
+        "assertividade": 1.0
+    },
+    {
         "mercado": "-4.5 GOLS (85%)",
         "green": 17,
         "red": 2,
@@ -94,6 +106,12 @@
         "green": 3,
         "red": 3,
         "assertividade": 0.5
+    },
+    {
+        "mercado": "AMBAS MARCAM: SIM",
+        "green": 1,
+        "red": 2,
+        "assertividade": 0.3333333333333333
     },
     {
         "mercado": "X2 (85%)",
