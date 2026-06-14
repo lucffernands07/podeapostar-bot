@@ -2,11 +2,15 @@
     "stats": {
         "VITORIA CASA (80%)": {
             "green": 0,
-            "red": 1
+            "red": 12
         },
         "VITORIA CASA (100%)": {
             "green": 2,
-            "red": 0
+            "red": 7
+        },
+        "VITORIA CASA (85%)": {
+            "green": 0,
+            "red": 8
         },
         "1X (70%)": {
             "green": 6,
@@ -16,13 +20,25 @@
             "green": 11,
             "red": 3
         },
+        "1X (100%)": {
+            "green": 3,
+            "red": 2
+        },
+        "1X (80%)": {
+            "green": 5,
+            "red": 4
+        },
+        "1X (90%)": {
+            "green": 0,
+            "red": 1
+        },
         "X2 (70%)": {
             "green": 0,
-            "red": 2
+            "red": 7
         },
         "X2 (85%)": {
             "green": 1,
-            "red": 3
+            "red": 7
         },
         "+1.5 GOLS (70%)": {
             "green": 41,
@@ -40,6 +56,14 @@
             "green": 36,
             "red": 21
         },
+        "+2.5 GOLS (85%)": {
+            "green": 26,
+            "red": 19
+        },
+        "+2.5 GOLS (100%)": {
+            "green": 1,
+            "red": 0
+        },
         "AMBAS MARCAM: SIM (80%)": {
             "green": 55,
             "red": 51
@@ -56,61 +80,9 @@
             "green": 3,
             "red": 3
         },
-        "+2.5 GOLS (85%)": {
-            "green": 26,
-            "red": 19
-        },
         "-4.5 GOLS (85%)": {
             "green": 17,
             "red": 2
-        },
-        "VITÓRIA CASA (100%)": {
-            "green": 0,
-            "red": 7
-        },
-        "VITÓRIA CASA (80%)": {
-            "green": 0,
-            "red": 11
-        },
-        "1X (100%)": {
-            "green": 3,
-            "red": 2
-        },
-        "+2.5 GOLS (100%)": {
-            "green": 1,
-            "red": 0
-        },
-        "VITÓRIA CASA (85%)": {
-            "green": 0,
-            "red": 8
-        },
-        "1X (80%)": {
-            "green": 5,
-            "red": 4
-        },
-        "1X (90%)": {
-            "green": 0,
-            "red": 1
-        },
-        "2X (85%)": {
-            "green": 0,
-            "red": 4
-        },
-        "2X (70%)": {
-            "green": 0,
-            "red": 5
-        },
-        "AMBAS MARCAM: SIM": {
-            "green": 1,
-            "red": 2
-        },
-        "+1.5 GOLS": {
-            "green": 1,
-            "red": 0
-        },
-        "1X": {
-            "green": 1,
-            "red": 0
         }
     },
     "pendentes": {},
