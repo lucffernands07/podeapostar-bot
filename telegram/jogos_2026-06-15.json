@@ -1,0 +1,74 @@
+[
+    {
+        "horario": "16:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Bélgica",
+        "time_fora": "Egito",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Belgium-Egypt/77353021/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Eua - USL Liga 2",
+        "time_casa": "Christos",
+        "time_fora": "Annapolis Blues",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.29",
+        "link_betano": "https://www.betano.bet.br/match-odds/Christos-FC-Annapolis-Blues/86807962/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Eua - USL Liga 2",
+        "time_casa": "Christos",
+        "time_fora": "Annapolis Blues",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.36",
+        "link_betano": "https://www.betano.bet.br/match-odds/Christos-FC-Annapolis-Blues/86807962/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Eua - USL Liga 2",
+        "time_casa": "Christos",
+        "time_fora": "Annapolis Blues",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "2.95",
+        "link_betano": "https://www.betano.bet.br/match-odds/Christos-FC-Annapolis-Blues/86807962/"
+    },
+    {
+        "horario": "20:30",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Ypiranga",
+        "time_fora": "Botafogo-PB",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.36",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ypiranga-RS-Botafogo-PB/86496262/"
+    },
+    {
+        "horario": "20:30",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Ypiranga",
+        "time_fora": "Botafogo-PB",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "2.10",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ypiranga-RS-Botafogo-PB/86496262/"
+    },
+    {
+        "horario": "20:30",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Ypiranga",
+        "time_fora": "Botafogo-PB",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.83",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ypiranga-RS-Botafogo-PB/86496262/"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Londrina",
+        "time_fora": "Avaí",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Avai-SC/87070211/"
+    }
+]
