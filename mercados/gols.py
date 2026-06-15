@@ -1,14 +1,18 @@
 """
 REGRAS DE MERCADO - GOLS (REESTRUTURAÇÃO COMPLETA)
 1. Filtro Inicial de Recorrência Flexível: Um time deve ter no mínimo 4/5 e o outro no mínimo 3/5.
-2. Trava de H2H Mandatória: O último jogo do confronto direto DEVE bater o mercado escolhido.
+2. Trava de H2H Mandatória: [DESATIVADA] Não exige mais histórico de confronto direto.
 3. Multi-Mercado: Retorna todos os mercados que passarem nos filtros simultaneamente.
 """
 
 def verificar_ultimo_jogo(gols_placar_texto, alvo):
+    # Função mantida apenas para não quebrar outras importações se existirem,
+    # mas não está sendo usada no cálculo das porcentagens.
     try:
         import re
-        numeros = re.findall(r'\d+', str(gols_placar_texto))
+        # Remove os números de pênaltis entre parênteses ex: 1(4) vira 1
+        placar_limpo = re.sub(r'\(\d+\)', '', str(gols_placar_texto))
+        numeros = re.findall(r'\d+', placar_limpo)
         if len(numeros) < 2: return False
         
         g_t = int(numeros[0]) + int(numeros[1])
@@ -27,27 +31,24 @@ def calcular_porcentagem_gols(c, f, ultimo_h2h, alvo):
         return 0
 
     # ➔ PASSO 1: Nova Regra Flexível (Um pelo menos 4 e o outro pelo menos 3)
-    # Se o maior valor for menor que 4 OR o menor valor for menor que 3, descarte.
     maior = max(c, f)
     menor = min(c, f)
     
     if maior < 4 or menor < 3:
         return 0
 
-    # ➔ PASSO 2: O último confronto direto (H2H) DEVE bater o mercado
-    if not verificar_ultimo_jogo(ultimo_h2h, alvo):
-        return 0
+    # ➔ PASSO 2: Trava de Confronto Direto (H2H)
+    # 🚫 DESATIVADA: Comentada para liberar jogos de seleções/ligas sem histórico comum.
+    # if not verificar_ultimo_jogo(ultimo_h2h, alvo):
+    #     return 0
 
     # --- DEFINIÇÃO DAS ETIQUETAS DE PORCENTAGEM PARA O RANKING ---
-    # Se ambos os times forem perfeitos (5/5 e 5/5)
     if c == 5 and f == 5:
         return 100
     
-    # Se caiu na nova linha limite (um com 4/5 e outro com 3/5)
     if (c == 4 and f == 3) or (c == 3 and f == 4):
         return 70
         
-    # Para todos os outros cenários mistos aceitáveis (ex: 5 e 4, 4 e 4, 5 e 3)
     return 85
 
 def verificar_gols(s):
