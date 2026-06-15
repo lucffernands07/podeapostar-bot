@@ -1,0 +1,140 @@
+{
+    "data_geracao": "2026-06-15",
+    "jogos": [
+        {
+            "time_casa": "Criciúma",
+            "time_fora": "Ceará",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/A9HV9kJr/#/resumo-de-jogo",
+            "odd_casa": "1.91",
+            "odd_fora": "4.33"
+        },
+        {
+            "time_casa": "Londrina",
+            "time_fora": "Avaí",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0Gu6gUY1/#/resumo-de-jogo",
+            "odd_casa": "2.30",
+            "odd_fora": "3.25"
+        },
+        {
+            "time_casa": "Londrina",
+            "time_fora": "Avaí",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0Gu6gUY1/#/resumo-de-jogo",
+            "odd_casa": "2.30",
+            "odd_fora": "3.25"
+        },
+        {
+            "time_casa": "Maringá",
+            "time_fora": "Maranhão",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EXhA5jV7/#/resumo-de-jogo",
+            "odd_casa": "1.57",
+            "odd_fora": "5.40"
+        },
+        {
+            "time_casa": "Ypiranga",
+            "time_fora": "Botafogo-PB",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hrv4RXiR/#/resumo-de-jogo",
+            "odd_casa": "2.18",
+            "odd_fora": "3.30"
+        },
+        {
+            "time_casa": "Ypiranga",
+            "time_fora": "Botafogo-PB",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hrv4RXiR/#/resumo-de-jogo",
+            "odd_casa": "2.18",
+            "odd_fora": "3.30"
+        },
+        {
+            "time_casa": "Ypiranga",
+            "time_fora": "Botafogo-PB",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hrv4RXiR/#/resumo-de-jogo",
+            "odd_casa": "2.18",
+            "odd_fora": "3.30"
+        },
+        {
+            "time_casa": "Espanha",
+            "time_fora": "Cabo Verde",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Iiqjm5Pq/#/resumo-de-jogo",
+            "odd_casa": "1.06",
+            "odd_fora": "23.00"
+        },
+        {
+            "time_casa": "Espanha",
+            "time_fora": "Cabo Verde",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Iiqjm5Pq/#/resumo-de-jogo",
+            "odd_casa": "1.06",
+            "odd_fora": "23.00"
+        },
+        {
+            "time_casa": "Bélgica",
+            "time_fora": "Egito",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dG7zgzd5/#/resumo-de-jogo",
+            "odd_casa": "1.60",
+            "odd_fora": "5.75"
+        },
+        {
+            "time_casa": "Arábia Saudita",
+            "time_fora": "Uruguai",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Olnboqfd/#/resumo-de-jogo",
+            "odd_casa": "8.00",
+            "odd_fora": "1.44"
+        },
+        {
+            "time_casa": "Irã",
+            "time_fora": "Nova Zelândia",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4tBriEQH/#/resumo-de-jogo",
+            "odd_casa": "1.91",
+            "odd_fora": "4.33"
+        },
+        {
+            "time_casa": "Christos",
+            "time_fora": "Annapolis Blues",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KUVz9SAT/#/resumo-de-jogo",
+            "odd_casa": "2.95",
+            "odd_fora": "1.98"
+        },
+        {
+            "time_casa": "Christos",
+            "time_fora": "Annapolis Blues",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KUVz9SAT/#/resumo-de-jogo",
+            "odd_casa": "2.95",
+            "odd_fora": "1.98"
+        },
+        {
+            "time_casa": "Christos",
+            "time_fora": "Annapolis Blues",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KUVz9SAT/#/resumo-de-jogo",
+            "odd_casa": "2.95",
+            "odd_fora": "1.98"
+        }
+    ]
+}
