@@ -19,27 +19,27 @@
     },
     {
         "mercado": "1X (85%)",
-        "green": 11,
-        "red": 3,
-        "assertividade": 0.7857142857142857
+        "green": 12,
+        "red": 4,
+        "assertividade": 0.75
     },
     {
         "mercado": "+1.5 GOLS (85%)",
-        "green": 70,
-        "red": 27,
-        "assertividade": 0.7216494845360825
+        "green": 72,
+        "red": 28,
+        "assertividade": 0.72
+    },
+    {
+        "mercado": "1X (70%)",
+        "green": 7,
+        "red": 3,
+        "assertividade": 0.7
     },
     {
         "mercado": "+1.5 GOLS (70%)",
         "green": 41,
         "red": 20,
         "assertividade": 0.6721311475409836
-    },
-    {
-        "mercado": "1X (70%)",
-        "green": 6,
-        "red": 3,
-        "assertividade": 0.6666666666666666
     },
     {
         "mercado": "+1.5 GOLS (100%)",
@@ -55,9 +55,9 @@
     },
     {
         "mercado": "AMBAS MARCAM: SIM (100%)",
-        "green": 35,
-        "red": 23,
-        "assertividade": 0.603448275862069
+        "green": 37,
+        "red": 24,
+        "assertividade": 0.6065573770491803
     },
     {
         "mercado": "1X (100%)",
@@ -78,16 +78,16 @@
         "assertividade": 0.5555555555555556
     },
     {
-        "mercado": "AMBAS MARCAM: SIM (80%)",
-        "green": 55,
-        "red": 51,
-        "assertividade": 0.5188679245283019
-    },
-    {
         "mercado": "-4.5 GOLS (70%)",
         "green": 3,
         "red": 3,
         "assertividade": 0.5
+    },
+    {
+        "mercado": "AMBAS MARCAM: SIM (80%)",
+        "green": 55,
+        "red": 57,
+        "assertividade": 0.49107142857142855
     },
     {
         "mercado": "VITORIA CASA (100%)",
@@ -108,21 +108,21 @@
         "assertividade": 0.0
     },
     {
-        "mercado": "X2 (70%)",
-        "green": 0,
-        "red": 7,
-        "assertividade": 0.0
-    },
-    {
         "mercado": "VITORIA CASA (85%)",
         "green": 0,
-        "red": 8,
+        "red": 10,
         "assertividade": 0.0
     },
     {
         "mercado": "1X (90%)",
         "green": 0,
         "red": 1,
+        "assertividade": 0.0
+    },
+    {
+        "mercado": "X2 (70%)",
+        "green": 0,
+        "red": 7,
         "assertividade": 0.0
     }
 ]
