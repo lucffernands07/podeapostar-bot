@@ -1,12 +1,33 @@
 {
-    "data_geracao": "2026-06-14",
+    "data_geracao": "2026-06-15",
     "jogos": [
+        {
+            "time_casa": "Criciúma",
+            "time_fora": "Ceará",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/A9HV9kJr/#/resumo-de-jogo"
+        },
         {
             "time_casa": "Londrina",
             "time_fora": "Avaí",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
             "link_h2h": "https://www.flashscore.com.br/jogo/0Gu6gUY1/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Londrina",
+            "time_fora": "Avaí",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0Gu6gUY1/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Maringá",
+            "time_fora": "Maranhão",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EXhA5jV7/#/resumo-de-jogo"
         },
         {
             "time_casa": "Ypiranga",
@@ -30,11 +51,39 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/hrv4RXiR/#/resumo-de-jogo"
         },
         {
+            "time_casa": "Espanha",
+            "time_fora": "Cabo Verde",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Iiqjm5Pq/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Espanha",
+            "time_fora": "Cabo Verde",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Iiqjm5Pq/#/resumo-de-jogo"
+        },
+        {
             "time_casa": "Bélgica",
             "time_fora": "Egito",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
             "link_h2h": "https://www.flashscore.com.br/jogo/dG7zgzd5/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Arábia Saudita",
+            "time_fora": "Uruguai",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Olnboqfd/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Irã",
+            "time_fora": "Nova Zelândia",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4tBriEQH/#/resumo-de-jogo"
         },
         {
             "time_casa": "Christos",

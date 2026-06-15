@@ -1,5 +1,23 @@
 [
     {
+        "horario": "13:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Espanha",
+        "time_fora": "Cabo Verde",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.40",
+        "link_betano": "https://www.betano.bet.br/match-odds/Spain-Cape-Verde/77353215/"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Espanha",
+        "time_fora": "Cabo Verde",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.37",
+        "link_betano": "https://www.betano.bet.br/match-odds/Spain-Cape-Verde/77353215/"
+    },
+    {
         "horario": "16:00",
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Bélgica",
@@ -7,6 +25,24 @@
         "mercado": "+1.5 Gols (85%)",
         "odd": "1.33",
         "link_betano": "https://www.betano.bet.br/match-odds/Belgium-Egypt/77353021/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Arábia Saudita",
+        "time_fora": "Uruguai",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.37",
+        "link_betano": "https://www.betano.bet.br/match-odds/Saudi-Arabia-Uruguay/77353270/"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Maringá",
+        "time_fora": "Maranhão",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.68",
+        "link_betano": "https://www.betano.bet.br/match-odds/Maringa-FC-PR-Maranhao-MA/86496260/"
     },
     {
         "horario": "20:00",
@@ -65,10 +101,37 @@
     {
         "horario": "21:00",
         "liga": "Brasileirão Série B",
+        "time_casa": "Criciúma",
+        "time_fora": "Ceará",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.45",
+        "link_betano": "https://www.betano.bet.br/match-odds/Criciuma-SC-Ceara-SC-CE/87070210/"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Brasileirão Série B",
         "time_casa": "Londrina",
         "time_fora": "Avaí",
         "mercado": "+1.5 Gols (85%)",
         "odd": "1.42",
         "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Avai-SC/87070211/"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Londrina",
+        "time_fora": "Avaí",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "2.20",
+        "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Avai-SC/87070211/"
+    },
+    {
+        "horario": "22:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Irã",
+        "time_fora": "Nova Zelândia",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.47",
+        "link_betano": "https://www.betano.bet.br/match-odds/Iran-New-Zealand/77353166/"
     }
 ]
