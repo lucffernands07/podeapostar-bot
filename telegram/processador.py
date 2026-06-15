@@ -93,7 +93,7 @@ def executar():
     data_hoje = agora_br.strftime("%Y-%m-%d")
     caminho_json = f"telegram/jogos_{data_hoje}.json"
     caminho_ranking = "ranking/ranking_db.json"
-    caminho_pendentes = "ranking/pendentes.json"  # 📌 Mapeado o caminho do pendentes.json
+    caminho_pendentes = "ranking/pendentes.json"
 
     if not os.path.exists(caminho_json):
         print(f"Erro: Arquivo {caminho_json} não encontrado.")
@@ -102,13 +102,11 @@ def executar():
     with open(caminho_json, "r", encoding="utf-8") as f:
         jogos_banco = json.load(f)
 
-    # --- NOVO BLOCO: CARREGA LINKS H2H DO PENDENTES.JSON ---
     dict_h2h = {}
     if os.path.exists(caminho_pendentes):
         try:
             with open(caminho_pendentes, "r", encoding="utf-8") as f:
                 dados_pendentes = json.load(f)
-                # Verifica se a estrutura contém a chave "jogos" conforme o print
                 lista_jogos_p = dados_pendentes.get("jogos", []) if isinstance(dados_pendentes, dict) else dados_pendentes
                 
                 for item in lista_jogos_p:
@@ -116,7 +114,6 @@ def executar():
                     fora = item.get("time_fora")
                     link_h2h = item.get("link_h2h")
                     if casa and fora and link_h2h:
-                        # Cria uma chave única por confronto ignorando espaços e maiúsculas
                         chave_confronto = f"{casa.strip().lower()}x{fora.strip().lower()}"
                         dict_h2h[chave_confronto] = link_h2h
         except Exception as e:
@@ -192,14 +189,30 @@ def executar():
         elif estrategia == "AMBAS":
             j["score_filtro"] = (assertividade * 0.60) + (odd_val * 0.40)
 
+    # Ordena por maior pontuação de acordo com o modo escolhido
     jogos_filtrados.sort(key=lambda x: x.get("score_filtro", 0), reverse=True)
 
-    if len(jogos_filtrados) < qtd_alvo:
-        texto_insuficiente = f"ℹ️ O listão possui apenas {len(jogos_filtrados)} jogos futuros para os parâmetros atuais. Não há partidas suficientes para fechar um Bingo {qtd_alvo}."
+    # 🚨 TRAVA DE JOGOS ÚNICOS: Evita escolher o mesmo jogo com dois mercados diferentes no mesmo bilhete
+    jogos_selecionados = []
+    partidas_ja_incluidas = set()
+
+    for j in jogos_filtrados:
+        if len(jogos_selecionados) >= qtd_alvo:
+            break
+            
+        chave_partida = f"{j.get('time_casa')}x{j.get('time_fora')}".strip().lower()
+        
+        # Como a lista 'jogos_filtrados' já está ordenada pelo seu score_filtro do Modo escolhido, 
+        # o primeiro mercado a aparecer para aquele jogo já é matematicamente a melhor opção tática!
+        if chave_partida not in partidas_ja_incluidas:
+            jogos_selecionados.append(j)
+            partidas_ja_incluidas.add(chave_partida)
+
+    if len(jogos_selecionados) < qtd_alvo:
+        texto_insuficiente = f"ℹ️ O listão possui apenas {len(partidas_ja_incluidas)} partidas únicas para os parâmetros atuais. Não há jogos suficientes para fechar um Bingo {qtd_alvo}."
         menus.enviar_menu_bingo(chat_id, texto_insuficiente)
         return
 
-    jogos_selecionados = jogos_filtrados[:qtd_alvo]
     if "datetime_real" in jogos_selecionados[0]:
         jogos_selecionados.sort(key=lambda x: x["datetime_real"])
 
@@ -213,14 +226,12 @@ def executar():
         } for j in jogos_selecionados]
     }]
 
-    # --- BLOCO CORRIGIDO: MONTA O CACHE INJETANDO O LINK H2H ---
     cache_dados = {}
     for j in jogos_selecionados:
         casa = j.get("time_casa", "")
         fora = j.get("time_fora", "")
         chave_busca = f"{casa.strip().lower()}x{fora.strip().lower()}"
         
-        # Puxa o link do dicionário auxiliar ou define None caso não ache
         link_estatistica = dict_h2h.get(chave_busca, None)
 
         cache_dados[f"{casa}x{fora}"] = {
@@ -228,7 +239,7 @@ def executar():
             "liga": j.get("liga"),
             "horario": j.get("horario"),
             "odd": j.get("odd"),
-            "link_h2h": link_estatistica  # 📌 Chave nova enviada para o bingo357
+            "link_h2h": link_estatistica
         }
 
     if bilhete_solicitado:
@@ -248,4 +259,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-      
+        
