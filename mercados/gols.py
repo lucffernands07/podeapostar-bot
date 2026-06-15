@@ -1,6 +1,6 @@
 """
 REGRAS DE MERCADO - GOLS (REESTRUTURAÇÃO COMPLETA)
-1. Filtro Inicial de Recorrência: Exige no mínimo 4/5 para todos os mercados (+1.5, +2.5 e -4.5).
+1. Filtro Inicial de Recorrência Flexível: Um time deve ter no mínimo 4/5 e o outro no mínimo 3/5.
 2. Trava de H2H Mandatória: O último jogo do confronto direto DEVE bater o mercado escolhido.
 3. Multi-Mercado: Retorna todos os mercados que passarem nos filtros simultaneamente.
 """
@@ -26,23 +26,34 @@ def calcular_porcentagem_gols(c, f, ultimo_h2h, alvo):
     except:
         return 0
 
-    # ➔ PASSO 1: Exige no mínimo 4/5 para ambos os times
-    if c < 4 or f < 4:
+    # ➔ PASSO 1: Nova Regra Flexível (Um pelo menos 4 e o outro pelo menos 3)
+    # Se o maior valor for menor que 4 OR o menor valor for menor que 3, descarte.
+    maior = max(c, f)
+    menor = min(c, f)
+    
+    if maior < 4 or menor < 3:
         return 0
 
     # ➔ PASSO 2: O último confronto direto (H2H) DEVE bater o mercado
     if not verificar_ultimo_jogo(ultimo_h2h, alvo):
         return 0
 
-    # Se passou nas travas, calcula o peso da % (5/5 e 5/5 = 100%, mistos ou 4/5 = 85%)
+    # --- DEFINIÇÃO DAS ETIQUETAS DE PORCENTAGEM PARA O RANKING ---
+    # Se ambos os times forem perfeitos (5/5 e 5/5)
     if c == 5 and f == 5:
         return 100
+    
+    # Se caiu na nova linha limite (um com 4/5 e outro com 3/5)
+    if (c == 4 and f == 3) or (c == 3 and f == 4):
+        return 70
+        
+    # Para todos os outros cenários mistos aceitáveis (ex: 5 e 4, 4 e 4, 5 e 3)
     return 85
 
 def verificar_gols(s):
     """
     Recebe o dicionário 's' do main.py e retorna TODOS os mercados de gols 
-    que passarem simultaneamente no filtro de recorrência (mínimo 4/5).
+    que passarem simultaneamente no filtro de recorrência flexível.
     """
     if not isinstance(s, dict):
         return []
@@ -50,14 +61,14 @@ def verificar_gols(s):
     # Extração segura do placar em texto do último confronto direto (H2H)
     u_h2h = s.get("h2h_placar_1", "")
 
-    # Mapeamento e cálculo das porcentagens de cada mercado seguindo os Passos 1 e 2
+    # Mapeamento e cálculo das porcentagens de cada mercado seguindo os novos critérios
     pct_m45 = calcular_porcentagem_gols(s.get("casa_45_under", 0), s.get("fora_45_under", 0), u_h2h, 4.5)
     pct_15  = calcular_porcentagem_gols(s.get("casa_15", 0), s.get("fora_15", 0), u_h2h, 1.5)
     pct_25  = calcular_porcentagem_gols(s.get("casa_25", 0), s.get("fora_25", 0), u_h2h, 2.5)
 
     mercados_aprovados = []
 
-    # ➔ Em vez de escolher um vencedor e descartar os outros, adiciona todos os válidos (> 0)
+    # Adiciona os mercados válidos com suas respectivas porcentagens corrigidas
     if pct_m45 > 0:
         mercados_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
         
@@ -67,6 +78,5 @@ def verificar_gols(s):
     if pct_25 > 0:
         mercados_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
-    # Retorna a lista contendo de 0 a 3 mercados aprovados para o mesmo jogo
     return mercados_aprovados
     
