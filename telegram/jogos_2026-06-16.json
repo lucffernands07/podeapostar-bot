@@ -1,0 +1,47 @@
+[
+    {
+        "horario": "16:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "França",
+        "time_fora": "Senegal",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.28",
+        "link_betano": "https://www.betano.bet.br/match-odds/France-Senegal/77353568/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "França",
+        "time_fora": "Senegal",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.85",
+        "link_betano": "https://www.betano.bet.br/match-odds/France-Senegal/77353568/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Fortaleza",
+        "time_fora": "América-MG",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.36",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-America-MG/87070209/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Fortaleza",
+        "time_fora": "América-MG",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "1.51",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-America-MG/87070209/"
+    },
+    {
+        "horario": "22:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Argentina",
+        "time_fora": "Argélia",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Algeria/77353282/"
+    }
+]
