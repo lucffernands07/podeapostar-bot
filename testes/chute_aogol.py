@@ -45,27 +45,34 @@ def testar_clique_pelo_nome():
         
         # 1. Coleta os IDs e monta as URLs dos 3 jogos buscando os elementos de forma segura a cada loop
         for i in range(3):
-            # Sempre busca os elementos atualizados na página para evitar o erro de Stale Element
-            elementos_jogos = driver.find_elements(By.XPATH, "//*[contains(text(), 'Irlanda do Norte')]")
+            # AJUSTE DINÂMICO: Seleciona as linhas de jogos reais da primeira seção do H2H (Últimos jogos: França)
+            linhas_confrontos = driver.find_elements(By.XPATH, "//div[contains(@class, 'h2h__section')][1]//div[contains(@class, 'h2h__row')]")
             
-            # Se por acaso existirem menos de 3 jogos na tela, interrompe o loop sem quebrar
-            if i >= len(elementos_jogos):
+            if i >= len(linhas_confrontos):
                 break
                 
-            elemento = elementos_jogos[i]
+            elemento = linhas_confrontos[i]
             
-            print(f"🔄 Clicando na partida da Irlanda do Norte ({i+1}/3)...")
+            # Extrai o nome do adversário para manter o seu padrão de log descritivo
+            try:
+                nome_adversario = elemento.find_element(By.XPATH, ".//span[contains(@class, 'h2h__participantInner')]").text.strip()
+            except Exception:
+                nome_adversario = "Adversário"
+
+            print(f"🔄 Clicando na partida da {nome_adversario} ({i+1}/3)...")
             driver.execute_script("arguments[0].click();", elemento)
             time.sleep(5)
             
             url_final = driver.current_url
             print(f"🔗 URL capturada após o clique: {url_final}")
             
-            bloco_visitante = url_final.split("?")[0].strip("/").split("/")[-1]
-            match = re.search(r'-([a-zA-Z0-9]{8})$', bloco_visitante)
+            # Extrai o ID do bloco final da URL
+            bloco_url = url_final.split("?")[0].strip("/").split("/")[-1]
+            match = re.search(r'-([a-zA-Z0-9]{8})$', bloco_url)
             
             if match:
                 id_real = match.group(1)
+                # Monta a URL usando o ID capturado dinamicamente
                 url_alvo = f"https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/irlanda-do-norte-{id_real}/resumo/estatisticas-jogadores/finalizacoes/"
                 urls_estatisticas.append(url_alvo)
                 print(f"3. ✅ URL ALVO FORMATADA: {url_alvo}")
@@ -171,4 +178,4 @@ def testar_clique_pelo_nome():
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-                        
+            
