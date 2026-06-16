@@ -51,12 +51,17 @@ def testar_clique_pelo_nome():
                 
             elemento = linhas_confrontos[i]
             
+            # Ajuste dinâmico para pegar Mandante x Visitante para o Log
             try:
-                nome_adversario = elemento.text.split('\n')[2]
+                partes_texto = elemento.text.split('\n')
+                # O Flashscore armazena [Data, Campeonato, Mandante, Visitante, Placar...]
+                mandante = partes_texto[2].strip()
+                visitante = partes_texto[3].strip()
+                confronto_formatado = f"{mandante} x {visitante}"
             except Exception:
-                nome_adversario = f"Jogo {i+1}"
+                confronto_formatado = f"Jogo {i+1}"
 
-            print(f"🔄 Mapeando partida contra: {nome_adversario} ({i+1}/3)...")
+            print(f"🔄 Mapeando partida: {confronto_formatado} ({i+1}/3)...")
             driver.execute_script("arguments[0].click();", elemento)
             time.sleep(5)
             
@@ -72,7 +77,7 @@ def testar_clique_pelo_nome():
             driver.get("https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/senegal-hOIsJLJr/h2h/total/")
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
 
-        # 2. Executa a raspagem em segundo plano (sem poluir o log)
+        # 2. Executa a raspagem em segundo plano
         for url_estatisticas in urls_estatisticas:
             driver.get(url_estatisticas)
             try:
@@ -145,4 +150,4 @@ def testar_clique_pelo_nome():
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-            
+                        
