@@ -1,7 +1,10 @@
 name: Teste de chutes no alvo
 
 on:
-  workflow_dispatch: # Permite que você clique em "Run Workflow" no GitHub
+  push:
+    paths:
+      - 'testes/chute_aogol.py'        # Dispara automaticamente se houver commit em qualquer arquivo da pasta testes
+  workflow_dispatch:       # Mantém o botão para você clicar em "Run Workflow" manualmente se quiser
 
 jobs:
   run-test:
@@ -27,3 +30,4 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: python testes/chute_aogol.py
+        
