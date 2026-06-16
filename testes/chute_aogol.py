@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-import re
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -10,12 +9,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Ajuste para importar módulos da pasta raiz (caso precise futuramente)
+# Ajuste para importar módulos da pasta raiz
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 def configurar_driver():
     options = Options()
-    options.add_argument("--headless=new")  # Mantido padrão headless moderno
+    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
@@ -26,7 +25,7 @@ def configurar_driver():
     return driver
 
 def testar_captura_chutes():
-    # URL inicial de H2H fornecida por você para o teste
+    # URL inicial de H2H do jogo em teste
     url_h2h_teste = "https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/senegal-hOIsJLJr/h2h/total/"
     
     driver = configurar_driver()
@@ -43,51 +42,56 @@ def testar_captura_chutes():
         driver.get(url_h2h_teste)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
         
-        # Coleta nome dos times do topo para o log
-        time_a = driver.find_elements(By.CSS_SELECTOR, ".h2h__participant")[0].text.strip()
-        time_b = driver.find_elements(By.CSS_SELECTOR, ".h2h__participant")[1].text.strip()
+        # Pega os nomes do topo (França x Senegal)
+        time_a = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__home .participant__participantName").text.strip()
+        time_b = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__away .participant__participantName").text.strip()
         
         print(f"1. ✅ Acesso ao h2h de {time_a} x {time_b} realizado com sucesso.")
         
         # ---------------------------------------------------------------------
-        # ETAPA 2: Encontrar ID do último jogo da Tabela 1 (Sem cliques)
+        # ETAPA 2: Encontrar ID do último jogo da Tabela 1 (França x Irlanda do Norte)
         # ---------------------------------------------------------------------
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        tabela_1 = secoes[0] # Primeira tabela: Últimos jogos do mandante
+        tabela_1 = secoes[0] 
         
+        # Seleciona a primeira linha de jogo disponível na tabela
         primeira_linha = tabela_1.find_element(By.CSS_SELECTOR, ".h2h__row")
         
-        # Pega os nomes dos times que jogaram essa partida anterior
         time_c = primeira_linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text.strip()
         time_d = primeira_linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text.strip()
         
-        # Extrai o ID único do jogo pelo atributo 'id' do elemento (ex: g_1_lQADNSWu)
-        id_bruto = primeira_linha.get_attribute("id")
-        id_jogo = id_bruto.replace("g_1_", "").strip()
+        # ID por Split idêntico ao motor do seu main.py
+        id_bruto = primeira_linha.get_attribute('id')
         
-        if not id_jogo:
-            raise Exception("Não foi possível isolar o ID do jogo na Tabela 1.")
+        if not id_bruto or "_" not in id_bruto:
+            raise Exception("Erro ao ler ID na linha da tabela 1.")
             
+        id_jogo = id_bruto.split('_')[-1]
+        
         print(f"2. ✅ Encontrado id do último jogo da tabela 1 ({id_jogo}) -> {time_c} x {time_d}")
         
         # ---------------------------------------------------------------------
-        # ETAPA 3: Montagem e Redirecionamento para a URL de Estatísticas
+        # ETAPA 3: Montagem e Redirecionamento para a Aba de Finalizações (URL Exata)
         # ---------------------------------------------------------------------
-        url_finalizacoes = f"https://www.flashscore.com.br/jogo/{id_jogo}/resumo/estatisticas-jogadores/finalizacoes/"
-        print(f"3. ✅ URL das estatísticas de finalização gerada: {url_finalizacoes}")
+        # Montagem sem o hash (#), idêntica ao padrão de rota estática informada por você
+        url_finalizacoes = f"https://www.flashscore.com.br/jogo/futebol/{time_c.lower()}-{id_jogo}/{time_d.lower()}-{id_jogo}/resumo/estatisticas-jogadores/finalizacoes/"
+        
+        # Como o Flashscore aceita apenas o ID no meio do caminho para redirecionar para a URL com nomes,
+        # podemos usar a versão simplificada que o servidor deles resolve direto para a sua URL final:
+        url_finalizacoes_direta = f"https://www.flashscore.com.br/jogo/{id_jogo}/resumo/estatisticas-jogadores/finalizacoes/"
+        
+        print(f"3. ✅ URL das estatísticas de finalização gerada: {url_finalizacoes_direta}")
         
         print("\n🔀 Redirecionando navegador para a página alvo...")
-        driver.get(url_finalizacoes)
+        driver.get(url_finalizacoes_direta)
         
-        # Tempo de segurança para carregar a página de finalizações
-        time.sleep(4)
+        # Tempo de segurança para a tabela de jogadores carregar no ambiente headless do Actions
+        time.sleep(6)
         
         print("\n" + "="*60)
         print("🎉 FIM DA ETAPA DE OTIMIZAÇÃO: PRONTO PARA A RASPAGEM")
         print("="*60 + "\n")
         
-        # Próximo passo: Incluir os scapers das tabelas de finalizações aqui...
-
     except Exception as e:
         print(f"\n❌ Erro durante o teste: {e}")
     finally:
