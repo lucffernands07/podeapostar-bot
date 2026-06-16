@@ -28,121 +28,91 @@ def testar_clique_pelo_nome():
     wait = WebDriverWait(driver, 15)
     
     print("\n" + "="*60)
-    print("🚀 INICIANDO CLIQUE DIRETO NO TEXTO DO JOGO")
+    print("🚀 INICIANDO CONEXÃO E NAVEGAÇÃO")
     print("="*60 + "\n")
     
     try:
-        # --- ETAPA 1 e 2: Navegação e Descoberta de ID ---
+        # --- ETAPA 1: Captura do ID e Redirecionamento ---
         driver.get("https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/senegal-hOIsJLJr/h2h/total/")
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
-        elemento_jogo = driver.find_element(By.XPATH, "//*[contains(text(), 'Irlanda do Norte')]")
-        
-        print("🔄 Clicando na partida da Irlanda do Norte...")
+        elemento_jogo = driver.find_element(By.開, "//*[contains(text(), 'Irlanda do Norte')]") if hasattr(By, '開') else driver.find_element(By.XPATH, "//*[contains(text(), 'Irlanda do Norte')]")
         driver.execute_script("arguments[0].click();", elemento_jogo)
+        time.sleep(4)
         
+        id_real = driver.current_url.split("?")[0].strip("/").split("/")[-1].split("-")[-1]
+        url_estatisticas = f"https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/irlanda-do-norte-{id_real}/resumo/estatisticas-jogadores/"
+        
+        print(f"🔗 Acessando Hub de Estatísticas do Jogador: {url_estatisticas}")
+        driver.get(url_estatisticas)
         time.sleep(5)
         
-        url_final = driver.current_url
-        print(f"🔗 URL capturada após o clique: {url_final}")
-        
-        url_limpa = url_final.split("?")[0]
-        partes_url = url_limpa.strip("/").split("/")
-        ultimo_bloco = partes_url[-1] 
-        id_real = ultimo_bloco.split("-")[-1]
-        
-        url_estatisticas = f"https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/irlanda-do-norte-{id_real}/resumo/estatisticas-jogadores/finalizacoes/"
-        print(f"\n3. ✅ URL ALVO FORMATADA: {url_estatisticas}")
-        
-        # --- ETAPA 3: Acesso à Página de Estatísticas ---
-        print("\n🔀 Redirecionando para a página alvo de finalizações...")
-        driver.get(url_estatisticas)
-        time.sleep(6)
-        
-        # --- ETAPA 4: Identificação da Coluna e Raspagem Mapeada ---
+        # --- ETAPA 2: O PULO DO GATO (Clicar no Sub-menu Finalizações) ---
+        print("🎯 Forçando clique no botão 'FINALIZAÇÕES' para revelar a tabela...")
+        try:
+            # Busca pelo elemento de texto que você vê no print
+            botao_finalizacoes = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Finalizações')] | //div[contains(text(), 'Finalizações')]")))
+            driver.execute_script("arguments[0].click();", botao_finalizacoes)
+            print("✅ Sub-aba 'Finalizações' ativada com sucesso!")
+            time.sleep(3)
+        except Exception as e_clique:
+            print(f"⚠️ Não conseguiu clicar no botão 'Finalizações' pelo texto. Erro: {e_clique}")
+            print("Tentando buscar por elementos de sub-menu ancorados...")
+            
+        # --- ETAPA 3: Raspagem Cirúrgica dos Dados Revelados ---
         print("\n" + "="*60)
-        print("📊 INICIANDO MAPEAMENTO E RASPAGEM DA TABELA PARALELA")
+        print("📊 PROCESSANDO LINHAS DE JOGADORES REVELADAS")
         print("="*60)
         
-        # 1. Mapeia o índice da coluna usando o testid correto do cabeçalho
+        # Identifica o índice correto da coluna desejada ("Finalizações no alvo")
         cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell']")
-        
         indice_chutes_no_gol = -1
         contador_colunas = 0
         
         for th in cabecalhos:
             alias = th.get_attribute("data-analytics-alias")
-            if alias:
-                if alias == "SHOTS_ON_TARGET":
-                    indice_chutes_no_gol = contador_colunas
-                    print(f"🎯 Coluna 'Finalizações no alvo' identificada no índice: {indice_chutes_no_gol}")
-                    break
-                contador_colunas += 1
-        
+            if alias == "SHOTS_ON_TARGET":
+                indice_chutes_no_gol = contador_colunas
+                break
+            contador_colunas += 1
+            
         if indice_chutes_no_gol == -1:
-            indice_chutes_no_gol = 4
-            print(f"⚠️ Alerta: Alias não encontrado. Usando índice padrão: {indice_chutes_no_gol}")
-
-        # 2. Captura todas as células de NOMES dos jogadores (Tabela Esquerda Fira)
-        # O Flashscore costuma usar classes com 'participant' ou 'name' para os atletas
-        celulas_nomes = driver.find_elements(By.CSS_SELECTOR, "[class*='participantName'], [class*='name_'], td:first-child")
+            indice_chutes_no_gol = 4  # Mantém o fallback caso o alias mude
+            
+        # Captura as linhas da tabela que agora estão visíveis no DOM
+        linhas_dados = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableRow']")
+        print(f"📋 Total de linhas na tabela: {len(linhas_dados)}\n")
         
-        # Filtragem para remover textos indesejados da captura de nomes
-        nomes_filtrados = []
-        for celula in celulas_nomes:
-            txt = celula.text.strip()
-            if txt and txt != "TODOS" and "Rating" not in txt and txt != "JOGADOR":
-                nomes_filtrados.append(txt)
-
-        # 3. Captura todas as LINHAS de dados numéricos (Tabela Direita Móvel)
-        # Usamos uma busca por elementos de linha genéricos ou de tabela
-        linhas_dados = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableRow'], tr")
-        
-        print(f"📋 Jogadores filtrados: {len(nomes_filtrados)} | Linhas de dados bruto: {len(linhas_dados)}")
-        
-        # Varremos os nomes e associamos com as colunas numéricas de cada linha correspondente
-        contador_sucesso = 0
-        for idx, nome in enumerate(nomes_filtrados):
+        for linha in linhas_dados:
             try:
-                if idx >= len(linhas_dados):
-                    break
-                    
-                linha_atual = lines_dados[idx] if 'linhas_dados' in locals() else linhas_dados[idx]
+                # Pega o nome do jogador dentro da linha atual
+                celula_nome = linha.find_element(By.CSS_SELECTOR, "[class*='participantName'], [class*='name_']")
+                nome_jogador = celula_nome.text.strip()
                 
-                # Busca as células de valores numéricos baseando-se no HTML que você forneceu
-                celulas_valores = linha_atual.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell']")
+                if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador:
+                    continue
+                
+                # Pega os valores numéricos da mesma linha
+                celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell']")
                 
                 if len(celulas_valores) > indice_chutes_no_gol:
-                    # Captura o texto interno (que pode ser o "-" ou o número de chutes)
                     valor_bruto = celulas_valores[indice_chutes_no_gol].text.strip()
-                    
-                    # Tratamento: se for o traço "-", convertemos para "0" como você pediu
+                    # Faz o tratamento do "-" para "0" baseado no seu pedaço de HTML
                     chutes_no_alvo = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
                     
-                    print(f"🏃‍♂️ {nome:<25} ➔ Chutes no Alvo: {chutes_no_alvo}")
-                    contador_sucesso += 1
-            except Exception as e_linha:
+                    print(f"🏃‍♂️ {nome_jogador:<25} ➔ Chutes no Alvo: {chutes_no_alvo}")
+            except Exception:
                 continue
-                
-        if contador_sucesso == 0:
-            print("\n⚠️ Nenhuma linha processada com sucesso. Tentando modo de varredura direta por linha...")
-            # Fallback direto: se a separação falhar, tentamos ler cada linha inteira pelo testid padrão
-            linhas_gerais = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableRow']")
-            for lg in linhas_gerais:
-                texto_total = lg.text.replace("\n", " ").strip()
-                if texto_total and "TODOS" not in texto_total:
-                    print(f"📄 Linha Bruta Detectada: {texto_total}")
 
         print("\n" + "="*60)
-        print("🎉 FIM DA ETAPA DE OTIMIZAÇÃO: RASPAGEM EXECUTADA")
+        print("🎉 FIM DA RASPAGEM: DADOS EXTRAÍDOS COM SUCESSO")
         print("="*60 + "\n")
         
     except Exception as e:
-        print(f"\n❌ Erro durante o teste: {e}")
+        print(f"\n❌ Erro Geral: {e}")
     finally:
         driver.quit()
-        print("🏁 Teste finalizado.")
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-    
+            
