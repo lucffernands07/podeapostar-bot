@@ -39,17 +39,22 @@ def testar_clique_pelo_nome():
         # Espera as linhas do H2H carregarem na tela
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
-        # --- BUSCA OS 3 ÚLTIMOS CONFRONTOS USANDO O SEU PADRÃO ---
-        elementos_jogos = driver.find_elements(By.XPATH, "//*[contains(text(), 'Irlanda do Norte')]")
-        elementos_alvo = elementos_jogos[:3]
-        
         # Estrutura para acumular os chutes {nome: [chutes_j1, chutes_j2, ...]}
         historico_jogadores = {}
         urls_estatisticas = []
         
-        # 1. Coleta os IDs e monta as URLs dos 3 jogos usando sua lógica exata
-        for i, elemento in enumerate(elementos_alvo):
-            print(f"🔄 Clicando na partida da Irlanda do Norte ({i+1}/{len(elementos_alvo)})...")
+        # 1. Coleta os IDs e monta as URLs dos 3 jogos buscando os elementos de forma segura a cada loop
+        for i in range(3):
+            # Sempre busca os elementos atualizados na página para evitar o erro de Stale Element
+            elementos_jogos = driver.find_elements(By.XPATH, "//*[contains(text(), 'Irlanda do Norte')]")
+            
+            # Se por acaso existirem menos de 3 jogos na tela, interrompe o loop sem quebrar
+            if i >= len(elementos_jogos):
+                break
+                
+            elemento = elementos_jogos[i]
+            
+            print(f"🔄 Clicando na partida da Irlanda do Norte ({i+1}/3)...")
             driver.execute_script("arguments[0].click();", elemento)
             time.sleep(5)
             
@@ -61,15 +66,13 @@ def testar_clique_pelo_nome():
             
             if match:
                 id_real = match.group(1)
-                url_estatisticas = f"https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/irlanda-do-norte-{id_real}/resumo/estatisticas-jogadores/finalizacoes/"
-                urls_estatisticas.append(url_estatisticas)
-                print(f"3. ✅ URL ALVO FORMATADA: {url_estatisticas}")
+                url_alvo = f"https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/irlanda-do-norte-{id_real}/resumo/estatisticas-jogadores/finalizacoes/"
+                urls_estatisticas.append(url_alvo)
+                print(f"3. ✅ URL ALVO FORMATADA: {url_alvo}")
             
-            # Retorna para o H2H principal para buscar o próximo
+            # Retorna para o H2H principal e aguarda o carregamento antes da próxima iteração
             driver.get("https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/senegal-hOIsJLJr/h2h/total/")
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-            elementos_jogos = driver.find_elements(By.XPATH, "//*[contains(text(), 'Irlanda do Norte')]")
-            elementos_alvo = elementos_jogos[:3]
 
         # 2. Executa a raspagem para cada uma das URLs encontradas
         for url_estatisticas in urls_estatisticas:
@@ -125,7 +128,6 @@ def testar_clique_pelo_nome():
                         valor_bruto = celulas_valores[indice_chutes_no_gol].text.strip()
                         chutes_no_alvo = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
                         
-                        # Guardamos em formato numérico para o cálculo da média posterior
                         if nome_jogador not in historico_jogadores:
                             historico_jogadores[nome_jogador] = []
                         historico_jogadores[nome_jogador].append(int(chutes_no_alvo))
@@ -134,7 +136,7 @@ def testar_clique_pelo_nome():
                 except Exception:
                     continue
 
-        # --- LÓGICA DE TRATAMENTO DE MÉDIAS E EMPATES (NOVO) ---
+        # --- TRATAMENTO DE MÉDIAS E EMPATES ---
         print("\n" + "="*60)
         print("📊 CÁLCULO FINAL DAS MÉDIAS DOS CONFRONTOS")
         print("="*60)
@@ -146,7 +148,6 @@ def testar_clique_pelo_nome():
             media_atual = sum(chutes_lista) / len(chutes_lista)
             print(f"🏃‍♂️ {jogador:<25} ➔ Média: {media_atual:.2f} (baseado em {len(chutes_lista)} jogos)")
             
-            # Guarda o primeiro em caso de empate (critério do maior estrito)
             if media_atual > maior_media_calculada:
                 maior_media_calculada = media_atual
                 jogador_maior_media = jogador
@@ -170,4 +171,4 @@ def testar_clique_pelo_nome():
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-                    
+                        
