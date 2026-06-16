@@ -68,8 +68,8 @@ def testar_clique_pelo_nome():
             # --- CONTINUAÇÃO AQUI: ESPERA ATÉ A TABELA CARREGAR DE VERDADE ---
             print("⏳ Aguardando renderização dinâmica das estatísticas dos jogadores...")
             try:
-                # Ajustado para usar também o indicador do cartão do jogador que você mapeou
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], [data-testid='wcl-tableRow']")))
+                # Modificado para focar no elemento de célula de jogador que você extraiu no HTML
+                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
                 print("⚡ Tabela de estatísticas carregada com sucesso!")
                 time.sleep(3)  # Respiro para o JS preencher os nós de texto
             except Exception:
@@ -80,7 +80,6 @@ def testar_clique_pelo_nome():
             print("="*60)
             
             # 1. Mapeamento dinâmico da coluna desejada
-            # Ajustado incluindo o botão .wcl-sortingButton_isgjY que você enviou
             cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY")
             indice_chutes_no_gol = -1
             contador_colunas = 0
@@ -95,30 +94,34 @@ def testar_clique_pelo_nome():
                 contador_colunas += 1
                 
             if indice_chutes_no_gol == -1:
-                indice_chutes_no_gol = 5  # Fallback dinâmico para o índice 5 capturado no seu último log válido
+                indice_chutes_no_gol = 10  # Mantém o índice 10 pego no seu último log de sucesso como fallback
                 print(f"⚠️ Alias não encontrado. Usando índice padrão: {indice_chutes_no_gol}")
                 
-            # 2. Coleta e Varredura das Linhas Reais da Tabela (Mantendo o seletor base que retorna as linhas)
-            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableRow'], div.wcl-table__row_")
+            # 2. Varredura das Linhas Reais (Mudado para buscar as linhas da tabela tradicional 'tr' ou containers de linha nativos)
+            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+            
+            # Se a busca falhar por usar tags estruturais puras, faz o fallback para varredura ampla de elementos de jogador
+            if len(linhas_dados) <= 1:
+                linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
+                
             print(f"📋 Total de linhas detectadas para processamento: {len(linhas_dados)}\n")
             
             for linha in linhas_dados:
                 try:
-                    # Ajustado: Busca a classe cirúrgica do nome (.fp-playerName_E6lgN) dentro da linha
-                    celula_name = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN, [class*='participantName'], [class*='name_']")
+                    # Busca o nome usando a classe exata fornecida: .fp-playerName_E6lgN
+                    celula_name = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")
                     nome_jogador = celula_name.text.strip()
                     
-                    # Ignora linhas vazias ou o cabeçalho "TODOS" mapeado
                     if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
                         continue
                     
-                    # Ajustado: Pega os spans de valores simples ou as células estruturais da linha
-                    celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], [data-testid='wcl-tableBodyCell']")
+                    # Coleta os valores usando as tags de texto que você indicou no HTML (wcl-scores-simple-text-01) ou células normais
+                    celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
                     
                     if len(celulas_valores) > indice_chutes_no_gol:
                         valor_bruto = celulas_valores[indice_chutes_no_gol].text.strip()
                         
-                        # Converte o traço "-" do Flashscore para "0" baseado no seu HTML
+                        # Converte o traço "-" do Flashscore para "0"
                         chutes_no_alvo = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
                         
                         print(f"🏃‍♂️ {nome_jogador:<25} ➔ Chutes no Alvo: {chutes_no_alvo}")
@@ -139,4 +142,4 @@ def testar_clique_pelo_nome():
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-            
+                
