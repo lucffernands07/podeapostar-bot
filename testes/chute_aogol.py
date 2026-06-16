@@ -52,42 +52,42 @@ def testar_captura_chutes():
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         tabela_1 = secoes[0] 
         
-        # Localiza a primeira linha do confronto
         primeira_linha = tabela_1.find_element(By.CSS_SELECTOR, ".h2h__row")
         
         time_c = primeira_linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text.strip()
         time_d = primeira_linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text.strip()
         
         print(f"🔄 Elemento de {time_c} x {time_d} localizado. Disparando clique simulado...")
-        
-        # Executa o clique via JavaScript diretamente no elemento da linha para evitar bloqueio de overlay
         driver.execute_script("arguments[0].click();", primeira_linha)
         
-        # Espera curta para garantir a mudança de página
         time.sleep(4)
         
-        # Pega a URL atual do navegador (Ex: https://www.flashscore.com.br/jogo/lQADNSWu/#/resumo)
+        # Captura a URL gerada pós-clique
         url_remanecente = driver.current_url
         
-        # Corta a URL para extrair o ID do jogo
-        partes_url = url_remanecente.strip("/").split("#")[0].split("/")
-        id_jogo = partes_url[-1] if partes_url[-1] != "resumo" else partes_url[-2]
-        
-        # Se por acaso o ID contiver traços (nome do time junto), pega a última parte dele
-        if "-" in id_jogo:
-            id_jogo = id_jogo.split("-")[-1]
+        # Tratamento do parâmetro dinâmico ?mid= detectado no ambiente de testes do Actions
+        if "?mid=" in url_remanecente:
+            id_jogo = url_remanecente.split("?mid=")[-1].split("&")[0].split("#")[0].strip("/")
+        else:
+            # Fallback para o padrão de URL estática caso mude de ambiente
+            partes_url = url_remanecente.strip("/").split("#")[0].split("/")
+            id_jogo = partes_url[-1] if partes_url[-1] != "resumo" else partes_url[-2]
+            if "-" in id_jogo:
+                id_jogo = id_jogo.split("-")[-1]
             
-        print(f"2. ✅ Navegação detectada. ID extraído da URL atual ({id_jogo}) -> {time_c} x {time_d}")
+        print(f"2. ✅ Navegação detectada. ID extraído ({id_jogo}) -> {time_c} x {time_d}")
         
         # ---------------------------------------------------------------------
-        # ETAPA 3: Redirecionamento para a Página Alvo de Finalizações
+        # ETAPA 3: Montagem e Redirecionamento para a Página Alvo de Finalizações
         # ---------------------------------------------------------------------
+        # Montagem limpa sem o parâmetro quebrado. O Flashscore resolve esse ID diretamente para a URL final longa.
         url_finalizacoes_direta = f"https://www.flashscore.com.br/jogo/{id_jogo}/resumo/estatisticas-jogadores/finalizacoes/"
         print(f"3. ✅ URL das estatísticas de finalização gerada: {url_finalizacoes_direta}")
         
         print("\n🔀 Redirecionando navegador para a página alvo...")
         driver.get(url_finalizacoes_direta)
         
+        # Tempo para garantir o carregamento completo da tabela interna
         time.sleep(6)
         
         print("\n" + "="*60)
