@@ -32,6 +32,7 @@ def testar_clique_pelo_nome():
     print("="*60 + "\n")
     
     try:
+        # --- ETAPA 1 e 2: Navegação e Descoberta de ID ---
         driver.get("https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/senegal-hOIsJLJr/h2h/total/")
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
@@ -45,7 +46,6 @@ def testar_clique_pelo_nome():
         url_final = driver.current_url
         print(f"🔗 URL capturada após o clique: {url_final}")
         
-        # --- Nova lógica de extração sem erro de alvo ---
         url_limpa = url_final.split("?")[0]
         partes_url = url_limpa.strip("/").split("/")
         ultimo_bloco = partes_url[-1] 
@@ -53,13 +53,79 @@ def testar_clique_pelo_nome():
         
         url_estatisticas = f"https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/irlanda-do-norte-{id_real}/resumo/estatisticas-jogadores/finalizacoes/"
         print(f"\n3. ✅ URL ALVO FORMATADA: {url_estatisticas}")
-        # ------------------------------------------------
         
-        print("\n🔀 Redirecionando para validar acesso à página alvo...")
+        # --- ETAPA 3: Acesso à Página de Estatísticas ---
+        print("\n🔀 Redirecionando para a página alvo de finalizações...")
         driver.get(url_estatisticas)
-        time.sleep(5)
+        time.sleep(6)  # Tempo essencial para renderização das tabelas paralelas via JS
+        
+        # --- ETAPA 4: Identificação da Coluna e Raspagem dos Jogadores ---
         print("\n" + "="*60)
-        print("🎉 FIM DA ETAPA DE OTIMIZAÇÃO: PRONTO PARA A RASPAGEM")
+        print("📊 INICIANDO MAPEAMENTO E RASPAGEM DA TABELA PARALELA")
+        print("="*60)
+        
+        # Mapeia dinamicamente onde está a coluna "Finalizações no alvo"
+        cabecalhos = driver.find_elements(By.CSS_SELECTOR, "th[data-testid='wcl-tableHeadCell']")
+        
+        indice_chutes_no_gol = -1
+        contador_colunas = 0
+        
+        for th in cabecalhos:
+            alias = th.get_attribute("data-analytics-alias")
+            if alias:
+                if alias == "SHOTS_ON_TARGET":
+                    indice_chutes_no_gol = contador_colunas
+                    print(f"🎯 Coluna 'Finalizações no alvo' identificada no índice de dados: {indice_chutes_no_gol}")
+                    break
+                contador_colunas += 1
+        
+        # Fallback de segurança: se a busca por alias falhar, usa a 5ª coluna de dados informada (índice 4)
+        if indice_chutes_no_gol == -1:
+            indice_chutes_no_gol = 4
+            print(f"⚠️ Alerta: Alias não encontrado. Utilizando índice de fallback padrão: {indice_chutes_no_gol} (5ª coluna)")
+            
+        # Captura todas as linhas de jogadores renderizadas na tela
+        # O Flashscore costuma usar 'tr' com 'wcl-tableRow' ou blocos de estatísticas de linha
+        linhas_jogadores = driver.find_elements(By.CSS_SELECTOR, "tr[data-testid='wcl-tableRow']")
+        
+        # Fallback de seletor para linhas se forem divs em vez de tr
+        if not linhas_jogadores:
+            linhas_jogadores = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-playerStats-row'], .ui-table__row")
+            
+        print(f"📋 Total de linhas de dados encontradas para processamento: {len(linhas_jogadores)}\n")
+        
+        # Varredura paralela das linhas
+        for idx, linha in enumerate(linhas_jogadores):
+            try:
+                # Localiza a célula do nome (Geralmente a primeira célula ou elemento com classe name)
+                # Tentamos buscar o seletor de nome ou a primeira célula fixa (coluna esquerda)
+                celula_nome = linha.find_element(By.CSS_SELECTOR, "td:first-child, [class*='ParticipantName'], [class*='name_']")
+                nome_jogador = celula_nome.text.strip()
+                
+                # Ignora linhas vazias ou de cabeçalho intermediário (ex: texto "TODOS" ou nome de times)
+                if not nome_jogador or nome_jogador == "TODOS":
+                    continue
+                
+                # Captura as colunas de dados numéricos (coluna direita da linha)
+                celulas_valores = linha.find_elements(By.CSS_SELECTOR, "td[data-testid='wcl-tableCell'], [class*='tableCell_'], td")
+                
+                # Descontando a primeira coluna (que pode ser o nome) para alinhar com o índice de dados mapeado
+                # Se o find_elements capturar tudo incluindo o nome, o ajuste do índice é automático
+                ajuste_indice = 1 if len(celulas_valores) > contador_colunas else 0
+                indice_final = indice_chutes_no_gol + ajuste_indice
+                
+                if len(celulas_valores) > indice_final:
+                    chutes_no_alvo = celulas_valores[indice_final].text.strip()
+                    print(f"🏃‍♂️ {nome_jogador:<25} ➔ Chutes no Alvo: {chutes_no_alvo}")
+                else:
+                    print(f"🏃‍♂️ {nome_jogador:<25} ➔ Dados insuficientes na linha.")
+                    
+            except Exception as linha_erro:
+                # Evita que uma linha com formato de quebra de seção trave o loop inteiro
+                continue
+                
+        print("\n" + "="*60)
+        print("🎉 FIM DA ETAPA DE OTIMIZAÇÃO: RASPAGEM EXECUTADA")
         print("="*60 + "\n")
         
     except Exception as e:
@@ -70,4 +136,4 @@ def testar_clique_pelo_nome():
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-        
+                    
