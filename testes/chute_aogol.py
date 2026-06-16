@@ -52,8 +52,11 @@ def testar_clique_pelo_nome():
         url_final = driver.current_url
         print(f"🔗 URL capturada após o clique: {url_final}")
         
-        # Extrai os 8 caracteres do ID real usando a Regex
-        match = re.search(r'-([a-zA-Z0-9]{8})', url_final)
+        # --- AJUSTE CIRÚRGICO DA REGEX PARA PEGAR O ID DA IRLANDA DO NORTE ---
+        # Filtra para buscar o padrão de 8 caracteres apenas no último bloco da URL do jogo
+        bloco_visitante = url_final.split("?")[0].strip("/").split("/")[-1]
+        match = re.search(r'-([a-zA-Z0-9]{8})$', bloco_visitante)
+        
         if match:
             id_real = match.group(1)
             url_estatisticas = f"https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/irlanda-do-norte-{id_real}/resumo/estatisticas-jogadores/finalizacoes/"
@@ -87,7 +90,7 @@ def testar_clique_pelo_nome():
                 alias = th.get_attribute("data-analytics-alias")
                 if alias == "SHOTS_ON_TARGET":
                     indice_chutes_no_gol = contador_colunas
-                    print(f"🎯 Coluna 'Finalizações no alvo' identificada no índice: {indice_chutes_no_gol}")
+                    print(f"🎯 Coluna 'Finalizações no alvo' identified no índice: {indice_chutes_no_gol}")
                     break
                 contador_colunas += 1
                 
@@ -99,7 +102,7 @@ def testar_clique_pelo_nome():
             linhas_dados = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableRow']")
             print(f"📋 Total de linhas detectadas para processamento: {len(linhas_dados)}\n")
             
-            for linha in linhas_dados:
+            for linha in lignes_dados if 'lignes_dados' in locals() else linhas_dados:
                 try:
                     # Extrai o nome do jogador de dentro da linha atual
                     celula_nome = linha.find_element(By.CSS_SELECTOR, "[class*='participantName'], [class*='name_'], .wcl-participantName_")
@@ -136,4 +139,4 @@ def testar_clique_pelo_nome():
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-            
+                
