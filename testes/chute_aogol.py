@@ -43,21 +43,25 @@ def testar_clique_pelo_nome():
         historico_jogadores = {}
         urls_estatisticas = []
         
-        # 1. Coleta os IDs e monta as URLs dos 3 jogos buscando os elementos de forma segura a cada loop
+        # 1. Coleta os IDs e monta as URLs dos 3 jogos de forma segura
         for i in range(3):
-            # AJUSTE DINÂMICO: Seleciona as linhas de jogos reais da primeira seção do H2H (Últimos jogos: França)
-            linhas_confrontos = driver.find_elements(By.XPATH, "//div[contains(@class, 'h2h__section')][1]//div[contains(@class, 'h2h__row')]")
+            # Procura de forma genérica pelas linhas de H2H presentes na primeira seção
+            linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__section:nth-child(1) .h2h__row")
+            
+            # Se falhar pelo seletor nth-child, tenta buscar de forma ampla na página
+            if not linhas_confrontos:
+                linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__row")
             
             if i >= len(linhas_confrontos):
                 break
                 
             elemento = linhas_confrontos[i]
             
-            # Extrai o nome do adversário para manter o seu padrão de log descritivo
+            # Tenta capturar o nome do adversário para o seu log, se falhar usa um padrão
             try:
-                nome_adversario = elemento.find_element(By.XPATH, ".//span[contains(@class, 'h2h__participantInner')]").text.strip()
+                nome_adversario = elemento.text.split('\n')[2] # Pega o nome do time que varia
             except Exception:
-                nome_adversario = "Adversário"
+                nome_adversario = "Confronto"
 
             print(f"🔄 Clicando na partida da {nome_adversario} ({i+1}/3)...")
             driver.execute_script("arguments[0].click();", elemento)
@@ -66,18 +70,17 @@ def testar_clique_pelo_nome():
             url_final = driver.current_url
             print(f"🔗 URL capturada após o clique: {url_final}")
             
-            # Extrai o ID do bloco final da URL
             bloco_url = url_final.split("?")[0].strip("/").split("/")[-1]
             match = re.search(r'-([a-zA-Z0-9]{8})$', bloco_url)
             
             if match:
                 id_real = match.group(1)
-                # Monta a URL usando o ID capturado dinamicamente
+                # Mantém o seu padrão de URL alvo idêntico
                 url_alvo = f"https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/irlanda-do-norte-{id_real}/resumo/estatisticas-jogadores/finalizacoes/"
                 urls_estatisticas.append(url_alvo)
                 print(f"3. ✅ URL ALVO FORMATADA: {url_alvo}")
             
-            # Retorna para o H2H principal e aguarda o carregamento antes da próxima iteração
+            # Retorna para o H2H principal e aguarda carregar antes do próximo clique
             driver.get("https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/senegal-hOIsJLJr/h2h/total/")
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
 
@@ -178,4 +181,4 @@ def testar_clique_pelo_nome():
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-            
+                                                          
