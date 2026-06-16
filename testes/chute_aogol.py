@@ -68,12 +68,10 @@ def testar_clique_pelo_nome():
             # --- CONTINUAÇÃO AQUI: ESPERA ATÉ A TABELA CARREGAR DE VERDADE ---
             print("⏳ Aguardando renderização dinâmica das estatísticas dos jogadores...")
             try:
-                # Espera o container principal do corpo da tabela aparecer
-                wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[class*='tableBody'], .wcl-table__body_")))
-                # Espera as linhas com os dados aparecerem
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-tableRow']")))
+                # Ajustado para usar também o indicador do cartão do jogador que você mapeou
+                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], [data-testid='wcl-tableRow']")))
                 print("⚡ Tabela de estatísticas carregada com sucesso!")
-                time.sleep(2)  # Respiro de segurança pro JS estabilizar os textos
+                time.sleep(3)  # Respiro para o JS preencher os nós de texto
             except Exception:
                 print("⚠️ Tempo de espera esgotado. Tentando extrair com o que estiver pronto...")
 
@@ -82,43 +80,45 @@ def testar_clique_pelo_nome():
             print("="*60)
             
             # 1. Mapeamento dinâmico da coluna desejada
-            cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell']")
+            # Ajustado incluindo o botão .wcl-sortingButton_isgjY que você enviou
+            cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY")
             indice_chutes_no_gol = -1
             contador_colunas = 0
             
             for th in cabecalhos:
+                texto_th = th.text.strip().upper()
                 alias = th.get_attribute("data-analytics-alias")
-                if alias == "SHOTS_ON_TARGET":
+                if alias == "SHOTS_ON_TARGET" or "FINALIZAÇÕES NO ALVO" in texto_th:
                     indice_chutes_no_gol = contador_colunas
-                    print(f"🎯 Coluna 'Finalizações no alvo' identified no índice: {indice_chutes_no_gol}")
+                    print(f"🎯 Coluna 'Finalizações no alvo' identificada no índice: {indice_chutes_no_gol}")
                     break
                 contador_colunas += 1
                 
             if indice_chutes_no_gol == -1:
-                indice_chutes_no_gol = 4  # Fallback seguro para a 5ª coluna baseado no seu HTML
+                indice_chutes_no_gol = 5  # Fallback dinâmico para o índice 5 capturado no seu último log válido
                 print(f"⚠️ Alias não encontrado. Usando índice padrão: {indice_chutes_no_gol}")
                 
-            # 2. Coleta e Varredura das Linhas Reais da Tabela
-            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableRow']")
+            # 2. Coleta e Varredura das Linhas Reais da Tabela (Mantendo o seletor base que retorna as linhas)
+            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableRow'], div.wcl-table__row_")
             print(f"📋 Total de linhas detectadas para processamento: {len(linhas_dados)}\n")
             
-            for linha in lignes_dados if 'lignes_dados' in locals() else linhas_dados:
+            for linha in linhas_dados:
                 try:
-                    # Extrai o nome do jogador de dentro da linha atual
-                    celula_nome = linha.find_element(By.CSS_SELECTOR, "[class*='participantName'], [class*='name_'], .wcl-participantName_")
-                    nome_jogador = celula_nome.text.strip()
+                    # Ajustado: Busca a classe cirúrgica do nome (.fp-playerName_E6lgN) dentro da linha
+                    celula_name = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN, [class*='participantName'], [class*='name_']")
+                    nome_jogador = celula_name.text.strip()
                     
-                    # Ignora linhas que não sejam de jogadores válidos
+                    # Ignora linhas vazias ou o cabeçalho "TODOS" mapeado
                     if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
                         continue
                     
-                    # Coleta as células com valores numéricos desta mesma linha
-                    celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell']")
+                    # Ajustado: Pega os spans de valores simples ou as células estruturais da linha
+                    celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], [data-testid='wcl-tableBodyCell']")
                     
                     if len(celulas_valores) > indice_chutes_no_gol:
                         valor_bruto = celulas_valores[indice_chutes_no_gol].text.strip()
                         
-                        # Converte o traço "-" do Flashscore para "0"
+                        # Converte o traço "-" do Flashscore para "0" baseado no seu HTML
                         chutes_no_alvo = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
                         
                         print(f"🏃‍♂️ {nome_jogador:<25} ➔ Chutes no Alvo: {chutes_no_alvo}")
@@ -139,4 +139,4 @@ def testar_clique_pelo_nome():
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-                
+            
