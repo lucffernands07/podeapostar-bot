@@ -86,8 +86,15 @@ def testar_clique_pelo_nome():
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
                 time.sleep(3)
                 
-                # Usa índice fixo 4 (5ª coluna) conforme os prints do layout mobile
-                indice_chutes_no_gol = 4
+                # Mapeia o índice dinamicamente pelo cabeçalho
+                cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
+                indice_chutes_no_gol = 4  # Fallback seguro
+                for idx, th in enumerate(cabecalhos):
+                    texto_th = th.text.strip().upper()
+                    alias = th.get_attribute("data-analytics-alias")
+                    if alias == "SHOTS_ON_TARGET" or "ALVO" in texto_th or "GOL" in texto_th:
+                        indice_chutes_no_gol = idx
+                        break
                 
                 linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
                 if len(linhas_dados) <= 1:
@@ -109,9 +116,9 @@ def testar_clique_pelo_nome():
                             historico_chutes[nome_jogador].append(int(chutes_no_alvo))
                     except Exception:
                         continue
-                print(f"  ✓ Chutes no Alvo coletados.")
-            except Exception:
-                print(f"  ⚠️ Sem aba de Finalizações para o jogo {id_real}.")
+                print(f"  ✓ Chutes no Alvo coletados (Índice mapeado: {indice_chutes_no_gol}).")
+            except Exception as e:
+                print(f"  ⚠️ Sem aba de Finalizações para o jogo {id_real}: {e}")
 
             # --- ABA 2: ATAQUE ---
             url_faltas = f"https://www.flashscore.com.br/jogo/{id_real}/#/estatisticas-jogadores/ataque/"
@@ -120,8 +127,15 @@ def testar_clique_pelo_nome():
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
                 time.sleep(3)
                 
-                # Usa rigorosamente o mesmo índice 4 (5ª coluna) visto no print
-                indice_faltas_sofridas = 4  
+                # Mapeia o índice dinamicamente pelo cabeçalho do Ataque
+                cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
+                indice_faltas_sofridas = 4  # Fallback seguro
+                for idx, th in enumerate(cabecalhos):
+                    texto_th = th.text.strip().upper()
+                    alias = th.get_attribute("data-analytics-alias")
+                    if alias == "FOULS_SUFFERED" or "FALTAS" in texto_th or "SOFRIDAS" in texto_th:
+                        indice_faltas_sofridas = idx
+                        break
                 
                 linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
                 if len(linhas_dados) <= 1:
@@ -143,9 +157,10 @@ def testar_clique_pelo_nome():
                             historico_faltas[nome_jogador].append(int(faltas_sofridas))
                     except Exception:
                         continue
-                print(f"  ✓ Faltas Sofridas coletadas.")
-            except Exception:
-                print(f"  ⚠️ Sem aba de Ataque para o jogo {id_real}.")
+                print(f"  ✓ Faltas Sofridas coletadas (Índice mapeado: {indice_faltas_sofridas}).")
+            except Exception as e:
+                print(f"  ⚠️ Sem aba de Ataque para o jogo {id_real}: {e}")
+
 
         # --- EXIBIÇÃO DO VENCEDOR: CHUTES NO ALVO ---
         jogador_top_chutes = None
