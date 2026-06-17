@@ -29,12 +29,12 @@ def testar_clique_pelo_nome():
     driver = configurar_driver()
     wait = WebDriverWait(driver, 15)
     
-    # URL do jogo de hoje enviado
+    # URL do confronto base (H2H)
     url_inicial = "https://www.flashscore.com.br/jogo/futebol/croacia-K8aznggo/inglaterra-j9N9ZNFA/h2h/total/"
     id_jogo_principal = "K8aznggo"
     
     print("\n" + "="*60)
-    print("🚀 INICIANDO PROCESSAMENTO APENAS DO ÚLTIMO JOGO")
+    print("🚀 INICIANDO PROCESSAMENTO APENAS DO ÚLTIMO JOGO DE FORMA ESTRUTURADA")
     print("="*60 + "\n")
     
     try:
@@ -44,7 +44,7 @@ def testar_clique_pelo_nome():
         driver.get(url_inicial)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
-        # Pega estritamente a primeira linha da Tabela 1 (Último jogo do Mandante)
+        # Seleciona estritamente a primeira linha da Tabela 1
         linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__section:nth-child(1) .h2h__row")
         if not linhas_confrontos:
             linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__row")
@@ -57,11 +57,11 @@ def testar_clique_pelo_nome():
         
         try:
             partes_texto = primeiro_elemento.text.split('\n')
-            confronto_formatado = f"{partes_texto[2].strip()} x {partes_texto[3].strip()}"
+            confronto_nome = f"{partes_texto[2].strip()} x {partes_texto[3].strip()}"
         except Exception:
-            confronto_formatado = "Último Jogo"
+            confronto_nome = "Último Jogo"
 
-        print(f"🔄 Clicando e mapeando o último confronto: {confronto_formatado}...")
+        print(f"🔄 Redirecionando para o último confronto: {confronto_nome}...")
         
         url_anterior = driver.current_url
         driver.execute_script("arguments[0].click();", primeiro_elemento)
@@ -73,25 +73,29 @@ def testar_clique_pelo_nome():
             
         time.sleep(3)
         
-        url_final = driver.current_url
-        bloco_url = url_final.split("?")[0].strip("/").split("/")[-1]
+        # LOG 2: URL do último jogo capturada dinamicamente (com slug completo)
+        url_jogo_completa = driver.current_url.split("?")[0].strip("/")
+        print(f"2. URL DO ÚLTIMO JOGO:\n👉 {url_jogo_completa}\n")
+        
+        # Captura o ID real apenas para controle interno e segurança
+        bloco_url = url_jogo_completa.split("/")[-1]
         match = re.search(r'-([a-zA-Z0-9]{8})$', bloco_url)
         
         if not match:
-            print("❌ Não foi possível capturar o ID da partida.")
+            print("❌ Não foi possível extrair o ID da URL da partida.")
             return
             
         id_real = match.group(1)
         if id_real == id_jogo_principal:
-            print("⚠️ URL não mudou a tempo. O ID capturado é do jogo principal.")
+            print("⚠️ URL não trocou a tempo. O ID capturado pertence ao jogo principal.")
             return
-            
-        print(f"🎯 ID do jogo encontrado: {id_real}\n")
 
         # --- ABA 1: FINALIZAÇÕES ---
-        url_chutes = f"https://www.flashscore.com.br/jogo/{id_real}/#/estatisticas-jogadores/finalizacoes/"
-        # LOG 2: URL da aba finalizações
-        print(f"2. URL DA ABA FINALIZAÇÕES:\n👉 {url_chutes}\n")
+        # Monta a URL baseado no padrão correto: url_do_jogo/resumo/estatisticas-jogadores/finalizacoes/
+        url_chutes = f"{url_jogo_completa}/resumo/estatisticas-jogadores/finalizacoes/"
+        
+        # LOG 3: URL da aba finalizações
+        print(f"3. URL DA ABA FINALIZAÇÕES:\n👉 {url_chutes}\n")
         
         driver.get(url_chutes)
         try:
@@ -107,9 +111,9 @@ def testar_clique_pelo_nome():
                     indice_chutes_no_gol = idx
                     break
             
-            print(f"🔍 Índice detectado para Chutes no Alvo: {indice_chutes_no_gol}")
-            print("3. VALORES DE CADA JOGADOR DA COLUNA CHUTE NO ALVO:")
-            print("-" * 50)
+            # LOG 4: Valores de cada jogador da coluna chute no alvo
+            print("4. VALORES DE CADA JOGADOR DA COLUNA CHUTE NO ALVO:")
+            print("-" * 55)
             
             linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
             if len(linhas_dados) <= 1:
@@ -128,14 +132,16 @@ def testar_clique_pelo_nome():
                         print(f"  👤 {nome_jogador.ljust(25)} ➔ {chutes_no_alvo} chutes no alvo")
                 except Exception:
                     continue
-            print("-" * 50 + "\n")
-        except Exception as e:
-            print("⚠️ Sem dados ou aba de Finalizações disponível para esta partida.\n")
+            print("-" * 55 + "\n")
+        except Exception:
+            print("⚠️ Sem dados de Finalizações disponíveis (Aba ausente nesta partida).\n")
 
         # --- ABA 2: ATAQUE ---
-        url_faltas = f"https://www.flashscore.com.br/jogo/{id_real}/#/estatisticas-jogadores/ataque/"
-        # LOG 4: URL da aba ataque
-        print(f"4. URL DA ABA ATAQUE:\n👉 {url_faltas}\n")
+        # Monta a URL baseado no padrão correto: url_do_jogo/resumo/estatisticas-jogadores/ataque/
+        url_faltas = f"{url_jogo_completa}/resumo/estatisticas-jogadores/ataque/"
+        
+        # LOG 5: URL da aba ataque
+        print(f"5. URL DA ABA ATAQUE:\n👉 {url_faltas}\n")
         
         driver.get(url_faltas)
         try:
@@ -151,9 +157,9 @@ def testar_clique_pelo_nome():
                     indice_faltas_sofridas = idx
                     break
             
-            print(f"🔍 Índice detectado para Faltas Sofridas: {indice_faltas_sofridas}")
-            print("5. VALORES DE CADA JOGADOR DA COLUNA FALTA SOFRIDA:")
-            print("-" * 50)
+            # LOG 6: Valores de cada jogador da coluna falta sofrida
+            print("6. VALORES DE CADA JOGADOR DA COLUNA FALTA SOFRIDA:")
+            print("-" * 55)
             
             linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
             if len(linhas_dados) <= 1:
@@ -172,18 +178,18 @@ def testar_clique_pelo_nome():
                         print(f"  👤 {nome_jogador.ljust(25)} ➔ {faltas_sofridas} faltas sofridas")
                 except Exception:
                     continue
-            print("-" * 50 + "\n")
-        except Exception as e:
-            print("⚠️ Sem dados ou aba de Ataque disponível para esta partida.\n")
+            print("-" * 55 + "\n")
+        except Exception:
+            print("⚠️ Sem dados de Ataque disponíveis (Aba ausente nesta partida).\n")
             
     except Exception as e:
-        print(f"\n❌ Erro durante o teste: {e}")
+        print(f"\n❌ Erro crítico na execução: {e}")
     finally:
         driver.quit()
         print("="*60)
-        print("🏁 Teste único finalizado com logs estruturados.")
+        print("🏁 Teste finalizado.")
         print("="*60)
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-        
+    
