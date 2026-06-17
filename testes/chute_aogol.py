@@ -91,10 +91,7 @@ def testar_clique_pelo_nome():
             return
 
         # --- ABA 1: FINALIZAÇÕES ---
-        # Monta a URL baseado no padrão correto: url_do_jogo/resumo/estatisticas-jogadores/finalizacoes/
         url_chutes = f"{url_jogo_completa}/resumo/estatisticas-jogadores/finalizacoes/"
-        
-        # LOG 3: URL da aba finalizações
         print(f"3. URL DA ABA FINALIZAÇÕES:\n👉 {url_chutes}\n")
         
         driver.get(url_chutes)
@@ -102,16 +99,20 @@ def testar_clique_pelo_nome():
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
             time.sleep(3)
             
+            # Busca dinâmica estrita apenas pela palavra chave única "ALVO"
             cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
-            indice_chutes_no_gol = 4
+            indice_chutes_no_gol = 10  # Fallback seguro caso o headless mude o comportamento
+            
             for idx, th in enumerate(cabecalhos):
                 texto_th = th.text.strip().upper()
-                alias = th.get_attribute("data-analytics-alias")
-                if alias == "SHOTS_ON_TARGET" or "ALVO" in texto_th or "GOL" in texto_th:
+                alias = str(th.get_attribute("data-analytics-alias")).upper()
+                
+                # Procura estritamente por ALVO ou pelo alias exato do Flashscore para evitar colisão com "Gols"
+                if "ALVO" in texto_th or alias == "SHOTS_ON_TARGET":
                     indice_chutes_no_gol = idx
                     break
             
-            # LOG 4: Valores de cada jogador da coluna chute no alvo
+            print(f"🔍 Índice detectado dinamicamente para Chutes no Alvo: {indice_chutes_no_gol}")
             print("4. VALORES DE CADA JOGADOR DA COLUNA CHUTE NO ALVO:")
             print("-" * 55)
             
@@ -133,14 +134,12 @@ def testar_clique_pelo_nome():
                 except Exception:
                     continue
             print("-" * 55 + "\n")
-        except Exception:
-            print("⚠️ Sem dados de Finalizações disponíveis (Aba ausente nesta partida).\n")
+        except Exception as e:
+            print(f"⚠️ Erro ao processar Finalizações: {e}\n")
+
 
         # --- ABA 2: ATAQUE ---
-        # Monta a URL baseado no padrão correto: url_do_jogo/resumo/estatisticas-jogadores/ataque/
         url_faltas = f"{url_jogo_completa}/resumo/estatisticas-jogadores/ataque/"
-        
-        # LOG 5: URL da aba ataque
         print(f"5. URL DA ABA ATAQUE:\n👉 {url_faltas}\n")
         
         driver.get(url_faltas)
@@ -148,16 +147,20 @@ def testar_clique_pelo_nome():
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
             time.sleep(3)
             
+            # Busca dinâmica estrita apenas pela palavra chave única "SOFRIDAS" no Ataque
             cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
-            indice_faltas_sofridas = 4
+            indice_faltas_sofridas = 5  # Fallback seguro
+            
             for idx, th in enumerate(cabecalhos):
                 texto_th = th.text.strip().upper()
-                alias = th.get_attribute("data-analytics-alias")
-                if alias == "FOULS_SUFFERED" or "FALTAS" in texto_th or "SOFRIDAS" in texto_th:
+                alias = str(th.get_attribute("data-analytics-alias")).upper()
+                
+                # Procura estritamente por SOFRIDAS ou pelo alias analítico de faltas sofridas
+                if "SOFRIDAS" in texto_th or "SUFFERED" in alias:
                     indice_faltas_sofridas = idx
                     break
             
-            # LOG 6: Valores de cada jogador da coluna falta sofrida
+            print(f"🔍 Índice detectado dinamicamente para Faltas Sofridas: {indice_faltas_sofridas}")
             print("6. VALORES DE CADA JOGADOR DA COLUNA FALTA SOFRIDA:")
             print("-" * 55)
             
@@ -165,6 +168,7 @@ def testar_clique_pelo_nome():
             if len(linhas_dados) <= 1:
                 linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
                 
+            dados_encontrados = False
             for linha in linhas_dados:
                 try:
                     nome_jogador = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN").text.strip()
@@ -176,11 +180,17 @@ def testar_clique_pelo_nome():
                         valor_bruto = celulas_valores[indice_faltas_sofridas].text.strip()
                         faltas_sofridas = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
                         print(f"  👤 {nome_jogador.ljust(25)} ➔ {faltas_sofridas} faltas sofridas")
+                        dados_encontrados = True
                 except Exception:
                     continue
+            
+            if not dados_encontrados:
+                print("  ⚠️ Nenhuma linha de jogador válida processada na tabela de Ataque.")
             print("-" * 55 + "\n")
-        except Exception:
-            print("⚠️ Sem dados de Ataque disponíveis (Aba ausente nesta partida).\n")
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao tentar ler a aba de Ataque: {e}\n")
+
             
     except Exception as e:
         print(f"\n❌ Erro crítico na execução: {e}")
