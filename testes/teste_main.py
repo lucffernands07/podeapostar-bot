@@ -98,11 +98,11 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             limite = 6 if idx == 2 else 5
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
             
-            # 💡 Reaproveita as linhas de jogos reais do time da casa (Seção 0)
             if idx == 0:
                 linhas_t1_para_jogadores = linhas
-            
+
             for i, linha in enumerate(linhas):
+
                 try:
                     n_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
                     n_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
