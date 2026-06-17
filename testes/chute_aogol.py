@@ -25,44 +25,6 @@ def configurar_driver():
     driver.set_page_load_timeout(30)
     return driver
 
-def raspar_dados_tabela(driver, indice_coluna, historico_dict):
-    """Função auxiliar para ler as linhas da tabela e somar no dicionário do jogador"""
-    linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
-    if len(linhas_dados) <= 1:
-        linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
-        
-    for linha in linhas_dados:
-        try:
-            nome_jogador = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN").text.strip()
-            if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
-                continue
-                
-            celulas = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
-            if len(celulas) > indice_coluna:
-                val = celulas[indice_coluna].text.strip()
-                qtd = "0" if val == "-" or val == "" else val
-                
-                if nome_jogador not in historico_dict:
-                    historico_dict[nome_jogador] = []
-                historico_dict[nome_jogador].append(int(qtd))
-        except Exception:
-            continue
-
-def descobrir_indice_coluna(driver, termos_busca, indice_padrao):
-    """Descobre o índice da coluna dinamicamente pelo alias ou texto do cabeçalho"""
-    cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY")
-    contador = 0
-    for th in cabecalhos:
-        texto_th = th.text.strip().upper()
-        alias = th.get_attribute("data-analytics-alias") or ""
-        alias = alias.upper()
-        
-        for termo in termos_busca:
-            if termo in alias or termo in texto_th:
-                return contador
-        contador += 1
-    return indice_padrao
-
 def testar_clique_pelo_nome():
     driver = configurar_driver()
     wait = WebDriverWait(driver, 15)
@@ -77,9 +39,9 @@ def testar_clique_pelo_nome():
         
         historico_chutes = {}
         historico_faltas = {}
-        links_resumos = []
+        ids_jogos = []
         
-        # 1. Mapeia e armazena os links bases dos 3 jogos reais
+        # 1. Mapeia e armazena os IDs dos 3 últimos jogos de forma limpa
         for i in range(3):
             linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__section:nth-child(1) .h2h__row")
             if not linhas_confrontos:
@@ -102,42 +64,110 @@ def testar_clique_pelo_nome():
             driver.execute_script("arguments[0].click();", elemento)
             time.sleep(5)
             
-            # Pega a URL limpa do resumo da partida atual (ex: .../jogo/XXXXXX/resumo/)
-            url_resumo_base = driver.current_url.split("?")[0]
-            if not url_resumo_base.endswith("/"):
-                url_resumo_base += "/"
-                
-            links_resumos.append(url_resumo_base)
+            url_final = driver.current_url
+            bloco_url = url_final.split("?")[0].strip("/").split("/")[-1]
+            match = re.search(r'-([a-zA-Z0-9]{8})$', bloco_url)
             
-            # Volta para o H2H principal
+            if match:
+                id_real = match.group(1)
+                ids_jogos.append(id_real)
+            
             driver.get("https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/senegal-hOIsJLJr/h2h/total/")
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
 
-        # 2. Visita cada partida e extrai as duas categorias sequencialmente
-        for url_base in links_resumos:
-            # --- Categoria 1: Chutes no Alvo ---
-            url_chutes = url_base + "estatisticas-jogadores/finalizacoes/"
+        # 2. Executa a raspagem de Chutes no Alvo (Idêntica ao que funcionava)
+        for id_real in ids_jogos:
+            url_chutes = f"https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/irlanda-do-norte-{id_real}/resumo/estatisticas-jogadores/finalizacoes/"
             driver.get(url_chutes)
             try:
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
-                time.sleep(2)
-                idx_chutes = descobrir_indice_coluna(driver, ["SHOTS_ON_TARGET", "FINALIZAÇÕES NO ALVO"], 10)
-                raspar_dados_tabela(driver, idx_chutes, historico_chutes)
+                time.sleep(3)
             except Exception:
-                pass
+                continue
+            
+            cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY")
+            indice_chutes_no_gol = -1
+            contador_colunas = 0
+            
+            for th in cabecalhos:
+                texto_th = th.text.strip().upper()
+                alias = th.get_attribute("data-analytics-alias")
+                if alias == "SHOTS_ON_TARGET" or "FINALIZAÇÕES NO ALVO" in texto_th:
+                    indice_chutes_no_gol = contador_colunas
+                    break
+                contador_colunas += 1
+                
+            if indice_chutes_no_gol == -1:
+                indice_chutes_no_gol = 10
+                
+            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+            if len(linhas_dados) <= 1:
+                linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
+                
+            for linha in linhas_dados:
+                try:
+                    nome_jogador = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN").text.strip()
+                    if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
+                        continue
+                    
+                    celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                    if len(celulas_valores) > indice_chutes_no_gol:
+                        valor_bruto = celulas_valores[indice_chutes_no_gol].text.strip()
+                        chutes_no_alvo = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
+                        
+                        if nome_jogador not in historico_chutes:
+                            historico_chutes[nome_jogador] = []
+                        historico_chutes[nome_jogador].append(int(chutes_no_alvo))
+                except Exception:
+                    continue
 
-            # --- Categoria 2: Faltas Sofridas (Aproveitando a mesma partida) ---
-            url_faltas = url_base + "estatisticas-jogadores/ataque/"
+        # 3. Executa a raspagem de Faltas Sofridas na sequência aproveitando os IDs
+        for id_real in ids_jogos:
+            url_faltas = f"https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/irlanda-do-norte-{id_real}/resumo/estatisticas-jogadores/ataque/"
             driver.get(url_faltas)
             try:
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
-                time.sleep(2)
-                idx_faltas = descobrir_indice_coluna(driver, ["FOULS_SUFFERED", "FALTAS SOFRIDAS", "FALTAS"], 4)
-                raspar_dados_tabela(driver, idx_faltas, historico_faltas)
+                time.sleep(3)
             except Exception:
-                pass
+                continue
+            
+            cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY")
+            indice_faltas_sofridas = -1
+            contador_colunas = 0
+            
+            for th in cabecalhos:
+                texto_th = th.text.strip().upper()
+                alias = th.get_attribute("data-analytics-alias")
+                if alias == "FOULS_SUFFERED" or "FALTAS SOFRIDAS" in texto_th or "FALTAS" in texto_th:
+                    indice_faltas_sofridas = contador_colunas
+                    break
+                contador_colunas += 1
+                
+            if indice_faltas_sofridas == -1:
+                indice_faltas_sofridas = 4  # Índice físico da 5ª coluna
+                
+            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+            if len(linhas_dados) <= 1:
+                linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
+                
+            for linha in linhas_dados:
+                try:
+                    nome_jogador = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN").text.strip()
+                    if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
+                        continue
+                    
+                    celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                    if len(celulas_valores) > indice_faltas_sofridas:
+                        valor_bruto = celulas_valores[indice_faltas_sofridas].text.strip()
+                        faltas_sofridas = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
+                        
+                        if nome_jogador not in historico_faltas:
+                            historico_faltas[nome_jogador] = []
+                        historico_faltas[nome_jogador].append(int(faltas_sofridas))
+                except Exception:
+                    continue
 
-        # --- PROCESSAMENTO FINAL E EXIBIÇÃO DOS LOGS ---
+        # --- EXIBIÇÃO DO VENCEDOR: CHUTES NO ALVO ---
         jogador_top_chutes = None
         media_top_chutes = -1.0
         for jogador, lista in historico_chutes.items():
@@ -153,13 +183,14 @@ def testar_clique_pelo_nome():
             print("⚠️ Nenhuma estatística de Chutes no Alvo pôde ser consolidada.")
         print("="*60 + "\n")
 
+        # --- EXIBIÇÃO DO VENCEDOR: FALTAS SOFRIDAS ---
         jogador_top_faltas = None
         media_top_faltas = -1.0
         for jogador, lista in historico_faltas.items():
             media = sum(lista) / len(lista)
             if media > media_top_faltas:
                 media_top_faltas = media
-                jogador_top_faltas = jogador
+                jogador_top_faltas = grandfather = jogador
 
         print("="*60)
         if jogador_top_faltas:
@@ -176,4 +207,4 @@ def testar_clique_pelo_nome():
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-                
+            
