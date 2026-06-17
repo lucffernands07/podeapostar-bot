@@ -29,197 +29,161 @@ def testar_clique_pelo_nome():
     driver = configurar_driver()
     wait = WebDriverWait(driver, 15)
     
-    # URL do jogo de hoje que você enviou
+    # URL do jogo de hoje enviado
     url_inicial = "https://www.flashscore.com.br/jogo/futebol/croacia-K8aznggo/inglaterra-j9N9ZNFA/h2h/total/"
     id_jogo_principal = "K8aznggo"
     
     print("\n" + "="*60)
-    print("🚀 INICIANDO PROCESSAMENTO OTIMIZADO DOS 3 ÚLTIMOS JOGOS")
+    print("🚀 INICIANDO PROCESSAMENTO APENAS DO ÚLTIMO JOGO")
     print("="*60 + "\n")
     
     try:
+        # LOG 1: URL do confronto base (H2H)
+        print(f"1. URL DO CONFRONTO (H2H):\n👉 {url_inicial}\n")
+        
         driver.get(url_inicial)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
-        historico_chutes = {}
-        historico_faltas = {}
-        ids_jogos = []
+        # Pega estritamente a primeira linha da Tabela 1 (Último jogo do Mandante)
+        linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__section:nth-child(1) .h2h__row")
+        if not linhas_confrontos:
+            linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__row")
+            
+        if not linhas_confrontos:
+            print("❌ Nenhuma partida encontrada no H2H.")
+            return
+            
+        primeiro_elemento = linhas_confrontos[0]
         
-        # 1. Mapeia e armazena os IDs dos 3 últimos jogos clicando na Tabela 1
-        for i in range(3):
-            # Força a busca estrita apenas na primeira tabela (Tabela 1 - Últimos jogos do mandante)
-            linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__section:nth-child(1) .h2h__row")
-            if not linhas_confrontos:
-                linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__row")
-            
-            if i >= len(linhas_confrontos):
-                break
-                
-            elemento = linhas_confrontos[i]
-            
-            try:
-                partes_texto = elemento.text.split('\n')
-                mandante = partes_texto[2].strip()
-                visitante = partes_texto[3].strip()
-                confronto_formatado = f"{mandante} x {visitante}"
-            except Exception:
-                confronto_formatado = f"Jogo {i+1}"
+        try:
+            partes_texto = primeiro_elemento.text.split('\n')
+            confronto_formatado = f"{partes_texto[2].strip()} x {partes_texto[3].strip()}"
+        except Exception:
+            confronto_formatado = "Último Jogo"
 
-            print(f"🔄 Mapeando partida: {confronto_formatado} ({i+1}/3)...")
+        print(f"🔄 Clicando e mapeando o último confronto: {confronto_formatado}...")
+        
+        url_anterior = driver.current_url
+        driver.execute_script("arguments[0].click();", primeiro_elemento)
+        
+        try:
+            WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
+        except:
+            pass
             
-            url_anterior = driver.current_url
-            driver.execute_script("arguments[0].click();", elemento)
+        time.sleep(3)
+        
+        url_final = driver.current_url
+        bloco_url = url_final.split("?")[0].strip("/").split("/")[-1]
+        match = re.search(r'-([a-zA-Z0-9]{8})$', bloco_url)
+        
+        if not match:
+            print("❌ Não foi possível capturar o ID da partida.")
+            return
             
-            # Espera a URL mudar para não capturar a página principal por lentidão
-            try:
-                WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
-            except:
-                pass
-                
+        id_real = match.group(1)
+        if id_real == id_jogo_principal:
+            print("⚠️ URL não mudou a tempo. O ID capturado é do jogo principal.")
+            return
+            
+        print(f"🎯 ID do jogo encontrado: {id_real}\n")
+
+        # --- ABA 1: FINALIZAÇÕES ---
+        url_chutes = f"https://www.flashscore.com.br/jogo/{id_real}/#/estatisticas-jogadores/finalizacoes/"
+        # LOG 2: URL da aba finalizações
+        print(f"2. URL DA ABA FINALIZAÇÕES:\n👉 {url_chutes}\n")
+        
+        driver.get(url_chutes)
+        try:
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
             time.sleep(3)
             
-            url_final = driver.current_url
-            bloco_url = url_final.split("?")[0].strip("/").split("/")[-1]
-            match = re.search(r'-([a-zA-Z0-9]{8})$', bloco_url)
+            cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
+            indice_chutes_no_gol = 4
+            for idx, th in enumerate(cabecalhos):
+                texto_th = th.text.strip().upper()
+                alias = th.get_attribute("data-analytics-alias")
+                if alias == "SHOTS_ON_TARGET" or "ALVO" in texto_th or "GOL" in texto_th:
+                    indice_chutes_no_gol = idx
+                    break
             
-            if match:
-                id_real = match.group(1)
-                # Só adiciona se for um ID de jogo passado e não o jogo pai atual
-                if id_real != id_jogo_principal and id_real not in ids_jogos:
-                    ids_jogos.append(id_real)
-                    print(f"  → ID do histórico capturado com sucesso: {id_real}")
-                else:
-                    print(f"  🔕 Ignorando ID duplicado ou do jogo de hoje: {id_real}")
+            print(f"🔍 Índice detectado para Chutes no Alvo: {indice_chutes_no_gol}")
+            print("3. VALORES DE CADA JOGADOR DA COLUNA CHUTE NO ALVO:")
+            print("-" * 50)
             
-            # Volta para a tela principal do H2H para pegar o próximo clique
-            driver.get(url_inicial)
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-
-        # 2. LOOP UNIFICADO: Visita cada partida mapeada e puxa Finalizações e Ataque consecutivamente
-        for id_real in ids_jogos:
-            print(f"\n📥 Coletando dados da partida ID: {id_real}")
-            
-            # --- ABA 1: FINALIZAÇÕES ---
-            url_chutes = f"https://www.flashscore.com.br/jogo/{id_real}/#/estatisticas-jogadores/finalizacoes/"
-            driver.get(url_chutes)
-            try:
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
-                time.sleep(3)
+            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+            if len(linhas_dados) <= 1:
+                linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
                 
-                # Mapeia o índice dinamicamente pelo cabeçalho
-                cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
-                indice_chutes_no_gol = 4  # Fallback seguro
-                for idx, th in enumerate(cabecalhos):
-                    texto_th = th.text.strip().upper()
-                    alias = th.get_attribute("data-analytics-alias")
-                    if alias == "SHOTS_ON_TARGET" or "ALVO" in texto_th or "GOL" in texto_th:
-                        indice_chutes_no_gol = idx
-                        break
-                
-                linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
-                if len(linhas_dados) <= 1:
-                    linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
-                    
-                for linha in linhas_dados:
-                    try:
-                        nome_jogador = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN").text.strip()
-                        if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
-                            continue
-                        
-                        celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
-                        if len(celulas_valores) > indice_chutes_no_gol:
-                            valor_bruto = celulas_valores[indice_chutes_no_gol].text.strip()
-                            chutes_no_alvo = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
-                            
-                            if nome_jogador not in historico_chutes:
-                                historico_chutes[nome_jogador] = []
-                            historico_chutes[nome_jogador].append(int(chutes_no_alvo))
-                    except Exception:
+            for linha in linhas_dados:
+                try:
+                    nome_jogador = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN").text.strip()
+                    if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
                         continue
-                print(f"  ✓ Chutes no Alvo coletados (Índice mapeado: {indice_chutes_no_gol}).")
-            except Exception as e:
-                print(f"  ⚠️ Sem aba de Finalizações para o jogo {id_real}.")
-
-            # --- ABA 2: ATAQUE ---
-            url_faltas = f"https://www.flashscore.com.br/jogo/{id_real}/#/estatisticas-jogadores/ataque/"
-            driver.get(url_faltas)
-            try:
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
-                time.sleep(3)
-                
-                # Mapeia o índice dinamicamente pelo cabeçalho do Ataque
-                cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
-                indice_faltas_sofridas = 4  # Fallback seguro
-                for idx, th in enumerate(cabecalhos):
-                    texto_th = th.text.strip().upper()
-                    alias = th.get_attribute("data-analytics-alias")
-                    if alias == "FOULS_SUFFERED" or "FALTAS" in texto_th or "SOFRIDAS" in texto_th:
-                        indice_faltas_sofridas = idx
-                        break
-                
-                linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
-                if len(linhas_dados) <= 1:
-                    linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
                     
-                for linha in linhas_dados:
-                    try:
-                        nome_jogador = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN").text.strip()
-                        if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
-                            continue
-                        
-                        celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
-                        if len(celulas_valores) > indice_faltas_sofridas:
-                            valor_bruto = celulas_valores[indice_faltas_sofridas].text.strip()
-                            faltas_sofridas = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
-                            
-                            if nome_jogador not in historico_faltas:
-                                historico_faltas[nome_jogador] = []
-                            historico_faltas[nome_jogador].append(int(faltas_sofridas))
-                    except Exception:
-                        continue
-                print(f"  ✓ Faltas Sofridas coletadas (Índice mapeado: {indice_faltas_sofridas}).")
-            except Exception as e:
-                print(f"  ⚠️ Sem aba de Ataque para o jogo {id_real}.")
+                    celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                    if len(celulas_valores) > indice_chutes_no_gol:
+                        valor_bruto = celulas_valores[indice_chutes_no_gol].text.strip()
+                        chutes_no_alvo = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
+                        print(f"  👤 {nome_jogador.ljust(25)} ➔ {chutes_no_alvo} chutes no alvo")
+                except Exception:
+                    continue
+            print("-" * 50 + "\n")
+        except Exception as e:
+            print("⚠️ Sem dados ou aba de Finalizações disponível para esta partida.\n")
 
-
-        # --- EXIBIÇÃO DO VENCEDOR: CHUTES NO ALVO ---
-        jogador_top_chutes = None
-        media_top_chutes = -1.0
-        for jogador, lista in historico_chutes.items():
-            media = sum(lista) / len(lista)
-            if media > media_top_chutes:
-                media_top_chutes = media
-                jogador_top_chutes = jogador
-
-        print("\n" + "="*60)
-        if Red_top_chutes := jogador_top_chutes:
-            print(f"👑 JOGADOR COM MAIOR MÉDIA DE CHUTES NO ALVO: {Red_top_chutes} ({media_top_chutes:.2f})")
-        else:
-            print("⚠️ Nenhuma estatística de Chutes no Alvo pôde ser consolidada.")
-        print("="*60 + "\n")
-
-        # --- EXIBIÇÃO DO VENCEDOR: FALTAS SOFRIDAS ---
-        jogador_top_faltas = None
-        media_top_faltas = -1.0
-        for jogador, lista in historico_faltas.items():
-            media = sum(lista) / len(lista)
-            if media > media_top_faltas:
-                media_top_faltas = media
-                jogador_top_faltas = jogador
-
-        print("="*60)
-        if Red_top_faltas := jogador_top_faltas:
-            print(f"👑 JOGADOR COM MAIOR MÉDIA DE FALTAS SOFRIDAS: {Red_top_faltas} ({media_top_faltas:.2f})")
-        else:
-            print("⚠️ Nenhuma estatística de Faltas Sofridas pôde ser consolidada.")
-        print("="*60 + "\n")
+        # --- ABA 2: ATAQUE ---
+        url_faltas = f"https://www.flashscore.com.br/jogo/{id_real}/#/estatisticas-jogadores/ataque/"
+        # LOG 4: URL da aba ataque
+        print(f"4. URL DA ABA ATAQUE:\n👉 {url_faltas}\n")
         
+        driver.get(url_faltas)
+        try:
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
+            time.sleep(3)
+            
+            cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
+            indice_faltas_sofridas = 4
+            for idx, th in enumerate(cabecalhos):
+                texto_th = th.text.strip().upper()
+                alias = th.get_attribute("data-analytics-alias")
+                if alias == "FOULS_SUFFERED" or "FALTAS" in texto_th or "SOFRIDAS" in texto_th:
+                    indice_faltas_sofridas = idx
+                    break
+            
+            print(f"🔍 Índice detectado para Faltas Sofridas: {indice_faltas_sofridas}")
+            print("5. VALORES DE CADA JOGADOR DA COLUNA FALTA SOFRIDA:")
+            print("-" * 50)
+            
+            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+            if len(linhas_dados) <= 1:
+                linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
+                
+            for linha in linhas_dados:
+                try:
+                    nome_jogador = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN").text.strip()
+                    if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
+                        continue
+                    
+                    celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                    if len(celulas_valores) > indice_faltas_sofridas:
+                        valor_bruto = celulas_valores[indice_faltas_sofridas].text.strip()
+                        faltas_sofridas = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
+                        print(f"  👤 {nome_jogador.ljust(25)} ➔ {faltas_sofridas} faltas sofridas")
+                except Exception:
+                    continue
+            print("-" * 50 + "\n")
+        except Exception as e:
+            print("⚠️ Sem dados ou aba de Ataque disponível para esta partida.\n")
+            
     except Exception as e:
         print(f"\n❌ Erro durante o teste: {e}")
     finally:
         driver.quit()
-        print("🏁 Teste finalizado.")
+        print("="*60)
+        print("🏁 Teste único finalizado com logs estruturados.")
+        print("="*60)
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-                    
+        
