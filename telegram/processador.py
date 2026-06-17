@@ -239,7 +239,7 @@ def executar():
             "liga": j.get("liga"),
             "horario": j.get("horario"),
             "odd": j.get("odd"),
-            "link_estatistica": link_estatistica
+            "link_h2h": link_estatistica
         }
 
     if bilhete_solicitado:
