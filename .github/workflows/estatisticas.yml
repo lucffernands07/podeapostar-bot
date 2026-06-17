@@ -1,4 +1,4 @@
-name: Gerador de Estatísticas e Padrões
+name: 3. Gerador de Estatísticas e Padrões
 
 on:
   schedule:
