@@ -137,8 +137,10 @@ def testar_clique_pelo_nome():
         except Exception as e:
             print(f"⚠️ Erro ao processar Finalizações: {e}\n")
 
-        # --- ABA 2: ATAQUE (FALTAS SOFRIDAS) ---
+        # --- ABA 2: ATAQUE ---
         url_faltas = f"{url_jogo_completa}/resumo/estatisticas-jogadores/ataque/"
+        
+        # LOG 5: URL da aba ataque
         print(f"5. URL DA ABA ATAQUE:\n👉 {url_faltas}\n")
         
         driver.get(url_faltas)
@@ -146,30 +148,29 @@ def testar_clique_pelo_nome():
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .fp-playerName_E6lgN")))
             time.sleep(3)
             
-            # Varredura dinâmica baseada no HTML real que você enviou
             cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
-            indice_faltas_sofridas = 5  # Fallback seguro caso o headless mude de comportamento
+            indice_faltas_sofridas = 5  # Fallback seguro
             
             for idx, th in enumerate(cabecalhos):
                 texto_th = th.text.strip().upper()
                 alias = str(th.get_attribute("data-analytics-alias")).upper()
                 
-                # CRAVANDO O ALVO: Procura pelo alias exato do HTML ou pelo texto completo do botão
                 if alias == "FOULS_SUFFERED" or "SOFRIDAS" in texto_th:
                     indice_faltas_sofridas = idx
                     break
             
             print(f"🔍 Índice detectado dinamicamente para Faltas Sofridas: {indice_faltas_sofridas}")
+            
+            # LOG 6: Valores de cada jogador da coluna falta sofrida
             print("6. VALORES DE CADA JOGADOR DA COLUNA FALTA SOFRIDA:")
             print("-" * 55)
             
-            # Captura corrigida (Variável padronizada em português)
             linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
             if len(linhas_dados) <= 1:
                 linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
                 
             dados_encontrados = False
-            for linha in linhas_dados:  # Corrigido aqui de lines_dados para linhas_dados
+            for linha in linhas_dados:
                 try:
                     nome_jogador = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN").text.strip()
                     if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
@@ -179,11 +180,7 @@ def testar_clique_pelo_nome():
                     if len(celulas_valores) > indice_faltas_sofridas:
                         valor_bruto = celulas_valores[indice_faltas_sofridas].text.strip()
                         
-                        # Segunda camada de segurança contra dribles
-                        if "%" in valor_bruto or "/" in valor_bruto:
-                            if indice_faltas_sofridas == 4:
-                                valor_bruto = celulas_valores[5].text.strip()
-                        
+                        # Limpa traços e garante o valor puro vindo do índice detectado
                         faltas_sofridas = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
                         print(f"  👤 {nome_jogador.ljust(25)} ➔ {faltas_sofridas} faltas sofridas")
                         dados_encontrados = True
