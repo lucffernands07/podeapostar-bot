@@ -137,8 +137,7 @@ def testar_clique_pelo_nome():
         except Exception as e:
             print(f"⚠️ Erro ao processar Finalizações: {e}\n")
 
-
-        # --- ABA 2: ATAQUE ---
+        # --- ABA 2: ATAQUE (FALTAS COMETIDAS) ---
         url_faltas = f"{url_jogo_completa}/resumo/estatisticas-jogadores/ataque/"
         print(f"5. URL DA ABA ATAQUE:\n👉 {url_faltas}\n")
         
@@ -147,21 +146,21 @@ def testar_clique_pelo_nome():
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
             time.sleep(3)
             
-            # Busca dinâmica estrita apenas pela palavra chave única "SOFRIDAS" no Ataque
+            # Busca dinâmica estrita apenas pela coluna de Faltas Cometidas
             cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
-            indice_faltas_sofridas = 5  # Fallback seguro
+            indice_faltas_cometidas = 4  # Fallback seguro
             
             for idx, th in enumerate(cabecalhos):
                 texto_th = th.text.strip().upper()
                 alias = str(th.get_attribute("data-analytics-alias")).upper()
                 
-                # Procura estritamente por SOFRIDAS ou pelo alias analítico de faltas sofridas
-                if "SOFRIDAS" in texto_th or "SUFFERED" in alias:
-                    indice_faltas_sofridas = idx
+                # Procura pelo alias COMMITTED ou se o texto for exatamente FALTAS (evitando SOFRIDAS)
+                if "COMMITTED" in alias or (texto_th == "FALTAS" or texto_th == "F"):
+                    indice_faltas_cometidas = idx
                     break
             
-            print(f"🔍 Índice detectado dinamicamente para Faltas Sofridas: {indice_faltas_sofridas}")
-            print("6. VALORES DE CADA JOGADOR DA COLUNA FALTA SOFRIDA:")
+            print(f"🔍 Índice detectado dinamicamente para Faltas Cometidas: {indice_faltas_cometidas}")
+            print("6. VALORES DE CADA JOGADOR DA COLUNA FALTA COMETIDA:")
             print("-" * 55)
             
             linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
@@ -176,10 +175,10 @@ def testar_clique_pelo_nome():
                         continue
                     
                     celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
-                    if len(celulas_valores) > indice_faltas_sofridas:
-                        valor_bruto = celulas_valores[indice_faltas_sofridas].text.strip()
-                        faltas_sofridas = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
-                        print(f"  👤 {nome_jogador.ljust(25)} ➔ {faltas_sofridas} faltas sofridas")
+                    if len(celulas_valores) > indice_faltas_cometidas:
+                        valor_bruto = celulas_valores[indice_faltas_cometidas].text.strip()
+                        faltas_cometidas = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
+                        print(f"  👤 {nome_jogador.ljust(25)} ➔ {faltas_cometidas} faltas cometidas")
                         dados_encontrados = True
                 except Exception:
                     continue
@@ -191,7 +190,6 @@ def testar_clique_pelo_nome():
         except Exception as e:
             print(f"⚠️ Erro ao tentar ler a aba de Ataque: {e}\n")
 
-            
     except Exception as e:
         print(f"\n❌ Erro crítico na execução: {e}")
     finally:
