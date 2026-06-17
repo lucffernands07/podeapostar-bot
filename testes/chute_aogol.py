@@ -149,29 +149,56 @@ def testar_clique_pelo_nome():
             time.sleep(4)
             
             cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
-            indice_detectado = 13  # Fallback baseado no seu log
+            indice_base = 13  # Ponto de partida descoberto no cabeçalho
             
             for idx, th in enumerate(cabecalhos):
                 texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
                 alias = str(th.get_attribute("data-analytics-alias")).upper()
-                
                 if alias == "FOULS_SUFFERED" or "SOFRIDAS" in texto_th:
-                    indice_detectado = idx
+                    indice_base = idx
                     break
             
-            # Recuando 1 índice para pegar a coluna correta de Faltas Sofridas antes do impedimento
-            indice_faltas_sofridas = indice_detectado - 1
+            # Captura todas as linhas de jogadores disponíveis
+            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+            if len(linhas_dados) <= 1:
+                linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
             
-            print(f"🔍 Índice detectado no cabeçalho: {indice_detectado} ➔ Recuando para o índice real: {indice_faltas_sofridas}")
+            # --- ALGORITMO DE VARREDURA REVERSA ---
+            print(f"🔄 Iniciando varredura reversa a partir do índice {indice_base} para localizar dados válidos...")
+            indice_real_faltas = -1
+            
+            # Testa os índices de trás para frente (ex: 13, 12, 11, 10, 9...)
+            for test_idx in range(indice_base, -1, -1):
+                encontrou_valor_valido = False
+                
+                for linha in linhas_dados:
+                    try:
+                        celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                        if len(celulas_valores) > test_idx:
+                            val_bruto = driver.execute_script("return arguments[0].textContent;", celulas_valores[test_idx]).strip()
+                            
+                            # Se for um número puro e maior ou igual a 1, achamos a coluna onde o jogo aconteceu!
+                            if val_bruto.isdigit() and int(val_bruto) >= 1:
+                                encontrou_valor_valido = True
+                                break
+                    except:
+                        continue
+                
+                if encontrou_valor_valido:
+                    indice_real_faltas = test_idx
+                    break
+            
+            # Caso a varredura falhe por preciosismo, aplica o recuo padrão seguro
+            if indice_real_faltas == -1:
+                indice_real_faltas = indice_base - 1
+                print(f"⚠️ Varredura dinâmica não encontrou valores >= 1. Usando recuo padrão: {indice_real_faltas}")
+            else:
+                print(f"🎯 Sucesso! Coluna viva identificada dinamicamente no Índice: {indice_real_faltas}")
             
             # LOG 6: Valores de cada jogador da coluna falta sofrida
             print("6. VALORES DE CADA JOGADOR DA COLUNA FALTA SOFRIDA:")
             print("-" * 55)
             
-            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
-            if len(linhas_dados) <= 1:
-                linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
-                
             dados_encontrados = False
             for linha in linhas_dados:
                 try:
@@ -188,10 +215,11 @@ def testar_clique_pelo_nome():
                     
                     celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
                     
-                    if len(celulas_valores) > indice_faltas_sofridas:
-                        valor_bruto = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_faltas_sofridas]).strip()
+                    if len(celulas_valores) > indice_real_faltas:
+                        valor_bruto = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_real_faltas]).strip()
                         
-                        faltas_sofridas = "0" if valor_bruto == "-" or valor_bruto == "" else valor_bruto
+                        # Defesa final para limpar o output
+                        faltas_sofridas = "0" if valor_bruto == "-" or valor_bruto == "" or "%" in valor_bruto or "/" in valor_bruto else valor_bruto
                         print(f"  👤 {nome_jogador.ljust(25)} ➔ {faltas_sofridas} faltas sofridas")
                         dados_encontrados = True
                 except Exception:
