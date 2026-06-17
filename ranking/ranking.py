@@ -30,6 +30,11 @@ def configurar_driver():
 
 def validar_palpite(mercado_str, g_c, g_f):
     m = mercado_str.lower()
+    
+    # 🚀 NOVO: Se for mercado de jogador, não valida pelo placar de gols (retorna None)
+    if "chutes" in m or "faltas" in m or "média" in m:
+        return None
+        
     total = g_c + g_f
     if "+1.5" in m: return total >= 2
     if "+2.5" in m: return total >= 3
@@ -125,6 +130,12 @@ def main():
                     g_c, g_f = int(score_casa), int(score_fora)
                     
                     deu_green = validar_palpite(jogo['mercado'], g_c, g_f)
+                    
+                    # 🚀 NOVO: Se o retorno for None, significa mercado de jogador. Pula a gravação no banco.
+                    if deu_green is None:
+                        log("IGNORADO", f"Mercado de Jogador detectado ({jogo['mercado']}). Pulando auditoria automatizada.")
+                        continue
+                    
                     m_rank = jogo['mercado_ranking'].strip().upper()
                     
                     # 🛠️ --- PADRONIZAÇÃO EXCLUSIVA DE ESCRITA ---
