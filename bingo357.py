@@ -15,6 +15,8 @@ def extrair_porcentagem(texto_mercado):
 def extrair_odd(odd_str):
     try:
         if not odd_str or odd_str == "N/A": return 1.0
+        # 🚀 NOVO: Se a odd for a string de análise dos jogadores, injeta 1.50 para o cálculo matemático de multiplicador
+        if isinstance(odd_str, str) and "Análise" in odd_str: return 1.50
         if isinstance(odd_str, (int, float)): return float(odd_str)
         return float(odd_str.replace(',', '.'))
     except: return 1.0
@@ -26,7 +28,9 @@ def prioridade_mercado(mercado_texto):
     if "ambas" in m: return 3
     if "vitória" in m or "vitoria" in m: return 4
     if "2x" in m or "x2" in m: return 5
-    return 6
+    # 🚀 NOVO: Jogadores ganham prioridade logo após os mercados tradicionais de resultado
+    if "chutes" in m or "faltas" in m or "média" in m: return 6
+    return 7
 
 def carregar_ranking_pro():
     """Lê o ranking pré-montado pelo ranking.py"""
@@ -133,7 +137,6 @@ def formatar_para_telegram(bilhetes, cache_dados):
             odd_valor = j.get('odd') or info_extra.get('odd', '1.0')
             link_final = info_extra.get('link') or "https://www.betano.bet.br/"
             
-            # 🚀 CAPTURA O LINK H2H DO CACHE (SE EXISTIR)
             link_h2h = info_extra.get('link_h2h', None)
 
             chave_jogo = f"{horario}_{j.get('time_casa')}_{j.get('time_fora')}"
@@ -143,7 +146,7 @@ def formatar_para_telegram(bilhetes, cache_dados):
                     "time_casa": j.get('time_casa', 'Casa'),
                     "time_fora": j.get('time_fora', 'Fora'),
                     "mercados": [], "link": link_final,
-                    "link_h2h": link_h2h  # Armazena no agrupamento do confronto
+                    "link_h2h": link_h2h  
                 }
             
             agrupados[chave_jogo]["mercados"].append({
@@ -158,10 +161,8 @@ def formatar_para_telegram(bilhetes, cache_dados):
             dados["mercados"].sort(key=lambda x: x['prioridade'])
             linhas_mercados = "\n".join([m['texto'] for m in dados["mercados"]])
             
-            # Limpeza e encode básico para evitar links quebrados no Telegram
             link_betano_limpo = dados['link'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
             
-            # --- MONTAGEM DO BLOCO DO JOGO COM PARSE CONDICIONAL ---
             bloco_jogo = (
                 f"⏱️ {dados['horario']} | {dados['liga']}\n"
                 f"🏟️ {dados['time_casa']} x {dados['time_fora']}\n"
@@ -169,7 +170,6 @@ def formatar_para_telegram(bilhetes, cache_dados):
                 f"🌐 [Abrir na Betano]({link_betano_limpo})"
             )
             
-            # 🚀 SE HOUVER O LINK H2H, ADICIONA ABAIXO DO LINK DA BETANO
             if dados.get("link_h2h"):
                 link_h2h_limpo = dados['link_h2h'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
                 bloco_jogo += f"\n📊 [Estatísticas]({link_h2h_limpo})"
@@ -181,4 +181,3 @@ def formatar_para_telegram(bilhetes, cache_dados):
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
-    
