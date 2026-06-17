@@ -1,4 +1,4 @@
-name: Atualizar Ranking Flashscore
+name: 1. Atualizar Ranking Flashscore
 
 on:
   push:
