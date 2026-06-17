@@ -1,40 +1,117 @@
 {
-    "data_geracao": "2026-06-16",
+    "data_geracao": "2026-06-17",
     "jogos": [
         {
-            "time_casa": "Fortaleza",
-            "time_fora": "América-MG",
+            "time_casa": "Inglaterra",
+            "time_fora": "Croácia",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/6DSiHXQ8/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/b5qGuKMs/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Fortaleza",
-            "time_fora": "América-MG",
-            "mercado": "Vitória Casa (85%)",
-            "mercado_ranking": "VITÓRIA CASA (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/6DSiHXQ8/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "França",
-            "time_fora": "Senegal",
+            "time_casa": "Gana",
+            "time_fora": "Panamá",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/ALxYcMw2/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/jD1Nwbif/#/resumo-de-jogo"
         },
         {
-            "time_casa": "França",
-            "time_fora": "Senegal",
+            "time_casa": "Uzbequistão",
+            "time_fora": "Colômbia",
+            "mercado": "+1.5 Gols (100%)",
+            "mercado_ranking": "+1.5 GOLS (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jaMlPbx1/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Uzbequistão",
+            "time_fora": "Colômbia",
             "mercado": "+2.5 Gols (85%)",
             "mercado_ranking": "+2.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/ALxYcMw2/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/jaMlPbx1/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Argentina",
-            "time_fora": "Argélia",
+            "time_casa": "Kairat Almaty",
+            "time_fora": "Kyzylzhar",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/UP9bEsOr/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/v32GWunD/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Gimnasia Jujuy",
+            "time_fora": "Nueva Chicago",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/biOFOUwA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "HJK",
+            "time_fora": "Inter Turku",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/nDSH0eDr/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "HJK",
+            "time_fora": "Inter Turku",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/nDSH0eDr/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Ilves",
+            "time_fora": "Jaro",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hAVPbZse/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Gnistan",
+            "time_fora": "Lahti",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/YTjaDYdl/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Gnistan",
+            "time_fora": "Lahti",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/YTjaDYdl/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "SJK",
+            "time_fora": "VPS",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xb5TIfZQ/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "SJK",
+            "time_fora": "VPS",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xb5TIfZQ/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "SJK",
+            "time_fora": "VPS",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xb5TIfZQ/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Maghreb Fez",
+            "time_fora": "Difaa El Jadidi",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zicWfUsA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Union Touarga",
+            "time_fora": "COD Meknes",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/W0u5ieyI/#/resumo-de-jogo"
         }
     ]
 }

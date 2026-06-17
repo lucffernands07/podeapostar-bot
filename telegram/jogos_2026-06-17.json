@@ -1,0 +1,146 @@
+[
+    {
+        "horario": "11:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Kairat Almaty",
+        "time_fora": "Kyzylzhar",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Kairat-Kyzylzhar-Petropavlosvk/87193598/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "HJK",
+        "time_fora": "Inter Turku",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/HJK-Helsinki-FC-Inter-Turku/85347319/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "HJK",
+        "time_fora": "Inter Turku",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.82",
+        "link_betano": "https://www.betano.bet.br/match-odds/HJK-Helsinki-FC-Inter-Turku/85347319/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "Ilves",
+        "time_fora": "Jaro",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "1.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Ilves-FF-Jaro/85347323/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Marrocos - Botola Pro",
+        "time_casa": "Maghreb Fez",
+        "time_fora": "Difaa El Jadidi",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Maghreb-Association-Sportive-de-Fes-Dhj-Difaa-Hassani-Jdidi/87416488/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Marrocos - Botola Pro",
+        "time_casa": "Union Touarga",
+        "time_fora": "COD Meknes",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Union-Touarga-Sport-Club-Omnisports-De-Meknes/87419117/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Argentina Primeira Nacional",
+        "time_casa": "Gimnasia Jujuy",
+        "time_fora": "Nueva Chicago",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.40",
+        "link_betano": "https://kg-br.com/C.ashx/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "Gnistan",
+        "time_fora": "Lahti",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.31",
+        "link_betano": "https://www.betano.bet.br/match-odds/IF-Gnistan-FC-Lahti/85347330/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "Gnistan",
+        "time_fora": "Lahti",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.93",
+        "link_betano": "https://www.betano.bet.br/match-odds/IF-Gnistan-FC-Lahti/85347330/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "SJK",
+        "time_fora": "VPS",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Seinajoen-JK-Vaasa-PS/85347329/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "SJK",
+        "time_fora": "VPS",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.78",
+        "link_betano": "https://www.betano.bet.br/match-odds/Seinajoen-JK-Vaasa-PS/85347329/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Finlândia - Veikkausliiga",
+        "time_casa": "SJK",
+        "time_fora": "VPS",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/Seinajoen-JK-Vaasa-PS/85347329/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Inglaterra",
+        "time_fora": "Croácia",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.40",
+        "link_betano": "https://www.betano.bet.br/match-odds/England-Croatia/77353713/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Gana",
+        "time_fora": "Panamá",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.45",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ghana-Panama/77353653/"
+    },
+    {
+        "horario": "23:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Uzbequistão",
+        "time_fora": "Colômbia",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.31",
+        "link_betano": "https://www.betano.bet.br/match-odds/Uzbekistan-Colombia/77353749/"
+    },
+    {
+        "horario": "23:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Uzbequistão",
+        "time_fora": "Colômbia",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.93",
+        "link_betano": "https://www.betano.bet.br/match-odds/Uzbekistan-Colombia/77353749/"
+    }
+]
