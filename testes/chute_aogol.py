@@ -29,20 +29,25 @@ def testar_clique_pelo_nome():
     driver = configurar_driver()
     wait = WebDriverWait(driver, 15)
     
+    # URL do jogo de hoje que você enviou
+    url_inicial = "https://www.flashscore.com.br/jogo/futebol/croacia-K8aznggo/inglaterra-j9N9ZNFA/h2h/total/"
+    id_jogo_principal = "K8aznggo"
+    
     print("\n" + "="*60)
     print("🚀 INICIANDO PROCESSAMENTO OTIMIZADO DOS 3 ÚLTIMOS JOGOS")
     print("="*60 + "\n")
     
     try:
-        driver.get("https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/senegal-hOIsJLJr/h2h/total/")
+        driver.get(url_inicial)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
         historico_chutes = {}
         historico_faltas = {}
         ids_jogos = []
         
-        # 1. Mapeia e armazena os IDs dos 3 últimos jogos de forma limpa
+        # 1. Mapeia e armazena os IDs dos 3 últimos jogos clicando na Tabela 1
         for i in range(3):
+            # Força a busca estrita apenas na primeira tabela (Tabela 1 - Últimos jogos do mandante)
             linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__section:nth-child(1) .h2h__row")
             if not linhas_confrontos:
                 linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__row")
@@ -61,8 +66,17 @@ def testar_clique_pelo_nome():
                 confronto_formatado = f"Jogo {i+1}"
 
             print(f"🔄 Mapeando partida: {confronto_formatado} ({i+1}/3)...")
+            
+            url_anterior = driver.current_url
             driver.execute_script("arguments[0].click();", elemento)
-            time.sleep(5)
+            
+            # Espera a URL mudar para não capturar a página principal por lentidão
+            try:
+                WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
+            except:
+                pass
+                
+            time.sleep(3)
             
             url_final = driver.current_url
             bloco_url = url_final.split("?")[0].strip("/").split("/")[-1]
@@ -70,12 +84,18 @@ def testar_clique_pelo_nome():
             
             if match:
                 id_real = match.group(1)
-                ids_jogos.append(id_real)
+                # Só adiciona se for um ID de jogo passado e não o jogo pai atual
+                if id_real != id_jogo_principal and id_real not in ids_jogos:
+                    ids_jogos.append(id_real)
+                    print(f"  → ID do histórico capturado com sucesso: {id_real}")
+                else:
+                    print(f"  🔕 Ignorando ID duplicado ou do jogo de hoje: {id_real}")
             
-            driver.get("https://www.flashscore.com.br/jogo/futebol/franca-QkGeVG1n/senegal-hOIsJLJr/h2h/total/")
+            # Volta para a tela principal do H2H para pegar o próximo clique
+            driver.get(url_inicial)
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
 
-        # 2. LOOP UNIFICADO: Entra na partida uma vez e raspa ambas as abas na sequência
+        # 2. LOOP UNIFICADO: Visita cada partida mapeada e puxa Finalizações e Ataque consecutivamente
         for id_real in ids_jogos:
             print(f"\n📥 Coletando dados da partida ID: {id_real}")
             
@@ -118,7 +138,7 @@ def testar_clique_pelo_nome():
                         continue
                 print(f"  ✓ Chutes no Alvo coletados (Índice mapeado: {indice_chutes_no_gol}).")
             except Exception as e:
-                print(f"  ⚠️ Sem aba de Finalizações para o jogo {id_real}: {e}")
+                print(f"  ⚠️ Sem aba de Finalizações para o jogo {id_real}.")
 
             # --- ABA 2: ATAQUE ---
             url_faltas = f"https://www.flashscore.com.br/jogo/{id_real}/#/estatisticas-jogadores/ataque/"
@@ -159,7 +179,7 @@ def testar_clique_pelo_nome():
                         continue
                 print(f"  ✓ Faltas Sofridas coletadas (Índice mapeado: {indice_faltas_sofridas}).")
             except Exception as e:
-                print(f"  ⚠️ Sem aba de Ataque para o jogo {id_real}: {e}")
+                print(f"  ⚠️ Sem aba de Ataque para o jogo {id_real}.")
 
 
         # --- EXIBIÇÃO DO VENCEDOR: CHUTES NO ALVO ---
@@ -172,8 +192,8 @@ def testar_clique_pelo_nome():
                 jogador_top_chutes = jogador
 
         print("\n" + "="*60)
-        if jogador_top_chutes:
-            print(f"👑 JOGADOR COM MAIOR MÉDIA DE CHUTES NO ALVO: {jogador_top_chutes} ({media_top_chutes:.2f})")
+        if Red_top_chutes := jogador_top_chutes:
+            print(f"👑 JOGADOR COM MAIOR MÉDIA DE CHUTES NO ALVO: {Red_top_chutes} ({media_top_chutes:.2f})")
         else:
             print("⚠️ Nenhuma estatística de Chutes no Alvo pôde ser consolidada.")
         print("="*60 + "\n")
@@ -188,8 +208,8 @@ def testar_clique_pelo_nome():
                 jogador_top_faltas = jogador
 
         print("="*60)
-        if jogador_top_faltas:
-            print(f"👑 JOGADOR COM MAIOR MÉDIA DE FALTAS SOFRIDAS: {jogador_top_faltas} ({media_top_faltas:.2f})")
+        if Red_top_faltas := jogador_top_faltas:
+            print(f"👑 JOGADOR COM MAIOR MÉDIA DE FALTAS SOFRIDAS: {Red_top_faltas} ({media_top_faltas:.2f})")
         else:
             print("⚠️ Nenhuma estatística de Faltas Sofridas pôde ser consolidada.")
         print("="*60 + "\n")
@@ -202,4 +222,4 @@ def testar_clique_pelo_nome():
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
-                
+                    
