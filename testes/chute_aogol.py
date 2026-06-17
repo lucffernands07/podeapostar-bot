@@ -33,10 +33,10 @@ def testar_clique_pelo_nome():
     url_inicial = "https://www.flashscore.com.br/jogo/futebol/croacia-K8aznggo/inglaterra-j9N9ZNFA/h2h/total/"
     
     print("\n" + "="*60)
-    print("🚀 INICIANDO ANÁLISE DOS 2 ÚLTIMOS JOGOS COM MÉDIAS E DESTAQUES")
+    print("🚀 INICIANDO ANÁLISE DOS 3 ÚLTIMOS JOGOS COM MÉDIAS E DESTAQUES")
     print("="*60 + "\n")
     
-    # Dicionários para acumular o histórico de cada jogo -> { Nome: [jogo1, jogo2] }
+    # Dicionários para acumular o histórico de cada jogo -> { Nome: [jogo1, jogo2, jogo3] }
     historico_chutes = {}
     historico_faltas = {}
     
@@ -52,12 +52,12 @@ def testar_clique_pelo_nome():
         if not linhas_confrontos:
             linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__row")
             
-        if len(linhas_confrontos) < 2:
-            print("❌ Partidas insuficientes no H2H para processar os 2 últimos jogos.")
+        if len(linhas_confrontos) < 3:
+            print("❌ Partidas insuficientes no H2H para processar os 3 últimos jogos.")
             return
 
-        # Armazena os índices/elementos para interagir sem quebrar o DOM nas idas e vindas
-        quantidade_jogos = 2
+        # ALTERADO PARA 3 JOGOS
+        quantidade_jogos = 3
         urls_jogos_alvo = []
 
         # Mapeia os confrontos antes de navegar
@@ -69,7 +69,7 @@ def testar_clique_pelo_nome():
                 nome_confronto = f"Jogo {i+1}"
             urls_jogos_alvo.append(nome_confronto)
 
-        # --- LOOP PARA PROCESSAR OS 2 JOGOS ---
+        # --- LOOP PARA PROCESSAR OS 3 JOGOS ---
         for jogo_index in range(quantidade_jogos):
             print(f"🔄 Redirecionando para o Jogo {jogo_index + 1}: {urls_jogos_alvo[jogo_index]}...")
             
@@ -119,13 +119,18 @@ def testar_clique_pelo_nome():
                         if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
                             continue
                         
-                        celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                        celulas_valores = inline_cells = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
                         if len(celulas_valores) > indice_chutes_no_gol:
                             valor_bruto = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_chutes_no_gol]).strip()
                             chutes_no_alvo = 0 if valor_bruto == "-" or valor_bruto == "" else int(valor_bruto)
                             
                             if nome_jogador not in historico_chutes:
                                 historico_chutes[nome_jogador] = []
+                            
+                            # Garante o alinhamento caso o jogador não tenha dados nos jogos anteriores
+                            while len(historico_chutes[nome_jogador]) < jogo_index:
+                                historico_chutes[nome_jogador].append(0)
+                                
                             historico_chutes[nome_jogador].append(chutes_no_alvo)
                     except:
                         continue
@@ -193,6 +198,11 @@ def testar_clique_pelo_nome():
                             
                             if nome_jogador not in historico_faltas:
                                 historico_faltas[nome_jogador] = []
+                                
+                            # Garante o alinhamento caso o jogador não tenha dados nos jogos anteriores
+                            while len(historico_faltas[nome_jogador]) < jogo_index:
+                                historico_faltas[nome_jogador].append(0)
+                                
                             historico_faltas[nome_jogador].append(faltas_sofridas)
                     except:
                         continue
@@ -203,23 +213,22 @@ def testar_clique_pelo_nome():
 
         # --- PROCESSAMENTO DOS CONSOLIDADOS E MÉDIAS ---
         print("\n" + "="*60)
-        print("📊 CONSOLIDADO DE MÉDIAS DOS ÚLTIMOS 2 JOGOS")
+        print(f"📊 CONSOLIDADO DE MÉDIAS DOS ÚLTIMOS {quantidade_jogos} JOGOS")
         print("="*60)
         
         medias_chutes = {}
         medias_faltas = {}
         
-        print("\n📈 3 e 4. MERCADO: CHUTES NO ALVO (Médias):")
+        print(f"\n📈 MERCADO: CHUTES NO ALVO (Médias baseadas em {quantidade_jogos} jogos):")
         print("-" * 55)
         for jogador, lista_valores in historico_chutes.items():
-            # Preenche com 0 se o jogador não entrou em campo em algum dos dois jogos
             while len(lista_valores) < quantidade_jogos:
                 lista_valores.append(0)
             media = sum(lista_valores) / quantidade_jogos
             medias_chutes[jogador] = media
             print(f"  👤 {jogador.ljust(25)} ➔ Média: {media:.1f} chutes/jogo {lista_valores}")
             
-        print("\n📉 5 e 6. MERCADO: FALTAS SOFRIDAS (Médias):")
+        print(f"\n📉 MERCADO: FALTAS SOFRIDAS (Médias baseadas em {quantidade_jogos} jogos):")
         print("-" * 55)
         for jogador, lista_valores in historico_faltas.items():
             while len(lista_valores) < quantidade_jogos:
@@ -255,3 +264,4 @@ def testar_clique_pelo_nome():
 
 if __name__ == "__main__":
     testar_clique_pelo_nome()
+                           
