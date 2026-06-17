@@ -163,12 +163,13 @@ def testar_clique_pelo_nome():
             print("6. VALORES DE CADA JOGADOR DA COLUNA FALTA SOFRIDA:")
             print("-" * 55)
             
+            # Captura corrigida (Variável padronizada em português)
             linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
             if len(linhas_dados) <= 1:
                 linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
                 
             dados_encontrados = False
-            for linha in lines_dados:
+            for linha in linhas_dados:  # Corrigido aqui de lines_dados para linhas_dados
                 try:
                     nome_jogador = linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN").text.strip()
                     if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
@@ -178,7 +179,7 @@ def testar_clique_pelo_nome():
                     if len(celulas_valores) > indice_faltas_sofridas:
                         valor_bruto = celulas_valores[indice_faltas_sofridas].text.strip()
                         
-                        # Segunda camada de segurança: se cair na coluna de porcentagem por erro de índice, ajusta
+                        # Segunda camada de segurança contra dribles
                         if "%" in valor_bruto or "/" in valor_bruto:
                             if indice_faltas_sofridas == 4:
                                 valor_bruto = celulas_valores[5].text.strip()
