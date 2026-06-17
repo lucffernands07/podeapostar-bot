@@ -343,6 +343,69 @@ def main():
                             mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
 
                         # 3. Chance Dupla
+def main():
+    driver = configurar_driver()
+    hoje_ref = datetime.now()
+    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
+    lista_para_filtros = []     
+    jogos_para_pendentes = [] 
+    total_mercados = 0 
+
+    try:
+        for nome_comp, url in COMPETICOES.items():
+            if total_mercados >= 200: break 
+            print(f"\n--- Analisando: {nome_comp} ---")
+            
+            try:
+                driver.get(url)
+                time.sleep(4)
+                elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+            except Exception as e:
+                if "invalid session id" in str(e).lower() or "session" in str(e).lower():
+                    print("⚠️ Sessão do Chrome caiu! Reiniciando o navegador para continuar...")
+                    try: driver.quit()
+                    except: pass
+                    driver = configurar_driver() 
+                    driver.get(url)
+                    time.sleep(4)
+                    elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+                else:
+                    print(f"⚠️ Erro ao carregar liga {nome_comp}: {e}")
+                    continue
+            
+            for el in elementos:
+                try:
+                    tempo_raw = el.find_element(By.CSS_SELECTOR, ".event__time").text.strip()
+                    h_obj = datetime.strptime(tempo_raw.split()[-1], "%H:%M")
+                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
+                    
+                    aceitar = False
+                    if amanha_no_site in tempo_raw:
+                        if h_obj.hour <= 3: aceitar = True
+                    elif "." not in tempo_raw:
+                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
+
+                    if aceitar:
+                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                        t1, t2 = times[0].text.strip(), times[1].text.strip()
+                        id_jogo = el.get_attribute('id').split('_')[-1]
+                        
+                        url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
+                        s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
+                        
+                        mercados_para_processar = []
+
+                        # 1. Gols
+                        res_gols = gols.verificar_gols(s)
+                        for rg in res_gols:
+                            mercados_para_processar.append({"texto": rg['mercado'], "chave": rg['tipo']})
+
+                        # 2. Ambas Marcam
+                        res_btts = ambos_marcam.verificar_btts(s)
+                        if res_btts:
+                            mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
+
+                        # 3. Chance Dupla
                         if s.get("casa_vitorias_recente", 0) >= 4 or s.get("fora_vitorias_recente", 0) >= 4:
                             s["chance_dupla_pct"] = "100%"
                         elif s.get("casa_vitorias_recente", 0) == 3 or s.get("fora_vitorias_recente", 0) == 3:
@@ -373,8 +436,137 @@ def main():
                                 m_texto = item["texto"]
                                 m_chave = item["chave"]
                                 
-                                # Injeta odd fixa de aprovação se for mercado de jogador para o validador aceitar
+                                # Injeta odd fixa se for mercado de jogador para o validador aprovar
                                 if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"]:
                                     valor_odd_str = "1.50"
                                 else:
-                                    valor_odd_str = v_odds.get(m_chave,
+                                    valor_odd_str = v_odds.get(m_chave, "N/A")
+
+                                try:
+                                    odd_float = float(valor_odd_str.replace(',', '.'))
+                                    
+                                    if "M45" in m_chave and odd_float >= 4.0:
+                                        continue 
+
+                                    # 🚀 RÉGUA SUBIU: Mínimo 1.40
+                                    if odd_float >= 1.40:
+                                        lista_para_filtros.append({
+                                            "horario": h_br, "time_casa": t1, "time_fora": t2,
+                                            "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"] else "Análise", "liga": nome_comp,
+                                            "link_betano": s.get("link_betano")
+                                        })
+                                        
+                                        jogos_para_pendentes.append({
+                                            "time_casa": t1,
+                                            "time_fora": t2,
+                                            "mercado": m_texto,
+                                            "mercado_ranking": m_texto.upper(),
+                                            "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
+                                        })
+                                                
+                                        total_mercados += 1
+                                except: continue
+                except: continue
+
+        # --- PROCESSAMENTO E ENVIO FINAL ---
+        if lista_para_filtros:
+            lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
+            
+            meu_chat_id = os.getenv('CHAT_ID')
+            if meu_chat_id:
+                cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
+                corpo = ""
+                for j in lista_para_filtros:
+                    bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
+                    
+                    if len(cabecalho + corpo + bloco) > 4000:
+                        enviar_telegram(cabecalho + corpo, meu_chat_id)
+                        cabecalho = "🎫 *LISTA (Continuação)*\n\n"
+                        corpo = bloco
+                    else:
+                        corpo += bloco
+                
+                enviar_telegram(cabecalho + corpo, meu_chat_id)
+                print("📨 Listão enviado.")
+
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
+            cache_dados = {}
+            for j in lista_para_filtros:
+                chave = f"{j['time_casa']}x{j['time_fora']}"
+                cache_dados[chave] = {
+                    "link": j.get("link_betano"),
+                    "liga": j.get("liga"),
+                    "horario": j.get("horario"),
+                    "odd": j.get("odd")
+                }
+            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
+
+            canal_id = os.getenv('CHANNEL_ID')
+            if texto_bingos_final and canal_id:
+                msg_bingo_formatada = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_bingos_final
+                menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
+                print("📢 Bingos enviados com botões para o Canal.")
+
+            # --- TRATAMENTO DOS ARQUIVOS DE RANKING E BANCO LOCAL ---
+            import json
+            os.makedirs("ranking", exist_ok=True)
+            caminho_p = "ranking/pendentes.json"
+            data_hoje = hoje_ref.strftime("%Y-%m-%d")
+            
+            pode_gravar = True 
+
+            if os.path.exists(caminho_p):
+                try:
+                    with open(caminho_p, 'r', encoding='utf-8') as f:
+                        conteudo = f.read().strip()
+                        if conteudo:
+                            dados_existentes = json.loads(conteudo)
+                            if dados_existentes.get("data_geracao") == data_hoje:
+                                if len(dados_existentes.get("jogos", [])) > 0:
+                                    pode_gravar = False
+                except (json.JSONDecodeError, Exception) as e:
+                    print(f"⚠️ Arquivo de ranking corrompido ou ilegível, resetando: {e}")
+                    pode_gravar = True
+
+            if pode_gravar and jogos_para_pendentes: 
+                dados_final = {
+                    "data_geracao": data_hoje,
+                    "jogos": jogos_para_pendentes 
+                }
+                with open(caminho_p, "w", encoding="utf-8") as f:
+                    json.dump(dados_final, f, indent=4, ensure_ascii=False)
+                print(f"✅ Ranking: Primeira execução do dia salva ({len(jogos_para_pendentes)} jogos).")
+            elif not pode_gravar:
+                print(f"🚫 BLOQUEIO: O Ranking de hoje ({data_hoje}) já foi consolidado na 1ª execução.")
+
+            os.makedirs("telegram", exist_ok=True)
+            caminho_banco = f"telegram/jogos_{data_hoje}.json"
+
+            dados_para_o_bot = []
+            for j in lista_para_filtros:
+                dados_para_o_bot.append({
+                    "horario": j.get("horario"),
+                    "liga": j.get("liga"),
+                    "time_casa": j.get("time_casa"),
+                    "time_fora": j.get("time_fora"),
+                    "mercado": j.get("mercado"),
+                    "odd": j.get("odd"),
+                    "link_betano": j.get("link_betano") 
+                })
+
+            with open(caminho_banco, "w", encoding="utf-8") as f:
+                json.dump(dados_para_o_bot, f, indent=4, ensure_ascii=False)
+
+            print(f"📂 Banco de dados do dia salvo para o Bot: {caminho_banco}")
+            print("✅ Processamento concluído com sucesso.")
+
+    except Exception as e:
+        print(f"❌ Erro Crítico no Main: {e}")
+    finally:
+        try:
+            driver.quit()
+        except:
+            pass
+
+if __name__ == "__main__":
+    main()
