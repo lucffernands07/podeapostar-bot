@@ -15,7 +15,7 @@ def extrair_porcentagem(texto_mercado):
 def extrair_odd(odd_str):
     try:
         if not odd_str or odd_str == "N/A": return 1.0
-        # 🚀 NOVO: Se a odd for a string de análise dos jogadores, injeta 1.50 para o cálculo matemático de multiplicador
+        # 🚀 NOVO: Se a odd for a string de análise dos jogadores, injeta 1.50 para o cálculo matemático de multiplicador e ordenação
         if isinstance(odd_str, str) and "Análise" in odd_str: return 1.50
         if isinstance(odd_str, (int, float)): return float(odd_str)
         return float(odd_str.replace(',', '.'))
@@ -45,6 +45,12 @@ def carregar_ranking_pro():
     return []
 
 def montar_bilhetes_estrategicos(dados_entrada):
+    """
+    Ordena a lista pelas maiores odds (com bypass de 1.50 para análise) e monta exatamente dois bilhetes:
+    - Bingo A: Os 3 mercados com as maiores odds da rodada.
+    - Bingo B: Os próximos 3 mercados com as maiores odds que sobraram.
+    Sem travas de confrontos duplicados, sem limites de mercados.
+    """
     bilhetes = []
     lista_jogos = dados_entrada.get('jogos', []) if isinstance(dados_entrada, dict) else dados_entrada
     lista_jogos = [j for j in lista_jogos if isinstance(j, dict) and 'mercado' in j]
@@ -70,53 +76,21 @@ def montar_bilhetes_estrategicos(dados_entrada):
     
     lista_jogos = lista_filtrada
 
-    # --- BINGO 3: VALOR ---
-    if len(lista_jogos) >= 3:
-        lista_bingo3 = sorted(lista_jogos, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)[:3]
-        lista_bingo3.sort(key=lambda x: x.get('horario', '00:00'))
-        bilhetes.append({"id": "BINGO3", "nome": "🔥 BINGO 3: VALOR", "jogos": lista_bingo3})
+    # 1. Ordena todos os jogos unificados pelas maiores odds (do maior para o menor)
+    jogos_ordenados = sorted(lista_jogos, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)
 
-    # --- BINGO 5: ESTRUTURADO ---
-    if len(lista_jogos) >= 5:
-        bingo5_selecao = sorted(lista_jogos, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)[:3]
-        restantes = [j for j in lista_jogos if j not in bingo5_selecao]
-        bingo5_selecao.extend(sorted(restantes, key=lambda x: extrair_porcentagem(x.get('mercado', '')), reverse=True)[:2])
-        bingo5_selecao.sort(key=lambda x: x.get('horario', '00:00'))
-        bilhetes.append({"id": "BINGO5", "nome": "💰 BINGO 5: ESTRUTURADO", "jogos": bingo5_selecao[:5]})
+    # 2. Distribui em blocos de 3 estritamente sequenciais (sem restrição de repetição de confronto)
+    bilhete_1 = jogos_ordenados[0:3]
+    bilhete_2 = jogos_ordenados[3:6]
 
-    # --- BINGO PREMIUM (PRO): ELITE ---
-    ranking_pro = carregar_ranking_pro()
-    lista_premium = []
-    jogos_disponiveis = lista_jogos.copy()
+    # --- MONTAGEM DOS DOIS BILHETES ---
+    if len(bilhete_1) >= 3:
+        bilhete_1.sort(key=lambda x: x.get('horario', '00:00'))
+        bilhetes.append({"id": "BINGO_A", "nome": "🔥 BINGO ALTO VALOR (A)", "jogos": bilhete_1})
 
-    for elite in ranking_pro:
-        mercado_elite = elite['mercado'].upper().strip()
-        
-        for i in range(len(jogos_disponiveis) - 1, -1, -1):
-            jogo = jogos_disponiveis[i]
-            mercado_jogo = str(jogo.get('mercado', "")).upper().strip()
-            
-            if mercado_elite in mercado_jogo:
-                lista_premium.append(jogo)
-                jogos_disponiveis.pop(i) 
-                
-            if len(lista_premium) >= 7: break
-        if len(lista_premium) >= 7: break
-
-    if len(lista_premium) < 7:
-        sobra = sorted(jogos_disponiveis, key=lambda x: extrair_porcentagem(x.get('mercado', '')), reverse=True)
-        for s in sobra:
-            if len(lista_premium) >= 7: break
-            lista_premium.append(s)
-
-    if len(lista_premium) >= 3:
-        lista_premium.sort(key=lambda x: x.get('horario', '00:00'))
-        status = "🔥 _Filtro: Ranking de Elite_" if ranking_pro else "⚠️ _Filtro: Probabilidade Diária_"
-        bilhetes.append({
-            "id": "PREMIUM", 
-            "nome": f"💎 BINGO PRO: ELITE (TOP {len(lista_premium)})\n{status}", 
-            "jogos": lista_premium
-        })
+    if len(bilhete_2) >= 3:
+        bilhete_2.sort(key=lambda x: x.get('horario', '00:00'))
+        bilhetes.append({"id": "BINGO_B", "nome": "💰 BINGO ALTO VALOR (B)", "jogos": bilhete_2})
 
     return bilhetes
 
@@ -130,7 +104,7 @@ def formatar_para_telegram(bilhetes, cache_dados):
         agrupados = {}
         
         for j in b['jogos']:
-            chave_cache = f"{j.get('time_casa')}x{j.get('time_fora')}"
+            chave_cache = f"{j.get('time_casa')}x{j.get('time_fora']}"
             info_extra = cache_dados.get(chave_cache, {})
             horario = j.get('horario') or info_extra.get('horario', '00:00')
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
@@ -139,6 +113,7 @@ def formatar_para_telegram(bilhetes, cache_dados):
             
             link_h2h = info_extra.get('link_h2h', None)
 
+            # O agrupamento visual por jogo na string do Telegram continua funcionando perfeitamente!
             chave_jogo = f"{horario}_{j.get('time_casa')}_{j.get('time_fora')}"
             if chave_jogo not in agrupados:
                 agrupados[chave_jogo] = {
@@ -149,9 +124,9 @@ def formatar_para_telegram(bilhetes, cache_dados):
                     "link_h2h": link_h2h  
                 }
             
-            # 🔄 CÓDIGO ALTERADO: Limpa o mercado de jogadores tirando Frequência e Odd
+            # 🔄 CÓDIGO MANTIDO: Limpa o mercado de jogadores tirando Frequência e Odd
             mercado_limpo = j.get('mercado', '')
-            if "Faltas Sofridas:" in mercado_limpo:
+            if "Faltas Sofridas:" in mercado_limpo or "Chutes no Alvo:" in mercado_limpo:
                 # Remove o trecho da Frequência mantendo apenas a Média
                 mercado_limpo = re.sub(r'\(Frequência:.*\| (Méd:.*?)\)', r'(\1)', mercado_limpo)
                 texto_final_linha = f"🔶 {mercado_limpo}"
