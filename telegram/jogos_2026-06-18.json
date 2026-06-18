@@ -1,32 +1,5 @@
 [
     {
-        "horario": "16:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Suíça",
-        "time_fora": "Bósnia e Herzegovina",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.32",
-        "link_betano": "https://www.betano.bet.br/match-odds/Switzerland-Bosnia-Herzegovina/83961960/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Suíça",
-        "time_fora": "Bósnia e Herzegovina",
-        "mercado": "Faltas Sofridas: Amdouni Z. (Frequência: 3/3j | Méd: 2.0)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Switzerland-Bosnia-Herzegovina/83961960/"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Canadá",
-        "time_fora": "Catar",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.25",
-        "link_betano": "https://www.betano.bet.br/match-odds/Canada-Qatar/83962284/"
-    },
-    {
         "horario": "19:00",
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Canadá",
@@ -41,7 +14,7 @@
         "time_casa": "Lansing City",
         "time_fora": "Midwest United",
         "mercado": "+2.5 Gols (70%)",
-        "odd": "1.34",
+        "odd": "1.25",
         "link_betano": "https://www.betano.bet.br/match-odds/Lansing-City-Midwest-United/87402478/"
     },
     {
@@ -50,7 +23,7 @@
         "time_casa": "Sport",
         "time_fora": "Atlético-GO",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.34",
+        "odd": "1.35",
         "link_betano": "https://www.betano.bet.br/match-odds/Sport-Recife-PE-Atletico-GO/87447184/"
     },
     {
@@ -68,7 +41,7 @@
         "time_casa": "Universidad de Chile",
         "time_fora": "O'Higgins",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.34",
+        "odd": "1.33",
         "link_betano": "https://www.betano.bet.br/match-odds/Universidad-de-Chile-O-Higgins/86008171/"
     },
     {
@@ -77,7 +50,7 @@
         "time_casa": "Universidad de Chile",
         "time_fora": "O'Higgins",
         "mercado": "+2.5 Gols (70%)",
-        "odd": "2.00",
+        "odd": "1.98",
         "link_betano": "https://www.betano.bet.br/match-odds/Universidad-de-Chile-O-Higgins/86008171/"
     },
     {
@@ -86,7 +59,7 @@
         "time_casa": "Texoma",
         "time_fora": "West Texas",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.52",
+        "odd": "1.53",
         "link_betano": "https://www.betano.bet.br/match-odds/Texoma-FC-West-Texas-FC/87402674/"
     },
     {
@@ -95,7 +68,7 @@
         "time_casa": "México",
         "time_fora": "Coreia do Sul",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.44",
+        "odd": "1.42",
         "link_betano": "https://www.betano.bet.br/match-odds/Mexico-South-Korea/83962285/"
     },
     {
