@@ -104,16 +104,18 @@ def formatar_para_telegram(bilhetes, cache_dados):
         agrupados = {}
         
         for j in b['jogos']:
-            chave_cache = f"{j.get('time_casa')}x{j.get('time_fora')}"
+            # 🚀 Normalização rigorosa em minúsculas para encontrar no cache
+            chave_cache = f"{str(j.get('time_casa')).strip().lower()}x{str(j.get('time_fora')).strip().lower()}"
             info_extra = cache_dados.get(chave_cache, {})
+            
             horario = j.get('horario') or info_extra.get('horario', '00:00')
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
             odd_valor = j.get('odd') or info_extra.get('odd', '1.0')
-            link_final = info_extra.get('link') or "https://www.betano.bet.br/"
             
+            # 🚀 Puxa o link do objeto do jogo ou do cache unificado
+            link_final = j.get('link_betano') or info_extra.get('link_betano') or "https://www.betano.bet.br/"
             link_h2h = info_extra.get('link_h2h', None)
 
-            # O agrupamento visual por jogo na string do Telegram continua funcionando perfeitamente!
             chave_jogo = f"{horario}_{j.get('time_casa')}_{j.get('time_fora')}"
             if chave_jogo not in agrupados:
                 agrupados[chave_jogo] = {
@@ -124,10 +126,8 @@ def formatar_para_telegram(bilhetes, cache_dados):
                     "link_h2h": link_h2h  
                 }
             
-            # 🔄 CÓDIGO MANTIDO: Limpa o mercado de jogadores tirando Frequência e Odd
             mercado_limpo = j.get('mercado', '')
             if "Faltas Sofridas:" in mercado_limpo or "Chutes no Alvo:" in mercado_limpo:
-                # Remove o trecho da Frequência mantendo apenas a Média
                 mercado_limpo = re.sub(r'\(Frequência:.*\| (Méd:.*?)\)', r'(\1)', mercado_limpo)
                 texto_final_linha = f"🔶 {mercado_limpo}"
             else:
