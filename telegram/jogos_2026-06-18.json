@@ -1,20 +1,11 @@
 [
     {
-        "horario": "19:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Canadá",
-        "time_fora": "Catar",
-        "mercado": "Faltas Sofridas: De Fougerolles L. (Frequência: 3/3j | Méd: 2.3)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Canada-Qatar/83962284/"
-    },
-    {
         "horario": "20:00",
         "liga": "Eua - USL Liga 2",
         "time_casa": "Lansing City",
         "time_fora": "Midwest United",
         "mercado": "+2.5 Gols (70%)",
-        "odd": "1.25",
+        "odd": "1.26",
         "link_betano": "https://www.betano.bet.br/match-odds/Lansing-City-Midwest-United/87402478/"
     },
     {
@@ -24,15 +15,6 @@
         "time_fora": "Atlético-GO",
         "mercado": "+1.5 Gols (70%)",
         "odd": "1.35",
-        "link_betano": "https://www.betano.bet.br/match-odds/Sport-Recife-PE-Atletico-GO/87447184/"
-    },
-    {
-        "horario": "21:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "Sport",
-        "time_fora": "Atlético-GO",
-        "mercado": "Faltas Sofridas: Ian Luccas (Frequência: 1/3j | Méd: 1.3)",
-        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Sport-Recife-PE-Atletico-GO/87447184/"
     },
     {
@@ -68,7 +50,7 @@
         "time_casa": "México",
         "time_fora": "Coreia do Sul",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.42",
+        "odd": "1.40",
         "link_betano": "https://www.betano.bet.br/match-odds/Mexico-South-Korea/83962285/"
     },
     {
@@ -76,8 +58,8 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "México",
         "time_fora": "Coreia do Sul",
-        "mercado": "1X (70%)",
-        "odd": "1.25",
+        "mercado": "Chutes no Alvo: Jimenez R. (Frequência: 2/3j | Méd: 0.7)",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Mexico-South-Korea/83962285/"
     },
     {
