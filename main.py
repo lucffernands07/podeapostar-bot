@@ -87,7 +87,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         # 🎯 Redireciona o foco explicitamente de volta para a aba do jogo atualizada
         driver.switch_to.window(driver.window_handles[-1])
 
-        # 1. Vai para a aba H2H
+        # 1. Vai para a aba H2H (Corrigido By.XPATH padrão)
         h2h_tab = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
         time.sleep(2)
