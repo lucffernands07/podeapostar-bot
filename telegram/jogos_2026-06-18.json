@@ -1,32 +1,5 @@
 [
     {
-        "horario": "11:00",
-        "liga": "Marrocos - Botola Pro",
-        "time_casa": "Dcheira",
-        "time_fora": "FAR Rabat",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.32",
-        "link_betano": "https://www.betano.bet.br/match-odds/Olympique-Dcheira-Far-Rabat/87455707/"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Marrocos - Botola Pro",
-        "time_casa": "Dcheira",
-        "time_fora": "FAR Rabat",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "2.20",
-        "link_betano": "https://www.betano.bet.br/match-odds/Olympique-Dcheira-Far-Rabat/87455707/"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Marrocos - Botola Pro",
-        "time_casa": "Wydad AC",
-        "time_fora": "FUS Rabat",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.38",
-        "link_betano": "https://www.betano.bet.br/match-odds/WAC-Casablanca-Fus-Fath-Union-Sportive-Rabat/87416489/"
-    },
-    {
         "horario": "20:00",
         "liga": "Eua - USL Liga 2",
         "time_casa": "Lansing City",
@@ -59,7 +32,7 @@
         "time_casa": "Texoma",
         "time_fora": "West Texas",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.59",
-        "link_betano": null
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/Texoma-FC-West-Texas-FC/87402674/"
     }
 ]
