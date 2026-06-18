@@ -57,6 +57,9 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
     
+    # ⏱️ Pausa crucial: Permite o carregamento estável dos mercados secundários (ex: faltas sofridas)
+    time.sleep(1.5)
+    
     stats = {
         "link_betano": None,
         "casa_15": 0, "casa_25": 0, "casa_45_under": 0, "casa_btts": 0, 
@@ -74,15 +77,18 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     try:
         wait = WebDriverWait(driver, 15)
         
-        # 🛡️ CORREÇÃO CRÍTICA: Captura o Link Betano ANTES de mudar de aba ou alterar a URL do DOM
+        # 🛡️ Bloco Isolado: Captura o Link Betano sem quebrar o DOM das sub-abas
         print(f"      🔗 Capturando link Betano para {t1} x {t2}...")
         try:
             stats["link_betano"] = links.extrair_url_betano(driver)
         except Exception as e:
             print(f"      ⚠️ Erro ao extrair link Betano inicial: {e}")
 
+        # 🎯 Redireciona o foco explicitamente de volta para a aba do jogo atualizada
+        driver.switch_to.window(driver.window_handles[-1])
+
         # 1. Vai para a aba H2H
-        h2h_tab = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
+        h2h_tab = wait.until(EC.element_to_be_clickable((By.開く_XPATH, "//a[contains(@href, '/h2h')]")) if False else (By.XPATH, "//a[contains(@href, '/h2h')]"))
         h2h_tab.click()
         time.sleep(2)
         
