@@ -1,0 +1,29 @@
+[
+    {
+        "horario": "11:00",
+        "liga": "Marrocos - Botola Pro",
+        "time_casa": "Dcheira",
+        "time_fora": "FAR Rabat",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.25",
+        "link_betano": null
+    },
+    {
+        "horario": "16:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Suíça",
+        "time_fora": "Bósnia e Herzegovina",
+        "mercado": "Faltas Sofridas: Ndoye D. (Média 2.0)",
+        "odd": "Análise",
+        "link_betano": null
+    },
+    {
+        "horario": "21:00",
+        "liga": "Chile - Liga Primeira",
+        "time_casa": "Universidad de Chile",
+        "time_fora": "O'Higgins",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "2.02",
+        "link_betano": null
+    }
+]
