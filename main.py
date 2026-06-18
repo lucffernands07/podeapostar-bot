@@ -88,7 +88,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         driver.switch_to.window(driver.window_handles[-1])
 
         # 1. Vai para a aba H2H
-        h2h_tab = wait.until(EC.element_to_be_clickable((By.開く_XPATH, "//a[contains(@href, '/h2h')]")) if False else (By.XPATH, "//a[contains(@href, '/h2h')]"))
+        h2h_tab = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
         time.sleep(2)
         
