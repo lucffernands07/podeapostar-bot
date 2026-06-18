@@ -1,3 +1,4 @@
+
 import sys
 import os
 import json
@@ -101,7 +102,21 @@ def executar():
     with open(caminho_json, "r", encoding="utf-8") as f:
         jogos_banco = json.load(f)
 
-    dict_h2h = {}
+    # 🚀 MAPEAMENTO UNIFICADO DE LINKS (Betano + H2H)
+    dict_cache_links = {}
+
+    # Passo A: Pega os links da Betano salvos no banco de dados do dia
+    for j in jogos_banco:
+        casa = j.get("time_casa")
+        fora = j.get("time_fora")
+        link_b = j.get("link_betano")
+        if casa and fora and link_b:
+            chave_confronto = f"{str(casa).strip().lower()}x{str(fora).strip().lower()}"
+            if chave_confronto not in dict_cache_links:
+                dict_cache_links[chave_confronto] = {}
+            dict_cache_links[chave_confronto]["link_betano"] = link_b
+
+    # Passo B: Cruza e adiciona os links H2H do pendentes.json se existirem
     if os.path.exists(caminho_pendentes):
         try:
             with open(caminho_pendentes, "r", encoding="utf-8") as f:
@@ -113,8 +128,10 @@ def executar():
                     fora = item.get("time_fora")
                     link_h2h = item.get("link_h2h")
                     if casa and fora and link_h2h:
-                        chave_confronto = f"{casa.strip().lower()}x{fora.strip().lower()}"
-                        dict_h2h[chave_confronto] = link_h2h
+                        chave_confronto = f"{str(casa).strip().lower()}x{str(fora).strip().lower()}"
+                        if chave_confronto not in dict_cache_links:
+                            dict_cache_links[chave_confronto] = {}
+                        dict_cache_links[chave_confronto]["link_h2h"] = link_h2h
         except Exception as e:
             print(f"⚠️ Erro ao processar links H2H do pendentes.json: {e}")
 
@@ -127,7 +144,6 @@ def executar():
             if int(h_partes[0]) < 4 and agora_br.hour > 20:
                 hora_jogo += timedelta(days=1)
             
-            # Filtro da janela de tempo por hora informada (Ex: HORA:3H)
             if filtro_hora != "DIA" and "H" in filtro_hora:
                 try:
                     horas_limite = int(filtro_hora.replace("H", ""))
@@ -146,11 +162,10 @@ def executar():
     jogos_validos_horario.sort(key=lambda x: x.get("datetime_real", agora_br))
 
     # --- PROCESSAMENTO DOS BILHETES ---
-    # Como as travas e filtros de amostragem/consistência rodam na main, passamos os jogos válidos
     bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(jogos_validos_horario)
     
-    # Renderiza o visual limpo para o formato do Telegram
-    texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_h2h)
+    # Repassa o cache contendo os dicionários de links limpos
+    texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links)
 
     if texto_final:
         try:
