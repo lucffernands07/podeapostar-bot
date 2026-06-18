@@ -92,7 +92,6 @@ def executar():
     agora_br = datetime.now() - timedelta(hours=3)
     data_hoje = agora_br.strftime("%Y-%m-%d")
     caminho_json = f"telegram/jogos_{data_hoje}.json"
-    caminho_ranking = "ranking/ranking_db.json"
     caminho_pendentes = "ranking/pendentes.json"
 
     if not os.path.exists(caminho_json):
@@ -119,8 +118,6 @@ def executar():
         except Exception as e:
             print(f"⚠️ Erro ao processar links H2H do pendentes.json: {e}")
 
-    agora_texto = agora_br.strftime("%H:%M") 
-    
     jogos_validos_horario = []
     for j in jogos_banco:
         try:
@@ -130,7 +127,14 @@ def executar():
             if int(h_partes[0]) < 4 and agora_br.hour > 20:
                 hora_jogo += timedelta(days=1)
             
-            if hora_jogo < agora_br - timedelta(minutes=15):
+            # Filtro da janela de tempo por hora informada (Ex: HORA:3H)
+            if filtro_hora != "DIA" and "H" in filtro_hora:
+                try:
+                    horas_limite = int(filtro_hora.replace("H", ""))
+                    if hora_jogo > agora_br + timedelta(hours=horas_limite) or hora_jogo < agora_br - timedelta(minutes=15):
+                        continue
+                except: pass
+            elif hora_jogo < agora_br - timedelta(minutes=15):
                 continue
                 
             j["datetime_real"] = hora_jogo
@@ -141,4 +145,26 @@ def executar():
 
     jogos_validos_horario.sort(key=lambda x: x.get("datetime_real", agora_br))
 
-    jogos_filtrados = []
+    # --- PROCESSAMENTO DOS BILHETES ---
+    # Como as travas e filtros de amostragem/consistência rodam na main, passamos os jogos válidos
+    bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(jogos_validos_horario)
+    
+    # Renderiza o visual limpo para o formato do Telegram
+    texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_h2h)
+
+    if texto_final:
+        try:
+            requests.post(url_msg, json={
+                "chat_id": chat_id,
+                "text": texto_final,
+                "parse_mode": "Markdown",
+                "disable_web_page_preview": False
+            })
+            print("🚀 Bilhetes do Bingo enviados com sucesso para o Telegram!")
+        except Exception as e:
+            print(f"⚠️ Erro ao enviar os bilhetes formatados para o Telegram: {e}")
+    else:
+        print("⚠️ Nenhum mercado passou nos critérios para gerar os bilhetes finais.")
+
+if __name__ == "__main__":
+    executar()
