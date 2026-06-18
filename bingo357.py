@@ -149,8 +149,17 @@ def formatar_para_telegram(bilhetes, cache_dados):
                     "link_h2h": link_h2h  
                 }
             
+            # 🔄 CÓDIGO ALTERADO: Limpa o mercado de jogadores tirando Frequência e Odd
+            mercado_limpo = j.get('mercado', '')
+            if "Faltas Sofridas:" in mercado_limpo:
+                # Remove o trecho da Frequência mantendo apenas a Média
+                mercado_limpo = re.sub(r'\(Frequência:.*\| (Méd:.*?)\)', r'(\1)', mercado_limpo)
+                texto_final_linha = f"🔶 {mercado_limpo}"
+            else:
+                texto_final_linha = f"🔶 {mercado_limpo} | Odd: {odd_valor}"
+
             agrupados[chave_jogo]["mercados"].append({
-                "texto": f"🔶 {j.get('mercado')} | Odd: {odd_valor}",
+                "texto": texto_final_linha,
                 "prioridade": prioridade_mercado(j.get('mercado', ''))
             })
             odd_total *= extrair_odd(odd_valor)
