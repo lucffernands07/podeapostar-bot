@@ -104,7 +104,7 @@ def formatar_para_telegram(bilhetes, cache_dados):
         agrupados = {}
         
         for j in b['jogos']:
-            chave_cache = f"{j.get('time_casa')}x{j.get('time_fora']}"
+            chave_cache = f"{j.get('time_casa')}x{j.get('time_fora')}"
             info_extra = cache_dados.get(chave_cache, {})
             horario = j.get('horario') or info_extra.get('horario', '00:00')
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
