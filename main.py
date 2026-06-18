@@ -379,7 +379,7 @@ def main():
                                         continue 
 
                                     # 🚀 Réguar em 1.40 unificada
-                                    if odd_float >= 1.40:
+                                    if odd_float >= 1.25:
                                         lista_para_filtros.append({
                                             "horario": h_br, "time_casa": t1, "time_fora": t2,
                                             "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"] else "Análise", "liga": nome_comp,
