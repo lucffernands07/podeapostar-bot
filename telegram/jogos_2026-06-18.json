@@ -5,8 +5,8 @@
         "time_casa": "Dcheira",
         "time_fora": "FAR Rabat",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.33",
-        "link_betano": null
+        "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/Olympique-Dcheira-Far-Rabat/87455707/"
     },
     {
         "horario": "11:00",
@@ -14,8 +14,8 @@
         "time_casa": "Dcheira",
         "time_fora": "FAR Rabat",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "2.25",
-        "link_betano": null
+        "odd": "2.20",
+        "link_betano": "https://www.betano.bet.br/match-odds/Olympique-Dcheira-Far-Rabat/87455707/"
     },
     {
         "horario": "11:00",
@@ -23,35 +23,8 @@
         "time_casa": "Wydad AC",
         "time_fora": "FUS Rabat",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.37",
-        "link_betano": null
-    },
-    {
-        "horario": "13:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Republica Tcheca",
-        "time_fora": "África do Sul",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.39",
-        "link_betano": null
-    },
-    {
-        "horario": "16:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Suíça",
-        "time_fora": "Bósnia e Herzegovina",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.34",
-        "link_betano": null
-    },
-    {
-        "horario": "16:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Suíça",
-        "time_fora": "Bósnia e Herzegovina",
-        "mercado": "Faltas Sofridas: Ndoye D. (Média 2.0)",
-        "odd": "Análise",
-        "link_betano": null
+        "odd": "1.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/WAC-Casablanca-Fus-Fath-Union-Sportive-Rabat/87416489/"
     },
     {
         "horario": "20:00",
@@ -59,17 +32,8 @@
         "time_casa": "Lansing City",
         "time_fora": "Midwest United",
         "mercado": "+2.5 Gols (70%)",
-        "odd": "1.39",
-        "link_betano": null
-    },
-    {
-        "horario": "21:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "Sport",
-        "time_fora": "Atlético-GO",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.36",
-        "link_betano": null
+        "odd": "1.45",
+        "link_betano": "https://www.betano.bet.br/match-odds/Lansing-City-Midwest-United/87402478/"
     },
     {
         "horario": "21:00",
@@ -78,7 +42,7 @@
         "time_fora": "O'Higgins",
         "mercado": "+1.5 Gols (70%)",
         "odd": "1.34",
-        "link_betano": null
+        "link_betano": "https://www.betano.bet.br/match-odds/Universidad-de-Chile-O-Higgins/86008171/"
     },
     {
         "horario": "21:00",
@@ -86,7 +50,16 @@
         "time_casa": "Universidad de Chile",
         "time_fora": "O'Higgins",
         "mercado": "+2.5 Gols (70%)",
-        "odd": "2.02",
+        "odd": "2.00",
+        "link_betano": "https://www.betano.bet.br/match-odds/Universidad-de-Chile-O-Higgins/86008171/"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Eua - USL Liga 2",
+        "time_casa": "Texoma",
+        "time_fora": "West Texas",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.59",
         "link_betano": null
     }
 ]
