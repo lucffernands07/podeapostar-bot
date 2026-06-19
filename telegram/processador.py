@@ -166,6 +166,7 @@ def executar():
     # Repassa o cache contendo os dicionários de links limpos
     texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links)
 
+    # 🛠️ --- TRECHO ALTERADO DAQUI EM DIANTE ---
     if texto_final:
         try:
             requests.post(url_msg, json={
@@ -178,7 +179,19 @@ def executar():
         except Exception as e:
             print(f"⚠️ Erro ao enviar os bilhetes formatados para o Telegram: {e}")
     else:
-        print("⚠️ Nenhum mercado passou nos critérios para gerar os bilhetes finais.")
+        # Envia o aviso customizado diretamente para o chat do Telegram do usuário
+        msg_erro = f"{config['aviso']}\n\n⚠️😢 Não foi encontrado bilhete com esse filtro. Tente outra janela, bingo ou tente amanhã."
+        try:
+            requests.post(url_msg, json={
+                "chat_id": chat_id,
+                "text": msg_erro,
+                "parse_mode": "Markdown",
+                "disable_web_page_preview": True
+            })
+            print("⚠️ Aviso de 'Não foi encontrado bilhete' enviado ao Telegram.")
+        except Exception as e:
+            print(f"⚠️ Erro ao enviar aviso de erro para o Telegram: {e}")
 
 if __name__ == "__main__":
     executar()
+            
