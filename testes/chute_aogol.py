@@ -30,7 +30,7 @@ def testar_clique_pelo_nome():
     wait = WebDriverWait(driver, 15)
     
     # URL do confronto base (H2H)
-    url_inicial = "https://www.flashscore.com.br/jogo/futebol/croacia-K8aznggo/inglaterra-j9N9ZNFA/h2h/total/"
+    url_inicial = "https://www.flashscore.com.br/jogo/futebol/escocia-fZRU25WH/marrocos-IDKYO3R8/h2h/total/"
     
     print("\n" + "="*60)
     print("🚀 INICIANDO ANÁLISE DOS 3 ÚLTIMOS JOGOS COM MÉDIAS E DESTAQUES")
