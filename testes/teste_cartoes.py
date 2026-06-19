@@ -26,16 +26,17 @@ def configurar_driver():
 
 def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
     """
-    Navega diretamente para a URL de estatísticas totais do jogo e extrai os cartões 
+    Navega diretamente para a URL de resumo do jogo e extrai os cartões 
     baseado na estrutura exata do DevTools (divs com wcl-statistics).
     """
     try:
+        url_resumo = url_jogo.split("?")[0].strip("/") + "/resumo/"
         print(f"      🌍 [Navegação] Abrindo jogo: {url_jogo}")
         driver.get(url_jogo)
         
-        # Espera explícita para garantir que os números das estatísticas apareçam na tela
+        # Espera os valores carregarem na tela antes de contar as linhas
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")))
-        time.sleep(2) # Margem de segurança para o carregamento dinâmico dos textos
+        time.sleep(2) 
         
         # Encontra todas as linhas de estatísticas pelo data-testid do print
         linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics']")
@@ -43,23 +44,24 @@ def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
         
         for linha in linhas:
             try:
-                # Localiza a categoria centralizada usando o data-testid exato do DevTools
+                # Localiza a categoria centralizada
                 cat_el = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")
                 texto_categoria = cat_el.text.upper().strip()
                 
                 if "CARTÕES AMARELOS" in texto_categoria or "CARTÃO AMARELO" in texto_categoria:
-                    # Busca os elementos de valores (casa e fora) usando seletores específicos da linha
+                    print(f"      🟨 [Match] Linha de cartões localizada!")
+                    
+                    # Busca os elementos de valores (casa e fora)
                     valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")
                     
                     if len(valores) >= 2:
-                        # Pega o texto bruto e limpa qualquer espaço extra
                         txt_casa = valores[0].text.strip()
                         txt_fora = valores[1].text.strip()
                         
-                        # Converte em número se for dígito válido
                         val_casa = int(txt_casa) if txt_casa.isdigit() else 0
                         val_fora = int(txt_fora) if txt_fora.isdigit() else 0
                         
+                        print(f"      ✅ [Resultado Encontrado] Casa: {val_casa} | Visitante: {val_fora}")
                         return val_casa if buscar_casa else val_fora
             except:
                 continue
