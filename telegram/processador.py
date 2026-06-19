@@ -1,4 +1,3 @@
-
 import sys
 import os
 import json
@@ -162,7 +161,7 @@ def executar():
     jogos_validos_horario.sort(key=lambda x: x.get("datetime_real", agora_br))
 
     # --- PROCESSAMENTO DOS BILHETES ---
-    bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(jogos_validos_horario)
+    bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(jogos_validos_horario, qtd_alvo=qtd_alvo)
     
     # Repassa o cache contendo os dicionários de links limpos
     texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links)
