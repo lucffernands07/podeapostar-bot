@@ -167,7 +167,8 @@ def executar():
     texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links)
 
     # --- ENVIO DOS RESULTADOS OU AVISO DE ERRO ---
-    menu_botoes = menus.menu_principal() if hasattr(menus, 'menu_principal') else None
+    # 🟢 Aqui chamamos a função correta do menus.py para ser usada em qualquer um dos casos
+    menu_botoes = menus.extrair_markup_filtros() if hasattr(menus, 'extrair_markup_filtros') else None
 
     if texto_final:
         try:
@@ -177,7 +178,6 @@ def executar():
                 "parse_mode": "Markdown",
                 "disable_web_page_preview": False
             }
-            # Se o menu de botões existir, anexa ele à mensagem do bilhete
             if menu_botoes:
                 payload["reply_markup"] = menu_botoes
 
@@ -195,8 +195,8 @@ def executar():
                 "parse_mode": "Markdown",
                 "disable_web_page_preview": True
             }
-            # Se o menu de botões existir, anexa ele também no aviso de erro
-            if menu_botoes = menus.extrair_markup_filtros() if hasattr(menus, 'extrair_markup_filtros') else None
+            if menu_botoes:
+                payload["reply_markup"] = menu_botoes
 
             requests.post(url_msg, json=payload)
             print("⚠️ Aviso de 'Não foi encontrado bilhete' enviado com o Menu anexado!")
@@ -205,4 +205,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-            
+        
