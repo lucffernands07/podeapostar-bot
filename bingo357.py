@@ -44,10 +44,12 @@ def carregar_ranking_pro():
         except: return []
     return []
 
-def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"):
+def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS", modo_elite=False):
     """
     Ordena e monta UM ÚNICO bilhete com a quantidade exata (qtd_alvo) solicitada,
     respeitando a estratégia escolhida (ODDS, ACERTOS ou AMBAS/EQUILIBRADO).
+    
+    🚀 MODO ELITE: Agrupa e prioriza partidas que acumularam o maior número de mercados aprovados.
     """
     bilhetes = []
     lista_jogos = dados_entrada
@@ -70,8 +72,23 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
                     lista_filtrada.append(m)
         else:
             lista_filtrada.extend(mercados)
+            
+    # 🚀 INTEGRAÇÃO DO BINGO ELITE (Agrupamento por volume de mercados por jogo)
+    if modo_elite:
+        # Conta quantos mercados cada confronto possui na lista filtrada
+        contagem_confrontos = {}
+        for m in lista_filtrada:
+            chave_jogo = f"{m['time_casa']}x{m['time_fora']}".lower().strip()
+            contagem_confrontos[chave_jogo] = contagem_confrontos.get(chave_jogo, 0) + 1
+        
+        # Ordena a lista de mercados baseando-se no volume de opções daquele jogo (do maior para o menor)
+        lista_filtrada = sorted(
+            lista_filtrada, 
+            key=lambda x: contagem_confrontos.get(f"{x['time_casa']}x{x['time_fora']}".lower().strip(), 0), 
+            reverse=True
+        )
     
-    # 2. 📊 Aplicação das Estratégias de Ordenação
+    # 2. 📊 Aplicação das Estratégias de Ordenação (Respeita a ordem anterior caso as notas sejam iguais)
     if estrategia == "ODDS":
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)
     elif estrategia == "ACERTOS":
@@ -95,6 +112,15 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             return odd * pct
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: calcular_peso_equilibrado(x), reverse=True)
 
+    # Se for Elite, garante a re-ordenação final para trazer os agrupados juntos para o topo
+    if modo_elite:
+        # Mantém a ordenação estratégica interna, mas garante que jogos com mais mercados fiquem colados no topo
+        jogos_ordenados = sorted(
+            jogos_ordenados, 
+            key=lambda x: contagem_confrontos.get(f"{x['time_casa']}x{x['time_fora']}".lower().strip(), 0), 
+            reverse=True
+        )
+
     # 3. Corte exato pela quantidade pedida (qtd_alvo)
     jogos_selecionados = jogos_ordenados[:qtd_alvo]
     jogos_selecionados.sort(key=lambda x: x.get('horario', '00:00'))
@@ -108,9 +134,11 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
     # 4. Retorna apenas um bloco (Bilhete Único)
     if qtd_real > 0:
         traducao_modo = "MAIORES ODDS" if estrategia == "ODDS" else "MAIS ACERTOS" if estrategia == "ACERTOS" else "EQUILIBRADO"
+        nome_bilhete = f"✨ BINGO ELITE DE {qtd_real} MERCADOS ({traducao_modo})" if modo_elite else f"🔥 BINGO DE {qtd_real} MERCADOS ({traducao_modo})"
+        
         bilhetes.append({
             "id": "BINGO_CUSTOM", 
-            "nome": f"🔥 BINGO DE {qtd_real} MERCADOS ({traducao_modo})", 
+            "nome": nome_bilhete, 
             "jogos": jogos_selecionados,
             "aviso_escassez": aviso_escassez
         })
