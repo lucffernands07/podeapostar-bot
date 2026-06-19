@@ -75,7 +75,7 @@ def executar():
     config = processar_comando_direto(tipo_bruto)
     qtd_alvo = config["bingo"]
     filtro_hora = config["horario"]
-    estrategia = config["bilhete"]
+    estrategia = config["bilhete"].strip().upper() # Força ficar em maiúsculo (ODDS, ACERTOS, AMBAS)
 
     msg_aguarde = f"{config['aviso']}\n\n⏳ *Buscando os melhores jogos no banco de dados, aguarde um instante...*"
     url_msg = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -161,7 +161,7 @@ def executar():
     jogos_validos_horario.sort(key=lambda x: x.get("datetime_real", agora_br))
 
     # --- PROCESSAMENTO DOS BILHETES ---
-    bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(jogos_validos_horario, qtd_alvo=qtd_alvo)
+    bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(jogos_validos_horario, qtd_alvo=qtd_alvo, estrategia=estrategia)
     
     # Repassa o cache contendo os dicionários de links limpos
     texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links)
