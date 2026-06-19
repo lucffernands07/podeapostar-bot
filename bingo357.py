@@ -197,9 +197,8 @@ def formatar_para_telegram(bilhetes, cache_dados):
                     # Remove completamente o padrão antigo e injeta o visual simplificado (X+)
                     mercado_limpo = re.sub(r'\(.*?\)', f'({valor_arredondado}+)', mercado_limpo)
                 
-                # Exibe a odd 1.50 para jogadores para não ficar em branco no print
-                odd_num = extrair_odd(odd_valor)
-                texto_final_linha = f"🔶 {mercado_limpo} | Odd: {odd_num:.2f}"
+                # O cálculo continua usando a odd normal (1.50 nos bastidores), mas removemos o texto do visual
+                texto_final_linha = f"🔶 {mercado_limpo}"
             else:
                 texto_final_linha = f"🔶 {mercado_limpo} | Odd: {odd_valor}"
 
@@ -240,4 +239,3 @@ def formatar_para_telegram(bilhetes, cache_dados):
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
-            
