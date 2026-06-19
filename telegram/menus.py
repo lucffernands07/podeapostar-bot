@@ -23,7 +23,7 @@ def extrair_markup_filtros(escolhas=None):
             [
                 {"text": "Bingo 3", "callback_data": "cb_bingo_3"},
                 {"text": "Bingo 5", "callback_data": "cb_bingo_5"},
-                {"text": "Bingo 7", "callback_data": "cb_bingo_7"}
+                {"text": "Bingo Elite", "callback_data": "cb_bingo_ELITE"}
             ],
             # --- SEÇÃO 2: HORÁRIOS ---
             [{"text": "✅ Escolha uma janela:", "callback_data": "ignore"}],
@@ -103,4 +103,3 @@ def atualizar_menu_inline(chat_id, message_id, texto, escolhas_atuais):
         requests.post(url, json=payload)
     except Exception as e:
         print(f"❌ Erro ao atualizar os botões dinâmicos: {e}")
-        
