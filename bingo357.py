@@ -44,9 +44,10 @@ def carregar_ranking_pro():
         except: return []
     return []
 
-def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5):
+def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"):
     """
-    Ordena e monta UM ÚNICO bilhete com a quantidade exata (qtd_alvo) solicitada.
+    Ordena e monta UM ÚNICO bilhete com a quantidade exata (qtd_alvo) solicitada,
+    respeitando a estratégia escolhida (ODDS, ACERTOS ou AMBAS/EQUILIBRADO).
     """
     bilhetes = []
     lista_jogos = dados_entrada
@@ -70,19 +71,49 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5):
         else:
             lista_filtrada.extend(mercados)
     
-    # 2. Ordenação pelas maiores odds
-    jogos_ordenados = sorted(lista_filtrada, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)
+    # 2. 📊 Aplicação das Estratégias de Ordenação
+    if estrategia == "ODDS":
+        jogos_ordenados = sorted(lista_filtrada, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)
+    elif estrategia == "ACERTOS":
+        def pegar_assertividade(x):
+            if "%" in x.get('mercado', ''):
+                return extrair_porcentagem(x.get('mercado', ''))
+            if "5/5j" in x.get('mercado', ''): return 100
+            if "4/5j" in x.get('mercado', ''): return 80
+            if "3/5j" in x.get('mercado', ''): return 60
+            if "3/3j" in x.get('mercado', ''): return 100
+            if "2/3j" in x.get('mercado', ''): return 66
+            return 50
+        jogos_ordenados = sorted(lista_filtrada, key=lambda x: pegar_assertividade(x), reverse=True)
+    else: # EQUILIBRADO / AMBAS
+        def calcular_peso_equilibrado(x):
+            odd = extrair_odd(x.get('odd', '1.0'))
+            if "%" in x.get('mercado', ''):
+                pct = extrair_porcentagem(x.get('mercado', '')) / 100.0
+            else:
+                pct = 1.0 if ("3/3j" in x.get('mercado', '') or "5/5j" in x.get('mercado', '')) else 0.66
+            return odd * pct
+        jogos_ordenados = sorted(lista_filtrada, key=lambda x: calcular_peso_equilibrado(x), reverse=True)
 
     # 3. Corte exato pela quantidade pedida (qtd_alvo)
     jogos_selecionados = jogos_ordenados[:qtd_alvo]
     jogos_selecionados.sort(key=lambda x: x.get('horario', '00:00'))
 
+    # 🚀 Nome dinâmico baseado na quantidade real que sobrou após os filtros
+    qtd_real = len(jogos_selecionados)
+    aviso_escassez = ""
+    if qtd_real < qtd_alvo:
+        aviso_escassez = f"\n⚠️ *Nota:* Foram solicitados {qtd_alvo} mercados, mas a janela selecionada só possuía {qtd_real} disponíveis."
+
     # 4. Retorna apenas um bloco (Bilhete Único)
-    bilhetes.append({
-        "id": "BINGO_CUSTOM", 
-        "nome": f"🔥 BINGO DE {qtd_alvo} JOGOS", 
-        "jogos": jogos_selecionados
-    })
+    if qtd_real > 0:
+        traducao_modo = "MAIORES ODDS" if estrategia == "ODDS" else "MAIS ACERTOS" if estrategia == "ACERTOS" else "EQUILIBRADO"
+        bilhetes.append({
+            "id": "BINGO_CUSTOM", 
+            "nome": f"🔥 BINGO DE {qtd_real} MERCADOS ({traducao_modo})", 
+            "jogos": jogos_selecionados,
+            "aviso_escassez": aviso_escassez
+        })
 
     return bilhetes
 
@@ -121,7 +152,10 @@ def formatar_para_telegram(bilhetes, cache_dados):
             mercado_limpo = j.get('mercado', '')
             if "Faltas Sofridas:" in mercado_limpo or "Chutes no Alvo:" in mercado_limpo:
                 mercado_limpo = re.sub(r'\(Frequência:.*\| (Méd:.*?)\)', r'(\1)', mercado_limpo)
-                texto_final_linha = f"🔶 {mercado_limpo}"
+                
+                # Exibe a odd 1.50 para jogadores para não ficar em branco no print
+                odd_num = extrair_odd(odd_valor)
+                texto_final_linha = f"🔶 {mercado_limpo} | Odd: {odd_num:.2f}"
             else:
                 texto_final_linha = f"🔶 {mercado_limpo} | Odd: {odd_valor}"
 
@@ -154,6 +188,12 @@ def formatar_para_telegram(bilhetes, cache_dados):
 
         corpo += "\n\n".join(lista_blocos_jogos)
         corpo += f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        
+        # Injeta a nota explicativa de redução se houver escassez
+        if b.get("aviso_escassez"):
+            corpo += b["aviso_escassez"]
+            
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
+                
