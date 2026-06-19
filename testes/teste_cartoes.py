@@ -17,6 +17,8 @@ def configurar_driver():
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--blink-settings=imagesEnabled=false")
     options.add_argument("--window-size=1920,1080")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     
@@ -24,31 +26,30 @@ def configurar_driver():
     driver.set_page_load_timeout(30)
     return driver
 
-def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
+def extrair_cartoes_do_jogo(driver, url_jogo, buscar_casa):
     """
-    Navega diretamente para a URL de resumo do jogo e extrai os cartões 
-    baseado na estrutura exata do DevTools (divs com wcl-statistics).
+    Abre o jogo em uma nova aba, extrai os cartões com base na estrutura 
+    do FlashScore e retorna o valor inteiro.
     """
+    # Abre uma nova aba para o jogo específico seguindo o padrão do seu main.py
+    driver.execute_script(f"window.open('{url_jogo}', '_blank');")
+    driver.switch_to.window(driver.window_handles[-1])
+    
+    val_cartoes = 0
     try:
-        url_resumo = url_jogo.split("?")[0].strip("/") + "/resumo/"
-        print(f"      🌍 [Navegação] Abrindo jogo: {url_resumo}")
+        url_resumo = driver.current_url.split("?")[0].strip("/") + "/resumo/estatisticas/"
         driver.get(url_resumo)
-        time.sleep(3) # Garante o carregamento dos elementos dinâmicos
+        time.sleep(2.5) # Tempo seguro para renderização do DOM dinâmico
         
-        # Encontra todas as linhas de estatísticas pelo data-testid do print
+        # Procura as linhas de estatísticas estruturais
         linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics']")
-        print(f"      🔍 [DOM] Encontradas {len(linhas)} linhas estruturais de estatísticas.")
         
         for linha in linhas:
             try:
-                # Localiza a categoria centralizada
                 cat_el = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")
                 texto_categoria = cat_el.text.upper().strip()
                 
                 if "CARTÕES AMARELOS" in texto_categoria or "CARTÃO AMARELO" in texto_categoria:
-                    print(f"      🟨 [Match] Linha de cartões localizada!")
-                    
-                    # Busca os elementos de valores (casa e fora)
                     valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")
                     
                     if len(valores) >= 2:
@@ -58,24 +59,29 @@ def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
                         val_casa = int(txt_casa) if txt_casa.isdigit() else 0
                         val_fora = int(txt_fora) if txt_fora.isdigit() else 0
                         
-                        print(f"      ✅ [Resultado Encontrado] Casa: {val_casa} | Visitante: {val_fora}")
-                        return val_casa if buscar_casa else val_fora
+                        val_cartoes = val_casa if buscar_casa else val_fora
+                        print(f"      ✅ [Match Cartões] Casa: {val_casa} | Visitante: {val_fora} (Alvo buscado: {'Casa' if buscar_casa else 'Fora'} -> {val_cartoes})")
+                        break
             except:
                 continue
-                
-        print("      ⚠️ [Aviso] Texto 'Cartões amarelos' não foi achado nas estatísticas deste jogo.")
     except Exception as e:
-        print(f"      ❌ [Erro] Falha ao ler a estrutura do DevTools: {e}")
-    return 0
+        print(f"      ⚠️ Falha ao ler estatísticas do jogo {url_jogo}: {e}")
+    finally:
+        # Fecha a aba atual e retorna o controle para a aba principal
+        driver.close()
+        driver.switch_to.window(driver.window_handles[0])
+        
+    return val_cartoes
     
 def testar_analise_cartoes():
     driver = configurar_driver()
     wait = WebDriverWait(driver, 15)
     
+    # URL base do confronto direto para o ambiente de testes
     url_inicial = "https://www.flashscore.com.br/jogo/futebol/brasil-I9l9aqLq/marrocos-IDKYO3R8/h2h/total/"
     
     print("\n" + "="*60)
-    print("🚀 [TESTE INDESTRUTÍVEL] ANÁLISE DE CARTÕES COMPLETA")
+    print("🚀 [TESTE ALINHADO AO MAIN] ANÁLISE DE CARTÕES")
     print("="*60 + "\n")
     
     historico_mandante = []
@@ -85,79 +91,62 @@ def testar_analise_cartoes():
         driver.get(url_inicial)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
-        # --- TABELA 1: MANDANTE ---
-        print("📦 Coletando dados da TABELA 1 (Últimos jogos do Mandante)...")
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        linhas_t1 = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
         
+        # --- TABELA 1: ÚLTIMOS JOGOS DO MANDANTE (idx 0) ---
+        print("📦 Coletando dados da TABELA 1 (Últimos jogos do Mandante)...")
+        linhas_t1 = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
         urls_mandante = []
+        
         for linha in linhas_t1:
-            # Captura o ID estrutural do jogo ou o link nativo do FlashScore se houver
             try:
-                # O FlashScore costuma colocar atributos ou links clicáveis internos com a classe ou tag 'a'
-                link_el = linha.find_element(By.TAG_NAME, "a") if linha.find_elements(By.TAG_NAME, "a") else linha
-                href = link_el.get_attribute("href") or link_el.get_attribute("data-url")
-                if href:
-                    urls_mandante.append(href)
-            except:
-                continue
-
-        # Se falhar em pegar a URL direta pelo href, montamos usando o ID padrão igual no main.py
-        if not urls_mandante:
-            for linha in linhas_t1:
                 id_attr = linha.get_attribute("id") or ""
                 if "_" in id_attr:
                     id_jogo = id_attr.split('_')[-1]
                     urls_mandante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/")
-
-        # Processa as URLs coletadas do Mandante
-        for idx, url in enumerate(urls_mandante[:3]):
-            cartoes = extrair_cartoes_do_jogo(driver, wait, url, buscar_casa=True)
-            historico_mandante.append(cartoes)
-            print(f"  ➔ Jogo {idx+1}: {cartoes} cartões")
-
-        # --- TABELA 2: VISITANTE ---
-        print("\n📦 Coletando dados da TABELA 2 (Últimos jogos do Visitante)...")
-        driver.get(url_inicial)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-        
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        linhas_t2 = secoes[1].find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
-        
-        urls_visitante = []
-        for linha in linhas_t2:
-            try:
-                link_el = linha.find_element(By.TAG_NAME, "a") if linha.find_elements(By.TAG_NAME, "a") else linha
-                href = link_el.get_attribute("href") or link_el.get_attribute("data-url")
-                if href:
-                    urls_visitante.append(href)
             except:
                 continue
 
-        if not urls_visitante:
-            for linha in linhas_t2:
+        for idx, url in enumerate(urls_mandante):
+            print(f"   🔎 Analisando jogo {idx+1} do Mandante...")
+            cartoes = extrair_cartoes_do_jogo(driver, url, buscar_casa=True)
+            historico_mandante.append(cartoes)
+            print(f"   ➔ Salvo: {cartoes} cartões")
+
+        # --- TABELA 2: ÚLTIMOS JOGOS DO VISITANTE (idx 1) ---
+        print("\n📦 Coletando dados da TABELA 2 (Últimos jogos do Visitante)...")
+        linhas_t2 = secoes[1].find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
+        urls_visitante = []
+        
+        for linha in linhas_t2:
+            try:
                 id_attr = linha.get_attribute("id") or ""
                 if "_" in id_attr:
                     id_jogo = id_attr.split('_')[-1]
                     urls_visitante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/")
+            except:
+                continue
 
-        # Processa as URLs coletadas do Visitante
-        for idx, url in enumerate(urls_visitante[:3]):
-            cartoes = extrair_cartoes_do_jogo(driver, wait, url, buscar_casa=False)
+        for idx, url in enumerate(urls_visitante):
+            print(f"   🔎 Analisando jogo {idx+1} do Visitante...")
+            cartoes = extrair_cartoes_do_jogo(driver, url, buscar_casa=False)
             historico_visitante.append(cartoes)
-            print(f"  ➔ Jogo {idx+1}: {cartoes} cartões")
+            print(f"   ➔ Salvo: {cartoes} cartões")
 
-        # --- EXIBIÇÃO DOS RESULTADOS ---
+        # --- EXIBIÇÃO CONSOLIDADA DOS RESULTADOS ---
         print("\n" + "="*60)
-        print("📊 RESULTADO DO CONFRONTO")
+        print("📊 RESULTADO DO CONFRONTO COMPILADO")
         print("="*60)
-        print(f"🟨 Lista Mandante: {historico_mandante}")
-        print(f"🟨 Lista Visitante: {historico_visitante}")
+        print(f"🟨 Lista Histórica Mandante (Casa): {historico_mandante}")
+        print(f"🟨 Lista Histórica Visitante (Fora): {historico_visitante}")
 
     except Exception as e:
-        print(f"\n❌ Erro no fluxo de execução: {e}")
+        print(f"\n❌ Erro crítico no fluxo de execução: {e}")
     finally:
-        driver.quit()
+        try:
+            driver.quit()
+        except:
+            pass
         print("\n🏁 Processo finalizado.")
 
 if __name__ == "__main__":
