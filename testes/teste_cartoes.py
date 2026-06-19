@@ -26,139 +26,120 @@ def configurar_driver():
 
 def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
     """
-    Navega diretamente para a URL de resumo do jogo e extrai os cartões 
-    baseado na estrutura exata do DevTools (divs com wcl-statistics).
+    Navega diretamente para a URL de resumo do jogo e extrai os cartões usando Regex,
+    printando o log detalhado de cada etapa no terminal.
     """
     try:
         url_resumo = url_jogo.split("?")[0].strip("/") + "/resumo/"
         print(f"      🌍 [Navegação] Abrindo jogo: {url_resumo}")
         driver.get(url_resumo)
-        time.sleep(3) # Garante o carregamento dos elementos dinâmicos
+        time.sleep(3) # Tempo para garantir a renderização no ambiente headless
         
-        # Encontra todas as linhas de estatísticas pelo data-testid do print
-        linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics']")
-        print(f"      🔍 [DOM] Encontradas {len(linhas)} linhas estruturais de estatísticas.")
+        # Procura linhas estruturais de estatísticas
+        linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid*='category'], [class*='category_']")
+        print(f"      🔍 [DOM] Encontradas {len(linhas)} linhas de categorias na página.")
         
         for linha in linhas:
-            try:
-                # Localiza a categoria centralizada
-                cat_el = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")
-                texto_categoria = cat_el.text.upper().strip()
+            html_interno = linha.get_attribute("innerHTML")
+            texto_puro = re.sub(r'<[^>]+>', ' ', html_interno).upper()
+            
+            if "CARTÕES AMARELOS" in texto_puro or "CARTÃO AMARELO" in texto_puro:
+                print(f"      🟨 [Match] Linha de cartões localizada!")
+                print(f"      📄 [HTML Bruto]: {html_interno.strip()}")
                 
-                if "CARTÕES AMARELOS" in texto_categoria or "CARTÃO AMARELO" in texto_categoria:
-                    print(f"      🟨 [Match] Linha de cartões localizada!")
-                    
-                    # Busca os elementos de valores (casa e fora)
-                    valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")
-                    
-                    if len(valores) >= 2:
-                        txt_casa = valores[0].text.strip()
-                        txt_fora = valores[1].text.strip()
-                        
-                        val_casa = int(txt_casa) if txt_casa.isdigit() else 0
-                        val_fora = int(txt_fora) if txt_fora.isdigit() else 0
-                        
-                        print(f"      ✅ [Resultado Encontrado] Casa: {val_casa} | Visitante: {val_fora}")
-                        return val_casa if buscar_casa else val_fora
-            except:
-                continue
+                # Procura números delimitados por tags ou texto limpo
+                numeros = re.findall(r'>\s*(\d+)\s*<', html_interno)
+                if not numeros:
+                    numeros = re.findall(r'\d+', texto_puro)
                 
-        print("      ⚠️ [Aviso] Texto 'Cartões amarelos' não foi achado nas estatísticas deste jogo.")
+                print(f"      📊 [Regex] Números identificados na linha: {numeros}")
+                
+                if len(numeros) >= 2:
+                    val_casa = int(numeros[0])
+                    val_fora = int(numeros[-1])
+                    print(f"      ✅ [Resultado] Casa: {val_casa} | Visitante: {val_fora}")
+                    return val_casa if buscar_casa else val_fora
+                    
+        print("      ⚠️ [Aviso] Nenhuma linha com o texto 'Cartões amarelos' foi encontrada neste jogo.")
     except Exception as e:
-        print(f"      ❌ [Erro] Falha ao ler a estrutura do DevTools: {e}")
+        print(f"      ❌ [Erro] Falha crítica ao processar a página: {e}")
     return 0
-    
+
 def testar_analise_cartoes():
     driver = configurar_driver()
     wait = WebDriverWait(driver, 15)
     
     url_inicial = "https://www.flashscore.com.br/jogo/futebol/brasil-I9l9aqLq/marrocos-IDKYO3R8/h2h/total/"
     
-    print("\n" + "="*60)
-    print("🚀 [TESTE INDESTRUTÍVEL] ANÁLISE DE CARTÕES COMPLETA")
-    print("="*60 + "\n")
+    print("\n" + "="*80)
+    print("🚀 [TESTE COM LOG DETALHADO] ANÁLISE DE CARTÕES - BRASIL X MARROCOS")
+    print("="*80 + "\n")
     
     historico_mandante = []
     historico_visitante = []
     
     try:
+        print(f"🔗 Acessando página H2H principal: {url_inicial}")
         driver.get(url_inicial)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
         # --- TABELA 1: MANDANTE ---
-        print("📦 Coletando dados da TABELA 1 (Últimos jogos do Mandante)...")
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        linhas_t1 = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
+        print("\n📦 [TABELA 1] Mapeando os últimos 3 jogos do Mandante...")
+        # Alvo explícito via nth-of-type(1) para evitar vazamento do DOM
+        secao_mandante = driver.find_element(By.CSS_SELECTOR, ".h2h__section:nth-of-type(1)")
+        linhas_t1 = secao_mandante.find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
         
         urls_mandante = []
         for linha in linhas_t1:
-            # Captura o ID estrutural do jogo ou o link nativo do FlashScore se houver
-            try:
-                # O FlashScore costuma colocar atributos ou links clicáveis internos com a classe ou tag 'a'
-                link_el = linha.find_element(By.TAG_NAME, "a") if linha.find_elements(By.TAG_NAME, "a") else linha
-                href = link_el.get_attribute("href") or link_el.get_attribute("data-url")
-                if href:
-                    urls_mandante.append(href)
-            except:
-                continue
-
-        # Se falhar em pegar a URL direta pelo href, montamos usando o ID padrão igual no main.py
-        if not urls_mandante:
-            for linha in linhas_t1:
-                id_attr = linha.get_attribute("id") or ""
-                if "_" in id_attr:
-                    id_jogo = id_attr.split('_')[-1]
-                    urls_mandante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/")
-
-        # Processa as URLs coletadas do Mandante
-        for idx, url in enumerate(urls_mandante[:3]):
+            id_attr = linha.get_attribute("id") or ""
+            if "_" in id_attr:
+                id_jogo = id_attr.split('_')[-1]
+                urls_mandante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/")
+        
+        print(f"📋 URLs geradas para o Mandante: {urls_mandante}")
+        
+        for idx, url in enumerate(urls_mandante):
+            print(f"\n   ➔ [Tabela 1] Iniciando Processamento do Jogo {idx+1}/{len(urls_mandante)}")
             cartoes = extrair_cartoes_do_jogo(driver, wait, url, buscar_casa=True)
             historico_mandante.append(cartoes)
-            print(f"  ➔ Jogo {idx+1}: {cartoes} cartões")
+            print(f"   🔹 Fim do Jogo {idx+1}. Registrado para a Casa: {cartoes} cartões")
 
         # --- TABELA 2: VISITANTE ---
-        print("\n📦 Coletando dados da TABELA 2 (Últimos jogos do Visitante)...")
+        print("\n📦 [TABELA 2] Mapeando os últimos 3 jogos do Visitante...")
         driver.get(url_inicial)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        linhas_t2 = secoes[1].find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
+        # Alvo explícito via nth-of-type(2) focado estritamente na segunda tabela (Visitante)
+        secao_visitante = driver.find_element(By.CSS_SELECTOR, ".h2h__section:nth-of-type(2)")
+        linhas_t2 = secao_visitante.find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
         
         urls_visitante = []
         for linha in linhas_t2:
-            try:
-                link_el = linha.find_element(By.TAG_NAME, "a") if linha.find_elements(By.TAG_NAME, "a") else linha
-                href = link_el.get_attribute("href") or link_el.get_attribute("data-url")
-                if href:
-                    urls_visitante.append(href)
-            except:
-                continue
+            id_attr = linha.get_attribute("id") or ""
+            if "_" in id_attr:
+                id_jogo = id_attr.split('_')[-1]
+                urls_visitante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/")
+                
+        print(f"📋 URLs geradas para o Visitante: {urls_visitante}")
 
-        if not urls_visitante:
-            for linha in linhas_t2:
-                id_attr = linha.get_attribute("id") or ""
-                if "_" in id_attr:
-                    id_jogo = id_attr.split('_')[-1]
-                    urls_visitante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/")
-
-        # Processa as URLs coletadas do Visitante
-        for idx, url in enumerate(urls_visitante[:3]):
+        for idx, url in enumerate(urls_visitante):
+            print(f"\n   ➔ [Tabela 2] Iniciando Processamento do Jogo {idx+1}/{len(urls_visitante)}")
             cartoes = extrair_cartoes_do_jogo(driver, wait, url, buscar_casa=False)
             historico_visitante.append(cartoes)
-            print(f"  ➔ Jogo {idx+1}: {cartoes} cartões")
+            print(f"   🔹 Fim do Jogo {idx+1}. Registrado para o Visitante: {cartoes} cartões")
 
-        # --- EXIBIÇÃO DOS RESULTADOS ---
-        print("\n" + "="*60)
-        print("📊 RESULTADO DO CONFRONTO")
-        print("="*60)
-        print(f"🟨 Lista Mandante: {historico_mandante}")
-        print(f"🟨 Lista Visitante: {historico_visitante}")
+        # --- EXIBIÇÃO DOS RESULTADOS CONSOLIDADOS ---
+        print("\n" + "="*80)
+        print("📊 RESUMO FINAL DOS ARRAYS DO CONFRONTO")
+        print("="*80)
+        print(f"🟨 Lista Final Mandante (Tabela 1): {historico_mandante}")
+        print(f"🟨 Lista Final Visitante (Tabela 2): {historico_visitante}")
 
     except Exception as e:
-        print(f"\n❌ Erro no fluxo de execução: {e}")
+        print(f"\n❌ Erro geral durante o fluxo: {e}")
     finally:
         driver.quit()
-        print("\n🏁 Processo finalizado.")
+        print("\n🏁 Processo de teste encerrado.")
 
 if __name__ == "__main__":
     testar_analise_cartoes()
