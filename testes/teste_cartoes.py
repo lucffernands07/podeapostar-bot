@@ -26,52 +26,47 @@ def configurar_driver():
 
 def extrair_cartoes_do_jogo(driver, wait, buscar_casa):
     """
-    Extrai os cartões amarelos diretamente da tela de estatísticas/destaques ativa,
-    varrendo todas as linhas de categorias disponíveis de forma resiliente.
+    Extrai os cartões amarelos usando Expressão Regular diretamente no innerHTML,
+    ignorando variações de elementos internos ou spans do FlashScore.
     """
     try:
-        # Garante que estamos na aba de resumo/estatísticas do jogo
+        # Força estar na aba resumo do jogo ativo
         url_jogo_base = driver.current_url.split("?")[0].strip("/")
         if "/resumo" not in driver.current_url:
             driver.get(url_jogo_base + "/resumo/")
             time.sleep(2)
 
-        # Espera carregar qualquer elemento de categoria ou cabeçalho de destaques
+        # Aguarda carregar qualquer linha de categoria
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[class*='category_'], [class*='stat__header']")))
         
-        # Estratégia de Varredura Ampla: Pegamos todas as linhas de categorias textuais da tela
+        # Pega todas as linhas de categorias textuais disponíveis
         linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid*='category'], [class*='category_']")
         
         for linha in linhas:
-            texto_linha = linha.text.upper()
+            # Captura o HTML inteiro dessa linha específica
+            html_interno = linha.get_attribute("innerHTML")
             
-            if "CARTÕES AMARELOS" in texto_linha or "CARTÃO AMARELO" in texto_linha:
-                # Extrai todos os elementos de texto internos da linha
-                elementos_internos = linha.find_elements(By.XPATH, ".//*")
-                textos_limpos = [el.text.strip() for el in elementos_internos if el.text.strip()]
+            # Remove tags HTML para testar se a linha é de cartões
+            texto_puro = re.sub(r'<[^>]+>', ' ', html_interno).upper()
+            
+            if "CARTÕES AMARELOS" in texto_puro or "CARTÃO AMARELO" in texto_puro:
+                # O FlashScore coloca os números dentro de tags como >2< ou >0<. 
+                # Esta regex captura todos os números isolados dentro do HTML daquela linha
+                numeros = re.findall(r'>\s*(\d+)\s*<', html_interno)
                 
-                # Exemplo esperado de textos_limpos do seu print: ['1', 'Cartões amarelos', '3']
-                # Remove duplicatas consecutivas mantendo a ordem para evitar ruído no DOM
-                textos_filtrados = []
-                for t in textos_limpos:
-                    if not textos_filtrados or t != textos_filtrados[-1]:
-                        textos_filtrados.append(t)
+                # Se não achar com os delimitadores de tag, busca números gerais na linha desmascarada
+                if not numeros:
+                    numeros = re.findall(r'\d+', texto_puro)
                 
-                # Procura a posição da palavra-chave na lista limpa
-                for idx, item in enumerate(textos_filtrados):
-                    if "CARTÃO" in item.upper() or "CARTÕES" in item.upper():
-                        try:
-                            txt_casa = textos_filtrados[idx - 1]
-                            txt_fora = textos_filtrados[idx + 1]
-                            
-                            val_casa = int(txt_casa) if txt_casa.isdigit() else 0
-                            val_fora = int(txt_fora) if txt_fora.isdigit() else 0
-                            
-                            return val_casa if buscar_casa else val_fora
-                        except:
-                            continue
+                # Uma linha de estatística válida precisa ter pelo menos 2 números (casa e visitante)
+                if len(numeros) >= 2:
+                    val_casa = int(numeros[0])
+                    val_fora = int(numeros[-1]) # Pega o último elemento para evitar ruídos de IDs/classes
+                    
+                    return val_casa if buscar_casa else val_fora
+                    
     except Exception as e:
-        print(f"     ⚠️ Erro ao buscar elemento de cartões: {e}")
+        print(f"     ⚠️ Erro crítico Regex ao ler cartões: {e}")
     return 0
 
 
