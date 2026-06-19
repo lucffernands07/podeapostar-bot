@@ -44,20 +44,16 @@ def carregar_ranking_pro():
         except: return []
     return []
 
-def montar_bilhetes_estrategicos(dados_entrada):
+def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5):
     """
-    Ordena a lista pelas maiores odds (com bypass de 1.50 para análise) e monta exatamente dois bilhetes:
-    - Bingo A: Os 3 mercados com as maiores odds da rodada.
-    - Bingo B: Os próximos 3 mercados com as maiores odds que sobraram.
-    Sem travas de confrontos duplicados, sem limites de mercados.
+    Ordena e monta UM ÚNICO bilhete com a quantidade exata (qtd_alvo) solicitada.
     """
     bilhetes = []
-    lista_jogos = dados_entrada.get('jogos', []) if isinstance(dados_entrada, dict) else dados_entrada
-    lista_jogos = [j for j in lista_jogos if isinstance(j, dict) and 'mercado' in j]
-
+    lista_jogos = dados_entrada
+    
     if not lista_jogos: return bilhetes
 
-    # --- FILTRO: DUPLA CHANCE > VITÓRIA (MESMO JOGO) ---
+    # 1. Filtro de duplicidade (Dupla Chance vs Vitória)
     jogos_agrupados = {}
     for jogo in lista_jogos:
         chave = f"{jogo['time_casa']}x{jogo['time_fora']}".lower().strip()
@@ -74,23 +70,19 @@ def montar_bilhetes_estrategicos(dados_entrada):
         else:
             lista_filtrada.extend(mercados)
     
-    lista_jogos = lista_filtrada
+    # 2. Ordenação pelas maiores odds
+    jogos_ordenados = sorted(lista_filtrada, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)
 
-    # 1. Ordena todos os jogos unificados pelas maiores odds (do maior para o menor)
-    jogos_ordenados = sorted(lista_jogos, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)
+    # 3. Corte exato pela quantidade pedida (qtd_alvo)
+    jogos_selecionados = jogos_ordenados[:qtd_alvo]
+    jogos_selecionados.sort(key=lambda x: x.get('horario', '00:00'))
 
-    # 2. Distribui em blocos de 3 estritamente sequenciais (sem restrição de repetição de confronto)
-    bilhete_1 = jogos_ordenados[0:3]
-    bilhete_2 = jogos_ordenados[3:6]
-
-    # --- MONTAGEM DOS DOIS BILHETES ---
-    if len(bilhete_1) >= 3:
-        bilhete_1.sort(key=lambda x: x.get('horario', '00:00'))
-        bilhetes.append({"id": "BINGO_A", "nome": "🔥 BINGO ALTO VALOR (A)", "jogos": bilhete_1})
-
-    if len(bilhete_2) >= 3:
-        bilhete_2.sort(key=lambda x: x.get('horario', '00:00'))
-        bilhetes.append({"id": "BINGO_B", "nome": "💰 BINGO ALTO VALOR (B)", "jogos": bilhete_2})
+    # 4. Retorna apenas um bloco (Bilhete Único)
+    bilhetes.append({
+        "id": "BINGO_CUSTOM", 
+        "nome": f"🔥 BINGO DE {qtd_alvo} JOGOS", 
+        "jogos": jogos_selecionados
+    })
 
     return bilhetes
 
