@@ -46,10 +46,10 @@ def carregar_ranking_pro():
 
 def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS", modo_elite=False):
     """
-    Ordena e monta UM ÚNICO bilhete com a quantidade exata (qtd_alvo) solicitada,
-    respeitando a estratégia escolhida (ODDS, ACERTOS ou AMBAS/EQUILIBRADO).
+    Ordena e monta UM ÚNICO bilhete respeitando a estratégia escolhida.
     
-    🚀 MODO ELITE: Agrupa e prioriza partidas que acumularam o maior número de mercados aprovados.
+    🚀 MODO ELITE: Filtra e traz os 3 JOGOS com maior volume/densidade de mercados,
+    retornando TODOS os mercados aprovados desses jogos (sem limite de linhas).
     """
     bilhetes = []
     lista_jogos = dados_entrada
@@ -73,22 +73,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
         else:
             lista_filtrada.extend(mercados)
             
-    # 🚀 INTEGRAÇÃO DO BINGO ELITE (Agrupamento por volume de mercados por jogo)
-    if modo_elite:
-        # Conta quantos mercados cada confronto possui na lista filtrada
-        contagem_confrontos = {}
-        for m in lista_filtrada:
-            chave_jogo = f"{m['time_casa']}x{m['time_fora']}".lower().strip()
-            contagem_confrontos[chave_jogo] = contagem_confrontos.get(chave_jogo, 0) + 1
-        
-        # Ordena a lista de mercados baseando-se no volume de opções daquele jogo (do maior para o menor)
-        lista_filtrada = sorted(
-            lista_filtrada, 
-            key=lambda x: contagem_confrontos.get(f"{x['time_casa']}x{x['time_fora']}".lower().strip(), 0), 
-            reverse=True
-        )
-    
-    # 2. 📊 Aplicação das Estratégias de Ordenação (Respeita a ordem anterior caso as notas sejam iguais)
+    # 2. 📊 Aplicação das Estratégias de Ordenação Tradicional
     if estrategia == "ODDS":
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)
     elif estrategia == "ACERTOS":
@@ -112,30 +97,52 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             return odd * pct
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: calcular_peso_equilibrado(x), reverse=True)
 
-    # Se for Elite, garante a re-ordenação final para trazer os agrupados juntos para o topo
+    # 3. 🚀 CORTE POR JOGO (SE FOR ELITE) VS CORTE POR MERCADO (TRADICIONAL)
     if modo_elite:
-        # Mantém a ordenação estratégica interna, mas garante que jogos com mais mercados fiquem colados no topo
-        jogos_ordenados = sorted(
-            jogos_ordenados, 
-            key=lambda x: contagem_confrontos.get(f"{x['time_casa']}x{x['time_fora']}".lower().strip(), 0), 
+        # Conta o volume total de mercados que CADA jogo possui na lista final filtrada
+        contagem_confrontos = {}
+        for m in jogos_ordenados:
+            chave_jogo = f"{m['time_casa']}x{m['time_fora']}".lower().strip()
+            contagem_confrontos[chave_jogo] = contagem_confrontos.get(chave_jogo, 0) + 1
+        
+        # Ordena as chaves dos confrontos estritamente pelo maior volume de mercados gerados
+        jogos_mais_densos = sorted(
+            contagem_confrontos.keys(),
+            key=lambda k: contagem_confrontos[k],
             reverse=True
         )
+        
+        # Pega no máximo os 3 confrontos que mais possuem mercados ativos
+        top_3_jogos = jogos_mais_densos[:3]
+        
+        # Captura TODOS os mercados de forma irrestrita pertencentes apenas a esses 3 confrontos tops
+        jogos_selecionados = [
+            m for m in jogos_ordenados 
+            if f"{m['time_casa']}x{m['time_fora']}".lower().strip() in top_3_jogos
+        ]
+        
+        qtd_confrontos_real = len(top_3_jogos)
+        aviso_escassez = ""
+        if qtd_confrontos_real < 3:
+            aviso_escassez = f"\n⚠️ *Nota:* Foram solicitados 3 jogos elite, mas a janela só possuía {qtd_confrontos_real} disponíveis."
+            
+        nome_bilhete = f"✨ BINGO ELITE DE {qtd_confrontos_real} JOGOS ({estrategia})"
+    else:
+        # Lógica padrão antiga: Corta estritamente por limite de mercados fixos (linhas)
+        jogos_selecionados = jogos_ordenados[:qtd_alvo]
+        qtd_real = len(jogos_selecionados)
+        aviso_escassez = ""
+        if qtd_real < qtd_alvo:
+            aviso_escassez = f"\n⚠️ *Nota:* Foram solicitados {qtd_alvo} mercados, mas a janela só possuía {qtd_real} disponíveis."
+            
+        traducao_modo = "MAIORES ODDS" if estrategia == "ODDS" else "MAIS ACERTOS" if estrategia == "ACERTOS" else "EQUILIBRADO"
+        nome_bilhete = f"🔥 BINGO DE {qtd_real} MERCADOS ({traducao_modo})"
 
-    # 3. Corte exato pela quantidade pedida (qtd_alvo)
-    jogos_selecionados = jogos_ordenados[:qtd_alvo]
+    # Ordena cronologicamente os jogos selecionados para exibição limpa no Telegram
     jogos_selecionados.sort(key=lambda x: x.get('horario', '00:00'))
 
-    # 🚀 Nome dinâmico baseado na quantidade real que sobrou após os filtros
-    qtd_real = len(jogos_selecionados)
-    aviso_escassez = ""
-    if qtd_real < qtd_alvo:
-        aviso_escassez = f"\n⚠️ *Nota:* Foram solicitados {qtd_alvo} mercados, mas a janela selecionada só possuía {qtd_real} disponíveis."
-
-    # 4. Retorna apenas um bloco (Bilhete Único)
-    if qtd_real > 0:
-        traducao_modo = "MAIORES ODDS" if estrategia == "ODDS" else "MAIS ACERTOS" if estrategia == "ACERTOS" else "EQUILIBRADO"
-        nome_bilhete = f"✨ BINGO ELITE DE {qtd_real} MERCADOS ({traducao_modo})" if modo_elite else f"🔥 BINGO DE {qtd_real} MERCADOS ({traducao_modo})"
-        
+    # 4. Retorna o Bilhete Único estruturado
+    if jogos_selecionados:
         bilhetes.append({
             "id": "BINGO_CUSTOM", 
             "nome": nome_bilhete, 
