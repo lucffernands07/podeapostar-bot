@@ -1,11 +1,44 @@
 # mercados/jogadores.py
 
-def verificar_destaques_jogadores(historico_chutes, historico_faltas, quantidade_jogos=3):
+# 🟢 LISTA BRANCA: Apenas ligas de elite que comprovadamente abrem mercados de jogadores na Betano
+LIGAS_ELITE_JOGADORES = [
+    "Brasileirão Série A",
+    "Copa do Brasil",
+    "Libertadores",
+    "Sul-Americana",
+    "Brasileirão Série B",           # Costuma abrir em rodadas cheias
+    "Argentina - Liga Profesional",
+    "Mundo - Copa do Mundo",
+    "Champions League",
+    "Inglaterra - Premier League",
+    "Espanha - LaLiga",
+    "Alemanha - Bundesliga",
+    "Italia - Serie A",
+    "França - Ligue 1",
+    "Europa - League",
+    "Inglaterra - FA Cup",
+    "Espanha - Copa del Rey",
+    "Alemanha - DFB Pokal",
+    "EUA - MLS",
+    "Arábia Saudita - Primeira Liga",
+    "Portugal - Primeira Liga",
+    "Países Baixos - Eredivisie",
+    "Bélgica - Pro League",
+    "Turquia - Super Lig",
+    "México - Liga MX",
+    "Mundo - Amistoso Internacional" # Amistosos de seleções principais abrem mercado
+]
+
+def verificar_destaques_jogadores(historico_chutes, historico_faltas, quantidade_jogos=3, nome_liga=""):
     """
     Processa os históricos brutos extraídos pelo Selenium.
-    Aprova o jogador se ele tiver pelo menos 1 ação em pelo menos 2 dos 3 jogos,
-    OU se a média dele for maior ou igual a 1.0.
+    🛡️ ADICIONADA TRAVA DE LISTA BRANCA PARA LIGAS DE ELITE.
     """
+    # 🚀 TRAVA: Se a liga atual NÃO estiver na lista branca, barra na hora
+    if nome_liga and nome_liga not in LIGAS_ELITE_JOGADORES:
+        print(f"⏩ [TRAVA] Pulando análise de jogadores para a liga '{nome_liga}' (Não é considerada liga Elite para jogadores).")
+        return []
+
     mercados_aprovados = []
     
     # 📈 REGRA: CHUTES NO ALVO
@@ -14,19 +47,14 @@ def verificar_destaques_jogadores(historico_chutes, historico_faltas, quantidade
         while len(lista_valores) < quantidade_jogos:
             lista_valores.append(0)
             
-        # Calcula a média e conta em quantos jogos ele fez pelo menos 1 chute
         media = sum(lista_valores) / quantidade_jogos
         jogos_com_sucesso = sum(1 for qtd in lista_valores if qtd >= 1)
-        
-        # Guarda o maior peso para o critério de desempate no max()
         dados_chutes[jogador] = {"media": media, "jogos_com_sucesso": jogos_com_sucesso}
 
     if dados_chutes:
-        # Define o melhor com base na consistência de jogos e depois na média
         melhor_chutador = max(dados_chutes, key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]))
         res_c = dados_chutes[melhor_chutador]
         
-        # VALIDAÇÃO: Passa se teve sucesso em 2 de 3 jogos OU se a média geral for >= 1.0
         if res_c["jogos_com_sucesso"] >= 2 or res_c["media"] >= 1.0:
             mercados_aprovados.append({
                 "texto": f"Chutes no Alvo: {melhor_chutador} (Frequência: {res_c['jogos_com_sucesso']}/{quantidade_jogos}j | Méd: {res_c['media']:.1f})",
@@ -41,14 +69,12 @@ def verificar_destaques_jogadores(historico_chutes, historico_faltas, quantidade
             
         media = sum(lista_valores) / quantidade_jogos
         jogos_com_sucesso = sum(1 for qtd in lista_valores if qtd >= 1)
-        
         dados_faltas[jogador] = {"media": media, "jogos_com_sucesso": jogos_com_sucesso}
 
     if dados_faltas:
         mais_cacado = max(dados_faltas, key=lambda k: (dados_faltas[k]["jogos_com_sucesso"], dados_faltas[k]["media"]))
         res_f = dados_faltas[mais_cacado]
         
-        # VALIDAÇÃO: Passa se teve sucesso em 2 de 3 jogos OU se a média geral for >= 1.0
         if res_f["jogos_com_sucesso"] >= 2 or res_f["media"] >= 1.0:
             mercados_aprovados.append({
                 "texto": f"Faltas Sofridas: {mais_cacado} (Frequência: {res_f['jogos_com_sucesso']}/{quantidade_jogos}j | Méd: {res_f['media']:.1f})",
@@ -56,3 +82,4 @@ def verificar_destaques_jogadores(historico_chutes, historico_faltas, quantidade
             })
 
     return mercados_aprovados
+            
