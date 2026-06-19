@@ -166,29 +166,41 @@ def executar():
     # Repassa o cache contendo os dicionários de links limpos
     texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links)
 
-    # 🛠️ --- TRECHO ALTERADO DAQUI EM DIANTE ---
+    # --- ENVIO DOS RESULTADOS OU AVISO DE ERRO ---
+    menu_botoes = menus.menu_principal() if hasattr(menus, 'menu_principal') else None
+
     if texto_final:
         try:
-            requests.post(url_msg, json={
+            payload = {
                 "chat_id": chat_id,
                 "text": texto_final,
                 "parse_mode": "Markdown",
                 "disable_web_page_preview": False
-            })
-            print("🚀 Bilhetes do Bingo enviados com sucesso para o Telegram!")
+            }
+            # Se o menu de botões existir, anexa ele à mensagem do bilhete
+            if menu_botoes:
+                payload["reply_markup"] = menu_botoes
+
+            requests.post(url_msg, json=payload)
+            print("🚀 Bilhetes do Bingo enviados com sucesso com o Menu anexado!")
         except Exception as e:
             print(f"⚠️ Erro ao enviar os bilhetes formatados para o Telegram: {e}")
     else:
-        # Envia o aviso customizado diretamente para o chat do Telegram do usuário
+        # Aviso personalizado quando não encontra jogos no listão
         msg_erro = f"{config['aviso']}\n\n⚠️😢 Não foi encontrado bilhete com esse filtro. Tente outra janela, bingo ou tente amanhã."
         try:
-            requests.post(url_msg, json={
+            payload = {
                 "chat_id": chat_id,
                 "text": msg_erro,
                 "parse_mode": "Markdown",
                 "disable_web_page_preview": True
-            })
-            print("⚠️ Aviso de 'Não foi encontrado bilhete' enviado ao Telegram.")
+            }
+            # Se o menu de botões existir, anexa ele também no aviso de erro
+            if menu_botoes:
+                payload["reply_markup"] = menu_botoes
+
+            requests.post(url_msg, json=payload)
+            print("⚠️ Aviso de 'Não foi encontrado bilhete' enviado com o Menu anexado!")
         except Exception as e:
             print(f"⚠️ Erro ao enviar aviso de erro para o Telegram: {e}")
 
