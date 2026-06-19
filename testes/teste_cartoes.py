@@ -26,43 +26,52 @@ def configurar_driver():
 
 def extrair_cartoes_do_jogo(driver, wait, buscar_casa):
     """
-    Navega para a aba de estatísticas totais e extrai os cartões 
-    garantindo a captura dos elementos internos da categoria.
+    Extrai os cartões amarelos diretamente da tela de estatísticas/destaques ativa,
+    varrendo todas as linhas de categorias disponíveis de forma resiliente.
     """
     try:
-        url_estatisticas = driver.current_url.split("?")[0].strip("/") + "/resumo/estatisticas/total/"
-        driver.get(url_estatisticas)
-        
-        # Espera carregar a categoria principal
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")))
-        time.sleep(2)
-        
-        # Pega todas as linhas de categorias da página
-        linhas_estatisticas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")
-        
-        for linha in linhas_estatisticas:
-            # Buscamos todos os spans (ou elementos de texto) contidos nessa linha de categoria
-            elementos_texto = linha.find_elements(By.XPATH, ".//span")
-            
-            # Se não achar por span, tenta buscar todas as tags filhas diretas
-            if len(elementos_texto) < 3:
-                elementos_texto = linha.find_elements(By.XPATH, "./*")
+        # Garante que estamos na aba de resumo/estatísticas do jogo
+        url_jogo_base = driver.current_url.split("?")[0].strip("/")
+        if "/resumo" not in driver.current_url:
+            driver.get(url_jogo_base + "/resumo/")
+            time.sleep(2)
 
-            # Tratando a estrutura padrão do FlashScore de 3 colunas: [Valor_Casa, Nome_Categoria, Valor_Fora]
-            if len(elementos_texto) >= 3:
-                texto_categoria = elementos_texto[1].text.upper()  # O do meio sempre é o nome
+        # Espera carregar qualquer elemento de categoria ou cabeçalho de destaques
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[class*='category_'], [class*='stat__header']")))
+        
+        # Estratégia de Varredura Ampla: Pegamos todas as linhas de categorias textuais da tela
+        linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid*='category'], [class*='category_']")
+        
+        for linha in linhas:
+            texto_linha = linha.text.upper()
+            
+            if "CARTÕES AMARELOS" in texto_linha or "CARTÃO AMARELO" in texto_linha:
+                # Extrai todos os elementos de texto internos da linha
+                elementos_internos = linha.find_elements(By.XPATH, ".//*")
+                textos_limpos = [el.text.strip() for el in elementos_internos if el.text.strip()]
                 
-                if "CARTÕES AMARELOS" in texto_categoria or "CARTÃO AMARELO" in texto_categoria:
-                    txt_casa = elementos_texto[0].text.strip()
-                    txt_fora = elementos_texto[2].text.strip()
-                    
-                    # Garante que são números válidos para não quebrar no int() caso venha string vazia ou hífen
-                    val_casa = int(txt_casa) if txt_casa.isdigit() else 0
-                    val_fora = int(txt_fora) if txt_fora.isdigit() else 0
-                    
-                    return val_casa if buscar_casa else val_fora
+                # Exemplo esperado de textos_limpos do seu print: ['1', 'Cartões amarelos', '3']
+                # Remove duplicatas consecutivas mantendo a ordem para evitar ruído no DOM
+                textos_filtrados = []
+                for t in textos_limpos:
+                    if not textos_filtrados or t != textos_filtrados[-1]:
+                        textos_filtrados.append(t)
+                
+                # Procura a posição da palavra-chave na lista limpa
+                for idx, item in enumerate(textos_filtrados):
+                    if "CARTÃO" in item.upper() or "CARTÕES" in item.upper():
+                        try:
+                            txt_casa = textos_filtrados[idx - 1]
+                            txt_fora = textos_filtrados[idx + 1]
+                            
+                            val_casa = int(txt_casa) if txt_casa.isdigit() else 0
+                            val_fora = int(txt_fora) if txt_fora.isdigit() else 0
+                            
+                            return val_casa if buscar_casa else val_fora
+                        except:
+                            continue
     except Exception as e:
-        print(f"     ⚠️ Erro ao ler cartões nesta URL: {e}")
+        print(f"     ⚠️ Erro ao buscar elemento de cartões: {e}")
     return 0
 
 
