@@ -27,13 +27,13 @@ def configurar_driver():
 def extrair_cartoes_do_jogo(driver, wait, buscar_casa):
     """
     Navega para a aba de estatísticas totais e extrai os cartões 
-    com base na estrutura exata do HTML fornecido.
+    garantindo a captura dos elementos internos da categoria.
     """
     try:
         url_estatisticas = driver.current_url.split("?")[0].strip("/") + "/resumo/estatisticas/total/"
         driver.get(url_estatisticas)
         
-        # Espera carregar qualquer linha de estatística
+        # Espera carregar a categoria principal
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")))
         time.sleep(2)
         
@@ -41,21 +41,30 @@ def extrair_cartoes_do_jogo(driver, wait, buscar_casa):
         linhas_estatisticas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")
         
         for linha in linhas_estatisticas:
-            # Buscamos todos os spans dentro desta linha específica
-            spans = linha.find_elements(By.CSS_SELECTOR, "span[data-testid='wcl-scores-simple-text-01']")
+            # Buscamos todos os spans (ou elementos de texto) contidos nessa linha de categoria
+            elementos_texto = linha.find_elements(By.XPATH, ".//span")
             
-            # Uma linha válida de estatística do FlashScore costuma ter 3 spans: [Valor Casa, Nome Categoria, Valor Fora]
-            if len(spans) >= 3:
-                texto_categoria = spans[1].text.upper()  # O do meio é o nome (ex: "CARTÕES AMARELOS")
+            # Se não achar por span, tenta buscar todas as tags filhas diretas
+            if len(elementos_texto) < 3:
+                elementos_texto = linha.find_elements(By.XPATH, "./*")
+
+            # Tratando a estrutura padrão do FlashScore de 3 colunas: [Valor_Casa, Nome_Categoria, Valor_Fora]
+            if len(elementos_texto) >= 3:
+                texto_categoria = elementos_texto[1].text.upper()  # O do meio sempre é o nome
                 
                 if "CARTÕES AMARELOS" in texto_categoria or "CARTÃO AMARELO" in texto_categoria:
-                    val_casa = int(spans[0].text.strip()) # Primeiro span (Casa)
-                    val_fora = int(spans[2].text.strip()) # Terceiro span (Visitante)
+                    txt_casa = elementos_texto[0].text.strip()
+                    txt_fora = elementos_texto[2].text.strip()
+                    
+                    # Garante que são números válidos para não quebrar no int() caso venha string vazia ou hífen
+                    val_casa = int(txt_casa) if txt_casa.isdigit() else 0
+                    val_fora = int(txt_fora) if txt_fora.isdigit() else 0
                     
                     return val_casa if buscar_casa else val_fora
     except Exception as e:
         print(f"     ⚠️ Erro ao ler cartões nesta URL: {e}")
     return 0
+
 
 def testar_analise_cartoes():
     driver = configurar_driver()
