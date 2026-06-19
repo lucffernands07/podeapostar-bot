@@ -26,7 +26,7 @@ def configurar_driver():
 
 def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
     """
-    Navega diretamente para a URL de resumo do jogo e extrai os cartões 
+    Navega diretamente para a URL de estatísticas totais do jogo e extrai os cartões 
     baseado na estrutura exata do DevTools (divs com wcl-statistics).
     """
     try:
@@ -34,7 +34,7 @@ def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
         print(f"      🌍 [Navegação] Abrindo jogo: {url_jogo}")
         driver.get(url_jogo)
         
-        # Espera os valores carregarem na tela antes de contar as linhas
+        # Garante o carregamento dos elementos de valor conforme o DevTools antes de contar as linhas
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")))
         time.sleep(2) 
         
@@ -52,7 +52,7 @@ def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
                     print(f"      🟨 [Match] Linha de cartões localizada!")
                     
                     # Busca os elementos de valores (casa e fora)
-                    valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")
+                    valores = line.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")
                     
                     if len(valores) >= 2:
                         txt_casa = valores[0].text.strip()
@@ -113,13 +113,11 @@ def testar_analise_cartoes():
         urls_mandante = []
         for linha in linhas_t1:
             try:
-                # Extrai o ID do jogo através do atributo ID da linha (ex: g_1_I9l9aqLq) ou do link interno
                 id_attr = linha.get_attribute("id") or ""
                 if not id_attr:
                     link_el = linha.find_element(By.TAG_NAME, "a")
                     id_attr = link_el.get_attribute("id") or link_el.get_attribute("href") or ""
                 
-                # Captura o token ID final isolado por regex ou pelo caractere '_'
                 match = re.search(r'g_1_([A-Za-z0-9]+)', id_attr) or re.search(r'/jogo/([^/]+)', id_attr)
                 id_jogo = match.group(1) if match else (id_attr.split('_')[-1] if "_" in id_attr else None)
                 
@@ -127,6 +125,9 @@ def testar_analise_cartoes():
                     urls_mandante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/resumo/estatisticas/total/")
             except:
                 continue
+
+        # LOG DAS URLS DA TABELA 1
+        print(f"📋 URLs geradas para o Mandante: {urls_mandante}")
 
         # Processa as URLs coletadas do Mandante
         for idx, url in enumerate(urls_mandante[:3]):
@@ -169,6 +170,9 @@ def testar_analise_cartoes():
                     urls_visitante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/resumo/estatisticas/total/")
             except:
                 continue
+
+        # LOG DAS URLS DA TABELA 2
+        print(f"📋 URLs geradas para o Visitante: {urls_visitante}")
 
         # Processa as URLs coletadas do Visitante
         for idx, url in enumerate(urls_visitante[:3]):
