@@ -196,8 +196,7 @@ def executar():
                 "disable_web_page_preview": True
             }
             # Se o menu de botões existir, anexa ele também no aviso de erro
-            if menu_botoes:
-                payload["reply_markup"] = menu_botoes
+            if menu_botoes = menus.extrair_markup_filtros() if hasattr(menus, 'extrair_markup_filtros') else None
 
             requests.post(url_msg, json=payload)
             print("⚠️ Aviso de 'Não foi encontrado bilhete' enviado com o Menu anexado!")
