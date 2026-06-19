@@ -15,7 +15,7 @@ def processar_comando_direto(tipo_bruto):
     Lê a string unificada do novo Worker ("BINGO:3|HORA:3H|TIPO:ACERTOS")
     e separa os 3 filtros reais para montar o bilhete exato.
     """
-    config = {"bingo": 5, "horario": "DIA", "bilhete": "ACERTOS", "aviso": ""}
+    config = {"bingo": 5, "horario": "DIA", "bilhete": "ACERTOS", "aviso": "", "modo_elite": False}
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
     if "BINGO:" in tipo_limpo and "HORA:" in tipo_limpo:
@@ -23,7 +23,12 @@ def processar_comando_direto(tipo_bruto):
             partes = tipo_limpo.split("|")
             for parte in partes:
                 if parte.startswith("BINGO:"):
-                    config["bingo"] = int(parte.split(":")[1])
+                    valor_b = parte.split(":")[1]
+                    if valor_b.upper() == "ELITE":
+                        config["bingo"] = 3
+                        config["modo_elite"] = True
+                    else:
+                        config["bingo"] = int(valor_b)
                 elif parte.startswith("HORA:"):
                     config["horario"] = parte.split(":")[1]
                 elif parte.startswith("TIPO:"):
@@ -36,8 +41,9 @@ def processar_comando_direto(tipo_bruto):
             elif config['bilhete'] == "AMBAS":
                 txt_modo = "Equilibrado"
 
+            txt_bingo = "✨ Elite" if config["modo_elite"] else config["bingo"]
             config["aviso"] = (
-                f"🎲 Bingo: *{config['bingo']}*\n"
+                f"🎲 Bingo: *{txt_bingo}*\n"
                 f"⏱️ Janela: *{txt_janela}*\n"
                 f"📊 Modo: *{txt_modo}*"
             )
@@ -46,8 +52,14 @@ def processar_comando_direto(tipo_bruto):
             print(f"⚠️ Erro ao processar string composta ({e}), usando fallbacks...")
 
     if "cb_bingo_" in tipo_limpo:
-        config["bingo"] = int(tipo_limpo.split("_")[-1])
-        config["aviso"] = f"🎲 Você escolheu: *Bingo {config['bingo']}*"
+        valor_b = tipo_limpo.split("_")[-1]
+        if valor_b.upper() == "ELITE":
+            config["bingo"] = 3
+            config["modo_elite"] = True
+            config["aviso"] = f"🎲 Você escolheu: *✨ Bingo Elite (Multi-Mercados)*"
+        else:
+            config["bingo"] = int(valor_b)
+            config["aviso"] = f"🎲 Você escolheu: *Bingo {config['bingo']}*"
     elif "cb_hora_" in tipo_limpo:
         config["horario"] = tipo_limpo.split("_")[-1]
         txt_h = config["horario"] if config["horario"] != "DIA" else "Do Dia"
@@ -60,14 +72,20 @@ def processar_comando_direto(tipo_bruto):
         config["aviso"] = f"📊 Você escolheu a estratégia: *{txt_m}*"
     else:
         if "3" in tipo_limpo: config["bingo"] = 3
-        if "7" in tipo_limpo or "PRO" in tipo_limpo: config["bingo"] = 7
+        elif "7" in tipo_limpo or "PRO" in tipo_limpo: config["bingo"] = 7
+        elif "ELITE" in tipo_limpo.upper():
+            config["bingo"] = 3
+            config["modo_elite"] = True
+            
         if "ODDS" in tipo_limpo: config["bilhete"] = "ODDS"
-        config["aviso"] = f"🚀 Processando comando recebido: *{tipo_limpo}*"
+        
+        txt_bingo = "✨ Elite" if config["modo_elite"] else config["bingo"]
+        config["aviso"] = f"🚀 Processando comando recebido: *{txt_bingo}*"
 
     return config
 
 
-def executar():
+def ejecutar():
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
     tipo_bruto = os.getenv('TIPO_BINGO', '')
@@ -161,13 +179,18 @@ def executar():
     jogos_validos_horario.sort(key=lambda x: x.get("datetime_real", agora_br))
 
     # --- PROCESSAMENTO DOS BILHETES ---
-    bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(jogos_validos_horario, qtd_alvo=qtd_alvo, estrategia=estrategia)
+    # 🚀 Injetado o parâmetro modo_elite que informa se deve priorizar jogos com alta densidade de mercados
+    bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(
+        jogos_validos_horario, 
+        qtd_alvo=qtd_alvo, 
+        estrategia=estrategia,
+        modo_elite=config.get("modo_elite", False)
+    )
     
     # Repassa o cache contendo os dicionários de links limpos
     texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links)
 
     # --- ENVIO DOS RESULTADOS OU AVISO DE ERRO ---
-    # 🟢 Aqui chamamos a função correta do menus.py para ser usada em qualquer um dos casos
     menu_botoes = menus.extrair_markup_filtros() if hasattr(menus, 'extrair_markup_filtros') else None
 
     if texto_final:
@@ -181,7 +204,7 @@ def executar():
             if menu_botoes:
                 payload["reply_markup"] = menu_botoes
 
-            requests.post(url_msg, json=payload)
+            requests.post(url_msg, json={**payload})
             print("🚀 Bilhetes do Bingo enviados com sucesso com o Menu anexado!")
         except Exception as e:
             print(f"⚠️ Erro ao enviar os bilhetes formatados para o Telegram: {e}")
@@ -205,4 +228,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-        
+            
