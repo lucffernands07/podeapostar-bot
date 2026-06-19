@@ -19,13 +19,8 @@ LIGAS_ELITE_JOGADORES = [
     "Inglaterra - FA Cup",
     "Espanha - Copa del Rey",
     "Alemanha - DFB Pokal",
-    "EUA - MLS",
-    "Arábia Saudita - Primeira Liga",
     "Portugal - Primeira Liga",
     "Países Baixos - Eredivisie",
-    "Bélgica - Pro League",
-    "Turquia - Super Lig",
-    "México - Liga MX",
     "Mundo - Amistoso Internacional" # Amistosos de seleções principais abrem mercado
 ]
 
