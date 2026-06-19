@@ -26,33 +26,48 @@ def configurar_driver():
 
 def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
     """
-    Navega diretamente para a URL de resumo do jogo e extrai os cartões usando Regex.
+    Navega diretamente para a URL de resumo do jogo e extrai os cartões 
+    baseado na estrutura exata do DevTools (divs com wcl-statistics).
     """
     try:
         url_resumo = url_jogo.split("?")[0].strip("/") + "/resumo/"
+        print(f"      🌍 [Navegação] Abrindo jogo: {url_resumo}")
         driver.get(url_resumo)
-        time.sleep(3) # Tempo extra para o DOM renderizar no GitHub Actions
+        time.sleep(3) # Garante o carregamento dos elementos dinâmicos
         
-        # Procura qualquer linha estrutural de estatísticas
-        linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid*='category'], [class*='category_']")
+        # Encontra todas as linhas de estatísticas pelo data-testid do print
+        linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics']")
+        print(f"      🔍 [DOM] Encontradas {len(linhas)} linhas estruturais de estatísticas.")
         
         for linha in linhas:
-            html_interno = linha.get_attribute("innerHTML")
-            texto_puro = re.sub(r'<[^>]+>', ' ', html_interno).upper()
-            
-            if "CARTÕES AMARELOS" in texto_puro or "CARTÃO AMARELO" in texto_puro:
-                numeros = re.findall(r'>\s*(\d+)\s*<', html_interno)
-                if not numeros:
-                    numeros = re.findall(r'\d+', texto_puro)
+            try:
+                # Localiza a categoria centralizada
+                cat_el = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")
+                texto_categoria = cat_el.text.upper().strip()
                 
-                if len(numeros) >= 2:
-                    val_casa = int(numeros[0])
-                    val_fora = int(numeros[-1])
-                    return val_casa if buscar_casa else val_fora
+                if "CARTÕES AMARELOS" in texto_categoria or "CARTÃO AMARELO" in texto_categoria:
+                    print(f"      🟨 [Match] Linha de cartões localizada!")
+                    
+                    # Busca os elementos de valores (casa e fora)
+                    valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")
+                    
+                    if len(valores) >= 2:
+                        txt_casa = valores[0].text.strip()
+                        txt_fora = valores[1].text.strip()
+                        
+                        val_casa = int(txt_casa) if txt_casa.isdigit() else 0
+                        val_fora = int(txt_fora) if txt_fora.isdigit() else 0
+                        
+                        print(f"      ✅ [Resultado Encontrado] Casa: {val_casa} | Visitante: {val_fora}")
+                        return val_casa if buscar_casa else val_fora
+            except:
+                continue
+                
+        print("      ⚠️ [Aviso] Texto 'Cartões amarelos' não foi achado nas estatísticas deste jogo.")
     except Exception as e:
-        print(f"     ⚠️ Erro ao processar URL {url_jogo}: {e}")
+        print(f"      ❌ [Erro] Falha ao ler a estrutura do DevTools: {e}")
     return 0
-
+    
 def testar_analise_cartoes():
     driver = configurar_driver()
     wait = WebDriverWait(driver, 15)
