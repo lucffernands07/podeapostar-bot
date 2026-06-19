@@ -26,14 +26,16 @@ def configurar_driver():
 
 def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
     """
-    Navega diretamente para a URL de resumo do jogo e extrai os cartões 
+    Navega diretamente para a URL de estatísticas totais do jogo e extrai os cartões 
     baseado na estrutura exata do DevTools (divs com wcl-statistics).
     """
     try:
-        url_resumo = url_jogo.split("?")[0].strip("/") + "/resumo/"
-        print(f"      🌍 [Navegação] Abrindo jogo: {url_resumo}")
-        driver.get(url_resumo)
-        time.sleep(3) # Garante o carregamento dos elementos dinâmicos
+        print(f"      🌍 [Navegação] Abrindo jogo: {url_jogo}")
+        driver.get(url_jogo)
+        
+        # Espera explícita para garantir que os números das estatísticas apareçam na tela
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")))
+        time.sleep(2) # Margem de segurança para o carregamento dinâmico dos textos
         
         # Encontra todas as linhas de estatísticas pelo data-testid do print
         linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics']")
@@ -41,18 +43,20 @@ def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
         
         for linha in linhas:
             try:
-                # Localiza a categoria centralizada
+                # Localiza a categoria centralizada usando o data-testid exato do DevTools
                 cat_el = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")
                 texto_categoria = cat_el.text.upper().strip()
                 
                 if "CARTÕES AMARELOS" in texto_categoria or "CARTÃO AMARELO" in texto_categoria:
-                    # Busca os elementos de valores (casa e fora)
+                    # Busca os elementos de valores (casa e fora) usando seletores específicos da linha
                     valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")
                     
                     if len(valores) >= 2:
+                        # Pega o texto bruto e limpa qualquer espaço extra
                         txt_casa = valores[0].text.strip()
                         txt_fora = valores[1].text.strip()
                         
+                        # Converte em número se for dígito válido
                         val_casa = int(txt_casa) if txt_casa.isdigit() else 0
                         val_fora = int(txt_fora) if txt_fora.isdigit() else 0
                         
@@ -82,7 +86,6 @@ def testar_analise_cartoes():
         driver.get(url_inicial)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
-        # Filtra as seções de forma explícita pelo título para evitar duplicidade de dados no Headless
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         secao_mandante = None
         secao_visitante = None
@@ -97,7 +100,6 @@ def testar_analise_cartoes():
             except:
                 continue
                 
-        # Fallback caso o Flashscore oculte os títulos textuais
         if not secao_mandante or not secao_visitante:
             secao_mandante = secoes[0]
             secao_visitante = secoes[1]
@@ -109,19 +111,20 @@ def testar_analise_cartoes():
         urls_mandante = []
         for linha in linhas_t1:
             try:
-                link_el = linha.find_element(By.TAG_NAME, "a") if linha.find_elements(By.TAG_NAME, "a") else linha
-                href = link_el.get_attribute("href") or link_el.get_attribute("data-url")
-                if href:
-                    urls_mandante.append(href)
+                # Extrai o ID do jogo através do atributo ID da linha (ex: g_1_I9l9aqLq) ou do link interno
+                id_attr = linha.get_attribute("id") or ""
+                if not id_attr:
+                    link_el = linha.find_element(By.TAG_NAME, "a")
+                    id_attr = link_el.get_attribute("id") or link_el.get_attribute("href") or ""
+                
+                # Captura o token ID final isolado por regex ou pelo caractere '_'
+                match = re.search(r'g_1_([A-Za-z0-9]+)', id_attr) or re.search(r'/jogo/([^/]+)', id_attr)
+                id_jogo = match.group(1) if match else (id_attr.split('_')[-1] if "_" in id_attr else None)
+                
+                if id_jogo:
+                    urls_mandante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/resumo/estatisticas/total/")
             except:
                 continue
-
-        if not urls_mandante:
-            for linha in linhas_t1:
-                id_attr = linha.get_attribute("id") or ""
-                if "_" in id_attr:
-                    id_jogo = id_attr.split('_')[-1]
-                    urls_mandante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/")
 
         # Processa as URLs coletadas do Mandante
         for idx, url in enumerate(urls_mandante[:3]):
@@ -134,7 +137,6 @@ def testar_analise_cartoes():
         driver.get(url_inicial)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
-        # Recarrega as seções para evitar StaleElementReferenceException e aplica o mesmo filtro estrito
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         secao_visitante_atualizada = None
         for secao in secoes:
@@ -153,19 +155,18 @@ def testar_analise_cartoes():
         urls_visitante = []
         for linha in linhas_t2:
             try:
-                link_el = linha.find_element(By.TAG_NAME, "a") if linha.find_elements(By.TAG_NAME, "a") else linha
-                href = link_el.get_attribute("href") or link_el.get_attribute("data-url")
-                if href:
-                    urls_visitante.append(href)
+                id_attr = linha.get_attribute("id") or ""
+                if not id_attr:
+                    link_el = linha.find_element(By.TAG_NAME, "a")
+                    id_attr = link_el.get_attribute("id") or link_el.get_attribute("href") or ""
+                
+                match = re.search(r'g_1_([A-Za-z0-9]+)', id_attr) or re.search(r'/jogo/([^/]+)', id_attr)
+                id_jogo = match.group(1) if match else (id_attr.split('_')[-1] if "_" in id_attr else None)
+                
+                if id_jogo:
+                    urls_visitante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/resumo/estatisticas/total/")
             except:
                 continue
-
-        if not urls_visitante:
-            for linha in linhas_t2:
-                id_attr = linha.get_attribute("id") or ""
-                if "_" in id_attr:
-                    id_jogo = id_attr.split('_')[-1]
-                    urls_visitante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}/")
 
         # Processa as URLs coletadas do Visitante
         for idx, url in enumerate(urls_visitante[:3]):
