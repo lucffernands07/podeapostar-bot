@@ -186,7 +186,16 @@ def formatar_para_telegram(bilhetes, cache_dados):
             
             mercado_limpo = j.get('mercado', '')
             if "Faltas Sofridas:" in mercado_limpo or "Chutes no Alvo:" in mercado_limpo:
-                mercado_limpo = re.sub(r'\(Frequência:.*\| (Méd:.*?)\)', r'(\1)', mercado_limpo)
+                # 🚀 Captura o valor numérico da média (ex: 0.7 ou 1.3 ou 2.5)
+                match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
+                if match_med:
+                    media_num = float(match_med.group(1))
+                    # Regra Luciano: 0.5 a 1.4 -> 1 | 1.5 a 2.4 -> 2 | 2.5 a 3.4 -> 3
+                    valor_arredondado = int(media_num + 0.5)
+                    if valor_arredondado < 1: valor_arredondado = 1
+                    
+                    # Remove completamente o padrão antigo e injeta o visual simplificado (X+)
+                    mercado_limpo = re.sub(r'\(.*?\)', f'({valor_arredondado}+)', mercado_limpo)
                 
                 # Exibe a odd 1.50 para jogadores para não ficar em branco no print
                 odd_num = extrair_odd(odd_valor)
@@ -231,4 +240,4 @@ def formatar_para_telegram(bilhetes, cache_dados):
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
-                
+            
