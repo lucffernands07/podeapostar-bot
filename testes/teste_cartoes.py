@@ -288,3 +288,4 @@ def testar_cartoes_pela_logica_main():
         
 if __name__ == "__main__":
     testar_cartoes_pela_logica_main()
+    
