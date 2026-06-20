@@ -41,14 +41,11 @@ def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
         
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-statistics']")))
         
-        # Aqui definimos 'linhas'
         linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics']")
         print(f"      🔍 [DOM] Encontradas {len(linhas)} linhas estruturais de estatísticas.")
         
-        # CORREÇÃO: Mudado de 'lines' para 'linhas'
         for linha in linhas:
             try:
-                # CORREÇÃO: Removido o 'line_match =' duplicado dali de dentro
                 cat_el = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")
                 texto_categoria = cat_el.text.upper().strip()
                 
@@ -78,7 +75,6 @@ def testar_analise_cartoes():
     driver = configurar_driver()
     wait = WebDriverWait(driver, 15)
     
-    # URL Base estruturada de H2H para coletar a lista de partidas passadas
     url_inicial = "https://www.flashscore.com.br/jogo/futebol/brasil-I9l9aqLq/marrocos-IDKYO3R8/h2h/total/"
     
     print("\n" + "="*60)
@@ -107,15 +103,14 @@ def testar_analise_cartoes():
             except:
                 continue
 
-        # Fallback de ID para garantir compatibilidade caso não capture o href direto
+        # CORREÇÃO: Mudado de 'lines_t1' para 'linhas_t1'
         if not urls_mandante:
-            for linha in lines_t1:
+            for linha in linhas_t1:
                 id_attr = linha.get_attribute("id") or ""
                 if "_" in id_attr:
                     id_jogo = id_attr.split('_')[-1]
                     urls_mandante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}")
 
-        # Processa as URLs coletadas do Mandante forçando a rota correta de raspagem
         for idx, url in enumerate(urls_mandante[:3]):
             cartoes = extrair_cartoes_do_jogo(driver, wait, url, buscar_casa=True)
             historico_mandante.append(cartoes)
@@ -146,7 +141,6 @@ def testar_analise_cartoes():
                     id_jogo = id_attr.split('_')[-1]
                     urls_visitante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}")
 
-        # Processa as URLs coletadas do Visitante forçando a rota correta de raspagem
         for idx, url in enumerate(urls_visitante[:3]):
             cartoes = extrair_cartoes_do_jogo(driver, wait, url, buscar_casa=False)
             historico_visitante.append(cartoes)
@@ -159,25 +153,16 @@ def testar_analise_cartoes():
         print(f"🟨 Lista Mandante: {historico_mandante}")
         print(f"🟨 Lista Visitante: {historico_visitante}")
         
-        # CORREÇÃO: Média calculada com base no total de 6 confrontos combinados
         total_cartoes = sum(historico_mandante) + sum(historico_visitante)
         media_6_jogos = total_cartoes / 6
         
         print(f"\n📊 Média de cartões (6 jogos combinados): {media_6_jogos:.2f}")
         
-        # CORREÇÃO: Formatação exata do retorno do mercado de cartões
+        # Formatação exata do retorno do mercado de cartões exigida
         if media_6_jogos < 2.5:
             print("   💡 Tendência: -2.5 cartões")
         else:
             print("   💡 Tendência: +2.5 cartões")
-
-        
-        # Exemplo de validação simples no log baseado no seu critério
-        if media_3_jogos < 1.5:
-            print("   💡 Tendência: Menos de 1.5 cartões")
-        elif media_3_jogos < 2.5:
-            print("   💡 Tendência: Menos de 2.5 cartões")
-
 
     except Exception as e:
         print(f"\n❌ Erro no fluxo de execução: {e}")
@@ -187,4 +172,4 @@ def testar_analise_cartoes():
 
 if __name__ == "__main__":
     testar_analise_cartoes()
-                
+            
