@@ -33,7 +33,7 @@ def testar_cartoes_pela_logica_main():
     url_inicial = "https://www.flashscore.com.br/jogo/futebol/escocia-fZRU25WH/marrocos-IDKYO3R8/h2h/total/"
     
     print("\n" + "="*60)
-    print("🚀 INICIANDO ANÁLISE DOS 3 ÚLTIMOS JOGOS (MERCADO DE CARTÕES - DINÂMICO)")
+    print("🚀 INICIANDO ANÁLISE DOS 3 ÚLTIMOS JOGOS (MERCADO DE CARTÕES - SEGURO)")
     print("="*60 + "\n")
     
     # Dicionários para acumular o histórico de cada jogo -> { Nome: [jogo1, jogo2, jogo3] }
@@ -99,7 +99,7 @@ def testar_cartoes_pela_logica_main():
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
                 time.sleep(3)
                 
-                # Mapeamento dinâmico de colunas idêntico ao de chutes/faltas
+                # Tenta mapeamento dinâmico por cabeçalho
                 cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
                 indice_amarelos = -1
                 indice_vermelhos = -1
@@ -108,16 +108,10 @@ def testar_cartoes_pela_logica_main():
                     texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
                     alias = str(th.get_attribute("data-analytics-alias")).upper()
                     
-                    # Identifica coluna de cartões amarelos
                     if "AMARELO" in texto_th or alias == "YELLOW_CARDS" or texto_th == "CA":
                         indice_amarelos = idx
-                    # Identifica coluna de cartões vermelhos
                     if "VERMELHO" in texto_th or alias == "RED_CARDS" or texto_th == "CV":
                         indice_vermelhos = idx
-
-                # Fallback caso não encontre pelo texto (geralmente são as colunas 5 e 6 ou penúltimas antes dos minutos)
-                if indice_amarelos == -1:
-                    print("  ⚠️ Cabeçalho de amarelos não identificado por texto. Usando mapeamento reverso padrão.")
                 
                 linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
                 if len(linhas_dados) <= 1:
@@ -131,32 +125,38 @@ def testar_cartoes_pela_logica_main():
                             continue
                         
                         celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                        if not celulas_valores:
+                            continue
+                            
+                        # FALLBACK ROBUSTO: Se o cabeçalho falhou, adota o mapeamento padrão da estrutura de atletas
+                        if indice_amarelos != -1 and indice_vermelhos != -1 and len(celulas_valores) > max(indice_amarelos, indice_vermelhos):
+                            idx_am = indice_amarelos
+                            idx_vm = indice_vermelhos
+                        else:
+                            # Se a última coluna costuma ser minutos jogados (ex: 90'), cartões estão logo atrás
+                            idx_am = len(celulas_valores) - 3 if len(celulas_valores) >= 3 else 0
+                            idx_vm = len(celulas_valores) - 2 if len(celulas_valores) >= 2 else 0
+
+                        val_amarelo = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_am]).strip()
+                        val_vermelho = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_vm]).strip()
                         
-                        # Se achou os índices dinamicamente, usa eles. Se não, usa de trás para frente adaptado (-3 e -2, assumindo que -1 são minutos)
-                        idx_am = indice_amarelos if indice_amarelos != -1 else (len(celulas_valores) - 3)
-                        idx_vm = indice_vermelhos if indice_vermelhos != -1 else (len(celulas_valores) - 2)
+                        amarelos = 0 if val_amarelo in ["-", ""] or not val_amarelo.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_amarelo))
+                        vermelhos = 0 if val_vermelho in ["-", ""] or not val_vermelho.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_vermelho))
                         
-                        if len(celulas_valores) > max(idx_am, idx_vm) and idx_am >= 0:
-                            val_amarelo = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_am]).strip()
-                            val_vermelho = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_vm]).strip()
-                            
-                            amarelos = 0 if val_amarelo in ["-", ""] or not val_amarelo.isdigit() else int(val_amarelo)
-                            vermelhos = 0 if val_vermelho in ["-", ""] or not val_vermelho.isdigit() else int(val_vermelho)
-                            
-                            # Acumula Amarelos
-                            if nome_jogador not in historico_amarelos:
-                                historico_amarelos[nome_jogador] = []
-                            while len(historico_amarelos[nome_jogador]) < jogo_index:
-                                historico_amarelos[nome_jogador].append(0)
-                            historico_amarelos[nome_jogador].append(amarelos)
-                            
-                            # Acumula Vermelhos
-                            if nome_jogador not in historico_vermelhos:
-                                historico_vermelhos[nome_jogador] = []
-                            while len(historico_vermelhos[nome_jogador]) < jogo_index:
-                                historico_vermelhos[nome_jogador].append(0)
-                            historico_vermelhos[nome_jogador].append(vermelhos)
-                    except:
+                        # Acumula Amarelos
+                        if nome_jogador not in historico_amarelos:
+                            historico_amarelos[nome_jogador] = []
+                        while len(historico_amarelos[nome_jogador]) < jogo_index:
+                            historico_amarelos[nome_jogador].append(0)
+                        historico_amarelos[nome_jogador].append(amarelos)
+                        
+                        # Acumula Vermelhos
+                        if nome_jogador not in historico_vermelhos:
+                            historico_vermelhos[nome_jogador] = []
+                        while len(historico_vermelhos[nome_jogador]) < jogo_index:
+                            historico_vermelhos[nome_jogador].append(0)
+                        historico_vermelhos[nome_jogador].append(vermelhos)
+                    except Exception as e:
                         continue
             except Exception as e:
                 print(f"  ⚠️ Sem dados de Cartões Gerais para este jogo: {e}\n")
