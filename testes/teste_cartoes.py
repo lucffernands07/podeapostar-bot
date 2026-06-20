@@ -30,35 +30,31 @@ def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
     baseado na estrutura exata do DevTools (divs com wcl-statistics).
     """
     try:
-        # Limpa parâmetros de query (?) e barras extras no final da URL capturada
         url_limpa = url_jogo.split("?")[0].strip("/")
         
-        # Remove redundâncias antigas de '/resumo' para evitar duplicação na string
         if "/resumo" in url_limpa:
             url_limpa = url_limpa.split("/resumo")[0]
             
-        # Força o robô a acessar exatamente o endpoint alvo do print
         url_estatisticas = f"{url_limpa}/resumo/estatisticas/total/"
         print(f"      🌍 [Navegação] Abrindo jogo: {url_estatisticas}")
         driver.get(url_estatisticas)
         
-        # Espera dinâmica até que a estrutura de estatísticas esteja presente no DOM
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-statistics']")))
         
-        # Encontra todas as linhas de estatísticas pelo data-testid
+        # Aqui definimos 'linhas'
         linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics']")
         print(f"      🔍 [DOM] Encontradas {len(linhas)} linhas estruturais de estatísticas.")
         
-        for linha in lines:
+        # CORREÇÃO: Mudado de 'lines' para 'linhas'
+        for linha in linhas:
             try:
-                # Localiza a categoria centralizada
-                cat_el = line_match = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")
+                # CORREÇÃO: Removido o 'line_match =' duplicado dali de dentro
+                cat_el = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")
                 texto_categoria = cat_el.text.upper().strip()
                 
                 if "CARTÕES AMARELOS" in texto_categoria or "CARTÃO AMARELO" in texto_categoria:
                     print(f"      🟨 [Match] Linha de cartões localizada!")
                     
-                    # Busca os elementos de valores (casa e fora)
                     valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")
                     
                     if len(valores) >= 2:
