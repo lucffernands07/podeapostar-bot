@@ -13,7 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Importação dos seus módulos
 from ligas import COMPETICOES
-from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores # 🚀 Importado jogadores
+from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes # 🚀 Importado cartoes
 import odds  
 import bingo357  
 import links
@@ -67,8 +67,12 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "t1_placar_1": None, "t2_placar_1": None,     
         "h2h_placar_1": None, "h2h_placar_2": None,   
         "pular_gols": False,
-        "historico_chutes": {}, # 🚀 Chave para estatísticas de jogadores
-        "historico_faltas": {}  # 🚀 Chave para estatísticas de jogadores
+        "historico_chutes": {}, 
+        "historico_faltas": {},  
+        "historico_mandante_am": {}, # 🚀 Chaves de cartões adicionadas para o novo módulo
+        "historico_mandante_vm": {},
+        "historico_visitante_am": {},
+        "historico_visitante_vm": {}
     }
     
     try:
@@ -77,8 +81,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         h2h_tab.click()
         time.sleep(2)
         
-        # 🔗 CAPTURA DO LINK BETANO ADIANTADA
-        # Capturamos aqui porque o driver ainda está na página principal do confronto (/h2h/overall)
+        url_h2h_base = driver.current_url
+
         try:
             print(f"      🔗 Capturando link Betano para {t1} x {t2}...")
             stats["link_betano"] = links.extrair_url_betano(driver)
@@ -89,8 +93,138 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         time.sleep(1)
         
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        linhas_t1_para_jogadores = [] # Guarda referência limpa
 
+        # --- 🚀 MÓDULO INTEGRADO: RASPAGEM DE CARTÕES POR HISTÓRICO H2H ---
+        # Varre os 3 primeiros confrontos da seção 1 (Mandante) e seção 2 (Visitante)
+        jogo_global_index = 0
+        secoes_alvo_cartoes = [
+            {"tipo": "MANDANTE", "idx_secao": 1},
+            {"tipo": "VISITANTE", "idx_secao": 2}
+        ]
+
+        for alvo in secoes_alvo_cartoes:
+            for jogo_idx in range(3):
+                try:
+                    driver.get(url_h2h_base)
+                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
+                    
+                    selector_linhas = f".h2h__section:nth-child({alvo['idx_secao']}) .h2h__row"
+                    linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
+                    
+                    if len(linhas_confrontos) < 3:
+                        continue
+                        
+                    elemento_alvo = linhas_confrontos[jogo_idx]
+                    
+                    try:
+                        partes_texto = elemento_alvo.text.split('\n')
+                        mandante_atual = partes_texto[2].strip()
+                        visitante_atual = partes_texto[3].strip()
+                    except:
+                        mandante_atual, visitante_atual = "", ""
+
+                    url_anterior = driver.current_url
+                    driver.execute_script("arguments[0].click();", elemento_alvo)
+                    
+                    try:
+                        WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
+                    except: pass
+                        
+                    time.sleep(2.5)
+                    url_jogo_completa = driver.current_url.split("?")[0].strip("/")
+
+                    # Captura hashes dos escudos do cabeçalho fixo para conferência precisa
+                    hash_mandante_topo, hash_visitante_topo = "", ""
+                    try:
+                        img_m = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__homeLogo img.participant__image")
+                        hash_mandante_topo = img_m.get_attribute("src").split('/')[-1]
+                        img_v = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__awayLogo img.participant__image")
+                        hash_visitante_topo = img_v.get_attribute("src").split('/')[-1]
+                    except: pass
+
+                    # Entra diretamente na tabela de estatísticas dos jogadores
+                    url_gerais = f"{url_jogo_completa}/resumo/estatisticas-jogadores/gerais/"
+                    driver.get(url_gerais)
+                    
+                    try:
+                        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
+                        time.sleep(1.5)
+                        
+                        cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
+                        indice_amarelos, indice_vermelhos = -1, -1
+                        
+                        for idx_th, th in enumerate(cabecalhos):
+                            texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
+                            alias = str(th.get_attribute("data-analytics-alias")).upper()
+                            if "AMARELO" in texto_th or alias == "YELLOW_CARDS" or texto_th == "CA":
+                                indice_amarelos = idx_th
+                            if "VERMELHO" in texto_th or alias == "RED_CARDS" or texto_th == "CV":
+                                indice_vermelhos = idx_th
+
+                        linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+                        if len(linhas_dados) <= 1:
+                            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
+
+                        for linha in linhas_dados:
+                            try:
+                                nome_jogador = driver.execute_script("return arguments[0].textContent;", linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")).strip()
+                                if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
+                                    continue
+                                
+                                try:
+                                    img_linha = linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
+                                    hash_linha = img_linha.get_attribute("src").split('/')[-1]
+                                except: hash_linha = ""
+
+                                if hash_linha and hash_linha == hash_mandante_topo:
+                                    time_identificado = mandante_atual
+                                elif hash_linha and hash_linha == hash_visitante_topo:
+                                    time_identificado = visitante_atual
+                                else:
+                                    time_identificado = "OUTRO"
+
+                                # Decide qual dicionário popular baseando-se nas seleções de referência originais (t1 ou t2)
+                                if t1.upper() in time_identificado.upper():
+                                    dicionario_am = stats["historico_mandante_am"]
+                                    dicionario_vm = stats["historico_mandante_vm"]
+                                elif t2.upper() in time_identificado.upper():
+                                    dicionario_am = stats["historico_visitante_am"]
+                                    dicionario_vm = stats["historico_visitante_vm"]
+                                else:
+                                    continue
+
+                                celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                                if not celulas_valores: continue
+                                    
+                                if indice_amarelos != -1 and indice_vermelhos != -1 and len(celulas_valores) > max(indice_amarelos, indice_vermelhos):
+                                    idx_am, idx_vm = indice_amarelos, indice_vermelhos
+                                else:
+                                    idx_am = len(celulas_valores) - 3 if len(celulas_valores) >= 3 else 0
+                                    idx_vm = len(celulas_valores) - 2 if len(celulas_valores) >= 2 else 0
+
+                                val_amarelo = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_am]).strip()
+                                val_vermelho = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_vm]).strip()
+                                
+                                amarelos = 0 if val_amarelo in ["-", ""] or not val_amarelo.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_amarelo))
+                                vermelhos = 0 if val_vermelho in ["-", ""] or not val_vermelho.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_vermelho))
+                                
+                                if nome_jogador not in dicionario_am: dicionario_am[nome_jogador] = []
+                                while len(dicionario_am[nome_jogador]) < jogo_global_index: dicionario_am[nome_jogador].append(0)
+                                dicionario_am[nome_jogador].append(amarelos)
+                                
+                                if nome_jogador not in dicionario_vm: dicionario_vm[nome_jogador] = []
+                                while len(dicionario_vm[nome_jogador]) < jogo_global_index: dicionario_vm[nome_jogador].append(0)
+                                dicionario_vm[nome_jogador].append(vermelhos)
+                            except: continue
+                    except: pass
+                    jogo_global_index += 1
+                except: continue
+
+        # Volta o driver para a página h2h principal para executar a análise de gols padrão do seu main
+        driver.get(url_h2h_base)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
+
+        # --- RETORNO AO FLUXO TRADICIONAL DE GOLS/RESULTADOS DO SEU BOT ---
         for idx, secao in enumerate(secoes[:3]): 
             if idx == 2: 
                 try:
@@ -103,9 +237,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             limite = 6 if idx == 2 else 5
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
             
-            if idx == 0:
-                linhas_t1_para_jogadores = linhas # Isola a seção do time da casa
-
             for i, linha in enumerate(linhas):
                 try:
                     n_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
@@ -188,7 +319,7 @@ def main():
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
     lista_para_filtros = []     
-    jogos_para_pendentes = [] 
+    jogos_para_pendentes = []  
     total_mercados = 0 
 
     try:
@@ -263,12 +394,22 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # 🚀 5. PROCESSAMENTO DO MERCADO DE JOGADORES (MÉDIAS)
-                        res_jogadores = jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}))
+                        # 🚀 5. PROCESSAMENTO DO MERCADO DE JOGADORES (MÉDIAS CHUTES/FALTAS)
+                        res_jogadores = jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}), nome_liga=nome_comp)
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
-                        # --- VALIDAÇÃO DE ODDS E FILTRAGEM COM BYPASS PARA JOGADORES ---
+                        # 🚀 6. PROCESSAMENTO DO NOVO MERCADO DE CARTÕES COLETIVOS
+                        res_cartoes = cartoes.analisar_dados_cartoes(
+                            s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}),
+                            s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}),
+                            nome_liga=nome_comp
+                        )
+                        if res_cartoes.get("aprovado"):
+                            texto_cartao = f"Média Confronto Cartões: {res_cartoes['media_confronto']} (🟨 {res_cartoes['total_mandante']} x {res_cartoes['total_visitante']} 🟥)"
+                            mercados_para_processar.append({"texto": texto_cartao, "chave": "CARTOES_CONFRONTO"})
+
+                        # --- VALIDAÇÃO DE ODDS E FILTRAGEM COM BYPASS ---
                         if mercados_para_processar:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
                             
@@ -276,23 +417,21 @@ def main():
                                 m_texto = item["texto"]
                                 m_chave = item["chave"]
                                 
-                                # Injeta odd fictícia para jogadores passarem da régua
-                                if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"]:
+                                # Injeta odd fictícia para mercados analíticos passarem da régua
+                                if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"]:
                                     valor_odd_str = "1.50"
                                 else:
                                     valor_odd_str = v_odds.get(m_chave, "N/A")
 
                                 try:
                                     odd_float = float(valor_odd_str.replace(',', '.'))
-                                    
                                     if "M45" in m_chave and odd_float >= 4.0:
                                         continue 
 
-                                    # 🚀 Réguar em 1.40 unificada
                                     if odd_float >= 1.25:
                                         lista_para_filtros.append({
                                             "horario": h_br, "time_casa": t1, "time_fora": t2,
-                                            "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"] else "Análise", "liga": nome_comp,
+                                            "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else "Análise", "liga": nome_comp,
                                             "link_betano": s.get("link_betano")
                                         })
                                         
