@@ -178,21 +178,21 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
 
                 except: continue
 
-        # 🚀 SUB-NAVEGAÇÃO SEGURA PARA SCORES DE JOGADORES
+        # 🚀 SUB-NAVEGAÇÃO ULTRA-RÁPIDA E SEGURA PARA SCORES DE JOGADORES
         for jogo_index, url_jogo_passado in enumerate(urls_jogos_passados):
             
-            # 1. Abre a página principal do jogo passado para o Flashscore expandir a URL real com os nomes dos times
-            driver.get(url_jogo_passado)
-            time.sleep(2) # Tempo curto para o navegador completar o redirecionamento automático
-            
-            # 2. Captura a URL real e limpa (ex: https://www.flashscore.com.br/jogo/futebol/brasil-I9l9aqLq/marrocos-IDKYO3R8/)
-            url_base_real = driver.current_url.split("?")[0].strip("/")
+            # Extrai o ID limpo direto da URL curta que salvamos antes
+            id_limpo = url_jogo_passado.split("/")[-1] if url_jogo_passado.endswith("/") else url_jogo_passado.split("/")[-1]
+            if not id_limpo: continue
+
+            # Monta a URL estruturada que o Flashscore aceita diretamente sem forçar redirecionamento de página inteira
+            url_base_real = f"https://www.flashscore.com.br/jogo/futebol/partido-{id_limpo}"
             
             # --- Finalizações ---
-            # Concatenamos perfeitamente o caminho baseado no link real que você mandou
             driver.get(f"{url_base_real}/resumo/estatisticas-jogadores/finalizacoes/")
             try:
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".fp-playerName_E6lgN")))
+                # Diminuí para 8 segundos para se não tiver o mercado o bot não ficar travado esperando à toa
+                WebDriverWait(driver, 8).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".fp-playerName_E6lgN")))
                 
                 cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], th")
                 indice_base_chutes = 10  
@@ -209,7 +209,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                 indice_real_chutes = -1
                 for test_idx in range(indice_base_chutes, -1, -1):
                     encontrou_valor = False
-                    for linha in lines_dados:
+                    for linha in linhas_dados:
                         celulas = linha.find_elements(By.CSS_SELECTOR, ".wcl-table__bodyCell_, td")
                         if len(celulas) > test_idx:
                             v = driver.execute_script("return arguments[0].textContent;", celulas[test_idx]).strip()
@@ -251,13 +251,12 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     except: 
                         continue
             except Exception as e_chutes: 
-                print(f"      ⚠️ Falha ao raspar aba de chutes no alvo: {e_chutes}")
+                pass # Se não encontrar a tabela de chutes, passa reto sem quebrar o fluxo do jogo
 
             # --- Faltas Sofridas ---
-            # Concatenamos perfeitamente o caminho do mercado de ataque
             driver.get(f"{url_base_real}/resumo/estatisticas-jogadores/ataque/")
             try:
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".fp-playerName_E6lgN")))
+                WebDriverWait(driver, 8).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".fp-playerName_E6lgN")))
                 cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], th")
                 indice_base = 13
                 for idx_c, th in enumerate(cabecalhos):
@@ -297,7 +296,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                             while len(stats["historico_faltas"][nome_jogador]) < jogo_index: stats["historico_faltas"][nome_jogador].append(0)
                             stats["historico_faltas"][nome_jogador].append(faltas)
                     except: continue
-            except: pass
+            except: 
+                pass
                 
     except Exception as e:
         print(f"      ⚠️ Erro H2H {t1}x{t2}: {e}")
