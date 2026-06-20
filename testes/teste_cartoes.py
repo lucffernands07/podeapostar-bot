@@ -25,34 +25,25 @@ def configurar_driver():
     return driver
 
 def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
-    """
-    Navega diretamente para a URL de estatísticas totais do jogo e extrai os cartões 
-    baseado na estrutura exata do DevTools (divs com wcl-statistics).
-    """
     try:
-        url_resumo = url_jogo.split("?")[0].strip("/") + "/resumo/"
+        # LOG REQUISITO 2 e 3: Mostra qual jogo específico está abrindo para analisar cartões
         print(f"      🌍 [Navegação] Abrindo jogo: {url_jogo}")
         driver.get(url_jogo)
         
-        # Garante o carregamento dos elementos de valor conforme o DevTools antes de contar as linhas
+        # Garante o carregamento dos elementos reais de estatísticas antes da leitura
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")))
         time.sleep(2) 
         
-        # Encontra todas as linhas de estatísticas pelo data-testid do print
         linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics']")
         print(f"      🔍 [DOM] Encontradas {len(linhas)} linhas estruturais de estatísticas.")
         
         for linha in linhas:
             try:
-                # Localiza a categoria centralizada
                 cat_el = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-statistics-category']")
                 texto_categoria = cat_el.text.upper().strip()
                 
                 if "CARTÕES AMARELOS" in texto_categoria or "CARTÃO AMARELO" in texto_categoria:
-                    print(f"      🟨 [Match] Linha de cartões localizada!")
-                    
-                    # Busca os elementos de valores (casa e fora)
-                    valores = line.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")
+                    valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statistics-value']")
                     
                     if len(valores) >= 2:
                         txt_casa = valores[0].text.strip()
@@ -61,7 +52,6 @@ def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
                         val_casa = int(txt_casa) if txt_casa.isdigit() else 0
                         val_fora = int(txt_fora) if txt_fora.isdigit() else 0
                         
-                        print(f"      ✅ [Resultado Encontrado] Casa: {val_casa} | Visitante: {val_fora}")
                         return val_casa if buscar_casa else val_fora
             except:
                 continue
@@ -75,11 +65,15 @@ def testar_analise_cartoes():
     driver = configurar_driver()
     wait = WebDriverWait(driver, 15)
     
-    url_inicial = "https://www.flashscore.com.br/jogo/futebol/brasil-I9l9aqLq/marrocos-IDKYO3R8/h2h/total/"
+    # Confronto atualizado conforme solicitado: Brasil x Haiti (H2H Total)
+    url_inicial = "https://www.flashscore.com.br/jogo/futebol/brasil-I9l9aqLq/haiti-IDKYO3R8/h2h/total/"
     
     print("\n" + "="*60)
     print("🚀 [TESTE INDESTRUTÍVEL] ANÁLISE DE CARTÕES COMPLETA")
     print("="*60 + "\n")
+    
+    # LOG REQUISITO 1: URL H2H Principal do Confronto
+    print(f"🔗 Acessando página H2H principal: {url_inicial}\n")
     
     historico_mandante = []
     historico_visitante = []
@@ -89,26 +83,10 @@ def testar_analise_cartoes():
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        secao_mandante = None
-        secao_visitante = None
         
-        for secao in secoes:
-            try:
-                titulo = secao.find_element(By.CSS_SELECTOR, ".h2h__title").text.upper()
-                if "MANDANTE" in titulo:
-                    secao_mandante = secao
-                elif "VISITANTE" in titulo:
-                    secao_visitante = secao
-            except:
-                continue
-                
-        if not secao_mandante or not secao_visitante:
-            secao_mandante = secoes[0]
-            secao_visitante = secoes[1]
-        
-        # --- TABELA 1: MANDANTE ---
+        # --- TABELA 1: MANDANTE (CASA) ---
         print("📦 Coletando dados da TABELA 1 (Últimos jogos do Mandante)...")
-        linhas_t1 = secao_mandante.find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
+        linhas_t1 = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
         
         urls_mandante = []
         for linha in linhas_t1:
@@ -126,13 +104,14 @@ def testar_analise_cartoes():
             except:
                 continue
 
-        # LOG DAS URLS DA TABELA 1
+        # LOG REQUISITO 2: URL dos 3 últimos jogos da Casa
         print(f"📋 URLs geradas para o Mandante: {urls_mandante}")
 
-        # Processa as URLs coletadas do Mandante
-        for idx, url in enumerate(urls_mandante[:3]):
+        # Processa e busca cartões da Casa
+        for idx, url in enumerate(urls_mandante):
             cartoes = extrair_cartoes_do_jogo(driver, wait, url, buscar_casa=True)
             historico_mandante.append(cartoes)
+            # LOG REQUISITO 3: Total do jogo individual
             print(f"  ➔ Jogo {idx+1}: {cartoes} cartões")
 
         # --- TABELA 2: VISITANTE ---
@@ -140,20 +119,8 @@ def testar_analise_cartoes():
         driver.get(url_inicial)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        secao_visitante_atualizada = None
-        for secao in secoes:
-            try:
-                titulo = secao.find_element(By.CSS_SELECTOR, ".h2h__title").text.upper()
-                if "VISITANTE" in titulo:
-                    secao_visitante_atualizada = secao
-            except:
-                continue
-                
-        if not secao_visitante_atualizada:
-            secao_visitante_atualizada = secoes[1]
-            
-        linhas_t2 = secao_visitante_atualizada.find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
+        secoes_t2 = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        linhas_t2 = secoes_t2[1].find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
         
         urls_visitante = []
         for linha in linhas_t2:
@@ -171,19 +138,21 @@ def testar_analise_cartoes():
             except:
                 continue
 
-        # LOG DAS URLS DA TABELA 2
+        # LOG REQUISITO 2: URL dos 3 últimos jogos do Visitante
         print(f"📋 URLs geradas para o Visitante: {urls_visitante}")
 
-        # Processa as URLs coletadas do Visitante
-        for idx, url in enumerate(urls_visitante[:3]):
+        # Processa e busca cartões do Visitante
+        for idx, url in enumerate(urls_visitante):
             cartoes = extrair_cartoes_do_jogo(driver, wait, url, buscar_casa=False)
             historico_visitante.append(cartoes)
+            # LOG REQUISITO 3: Total do jogo individual
             print(f"  ➔ Jogo {idx+1}: {cartoes} cartões")
 
-        # --- EXIBIÇÃO DOS RESULTADOS ---
+        # --- EXIBIÇÃO DOS RESULTADOS FINAIS ---
         print("\n" + "="*60)
         print("📊 RESULTADO DO CONFRONTO")
         print("="*60)
+        # LOG REQUISITO 3: Total consolidado em array
         print(f"🟨 Lista Mandante: {historico_mandante}")
         print(f"🟨 Lista Visitante: {historico_visitante}")
 
