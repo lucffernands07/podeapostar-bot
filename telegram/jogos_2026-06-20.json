@@ -14,7 +14,7 @@
         "time_casa": "Países Baixos",
         "time_fora": "Suécia",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.62",
+        "odd": "1.67",
         "link_betano": "https://www.betano.bet.br/match-odds/Netherlands-Sweden/83962517/"
     },
     {
@@ -29,10 +29,19 @@
     {
         "horario": "14:30",
         "liga": "Argentina Primera B",
+        "time_casa": "Laferrere",
+        "time_fora": "Defensores Unidos",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.98",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Laferrere-Defensores-Unidos/86267211/"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Argentina Primera B",
         "time_casa": "UAI Urquiza",
         "time_fora": "San Martin Burzaco",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.50",
+        "odd": "1.46",
         "link_betano": "https://www.betano.bet.br/match-odds/UAI-Urquiza-San-Martin-de-Burzaco/86267186/"
     },
     {
@@ -104,7 +113,7 @@
         "time_casa": "San Martin",
         "time_fora": "Agropecuario",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.53",
+        "odd": "1.57",
         "link_betano": "https://www.betano.bet.br/match-odds/San-Martin-de-San-Juan-CA-Agropecuario/87267461/"
     },
     {
@@ -151,6 +160,15 @@
         "mercado": "Ambas Marcam: Sim (80%)",
         "odd": "1.32",
         "link_betano": "https://www.betano.bet.br/match-odds/Cleveland-Force-SC-Lorain-County-Leviathan-FC/87674153/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Alemanha",
+        "time_fora": "Costa do Marfim",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Germany-Ivory-Coast/83962518/"
     },
     {
         "horario": "18:00",
@@ -212,7 +230,7 @@
         "time_casa": "Velo Clube",
         "time_fora": "Água Santa",
         "mercado": "Vitória Casa (85%)",
-        "odd": "2.15",
+        "odd": "2.12",
         "link_betano": "https://www.betano.bet.br/match-odds/Velo-Clube-SP-EC-Agua-Santa-SP/87510998/"
     },
     {
