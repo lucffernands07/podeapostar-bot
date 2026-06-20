@@ -41,47 +41,28 @@ COMPETICOES = {
     "Cazaquistão - Primeira Liga": "https://www.flashscore.com.br/futebol/cazaquistao/primeira-liga/jogos"
 }
 
-    """
-    # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
-    "Irlanda - Premier": "https://www.flashscore.com.br/futebol/irlanda/divisao-premier/jogos/",
-    "Colombia - Copa": "https://www.flashscore.com.br/futebol/colombia/copa-da-colombia/jogos/",
-    "Colombia - Primeira A": "https://www.flashscore.com.br/futebol/colombia/primera-a/jogos/",
-    "Mundo - Amistoso Internacional": "https://www.flashscore.com.br/futebol/mundo/amistoso-internacional/jogos/",
-    "Alemanha - Liga Playoffs": "https://www.flashscore.com.br/futebol/alemanha/playoffs-da-liga-regional/jogos/",
-    "Albânia - Superliga": "https://www.flashscore.com.br/futebol/albania/super-liga/jogos/",
-    "Noruega - Serie de Elite": "https://www.flashscore.com.br/futebol/noruega/serie-de-el:ite/jogos/",
-    "França - Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
-    "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",
-    "Copa dos Campeões - CONCACAF": "https://www.flashscore.com.br/futebol/america-do-norte-e-central/copa-dos-campeoes-da-concacaf/jogos",
-    "México - Liga MX": "https://www.flashscore.com.br/futebol/mexico/liga-mx/jogos/",
-    "Andorra - Primeira Divisão": "https://www.flashscore.com.br/futebol/andorra/primeira-divisao/jogos/",
-    "Argélia - Liga 1": "https://www.flashscore.com.br/futebol/argelia/1-divisao/jogos/",
-    "Espanha - La Liga 2": "https://www.flashscore.com.br/futebol/espanha/laliga2/jogos/",
-    "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/jogos/",  # JÁ ESTAVA AQUI!
-    "Itália - Serie B": "https://www.flashscore.com.br/futebol/italia/serie-b/jogos/",
-    "França - Ligue 2": "https://www.flashscore.com.br/futebol/franca/ligue-2/jogos/",
-    "Países Baixos - Eerste Divisie": "https://www.flashscore.com.br/futebol/paises-baixos/eerste-divisie/jogos/",
-    "Ucrânia - Premier League": "https://www.flashscore.com.br/futebol/ucrania/premier-league/jogos/",
-    "Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/jogos/",
-    "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",  # <-- INCLUÍDO AQUI
-    "Colômbia - Primera A": "https://www.flashscore.com.br/futebol/colombia/primeira-a/jogos/",
-    "Argentina Primera B": "https://www.flashscore.com.br/futebol/argentina/primera-b/jogos/", 
-    "Argentina - Primeira C": "https://www.flashscore.com.br/futebol/argentina/primeira-c/jogos/",
-    "Argentina Primeira Nacional": "https://www.flashscore.com.br/futebol/argentina/primera-nacional/jogos/",
-    "Paraguai - Division 1": "https://www.flashscore.com.br/futebol/paraguai/primeira-divisao/jogos/",
-    "Uruguai - Primera Division": "https://www.flashscore.com.br/futebol/uruguai/primeira-divisao/jogos/",
-    "Bélgica - Challenger Pro League": "https://www.flashscore.com.br/futebol/belgica/challenger-pro-league/jogos/",
-    "Escócia - Championship": "https://www.flashscore.com.br/futebol/escocia/championship/jogos/",
-    "Finlândia - Veikkausliiga": "https://www.flashscore.com.br/futebol/finlandia/veikkausliiga/jogos/",
-    "Hungria - OTP Bank Liga": "https://www.flashscore.com.br/futebol/hungria/otp-bank-liga/jogos/",
-    "Croácia - HNL": "https://www.flashscore.com.br/futebol/croacia/hnl/jogos/",
-    "China - Super League": "https://www.flashscore.com.br/futebol/china/super-liga/jogos/",
-    "China - Liga 1": "https://www.flashscore.com.br/futebol/china/liga-1/jogos/",
-    "China - Liga 2": "https://www.flashscore.com.br/futebol/china/liga-2/jogos/",
-    "Índia - Indian Super League": "https://www.flashscore.com.br/futebol/india/super-liga-indiana/jogos/",
-    "Japão - Liga J1": "https://www.flashscore.com.br/futebol/japao/liga-j1/jogos/",
-    "Champions da Ásia": "https://www.flashscore.com.br/futebol/asia/liga-dos-campeoes-da-afc/jogos/",
-    "Eua - USL Liga 2": "https://www.flashscore.com.br/futebol/eua/usl-liga-dois/jogos/",
-    "Chile - Liga Primeira": "https://www.flashscore.com.br/futebol/chile/liga-de-primera/jogos/",
-    "Marrocos - Botola Pro": "https://www.flashscore.com.br/futebol/marrocos/botola-pro/jogos/"
-    """
+      # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
+#     "Irlanda - Premier": "https://www.flashscore.com.br/futebol/irlanda/divisao-premier/jogos/",
+#     "Colombia - Copa": "https://www.flashscore.com.br/futebol/colombia/copa-da-colombia/jogos/",
+#     "Colombia - Primeira A": "https://www.flashscore.com.br/futebol/colombia/primera-a/jogos/",
+#     "Mundo - Amistoso Internacional": "https://www.flashscore.com.br/futebol/mundo/amistoso-internacional/jogos/",
+#     "Alemanha - Liga Playoffs": "https://www.flashscore.com.br/futebol/alemanha/playoffs-da-liga-regional/jogos/",
+#     "Albânia - Superliga": "https://www.flashscore.com.br/futebol/albania/super-liga/jogos/",
+#     "Noruega - Serie de Elite": "https://www.flashscore.com.br/futebol/noruega/serie-de-el:ite/jogos/",
+#     "França - Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
+#     "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",
+#     "Copa dos Campeões - CONCACAF": "https://www.flashscore.com.br/futebol/america-do-norte-e-central/copa-dos-campeoes-da-concacaf/jogos",
+#     "México - Liga MX": "https://www.flashscore.com.br/futebol/mexico/liga-mx/jogos/",
+#     "Andorra - Primeira Divisão": "https://www.flashscore.com.br/futebol/andorra/primeira-divisao/jogos/",
+#     "Argélia - Liga 1": "https://www.flashscore.com.br/futebol/argelia/1-divisao/jogos/",
+#     "Espanha - La Liga 2": "https://www.flashscore.com.br/futebol/espanha/laliga2/jogos/",
+#     "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/jogos/",  # JÁ ESTAVA AQUI!
+#     "Itália - Serie B": "https://www.flashscore.com.br/futebol/italia/serie-b/jogos/",
+#     "França - Ligue 2": "https://www.flashscore.com.br/futebol/franca/ligue-2/jogos/",
+#     "Países Baixos - Eerste Divisie": "https://www.flashscore.com.br/futebol/paises-baixos/eerste-divisie/jogos/",
+#     "Ucrânia - Premier League": "https://www.flashscore.com.br/futebol/ucrania/premier-league/jogos/",
+#     "Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/jogos/",
+#     "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",  # <-- INCLUÍDO AQUI
+#     "Colômbia - Primera A": "https://www.flashscore.com.br/futebol/colombia/primeira-a/jogos/",
+#     "Argentina Primera B": "https://www.flashscore.com.
+
