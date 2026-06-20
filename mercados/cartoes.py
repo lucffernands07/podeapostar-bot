@@ -1,3 +1,5 @@
+import re
+
 # 🟢 LISTA BRANCA: Apenas ligas de elite que abrem mercados de cartões de jogadores na Betano
 LIGAS_ELITE_CARTOES = [
     "Brasileirão Série A",
@@ -25,7 +27,7 @@ LIGAS_ELITE_CARTOES = [
 def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, historico_visitante_am, historico_visitante_vm, nome_liga="", quantidade_jogos=3):
     """
     Processa os históricos brutos de cartões (já filtrados e isolados por time pelo main).
-    Calcula médias reais por atleta e o sumário coletivo de cartões do confronto.
+    Calcula médias reais por atleta e a média coletiva somando as médias de cada time.
     """
     # 🚀 TRAVA DE LIGA ELITE
     nome_liga_limpo = nome_liga.strip() if nome_liga else ""
@@ -79,8 +81,13 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
             if soma_jogador > 0:
                 relatorio_jogadores += f"  👤 {jogador.ljust(25)} ➔ Média Real: {media_real:.2f} cartões/jogo {jogos_reais} (Am: {am_reais} | Vm: {vm_reais})\n"
 
+    # --- 🚀 NOVA LÓGICA DE CÁLCULO DE MÉDIA MATEMÁTICA COLETIVA ---
+    # Em vez de dividir o total bruto por 6, calculamos a média isolada de cada time por 3 e somamos.
+    media_mandante = total_cartoes_mandante / quantidade_jogos if quantidade_jogos > 0 else 0
+    media_visitante = total_cartoes_visitante / quantidade_jogos if quantidade_jogos > 0 else 0
+    
+    media_geral_confronto = media_mandante + media_visitante
     total_geral_confronto = total_cartoes_mandante + total_cartoes_visitante
-    media_geral_confronto = total_geral_confronto / jogo_global_index if jogo_global_index > 0 else 0
 
     # Retorna o sumário executivo mastigado para o seu bot e para os logs do main
     return {
@@ -91,3 +98,4 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
         "media_confronto": round(media_geral_confronto, 2),
         "log_detalhado_jogadores": relatorio_jogadores
     }
+    
