@@ -69,7 +69,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "pular_gols": False,
         "historico_chutes": {}, 
         "historico_faltas": {},  
-        "historico_mandante_am": {}, # 🚀 Chaves de cartões adicionadas para o novo módulo
+        "historico_mandante_am": {}, 
         "historico_mandante_vm": {},
         "historico_visitante_am": {},
         "historico_visitante_vm": {}
@@ -92,10 +92,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         driver.execute_script("window.scrollTo(0, 800);")
         time.sleep(1)
         
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-
-        # --- 🚀 MÓDULO INTEGRADO: RASPAGEM DE CARTÕES POR HISTÓRICO H2H ---
-        # Varre os 3 primeiros confrontos da seção 1 (Mandante) e seção 2 (Visitante)
+        # --- 🚀 MÓDULO INTEGRADO: RASPAGEM DE CARTÕES POR HISTÓRICO H2H (BLINDADO) ---
         jogo_global_index = 0
         secoes_alvo_cartoes = [
             {"tipo": "MANDANTE", "idx_secao": 1},
@@ -103,25 +100,47 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         ]
 
         for alvo in secoes_alvo_cartoes:
-            for jogo_idx in range(3):
+            # 1. Coleta os elementos e textos primeiro sem sair da página h2h_base
+            lista_urls_jogos = []
+            try:
+                driver.get(url_h2h_base)
+                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
+                selector_linhas = f".h2h__section:nth-child({alvo['idx_secao']}) .h2h__row"
+                linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
+                
+                for jogo_idx in range(min(3, len(linhas_confrontos))):
+                    try:
+                        elemento_alvo = linhas_confrontos[jogo_idx]
+                        partes_texto = elemento_alvo.text.split('\n')
+                        mandante_atual = partes_texto[2].strip() if len(partes_texto) > 2 else ""
+                        visitante_atual = partes_texto[3].strip() if len(partes_texto) > 3 else ""
+                        
+                        # Armazena referências estáveis
+                        lista_urls_jogos.append({
+                            "idx": jogo_idx,
+                            "mandante_atual": mandante_atual,
+                            "visitante_atual": visitante_atual,
+                            "elemento": elemento_alvo
+                        })
+                    except: continue
+            except Exception as e_coleta:
+                print(f"      ⚠️ Erro ao listar linhas de cartões para {alvo['tipo']}: {e_coleta}")
+                continue
+
+            # 2. Navega individualmente em cada jogo de forma isolada
+            for jogo_dados in lista_urls_jogos:
                 try:
                     driver.get(url_h2h_base)
                     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
                     
+                    # Re-localiza o elemento dinamicamente para evitar o Stale Element
                     selector_linhas = f".h2h__section:nth-child({alvo['idx_secao']}) .h2h__row"
-                    linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
+                    linhas_atualizadas = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
+                    if len(linhas_atualizadas) <= jogo_dados["idx"]: continue
                     
-                    if len(linhas_confrontos) < 3:
-                        continue
-                        
-                    elemento_alvo = linhas_confrontos[jogo_idx]
-                    
-                    try:
-                        partes_texto = elemento_alvo.text.split('\n')
-                        mandante_atual = partes_texto[2].strip()
-                        visitante_atual = partes_texto[3].strip()
-                    except:
-                        mandante_atual, visitante_atual = "", ""
+                    elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
+                    mandante_atual = jogo_dados["mandante_atual"]
+                    visitante_atual = jogo_dados["visitante_atual"]
 
                     url_anterior = driver.current_url
                     driver.execute_script("arguments[0].click();", elemento_alvo)
@@ -133,7 +152,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     time.sleep(2.5)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
 
-                    # Captura hashes dos escudos do cabeçalho fixo para conferência precisa
+                    # Captura hashes dos escudos
                     hash_mandante_topo, hash_visitante_topo = "", ""
                     try:
                         img_m = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__homeLogo img.participant__image")
@@ -142,7 +161,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         hash_visitante_topo = img_v.get_attribute("src").split('/')[-1]
                     except: pass
 
-                    # Entra diretamente na tabela de estatísticas dos jogadores
+                    # Entra na tabela de estatísticas dos jogadores
                     url_gerais = f"{url_jogo_completa}/resumo/estatisticas-jogadores/gerais/"
                     driver.get(url_gerais)
                     
@@ -183,7 +202,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                                 else:
                                     time_identificado = "OUTRO"
 
-                                # Decide qual dicionário popular baseando-se nas seleções de referência originais (t1 ou t2)
                                 if t1.upper() in time_identificado.upper():
                                     dicionario_am = stats["historico_mandante_am"]
                                     dicionario_vm = stats["historico_mandante_vm"]
@@ -218,11 +236,15 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                             except: continue
                     except: pass
                     jogo_global_index += 1
-                except: continue
+                except Exception as e_jogo_cartao:
+                    print(f"      ⚠️ Falha isolada na linha de cartões ({jogo_dados['idx']}): {e_jogo_cartao}")
+                    jogo_global_index += 1
+                    continue
 
-        # Volta o driver para a página h2h principal para executar a análise de gols padrão do seu main
+        # Volta o driver para a página h2h principal de forma limpa antes do fluxo tradicional
         driver.get(url_h2h_base)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
+        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
 
         # --- RETORNO AO FLUXO TRADICIONAL DE GOLS/RESULTADOS DO SEU BOT ---
         for idx, secao in enumerate(secoes[:3]): 
@@ -308,12 +330,12 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                 except: continue
 
     except Exception as e:
-        print(f"      ⚠️ Erro H2H {t1}x{t2}: {e}")
+        print(f"      ⚠️ Erro Geral H2H {t1}x{t2}: {e}")
 
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
-    
+                                 
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
