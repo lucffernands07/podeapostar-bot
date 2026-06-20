@@ -38,21 +38,20 @@ def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
         print(f"      🌍 [Navegação] Abrindo estatísticas gerais de jogadores: {url_estatisticas}")
         driver.get(url_estatisticas)
         
-        # Aguarda as novas linhas de jogadores carregarem com base na classe do print
+        # Aguarda carregar os nomes dos jogadores usando a classe nova detectada
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".fp-playerName_E6lgN")))
-        time.sleep(1)
+        time.sleep(1.5)
         
         # Coleta as tabelas do framework atualizado do Flashscore
         tabelas_times = driver.find_elements(By.CSS_SELECTOR, ".wcl-table_") or driver.find_elements(By.TAG_NAME, "table")
         
         if len(tabelas_times) < 2:
-            print("      ⚠️ [Aviso] Não foi possível separar as tabelas de jogadores por time (Mandante/Visitante).")
+            print("      ⚠️ [Aviso] Tabelas separadas não encontradas. Analisando estrutura unificada.")
             tabela_alvo = tabelas_times[0] if len(tabelas_times) > 0 else driver
         else:
-            # Define qual tabela analisar baseado no comando (Casa=0, Fora=1)
+            # Define se varre o Mandante (0) ou Visitante (1)
             tabela_alvo = tabelas_times[0] if buscar_casa else tabelas_times[1]
         
-        # Captura as novas linhas estruturais
         linhas_jogadores = tabela_alvo.find_elements(By.CSS_SELECTOR, ".wcl-table__row_") or tabela_alvo.find_elements(By.TAG_NAME, "tr")
         
         total_amarelos = 0
@@ -60,13 +59,12 @@ def extrair_cartoes_do_jogo(driver, wait, url_jogo, buscar_casa):
         
         for linha in linhas_jogadores:
             try:
-                # Valida se a linha realmente pertence a um jogador
                 if not linha.find_elements(By.CSS_SELECTOR, ".fp-playerName_E6lgN"):
                     continue
                     
                 celulas = linha.find_elements(By.CSS_SELECTOR, ".wcl-table__bodyCell_") or linha.find_elements(By.TAG_NAME, "td")
                 
-                # 🚀 LÓGICA DO MAIN: Lê de trás para frente usando índices negativos (-2 e -1)
+                # LÓGICA DO MAIN: Lê de trás para frente usando índices negativos (-2 e -1)
                 if len(celulas) >= 2:
                     txt_amarelo = driver.execute_script("return arguments[0].textContent;", celulas[-2]).strip()
                     txt_vermelho = driver.execute_script("return arguments[0].textContent;", celulas[-1]).strip()
@@ -93,28 +91,34 @@ def testar_analise_cartoes():
     url_inicial = "https://www.flashscore.com.br/jogo/futebol/brasil-I9l9aqLq/marrocos-IDKYO3R8/h2h/total/"
     
     print("\n" + "="*60)
-    print("🚀 [TESTE INDESTRUTÍVEL] ANÁLISE DE CARTÕES VIA ABAS GERAIS (ATUALIZADO)")
+    print("🚀 [TESTE INDESTRUTÍVEL] ANÁLISE DE CARTÕES VIA CLIQUE E ABAS GERAIS")
     print("="*60 + "\n")
     
     historico_mandante = []
     historico_visitante = []
     
     try:
+        # --- TABELA 1: MANDANTE ---
+        print("📦 Coletando dados da TABELA 1 (Últimos jogos do Mandante)...")
         driver.get(url_inicial)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         
-        # --- TABELA 1: MANDANTE ---
-        print("📦 Coletando dados da TABELA 1 (Últimos jogos do Mandante)...")
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
         linhas_t1 = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:3]
         
         urls_mandante = []
+        # Captura as URLs completas de forma nativa abrindo o link temporariamente
         for linha in linhas_t1:
             try:
-                id_attr = linha.get_attribute("id") or ""
-                if "_" in id_attr:
-                    id_jogo = id_attr.split('_')[-1]
-                    urls_mandante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}")
+                driver.execute_script("arguments[0].click();", linha)
+                time.sleep(1.5)
+                driver.switch_to.window(driver.window_handles[-1])
+                
+                url_completa = driver.current_url.split("?")[0].strip("/")
+                urls_mandante.append(url_completa)
+                
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
             except:
                 continue
 
@@ -134,10 +138,15 @@ def testar_analise_cartoes():
         urls_visitante = []
         for linha in linhas_t2:
             try:
-                id_attr = linha.get_attribute("id") or ""
-                if "_" in id_attr:
-                    id_jogo = id_attr.split('_')[-1]
-                    urls_visitante.append(f"https://www.flashscore.com.br/jogo/{id_jogo}")
+                driver.execute_script("arguments[0].click();", linha)
+                time.sleep(1.5)
+                driver.switch_to.window(driver.window_handles[-1])
+                
+                url_completa = driver.current_url.split("?")[0].strip("/")
+                urls_visitante.append(url_completa)
+                
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
             except:
                 continue
 
