@@ -1,0 +1,452 @@
+[
+    {
+        "horario": "08:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Altai",
+        "time_fora": "Zhetysu",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Altay-Oskemen-Zhetysu-Taldykorgan/87402865/"
+    },
+    {
+        "horario": "08:00",
+        "liga": "China - Liga 2",
+        "time_casa": "Taian Tiankuang",
+        "time_fora": "Shandong Taishan B",
+        "mercado": "Chutes no Alvo: Memet-Ali Memet-Raim (Frequência: 1/3j | Méd: 1.3)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Taian-Tiankuang-Shandong-Taishan-II/87403009/"
+    },
+    {
+        "horario": "08:00",
+        "liga": "China - Liga 2",
+        "time_casa": "Taian Tiankuang",
+        "time_fora": "Shandong Taishan B",
+        "mercado": "Faltas Sofridas: He Shaolin (Frequência: 1/3j | Méd: 1.3)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Taian-Tiankuang-Shandong-Taishan-II/87403009/"
+    },
+    {
+        "horario": "08:30",
+        "liga": "China - Liga 2",
+        "time_casa": "Wuhan Three Towns B",
+        "time_fora": "Shenzhen",
+        "mercado": "Faltas Sofridas: Ruan Jingyang (Frequência: 1/3j | Méd: 1.7)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Wuhan-Three-Towns-II-Shenzhen-2028-FC/87402962/"
+    },
+    {
+        "horario": "09:00",
+        "liga": "China - Liga 2",
+        "time_casa": "Chengdu Rongcheng B",
+        "time_fora": "Wenzhou Professional",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.40",
+        "link_betano": "https://www.betano.bet.br/match-odds/Chengdu-Rongcheng-II-Wenzhou-Professional-FC/87403032/"
+    },
+    {
+        "horario": "09:00",
+        "liga": "China - Liga 2",
+        "time_casa": "Chengdu Rongcheng B",
+        "time_fora": "Wenzhou Professional",
+        "mercado": "1X (70%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/Chengdu-Rongcheng-II-Wenzhou-Professional-FC/87403032/"
+    },
+    {
+        "horario": "09:00",
+        "liga": "China - Liga 2",
+        "time_casa": "Chengdu Rongcheng B",
+        "time_fora": "Wenzhou Professional",
+        "mercado": "Faltas Sofridas: Zhang Yanjun (Frequência: 1/3j | Méd: 2.0)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Chengdu-Rongcheng-II-Wenzhou-Professional-FC/87403032/"
+    },
+    {
+        "horario": "10:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Zhenis",
+        "time_fora": "Ertis Pavlodar",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.31",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Zhenis-FC-Irtysh-Pavlodar/87402909/"
+    },
+    {
+        "horario": "11:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Londrina",
+        "time_fora": "Athletic Club",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Athletic-Club-MG/87511921/"
+    },
+    {
+        "horario": "11:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Londrina",
+        "time_fora": "Athletic Club",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Athletic-Club-MG/87511921/"
+    },
+    {
+        "horario": "11:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Londrina",
+        "time_fora": "Athletic Club",
+        "mercado": "Faltas Sofridas: Wesley Gasolina (Frequência: 1/3j | Méd: 2.0)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Athletic-Club-MG/87511921/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Kaisar",
+        "time_fora": "Ulytau",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.34",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Kaisar-Kyzylorda-Ulytau-FC/87402947/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Kaisar",
+        "time_fora": "Ulytau",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Kaisar-Kyzylorda-Ulytau-FC/87402947/"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Países Baixos",
+        "time_fora": "Suécia",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.70",
+        "link_betano": "https://www.betano.bet.br/match-odds/Netherlands-Sweden/83962517/"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Países Baixos",
+        "time_fora": "Suécia",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.70",
+        "link_betano": "https://www.betano.bet.br/match-odds/Netherlands-Sweden/83962517/"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Países Baixos",
+        "time_fora": "Suécia",
+        "mercado": "Faltas Sofridas: Gakpo C. (Frequência: 3/3j | Méd: 1.7)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Netherlands-Sweden/83962517/"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Argentina Primera B",
+        "time_casa": "Laferrere",
+        "time_fora": "Defensores Unidos",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.41",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Laferrere-Defensores-Unidos/86267211/"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Argentina Primera B",
+        "time_casa": "Laferrere",
+        "time_fora": "Defensores Unidos",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.02",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Laferrere-Defensores-Unidos/86267211/"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Argentina Primera B",
+        "time_casa": "UAI Urquiza",
+        "time_fora": "San Martin Burzaco",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/UAI-Urquiza-San-Martin-de-Burzaco/86267186/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Argentina Primeira Nacional",
+        "time_casa": "Almagro",
+        "time_fora": "Atletico Atlanta",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/Almagro-BA-Club-Atletico-Atlanta/86172060/"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Argentina Primera B",
+        "time_casa": "Brown Adrogue",
+        "time_fora": "Argentino de Quilmes",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/Brown-de-Adrogue-Argentino-Quilmes/86655881/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Argentina Primeira Nacional",
+        "time_casa": "Acassuso",
+        "time_fora": "San Miguel",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "2.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/Acassuso-San-Miguel/86172023/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Argentina Primeira Nacional",
+        "time_casa": "Acassuso",
+        "time_fora": "San Miguel",
+        "mercado": "1X (70%)",
+        "odd": "1.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/Acassuso-San-Miguel/86172023/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Argentina Primera B",
+        "time_casa": "Excursionistas",
+        "time_fora": "Deportivo Camioneros",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Excursionistas-Deportivo-Camioneros/86267151/"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Argentina Primera B",
+        "time_casa": "Real Pilar",
+        "time_fora": "Villa San Carlos",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.46",
+        "link_betano": "https://www.betano.bet.br/match-odds/Real-Pilar-Villa-San-Carlos/86267159/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Argentina Primeira Nacional",
+        "time_casa": "Chaco For Ever",
+        "time_fora": "Colón",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/Chaco-For-Ever-Colon-de-Santa-Fe/87402966/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Argentina Primeira Nacional",
+        "time_casa": "San Martin",
+        "time_fora": "Agropecuario",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.60",
+        "link_betano": "https://www.betano.bet.br/match-odds/San-Martin-de-San-Juan-CA-Agropecuario/87267461/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Argentina Primeira Nacional",
+        "time_casa": "Temperley",
+        "time_fora": "San Martin Tucuman",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "2.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Temperley-San-Martin-Tucuman/86172107/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Aparecidense",
+        "time_fora": "Capital-DF",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.41",
+        "link_betano": "https://www.betano.bet.br/match-odds/Aparecidense-Capital-CF-DF/87510961/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Ceilândia",
+        "time_fora": "Luverdense",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ceilandia-Esporte-Clube-DF-Luverdense-MT/87510962/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Imperatriz",
+        "time_fora": "Maracanã",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Imperatriz-Maracana-CE/87510963/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Espanha - La Liga 2",
+        "time_casa": "Almería",
+        "time_fora": "Málaga",
+        "mercado": "Chutes no Alvo: Calatrava A. (Frequência: 2/3j | Méd: 0.7)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/UD-Almeria-Malaga-CF/87242756/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Espanha - La Liga 2",
+        "time_casa": "Almería",
+        "time_fora": "Málaga",
+        "mercado": "Faltas Sofridas: Calatrava A. (Frequência: 2/3j | Méd: 2.7)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/UD-Almeria-Malaga-CF/87242756/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Eua - USL Liga 2",
+        "time_casa": "Cleveland Force",
+        "time_fora": "Lorain County Leviathan",
+        "mercado": "+2.5 Gols (100%)",
+        "odd": "1.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cleveland-Force-SC-Lorain-County-Leviathan-FC/87674153/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Eua - USL Liga 2",
+        "time_casa": "Cleveland Force",
+        "time_fora": "Lorain County Leviathan",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cleveland-Force-SC-Lorain-County-Leviathan-FC/87674153/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Alemanha",
+        "time_fora": "Costa do Marfim",
+        "mercado": "Chutes no Alvo: K. Havertz (Frequência: 2/3j | Méd: 1.0)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Germany-Ivory-Coast/83962518/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Alemanha",
+        "time_fora": "Costa do Marfim",
+        "mercado": "Faltas Sofridas: Pavlovic A. (Frequência: 3/3j | Méd: 1.7)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Germany-Ivory-Coast/83962518/"
+    },
+    {
+        "horario": "18:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Mixto",
+        "time_fora": "Gama",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.41",
+        "link_betano": "https://www.betano.bet.br/match-odds/Mixto-MT-SE-do-Gama/87510995/"
+    },
+    {
+        "horario": "18:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Mixto",
+        "time_fora": "Gama",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.90",
+        "link_betano": "https://www.betano.bet.br/match-odds/Mixto-MT-SE-do-Gama/87510995/"
+    },
+    {
+        "horario": "18:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Monte Roraima",
+        "time_fora": "Guaporé",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.28",
+        "link_betano": "https://www.betano.bet.br/match-odds/Monte-Roraima-Guapore-RO/87510996/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Santa Cruz",
+        "time_fora": "Ypiranga",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.48",
+        "link_betano": "https://www.betano.bet.br/match-odds/Santa-Cruz-PE-Ypiranga-RS/86496315/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Velo Clube",
+        "time_fora": "Água Santa",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.41",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velo-Clube-SP-EC-Agua-Santa-SP/87510998/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Velo Clube",
+        "time_fora": "Água Santa",
+        "mercado": "1X (70%)",
+        "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velo-Clube-SP-EC-Agua-Santa-SP/87510998/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Velo Clube",
+        "time_fora": "Água Santa",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "2.45",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velo-Clube-SP-EC-Agua-Santa-SP/87510998/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Ceará",
+        "time_fora": "Botafogo-SP",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "2.10",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ceara-SC-CE-Botafogo-SP/87511922/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Ceará",
+        "time_fora": "Botafogo-SP",
+        "mercado": "Faltas Sofridas: Otero (Frequência: 1/3j | Méd: 1.3)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ceara-SC-CE-Botafogo-SP/87511922/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Vila Nova",
+        "time_fora": "Náutico",
+        "mercado": "1X (70%)",
+        "odd": "1.36",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vila-Nova-GO-Nautico-PE/87447185/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Vila Nova",
+        "time_fora": "Náutico",
+        "mercado": "Faltas Sofridas: Kauan Cristtyan (Frequência: 1/3j | Méd: 1.0)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vila-Nova-GO-Nautico-PE/87447185/"
+    },
+    {
+        "horario": "20:30",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Ituano",
+        "time_fora": "Figueirense",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.98",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ituano-SP-Figueirense-SC/85408462/"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Equador",
+        "time_fora": "Curaçao",
+        "mercado": "Faltas Sofridas: Angulo N. (Frequência: 2/3j | Méd: 1.0)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ecuador-Curacao/83962519/"
+    }
+]
