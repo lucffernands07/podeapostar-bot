@@ -178,11 +178,19 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
 
                 except: continue
 
-        # 🚀 SUB-NAVEGAÇÃO SEGURA PARA SCORES DE JOGADORES (Utilizando URLs estáticas)
+        # 🚀 SUB-NAVEGAÇÃO SEGURA PARA SCORES DE JOGADORES
         for jogo_index, url_jogo_passado in enumerate(urls_jogos_passados):
             
+            # 1. Abre a página principal do jogo passado para o Flashscore expandir a URL real com os nomes dos times
+            driver.get(url_jogo_passado)
+            time.sleep(2) # Tempo curto para o navegador completar o redirecionamento automático
+            
+            # 2. Captura a URL real e limpa (ex: https://www.flashscore.com.br/jogo/futebol/brasil-I9l9aqLq/marrocos-IDKYO3R8/)
+            url_base_real = driver.current_url.split("?")[0].strip("/")
+            
             # --- Finalizações ---
-            driver.get(f"{url_jogo_passado}/resumo/estatisticas-jogadores/finalizacoes/")
+            # Concatenamos perfeitamente o caminho baseado no link real que você mandou
+            driver.get(f"{url_base_real}/resumo/estatisticas-jogadores/finalizacoes/")
             try:
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".fp-playerName_E6lgN")))
                 
@@ -201,7 +209,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                 indice_real_chutes = -1
                 for test_idx in range(indice_base_chutes, -1, -1):
                     encontrou_valor = False
-                    for linha in linhas_dados:
+                    for linha in lines_dados:
                         celulas = linha.find_elements(By.CSS_SELECTOR, ".wcl-table__bodyCell_, td")
                         if len(celulas) > test_idx:
                             v = driver.execute_script("return arguments[0].textContent;", celulas[test_idx]).strip()
@@ -224,7 +232,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         if not nome_jogador or nome_jogador == "TODOS": 
                             continue
                             
-                        celulas = line_cells = linha.find_elements(By.CSS_SELECTOR, ".wcl-table__bodyCell_, td")
+                        celulas = linha.find_elements(By.CSS_SELECTOR, ".wcl-table__bodyCell_, td")
                         if len(celulas) > indice_real_chutes:
                             valor_bruto = driver.execute_script("return arguments[0].textContent;", celulas[indice_real_chutes]).strip()
                             if "(" in valor_bruto:
@@ -246,7 +254,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                 print(f"      ⚠️ Falha ao raspar aba de chutes no alvo: {e_chutes}")
 
             # --- Faltas Sofridas ---
-            driver.get(f"{url_jogo_passado}/resumo/estatisticas-jogadores/ataque/")
+            # Concatenamos perfeitamente o caminho do mercado de ataque
+            driver.get(f"{url_base_real}/resumo/estatisticas-jogadores/ataque/")
             try:
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".fp-playerName_E6lgN")))
                 cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], th")
@@ -289,7 +298,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                             stats["historico_faltas"][nome_jogador].append(faltas)
                     except: continue
             except: pass
-
+                
     except Exception as e:
         print(f"      ⚠️ Erro H2H {t1}x{t2}: {e}")
         
