@@ -159,11 +159,18 @@ def testar_analise_cartoes():
         print(f"🟨 Lista Mandante: {historico_mandante}")
         print(f"🟨 Lista Visitante: {historico_visitante}")
         
-        # CORREÇÃO: Adiciona o cálculo e exibição da média dos 3 jogos
+        # CORREÇÃO: Média calculada com base no total de 6 confrontos combinados
         total_cartoes = sum(historico_mandante) + sum(historico_visitante)
-        media_3_jogos = total_cartoes / 3
+        media_6_jogos = total_cartoes / 6
         
-        print(f"\n📊 Média de cartões (últimos 3 jogos): {media_3_jogos:.2f}")
+        print(f"\n📊 Média de cartões (6 jogos combinados): {media_6_jogos:.2f}")
+        
+        # CORREÇÃO: Formatação exata do retorno do mercado de cartões
+        if media_6_jogos < 2.5:
+            print("   💡 Tendência: -2.5 cartões")
+        else:
+            print("   💡 Tendência: +2.5 cartões")
+
         
         # Exemplo de validação simples no log baseado no seu critério
         if media_3_jogos < 1.5:
