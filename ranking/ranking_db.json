@@ -10,7 +10,7 @@
         },
         "VITORIA CASA (85%)": {
             "green": 0,
-            "red": 13
+            "red": 14
         },
         "1X (70%)": {
             "green": 7,
@@ -41,12 +41,12 @@
             "red": 7
         },
         "+1.5 GOLS (70%)": {
-            "green": 42,
-            "red": 20
+            "green": 43,
+            "red": 21
         },
         "+1.5 GOLS (85%)": {
-            "green": 85,
-            "red": 30
+            "green": 88,
+            "red": 31
         },
         "+1.5 GOLS (100%)": {
             "green": 10,
@@ -58,7 +58,7 @@
         },
         "+2.5 GOLS (85%)": {
             "green": 29,
-            "red": 20
+            "red": 21
         },
         "+2.5 GOLS (100%)": {
             "green": 1,
@@ -81,11 +81,11 @@
             "red": 3
         },
         "-4.5 GOLS (85%)": {
-            "green": 19,
+            "green": 20,
             "red": 2
         }
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "19/06/2026 08:46"
+    "ultima_atualizacao": "20/06/2026 03:03"
 }

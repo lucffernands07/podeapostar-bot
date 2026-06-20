@@ -13,9 +13,9 @@
     },
     {
         "mercado": "-4.5 GOLS (85%)",
-        "green": 19,
+        "green": 20,
         "red": 2,
-        "assertividade": 0.9047619047619048
+        "assertividade": 0.9090909090909091
     },
     {
         "mercado": "1X (85%)",
@@ -25,9 +25,9 @@
     },
     {
         "mercado": "+1.5 GOLS (85%)",
-        "green": 85,
-        "red": 30,
-        "assertividade": 0.7391304347826086
+        "green": 88,
+        "red": 31,
+        "assertividade": 0.7394957983193278
     },
     {
         "mercado": "1X (70%)",
@@ -37,9 +37,9 @@
     },
     {
         "mercado": "+1.5 GOLS (70%)",
-        "green": 42,
-        "red": 20,
-        "assertividade": 0.6774193548387096
+        "green": 43,
+        "red": 21,
+        "assertividade": 0.671875
     },
     {
         "mercado": "+1.5 GOLS (100%)",
@@ -68,8 +68,8 @@
     {
         "mercado": "+2.5 GOLS (85%)",
         "green": 29,
-        "red": 20,
-        "assertividade": 0.5918367346938775
+        "red": 21,
+        "assertividade": 0.58
     },
     {
         "mercado": "1X (80%)",
@@ -110,7 +110,7 @@
     {
         "mercado": "VITORIA CASA (85%)",
         "green": 0,
-        "red": 13,
+        "red": 14,
         "assertividade": 0.0
     },
     {
