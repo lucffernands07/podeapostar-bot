@@ -217,15 +217,19 @@ def testar_cartoes_pela_logica_main():
                 print(f"✅ Jogo {jogo_index + 1} da seção processado com sucesso.\n" + "-"*40)
                 jogo_global_index += 1
 
-        # --- PROCESSAMENTO DOS CONSOLIDADOS E MÉDIAS POR SELEÇÃO ---
+       # --- PROCESSAMENTO DOS CONSOLIDADOS E MÉDIAS POR SELEÇÃO ---
         print("\n" + "="*70)
-        print(f"📊 RELATÓRIO FINAL DE MÉDIAS DOS JOGOS MAPEADOS (Total: {jogo_global_index} partidas)")
+        print(f"📊 RELATÓRIO FINAL DE MÉDIAS DOS JOGOS MAPEADOS")
         print("="*70)
         
         selecoes_prints = [
-            {"nome": "ESCÓCIA", "dict_am": historico_escocia_am, "dict_vm": historico_escocia_vm},
-            {"nome": "MARROCOS", "dict_am": historico_marrocos_am, "dict_vm": historico_marrocos_vm}
+            {"nome": "ESCÓCIA", "dict_am": historico_escocia_am, "dict_vm": historico_escocia_vm, "inicio_idx": 0, "fim_idx": 3},
+            {"nome": "MARROCOS", "dict_am": historico_marrocos_am, "dict_vm": historico_marrocos_vm, "inicio_idx": 3, "fim_idx": 6}
         ]
+        
+        jogos_por_time = 3
+        total_cartoes_escocia = 0
+        total_cartoes_marrocos = 0
         
         for sel in selecoes_prints:
             print(f"\n🟩 SELEÇÃO DA {sel['nome']}:")
@@ -244,10 +248,35 @@ def testar_cartoes_pela_logica_main():
                     lista_vermelhos.append(0)
                     
                 lista_combinada = [lista_amarelos[x] + lista_vermelhos[x] for x in range(jogo_global_index)]
-                media = sum(lista_combinada) / jogo_global_index
                 
-                if sum(lista_combinada) > 0:
-                    print(f"  👤 {jogador.ljust(25)} ➔ Média: {media:.1f} cartões/jogo {lista_combinada} (Am: {lista_amarelos} | Vm: {lista_vermelhos})")
+                # Separa os jogos reais do time para a média individual correta
+                jogos_reais_do_time = lista_combinada[sel["inicio_idx"]:sel["fim_idx"]]
+                amarelos_reais = lista_amarelos[sel["inicio_idx"]:sel["fim_idx"]]
+                vermelhos_reais = lista_vermelhos[sel["inicio_idx"]:sel["fim_idx"]]
+                
+                # Acumula para a soma coletiva do time
+                soma_jogador = sum(jogos_reais_do_time)
+                if sel["nome"] == "ESCÓCIA":
+                    total_cartoes_escocia += soma_jogador
+                else:
+                    total_cartoes_marrocos += soma_jogador
+                
+                media_real = soma_jogador / jogos_por_time
+                
+                if soma_jogador > 0:
+                    print(f"  👤 {jogador.ljust(25)} ➔ Média Real: {media_real:.2f} cartões/jogo {jogos_reais_do_time} (Am: {amarelos_reais} | Vm: {vermelhos_reais})")
+
+        # --- LOG COMPLEMENTAR: MÉTRICA COLETIVA DO CONFRONTO ---
+        total_geral_confronto = total_cartoes_escocia + total_cartoes_marrocos
+        media_geral_confronto = total_geral_confronto / jogo_global_index if jogo_global_index > 0 else 0
+        
+        print("\n" + "="*70)
+        print("📈 SUMÁRIO COLETIVO DO CONFRONTO (BUSINESS LOGIC)")
+        print("="*70)
+        print(f"🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escócia nos 3 jogos: {total_cartoes_escocia} cartões")
+        print(f"🇲🇦 Marrocos nos 3 jogos: {total_cartoes_marrocos} cartões")
+        print(f"🧮 Total Geral Analisado: {total_geral_confronto} cartões em {jogo_global_index} jogos")
+        print(f"📊 Média Final do Confronto: {media_geral_confronto:.2f} cartões por jogo")
 
     except Exception as e:
         print(f"\n❌ Erro crítico no fluxo de médias: {e}")
@@ -256,6 +285,6 @@ def testar_cartoes_pela_logica_main():
         print("\n" + "="*70)
         print("🏁 Análise inteligente de cartões finalizada com sucesso.")
         print("="*70)
-
+        
 if __name__ == "__main__":
     testar_cartoes_pela_logica_main()
