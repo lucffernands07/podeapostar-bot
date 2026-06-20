@@ -29,15 +29,6 @@
     {
         "horario": "14:30",
         "liga": "Argentina Primera B",
-        "time_casa": "Laferrere",
-        "time_fora": "Defensores Unidos",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.95",
-        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Laferrere-Defensores-Unidos/86267211/"
-    },
-    {
-        "horario": "14:30",
-        "liga": "Argentina Primera B",
         "time_casa": "UAI Urquiza",
         "time_fora": "San Martin Burzaco",
         "mercado": "+1.5 Gols (85%)",
@@ -95,7 +86,7 @@
         "time_casa": "Real Pilar",
         "time_fora": "Villa San Carlos",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.47",
+        "odd": "1.40",
         "link_betano": "https://www.betano.bet.br/match-odds/Real-Pilar-Villa-San-Carlos/86267159/"
     },
     {
@@ -131,7 +122,7 @@
         "time_casa": "Aparecidense",
         "time_fora": "Capital-DF",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.41",
+        "odd": "1.40",
         "link_betano": "https://www.betano.bet.br/match-odds/Aparecidense-Capital-CF-DF/87510961/"
     },
     {
@@ -140,7 +131,7 @@
         "time_casa": "Ceilândia",
         "time_fora": "Luverdense",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.46",
+        "odd": "1.36",
         "link_betano": "https://www.betano.bet.br/match-odds/Ceilandia-Esporte-Clube-DF-Luverdense-MT/87510962/"
     },
     {
@@ -151,15 +142,6 @@
         "mercado": "+1.5 Gols (85%)",
         "odd": "1.42",
         "link_betano": "https://www.betano.bet.br/match-odds/Imperatriz-Maracana-CE/87510963/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Eua - USL Liga 2",
-        "time_casa": "Cleveland Force",
-        "time_fora": "Lorain County Leviathan",
-        "mercado": "+2.5 Gols (100%)",
-        "odd": "1.25",
-        "link_betano": "https://www.betano.bet.br/match-odds/Cleveland-Force-SC-Lorain-County-Leviathan-FC/87674153/"
     },
     {
         "horario": "16:00",
