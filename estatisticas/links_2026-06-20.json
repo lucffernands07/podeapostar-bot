@@ -1,0 +1,455 @@
+{
+    "data_geracao": "2026-06-20",
+    "jogos": [
+        {
+            "time_casa": "Londrina",
+            "time_fora": "Athletic Club",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zViS5bOO/#/resumo-de-jogo",
+            "odd_casa": "2.57",
+            "odd_fora": "2.82"
+        },
+        {
+            "time_casa": "Londrina",
+            "time_fora": "Athletic Club",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zViS5bOO/#/resumo-de-jogo",
+            "odd_casa": "2.57",
+            "odd_fora": "2.82"
+        },
+        {
+            "time_casa": "Londrina",
+            "time_fora": "Athletic Club",
+            "mercado": "Faltas Sofridas: Wesley Gasolina (Frequência: 1/3j | Méd: 2.0)",
+            "mercado_ranking": "FALTAS SOFRIDAS: WESLEY GASOLINA (FREQUÊNCIA: 1/3J | MÉD: 2.0)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zViS5bOO/#/resumo-de-jogo",
+            "odd_casa": "2.57",
+            "odd_fora": "2.82"
+        },
+        {
+            "time_casa": "Ceará",
+            "time_fora": "Botafogo-SP",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QgXyQ19t/#/resumo-de-jogo",
+            "odd_casa": "1.86",
+            "odd_fora": "4.33"
+        },
+        {
+            "time_casa": "Ceará",
+            "time_fora": "Botafogo-SP",
+            "mercado": "Faltas Sofridas: Otero (Frequência: 1/3j | Méd: 1.3)",
+            "mercado_ranking": "FALTAS SOFRIDAS: OTERO (FREQUÊNCIA: 1/3J | MÉD: 1.3)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QgXyQ19t/#/resumo-de-jogo",
+            "odd_casa": "1.86",
+            "odd_fora": "4.33"
+        },
+        {
+            "time_casa": "Vila Nova",
+            "time_fora": "Náutico",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/z7FHxugn/#/resumo-de-jogo",
+            "odd_casa": "2.25",
+            "odd_fora": "3.25"
+        },
+        {
+            "time_casa": "Vila Nova",
+            "time_fora": "Náutico",
+            "mercado": "Faltas Sofridas: Kauan Cristtyan (Frequência: 1/3j | Méd: 1.0)",
+            "mercado_ranking": "FALTAS SOFRIDAS: KAUAN CRISTTYAN (FREQUÊNCIA: 1/3J | MÉD: 1.0)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/z7FHxugn/#/resumo-de-jogo",
+            "odd_casa": "2.25",
+            "odd_fora": "3.25"
+        },
+        {
+            "time_casa": "Santa Cruz",
+            "time_fora": "Ypiranga",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ClhhVzAa/#/resumo-de-jogo",
+            "odd_casa": "1.87",
+            "odd_fora": "4.50"
+        },
+        {
+            "time_casa": "Ituano",
+            "time_fora": "Figueirense",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UsOytX6K/#/resumo-de-jogo",
+            "odd_casa": "1.98",
+            "odd_fora": "3.75"
+        },
+        {
+            "time_casa": "Aparecidense",
+            "time_fora": "Capital-DF",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/U1fsHo2k/#/resumo-de-jogo",
+            "odd_casa": "2.57",
+            "odd_fora": "2.82"
+        },
+        {
+            "time_casa": "Ceilândia",
+            "time_fora": "Luverdense",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/n1TEQbZo/#/resumo-de-jogo",
+            "odd_casa": "2.60",
+            "odd_fora": "2.85"
+        },
+        {
+            "time_casa": "Imperatriz",
+            "time_fora": "Maracanã",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4ddN5IbC/#/resumo-de-jogo",
+            "odd_casa": "2.40",
+            "odd_fora": "3.20"
+        },
+        {
+            "time_casa": "Mixto",
+            "time_fora": "Gama",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rPpywTO8/#/resumo-de-jogo",
+            "odd_casa": "3.10",
+            "odd_fora": "2.50"
+        },
+        {
+            "time_casa": "Mixto",
+            "time_fora": "Gama",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rPpywTO8/#/resumo-de-jogo",
+            "odd_casa": "3.10",
+            "odd_fora": "2.50"
+        },
+        {
+            "time_casa": "Monte Roraima",
+            "time_fora": "Guaporé",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/GC1Ezyb2/#/resumo-de-jogo",
+            "odd_casa": "2.40",
+            "odd_fora": "3.05"
+        },
+        {
+            "time_casa": "Velo Clube",
+            "time_fora": "Água Santa",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jVw8FYQp/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.20"
+        },
+        {
+            "time_casa": "Velo Clube",
+            "time_fora": "Água Santa",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jVw8FYQp/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.20"
+        },
+        {
+            "time_casa": "Velo Clube",
+            "time_fora": "Água Santa",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jVw8FYQp/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.20"
+        },
+        {
+            "time_casa": "Países Baixos",
+            "time_fora": "Suécia",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0rAjVxuo/#/resumo-de-jogo",
+            "odd_casa": "1.70",
+            "odd_fora": "4.75"
+        },
+        {
+            "time_casa": "Países Baixos",
+            "time_fora": "Suécia",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0rAjVxuo/#/resumo-de-jogo",
+            "odd_casa": "1.70",
+            "odd_fora": "4.75"
+        },
+        {
+            "time_casa": "Países Baixos",
+            "time_fora": "Suécia",
+            "mercado": "Faltas Sofridas: Gakpo C. (Frequência: 3/3j | Méd: 1.7)",
+            "mercado_ranking": "FALTAS SOFRIDAS: GAKPO C. (FREQUÊNCIA: 3/3J | MÉD: 1.7)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0rAjVxuo/#/resumo-de-jogo",
+            "odd_casa": "1.70",
+            "odd_fora": "4.75"
+        },
+        {
+            "time_casa": "Alemanha",
+            "time_fora": "Costa do Marfim",
+            "mercado": "Chutes no Alvo: K. Havertz (Frequência: 2/3j | Méd: 1.0)",
+            "mercado_ranking": "CHUTES NO ALVO: K. HAVERTZ (FREQUÊNCIA: 2/3J | MÉD: 1.0)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SMzorJsm/#/resumo-de-jogo",
+            "odd_casa": "1.50",
+            "odd_fora": "5.75"
+        },
+        {
+            "time_casa": "Alemanha",
+            "time_fora": "Costa do Marfim",
+            "mercado": "Faltas Sofridas: Pavlovic A. (Frequência: 3/3j | Méd: 1.7)",
+            "mercado_ranking": "FALTAS SOFRIDAS: PAVLOVIC A. (FREQUÊNCIA: 3/3J | MÉD: 1.7)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SMzorJsm/#/resumo-de-jogo",
+            "odd_casa": "1.50",
+            "odd_fora": "5.75"
+        },
+        {
+            "time_casa": "Equador",
+            "time_fora": "Curaçao",
+            "mercado": "Faltas Sofridas: Angulo N. (Frequência: 2/3j | Méd: 1.0)",
+            "mercado_ranking": "FALTAS SOFRIDAS: ANGULO N. (FREQUÊNCIA: 2/3J | MÉD: 1.0)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/p2XLmuKP/#/resumo-de-jogo",
+            "odd_casa": "1.13",
+            "odd_fora": "19.00"
+        },
+        {
+            "time_casa": "Altai",
+            "time_fora": "Zhetysu",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/S4jI5iQa/#/resumo-de-jogo",
+            "odd_casa": "2.52",
+            "odd_fora": "2.85"
+        },
+        {
+            "time_casa": "Zhenis",
+            "time_fora": "Ertis Pavlodar",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xbSsMCAt/#/resumo-de-jogo",
+            "odd_casa": "2.20",
+            "odd_fora": "3.25"
+        },
+        {
+            "time_casa": "Kaisar",
+            "time_fora": "Ulytau",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ELlQ3VfC/#/resumo-de-jogo",
+            "odd_casa": "2.37",
+            "odd_fora": "3.05"
+        },
+        {
+            "time_casa": "Kaisar",
+            "time_fora": "Ulytau",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ELlQ3VfC/#/resumo-de-jogo",
+            "odd_casa": "2.37",
+            "odd_fora": "3.05"
+        },
+        {
+            "time_casa": "Almería",
+            "time_fora": "Málaga",
+            "mercado": "Chutes no Alvo: Calatrava A. (Frequência: 2/3j | Méd: 0.7)",
+            "mercado_ranking": "CHUTES NO ALVO: CALATRAVA A. (FREQUÊNCIA: 2/3J | MÉD: 0.7)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8EGZ04Di/#/resumo-de-jogo",
+            "odd_casa": "2.05",
+            "odd_fora": "3.40"
+        },
+        {
+            "time_casa": "Almería",
+            "time_fora": "Málaga",
+            "mercado": "Faltas Sofridas: Calatrava A. (Frequência: 2/3j | Méd: 2.7)",
+            "mercado_ranking": "FALTAS SOFRIDAS: CALATRAVA A. (FREQUÊNCIA: 2/3J | MÉD: 2.7)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8EGZ04Di/#/resumo-de-jogo",
+            "odd_casa": "2.05",
+            "odd_fora": "3.40"
+        },
+        {
+            "time_casa": "Laferrere",
+            "time_fora": "Defensores Unidos",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fk27xDn2/#/resumo-de-jogo",
+            "odd_casa": "2.02",
+            "odd_fora": "3.90"
+        },
+        {
+            "time_casa": "Laferrere",
+            "time_fora": "Defensores Unidos",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fk27xDn2/#/resumo-de-jogo",
+            "odd_casa": "2.02",
+            "odd_fora": "3.90"
+        },
+        {
+            "time_casa": "UAI Urquiza",
+            "time_fora": "San Martin Burzaco",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/n3NOReYq/#/resumo-de-jogo",
+            "odd_casa": "2.95",
+            "odd_fora": "2.55"
+        },
+        {
+            "time_casa": "Brown Adrogue",
+            "time_fora": "Argentino de Quilmes",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Mefg0Gv9/#/resumo-de-jogo",
+            "odd_casa": "2.60",
+            "odd_fora": "3.00"
+        },
+        {
+            "time_casa": "Excursionistas",
+            "time_fora": "Deportivo Camioneros",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Ay9Jmwe3/#/resumo-de-jogo",
+            "odd_casa": "1.80",
+            "odd_fora": "4.60"
+        },
+        {
+            "time_casa": "Real Pilar",
+            "time_fora": "Villa San Carlos",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2VohXHAM/#/resumo-de-jogo",
+            "odd_casa": "1.78",
+            "odd_fora": "4.80"
+        },
+        {
+            "time_casa": "Almagro",
+            "time_fora": "Atletico Atlanta",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0zmnuRxp/#/resumo-de-jogo",
+            "odd_casa": "3.80",
+            "odd_fora": "2.20"
+        },
+        {
+            "time_casa": "Acassuso",
+            "time_fora": "San Miguel",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vH4rso3m/#/resumo-de-jogo",
+            "odd_casa": "3.30",
+            "odd_fora": "2.45"
+        },
+        {
+            "time_casa": "Acassuso",
+            "time_fora": "San Miguel",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vH4rso3m/#/resumo-de-jogo",
+            "odd_casa": "3.30",
+            "odd_fora": "2.45"
+        },
+        {
+            "time_casa": "Chaco For Ever",
+            "time_fora": "Colón",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ns8juPXa/#/resumo-de-jogo",
+            "odd_casa": "3.40",
+            "odd_fora": "2.40"
+        },
+        {
+            "time_casa": "San Martin",
+            "time_fora": "Agropecuario",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/OfyesE8U/#/resumo-de-jogo",
+            "odd_casa": "1.86",
+            "odd_fora": "4.75"
+        },
+        {
+            "time_casa": "Temperley",
+            "time_fora": "San Martin Tucuman",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zZ4DaeOb/#/resumo-de-jogo",
+            "odd_casa": "2.25",
+            "odd_fora": "3.75"
+        },
+        {
+            "time_casa": "Taian Tiankuang",
+            "time_fora": "Shandong Taishan B",
+            "mercado": "Chutes no Alvo: Memet-Ali Memet-Raim (Frequência: 1/3j | Méd: 1.3)",
+            "mercado_ranking": "CHUTES NO ALVO: MEMET-ALI MEMET-RAIM (FREQUÊNCIA: 1/3J | MÉD: 1.3)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8W7JAWac/#/resumo-de-jogo",
+            "odd_casa": "1.91",
+            "odd_fora": "4.25"
+        },
+        {
+            "time_casa": "Taian Tiankuang",
+            "time_fora": "Shandong Taishan B",
+            "mercado": "Faltas Sofridas: He Shaolin (Frequência: 1/3j | Méd: 1.3)",
+            "mercado_ranking": "FALTAS SOFRIDAS: HE SHAOLIN (FREQUÊNCIA: 1/3J | MÉD: 1.3)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8W7JAWac/#/resumo-de-jogo",
+            "odd_casa": "1.91",
+            "odd_fora": "4.25"
+        },
+        {
+            "time_casa": "Wuhan Three Towns B",
+            "time_fora": "Shenzhen",
+            "mercado": "Faltas Sofridas: Ruan Jingyang (Frequência: 1/3j | Méd: 1.7)",
+            "mercado_ranking": "FALTAS SOFRIDAS: RUAN JINGYANG (FREQUÊNCIA: 1/3J | MÉD: 1.7)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fm6R8AU9/#/resumo-de-jogo",
+            "odd_casa": "3.30",
+            "odd_fora": "2.18"
+        },
+        {
+            "time_casa": "Chengdu Rongcheng B",
+            "time_fora": "Wenzhou Professional",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bqe51SMq/#/resumo-de-jogo",
+            "odd_casa": "2.55",
+            "odd_fora": "2.65"
+        },
+        {
+            "time_casa": "Chengdu Rongcheng B",
+            "time_fora": "Wenzhou Professional",
+            "mercado": "1X (70%)",
+            "mercado_ranking": "1X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bqe51SMq/#/resumo-de-jogo",
+            "odd_casa": "2.55",
+            "odd_fora": "2.65"
+        },
+        {
+            "time_casa": "Chengdu Rongcheng B",
+            "time_fora": "Wenzhou Professional",
+            "mercado": "Faltas Sofridas: Zhang Yanjun (Frequência: 1/3j | Méd: 2.0)",
+            "mercado_ranking": "FALTAS SOFRIDAS: ZHANG YANJUN (FREQUÊNCIA: 1/3J | MÉD: 2.0)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bqe51SMq/#/resumo-de-jogo",
+            "odd_casa": "2.55",
+            "odd_fora": "2.65"
+        },
+        {
+            "time_casa": "Cleveland Force",
+            "time_fora": "Lorain County Leviathan",
+            "mercado": "+2.5 Gols (100%)",
+            "mercado_ranking": "+2.5 GOLS (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tCUMoA44/#/resumo-de-jogo",
+            "odd_casa": "3.10",
+            "odd_fora": "1.93"
+        },
+        {
+            "time_casa": "Cleveland Force",
+            "time_fora": "Lorain County Leviathan",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tCUMoA44/#/resumo-de-jogo",
+            "odd_casa": "3.10",
+            "odd_fora": "1.93"
+        }
+    ]
+}

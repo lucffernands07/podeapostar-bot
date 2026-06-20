@@ -720,5 +720,43 @@
                 "-4.5": 1
             }
         }
+    },
+    "2026-06-19": {
+        "FAVORITO_CASA": {
+            "total_jogos": 7,
+            "greens": {
+                "1X": 4,
+                "VITORIA_CASA": 4,
+                "2X": 3,
+                "BTTS": 2,
+                "+1.5": 5,
+                "+2.5": 3,
+                "-4.5": 6
+            }
+        },
+        "EQUILIBRADO": {
+            "total_jogos": 2,
+            "greens": {
+                "1X": 1,
+                "VITORIA_CASA": 1,
+                "2X": 1,
+                "BTTS": 1,
+                "+1.5": 2,
+                "+2.5": 1,
+                "-4.5": 2
+            }
+        },
+        "FAVORITO_FORA": {
+            "total_jogos": 3,
+            "greens": {
+                "1X": 1,
+                "VITORIA_CASA": 0,
+                "2X": 3,
+                "BTTS": 1,
+                "+1.5": 2,
+                "+2.5": 1,
+                "-4.5": 3
+            }
+        }
     }
 }
