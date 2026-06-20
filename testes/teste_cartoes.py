@@ -50,7 +50,6 @@ def testar_cartoes_pela_logica_main():
     
     # Índice global para controlar a posição do jogo na lista de históricos (0 a 5)
     jogo_global_index = 0
-    total_jogos_esperados = 6
 
     try:
         print(f"1. URL DO CONFRONTO BASE (H2H):\n👉 {url_inicial}\n")
@@ -86,7 +85,8 @@ def testar_cartoes_pela_logica_main():
             for jogo_index in range(quantidade_jogos):
                 print(f"🔄 Redirecionando para o Jogo {jogo_index + 1}: {urls_jogos_alvo[jogo_index]}...")
                 
-                if juego_index > 0 or jogo_global_index > 0:
+                # CORRIGIDO: alterado de juego_index para jogo_index
+                if jogo_index > 0 or jogo_global_index > 0:
                     driver.get(url_inicial)
                     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
                     linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
@@ -113,8 +113,7 @@ def testar_cartoes_pela_logica_main():
                 url_jogo_completa = driver.current_url.split("?")[0].strip("/")
                 print(f"👉 URL DO CONFRONTO ATUAL: {url_jogo_completa}")
 
-                # 📸 TRATAMENTO HISTÓRICO DA IMAGEM (image_79651d.png)
-                # Coleta os hashes reais dos escudos no topo fixo da página antes de mudar de aba
+                # 📸 TRATAMENTO HISTÓRICO DA IMAGEM
                 hash_mandante_topo = ""
                 hash_visitante_topo = ""
                 try:
@@ -157,14 +156,13 @@ def testar_cartoes_pela_logica_main():
                             if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
                                 continue
                             
-                            # 2. SEPARAÇÃO POR FILTRO DE IMAGEM (image_797039.png)
+                            # 2. SEPARAÇÃO POR FILTRO DE IMAGEM
                             try:
                                 img_linha = linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
                                 hash_linha = img_linha.get_attribute("src").split('/')[-1]
                             except:
                                 hash_linha = ""
 
-                            # Determina se a linha pertence à Escócia ou ao Marrocos mapeando os hashes coletados
                             if hash_linha and hash_linha == hash_mandante_topo:
                                 time_identificado = mandante_atual
                             elif hash_linha and hash_linha == hash_visitante_topo:
@@ -172,7 +170,6 @@ def testar_cartoes_pela_logica_main():
                             else:
                                 time_identificado = "OUTRO"
 
-                            # Vincula aos dicionários alvos corretos ou ignora intrusos (Ex: Brasil)
                             if "ESCÓCIA" in time_identificado.upper() or "SCOTLAND" in time_identificado.upper():
                                 dicionario_am = historico_escocia_am
                                 dicionario_vm = historico_escocia_vm
@@ -180,7 +177,7 @@ def testar_cartoes_pela_logica_main():
                                 dicionario_am = historico_marrocos_am
                                 dicionario_vm = historico_marrocos_vm
                             else:
-                                continue # Ignora jogadores de seleções que não sejam Escócia ou Marrocos
+                                continue
 
                             # 3. Extração dos valores numéricos
                             celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
@@ -200,7 +197,6 @@ def testar_cartoes_pela_logica_main():
                             amarelos = 0 if val_amarelo in ["-", ""] or not val_amarelo.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_amarelo))
                             vermelhos = 0 if val_vermelho in ["-", ""] or not val_vermelho.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_vermelho))
                             
-                            # Aloca e preenche os arrays mantendo o alinhamento com a rodada atual do loop (jogo_global_index)
                             if nome_jogador not in dicionario_am:
                                 dicionario_am[nome_jogador] = []
                             while len(dicionario_am[nome_jogador]) < jogo_global_index:
@@ -219,7 +215,7 @@ def testar_cartoes_pela_logica_main():
                     print(f"  ⚠️ Sem dados de Cartões Gerais para este jogo: {e}\n")
                 
                 print(f"✅ Jogo {jogo_index + 1} da seção processado com sucesso.\n" + "-"*40)
-                jogo_global_index += 1 # Incrementa o passo geral da coleta
+                jogo_global_index += 1
 
         # --- PROCESSAMENTO DOS CONSOLIDADOS E MÉDIAS POR SELEÇÃO ---
         print("\n" + "="*70)
@@ -250,7 +246,6 @@ def testar_cartoes_pela_logica_main():
                 lista_combinada = [lista_amarelos[x] + lista_vermelhos[x] for x in range(jogo_global_index)]
                 media = sum(lista_combinada) / jogo_global_index
                 
-                # Exibe apenas atletas com cartões ativos para manter o terminal legível
                 if sum(lista_combinada) > 0:
                     print(f"  👤 {jogador.ljust(25)} ➔ Média: {media:.1f} cartões/jogo {lista_combinada} (Am: {lista_amarelos} | Vm: {lista_vermelhos})")
 
