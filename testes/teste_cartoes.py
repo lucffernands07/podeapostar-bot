@@ -32,178 +32,235 @@ def testar_cartoes_pela_logica_main():
     # URL do confronto base (H2H)
     url_inicial = "https://www.flashscore.com.br/jogo/futebol/escocia-fZRU25WH/marrocos-IDKYO3R8/h2h/total/"
     
-    print("\n" + "="*60)
-    print("🚀 INICIANDO ANÁLISE DOS 3 ÚLTIMOS JOGOS (MERCADO DE CARTÕES - SEGURO)")
-    print("="*60 + "\n")
+    print("\n" + "="*70)
+    print("🚀 INICIANDO ANÁLISE DUPLA H2H (MANDANTE E VISITANTE) FILTRADA POR IMAGEM")
+    print("="*70 + "\n")
     
-    # Dicionários para acumular o histórico de cada jogo -> { Nome: [jogo1, jogo2, jogo3] }
-    historico_amarelos = {}
-    historico_vermelhos = {}
+    # Dicionários separados por seleção alvo -> { Nome: [jogo1, jogo2, jogo3, jogo4, jogo5, jogo6] }
+    historico_escocia_am = {}
+    historico_escocia_vm = {}
+    historico_marrocos_am = {}
+    historico_marrocos_vm = {}
     
+    # Configuração de varredura: Seção 1 (Mandante - Escócia) e Seção 2 (Visitante - Marrocos)
+    secoes_alvo = [
+        {"nome_time_base": "Escócia", "secao": 1},
+        {"nome_time_base": "Marrocos", "secao": 2}
+    ]
+    
+    # Índice global para controlar a posição do jogo na lista de históricos (0 a 5)
+    jogo_global_index = 0
+    total_jogos_esperados = 6
+
     try:
-        # LOG 1: URL do confronto base (H2H)
-        print(f"1. URL DO CONFRONTO (H2H):\n👉 {url_inicial}\n")
+        print(f"1. URL DO CONFRONTO BASE (H2H):\n👉 {url_inicial}\n")
         
-        driver.get(url_inicial)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-        
-        # Seleciona as linhas de confrontos da primeira tabela do H2H (Últimos jogos do Mandante)
-        linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__section:nth-child(1) .h2h__row")
-        if not linhas_confrontos:
-            linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__row")
+        for alvo in secoes_alvo:
+            time_base = alvo["nome_time_base"]
+            print(f"\n📋 COLETANDO 3 JOGOS DO HISTÓRICO DO(A): {time_base.upper()}")
+            print("-" * 55)
             
-        if len(linhas_confrontos) < 3:
-            print("❌ Partidas insuficientes no H2H para processar os 3 últimos jogos.")
-            return
+            driver.get(url_inicial)
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
+            
+            selector_linhas = f".h2h__section:nth-child({alvo['secao']}) .h2h__row"
+            linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
+            
+            if len(linhas_confrontos) < 3:
+                print(f"⚠️ Partidas insuficientes na seção {alvo['secao']} para processar 3 jogos.")
+                continue
 
-        quantidade_jogos = 3
-        urls_jogos_alvo = []
+            quantidade_jogos = 3
+            urls_jogos_alvo = []
 
-        # Mapeia os confrontos antes de navegar
-        for i in range(quantidade_jogos):
-            try:
-                partes_texto = linhas_confrontos[i].text.split('\n')
-                nome_confronto = f"{partes_texto[2].strip()} x {partes_texto[3].strip()}"
-            except:
-                nome_confronto = f"Jogo {i+1}"
-            urls_jogos_alvo.append(nome_confronto)
+            # Mapeia os confrontos antes de navegar
+            for i in range(quantidade_jogos):
+                try:
+                    partes_texto = linhas_confrontos[i].text.split('\n')
+                    nome_confronto = f"{partes_texto[2].strip()} x {partes_texto[3].strip()}"
+                except:
+                    nome_confronto = f"Jogo {i+1}"
+                urls_jogos_alvo.append(nome_confronto)
 
-        # --- LOOP PARA PROCESSAR OS 3 JOGOS ---
-        for jogo_index in range(quantidade_jogos):
-            print(f"🔄 Redirecionando para o Jogo {jogo_index + 1}: {urls_jogos_alvo[jogo_index]}...")
-            
-            # Recarrega a página inicial H2H caso o driver venha de outra aba
-            if jogo_index > 0:
-                driver.get(url_inicial)
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-                linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__section:nth-child(1) .h2h__row") or driver.find_elements(By.CSS_SELECTOR, ".h2h__row")
-            
-            elemento_alvo = linhas_confrontos[jogo_index]
-            url_anterior = driver.current_url
-            driver.execute_script("arguments[0].click();", elemento_alvo)
-            
-            try:
-                WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
-            except:
-                pass
+            # --- LOOP PARA PROCESSAR OS JOGOS DA SEÇÃO ---
+            for jogo_index in range(quantidade_jogos):
+                print(f"🔄 Redirecionando para o Jogo {jogo_index + 1}: {urls_jogos_alvo[jogo_index]}...")
                 
-            time.sleep(3)
-            url_jogo_completa = driver.current_url.split("?")[0].strip("/")
-            print(f"👉 URL DO JOGO {jogo_index + 1}:\n   {url_jogo_completa}\n")
+                if juego_index > 0 or jogo_global_index > 0:
+                    driver.get(url_inicial)
+                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
+                    linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
+                
+                elemento_alvo = linhas_confrontos[jogo_index]
+                
+                # Guarda quem é mandante e visitante do jogo atual por texto
+                try:
+                    partes_texto = elemento_alvo.text.split('\n')
+                    mandante_atual = partes_texto[2].strip()
+                    visitante_atual = partes_texto[3].strip()
+                except:
+                    mandante_atual, visitante_atual = "", ""
 
-            # --- RASPAGEM DA ABA: GERAIS ---
-            url_gerais = f"{url_jogo_completa}/resumo/estatisticas-jogadores/gerais/"
-            driver.get(url_gerais)
-            try:
-                # Aguarda as novas linhas estruturais de jogadores
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
+                url_anterior = driver.current_url
+                driver.execute_script("arguments[0].click();", elemento_alvo)
+                
+                try:
+                    WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
+                except:
+                    pass
+                    
                 time.sleep(3)
-                
-                # Tenta mapeamento dinâmico por cabeçalho
-                cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
-                indice_amarelos = -1
-                indice_vermelhos = -1
-                
-                for idx, th in enumerate(cabecalhos):
-                    texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
-                    alias = str(th.get_attribute("data-analytics-alias")).upper()
+                url_jogo_completa = driver.current_url.split("?")[0].strip("/")
+                print(f"👉 URL DO CONFRONTO ATUAL: {url_jogo_completa}")
+
+                # 📸 TRATAMENTO HISTÓRICO DA IMAGEM (image_79651d.png)
+                # Coleta os hashes reais dos escudos no topo fixo da página antes de mudar de aba
+                hash_mandante_topo = ""
+                hash_visitante_topo = ""
+                try:
+                    img_m = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__homeLogo img.participant__image")
+                    hash_mandante_topo = img_m.get_attribute("src").split('/')[-1]
                     
-                    if "AMARELO" in texto_th or alias == "YELLOW_CARDS" or texto_th == "CA":
-                        indice_amarelos = idx
-                    if "VERMELHO" in texto_th or alias == "RED_CARDS" or texto_th == "CV":
-                        indice_vermelhos = idx
-                
-                linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
-                if len(linhas_dados) <= 1:
-                    linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
+                    img_v = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__awayLogo img.participant__image")
+                    hash_visitante_topo = img_v.get_attribute("src").split('/')[-1]
+                except Exception as e:
+                    print(f"  ⚠️ Não foi possível ler as imagens dos escudos no topo: {e}")
+
+                # --- RASPAGEM DA ABA: GERAIS ---
+                url_gerais = f"{url_jogo_completa}/resumo/estatisticas-jogadores/gerais/"
+                driver.get(url_gerais)
+                try:
+                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
+                    time.sleep(3)
                     
-                for linha in linhas_dados:
-                    try:
-                        # Extrai o nome do jogador
-                        nome_jogador = driver.execute_script("return arguments[0].textContent;", linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")).strip()
-                        if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
-                            continue
+                    cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
+                    indice_amarelos = -1
+                    indice_vermelhos = -1
+                    
+                    for idx, th in enumerate(cabecalhos):
+                        texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
+                        alias = str(th.get_attribute("data-analytics-alias")).upper()
                         
-                        celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
-                        if not celulas_valores:
-                            continue
+                        if "AMARELO" in texto_th or alias == "YELLOW_CARDS" or texto_th == "CA":
+                            indice_amarelos = idx
+                        if "VERMELHO" in texto_th or alias == "RED_CARDS" or texto_th == "CV":
+                            indice_vermelhos = idx
+                    
+                    linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+                    if len(linhas_dados) <= 1:
+                        linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
+                        
+                    for linha in linhas_dados:
+                        try:
+                            # 1. Extrai o nome do jogador
+                            nome_jogador = driver.execute_script("return arguments[0].textContent;", linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")).strip()
+                            if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
+                                continue
                             
-                        # FALLBACK ROBUSTO: Se o cabeçalho falhou, adota o mapeamento padrão da estrutura de atletas
-                        if indice_amarelos != -1 and indice_vermelhos != -1 and len(celulas_valores) > max(indice_amarelos, indice_vermelhos):
-                            idx_am = indice_amarelos
-                            idx_vm = indice_vermelhos
-                        else:
-                            # Se a última coluna costuma ser minutos jogados (ex: 90'), cartões estão logo atrás
-                            idx_am = len(celulas_valores) - 3 if len(celulas_valores) >= 3 else 0
-                            idx_vm = len(celulas_valores) - 2 if len(celulas_valores) >= 2 else 0
+                            # 2. SEPARAÇÃO POR FILTRO DE IMAGEM (image_797039.png)
+                            try:
+                                img_linha = linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
+                                hash_linha = img_linha.get_attribute("src").split('/')[-1]
+                            except:
+                                hash_linha = ""
 
-                        val_amarelo = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_am]).strip()
-                        val_vermelho = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_vm]).strip()
-                        
-                        amarelos = 0 if val_amarelo in ["-", ""] or not val_amarelo.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_amarelo))
-                        vermelhos = 0 if val_vermelho in ["-", ""] or not val_vermelho.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_vermelho))
-                        
-                        # Acumula Amarelos
-                        if nome_jogador not in historico_amarelos:
-                            historico_amarelos[nome_jogador] = []
-                        while len(historico_amarelos[nome_jogador]) < jogo_index:
-                            historico_amarelos[nome_jogador].append(0)
-                        historico_amarelos[nome_jogador].append(amarelos)
-                        
-                        # Acumula Vermelhos
-                        if nome_jogador not in historico_vermelhos:
-                            historico_vermelhos[nome_jogador] = []
-                        while len(historico_vermelhos[nome_jogador]) < jogo_index:
-                            historico_vermelhos[nome_jogador].append(0)
-                        historico_vermelhos[nome_jogador].append(vermelhos)
-                    except Exception as e:
-                        continue
-            except Exception as e:
-                print(f"  ⚠️ Sem dados de Cartões Gerais para este jogo: {e}\n")
+                            # Determina se a linha pertence à Escócia ou ao Marrocos mapeando os hashes coletados
+                            if hash_linha and hash_linha == hash_mandante_topo:
+                                time_identificado = mandante_atual
+                            elif hash_linha and hash_linha == hash_visitante_topo:
+                                time_identificado = visitante_atual
+                            else:
+                                time_identificado = "OUTRO"
+
+                            # Vincula aos dicionários alvos corretos ou ignora intrusos (Ex: Brasil)
+                            if "ESCÓCIA" in time_identificado.upper() or "SCOTLAND" in time_identificado.upper():
+                                dicionario_am = historico_escocia_am
+                                dicionario_vm = historico_escocia_vm
+                            elif "MARROCOS" in time_identificado.upper() or "MOROCCO" in time_identificado.upper():
+                                dicionario_am = historico_marrocos_am
+                                dicionario_vm = historico_marrocos_vm
+                            else:
+                                continue # Ignora jogadores de seleções que não sejam Escócia ou Marrocos
+
+                            # 3. Extração dos valores numéricos
+                            celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                            if not celulas_valores:
+                                continue
+                                
+                            if indice_amarelos != -1 and indice_vermelhos != -1 and len(celulas_valores) > max(indice_amarelos, indice_vermelhos):
+                                idx_am = indice_amarelos
+                                idx_vm = indice_vermelhos
+                            else:
+                                idx_am = len(celulas_valores) - 3 if len(celulas_valores) >= 3 else 0
+                                idx_vm = len(celulas_valores) - 2 if len(celulas_valores) >= 2 else 0
+
+                            val_amarelo = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_am]).strip()
+                            val_vermelho = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_vm]).strip()
+                            
+                            amarelos = 0 if val_amarelo in ["-", ""] or not val_amarelo.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_amarelo))
+                            vermelhos = 0 if val_vermelho in ["-", ""] or not val_vermelho.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_vermelho))
+                            
+                            # Aloca e preenche os arrays mantendo o alinhamento com a rodada atual do loop (jogo_global_index)
+                            if nome_jogador not in dicionario_am:
+                                dicionario_am[nome_jogador] = []
+                            while len(dicionario_am[nome_jogador]) < jogo_global_index:
+                                dicionario_am[nome_jogador].append(0)
+                            dicionario_am[nome_jogador].append(amarelos)
+                            
+                            if nome_jogador not in dicionario_vm:
+                                dicionario_vm[nome_jogador] = []
+                            while len(dicionario_vm[nome_jogador]) < jogo_global_index:
+                                dicionario_vm[nome_jogador].append(0)
+                            dicionario_vm[nome_jogador].append(vermelhos)
+
+                        except:
+                            continue
+                except Exception as e:
+                    print(f"  ⚠️ Sem dados de Cartões Gerais para este jogo: {e}\n")
                 
-            print(f"✅ Jogo {jogo_index + 1} coletado.\n" + "-"*40)
+                print(f"✅ Jogo {jogo_index + 1} da seção processado com sucesso.\n" + "-"*40)
+                jogo_global_index += 1 # Incrementa o passo geral da coleta
 
-        # --- PROCESSAMENTO DOS CONSOLIDADOS E MÉDIAS ---
-        print("\n" + "="*60)
-        print(f"📊 CONSOLIDADO DE MÉDIAS DOS ÚLTIMOS {quantidade_jogos} JOGOS")
-        print("="*60)
+        # --- PROCESSAMENTO DOS CONSOLIDADOS E MÉDIAS POR SELEÇÃO ---
+        print("\n" + "="*70)
+        print(f"📊 RELATÓRIO FINAL DE MÉDIAS DOS JOGOS MAPEADOS (Total: {jogo_global_index} partidas)")
+        print("="*70)
         
-        medias_totais = {}
+        selecoes_prints = [
+            {"nome": "ESCÓCIA", "dict_am": historico_escocia_am, "dict_vm": historico_escocia_vm},
+            {"nome": "MARROCOS", "dict_am": historico_marrocos_am, "dict_vm": historico_marrocos_vm}
+        ]
         
-        print(f"\n🟨 HISTÓRICO DETALHADO POR JOGADOR (Soma Amarelos + Vermelhos):")
-        print("-" * 55)
-        for jogador, lista_amarelos in historico_amarelos.items():
-            lista_vermelhos = historico_vermelhos.get(jogador, [])
+        for sel in selecoes_prints:
+            print(f"\n🟩 SELEÇÃO DA {sel['nome']}:")
+            print("-" * 55)
             
-            while len(lista_amarelos) < quantidade_jogos:
-                lista_amarelos.append(0)
-            while len(lista_vermelhos) < quantidade_jogos:
-                lista_vermelhos.append(0)
+            if not sel["dict_am"]:
+                print("  Nenhum jogador recebeu cartões nos jogos listados.")
+                continue
                 
-            lista_combinada = [lista_amarelos[x] + lista_vermelhos[x] for x in range(quantidade_jogos)]
-            media = sum(lista_combinada) / quantidade_jogos
-            medias_totais[jogador] = media
-            
-            print(f"  👤 {jogador.ljust(25)} ➔ Média: {media:.1f} cartões/jogo {lista_combinada} (Am: {lista_amarelos} | Vm: {lista_vermelhos})")
-
-        # --- EXIBIÇÃO DOS MELHORES ---
-        print("\n" + "="*60)
-        print("🏆 DESTAQUES EM INDISCIPLINA SELECIONADOS")
-        print("="*60)
-        
-        if medias_totais and max(medias_totais.values()) > 0:
-            jogador_mais_faltoso = max(medias_totais, key=medias_totais.get)
-            print(f"🔥 MAIOR TENDÊNCIA DE CARTÃO: {jogador_mais_faltoso} (Média de {medias_totais[jogador_mais_faltoso]:.1f} cartões/jogo)")
-        else:
-            print(f"🔥 MAIOR TENDÊNCIA DE CARTÃO: Nenhum jogador recebeu cartões nestes jogos.")
+            for jogador, lista_amarelos in sel["dict_am"].items():
+                lista_vermelhos = sel["dict_vm"].get(jogador, [])
+                
+                while len(lista_amarelos) < jogo_global_index:
+                    lista_amarelos.append(0)
+                while len(lista_vermelhos) < jogo_global_index:
+                    lista_vermelhos.append(0)
+                    
+                lista_combinada = [lista_amarelos[x] + lista_vermelhos[x] for x in range(jogo_global_index)]
+                media = sum(lista_combinada) / jogo_global_index
+                
+                # Exibe apenas atletas com cartões ativos para manter o terminal legível
+                if sum(lista_combinada) > 0:
+                    print(f"  👤 {jogador.ljust(25)} ➔ Média: {media:.1f} cartões/jogo {lista_combinada} (Am: {lista_amarelos} | Vm: {lista_vermelhos})")
 
     except Exception as e:
         print(f"\n❌ Erro crítico no fluxo de médias: {e}")
     finally:
         driver.quit()
-        print("="*60)
-        print("🏁 Teste de cartões finalizado.")
-        print("="*60)
+        print("\n" + "="*70)
+        print("🏁 Análise inteligente de cartões finalizada com sucesso.")
+        print("="*70)
 
 if __name__ == "__main__":
     testar_cartoes_pela_logica_main()
