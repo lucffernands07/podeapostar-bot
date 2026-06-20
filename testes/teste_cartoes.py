@@ -158,6 +158,19 @@ def testar_analise_cartoes():
         print("="*60)
         print(f"🟨 Lista Mandante: {historico_mandante}")
         print(f"🟨 Lista Visitante: {historico_visitante}")
+        
+        # CORREÇÃO: Adiciona o cálculo e exibição da média dos 3 jogos
+        total_cartoes = sum(historico_mandante) + sum(historico_visitante)
+        media_3_jogos = total_cartoes / 3
+        
+        print(f"\n📊 Média de cartões (últimos 3 jogos): {media_3_jogos:.2f}")
+        
+        # Exemplo de validação simples no log baseado no seu critério
+        if media_3_jogos < 1.5:
+            print("   💡 Tendência: Menos de 1.5 cartões")
+        elif media_3_jogos < 2.5:
+            print("   💡 Tendência: Menos de 2.5 cartões")
+
 
     except Exception as e:
         print(f"\n❌ Erro no fluxo de execução: {e}")
