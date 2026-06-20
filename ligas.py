@@ -41,7 +41,7 @@ COMPETICOES = {
     "Cazaquistão - Primeira Liga": "https://www.flashscore.com.br/futebol/cazaquistao/primeira-liga/jogos"
 }
 
-    """"
+    """
     # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
     "Irlanda - Premier": "https://www.flashscore.com.br/futebol/irlanda/divisao-premier/jogos/",
     "Colombia - Copa": "https://www.flashscore.com.br/futebol/colombia/copa-da-colombia/jogos/",
