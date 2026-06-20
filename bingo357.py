@@ -28,8 +28,8 @@ def prioridade_mercado(mercado_texto):
     if "ambas" in m: return 3
     if "vitória" in m or "vitoria" in m: return 4
     if "2x" in m or "x2" in m: return 5
-    # 🚀 NOVO: Jogadores ganham prioridade logo após os mercados tradicionais de resultado
-    if "chutes" in m or "faltas" in m or "média" in m: return 6
+    # 🚀 AJUSTADO: Cartões adicionado junto com as prioridades analíticas de jogadores
+    if "chutes" in m or "faltas" in m or "média" in m or "cartões" in m or "cartao" in m: return 6
     return 7
 
 def carregar_ranking_pro():
@@ -78,22 +78,27 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: extrair_odd(x.get('odd', '1.0')), reverse=True)
     elif estrategia == "ACERTOS":
         def pegar_assertividade(x):
-            if "%" in x.get('mercado', ''):
-                return extrair_porcentagem(x.get('mercado', ''))
-            if "5/5j" in x.get('mercado', ''): return 100
-            if "4/5j" in x.get('mercado', ''): return 80
-            if "3/5j" in x.get('mercado', ''): return 60
-            if "3/3j" in x.get('mercado', ''): return 100
-            if "2/3j" in x.get('mercado', ''): return 66
+            mercado_txt = x.get('mercado', '')
+            if "%" in mercado_txt:
+                return extrair_porcentagem(mercado_txt)
+            if "5/5j" in mercado_txt: return 100
+            if "4/5j" in mercado_txt: return 80
+            if "3/5j" in mercado_txt: return 60
+            if "3/3j" in mercado_txt: return 100
+            if "2/3j" in mercado_txt: return 66
+            # 🚀 AJUSTADO: Dá peso máximo na ordenação por acertos para o mercado de cartões analíticos (3 de 3 jogos coletados)
+            if "confronto cartões" in mercado_txt.lower(): return 100
             return 50
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: pegar_assertividade(x), reverse=True)
     else: # EQUILIBRADO / AMBAS
         def calcular_peso_equilibrado(x):
             odd = extrair_odd(x.get('odd', '1.0'))
-            if "%" in x.get('mercado', ''):
-                pct = extrair_porcentagem(x.get('mercado', '')) / 100.0
+            mercado_txt = x.get('mercado', '')
+            if "%" in mercado_txt:
+                pct = extrair_porcentagem(mercado_txt) / 100.0
             else:
-                pct = 1.0 if ("3/3j" in x.get('mercado', '') or "5/5j" in x.get('mercado', '')) else 0.66
+                # 🚀 AJUSTADO: Validação equilibrada considerando os cartões analíticos (3/3 jogos coletados) como 1.0 (100%)
+                pct = 1.0 if ("3/3j" in mercado_txt or "5/5j" in mercado_txt or "confronto cartões" in mercado_txt.lower()) else 0.66
             return odd * pct
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: calcular_peso_equilibrado(x), reverse=True)
 
@@ -198,6 +203,9 @@ def formatar_para_telegram(bilhetes, cache_dados):
                     mercado_limpo = re.sub(r'\(.*?\)', f'({valor_arredondado}+)', mercado_limpo)
                 
                 # O cálculo continua usando a odd normal (1.50 nos bastidores), mas removemos o texto do visual
+                texto_final_linha = f"🔶 {mercado_limpo}"
+            elif "confronto cartões:" in mercado_limpo.lower():
+                # 🚀 Mantém a odd oculta visualmente no Telegram para cartões analíticos igual feito em chutes/faltas
                 texto_final_linha = f"🔶 {mercado_limpo}"
             else:
                 texto_final_linha = f"🔶 {mercado_limpo} | Odd: {odd_valor}"
