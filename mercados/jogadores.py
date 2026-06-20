@@ -29,9 +29,13 @@ def verificar_destaques_jogadores(historico_chutes, historico_faltas, quantidade
     Processa os históricos brutos extraídos pelo Selenium.
     🛡️ ADICIONADA TRAVA DE LISTA BRANCA PARA LIGAS DE ELITE.
     """
-    # 🚀 TRAVA: Se a liga atual NÃO estiver na lista branca, barra na hora
-    if nome_liga and nome_liga not in LIGAS_ELITE_JOGADORES:
-        print(f"⏩ [TRAVA] Pulando análise de jogadores para a liga '{nome_liga}' (Não é considerada liga Elite para jogadores).")
+        # 🚀 TRAVA REMODELADA: Se o nome vier vazio ou NÃO estiver estritamente na lista branca, barra na hora
+    nome_liga_limpo = nome_liga.strip() if nome_liga else ""
+    
+    if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
+        # Coloquei um fallback visual caso o nome venha nulo do scraper principal
+        liga_print = nome_liga_limpo if nome_liga_limpo else "NOME_DA_LIGA_VAZIO"
+        print(f"⏩ [TRAVA] Pulando análise de jogadores para a liga '{liga_print}' (Não é considerada liga Elite ou string inválida).")
         return []
 
     mercados_aprovados = []
