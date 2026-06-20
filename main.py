@@ -67,8 +67,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "t1_placar_1": None, "t2_placar_1": None,     
         "h2h_placar_1": None, "h2h_placar_2": None,   
         "pular_gols": False,
-        "historico_chutes": {}, 
-        "historico_faltas": {}  
+        "historico_chutes": {}, # 🚀 Chave para estatísticas de jogadores
+        "historico_faltas": {}  # 🚀 Chave para estatísticas de jogadores
     }
     
     try:
@@ -77,6 +77,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         h2h_tab.click()
         time.sleep(2)
         
+        # 🔗 CAPTURA DO LINK BETANO ADIANTADA
+        # Capturamos aqui porque o driver ainda está na página principal do confronto (/h2h/overall)
         try:
             print(f"      🔗 Capturando link Betano para {t1} x {t2}...")
             stats["link_betano"] = links.extrair_url_betano(driver)
@@ -87,7 +89,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         time.sleep(1)
         
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        urls_jogos_passados = [] # 🎯 Armazenará as URLs string em vez de WebElements obsoletos
+        linhas_t1_para_jogadores = [] # Guarda referência limpa
 
         for idx, secao in enumerate(secoes[:3]): 
             if idx == 2: 
@@ -101,15 +103,11 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             limite = 6 if idx == 2 else 5
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
             
+            if idx == 0:
+                linhas_t1_para_jogadores = linhas # Isola a seção do time da casa
+
             for i, linha in enumerate(linhas):
                 try:
-                    # 🎯 Captura o ID/Link do jogo se for da seção do Mandante (idx == 0) para a sub-navegação futura
-                    if idx == 0 and len(urls_jogos_passados) < 3:
-                        id_attr = linha.get_attribute("id") # Ex: "g_1_xxxxxx"
-                        if id_attr:
-                            id_limpo = id_attr.split('_')[-1]
-                            urls_jogos_passados.append(f"https://www.flashscore.com.br/jogo/{id_limpo}")
-
                     n_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
                     n_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
                     res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
@@ -178,134 +176,13 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
 
                 except: continue
 
-        # 🚀 SUB-NAVEGAÇÃO ULTRA-RÁPIDA E SEGURA PARA SCORES DE JOGADORES
-        for jogo_index, url_jogo_passado in enumerate(urls_jogos_passados):
-            
-            # Extrai o ID limpo direto da URL curta que salvamos antes
-            id_limpo = url_jogo_passado.split("/")[-1] if url_jogo_passado.endswith("/") else url_jogo_passado.split("/")[-1]
-            if not id_limpo: continue
-
-            # Monta a URL estruturada que o Flashscore aceita diretamente sem forçar redirecionamento de página inteira
-            url_base_real = f"https://www.flashscore.com.br/jogo/futebol/partido-{id_limpo}"
-            
-            # --- Finalizações ---
-            driver.get(f"{url_base_real}/resumo/estatisticas-jogadores/finalizacoes/")
-            try:
-                # Diminuí para 8 segundos para se não tiver o mercado o bot não ficar travado esperando à toa
-                WebDriverWait(driver, 8).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".fp-playerName_E6lgN")))
-                
-                cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], th")
-                indice_base_chutes = 10  
-                
-                for idx_c, th in enumerate(cabecalhos):
-                    texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
-                    alias = str(th.get_attribute("data-analytics-alias")).upper()
-                    if "ALVO" in texto_th or "GOL" in texto_th or "CHUTES" in texto_th or alias == "SHOTS_ON_TARGET":
-                        indice_base_chutes = idx_c
-                        break
-                
-                linhas_dados = driver.find_elements(By.CSS_SELECTOR, ".wcl-table__row_") or driver.find_elements(By.TAG_NAME, "tr")
-                
-                indice_real_chutes = -1
-                for test_idx in range(indice_base_chutes, -1, -1):
-                    encontrou_valor = False
-                    for linha in linhas_dados:
-                        celulas = linha.find_elements(By.CSS_SELECTOR, ".wcl-table__bodyCell_, td")
-                        if len(celulas) > test_idx:
-                            v = driver.execute_script("return arguments[0].textContent;", celulas[test_idx]).strip()
-                            if "(" in v:
-                                match = re.search(r'\((.*?)\)', v)
-                                v = match.group(1) if match else v
-                            if v.isdigit() and int(v) >= 1:
-                                encontrou_valor = True
-                                break
-                    if encontrou_valor:
-                        indice_real_chutes = test_idx
-                        break
-                
-                if indice_real_chutes == -1:
-                    indice_real_chutes = 2
-
-                for linha in linhas_dados:
-                    try:
-                        nome_jogador = driver.execute_script("return arguments[0].textContent;", linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")).strip()
-                        if not nome_jogador or nome_jogador == "TODOS": 
-                            continue
-                            
-                        celulas = linha.find_elements(By.CSS_SELECTOR, ".wcl-table__bodyCell_, td")
-                        if len(celulas) > indice_real_chutes:
-                            valor_bruto = driver.execute_script("return arguments[0].textContent;", celulas[indice_real_chutes]).strip()
-                            if "(" in valor_bruto:
-                                match = re.search(r'\((.*?)\)', valor_bruto)
-                                valor_bruto = match.group(1) if match else valor_bruto
-                            
-                            chutes = 0 if valor_bruto in ["-", ""] else int(valor_bruto)
-                            
-                            if nome_jogador not in stats["historico_chutes"]: 
-                                stats["historico_chutes"][nome_jogador] = []
-                                
-                            while len(stats["historico_chutes"][nome_jogador]) < jogo_index: 
-                                stats["historico_chutes"][nome_jogador].append(0)
-                                
-                            stats["historico_chutes"][nome_jogador].append(chutes)
-                    except: 
-                        continue
-            except Exception as e_chutes: 
-                pass # Se não encontrar a tabela de chutes, passa reto sem quebrar o fluxo do jogo
-
-            # --- Faltas Sofridas ---
-            driver.get(f"{url_base_real}/resumo/estatisticas-jogadores/ataque/")
-            try:
-                WebDriverWait(driver, 8).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".fp-playerName_E6lgN")))
-                cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], th")
-                indice_base = 13
-                for idx_c, th in enumerate(cabecalhos):
-                    texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
-                    alias = str(th.get_attribute("data-analytics-alias")).upper()
-                    if alias == "FOULS_SUFFERED" or "SOFRIDAS" in texto_th:
-                        indice_base = idx_c
-                        break
-                
-                linhas_dados = driver.find_elements(By.CSS_SELECTOR, ".wcl-table__row_") or driver.find_elements(By.TAG_NAME, "tr")
-                indice_real_faltas = -1
-                for test_idx in range(indice_base, -1, -1):
-                    encontrou_valor = False
-                    for linha in linhas_dados:
-                        try:
-                            celulas = linha.find_elements(By.CSS_SELECTOR, ".wcl-table__bodyCell_, td")
-                            if len(celulas) > test_idx:
-                                v = driver.execute_script("return arguments[0].textContent;", celulas[test_idx]).strip()
-                                if v.isdigit() and int(v) >= 1:
-                                    encontrou_valor = True
-                                    break
-                        except: continue
-                    if encontrou_valor:
-                        indice_real_faltas = test_idx
-                        break
-                if indice_real_faltas == -1: indice_real_faltas = indice_base - 1
-
-                for linha in linhas_dados:
-                    try:
-                        nome_jogador = driver.execute_script("return arguments[0].textContent;", linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")).strip()
-                        if not nome_jogador or nome_jogador == "TODOS": continue
-                        celulas = linha.find_elements(By.CSS_SELECTOR, ".wcl-table__bodyCell_, td")
-                        if len(celulas) > indice_real_faltas:
-                            valor_bruto = driver.execute_script("return arguments[0].textContent;", celulas[indice_real_faltas]).strip()
-                            faltas = 0 if valor_bruto in ["-", ""] or "%" in valor_bruto or "/" in valor_bruto else int(valor_bruto)
-                            if nome_jogador not in stats["historico_faltas"]: stats["historico_faltas"][nome_jogador] = []
-                            while len(stats["historico_faltas"][nome_jogador]) < jogo_index: stats["historico_faltas"][nome_jogador].append(0)
-                            stats["historico_faltas"][nome_jogador].append(faltas)
-                    except: continue
-            except: 
-                pass
-                
     except Exception as e:
         print(f"      ⚠️ Erro H2H {t1}x{t2}: {e}")
-        
+
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
-
+    
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
