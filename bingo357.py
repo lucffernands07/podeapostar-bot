@@ -190,22 +190,34 @@ def formatar_para_telegram(bilhetes, cache_dados):
                 }
             
             mercado_limpo = j.get('mercado', '')
+            
+            # 🚀 REGRA EXTRAÇÃO / ARREDONDAMENTO PARA CHUTES E FALTAS
             if "Faltas Sofridas:" in mercado_limpo or "Chutes no Alvo:" in mercado_limpo:
-                # 🚀 Captura o valor numérico da média (ex: 0.7 ou 1.3 ou 2.5)
                 match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
                 if match_med:
                     media_num = float(match_med.group(1))
-                    # Regra Luciano: 0.5 a 1.4 -> 1 | 1.5 a 2.4 -> 2 | 2.5 a 3.4 -> 3
+                    valor_arredondado = int(media_num + 0.5)
+                    if valor_arredondado < 1: valor_arredondado = 1
+                    mercado_limpo = re.sub(r'\(.*?\)', f'({valor_arredondado}+)', mercado_limpo)
+                
+                texto_final_linha = f"🔶 {mercado_limpo}"
+                
+            # 🚀 NOVA REGRA: IDENTIFICA E PADRONIZA CARTÕES NO MESMO VISUAL (X+)
+            elif "confronto cartões:" in mercado_limpo.lower() or "confronto cartões" in mercado_limpo.lower():
+                # Busca qualquer número decimal logo após "Cartões:" ou "cartões"
+                match_med = re.search(r'(?:cartões|Cartões):\s*([\d.]+)', mercado_limpo)
+                if match_med:
+                    media_num = float(match_med.group(1))
+                    # Regra Luciano de arredondamento:
                     valor_arredondado = int(media_num + 0.5)
                     if valor_arredondado < 1: valor_arredondado = 1
                     
-                    # Remove completamente o padrão antigo e injeta o visual simplificado (X+)
-                    mercado_limpo = re.sub(r'\(.*?\)', f'({valor_arredondado}+)', mercado_limpo)
-                
-                # O cálculo continua usando a odd normal (1.50 nos bastidores), mas removemos o texto do visual
-                texto_final_linha = f"🔶 {mercado_limpo}"
-            elif "confronto cartões:" in mercado_limpo.lower():
-                # 🚀 Mantém a odd oculta visualmente no Telegram para cartões analíticos igual feito em chutes/faltas
+                    # Reconstrói a string limpando os emojis poluídos e deixando o padrão correto
+                    mercado_limpo = f"Confronto Cartões ({valor_arredondado}+)"
+                else:
+                    # Fallback de segurança se falhar o Regex, limpa o texto bruto tirando os emojis
+                    mercado_limpo = mercado_limpo.split("(")[0].strip()
+                    
                 texto_final_linha = f"🔶 {mercado_limpo}"
             else:
                 texto_final_linha = f"🔶 {mercado_limpo} | Odd: {odd_valor}"
@@ -240,10 +252,12 @@ def formatar_para_telegram(bilhetes, cache_dados):
         corpo += "\n\n".join(lista_blocos_jogos)
         corpo += f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         
-        # Injeta a nota explicativa de redução se houver escassez
         if b.get("aviso_escassez"):
             corpo += b["aviso_escassez"]
             
         blocos.append(corpo)
+    
+    return "\n\n".join(blocos)
+
     
     return "\n\n".join(blocos)
