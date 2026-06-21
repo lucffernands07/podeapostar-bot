@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout do repositorio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 🛠️ PASSO ADICIONADO ABAIXO PARA IMPLEMENTAR A SUA LÓGICA:
       - name: 🔒 Verificar se o bot já rodou hoje (Apenas para Automático)
@@ -55,6 +55,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: 1. Executar bot Selenium (Bilhetes de Hoje)
+        timeout-minutes: 15
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
@@ -78,4 +79,3 @@ jobs:
           git pull --rebase origin main
           
           git push origin main
-          
