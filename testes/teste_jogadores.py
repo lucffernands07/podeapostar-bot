@@ -18,7 +18,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 # Importa a função de análise real E a lista branca do seu arquivo mercados/jogadores.py
 from mercados.jogadores import verificar_destaques_jogadores, LIGAS_ELITE_JOGADORES
 
-# 🔥 Tenta importar o COMPETICOES diretamente da raiz do projeto
+# Tenta importar o COMPETICOES diretamente da raiz do projeto
 try:
     import ligas
     COMPETICOES = ligas.COMPETICOES
@@ -34,19 +34,11 @@ except ImportError:
 CAMINHO_JSON_TESTE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'jogos_hoje.json'))
 
 def criar_json_ficticio_para_teste():
-    """
-    Cruza as ligas do arquivo ligas.py com a lista branca do jogadores.py 
-    e gera um jogos_hoje.json dinamicamente para o teste.
-    """
     dados_teste = []
-    
-    # URL de partida conhecida com estrutura de H2H correta para validar a raspagem do motor
     url_confronto_real = "https://www.flashscore.com.br/jogo/futebol/escocia-fZRU25WH/marrocos-IDKYO3R8/h2h/total/"
     
     print("\n🔍 Cruzando dicionário de COMPETICOES (raiz) com a Lista Branca...")
-    
     for nome_liga in COMPETICOES.keys():
-        # Se a liga mapeada no seu ligas.py estiver na lista branca de atletas, nós testamos
         if nome_liga.strip() in LIGAS_ELITE_JOGADORES:
             dados_teste.append({
                 "time_casa": "Time Mandante Teste",
@@ -54,7 +46,6 @@ def criar_json_ficticio_para_teste():
                 "liga": nome_liga.strip(),
                 "url_flashscore": url_confronto_real 
             })
-            print(f"  ✅ Liga adicionada ao escopo do teste: {nome_liga}")
 
     if not dados_teste:
         dados_teste.append({
@@ -66,7 +57,7 @@ def criar_json_ficticio_para_teste():
     
     with open(CAMINHO_JSON_TESTE, 'w', encoding='utf-8') as f:
         json.dump(dados_teste, f, ensure_ascii=False, indent=4)
-    print(f"\n⚙️ Arquivo temporário 'jogos_hoje.json' gerado com {len(dados_teste)} ligas mapeadas.")
+    print(f"⚙️ Arquivo temporário 'jogos_hoje.json' gerado com {len(dados_teste)} ligas mapeadas.")
 
 def carregar_jogos_do_dia():
     if not os.path.exists(CAMINHO_JSON_TESTE):
@@ -84,22 +75,17 @@ def configurar_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-    
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     driver.set_page_load_timeout(30)
     return driver
 
 def rodar_teste_simulado_main():
-    # 1. Cria o ambiente baseado no seu arquivo de ligas da raiz cruzado com a lista branca
     criar_json_ficticio_para_teste()
-
-    # 2. Carrega as partidas geradas
     jogos = carregar_jogos_do_dia()
     if not jogos:
         print("❌ Nenhum jogo disponível para rodar o teste de validação.")
         return
 
-    # 3. Garante o filtro ativo da lista branca real
     jogos_validos = [j for j in jogos if j.get('liga', '').strip() in LIGAS_ELITE_JOGADORES and j.get('url_flashscore')]
     
     print("\n" + "="*60)
@@ -110,12 +96,12 @@ def rodar_teste_simulado_main():
     wait = WebDriverWait(driver, 15)
     quantidade_jogos = 3
 
-    # Limita o loop para testar as 3 primeiras ligas válidas encontradas para o teste não demorar demais no GitHub
-    for idx_jogo, jogo in enumerate(jogos_validos[:3]):
+    # Testa as 2 primeiras ligas para detalhar bem os mercados no terminal
+    for idx_jogo, jogo in enumerate(jogos_validos[:2]):
         liga = jogo.get('liga', '').strip()
         url_inicial = jogo.get('url_flashscore')
 
-        print(f"\n🌍 [{idx_jogo + 1}/{min(3, len(jogos_validos))}] Testando validação de Liga no Motor: {liga}")
+        print(f"\n🌍 [{idx_jogo + 1}/{min(2, len(jogos_validos))}] Testando validação no Motor: {liga}")
         
         historico_chutes = {}
         historico_faltas = {}
@@ -124,7 +110,6 @@ def rodar_teste_simulado_main():
             driver.get(url_inicial)
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
             linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__section:nth-child(1) .h2h__row") or driver.find_elements(By.CSS_SELECTOR, ".h2h__row")
-            
             loops_reais = min(quantidade_jogos, len(linhas_confrontos))
 
             for jogo_index in range(loops_reais):
@@ -207,7 +192,7 @@ def rodar_teste_simulado_main():
                     except: pass
                 except: continue
 
-            # 🔥 VALIDA SE O MOTOR ACEITA ESSA LIGA DO ARQUIVO DE COMPETIÇÕES
+            # 🔥 OBTÉM AS OPERAÇÕES FILTRADAS E DETALHA NO CONSOLE DO GITHUB ACTIONS
             resultados_analise = verificar_destaques_jogadores(
                 historico_chutes=historico_chutes,
                 historico_faltas=historico_faltas,
@@ -216,16 +201,17 @@ def rodar_teste_simulado_main():
             )
 
             if resultados_analise:
-                print(f"   🟢 [APROVADO PELA LIGA]: Operações geradas com sucesso.")
+                print(f"   🟢 [APROVADO] Operações encontradas para a liga {liga}:")
+                for res in resultados_analise:
+                    # Vai exibir de forma clara se foi Chute no Alvo ou Falta Sofrida, o nome do atleta e as médias!
+                    print(f"      🔶 Mercado: {res.get('texto', 'Operação mapeada')} | Chave: {res.get('chave', 'N/A')}")
             else:
-                print(f"   🔴 [NEGADO/VAZIO]: Bloqueado pela trava de liga ou critérios mínimos.")
+                print(f"   🔴 [VAZIO] O motor mercados/jogadores.py rodou, mas nenhum atleta bateu as médias mínimas exigidas.")
 
         except Exception as e:
             print(f"❌ Erro no processamento: {e}")
 
     driver.quit()
-    
-    # Limpa o arquivo temporário
     if os.path.exists(CAMINHO_JSON_TESTE):
         os.remove(CAMINHO_JSON_TESTE)
 
