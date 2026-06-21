@@ -418,7 +418,7 @@ def main():
                 elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
             except Exception as e:
                 if "invalid session id" in str(e).lower() or "session" in str(e).lower():
-                    print("⚠️ Sessão do Chrome caiu! Reiniciando o navegador para continuar...")
+                    print("⚠️" " Sessão do Chrome caiu! Reiniciando o navegador para continuar...")
                     try: driver.quit()
                     except: pass
                     driver = configurar_driver() 
@@ -512,6 +512,12 @@ def main():
                                     if "M45" in m_chave and odd_float >= 4.0:
                                         continue 
 
+                                    # 🚀 NOVA TRAVA DE SEGURANÇA PARA MERCADOS ZERADOS
+                                    if m_chave == "CARTOES_CONFRONTO" and "0.0" in m_texto:
+                                        continue
+                                    if m_chave == "CHUTES_ALVO" and "0.0" in m_texto:
+                                        continue
+
                                     if odd_float >= 1.25:
                                         lista_para_filtros.append({
                                             "horario": h_br, "time_casa": t1, "time_fora": t2,
@@ -528,6 +534,8 @@ def main():
                                         })
                                                 
                                         total_mercados += 1
+                                try:
+                                    pass
                                 except: 
                                     continue
                 except: 
@@ -628,7 +636,6 @@ def main():
     finally:
         try: driver.quit()
         except: pass
-
 
 if __name__ == "__main__":
     main()
