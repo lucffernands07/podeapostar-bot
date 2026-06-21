@@ -428,138 +428,138 @@ def main():
                     print(f"⚠️ Erro ao carregar liga {nome_comp}: {e}")
                     continue
             
-           for el in elementos:
-            try:
-                # 1. Tenta capturar o elemento de tempo de forma isolada e segura
+            for el in elementos:
                 try:
-                    tempo_el = el.find_element(By.CSS_SELECTOR, ".event__time")
-                    tempo_raw = tempo_el.text.strip()
-                except Exception:
-                    # Se o elemento sumiu (jogo ao vivo, encerrado, etc.), passa para o próximo sem estourar o log
-                    continue
+                    # 1. Tenta capturar o elemento de tempo de forma isolada e segura
+                    try:
+                        tempo_el = el.find_element(By.CSS_SELECTOR, ".event__time")
+                        tempo_raw = tempo_el.text.strip()
+                    except Exception:
+                        # Se o elemento sumiu (jogo ao vivo, encerrado, etc.), passa para o próximo sem estourar o log
+                        continue
 
-                # 2. Verifica se o texto é uma string de status/tempo extra em vez de horário válido
-                if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado"]):
-                    continue
+                    # 2. Verifica se o texto é uma string de status/tempo extra em vez de horário válido
+                    if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado"]):
+                        continue
 
-                # 3. Pega a última parte do texto do tempo para converter
-                partes_tempo = tempo_raw.split()
-                if not partes_tempo:
-                    continue
-                    
-                horario_str = partes_tempo[-1]
-                
-                # Garante que temos um formato de hora válido antes de fazer o strptime
-                if ":" not in horario_str:
-                    continue
-
-                h_obj = datetime.strptime(horario_str, "%H:%M")
-                h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
-                
-                aceitar = False
-                if amanha_no_site in tempo_raw:
-                    if h_obj.hour <= 3: aceitar = True
-                elif "." not in tempo_raw:
-                    if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
-
-                if aceitar:
-                    times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
-                    t1, t2 = times[0].text.strip(), times[1].text.strip()
-                    id_jogo = el.get_attribute('id').split('_')[-1]
-                    
-                    url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
-                    s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
-                    
-                    mercados_para_processar = []
-
-                    # 1. Gols
-                    res_gols = gols.verificar_gols(s)
-                    for rg in res_gols:
-                        mercados_para_processar.append({"texto": rg['mercado'], "chave": rg['tipo']})
-
-                    # 2. Ambas Marcam
-                    res_btts = ambos_marcam.verificar_btts(s)
-                    if res_btts:
-                        mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
-
-                    # 3. Chance Dupla
-                    if s.get("casa_vitorias_recente", 0) >= 4 or s.get("fora_vitorias_recente", 0) >= 4:
-                        s["chance_dupla_pct"] = "100%"
-                    elif s.get("casa_vitorias_recente", 0) == 3 or s.get("fora_vitorias_recente", 0) == 3:
-                        s["chance_dupla_pct"] = "90%"
-                    else:
-                        s["chance_dupla_pct"] = "80%"
-
-                    res_cd = chance_dupla.verificar_chance_dupla(s)
-                    for rc in res_cd:
-                        tipo_cd = "1X" if "1X" in rc else "X2"
-                        mercados_para_processar.append({"texto": rc, "chave": tipo_cd})
-
-                    # 4. Vitória Casa
-                    res_vc = vitoria_casa.verificar_vitoria_casa(s)
-                    for rv in res_vc:
-                        mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
-
-                    # 5. Processamento Jogadores
-                    res_jogadores = joggers.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}), nome_liga=nome_comp) if 'joggers' in globals() else jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}), nome_liga=nome_comp)
-                    for rj in res_jogadores:
-                        mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
-
-                    # 6. Mercado de Cartões Coletivos
-                    res_cartoes = cartoes.analisar_dados_cartoes(
-                        s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}),
-                        s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}),
-                        nome_liga=nome_comp
-                    )
-                    if res_cartoes.get("aprovado"):
-                        texto_cartao = f"Média Confronto Cartões: {res_cartoes['media_confronto']} (🟨 {res_cartoes['total_mandante']} x {res_cartoes['total_visitante']} 🟥)"
-                        mercados_para_processar.append({"texto": texto_cartao, "chave": "CARTOES_CONFRONTO"})
-
-                    # --- VALIDAÇÃO DE ODDS E FILTRAGEM ---
-                    if mercados_para_processar:
-                        v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
+                    # 3. Pega a última parte do texto do tempo para converter
+                    partes_tempo = tempo_raw.split()
+                    if not partes_tempo:
+                        continue
                         
-                        for item in mercados_para_processar:
-                            m_texto = item["texto"]
-                            m_chave = item["chave"]
+                    horario_str = partes_tempo[-1]
+                    
+                    # Garante que temos um formato de hora válido antes de fazer o strptime
+                    if ":" not in horario_str:
+                        continue
+
+                    h_obj = datetime.strptime(horario_str, "%H:%M")
+                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
+                    
+                    aceitar = False
+                    if amanha_no_site in tempo_raw:
+                        if h_obj.hour <= 3: aceitar = True
+                    elif "." not in tempo_raw:
+                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
+
+                    if aceitar:
+                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                        t1, t2 = times[0].text.strip(), times[1].text.strip()
+                        id_jogo = el.get_attribute('id').split('_')[-1]
+                        
+                        url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
+                        s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
+                        
+                        mercados_para_processar = []
+
+                        # 1. Gols
+                        res_gols = gols.verificar_gols(s)
+                        for rg in res_gols:
+                            mercados_para_processar.append({"texto": rg['mercado'], "chave": rg['tipo']})
+
+                        # 2. Ambas Marcam
+                        res_btts = ambos_marcam.verificar_btts(s)
+                        if res_btts:
+                            mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
+
+                        # 3. Chance Dupla
+                        if s.get("casa_vitorias_recente", 0) >= 4 or s.get("fora_vitorias_recente", 0) >= 4:
+                            s["chance_dupla_pct"] = "100%"
+                        elif s.get("casa_vitorias_recente", 0) == 3 or s.get("fora_vitorias_recente", 0) == 3:
+                            s["chance_dupla_pct"] = "90%"
+                        else:
+                            s["chance_dupla_pct"] = "80%"
+
+                        res_cd = chance_dupla.verificar_chance_dupla(s)
+                        for rc in res_cd:
+                            tipo_cd = "1X" if "1X" in rc else "X2"
+                            mercados_para_processar.append({"texto": rc, "chave": tipo_cd})
+
+                        # 4. Vitória Casa
+                        res_vc = vitoria_casa.verificar_vitoria_casa(s)
+                        for rv in res_vc:
+                            mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
+
+                        # 5. Processamento Jogadores
+                        res_jogadores = joggers.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}), nome_liga=nome_comp) if 'joggers' in globals() else jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}), nome_liga=nome_comp)
+                        for rj in res_jogadores:
+                            mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
+
+                        # 6. Mercado de Cartões Coletivos
+                        res_cartoes = cartoes.analisar_dados_cartoes(
+                            s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}),
+                            s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}),
+                            nome_liga=nome_comp
+                        )
+                        if res_cartoes.get("aprovado"):
+                            texto_cartao = f"Média Confronto Cartões: {res_cartoes['media_confronto']} (🟨 {res_cartoes['total_mandante']} x {res_cartoes['total_visitante']} 🟥)"
+                            mercados_para_processar.append({"texto": texto_cartao, "chave": "CARTOES_CONFRONTO"})
+
+                        # --- VALIDAÇÃO DE ODDS E FILTRAGEM ---
+                        if mercados_para_processar:
+                            v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
                             
-                            if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"]:
-                                valor_odd_str = "1.50"
-                            else:
-                                valor_odd_str = v_odds.get(m_chave, "N/A")
+                            for item in mercados_para_processar:
+                                m_texto = item["texto"]
+                                m_chave = item["chave"]
+                                
+                                if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"]:
+                                    valor_odd_str = "1.50"
+                                else:
+                                    valor_odd_str = v_odds.get(m_chave, "N/A")
 
-                            try:
-                                odd_float = float(valor_odd_str.replace(',', '.'))
-                                if "M45" in m_chave and odd_float >= 4.0:
-                                    continue 
+                                try:
+                                    odd_float = float(valor_odd_str.replace(',', '.'))
+                                    if "M45" in m_chave and odd_float >= 4.0:
+                                        continue 
 
-                                # 🚀 NOVA TRAVA DE SEGURANÇA PARA MERCADOS ZERADOS
-                                if m_chave == "CARTOES_CONFRONTO" and "0.0" in m_texto:
+                                    # 🚀 NOVA TRAVA DE SEGURANÇA PARA MERCADOS ZERADOS
+                                    if m_chave == "CARTOES_CONFRONTO" and "0.0" in m_texto:
+                                        continue
+                                    if m_chave == "CHUTES_ALVO" and "0.0" in m_texto:
+                                        continue
+
+                                    if odd_float >= 1.25:
+                                        lista_para_filtros.append({
+                                            "horario": h_br, "time_casa": t1, "time_fora": t2,
+                                            "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else "Análise", "liga": nome_comp,
+                                            "link_betano": s.get("link_betano")
+                                        })
+                                        
+                                        jogos_para_pendentes.append({
+                                            "time_casa": t1,
+                                            "time_fora": t2,
+                                            "mercado": m_texto,
+                                            "mercado_ranking": m_texto.upper(),
+                                            "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
+                                        })
+                                                
+                                        total_mercados += 1
+                                except ValueError:
                                     continue
-                                if m_chave == "CHUTES_ALVO" and "0.0" in m_texto:
-                                    continue
-
-                                if odd_float >= 1.25:
-                                    lista_para_filtros.append({
-                                        "horario": h_br, "time_casa": t1, "time_fora": t2,
-                                        "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else "Análise", "liga": nome_comp,
-                                        "link_betano": s.get("link_betano")
-                                    })
-                                    
-                                    jogos_para_pendentes.append({
-                                        "time_casa": t1,
-                                        "time_fora": t2,
-                                        "mercado": m_texto,
-                                        "mercado_ranking": m_texto.upper(),
-                                        "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
-                                    })
-                                            
-                                    total_mercados += 1
-                            except ValueError:
-                                continue
-            except Exception as e:
-                print(f"⚠️ Erro ao processar partida: {e}")
-                continue
+                except Exception as e:
+                    print(f"⚠️ Erro ao processar partida: {e}")
+                    continue
 
         # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
