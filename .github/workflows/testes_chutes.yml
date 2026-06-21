@@ -1,9 +1,9 @@
-name: Teste de chutes no alvo
+name: Teste jogadores
 
 on:
   push:
     paths:
-      - 'testes/chute_aogol.py'        # Dispara automaticamente se houver commit em qualquer arquivo da pasta testes
+      - 'testes/teste_jogadores.py'        # Dispara automaticamente se houver commit em qualquer arquivo da pasta testes
   workflow_dispatch:       # Mantém o botão para você clicar em "Run Workflow" manualmente se quiser
 
 jobs:
@@ -25,9 +25,9 @@ jobs:
           pip install selenium webdriver-manager requests
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Rodar Teste de Chutes no Alvo
+      - name: Rodar Teste jogadores
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-        run: python testes/chute_aogol.py
+        run: python testes/teste_jogadores.py
         
