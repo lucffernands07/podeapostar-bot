@@ -1,5 +1,3 @@
-# mercados/jogadores.py
-
 # 🟢 LISTA BRANCA: Apenas ligas de elite que comprovadamente abrem mercados de jogadores na Betano
 LIGAS_ELITE_JOGADORES = [
     "Brasileirão Série A",
@@ -24,16 +22,16 @@ LIGAS_ELITE_JOGADORES = [
     "Mundo - Amistoso Internacional" # Amistosos de seleções principais abrem mercado
 ]
 
-def verificar_destaques_jogadores(historico_chutes, historico_faltas, quantidade_jogos=3, nome_liga=""):
+def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_liga=""):
     """
-    Processa os históricos brutos extraídos pelo Selenium.
+    Processa os históricos brutos extraídos pelo Selenium (Aba Finalizações).
     🛡️ ADICIONADA TRAVA DE LISTA BRANCA PARA LIGAS DE ELITE.
     """
-        # 🚀 TRAVA REMODELADA: Se o nome vier vazio ou NÃO estiver estritamente na lista branca, barra na hora
+    # 🚀 TRAVA REMODELADA: Se o nome vier vazio ou NÃO estiver estritamente na lista branca, barra na hora
     nome_liga_limpo = nome_liga.strip() if nome_liga else ""
     
     if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
-        # Coloquei um fallback visual caso o nome venha nulo do scraper principal
+        # Fallback visual caso o nome venha nulo do scraper principal
         liga_print = nome_liga_limpo if nome_liga_limpo else "NOME_DA_LIGA_VAZIO"
         print(f"⏩ [TRAVA] Pulando análise de jogadores para a liga '{liga_print}' (Não é considerada liga Elite ou string inválida).")
         return []
@@ -60,25 +58,4 @@ def verificar_destaques_jogadores(historico_chutes, historico_faltas, quantidade
                 "chave": "CHUTES_ALVO"
             })
 
-    # 📉 REGRA: FALTAS SOFRIDAS
-    dados_faltas = {}
-    for jogador, lista_valores in historico_faltas.items():
-        while len(lista_valores) < quantidade_jogos:
-            lista_valores.append(0)
-            
-        media = sum(lista_valores) / quantidade_jogos
-        jogos_com_sucesso = sum(1 for qtd in lista_valores if qtd >= 1)
-        dados_faltas[jogador] = {"media": media, "jogos_com_sucesso": jogos_com_sucesso}
-
-    if dados_faltas:
-        mais_cacado = max(dados_faltas, key=lambda k: (dados_faltas[k]["jogos_com_sucesso"], dados_faltas[k]["media"]))
-        res_f = dados_faltas[mais_cacado]
-        
-        if res_f["jogos_com_sucesso"] >= 2 or res_f["media"] >= 1.0:
-            mercados_aprovados.append({
-                "texto": f"Faltas Sofridas: {mais_cacado} (Frequência: {res_f['jogos_com_sucesso']}/{quantidade_jogos}j | Méd: {res_f['media']:.1f})",
-                "chave": "FALTAS_SOFRIDAS"
-            })
-
     return mercados_aprovados
-            
