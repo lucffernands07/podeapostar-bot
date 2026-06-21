@@ -52,21 +52,15 @@ def configurar_driver():
     return driver
 
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
-    # Configura timeout de segurança para carregamento de páginas pesadas (ex: Betano)
-    driver.set_page_load_timeout(25)
-    
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
-    
-    # 🌟 SALVA A JANELA MÃE DO FLASHSCORE PARA EVITAR PERDA DE FOCO
-    janela_flashscore = driver.current_window_handle
     
     stats = {
         "link_betano": None,
         "casa_15": 0, "casa_25": 0, "casa_45_under": 0, "casa_btts": 0, 
         "casa_vitorias_recente": 0, "ultimo_gols_casa": 0, "t1_resultado_1": "",
         "fora_15": 0, "fora_25": 0, "fora_45_under": 0, "fora_btts": 0, 
-        "ultimo_gols_fora": 0, "t2_resultado_1": "",
+        "fora_vitorias_recente": 0, "ultimo_gols_fora": 0, "t2_resultado_1": "",
         "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
         "h2h_res_1": "", "h2h_res_2": "", 
         "h2h_geral_res_1": "", "h2h_geral_res_2": "", "h2h_geral_res_3": "", "h2h_geral_res_4": "", "h2h_geral_res_5": "",
@@ -94,27 +88,16 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             stats["link_betano"] = links.extrair_url_betano(driver)
         except Exception as e_link:
             print(f"      ⚠️ Erro ao capturar link Betano inicial: {e_link}")
-        finally:
-            # 🌟 GARANTE QUE O DRIVER VOLTE 100% RESPONSIVO PARA A JANELA DO FLASHSCORE
-            try:
-                driver.switch_to.window(janela_flashscore)
-            except:
-                if janela_flashscore in driver.window_handles:
-                    driver.switch_to.window(janela_flashscore)
-                else:
-                    driver.switch_to.window(driver.window_handles[-1])
         
         driver.execute_script("window.scrollTo(0, 800);")
         time.sleep(1)
         
-        # --- 🚀 MÓDULO INTEGRADO: RASPAGEM COMPLETA POR SUB-NAVEGAÇÃO (CARTÕES, CHUTES E FALTAS) ---
+        # --- 🚀 MÓDULO INTEGRADO: RASPAGEM DE CARTÕES POR HISTÓRICO H2H (BLINDADO) ---
         jogo_global_index = 0
         secoes_alvo_cartoes = [
             {"tipo": "MANDANTE", "idx_secao": 1},
             {"tipo": "VISITANTE", "idx_secao": 2}
         ]
-
-        abas_estatisticas = ["gerais", "ataque", "defesa"]
 
         for alvo in secoes_alvo_cartoes:
             lista_urls_jogos = []
@@ -137,9 +120,10 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                             "visitante_atual": visitante_atual,
                             "elemento": elemento_alvo
                         })
-                    except: continue
+                    except: 
+                        continue
             except Exception as e_coleta:
-                print(f"      ⚠️ Erro ao listar linhas de estatísticas para {alvo['tipo']}: {e_coleta}")
+                print(f"      ⚠️ Erro ao listar linhas de cartões para {alvo['tipo']}: {e_coleta}")
                 continue
 
             for jogo_dados in lista_urls_jogos:
@@ -149,7 +133,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     
                     selector_linhas = f".h2h__section:nth-child({alvo['idx_secao']}) .h2h__row"
                     linhas_atualizadas = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
-                    if len(linhas_atualizadas) <= jogo_dados["idx"]: continue
+                    if len(linhas_atualizadas) <= jogo_dados["idx"]: 
+                        continue
                     
                     elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
                     mandante_atual = jogo_dados["mandante_atual"]
@@ -160,7 +145,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     
                     try:
                         WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
-                    except: pass
+                    except: 
+                        pass
                         
                     time.sleep(2.5)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
@@ -171,109 +157,96 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         hash_mandante_topo = img_m.get_attribute("src").split('/')[-1]
                         img_v = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__awayLogo img.participant__image")
                         hash_visitante_topo = img_v.get_attribute("src").split('/')[-1]
-                    except: pass
+                    except: 
+                        pass
 
-                    for aba in abas_estatisticas:
-                        url_sub = f"{url_jogo_completa}/resumo/estatisticas-jogadores/{aba}/"
-                        try:
-                            driver.get(url_sub)
-                            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
-                            time.sleep(1.5)
-                            
-                            cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
-                            indice_amarelos, indice_vermelhos = -1, -1
-                            indice_chutes, indice_faltas = -1, -1
-                            
-                            for idx_th, th in enumerate(cabecalhos):
-                                texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
-                                alias = str(th.get_attribute("data-analytics-alias")).upper()
-                                
-                                if "AMARELO" in texto_th or alias == "YELLOW_CARDS" or texto_th == "CA":
-                                    indice_amarelos = idx_th
-                                if "VERMELHO" in texto_th or alias == "RED_CARDS" or texto_th == "CV":
-                                    indice_vermelhos = idx_th
-                                if "CHUTES" in texto_th or "FINALIZA" in texto_th or "SHOTS" in texto_th or alias in ["TOTAL_SHOTS", "SHOTS_ON_TARGET"]:
-                                    indice_chutes = idx_th
-                                if "FALTAS" in texto_th or "FOULS" in texto_th or alias in ["FOULS_COMMITTED", "FOULS_SUFFERED"]:
-                                    indice_faltas = idx_th
-
-                            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
-                            if len(linhas_dados) <= 1:
-                                linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
-
-                            for linha in linhas_dados:
-                                try:
-                                    nome_jogador = driver.execute_script("return arguments[0].textContent;", linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")).strip()
-                                    if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
-                                        continue
-                                    
-                                    try:
-                                        img_linha = linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
-                                        hash_linha = img_linha.get_attribute("src").split('/')[-1]
-                                    except: hash_linha = ""
-
-                                    if hash_linha and hash_linha == hash_mandante_topo:
-                                        time_identificado = mandante_atual
-                                    elif hash_linha and hash_linha == hash_visitante_topo:
-                                        time_identificado = visitante_atual
-                                    else:
-                                        time_identificado = "OUTRO"
-
-                                    if t1.upper() in time_identificado.upper():
-                                        dicionario_am = stats["historico_mandante_am"]
-                                        dicionario_vm = stats["historico_mandante_vm"]
-                                    elif t2.upper() in time_identificado.upper():
-                                        dicionario_am = stats["historico_visitante_am"]
-                                        dicionario_vm = stats["historico_visitante_vm"]
-                                    else:
-                                        continue
-
-                                    celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
-                                    if not celulas_valores: continue
-                                    
-                                    if indice_amarelos != -1 and len(celulas_valores) > indice_amarelos:
-                                        val_amarelo = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_amarelos]).strip()
-                                        amarelos = 0 if val_amarelo in ["-", ""] or not val_amarelo.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_amarelo))
-                                        if nome_jogador not in dicionario_am: dicionario_am[nome_jogador] = []
-                                        while len(dicionario_am[nome_jogador]) < jogo_global_index: dicionario_am[nome_jogador].append(0)
-                                        dicionario_am[nome_jogador].append(amarelos)
-                                        
-                                    if indice_vermelhos != -1 and len(celulas_valores) > indice_vermelhos:
-                                        val_vermelho = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_vermelhos]).strip()
-                                        vermelhos = 0 if val_vermelho in ["-", ""] or not val_vermelho.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_vermelho))
-                                        if nome_jogador not in dicionario_vm: dicionario_vm[nome_jogador] = []
-                                        while len(dicionario_vm[nome_jogador]) < jogo_global_index: dicionario_vm[nome_jogador].append(0)
-                                        dicionario_vm[nome_jogador].append(vermelhos)
-
-                                    if indice_chutes != -1 and len(celulas_valores) > indice_chutes:
-                                        val_chutes = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_chutes]).strip()
-                                        chutes = 0 if val_chutes in ["-", ""] or not val_chutes.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_chutes))
-                                        if nome_jogador not in stats["historico_chutes"]: stats["historico_chutes"][nome_jogador] = []
-                                        while len(stats["historico_chutes"][nome_jogador]) < jogo_global_index: stats["historico_chutes"][nome_jogador].append(0)
-                                        stats["historico_chutes"][nome_jogador].append(chutes)
-
-                                    if indice_faltas != -1 and len(celulas_valores) > indice_faltas:
-                                        val_faltas = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_faltas]).strip()
-                                        faltas = 0 if val_faltas in ["-", ""] or not val_faltas.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_faltas))
-                                        if nome_jogador not in stats["historico_faltas"]: stats["historico_faltas"][nome_jogador] = []
-                                        while len(stats["historico_faltas"][nome_jogador]) < jogo_global_index: stats["historico_faltas"][nome_jogador].append(0)
-                                        stats["historico_faltas"][nome_jogador].append(faltas)
-
-                                except: continue
-                        except Exception as e_aba:
-                            print(f"      ⚠️ Falha rápida na sub-aba {aba}: {e_aba}")
-                            continue
+                    url_gerais = f"{url_jogo_completa}/resumo/estatisticas-jogadores/gerais/"
+                    driver.get(url_gerais)
                     
+                    try:
+                        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
+                        time.sleep(1.5)
+                        
+                        cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
+                        indice_amarelos, indice_vermelhos = -1, -1
+                        
+                        for idx_th, th in enumerate(cabecalhos):
+                            texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
+                            alias = str(th.get_attribute("data-analytics-alias")).upper()
+                            if "AMARELO" in texto_th or alias == "YELLOW_CARDS" or texto_th == "CA":
+                                indice_amarelos = idx_th
+                            if "VERMELHO" in texto_th or alias == "RED_CARDS" or texto_th == "CV":
+                                indice_vermelhos = idx_th
+
+                        linhas_dados = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+                        if len(linhas_dados) <= 1:
+                            linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
+
+                        for linha in linhas_dados:
+                            try:
+                                nome_jogador = driver.execute_script("return arguments[0].textContent;", linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")).strip()
+                                if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
+                                    continue
+                                
+                                try:
+                                    img_linha = linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
+                                    hash_linha = img_linha.get_attribute("src").split('/')[-1]
+                                except: 
+                                    hash_linha = ""
+
+                                if hash_linha and hash_linha == hash_mandante_topo:
+                                    time_identificado = mandante_atual
+                                elif hash_linha and hash_linha == hash_visitante_topo:
+                                    time_identificado = visitante_atual
+                                else:
+                                    time_identificado = "OUTRO"
+
+                                if t1.upper() in time_identificado.upper():
+                                    dicionario_am = stats["historico_mandante_am"]
+                                    dicionario_vm = stats["historico_mandante_vm"]
+                                elif t2.upper() in time_identificado.upper():
+                                    dicionario_am = stats["historico_visitante_am"]
+                                    dicionario_vm = stats["historico_visitante_vm"]
+                                else:
+                                    continue
+
+                                celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                                if not celulas_valores: 
+                                    continue
+                                    
+                                if indice_amarelos != -1 and indice_vermelhos != -1 and len(celulas_valores) > max(indice_amarelos, indice_vermelhos):
+                                    idx_am, idx_vm = indice_amarelos, indice_vermelhos
+                                else:
+                                    idx_am = len(celulas_valores) - 3 if len(celulas_valores) >= 3 else 0
+                                    idx_vm = len(celulas_valores) - 2 if len(celulas_valores) >= 2 else 0
+
+                                val_amarelo = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_am]).strip()
+                                val_vermelho = driver.execute_script("return arguments[0].textContent;", celulas_valores[idx_vm]).strip()
+                                
+                                amarelos = 0 if val_amarelo in ["-", ""] or not val_amarelo.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_amarelo))
+                                vermelhos = 0 if val_vermelho in ["-", ""] or not val_vermelho.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_vermelho))
+                                
+                                if nome_jogador not in dicionario_am: 
+                                    dicionario_am[nome_jogador] = []
+                                while len(dicionario_am[nome_jogador]) < jogo_global_index: 
+                                    dicionario_am[nome_jogador].append(0)
+                                dicionario_am[nome_jogador].append(amarelos)
+                                
+                                if nome_jogador not in dicionario_vm: 
+                                    dicionario_vm[nome_jogador] = []
+                                while len(dicionario_vm[nome_jogador]) < jogo_global_index: 
+                                    dicionario_vm[nome_jogador].append(0)
+                                dicionario_vm[nome_jogador].append(vermelhos)
+                            except: 
+                                continue
+                    except: 
+                        pass
                     jogo_global_index += 1
                 except Exception as e_jogo_cartao:
-                    print(f"      ⚠️ Falha isolada na sub-navegação do jogo ({jogo_dados['idx']}): {e_jogo_cartao}")
+                    print(f"      ⚠️ Falha isolada na linha de cartões ({jogo_dados['idx']}): {e_jogo_cartao}")
                     jogo_global_index += 1
                     continue
 
-        # Restaura comportamento de timeout padrão
-        driver.set_page_load_timeout(60)
-
-        # Volta o driver para a página h2h principal de forma limpa antes do fluxo tradicional
         driver.get(url_h2h_base)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
@@ -286,7 +259,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     botao_mais = secao.find_element(By.CSS_SELECTOR, seletor_btn)
                     driver.execute_script("arguments[0].click();", botao_mais)
                     WebDriverWait(secao, 6).until(lambda s: len(s.find_elements(By.CSS_SELECTOR, ".h2h__row")) >= 6)
-                except: pass 
+                except: 
+                    pass 
 
             limite = 6 if idx == 2 else 5
             linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
@@ -304,7 +278,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         if i == 1: stats["h2h_placar_2"] = res_texto
 
                     numeros_placar = re.findall(r'\d+', res_texto)
-                    if len(numeros_placar) < 2: continue
+                    if len(numeros_placar) < 2: 
+                        continue
                     g1, g2 = int(numeros_placar[0]), int(numeros_placar[1])
                     total = g1 + g2
 
@@ -359,23 +334,14 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
 
                         if g1 == g2: stats["h2h_empates"] += 1
 
-                except: continue
+                except: 
+                    continue
 
     except Exception as e:
         print(f"      ⚠️ Erro Geral H2H {t1}x{t2}: {e}")
-    finally:
-        # Restaura comportamento de timeout padrão em caso de exceções severas
-        driver.set_page_load_timeout(60)
 
-    # Fecha estritamente a janela do jogo atual e devolve o foco para a aba index 0
-    try:
-        driver.close()
-    except: pass
-    
-    try:
-        driver.switch_to.window(driver.window_handles[0])
-    except: pass
-    
+    driver.close()
+    driver.switch_to.window(driver.window_handles[0])
     return stats
                                  
 def main():
