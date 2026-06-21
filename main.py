@@ -397,7 +397,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
         
     return stats
 
-
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
@@ -418,7 +417,7 @@ def main():
                 elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
             except Exception as e:
                 if "invalid session id" in str(e).lower() or "session" in str(e).lower():
-                    print("⚠️" " Sessão do Chrome caiu! Reiniciando o navegador para continuar...")
+                    print("⚠️ Sessão do Chrome caiu! Reiniciando o navegador para continuar...")
                     try: driver.quit()
                     except: pass
                     driver = configurar_driver() 
@@ -480,7 +479,7 @@ def main():
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
                         # 5. Processamento Jogadores
-                        res_jogadores = jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}), nome_liga=nome_comp)
+                        res_jogadores = joggers.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}), nome_liga=nome_comp) if 'joggers' in globals() else jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}), nome_liga=nome_comp)
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
@@ -534,11 +533,10 @@ def main():
                                         })
                                                 
                                         total_mercados += 1
-                                try:
-                                    pass
-                                except: 
+                                except ValueError:
                                     continue
-                except: 
+                except Exception as e:
+                    print(f"⚠️ Erro ao processar partida: {e}")
                     continue
 
         # --- PROCESSAMENTO E ENVIO FINAL ---
