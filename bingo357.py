@@ -28,8 +28,8 @@ def prioridade_mercado(mercado_texto):
     if "ambas" in m: return 3
     if "vitória" in m or "vitoria" in m: return 4
     if "2x" in m or "x2" in m: return 5
-    # 🚀 AJUSTADO: Cartões adicionado junto com as prioridades analíticas de jogadores
-    if "chutes" in m or "faltas" in m or "média" in m or "cartões" in m or "cartao" in m: return 6
+    # 🚀 CORRIGIDO: Removido "faltas" do filtro de prioridade analítica de jogadores
+    if "chutes" in m or "média" in m or "cartões" in m or "cartao" in m: return 6
     return 7
 
 def carregar_ranking_pro():
@@ -69,9 +69,13 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
         if tem_dupla:
             for m in mercados:
                 if "vitória" not in m['mercado'].lower() and "vitoria" not in m['mercado'].lower():
-                    lista_filtrada.append(m)
+                    # 🚀 CORRIGIDO: Garante que mercados fantasmas ou antigos de faltas sejam descartados aqui
+                    if "falta" not in m['mercado'].lower():
+                        lista_filtrada.append(m)
         else:
-            lista_filtrada.extend(mercados)
+            for m in mercados:
+                if "falta" not in m['mercado'].lower():
+                    lista_filtrada.append(m)
             
     # 2. 📊 Aplicação das Estratégias de Ordenação Tradicional
     if estrategia == "ODDS":
@@ -134,7 +138,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
         nome_bilhete = f"✨ BINGO ELITE DE {qtd_confrontos_real} JOGOS ({estrategia})"
     else:
         # Lógica padrão antiga: Corta estritamente por limite de mercados fixos (linhas)
-        jogos_selecionados = jogos_ordenados[:qtd_alvo]
+        jogos_selecionados = juegos_ordenados[:qtd_alvo]
         qtd_real = len(jogos_selecionados)
         aviso_escassez = ""
         if qtd_real < qtd_alvo:
@@ -191,8 +195,8 @@ def formatar_para_telegram(bilhetes, cache_dados):
             
             mercado_limpo = j.get('mercado', '')
             
-            # 🚀 REGRA EXTRAÇÃO / ARREDONDAMENTO PARA CHUTES E FALTAS
-            if "Faltas Sofridas:" in mercado_limpo or "Chutes no Alvo:" in mercado_limpo:
+            # 🚀 REGRA EXTRAÇÃO / ARREDONDAMENTO APENAS PARA CHUTES NO ALVO (Faltas removidas)
+            if "Chutes no Alvo:" in mercado_limpo:
                 match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
                 if match_med:
                     media_num = float(match_med.group(1))
@@ -202,20 +206,15 @@ def formatar_para_telegram(bilhetes, cache_dados):
                 
                 texto_final_linha = f"🔶 {mercado_limpo}"
                 
-            # 🚀 NOVA REGRA: IDENTIFICA E PADRONIZA CARTÕES NO MESMO VISUAL (X+)
+            # 🚀 REGRA DE CARTÕES MANTIDA NO MESMO VISUAL (X+)
             elif "confronto cartões:" in mercado_limpo.lower() or "confronto cartões" in mercado_limpo.lower():
-                # Busca qualquer número decimal logo após "Cartões:" ou "cartões"
                 match_med = re.search(r'(?:cartões|Cartões):\s*([\d.]+)', mercado_limpo)
                 if match_med:
                     media_num = float(match_med.group(1))
-                    # Regra Luciano de arredondamento:
                     valor_arredondado = int(media_num + 0.5)
                     if valor_arredondado < 1: valor_arredondado = 1
-                    
-                    # Reconstrói a string limpando os emojis poluídos e deixando o padrão correto
                     mercado_limpo = f"Confronto Cartões ({valor_arredondado}+)"
                 else:
-                    # Fallback de segurança se falhar o Regex, limpa o texto bruto tirando os emojis
                     mercado_limpo = mercado_limpo.split("(")[0].strip()
                     
                 texto_final_linha = f"🔶 {mercado_limpo}"
@@ -258,6 +257,4 @@ def formatar_para_telegram(bilhetes, cache_dados):
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
-
     
-    return "\n\n".join(blocos)
