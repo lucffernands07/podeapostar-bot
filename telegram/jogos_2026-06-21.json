@@ -1,200 +1,11 @@
 [
     {
-        "horario": "10:00",
-        "liga": "Cazaquistão - Primeira Liga",
-        "time_casa": "Kyzylzhar",
-        "time_fora": "Kairat Almaty",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.35",
-        "link_betano": "https://www.betano.bet.br/match-odds/Kyzylzhar-Petropavlosvk-FC-Kairat/87457490/"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Brasileiro Serie C",
-        "time_casa": "Caxias",
-        "time_fora": "Maringá",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.30",
-        "link_betano": "https://www.betano.bet.br/match-odds/Caxias-RS-Maringa-FC-PR/86496312/"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "Avaí",
-        "time_fora": "Cuiabá",
-        "mercado": "Média Confronto Cartões: 1.0 (🟨 2 x 1 🟥)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Avai-SC-Cuiaba-MT/87511924/"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Cazaquistão - Primeira Liga",
-        "time_casa": "Yelimay Semey",
-        "time_fora": "Atyrau",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.42",
-        "link_betano": "https://www.betano.bet.br/match-odds/Elimai-FK-Atyrau/87457587/"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Cazaquistão - Primeira Liga",
-        "time_casa": "Yelimay Semey",
-        "time_fora": "Atyrau",
-        "mercado": "Ambas Marcam: Sim (100%)",
-        "odd": "2.40",
-        "link_betano": "https://www.betano.bet.br/match-odds/Elimai-FK-Atyrau/87457587/"
-    },
-    {
-        "horario": "12:00",
-        "liga": "Cazaquistão - Primeira Liga",
-        "time_casa": "Aktobe",
-        "time_fora": "FC Astana",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.32",
-        "link_betano": "https://www.betano.bet.br/match-odds/FK-Aktobe-FC-Astana/87457569/"
-    },
-    {
-        "horario": "13:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Espanha",
-        "time_fora": "Arábia Saudita",
-        "mercado": "-4.5 Gols (100%)",
-        "odd": "1.38",
-        "link_betano": "https://www.betano.bet.br/match-odds/Spain-Saudi-Arabia/83962540/"
-    },
-    {
-        "horario": "13:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Espanha",
-        "time_fora": "Arábia Saudita",
-        "mercado": "Média Confronto Cartões: 2.33 (🟨 3 x 4 🟥)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Spain-Saudi-Arabia/83962540/"
-    },
-    {
-        "horario": "15:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Parnahyba",
-        "time_fora": "Águia de Marabá",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.32",
-        "link_betano": "https://www.betano.bet.br/match-odds/Parnahyba-PI-Aguia-de-Maraba-PA/87511187/"
-    },
-    {
-        "horario": "15:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Parnahyba",
-        "time_fora": "Águia de Marabá",
-        "mercado": "+2.5 Gols (70%)",
-        "odd": "2.08",
-        "link_betano": "https://www.betano.bet.br/match-odds/Parnahyba-PI-Aguia-de-Maraba-PA/87511187/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Altos-PI",
-        "time_fora": "ABC",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.41",
-        "link_betano": "https://www.betano.bet.br/match-odds/AE-Altos-PI-ABC-FC-RN/87511196/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Altos-PI",
-        "time_fora": "ABC",
-        "mercado": "1X (70%)",
-        "odd": "1.70",
-        "link_betano": "https://www.betano.bet.br/match-odds/AE-Altos-PI-ABC-FC-RN/87511196/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Brasiliense",
-        "time_fora": "Goiatuba",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.41",
-        "link_betano": "https://www.betano.bet.br/match-odds/Brasiliense-Goiatuba-GO/87511188/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "CRAC",
-        "time_fora": "Tombense",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.35",
-        "link_betano": "https://www.betano.bet.br/match-odds/CRAC-GO-Tombense-MG/87511182/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Jacuipense",
-        "time_fora": "Treze",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.38",
-        "link_betano": "https://www.betano.bet.br/match-odds/Jacuipense-BA-Treze/87511184/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Lagarto",
-        "time_fora": "CSA",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.28",
-        "link_betano": "https://www.betano.bet.br/match-odds/Lagarto-SE-CSA-AL/87511189/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Portuguesa-RJ",
-        "time_fora": "Noroeste",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.42",
-        "link_betano": "https://www.betano.bet.br/match-odds/Portuguesa-RJ-Noroeste-SP/87511191/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Tuna Luso",
-        "time_fora": "Iguatu",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.35",
-        "link_betano": "https://www.betano.bet.br/match-odds/Tuna-Luso-PA-Iguatu-CE/87511186/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "CRB",
-        "time_fora": "Fortaleza",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.40",
-        "link_betano": "https://www.betano.bet.br/match-odds/CRB-AL-Fortaleza-CE/87581877/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "CRB",
-        "time_fora": "Fortaleza",
-        "mercado": "+2.5 Gols (70%)",
-        "odd": "2.15",
-        "link_betano": "https://www.betano.bet.br/match-odds/CRB-AL-Fortaleza-CE/87581877/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "CRB",
-        "time_fora": "Fortaleza",
-        "mercado": "Média Confronto Cartões: 0.33 (🟨 0 x 1 🟥)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/CRB-AL-Fortaleza-CE/87581877/"
-    },
-    {
         "horario": "16:00",
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Bélgica",
         "time_fora": "Irã",
         "mercado": "+1.5 Gols (100%)",
-        "odd": "1.27",
+        "odd": "1.29",
         "link_betano": "https://www.betano.bet.br/match-odds/Belgium-Iran/83962542/"
     },
     {
@@ -202,124 +13,16 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Bélgica",
         "time_fora": "Irã",
-        "mercado": "Média Confronto Cartões: 2.0 (🟨 5 x 1 🟥)",
+        "mercado": "Média Confronto Cartões: 1.33 (🟨 3 x 1 🟥)",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Belgium-Iran/83962542/"
     },
     {
-        "horario": "17:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "ASA",
-        "time_fora": "Sergipe",
-        "mercado": "Ambas Marcam: Sim (100%)",
-        "odd": "2.05",
-        "link_betano": "https://www.betano.bet.br/match-odds/AS-Arapiraquense-AL-Sergipe/87511207/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Ivinhema",
-        "time_fora": "Democrata-GV",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.42",
-        "link_betano": "https://www.betano.bet.br/match-odds/Ivinhema-FC-MS-Esporte-Clube-Democrata-MG/87511214/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Rio Branco-ES",
-        "time_fora": "Uberlândia",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.42",
-        "link_betano": "https://www.betano.bet.br/match-odds/Rio-Branco-ES-Uberlandia-MG/87511213/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "São Bernardo",
-        "time_fora": "Juventude",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.50",
-        "link_betano": "https://www.betano.bet.br/match-odds/Sao-Bernardo-SP-Juventude-RS/87447186/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "São Bernardo",
-        "time_fora": "Juventude",
-        "mercado": "Média Confronto Cartões: 0.33 (🟨 0 x 1 🟥)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Sao-Bernardo-SP-Juventude-RS/87447186/"
-    },
-    {
-        "horario": "18:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Araguaína",
-        "time_fora": "Nacional-AM",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.33",
-        "link_betano": "https://www.betano.bet.br/match-odds/Araguaina-TO-Nacional-AM/87511181/"
-    },
-    {
-        "horario": "18:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "São Raimundo-RR",
-        "time_fora": "Porto Velho",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.35",
-        "link_betano": "https://www.betano.bet.br/match-odds/Sao-Raimundo-RR-Porto-Velho/87511227/"
-    },
-    {
-        "horario": "18:30",
-        "liga": "Brasileirão Série B",
-        "time_casa": "Goiás",
-        "time_fora": "Operário",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.47",
-        "link_betano": "https://www.betano.bet.br/match-odds/Goi-s-GO-Operario-PR/87447187/"
-    },
-    {
-        "horario": "18:30",
-        "liga": "Brasileirão Série B",
-        "time_casa": "Goiás",
-        "time_fora": "Operário",
-        "mercado": "Ambas Marcam: Sim (100%)",
-        "odd": "2.10",
-        "link_betano": "https://www.betano.bet.br/match-odds/Goi-s-GO-Operario-PR/87447187/"
-    },
-    {
-        "horario": "18:30",
-        "liga": "Brasileirão Série B",
-        "time_casa": "Goiás",
-        "time_fora": "Operário",
-        "mercado": "1X (70%)",
-        "odd": "1.29",
-        "link_betano": "https://www.betano.bet.br/match-odds/Goi-s-GO-Operario-PR/87447187/"
-    },
-    {
-        "horario": "18:30",
-        "liga": "Brasileirão Série B",
-        "time_casa": "Goiás",
-        "time_fora": "Operário",
-        "mercado": "Média Confronto Cartões: 2.0 (🟨 3 x 3 🟥)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Goi-s-GO-Operario-PR/87447187/"
-    },
-    {
         "horario": "19:00",
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Uruguai",
         "time_fora": "Cabo Verde",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.44",
-        "link_betano": "https://www.betano.bet.br/match-odds/Uruguay-Cape-Verde/83962544/"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Uruguai",
-        "time_fora": "Cabo Verde",
-        "mercado": "Média Confronto Cartões: 1.33 (🟨 3 x 1 🟥)",
+        "mercado": "Média Confronto Cartões: 0.0 (🟨 0 x 0 🟥)",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Uruguay-Cape-Verde/83962544/"
     },
@@ -329,7 +32,7 @@
         "time_casa": "Nova Zelândia",
         "time_fora": "Egito",
         "mercado": "+1.5 Gols (70%)",
-        "odd": "1.37",
+        "odd": "1.35",
         "link_betano": "https://www.betano.bet.br/match-odds/New-Zealand-Egypt/83962546/"
     },
     {
@@ -337,7 +40,7 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Nova Zelândia",
         "time_fora": "Egito",
-        "mercado": "Média Confronto Cartões: 1.0 (🟨 0 x 3 🟥)",
+        "mercado": "Média Confronto Cartões: 0.33 (🟨 0 x 1 🟥)",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/New-Zealand-Egypt/83962546/"
     }
