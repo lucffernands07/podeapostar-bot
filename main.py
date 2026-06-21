@@ -52,8 +52,14 @@ def configurar_driver():
     return driver
 
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
+    # Configura timeout de segurança para carregamento de páginas pesadas (ex: Betano)
+    driver.set_page_load_timeout(25)
+    
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
     driver.switch_to.window(driver.window_handles[-1])
+    
+    # 🌟 SALVA A JANELA MÃE DO FLASHSCORE PARA EVITAR PERDA DE FOCO
+    janela_flashscore = driver.current_window_handle
     
     stats = {
         "link_betano": None,
@@ -88,6 +94,15 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             stats["link_betano"] = links.extrair_url_betano(driver)
         except Exception as e_link:
             print(f"      ⚠️ Erro ao capturar link Betano inicial: {e_link}")
+        finally:
+            # 🌟 GARANTE QUE O DRIVER VOLTE 100% RESPONSIVO PARA A JANELA DO FLASHSCORE
+            try:
+                driver.switch_to.window(janela_flashscore)
+            except:
+                if janela_flashscore in driver.window_handles:
+                    driver.switch_to.window(janela_flashscore)
+                else:
+                    driver.switch_to.window(driver.window_handles[-1])
         
         driver.execute_script("window.scrollTo(0, 800);")
         time.sleep(1)
@@ -99,7 +114,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             {"tipo": "VISITANTE", "idx_secao": 2}
         ]
 
-        # Mapeia todas as abas necessárias para não deixar nenhum mercado de fora
         abas_estatisticas = ["gerais", "ataque", "defesa"]
 
         for alvo in secoes_alvo_cartoes:
@@ -151,7 +165,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     time.sleep(2.5)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
 
-                    # Captura hashes dos escudos
                     hash_mandante_topo, hash_visitante_topo = "", ""
                     try:
                         img_m = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__homeLogo img.participant__image")
@@ -160,12 +173,10 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         hash_visitante_topo = img_v.get_attribute("src").split('/')[-1]
                     except: pass
 
-                    # Loop de Sub-Navegação por abas analíticas
                     for aba in abas_estatisticas:
                         url_sub = f"{url_jogo_completa}/resumo/estatisticas-jogadores/{aba}/"
-                        driver.get(url_sub)
-                        
                         try:
+                            driver.get(url_sub)
                             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
                             time.sleep(1.5)
                             
@@ -220,7 +231,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                                     celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
                                     if not celulas_valores: continue
                                     
-                                    # 🟨 Cartões Amarelos
                                     if indice_amarelos != -1 and len(celulas_valores) > indice_amarelos:
                                         val_amarelo = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_amarelos]).strip()
                                         amarelos = 0 if val_amarelo in ["-", ""] or not val_amarelo.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_amarelo))
@@ -228,7 +238,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                                         while len(dicionario_am[nome_jogador]) < jogo_global_index: dicionario_am[nome_jogador].append(0)
                                         dicionario_am[nome_jogador].append(amarelos)
                                         
-                                    # 🟥 Cartões Vermelhos
                                     if indice_vermelhos != -1 and len(celulas_valores) > indice_vermelhos:
                                         val_vermelho = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_vermelhos]).strip()
                                         vermelhos = 0 if val_vermelho in ["-", ""] or not val_vermelho.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_vermelho))
@@ -236,7 +245,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                                         while len(dicionario_vm[nome_jogador]) < jogo_global_index: dicionario_vm[nome_jogador].append(0)
                                         dicionario_vm[nome_jogador].append(vermelhos)
 
-                                    # 🎯 Chutes / Finalizações
                                     if indice_chutes != -1 and len(celulas_valores) > indice_chutes:
                                         val_chutes = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_chutes]).strip()
                                         chutes = 0 if val_chutes in ["-", ""] or not val_chutes.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_chutes))
@@ -244,7 +252,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                                         while len(stats["historico_chutes"][nome_jogador]) < jogo_global_index: stats["historico_chutes"][nome_jogador].append(0)
                                         stats["historico_chutes"][nome_jogador].append(chutes)
 
-                                    # 💥 Faltas Cometidas / Sofridas
                                     if indice_faltas != -1 and len(celulas_valores) > indice_faltas:
                                         val_faltas = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_faltas]).strip()
                                         faltas = 0 if val_faltas in ["-", ""] or not val_faltas.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_faltas))
@@ -253,13 +260,18 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                                         stats["historico_faltas"][nome_jogador].append(faltas)
 
                                 except: continue
-                        except: pass
+                        except Exception as e_aba:
+                            print(f"      ⚠️ Falha rápida na sub-aba {aba}: {e_aba}")
+                            continue
                     
                     jogo_global_index += 1
                 except Exception as e_jogo_cartao:
                     print(f"      ⚠️ Falha isolada na sub-navegação do jogo ({jogo_dados['idx']}): {e_jogo_cartao}")
                     jogo_global_index += 1
                     continue
+
+        # Restaura comportamento de timeout padrão
+        driver.set_page_load_timeout(60)
 
         # Volta o driver para a página h2h principal de forma limpa antes do fluxo tradicional
         driver.get(url_h2h_base)
@@ -351,9 +363,19 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
 
     except Exception as e:
         print(f"      ⚠️ Erro Geral H2H {t1}x{t2}: {e}")
+    finally:
+        # Restaura comportamento de timeout padrão em caso de exceções severas
+        driver.set_page_load_timeout(60)
 
-    driver.close()
-    driver.switch_to.window(driver.window_handles[0])
+    # Fecha estritamente a janela do jogo atual e devolve o foco para a aba index 0
+    try:
+        driver.close()
+    except: pass
+    
+    try:
+        driver.switch_to.window(driver.window_handles[0])
+    except: pass
+    
     return stats
                                  
 def main():
