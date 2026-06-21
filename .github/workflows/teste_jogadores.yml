@@ -3,8 +3,8 @@ name: Teste jogadores
 on:
   push:
     paths:
-      - 'testes/teste_jogadores.py'        # Dispara automaticamente se houver commit em qualquer arquivo da pasta testes
-  workflow_dispatch:       # Mantém o botão para você clicar em "Run Workflow" manualmente se quiser
+      - 'testes/teste_jogadores.py'
+  workflow_dispatch:
 
 jobs:
   run-test:
@@ -24,6 +24,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install selenium webdriver-manager requests
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # 🔥 PASSO NOVO: Roda o script que gera o 'jogos_hoje.json'
+      - name: Gerar JSON com jogos do dia
+        run: |
+          # Altere 'main.py' para o nome exato do script que você usa para coletar as URLs da rodada
+          python main.py --apenas-coleta || python main.py 
 
       - name: Rodar Teste jogadores
         env:
