@@ -28,7 +28,7 @@ def prioridade_mercado(mercado_texto):
     if "ambas" in m: return 3
     if "vitória" in m or "vitoria" in m: return 4
     if "2x" in m or "x2" in m: return 5
-    # 🚀 CORRIGIDO: Removido "faltas" do filtro de prioridade analítica de jogadores
+    # 🚀 MODIFICADO: "faltas" removido completamente daqui
     if "chutes" in m or "média" in m or "cartões" in m or "cartao" in m: return 6
     return 7
 
@@ -69,11 +69,12 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
         if tem_dupla:
             for m in mercados:
                 if "vitória" not in m['mercado'].lower() and "vitoria" not in m['mercado'].lower():
-                    # 🚀 CORRIGIDO: Garante que mercados fantasmas ou antigos de faltas sejam descartados aqui
+                    # 🚀 FILTRO: Ignora qualquer mercado antigo ou fantasma de faltas
                     if "falta" not in m['mercado'].lower():
                         lista_filtrada.append(m)
         else:
             for m in mercados:
+                # 🚀 FILTRO: Ignora qualquer mercado antigo ou fantasma de faltas
                 if "falta" not in m['mercado'].lower():
                     lista_filtrada.append(m)
             
@@ -137,8 +138,8 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             
         nome_bilhete = f"✨ BINGO ELITE DE {qtd_confrontos_real} JOGOS ({estrategia})"
     else:
-        # Lógica padrão antiga: Corta estritamente por limite de mercados fixos (linhas)
-        jogos_selecionados = juegos_ordenados[:qtd_alvo]
+        # Lógica padrão antiga: Corta estritamente por limite de mercados fixos (linhas) - CORRIGIDO de juegos para jogos
+        jogos_selecionados = jogos_ordenados[:qtd_alvo]
         qtd_real = len(jogos_selecionados)
         aviso_escassez = ""
         if qtd_real < qtd_alvo:
@@ -195,7 +196,7 @@ def formatar_para_telegram(bilhetes, cache_dados):
             
             mercado_limpo = j.get('mercado', '')
             
-            # 🚀 REGRA EXTRAÇÃO / ARREDONDAMENTO APENAS PARA CHUTES NO ALVO (Faltas removidas)
+            # 🚀 REGRA EXTRAÇÃO / ARREDONDAMENTO EXCLUSIVA PARA CHUTES NO ALVO (Faltas removidas)
             if "Chutes no Alvo:" in mercado_limpo:
                 match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
                 if match_med:
@@ -213,6 +214,7 @@ def formatar_para_telegram(bilhetes, cache_dados):
                     media_num = float(match_med.group(1))
                     valor_arredondado = int(media_num + 0.5)
                     if valor_arredondado < 1: valor_arredondado = 1
+                    
                     mercado_limpo = f"Confronto Cartões ({valor_arredondado}+)"
                 else:
                     mercado_limpo = mercado_limpo.split("(")[0].strip()
@@ -221,40 +223,4 @@ def formatar_para_telegram(bilhetes, cache_dados):
             else:
                 texto_final_linha = f"🔶 {mercado_limpo} | Odd: {odd_valor}"
 
-            agrupados[chave_jogo]["mercados"].append({
-                "texto": texto_final_linha,
-                "prioridade": prioridade_mercado(j.get('mercado', ''))
-            })
-            odd_total *= extrair_odd(odd_valor)
-
-        lista_blocos_jogos = []
-        for chave in sorted(agrupados.keys()):
-            dados = agrupados[chave]
-            dados["mercados"].sort(key=lambda x: x['prioridade'])
-            linhas_mercados = "\n".join([m['texto'] for m in dados["mercados"]])
-            
-            link_betano_limpo = dados['link'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
-            
-            bloco_jogo = (
-                f"⏱️ {dados['horario']} | {dados['liga']}\n"
-                f"🏟️ {dados['time_casa']} x {dados['time_fora']}\n"
-                f"{linhas_mercados}\n"
-                f"🌐 [Abrir na Betano]({link_betano_limpo})"
-            )
-            
-            if dados.get("link_h2h"):
-                link_h2h_limpo = dados['link_h2h'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
-                bloco_jogo += f"\n📊 [Estatísticas]({link_h2h_limpo})"
-
-            lista_blocos_jogos.append(bloco_jogo)
-
-        corpo += "\n\n".join(lista_blocos_jogos)
-        corpo += f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-        
-        if b.get("aviso_escassez"):
-            corpo += b["aviso_escassez"]
-            
-        blocos.append(corpo)
-    
-    return "\n\n".join(blocos)
-    
+            agrupados[chave_jogo]
