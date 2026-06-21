@@ -1,47 +1,11 @@
 [
     {
-        "horario": "16:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Bélgica",
-        "time_fora": "Irã",
-        "mercado": "+1.5 Gols (100%)",
-        "odd": "1.29",
-        "link_betano": "https://www.betano.bet.br/match-odds/Belgium-Iran/83962542/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Bélgica",
-        "time_fora": "Irã",
-        "mercado": "Média Confronto Cartões: 1.33 (🟨 3 x 1 🟥)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Belgium-Iran/83962542/"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Uruguai",
-        "time_fora": "Cabo Verde",
-        "mercado": "Média Confronto Cartões: 0.0 (🟨 0 x 0 🟥)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Uruguay-Cape-Verde/83962544/"
-    },
-    {
         "horario": "22:00",
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Nova Zelândia",
         "time_fora": "Egito",
         "mercado": "+1.5 Gols (70%)",
         "odd": "1.35",
-        "link_betano": "https://www.betano.bet.br/match-odds/New-Zealand-Egypt/83962546/"
-    },
-    {
-        "horario": "22:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Nova Zelândia",
-        "time_fora": "Egito",
-        "mercado": "Média Confronto Cartões: 0.33 (🟨 0 x 1 🟥)",
-        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/New-Zealand-Egypt/83962546/"
     }
 ]
