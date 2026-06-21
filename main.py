@@ -2,6 +2,7 @@ import os
 import time
 import re
 import requests
+import json
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -13,7 +14,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Importação dos seus módulos
 from ligas import COMPETICOES
-from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes # 🚀 Importado cartoes
+from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes 
 import odds  
 import bingo357  
 import links
@@ -29,12 +30,13 @@ def enviar_telegram(mensagem, chat_id_destino):
     try:
         requests.post(url, data={
             "chat_id": chat_id_destino, 
-            "text": mensagem, 
+            "text": message, 
             "parse_mode": "Markdown",
             "disable_web_page_preview": True
         })
     except Exception as e:
         print(f"Erro Telegram: {e}")
+
 
 def configurar_driver():
     options = Options()
@@ -50,6 +52,7 @@ def configurar_driver():
     driver.set_page_load_timeout(30) 
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
+
 
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.execute_script(f"window.open('{url_jogo}', '_blank');")
@@ -92,7 +95,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         driver.execute_script("window.scrollTo(0, 800);")
         time.sleep(1)
         
-        # --- 🚀 MÓDULO INTEGRADO: RASPAGEM DE CARTÕES POR HISTÓRICO H2H (BLINDADO) ---
+        # --- 🚀 RASPAGEM DE CARTÕES POR HISTÓRICO H2H ---
         jogo_global_index = 0
         secoes_alvo_cartoes = [
             {"tipo": "MANDANTE", "idx_secao": 1},
@@ -191,7 +194,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                                 try:
                                     img_linha = linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
                                     hash_linha = img_linha.get_attribute("src").split('/')[-1]
-                                except: 
+                                Except: 
                                     hash_linha = ""
 
                                 if hash_linha and hash_linha == hash_mandante_topo:
@@ -247,11 +250,11 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     jogo_global_index += 1
                     continue
 
+        # --- RETORNO AO FLUXO TRADICIONAL DE GOLS/RESULTADOS ---
         driver.get(url_h2h_base)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
 
-        # --- RETORNO AO FLUXO TRADICIONAL DE GOLS/RESULTADOS DO SEU BOT ---
         for idx, secao in enumerate(secoes[:3]): 
             if idx == 2: 
                 try:
@@ -333,7 +336,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                             stats["h2h_res_2"] = res_h2h
 
                         if g1 == g2: stats["h2h_empates"] += 1
-
                 except: 
                     continue
 
@@ -343,7 +345,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     return stats
-                                 
+
+
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
@@ -354,7 +357,8 @@ def main():
 
     try:
         for nome_comp, url in COMPETICOES.items():
-            if total_mercados >= 200: break 
+            if total_mercados >= 200: 
+                break 
             print(f"\n--- Analisando: {nome_comp} ---")
             
             try:
@@ -424,12 +428,12 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # 🚀 5. PROCESSAMENTO DO MERCADO DE JOGADORES (MÉDIAS CHUTES/FALTAS)
+                        # 5. Processamento Jogadores
                         res_jogadores = jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}), nome_liga=nome_comp)
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
-                        # 🚀 6. PROCESSAMENTO DO NOVO MERCADO DE CARTÕES COLETIVOS
+                        # 6. Mercado de Cartões Coletivos
                         res_cartoes = cartoes.analisar_dados_cartoes(
                             s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}),
                             s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}),
@@ -439,7 +443,7 @@ def main():
                             texto_cartao = f"Média Confronto Cartões: {res_cartoes['media_confronto']} (🟨 {res_cartoes['total_mandante']} x {res_cartoes['total_visitante']} 🟥)"
                             mercados_para_processar.append({"texto": texto_cartao, "chave": "CARTOES_CONFRONTO"})
 
-                        # --- VALIDAÇÃO DE ODDS E FILTRAGEM COM BYPASS ---
+                        # --- VALIDAÇÃO DE ODDS E FILTRAGEM ---
                         if mercados_para_processar:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
                             
@@ -447,7 +451,6 @@ def main():
                                 m_texto = item["texto"]
                                 m_chave = item["chave"]
                                 
-                                # Injeta odd fictícia para mercados analíticos passarem da régua
                                 if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"]:
                                     valor_odd_str = "1.50"
                                 else:
@@ -474,8 +477,10 @@ def main():
                                         })
                                                 
                                         total_mercados += 1
-                                except: continue
-                except: continue
+                                except: 
+                                    continue
+                except: 
+                    continue
 
         # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
@@ -516,7 +521,6 @@ def main():
                 menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
                 print("📢 Bingos enviados com botões para o Canal.")
 
-            import json
             os.makedirs("ranking", exist_ok=True)
             caminho_p = "ranking/pendentes.json"
             data_hoje = hoje_ref.strftime("%Y-%m-%d")
@@ -573,6 +577,7 @@ def main():
     finally:
         try: driver.quit()
         except: pass
+
 
 if __name__ == "__main__":
     main()
