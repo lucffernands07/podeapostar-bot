@@ -55,9 +55,10 @@ def configurar_driver():
 
 
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
-    driver.execute_script(f"window.open('{url_jogo}', '_blank');")
-    driver.switch_to.window(driver.window_handles[-1])
-    
+    """
+    RASPAGEM 1: Abre a aba, acessa o H2H, captura o link Betano, gols, placares e resultados.
+    MANTÉM A ABA ABERTA para o main avaliar se vale a pena continuar para os scouts avançados.
+    """
     stats = {
         "link_betano": None,
         "casa_15": 0, "casa_25": 0, "casa_45_under": 0, "casa_btts": 0, 
@@ -70,39 +71,161 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "t1_placar_1": None, "t2_placar_1": None,     
         "h2h_placar_1": None, "h2h_placar_2": None,   
         "pular_gols": False,
+        "url_h2h_base": None,
+        # Inicializados vazios por segurança caso o jogo não passe nos filtros iniciais
         "historico_chutes": {}, 
-        "historico_faltas": {},  
-        "historico_mandante_am": {}, 
-        "historico_mandante_vm": {},
-        "historico_visitante_am": {},
-        "historico_visitante_vm": {}
+        "historico_mandante_am": {}, "historico_mandante_vm": {},
+        "historico_visitante_am": {}, "historico_visitante_vm": {}
     }
+    
+    # Abre o confronto em uma nova aba
+    driver.execute_script(f"window.open('{url_jogo}', '_blank');")
+    driver.switch_to.window(driver.window_handles[-1])
     
     try:
         wait = WebDriverWait(driver, 15)
+        
+        # Clica na aba H2H do Flashscore
         h2h_tab = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
         time.sleep(2)
         
-        url_h2h_base = driver.current_url
+        # Guarda a URL base do H2H para a Raspagem 2 usar se for necessário
+        stats["url_h2h_base"] = driver.current_url
 
+        # --- CAPTURA DO LINK DA BETANO ---
         try:
             print(f"      🔗 Capturando link Betano para {t1} x {t2}...")
+            # Presume que o seu módulo 'links' importado cuida dessa extração
+            import links 
             stats["link_betano"] = links.extrair_url_betano(driver)
         except Exception as e_link:
             print(f"      ⚠️ Erro ao capturar link Betano inicial: {e_link}")
         
+        # Rola a página para carregar as seções de jogos anteriores
         driver.execute_script("window.scrollTo(0, 800);")
         time.sleep(1)
+
+        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+
+        # Varre as 3 seções clássicas: Últimos jogos Mandante, Últimos jogos Visitante e Confrontos Diretos
+        for idx, secao in enumerate(secoes[:3]): 
+            if idx == 2: 
+                # Tenta expandir para ver mais confrontos diretos se o botão existir
+                try:
+                    seletor_btn = "span[data-testid='wcl-scores-caption-05']"
+                    botao_mais = secao.find_element(By.CSS_SELECTOR, seletor_btn)
+                    driver.execute_script("arguments[0].click();", botao_mais)
+                    WebDriverWait(secao, 6).until(lambda s: len(s.find_elements(By.CSS_SELECTOR, ".h2h__row")) >= 6)
+                except: 
+                    pass 
+
+            limite = 6 if idx == 2 else 5
+            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
+            
+            for i, linha in enumerate(linhas):
+                try:
+                    n_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
+                    n_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
+                    res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
+                    
+                    # Salva placares textuais recentes para o relatório
+                    if idx == 0 and i == 0: stats["t1_placar_1"] = res_texto
+                    if idx == 1 and i == 0: stats["t2_placar_1"] = res_texto
+                    if idx == 2:
+                        if i == 0: stats["h2h_placar_1"] = res_texto
+                        if i == 1: stats["h2h_placar_2"] = res_texto
+
+                    # Extrai os gols numéricos do placar
+                    numeros_placar = re.findall(r'\d+', res_texto)
+                    if len(numeros_placar) < 2: 
+                        continue
+                    g1, g2 = int(numeros_placar[0]), int(numeros_placar[1])
+                    total = g1 + g2
+
+                    # Seções 0 (Mandante) e 1 (Visitante)
+                    if idx < 2: 
+                        prefixo = "casa" if idx == 0 else "fora"
+                        t_ref = t1 if idx == 0 else t2
+                        
+                        if i == 0: stats[f"ultimo_gols_{prefixo}"] = total
+                        if total > 1.5: stats[f"{prefixo}_15"] += 1
+                        if total > 2.5: stats[f"{prefixo}_25"] += 1
+                        if total <= 4: stats[f"{prefixo}_45_under"] += 1 
+                        if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
+                        
+                        res_atual = "E"
+                        if (t_ref.lower() in n_casa_h2h.lower() and g1 > g2) or \
+                           (t_ref.lower() in n_fora_h2h.lower() and g2 > g1):
+                            res_atual = "V"
+                            stats[f"{prefixo}_vitorias_recente"] += 1
+                        elif (t_ref.lower() in n_casa_h2h.lower() and g1 < g2) or \
+                             (t_ref.lower() in n_fora_h2h.lower() and g2 < g1):
+                            res_atual = "D"
+                        
+                        if i == 0: stats[f"t{idx+1}_resultado_1"] = res_atual
+                 
+                    # Seção 2 (Confronto Direto H2H Histórico)
+                    elif idx == 2: 
+                        if i < 5:
+                            res_geral = "EMPATE"
+                            if g1 > g2:
+                                if t1.lower() in n_casa_h2h.lower(): res_geral = "CASA"
+                                elif t2.lower() in n_casa_h2h.lower(): res_geral = "FORA"
+                            elif g1 < g2:
+                                if t1.lower() in n_fora_h2h.lower(): res_geral = "CASA"
+                                elif t2.lower() in n_fora_h2h.lower(): res_geral = "FORA"
+                            
+                            stats[f"h2h_geral_res_{i+1}"] = res_geral
+
+                        # Garante a perspectiva fixa do Mandante nos confrontos diretos
+                        if t1.lower() in n_fora_h2h.lower():
+                            continue 
+
+                        stats["h2h_jogos"] += 1
+                        res_h2h = "E"
+                        if g1 > g2:
+                            res_h2h = "V"
+                            stats["h2h_vitorias_t1"] += 1
+                        elif g1 < g2:
+                            res_h2h = "D"
+                            stats["h2h_vitorias_t2"] += 1
+                        
+                        if stats["h2h_res_1"] == "":
+                            stats["h2h_res_1"] = res_h2h
+                        elif stats["h2h_res_2"] == "":
+                            stats["h2h_res_2"] = res_h2h
+
+                        if g1 == g2: stats["h2h_empates"] += 1
+                except: 
+                    continue
+    except Exception as e:
+        print(f"      ⚠️ Erro na Raspagem 1: {e}")
         
-        # --- 🚀 RASPAGEM DE CARTÕES POR HISTÓRICO H2H ---
+    return stats
+
+def pegar_scouts_avancados(driver, stats, t1, t2):
+    """
+    RASPAGEM 2: Aproveita a aba aberta no H2H e varre as subpáginas dos últimos
+    jogos coletando Chutes no Alvo e Cartões. Fecha a aba ao terminar.
+    """
+    url_h2h_base = stats.get("url_h2h_base")
+    if not url_h2h_base:
+        try:
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+        except: pass
+        return stats
+
+    try:
+        wait = WebDriverWait(driver, 10)
         jogo_global_index = 0
-        secoes_alvo_cartoes = [
+        secoes_alvo_scouts = [
             {"tipo": "MANDANTE", "idx_secao": 1},
             {"tipo": "VISITANTE", "idx_secao": 2}
         ]
 
-        for alvo in secoes_alvo_cartoes:
+        for alvo in secoes_alvo_scouts:
             lista_urls_jogos = []
             try:
                 driver.get(url_h2h_base)
@@ -126,7 +249,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     except: 
                         continue
             except Exception as e_coleta:
-                print(f"      ⚠️ Erro ao listar linhas de cartões para {alvo['tipo']}: {e_coleta}")
+                print(f"      ⚠️ Erro ao listar linhas para scouts: {e_coleta}")
                 continue
 
             for jogo_dados in lista_urls_jogos:
@@ -171,11 +294,14 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         time.sleep(1.5)
                         
                         cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
-                        indice_amarelos, indice_vermelhos = -1, -1
+                        indice_chutes, indice_amarelos, indice_vermelhos = -1, -1, -1
                         
                         for idx_th, th in enumerate(cabecalhos):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
                             alias = str(th.get_attribute("data-analytics-alias")).upper()
+                            
+                            if "REMATES" in texto_th or "CHUTES" in texto_th or alias == "SHOTS_ON_TARGET":
+                                indice_chutes = idx_th
                             if "AMARELO" in texto_th or alias == "YELLOW_CARDS" or texto_th == "CA":
                                 indice_amarelos = idx_th
                             if "VERMELHO" in texto_th or alias == "RED_CARDS" or texto_th == "CV":
@@ -185,16 +311,16 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         if len(linhas_dados) <= 1:
                             linhas_dados = driver.find_elements(By.CSS_SELECTOR, "div.wcl-table__body_ > div, [class*='tableRow']")
 
-                        for linha in linhas_dados:
+                        for lambda_linha in linhas_dados:
                             try:
-                                nome_jogador = driver.execute_script("return arguments[0].textContent;", linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")).strip()
+                                nome_jogador = driver.execute_script("return arguments[0].textContent;", lambda_linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")).strip()
                                 if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
                                     continue
                             
                                 try:
-                                    img_linha = linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
+                                    img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
                                     hash_linha = img_linha.get_attribute("src").split('/')[-1]
-                                except: # <- Corrigido de 'Except:' para 'except:'
+                                except: 
                                     hash_linha = ""
 
                                 if hash_linha and hash_linha == hash_mandante_topo:
@@ -213,10 +339,15 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                                 else:
                                     continue
 
-                                celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                                celulas_valores = lambda_linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
                                 if not celulas_valores: 
                                     continue
-                                    
+
+                                chutes = 0
+                                if indice_chutes != -1 and len(celulas_valores) > indice_chutes:
+                                    val_chute = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_chutes]).strip()
+                                    chutes = 0 if val_chute in ["-", ""] or not val_chute.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_chute))
+                                
                                 if indice_amarelos != -1 and indice_vermelhos != -1 and len(celulas_valores) > max(indice_amarelos, indice_vermelhos):
                                     idx_am, idx_vm = indice_amarelos, indice_vermelhos
                                 else:
@@ -229,6 +360,12 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                                 amarelos = 0 if val_amarelo in ["-", ""] or not val_amarelo.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_amarelo))
                                 vermelhos = 0 if val_vermelho in ["-", ""] or not val_vermelho.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_vermelho))
                                 
+                                if nome_jogador not in stats["historico_chutes"]:
+                                    stats["historico_chutes"][nome_jogador] = []
+                                while len(stats["historico_chutes"][nome_jogador]) < jogo_global_index:
+                                    stats["historico_chutes"][nome_jogador].append(0)
+                                stats["historico_chutes"][nome_jogador].append(chutes)
+
                                 if nome_jogador not in dicionario_am: 
                                     dicionario_am[nome_jogador] = []
                                 while len(dicionario_am[nome_jogador]) < jogo_global_index: 
@@ -245,105 +382,19 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     except: 
                         pass
                     jogo_global_index += 1
-                except Exception as e_jogo_cartao:
-                    print(f"      ⚠️ Falha isolada na linha de cartões ({jogo_dados['idx']}): {e_jogo_cartao}")
+                except Exception as e_jogo_scout:
+                    print(f"      ⚠️ Falha isolada na linha de scouts ({jogo_dados['idx']}): {e_jogo_scout}")
                     jogo_global_index += 1
                     continue
-
-        # --- RETORNO AO FLUXO TRADICIONAL DE GOLS/RESULTADOS ---
-        driver.get(url_h2h_base)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-
-        for idx, secao in enumerate(secoes[:3]): 
-            if idx == 2: 
-                try:
-                    seletor_btn = "span[data-testid='wcl-scores-caption-05']"
-                    botao_mais = secao.find_element(By.CSS_SELECTOR, seletor_btn)
-                    driver.execute_script("arguments[0].click();", botao_mais)
-                    WebDriverWait(secao, 6).until(lambda s: len(s.find_elements(By.CSS_SELECTOR, ".h2h__row")) >= 6)
-                except: 
-                    pass 
-
-            limite = 6 if idx == 2 else 5
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
-            
-            for i, linha in enumerate(linhas):
-                try:
-                    n_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
-                    n_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
-                    res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
-                    
-                    if idx == 0 and i == 0: stats["t1_placar_1"] = res_texto
-                    if idx == 1 and i == 0: stats["t2_placar_1"] = res_texto
-                    if idx == 2:
-                        if i == 0: stats["h2h_placar_1"] = res_texto
-                        if i == 1: stats["h2h_placar_2"] = res_texto
-
-                    numeros_placar = re.findall(r'\d+', res_texto)
-                    if len(numeros_placar) < 2: 
-                        continue
-                    g1, g2 = int(numeros_placar[0]), int(numeros_placar[1])
-                    total = g1 + g2
-
-                    if idx < 2: 
-                        prefixo = "casa" if idx == 0 else "fora"
-                        t_ref = t1 if idx == 0 else t2
-                        if i == 0: stats[f"ultimo_gols_{prefixo}"] = total
-                        if total > 1.5: stats[f"{prefixo}_15"] += 1
-                        if total > 2.5: stats[f"{prefixo}_25"] += 1
-                        if total <= 4: stats[f"{prefixo}_45_under"] += 1 
-                        if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
-                        
-                        res_atual = "E"
-                        if (t_ref.lower() in n_casa_h2h.lower() and g1 > g2) or \
-                           (t_ref.lower() in n_fora_h2h.lower() and g2 > g1):
-                            res_atual = "V"
-                            stats[f"{prefixo}_vitorias_recente"] += 1
-                        elif (t_ref.lower() in n_casa_h2h.lower() and g1 < g2) or \
-                             (t_ref.lower() in n_fora_h2h.lower() and g2 < g1):
-                            res_atual = "D"
-                        
-                        if i == 0: stats[f"t{idx+1}_resultado_1"] = res_atual
-                 
-                    elif idx == 2: 
-                        if i < 5:
-                            res_geral = "EMPATE"
-                            if g1 > g2:
-                                if t1.lower() in n_casa_h2h.lower(): res_geral = "CASA"
-                                elif t2.lower() in n_casa_h2h.lower(): res_geral = "FORA"
-                            elif g1 < g2:
-                                if t1.lower() in n_fora_h2h.lower(): res_geral = "CASA"
-                                elif t2.lower() in n_fora_h2h.lower(): res_geral = "FORA"
-                            
-                            stats[f"h2h_geral_res_{i+1}"] = res_geral
-
-                        if t1.lower() in n_fora_h2h.lower():
-                            continue 
-
-                        stats["h2h_jogos"] += 1
-                        res_h2h = "E"
-                        if g1 > g2:
-                            res_h2h = "V"
-                            stats["h2h_vitorias_t1"] += 1
-                        elif g1 < g2:
-                            res_h2h = "D"
-                            stats["h2h_vitorias_t2"] += 1
-                        
-                        if stats["h2h_res_1"] == "":
-                            stats["h2h_res_1"] = res_h2h
-                        elif stats["h2h_res_2"] == "":
-                            stats["h2h_res_2"] = res_h2h
-
-                        if g1 == g2: stats["h2h_empates"] += 1
-                except: 
-                    continue
-
     except Exception as e:
-        print(f"      ⚠️ Erro Geral H2H {t1}x{t2}: {e}")
-
-    driver.close()
-    driver.switch_to.window(driver.window_handles[0])
+        print(f"      ⚠️ Erro na Raspagem 2: {e}")
+        
+    try:
+        driver.close()
+        driver.switch_to.window(driver.window_handles[0])
+    except:
+        pass
+        
     return stats
 
 
