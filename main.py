@@ -190,11 +190,11 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                                 nome_jogador = driver.execute_script("return arguments[0].textContent;", linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")).strip()
                                 if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
                                     continue
-                                
+                            
                                 try:
                                     img_linha = linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
                                     hash_linha = img_linha.get_attribute("src").split('/')[-1]
-                                Except: 
+                                except: # <- Corrigido de 'Except:' para 'except:'
                                     hash_linha = ""
 
                                 if hash_linha and hash_linha == hash_mandante_topo:
