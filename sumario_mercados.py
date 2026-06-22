@@ -28,9 +28,12 @@ def interpretar_texto(texto_sumario):
     diagnostico = {
         "vitoria": {"possivel": False, "motivo": ""},
         "dupla_chance": {"possivel": False, "motivo": ""},
-        "quantidade_gols": {"possivel": False, "motivo": ""},
+        # Mapeamento específico para as linhas solicitadas: +1.5, +2.5 ou -4.5
+        "gols_over_1_5": {"possivel": False, "motivo": ""},
+        "gols_over_2_5": {"possivel": False, "motivo": ""},
+        "gols_under_4_5": {"possivel": False, "motivo": ""},
         "btts": {"possivel": False, "motivo": ""},
-        "chutes_no_gol_jogador": {"possivel": False, "jogadores": []},
+        "chutes_no_gol_jogador": {"possivel": False, "motivo": "", "jogadores": []},
         "quantidade_cartoes": {"possivel": False, "motivo": ""}
     }
 
@@ -47,18 +50,31 @@ def interpretar_texto(texto_sumario):
         diagnostico["dupla_chance"]["possivel"] = True
         diagnostico["dupla_chance"]["motivo"] = "Favorito mapeado; chance dupla de segurança a favor do time mais forte."
 
-    # 3. MERCADO: QUANTIDADE DE GOLS
-    if any(t in texto_lower for t in ["ataque avassalador", "goleada", "gols", "ofensiv", "placar elástico", "artilheiro"]):
-        diagnostico["quantidade_gols"]["possivel"] = True
-        diagnostico["quantidade_gols"]["motivo"] = "Análise indica alta presença ofensiva (Tendência de Over)."
-    elif any(t in texto_lower for t in ["defesa sólida", "retranca", "jogo fechado", "poucos gols", "foco defensivo", "amarrado"]):
-        diagnostico["quantidade_gols"]["possivel"] = True
-        diagnostico["quantidade_gols"]["motivo"] = "Texto foca em consistência defensiva ou jogo travado (Tendência de Under)."
+    # 3. MERCADOS DE GOLS personalizados (+1.5, +2.5, -4.5)
+    # Padrão extremo de gols (Over 2.5)
+    if any(t in texto_lower for t in ["ataque avassalador", "goleada", "placar elástico", "artilheiro"]):
+        diagnostico["gols_over_2_5"]["possivel"] = True
+        diagnostico["gols_over_2_5"]["motivo"] = "Termos indicam forte tendência a placar elástico e goleada."
+    
+    # Padrão moderado de gols (Over 1.5)
+    elif any(t in texto_lower for t in ["gols", "ofensiv", "marcou", "sofreu"]):
+        diagnostico["gols_over_1_5"]["possivel"] = True
+        diagnostico["gols_over_1_5"]["motivo"] = "Presença de movimentação ofensiva padrão ou histórico de gols citado."
+        
+    # Padrão de segurança / jogo amarrado (Under 4.5)
+    # Ativa por padrão na maioria dos jogos truncados ou como margem de segurança alta
+    if any(t in texto_lower for t in ["defesa sólida", "retranca", "jogo fechado", "poucos gols", "foco defensivo", "amarrado", "empate"]):
+        diagnostico["gols_under_4_5"]["possivel"] = True
+        diagnostico["gols_under_4_5"]["motivo"] = "Jogo com tendência truncada ou focado em defesas. Margem segura para Under 4.5."
+    else:
+        # Se o jogo não é uma total várzea fora do comum, o Under 4.5 é uma excelente linha de segurança
+        diagnostico["gols_under_4_5"]["possivel"] = True
+        diagnostico["gols_under_4_5"]["motivo"] = "Linha de segurança padrão aplicável para o cenário do confronto."
 
     # 4. MERCADO: BTTS (Ambos Marcam)
-    if any(t in texto_lower for t in ["ambas marcam", "vulnerabilidade defensiva", "ambos os lados", "lá e cá", "troca de golpes", "vazada"]):
+    if any(t in texto_lower for t in ["ambas marcam", "vulnerabilidade defensiva", "ambos os lados", "lá e cá", "troca de golpes", "vazada", "marcaram"]):
         diagnostico["btts"]["possivel"] = True
-        diagnostico["btts"]["motivo"] = "Mencionou fragilidades em ambos os setores defensivos ou ritmo franco."
+        diagnostico["btts"]["motivo"] = "Identificada troca de golpes ou fragilidades defensivas de ambos os lados."
 
     # 5. MERCADO: CHUTES NO GOL DE JOGADOR
     estrelas_copa = ["messi", "ronaldo", "mbappé", "bellingham", "vinicius", "haaland", "kane", "griezmann", "lewandowski"]
@@ -71,6 +87,9 @@ def interpretar_texto(texto_sumario):
         diagnostico["chutes_no_gol_jogador"]["possivel"] = True
         if not diagnostico["chutes_no_gol_jogador"]["jogadores"]:
             diagnostico["chutes_no_gol_jogador"]["jogadores"].append("Destaque Ofensivo Citado")
+            
+    if diagnostico["chutes_no_gol_jogador"]["possivel"]:
+        diagnostico["chutes_no_gol_jogador"]["motivo"] = "Presença de finalizadores de elite citados nominalmente ou em atividade no texto."
 
     # 6. MERCADO: QUANTIDADE DE CARTÕES
     if any(t in texto_lower for t in ["cartão", "cartões", "árbitro", "juiz", "faltoso", "clima tenso", "rivalidade", "truncado", "jogo duro", "disciplinar"]):
@@ -84,8 +103,6 @@ def main():
     driver = configurar_driver()
     wait = WebDriverWait(driver, 12)
     
-    # Lista de URLs que você deseja analisar diretamente
-    # Você pode colocar múltiplas URLs aqui dentro se quiser analisar vários jogos em lote
     urls_para_analisar = [
         "https://www.flashscore.com.br/jogo/futebol/argentina-f9OppQjp/austria-naHiWdnt/"
     ]
@@ -98,32 +115,28 @@ def main():
         try:
             driver.get(url)
             
-            # 1. Localiza o contêiner do artigo com base na estrutura real do HTML enviado
             elemento_texto = wait.until(EC.presence_of_element_located((
                 By.CSS_SELECTOR, "[data-testid='fp-newsArticle-body'], .fp-body_9caht, .section--preview"
             )))
             
-            # 2. Tenta expandir clicando no botão "Mostrar pré-jogo detalhado" (classe exata do HTML: .wclButtonLink--preview)
             try:
                 btn_mais = driver.find_element(By.CSS_SELECTOR, ".wclButtonLink--preview, [class*='previewShowMore']")
                 driver.execute_script("arguments[0].click();", btn_mais)
                 time.sleep(0.5)
             except:
-                pass # Se já estiver expandido ou não tiver o botão, segue a vida
+                pass 
             
-            # 3. Extrai o conteúdo em texto puro limpo
             texto_sumario = driver.execute_script("return arguments[0].textContent;", elemento_texto).strip()
             
             print(f"📖 TEXTO EXTRAÍDO COM SUCESSO:\n\"{texto_sumario}\"\n")
             
-            # 4. Processa no motor de palavras-chave
             analise = interpretar_texto(texto_sumario)
             
             print("📊 DIAGNÓSTICO DE MERCADOS MAPEADOS:")
             for mercado, dados in analise.items():
                 if dados["possivel"]:
                     print(f"  ✅ [{mercado.upper()}] - Ativado!")
-                    if dados["motivo"]:
+                    if "motivo" in dados and dados["motivo"]:
                         print(f"     ↳ Razão: {dados['motivo']}")
                     if "jogadores" in dados and dados["jogadores"]:
                         print(f"     ↳ Atletas Citados: {', '.join(dados['jogadores'])}")
