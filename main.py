@@ -504,16 +504,35 @@ def main():
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
                         # 5. Processamento Jogadores
-                        res_jogadores = joggers.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}), nome_liga=nome_comp) if 'joggers' in globals() else jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), s.get("historico_faltas", {}), nome_liga=nome_comp)
+                        # Garantindo que passamos os dicionários de scouts esperados
+                        hist_chutes = s.get("historico_chutes", {})
+                        hist_faltas = s.get("historico_faltas", {}) # Caso seu módulo use, se não passe vazio
+                        
+                        try:
+                            if 'joggers' in globals():
+                                res_jogadores = joggers.verificar_destaques_jogadores(hist_chutes, hist_faltas, nome_liga=nome_comp)
+                            else:
+                                res_jogadores = jogadores.verificar_destaques_jogadores(hist_chutes, hist_faltas, nome_liga=nome_comp)
+                        except Exception as e_jog:
+                            print(f"  ⚠️ Erro no módulo de jogadores: {e_jog}")
+                            res_jogadores = []
+
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
                         # 6. Mercado de Cartões Coletivos
-                        res_cartoes = cartoes.analisar_dados_cartoes(
-                            s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}),
-                            s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}),
-                            nome_liga=nome_comp
-                        )
+                        try:
+                            res_cartoes = cartoes.analisar_dados_cartoes(
+                                s.get("historico_mandante_am", {}), 
+                                s.get("historico_mandante_vm", {}),
+                                s.get("historico_visitante_am", {}), 
+                                s.get("historico_visitante_vm", {}),
+                                nome_liga=nome_comp
+                            )
+                        except Exception as e_cart:
+                            print(f"  ⚠️ Erro no módulo de cartões: {e_cart}")
+                            res_cartoes = {"aprovado": False}
+
                         if res_cartoes.get("aprovado"):
                             texto_cartao = f"Média Confronto Cartões: {res_cartoes['media_confronto']} (🟨 {res_cartoes['total_mandante']} x {res_cartoes['total_visitante']} 🟥)"
                             mercados_para_processar.append({"texto": texto_cartao, "chave": "CARTOES_CONFRONTO"})
