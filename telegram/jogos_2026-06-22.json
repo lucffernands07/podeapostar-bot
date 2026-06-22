@@ -18,13 +18,13 @@
         "link_betano": "https://www.betano.bet.br/match-odds/Jordan-Algeria/83963560/"
     },
     {
-        "horario": "14:00",
+        "horario": "00:00",
         "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Argentina",
-        "time_fora": "Áustria",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.33",
-        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Austria/83962573/"
+        "time_casa": "Jordânia",
+        "time_fora": "Argélia",
+        "mercado": "Cartões Totais: -2.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Jordan-Algeria/83963560/"
     },
     {
         "horario": "18:00",
@@ -33,6 +33,15 @@
         "time_fora": "Iraque",
         "mercado": "-4.5 Gols (85%)",
         "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/France-Iraq/83962695/"
+    },
+    {
+        "horario": "18:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "França",
+        "time_fora": "Iraque",
+        "mercado": "Cartões Totais: -3.5",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/France-Iraq/83962695/"
     },
     {
@@ -63,12 +72,21 @@
         "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Gremio-Novorizontino/87512069/"
     },
     {
+        "horario": "20:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Ponte Preta",
+        "time_fora": "Novorizontino",
+        "mercado": "Cartões Totais: -3.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Gremio-Novorizontino/87512069/"
+    },
+    {
         "horario": "21:00",
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Noruega",
         "time_fora": "Senegal",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.30",
+        "odd": "1.31",
         "link_betano": "https://www.betano.bet.br/match-odds/Norway-Senegal/83962793/"
     },
     {
@@ -78,6 +96,15 @@
         "time_fora": "Senegal",
         "mercado": "Ambas Marcam: Sim (80%)",
         "odd": "1.70",
+        "link_betano": "https://www.betano.bet.br/match-odds/Norway-Senegal/83962793/"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Noruega",
+        "time_fora": "Senegal",
+        "mercado": "Cartões Totais: -3.5",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Norway-Senegal/83962793/"
     }
 ]
