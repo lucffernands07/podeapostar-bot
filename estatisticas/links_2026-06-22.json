@@ -1,0 +1,95 @@
+{
+    "data_geracao": "2026-06-22",
+    "jogos": [
+        {
+            "time_casa": "Ponte Preta",
+            "time_fora": "Novorizontino",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8zh4B2fm/#/resumo-de-jogo",
+            "odd_casa": "5.00",
+            "odd_fora": "1.71"
+        },
+        {
+            "time_casa": "Ponte Preta",
+            "time_fora": "Novorizontino",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8zh4B2fm/#/resumo-de-jogo",
+            "odd_casa": "5.00",
+            "odd_fora": "1.71"
+        },
+        {
+            "time_casa": "Confiança",
+            "time_fora": "Guarani",
+            "mercado": "2X (70%)",
+            "mercado_ranking": "2X (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/YwDFYlaf/#/resumo-de-jogo",
+            "odd_casa": "3.30",
+            "odd_fora": "2.20"
+        },
+        {
+            "time_casa": "Nova Zelândia",
+            "time_fora": "Egito",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QeaikheU/#/resumo-de-jogo",
+            "odd_casa": "5.75",
+            "odd_fora": "1.62"
+        },
+        {
+            "time_casa": "Argentina",
+            "time_fora": "Áustria",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Cpq2Y2FE/#/resumo-de-jogo",
+            "odd_casa": "1.48",
+            "odd_fora": "7.00"
+        },
+        {
+            "time_casa": "França",
+            "time_fora": "Iraque",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KMRMTaNM/#/resumo-de-jogo",
+            "odd_casa": "1.07",
+            "odd_fora": "29.00"
+        },
+        {
+            "time_casa": "Noruega",
+            "time_fora": "Senegal",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xSUJLPV8/#/resumo-de-jogo",
+            "odd_casa": "2.10",
+            "odd_fora": "3.40"
+        },
+        {
+            "time_casa": "Noruega",
+            "time_fora": "Senegal",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xSUJLPV8/#/resumo-de-jogo",
+            "odd_casa": "2.10",
+            "odd_fora": "3.40"
+        },
+        {
+            "time_casa": "Jordânia",
+            "time_fora": "Argélia",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dx1FAaN7/#/resumo-de-jogo",
+            "odd_casa": "6.00",
+            "odd_fora": "1.53"
+        },
+        {
+            "time_casa": "Jordânia",
+            "time_fora": "Argélia",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dx1FAaN7/#/resumo-de-jogo",
+            "odd_casa": "6.00",
+            "odd_fora": "1.53"
+        }
+    ]
+}
