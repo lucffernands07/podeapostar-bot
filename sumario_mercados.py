@@ -1,6 +1,7 @@
 import re
 import time
 import os
+from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -92,71 +93,88 @@ def interpretar_texto(texto_sumario):
     return diagnostico
 
 def main():
-    print("\n🤖 [INICIANDO SCRAPER DE SUMÁRIOS DA COPA DO MUNDO]")
+    print("\n🤖 [INICIANDO SCRAPER DE SUMÁRIOS DA COPA - FILTRO POR DATA DO MAIN]")
     driver = configurar_driver()
-    wait = WebDriverWait(driver, 15)
+    wait = WebDriverWait(driver, 5) # Espera curta e rápida de 5s
     
-    url_copa = "https://www.flashscore.com.br/futebol/mundo/campeonato-do-mundo/"
+    hoje_ref = datetime.now()
+    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
+    
+    url_calendario = "https://www.flashscore.com.br/futebol/mundo/campeonato-do-mundo/calendario/"
     
     try:
-        print(f"🌍 Acessando o painel de jogos da Copa: {url_copa}")
-        driver.get(url_copa)
-        time.sleep(6) # Tempo para garantir que o painel dinâmico carregue os jogos
+        print(f"🌍 Acessando o calendário de jogos da Copa: {url_calendario}")
+        driver.get(url_calendario)
+        time.sleep(5)
         
-        # 🔍 CAPTURA DINÂMICA: Busca os blocos de jogos ativos/agendados na tela (igual à lógica do main.py)
-        elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-        print(f"📦 Encontrados {len(elementos_jogos)} blocos de eventos no painel.")
+        elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+        print(f"📦 Encontrados {len(elementos)} blocos de eventos totais no painel.")
         
-        jogos_do_dia = []
+        jogos_filtrados = []
         
-        for el in elementos_jogos:
+        for el in elementos:
             try:
-                # Captura o ID escondido no elemento (ex: g_1_f9OppQjp -> pega apenas 'f9OppQjp')
-                id_atrib = el.get_attribute("id")
-                if not id_atrib:
+                # LÓGICA DE FILTRO EXTRAÍDA DO SEU MAIN.PY
+                try:
+                    tempo_el = el.find_element(By.CSS_SELECTOR, ".event__time")
+                    tempo_raw = tempo_el.text.strip()
+                except Exception:
                     continue
-                id_jogo = id_atrib.split('_')[-1]
+
+                if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado"]):
+                    continue
+
+                partes_tempo = tempo_raw.split()
+                if not partes_tempo:
+                    continue
+                    
+                horario_str = partes_tempo[-1]
+                if ":" not in horario_str:
+                    continue
+
+                h_obj = datetime.strptime(horario_str, "%H:%M")
                 
-                # Coleta os nomes dos times para o log ficar bonito
-                times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name'], .event__participant")
-                if len(times) >= 2:
-                    casa = times[0].text.strip()
-                    fora = times[1].text.strip()
-                else:
-                    casa = "Time Casa"
-                    fora = "Time Fora"
-                
-                url_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/"
-                
-                # Evita duplicados na mesma rodada
-                if url_jogo not in [j["url"] for j in jogos_do_dia]:
-                    jogos_do_dia.append({
-                        "id": id_jogo,
-                        "casa": casa,
-                        "fora": fora,
-                        "url": url_jogo
-                    })
+                aceitar = False
+                if amanha_no_site in tempo_raw:
+                    if h_obj.hour <= 3: 
+                        aceitar = True
+                elif "." not in tempo_raw:
+                    if (h_obj - timedelta(hours=3)).hour >= 7: 
+                        aceitar = True
+
+                if aceitar:
+                    times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name'], .event__participant")
+                    t1 = times[0].text.strip() if len(times) >= 1 else "Time Casa"
+                    t2 = times[1].text.strip() if len(times) >= 2 else "Time Fora"
+                    
+                    id_jogo = el.get_attribute('id').split('_')[-1]
+                    url_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/"
+                    
+                    if url_jogo not in [j["url"] for j in jogos_filtrados]:
+                        jogos_filtrados.append({
+                            "id": id_jogo,
+                            "casa": t1,
+                            "fora": t2,
+                            "url": url_jogo
+                        })
             except Exception:
                 continue
                 
-        print(f"✅ Mapeamento concluído! {len(jogos_do_dia)} jogos da Copa prontos para análise.\n")
+        print(f"🔥 Filtro de data aplicado! {len(jogos_filtrados)} jogos correspondem à janela operacional.\n")
         
-        # Percorre a lista de jogos encontrados abrindo cada sumário
-        for jogo in jogos_do_dia:
+        for jogo in jogos_filtrados:
             print("=" * 70)
-            print(f"🏟️ CONFRONTO: {jogo['casa']} x {jogo['fora']}")
-            print(f"🔗 URL DO JOGO: {jogo['url']}")
+            print(f"🏟️ ANALISANDO: {jogo['casa']} x {jogo['fora']}")
+            print(f"🔗 URL: {jogo['url']}")
             print("-" * 70)
             
             try:
                 driver.get(jogo['url'])
                 
-                # Localiza o contêiner do texto do sumário
                 elemento_texto = wait.until(EC.presence_of_element_located((
                     By.CSS_SELECTOR, "[data-testid='fp-newsArticle-body'], .fp-body_9caht, .section--preview"
                 )))
                 
-                # Tenta expandir o texto longo se o botão de "Mostrar pré-jogo" existir
                 try:
                     btn_mais = driver.find_element(By.CSS_SELECTOR, ".wclButtonLink--preview, [class*='previewShowMore']")
                     driver.execute_script("arguments[0].click();", btn_mais)
@@ -165,9 +183,8 @@ def main():
                     pass 
                 
                 texto_sumario = driver.execute_script("return arguments[0].textContent;", elemento_texto).strip()
-                print(f"📖 TEXTO EXTRAÍDO:\n\"{texto_sumario[:200]}... [Texto Completo Lido]\"\n")
+                print(f"📖 TEXTO EXTRAÍDO:\n\"{texto_sumario[:180]}... [Conteúdo Completo Lido]\"\n")
                 
-                # Interpreta os mercados usando o motor calibrado
                 analise = interpretar_texto(texto_sumario)
                 
                 print("📊 DIAGNÓSTICO DE MERCADOS MAPEADOS:")
@@ -181,8 +198,8 @@ def main():
                     else:
                         print(f"  ❌ [{mercado.upper()}] - Ignorado.")
                         
-            except Exception as e:
-                print(f"❌ Não foi possível analisar o sumário para este jogo (Pode não ter pré-visualização disponível ainda).")
+            except Exception:
+                print(f"❌ Sumário indisponível para este jogo no momento.")
                 
             print("=" * 70 + "\n")
             
