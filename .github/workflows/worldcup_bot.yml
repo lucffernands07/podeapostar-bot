@@ -1,4 +1,4 @@
-name: 3. World Cup Bot Apostas (Sumário)
+name: World Cup Bot Apostas (Sumário)
 
 on:
   push:
@@ -6,15 +6,13 @@ on:
       - 'sumario_mercados.py'
   schedule:
     # 06:11 UTC corresponde às 03:11 de Brasília (GMT-3)
-    # Ótimo horário para varrer os sumários dos jogos da Copa do Mundo do dia
+    # Horário ideal para rodar os sumários dos jogos da Copa do Mundo do dia
     - cron: '11 6 * * *'
   workflow_dispatch: 
 
 jobs:
   run-wc-bot:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout do repositorio
@@ -36,12 +34,4 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
         run: python sumario_mercados.py
-
-      - name: 2. Salvar Dados da Copa no Repositório
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Prevenção contra erros de lock ref/concorrência
-          git pull --rebase origin main
-          git push origin main
+        
