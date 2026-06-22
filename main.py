@@ -271,8 +271,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     
                     try:
                         WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
-                    except: 
-                        pass
+                    except: pass
                         
                     time.sleep(2.5)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
@@ -283,8 +282,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         hash_mandante_topo = img_m.get_attribute("src").split('/')[-1]
                         img_v = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__awayLogo img.participant__image")
                         hash_visitante_topo = img_v.get_attribute("src").split('/')[-1]
-                    except: 
-                        pass
+                    except: pass
 
                     # 🗂️ PASSO 1: Coleta de Cartões (Aba Gerais)
                     url_gerais = f"{url_jogo_completa}/resumo/estatisticas-jogadores/gerais/"
@@ -347,21 +345,22 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 dicionario_vm[nome_jogador].append(vermelhos)
                             except: continue
                     except: pass
-
+                        
                     # 🎯 PASSO 2: Coleta de Chutes no Alvo (Aba Finalizações)
                     url_finalizacoes = f"{url_jogo_completa}/resumo/estatisticas-jogadores/finalizacoes/"
-                    
                     try:
                         driver.get(url_finalizacoes)
-                        time.sleep(1.5) 
-                        
                         try:
                             elemento_aba_fin = driver.find_element(By.XPATH, "//a[contains(@href, 'finalizacoes')]")
                             driver.execute_script("arguments[0].click();", elemento_aba_fin)
-                            time.sleep(1.0)
-                        except:
-                            pass 
+                        except: pass 
 
+                        # --- 🛡️ BLINDAGEM ---
+                        wait.until(lambda d: any(
+                            "FN" in el.text.upper() or "ALVO" in el.text.upper() or "SHOTS" in el.text.upper()
+                            for el in d.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
+                        ))
+                        
                         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
                         
                         cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
@@ -369,46 +368,33 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         for idx_th, th in enumerate(cabecalhos_fin):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
                             alias = str(th.get_attribute("data-analytics-alias")).upper()
-                            
                             if "CHUTE" in texto_th or "ALVO" in texto_th or alias == "SHOTS_ON_TARGET" or texto_th == "FN":
                                 indice_chutes = idx_th
                                 break
-
-                        if indice_chutes == -1:
-                            indice_chutes = 2 
+                        if indice_chutes == -1: indice_chutes = 2 
 
                         linhas_dados_fin = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
                         for lambda_linha in linhas_dados_fin:
                             try:
-                                nome_jogador = driver.execute_script("return arguments[0].textContent;", lambda_linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN")).strip()
-                                if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper():
-                                    continue
-
+                                nome_element = lambda_linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN, [class*='playerName']")
+                                nome_jogador = driver.execute_script("return arguments[0].textContent;", nome_element).strip()
+                                if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper(): continue
                                 celulas_valores = lambda_linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell']")
-                                if not celulas_valores or len(celulas_valores) <= indice_chutes: 
-                                    continue
-
+                                if not celulas_valores or len(celulas_valores) <= indice_chutes: continue
                                 val_chute = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_chutes]).strip()
-                                chutes = 0 if val_chute in ["-", ""] or not val_chute.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_chute))
-                                
-                                if nome_jogador not in stats["historico_chutes"]:
-                                    stats["historico_chutes"][nome_jogador] = []
-                                while len(stats["historico_chutes"][nome_jogador]) < jogo_global_index:
-                                    stats["historico_chutes"][nome_jogador].append(0)
+                                chutes = 0 if val_chute in ["-", ""] or not re.search(r'\d', val_chute) else int(re.sub(r'\D', '', val_chute))
+                                if nome_jogador not in stats["historico_chutes"]: stats["historico_chutes"][nome_jogador] = []
+                                while len(stats["historico_chutes"][nome_jogador]) < jogo_global_index: stats["historico_chutes"][nome_jogador].append(0)
                                 stats["historico_chutes"][nome_jogador].append(chutes)
-                            except: 
-                                continue
+                            except: continue
                     except Exception as e_passo2:
-                        print(f"  ⚠️ Erro ao carregar ou ler a aba de finalizações: {e_passo2}")                    
+                        print(f" ⚠️ Erro ao carregar aba de finalizações: {e_passo2}")
                     
-                    # Incremento global deve acontecer aqui, após tentar rodar os dois passos para o jogo atual
                     jogo_global_index += 1
-
-                except:
-                    continue
-    except Exception as e:
-        print(f"      ⚠️ Erro na Raspagem 2: {e}")
-        
+                except: continue
+        except Exception as e:
+            print(f"      ⚠️ Erro na Raspagem 2: {e}")
+            
     try:
         driver.close()
         driver.switch_to.window(driver.window_handles[0])
