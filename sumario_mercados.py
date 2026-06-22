@@ -28,7 +28,6 @@ def interpretar_texto(texto_sumario):
     diagnostico = {
         "vitoria": {"possivel": False, "motivo": ""},
         "dupla_chance": {"possivel": False, "motivo": ""},
-        # Mapeamento específico para as linhas solicitadas: +1.5, +2.5 ou -4.5
         "gols_over_1_5": {"possivel": False, "motivo": ""},
         "gols_over_2_5": {"possivel": False, "motivo": ""},
         "gols_under_4_5": {"possivel": False, "motivo": ""},
@@ -50,24 +49,18 @@ def interpretar_texto(texto_sumario):
         diagnostico["dupla_chance"]["possivel"] = True
         diagnostico["dupla_chance"]["motivo"] = "Favorito mapeado; chance dupla de segurança a favor do time mais forte."
 
-    # 3. MERCADOS DE GOLS personalizados (+1.5, +2.5, -4.5)
-    # Padrão extremo de gols (Over 2.5)
+    # 3. MERCADOS DE GOLS (+1.5, +2.5, -4.5)
     if any(t in texto_lower for t in ["ataque avassalador", "goleada", "placar elástico", "artilheiro"]):
         diagnostico["gols_over_2_5"]["possivel"] = True
         diagnostico["gols_over_2_5"]["motivo"] = "Termos indicam forte tendência a placar elástico e goleada."
-    
-    # Padrão moderado de gols (Over 1.5)
     elif any(t in texto_lower for t in ["gols", "ofensiv", "marcou", "sofreu"]):
         diagnostico["gols_over_1_5"]["possivel"] = True
         diagnostico["gols_over_1_5"]["motivo"] = "Presença de movimentação ofensiva padrão ou histórico de gols citado."
         
-    # Padrão de segurança / jogo amarrado (Under 4.5)
-    # Ativa por padrão na maioria dos jogos truncados ou como margem de segurança alta
     if any(t in texto_lower for t in ["defesa sólida", "retranca", "jogo fechado", "poucos gols", "foco defensivo", "amarrado", "empate"]):
         diagnostico["gols_under_4_5"]["possivel"] = True
         diagnostico["gols_under_4_5"]["motivo"] = "Jogo com tendência truncada ou focado em defesas. Margem segura para Under 4.5."
     else:
-        # Se o jogo não é uma total várzea fora do comum, o Under 4.5 é uma excelente linha de segurança
         diagnostico["gols_under_4_5"]["possivel"] = True
         diagnostico["gols_under_4_5"]["motivo"] = "Linha de segurança padrão aplicável para o cenário do confronto."
 
@@ -99,58 +92,106 @@ def interpretar_texto(texto_sumario):
     return diagnostico
 
 def main():
-    print("\n🤖 [INICIANDO SCRAPER DE SUMÁRIOS]")
+    print("\n🤖 [INICIANDO SCRAPER DE SUMÁRIOS DA COPA DO MUNDO]")
     driver = configurar_driver()
-    wait = WebDriverWait(driver, 12)
+    wait = WebDriverWait(driver, 15)
     
-    urls_para_analisar = [
-        "https://www.flashscore.com.br/jogo/futebol/argentina-f9OppQjp/austria-naHiWdnt/"
-    ]
+    url_copa = "https://www.flashscore.com.br/futebol/mundo/campeonato-do-mundo/"
     
-    for url in urls_para_analisar:
-        print("=" * 70)
-        print(f"🔗 ACESSANDO URL: {url}")
-        print("-" * 70)
+    try:
+        print(f"🌍 Acessando o painel de jogos da Copa: {url_copa}")
+        driver.get(url_copa)
+        time.sleep(6) # Tempo para garantir que o painel dinâmico carregue os jogos
         
-        try:
-            driver.get(url)
-            
-            elemento_texto = wait.until(EC.presence_of_element_located((
-                By.CSS_SELECTOR, "[data-testid='fp-newsArticle-body'], .fp-body_9caht, .section--preview"
-            )))
+        # 🔍 CAPTURA DINÂMICA: Busca os blocos de jogos ativos/agendados na tela (igual à lógica do main.py)
+        elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+        print(f"📦 Encontrados {len(elementos_jogos)} blocos de eventos no painel.")
+        
+        jogos_do_dia = []
+        
+        for el in elementos_jogos:
+            try:
+                # Captura o ID escondido no elemento (ex: g_1_f9OppQjp -> pega apenas 'f9OppQjp')
+                id_atrib = el.get_attribute("id")
+                if not id_atrib:
+                    continue
+                id_jogo = id_atrib.split('_')[-1]
+                
+                # Coleta os nomes dos times para o log ficar bonito
+                times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name'], .event__participant")
+                if len(times) >= 2:
+                    casa = times[0].text.strip()
+                    fora = times[1].text.strip()
+                else:
+                    casa = "Time Casa"
+                    fora = "Time Fora"
+                
+                url_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/"
+                
+                # Evita duplicados na mesma rodada
+                if url_jogo not in [j["url"] for j in jogos_do_dia]:
+                    jogos_do_dia.append({
+                        "id": id_jogo,
+                        "casa": casa,
+                        "fora": fora,
+                        "url": url_jogo
+                    })
+            except Exception:
+                continue
+                
+        print(f"✅ Mapeamento concluído! {len(jogos_do_dia)} jogos da Copa prontos para análise.\n")
+        
+        # Percorre a lista de jogos encontrados abrindo cada sumário
+        for jogo in jogos_do_dia:
+            print("=" * 70)
+            print(f"🏟️ CONFRONTO: {jogo['casa']} x {jogo['fora']}")
+            print(f"🔗 URL DO JOGO: {jogo['url']}")
+            print("-" * 70)
             
             try:
-                btn_mais = driver.find_element(By.CSS_SELECTOR, ".wclButtonLink--preview, [class*='previewShowMore']")
-                driver.execute_script("arguments[0].click();", btn_mais)
-                time.sleep(0.5)
-            except:
-                pass 
+                driver.get(jogo['url'])
+                
+                # Localiza o contêiner do texto do sumário
+                elemento_texto = wait.until(EC.presence_of_element_located((
+                    By.CSS_SELECTOR, "[data-testid='fp-newsArticle-body'], .fp-body_9caht, .section--preview"
+                )))
+                
+                # Tenta expandir o texto longo se o botão de "Mostrar pré-jogo" existir
+                try:
+                    btn_mais = driver.find_element(By.CSS_SELECTOR, ".wclButtonLink--preview, [class*='previewShowMore']")
+                    driver.execute_script("arguments[0].click();", btn_mais)
+                    time.sleep(0.5)
+                except:
+                    pass 
+                
+                texto_sumario = driver.execute_script("return arguments[0].textContent;", elemento_texto).strip()
+                print(f"📖 TEXTO EXTRAÍDO:\n\"{texto_sumario[:200]}... [Texto Completo Lido]\"\n")
+                
+                # Interpreta os mercados usando o motor calibrado
+                analise = interpretar_texto(texto_sumario)
+                
+                print("📊 DIAGNÓSTICO DE MERCADOS MAPEADOS:")
+                for mercado, dados in analise.items():
+                    if dados["possivel"]:
+                        print(f"  ✅ [{mercado.upper()}] - Ativado!")
+                        if dados["motivo"]:
+                            print(f"     ↳ Razão: {dados['motivo']}")
+                        if "jogadores" in dados and dados["jogadores"]:
+                            print(f"     ↳ Atletas Citados: {', '.join(dados['jogadores'])}")
+                    else:
+                        print(f"  ❌ [{mercado.upper()}] - Ignorado.")
+                        
+            except Exception as e:
+                print(f"❌ Não foi possível analisar o sumário para este jogo (Pode não ter pré-visualização disponível ainda).")
+                
+            print("=" * 70 + "\n")
             
-            texto_sumario = driver.execute_script("return arguments[0].textContent;", elemento_texto).strip()
-            
-            print(f"📖 TEXTO EXTRAÍDO COM SUCESSO:\n\"{texto_sumario}\"\n")
-            
-            analise = interpretar_texto(texto_sumario)
-            
-            print("📊 DIAGNÓSTICO DE MERCADOS MAPEADOS:")
-            for mercado, dados in analise.items():
-                if dados["possivel"]:
-                    print(f"  ✅ [{mercado.upper()}] - Ativado!")
-                    if "motivo" in dados and dados["motivo"]:
-                        print(f"     ↳ Razão: {dados['motivo']}")
-                    if "jogadores" in dados and dados["jogadores"]:
-                        print(f"     ↳ Atletas Citados: {', '.join(dados['jogadores'])}")
-                else:
-                    print(f"  ❌ [{mercado.upper()}] - Ignorado.")
-                    
-        except Exception as e:
-            print(f"🚨 Erro ao raspar esta partida: {e}")
-            
-        print("=" * 70 + "\n")
-        
-    driver.quit()
-    print("🤖 [PROCESSO CONCLUÍDO]")
+    except Exception as e:
+        print(f"🚨 Erro crítico na execução geral do Scraper: {e}")
+    finally:
+        driver.quit()
+        print("🤖 [PROCESSO CONCLUÍDO]")
 
 if __name__ == "__main__":
     main()
-        
+    
