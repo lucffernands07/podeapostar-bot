@@ -1,0 +1,92 @@
+[
+    {
+        "horario": "00:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Jordânia",
+        "time_fora": "Argélia",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/Jordan-Algeria/83963560/"
+    },
+    {
+        "horario": "00:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Jordânia",
+        "time_fora": "Argélia",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.88",
+        "link_betano": "https://www.betano.bet.br/match-odds/Jordan-Algeria/83963560/"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Argentina",
+        "time_fora": "Áustria",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Austria/83962573/"
+    },
+    {
+        "horario": "18:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "França",
+        "time_fora": "Iraque",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.40",
+        "link_betano": "https://www.betano.bet.br/match-odds/France-Iraq/83962695/"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Confiança",
+        "time_fora": "Guarani",
+        "mercado": "2X (70%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Confianca-SE-Guarani-SP/86496261/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Ponte Preta",
+        "time_fora": "Novorizontino",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Gremio-Novorizontino/87512069/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Ponte Preta",
+        "time_fora": "Novorizontino",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "2.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Gremio-Novorizontino/87512069/"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Noruega",
+        "time_fora": "Senegal",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/Norway-Senegal/83962793/"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Noruega",
+        "time_fora": "Senegal",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/Norway-Senegal/83962793/"
+    },
+    {
+        "horario": "22:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Nova Zelândia",
+        "time_fora": "Egito",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.34",
+        "link_betano": "https://www.betano.bet.br/match-odds/New-Zealand-Egypt/83962546/"
+    }
+]
