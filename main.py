@@ -468,7 +468,10 @@ def main():
                         id_jogo = el.get_attribute('id').split('_')[-1]
                         
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
-                        s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
+                        
+                        # EXECUÇÃO SEQUENCIAL DA RASPAGEM 1 E RASPAGEM 2
+                        s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
+                        s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
                         
                         mercados_para_processar = []
 
