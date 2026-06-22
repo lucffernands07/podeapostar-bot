@@ -350,23 +350,30 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
 
                     # 🎯 PASSO 2: Coleta de Chutes no Alvo (Aba Finalizações)
                     url_finalizacoes = f"{url_jogo_completa}/resumo/estatisticas-jogadores/finalizacoes/"
-                    driver.get(url_finalizacoes)
                     
                     try:
+                        driver.get(url_finalizacoes)
+                        time.sleep(1.5) 
+                        
+                        try:
+                            elemento_aba_fin = driver.find_element(By.XPATH, "//a[contains(@href, 'finalizacoes')]")
+                            driver.execute_script("arguments[0].click();", elemento_aba_fin)
+                            time.sleep(1.0)
+                        except:
+                            pass 
+
                         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
-                        time.sleep(1.2)
                         
                         cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
                         indice_chutes = -1
                         for idx_th, th in enumerate(cabecalhos_fin):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
                             alias = str(th.get_attribute("data-analytics-alias")).upper()
-                            # Procura pelo cabeçalho de Chutes no Alvo / Finalizações no Alvo
+                            
                             if "CHUTE" in texto_th or "ALVO" in texto_th or alias == "SHOTS_ON_TARGET" or texto_th == "FN":
                                 indice_chutes = idx_th
                                 break
 
-                        # Se não mapeou por texto, geralmente é a terceira ou quarta coluna de dados nesta aba específica
                         if indice_chutes == -1:
                             indice_chutes = 2 
 
@@ -378,7 +385,8 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                     continue
 
                                 celulas_valores = lambda_linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell']")
-                                if not celulas_valores or len(celulas_valores) <= indice_chutes: continue
+                                if not celulas_valores or len(celulas_valores) <= indice_chutes: 
+                                    continue
 
                                 val_chute = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_chutes]).strip()
                                 chutes = 0 if val_chute in ["-", ""] or not val_chute.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_chute))
@@ -388,13 +396,15 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 while len(stats["historico_chutes"][nome_jogador]) < jogo_global_index:
                                     stats["historico_chutes"][nome_jogador].append(0)
                                 stats["historico_chutes"][nome_jogador].append(chutes)
-                            except: continue
-                    except: pass
+                            except: 
+                                continue
+                    except Exception as e_passo2:
+                        print(f"  ⚠️ Erro ao carregar ou ler a aba de finalizações: {e_passo2}")                    
+                    
+                    # Incremento global deve acontecer aqui, após tentar rodar os dois passos para o jogo atual
+                    jogo_global_index += 1
 
-                    jogo_global_index += 1
-                except Exception as e_jogo_scout:
-                    print(f"      ⚠️ Falha isolada na linha de scouts ({jogo_dados['idx']}): {e_jogo_scout}")
-                    jogo_global_index += 1
+                except:
                     continue
     except Exception as e:
         print(f"      ⚠️ Erro na Raspagem 2: {e}")
