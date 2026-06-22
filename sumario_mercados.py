@@ -1,7 +1,7 @@
 import re
 import time
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -93,74 +93,63 @@ def interpretar_texto(texto_sumario):
     return diagnostico
 
 def main():
-    print("\n🤖 [INICIANDO SCRAPER DE SUMÁRIOS DA COPA - FILTRO POR DATA DO MAIN]")
+    print("\n🤖 [INICIANDO SCRAPER DE SUMÁRIOS - PAINEL DO DIA PRINCIPAL]")
     driver = configurar_driver()
-    wait = WebDriverWait(driver, 5) # Espera curta e rápida de 5s
+    wait = WebDriverWait(driver, 5)
     
-    hoje_ref = datetime.now()
-    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
-    
-    url_calendario = "https://www.flashscore.com.br/futebol/mundo/campeonato-do-mundo/calendario/"
+    # URL principal focada nos jogos do dia corrente
+    url_principal = "https://www.flashscore.com.br/futebol/mundo/campeonato-do-mundo/"
     
     try:
-        print(f"🌍 Acessando o calendário de jogos da Copa: {url_calendario}")
-        driver.get(url_calendario)
+        print(f"🌍 Acessando painel geral de hoje: {url_principal}")
+        driver.get(url_principal)
         time.sleep(5)
         
         elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-        print(f"📦 Encontrados {len(elementos)} blocos de eventos totais no painel.")
+        print(f"📦 Encontrados {len(elementos)} blocos de eventos no painel.")
         
         jogos_filtrados = []
         
         for el in elementos:
             try:
-                # LÓGICA DE FILTRO EXTRAÍDA DO SEU MAIN.PY
+                # Captura o horário do jogo
                 try:
                     tempo_el = el.find_element(By.CSS_SELECTOR, ".event__time")
                     tempo_raw = tempo_el.text.strip()
                 except Exception:
                     continue
 
-                if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado"]):
+                # Evita jogos encerrados, ao vivo ou adiados do painel de hoje
+                if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado", "Ao vivo"]):
                     continue
 
+                # Valida se possui um formato de hora válido HH:MM (ex: 14:00, 18:00)
                 partes_tempo = tempo_raw.split()
                 if not partes_tempo:
                     continue
-                    
                 horario_str = partes_tempo[-1]
                 if ":" not in horario_str:
                     continue
 
-                h_obj = datetime.strptime(horario_str, "%H:%M")
+                # Se passou pelos filtros, é um jogo agendado para hoje!
+                times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name'], .event__participant")
+                t1 = times[0].text.strip() if len(times) >= 1 else "Time Casa"
+                t2 = times[1].text.strip() if len(times) >= 2 else "Time Fora"
                 
-                aceitar = False
-                if amanha_no_site in tempo_raw:
-                    if h_obj.hour <= 3: 
-                        aceitar = True
-                elif "." not in tempo_raw:
-                    if (h_obj - timedelta(hours=3)).hour >= 7: 
-                        aceitar = True
-
-                if aceitar:
-                    times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name'], .event__participant")
-                    t1 = times[0].text.strip() if len(times) >= 1 else "Time Casa"
-                    t2 = times[1].text.strip() if len(times) >= 2 else "Time Fora"
-                    
-                    id_jogo = el.get_attribute('id').split('_')[-1]
-                    url_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/"
-                    
-                    if url_jogo not in [j["url"] for j in jogos_filtrados]:
-                        jogos_filtrados.append({
-                            "id": id_jogo,
-                            "casa": t1,
-                            "fora": t2,
-                            "url": url_jogo
-                        })
+                id_jogo = el.get_attribute('id').split('_')[-1]
+                url_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/"
+                
+                if url_jogo not in [j["url"] for j in jogos_filtrados]:
+                    jogos_filtrados.append({
+                        "id": id_jogo,
+                        "casa": t1,
+                        "fora": t2,
+                        "url": url_jogo
+                    })
             except Exception:
                 continue
                 
-        print(f"🔥 Filtro de data aplicado! {len(jogos_filtrados)} jogos correspondem à janela operacional.\n")
+        print(f"🔥 Filtro aplicado! {len(jogos_filtrados)} jogos agendados para hoje serão analisados.\n")
         
         for jogo in jogos_filtrados:
             print("=" * 70)
@@ -211,4 +200,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
+        
