@@ -99,7 +99,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             if "3/5j" in mercado_txt: return 60
             if "3/3j" in mercado_txt: return 100
             if "2/3j" in mercado_txt: return 66
-            if "confronto cartões" in mercado_txt.lower() or "chutes" in mercado_txt.lower(): return 100
+            if "confronto cartões" in mercado_txt.lower() or "cartões totais" in mercado_txt.lower() or "chutes" in mercado_txt.lower(): return 100
             return 50
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: pegar_assertividade(x), reverse=True)
     else: # EQUILIBRADO / AMBAS
@@ -109,7 +109,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             if "%" in mercado_txt:
                 pct = extrair_porcentagem(mercado_txt) / 100.0
             else:
-                pct = 1.0 if ("3/3j" in mercado_txt or "5/5j" in mercado_txt or "confronto cartões" in mercado_txt.lower() or "chutes" in mercado_txt.lower()) else 0.66
+                pct = 1.0 if ("3/3j" in mercado_txt or "5/5j" in mercado_txt or "confronto cartões" in mercado_txt.lower() or "cartões totais" in mercado_txt.lower() or "chutes" in mercado_txt.lower()) else 0.66
             return odd * pct
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: calcular_peso_equilibrado(x), reverse=True)
 
@@ -135,7 +135,6 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             
         nome_bilhete = f"✨ BINGO ELITE DE {qtd_confrontos_real} JOGOS ({estrategia})"
     else:
-        # 🚀 FIX: Corrigido de juegos_ordenados para jogos_ordenados
         jogos_selecionados = jogos_ordenados[:qtd_alvo]
         qtd_real = len(jogos_selecionados)
         aviso_escassez = ""
@@ -202,18 +201,33 @@ def formatar_para_telegram(bilhetes, cache_dados):
                 
                 texto_final_linha = f"🔶 {mercado_limpo}"
                 
-            # 🚀 REGRA DE CARTÕES MANTIDA NO MESMO VISUAL (X+)
-            elif "confronto cartões:" in mercado_limpo.lower() or "confronto cartões" in mercado_limpo.lower():
-                match_med = re.search(r'(?:cartões|Cartões):\s*([\d.]+)', mercado_limpo)
-                if match_med:
-                    media_num = float(match_med.group(1))
-                    valor_arredondado = int(media_num + 0.5)
-                    if valor_arredondado < 1: valor_arredondado = 1
-                    mercado_limpo = f"Confronto Cartões ({valor_arredondado}+)"
+            # 🚀 REFORMULADO: NOVA REGRA DE PROCESSAMENTO DE CARTÕES GERAIS E COLETIVOS
+            elif "cartões" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
+                # Se o mercado já vier formatado do main como "Cartões Totais: +X.5", mantém intacto
+                if "totais:" in mercado_limpo.lower():
+                    texto_final_linha = f"🔶 {mercado_limpo}"
                 else:
-                    mercado_limpo = mercado_limpo.split("(")[0].strip()
-                    
-                texto_final_linha = f"🔶 {mercado_limpo}"
+                    # Captura qualquer padrão numérico de média (ex: "Média Confronto Cartões: 3.33")
+                    match_med = re.search(r'(?:cartões|Cartões|cartao|Cartao):\s*([\d.]+)', mercado_limpo)
+                    if match_med:
+                        media_num = float(match_med.group(1))
+                        
+                        # Aplicação exata da tabela de escalonamento solicitada
+                        if media_num >= 4.0:
+                            mercado_limpo = "Cartões Totais: +4.5"
+                        elif media_num >= 3.0:
+                            mercado_limpo = "Cartões Totais: +2.5"
+                        elif media_num >= 2.0:
+                            mercado_limpo = "Cartões Totais: +1.5"
+                        elif media_num >= 1.0:
+                            mercado_limpo = "Cartões Totais: -3.5"
+                        else:
+                            mercado_limpo = "Cartões Totais: -2.5"
+                    else:
+                        # Fallback de segurança se não achar números flutuantes
+                        mercado_limpo = "Cartões Totais: +1.5"
+                        
+                    texto_final_linha = f"🔶 {mercado_limpo}"
             else:
                 texto_final_linha = f"🔶 {mercado_limpo} | Odd: {odd_valor}"
 
