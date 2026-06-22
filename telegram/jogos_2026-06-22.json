@@ -14,7 +14,7 @@
         "time_casa": "Jordânia",
         "time_fora": "Argélia",
         "mercado": "+2.5 Gols (70%)",
-        "odd": "1.88",
+        "odd": "1.90",
         "link_betano": "https://www.betano.bet.br/match-odds/Jordan-Algeria/83963560/"
     },
     {
@@ -23,7 +23,7 @@
         "time_casa": "Argentina",
         "time_fora": "Áustria",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.33",
+        "odd": "1.32",
         "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Austria/83962573/"
     },
     {
@@ -32,7 +32,7 @@
         "time_casa": "França",
         "time_fora": "Iraque",
         "mercado": "-4.5 Gols (85%)",
-        "odd": "1.40",
+        "odd": "1.45",
         "link_betano": "https://www.betano.bet.br/match-odds/France-Iraq/83962695/"
     },
     {
@@ -79,14 +79,5 @@
         "mercado": "Ambas Marcam: Sim (80%)",
         "odd": "1.75",
         "link_betano": "https://www.betano.bet.br/match-odds/Norway-Senegal/83962793/"
-    },
-    {
-        "horario": "22:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Nova Zelândia",
-        "time_fora": "Egito",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.34",
-        "link_betano": "https://www.betano.bet.br/match-odds/New-Zealand-Egypt/83962546/"
     }
 ]
