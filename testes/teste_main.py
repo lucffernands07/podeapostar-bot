@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
         time.sleep(1.2)
 
-        # 🔍 DESCOBRE DINAMICAMENTE O ÍNDICE DA COLUNA DE CHUTES NO ALVO
+       # 🔍 DESCOBRE DINAMICAMENTE O ÍNDICE DA COLUNA DE CHUTES NO ALVO
         cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
         indice_chutes = -1
         
@@ -116,16 +116,20 @@ if __name__ == "__main__":
             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
             alias = str(th.get_attribute("data-analytics-alias")).upper()
             
-            if "CHUTE" in texto_th or "ALVO" in texto_th or alias == "SHOTS_ON_TARGET" or texto_th == "FN":
+            # IGNORA colunas de expectativa de gol (xG, xGOT) para não confundir com o chute no alvo
+            if "XG" in texto_th or "EXPECTATIVA" in texto_th:
+                continue
+                
+            # Mapeia a coluna correta (Geralmente "FN" no Flashscore clássico ou SHOTS_ON_TARGET)
+            if alias == "SHOTS_ON_TARGET" or texto_th == "FN" or "CHUTES NO ALVO" in texto_th or "FINALIZAÇÕES NO ALVO" in texto_th:
                 indice_chutes = idx_th
                 print(f"🎯 Coluna de Chutes no Alvo mapeada dinamicamente no Índice: {indice_chutes} ('{texto_th}')")
                 break
 
-        # Fallback se o mapeamento falhar
+        # Fallback se o mapeamento falhar (vimos que o correto no array atual é o 5)
         if indice_chutes == -1:
             indice_chutes = 5
             print(f"⚠️ Não foi possível mapear o cabeçalho. Usando Fallback padrão no índice {indice_chutes}")
-
         linhas_dados_fin = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
         print(f"📊 Total de linhas identificadas na tabela final: {len(linhas_dados_fin)}")
         
