@@ -22,36 +22,18 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Jordânia",
         "time_fora": "Argélia",
-        "mercado": "Cartões Totais: -2.5",
+        "mercado": "Chutes no Alvo: Al Fakhouri O. (Frequência: 2/3j | Méd: 38.3)",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Jordan-Algeria/83963560/"
     },
     {
-        "horario": "20:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "Ponte Preta",
-        "time_fora": "Novorizontino",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.40",
-        "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Gremio-Novorizontino/87512069/"
-    },
-    {
-        "horario": "20:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "Ponte Preta",
-        "time_fora": "Novorizontino",
-        "mercado": "+2.5 Gols (85%)",
-        "odd": "2.20",
-        "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Gremio-Novorizontino/87512069/"
-    },
-    {
-        "horario": "20:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "Ponte Preta",
-        "time_fora": "Novorizontino",
+        "horario": "00:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Jordânia",
+        "time_fora": "Argélia",
         "mercado": "Cartões Totais: -2.5",
         "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Gremio-Novorizontino/87512069/"
+        "link_betano": "https://www.betano.bet.br/match-odds/Jordan-Algeria/83963560/"
     },
     {
         "horario": "21:00",
@@ -68,7 +50,16 @@
         "time_casa": "Noruega",
         "time_fora": "Senegal",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.70",
+        "odd": "1.67",
+        "link_betano": "https://www.betano.bet.br/match-odds/Norway-Senegal/83962793/"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Noruega",
+        "time_fora": "Senegal",
+        "mercado": "Chutes no Alvo: Nusa A. (Frequência: 2/3j | Méd: 13.3)",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Norway-Senegal/83962793/"
     },
     {
