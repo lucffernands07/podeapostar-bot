@@ -1,61 +1,65 @@
 # 🟢 LISTA BRANCA: Apenas ligas de elite que comprovadamente abrem mercados de jogadores na Betano
 LIGAS_ELITE_JOGADORES = [
-    "Brasileirão Série A",
-    "Copa do Brasil",
-    "Libertadores",
-    "Sul-Americana",
-    "Brasileirão Série B",           # Costuma abrir em rodadas cheias
-    "Argentina - Liga Profesional",
-    "Mundo - Copa do Mundo",
-    "Champions League",
-    "Inglaterra - Premier League",
-    "Espanha - LaLiga",
-    "Alemanha - Bundesliga",
-    "Italia - Serie A",
-    "França - Ligue 1",
-    "Europa - League",
-    "Inglaterra - FA Cup",
-    "Espanha - Copa del Rey",
-    "Alemanha - DFB Pokal",
-    "Portugal - Primeira Liga",
-    "Países Baixos - Eredivisie",
-    "Mundo - Amistoso Internacional" # Amistosos de seleções principais abrem mercado
+    "Brasileirão Série A", "Copa do Brasil", "Libertadores", "Sul-Americana",
+    "Brasileirão Série B", "Argentina - Liga Profesional", "Mundo - Copa do Mundo",
+    "Champions League", "Inglaterra - Premier League", "Espanha - LaLiga",
+    "Alemanha - Bundesliga", "Italia - Serie A", "França - Ligue 1",
+    "Europa - League", "Inglaterra - FA Cup", "Espanha - Copa del Rey",
+    "Alemanha - DFB Pokal", "Portugal - Primeira Liga", "Países Baixos - Eredivisie",
+    "Mundo - Amistoso Internacional"
 ]
 
 def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_liga=""):
-    """
-    Processa os históricos brutos extraídos pelo Selenium (Aba Finalizações).
-    🛡️ ADICIONADA TRAVA DE LISTA BRANCA PARA LIGAS DE ELITE.
-    """
-    # 🚀 TRAVA REMODELADA: Se o nome vier vazio ou NÃO estiver estritamente na lista branca, barra na hora
+    # Prevenção contra dicionários acidentais na quantidade_jogos
+    if isinstance(quantidade_jogos, dict):
+        quantidade_jogos = 3
+
     nome_liga_limpo = nome_liga.strip() if nome_liga else ""
     
     if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
-        # Fallback visual caso o nome venha nulo do scraper principal
-        liga_print = nome_liga_limpo if nome_liga_limpo else "NOME_DA_LIGA_VAZIO"
-        print(f"⏩ [TRAVA] Pulando análise de jogadores para a liga '{liga_print}' (Não é considerada liga Elite ou string inválida).")
         return []
 
+    print(f"  ⚽ [MODULO JOGADORES] Iniciando análise para {nome_liga_limpo}. Dados recebidos: {historico_chutes}")
+
     mercados_aprovados = []
-    
-    # 📈 REGRA: CHUTES NO ALVO
     dados_chutes = {}
+    
+    if not isinstance(historico_chutes, dict) or not historico_chutes:
+        print("  ⚠️ [MODULO JOGADORES] Dicionário de chutes está VAZIO ou inválido. A raspagem falhou ou não houve finalizações.")
+        return mercados_aprovados
+
     for jogador, lista_valores in historico_chutes.items():
-        while len(lista_valores) < quantidade_jogos:
-            lista_valores.append(0)
+        if not isinstance(lista_valores, list):
+            continue
             
-        media = sum(lista_valores) / quantidade_jogos
-        jogos_com_sucesso = sum(1 for qtd in lista_valores if qtd >= 1)
+        valores_copia = list(lista_valores)
+        
+        while len(valores_copia) < quantidade_jogos:
+            valores_copia.append(0)
+            
+        valores_analise = valores_copia[:quantidade_jogos]
+            
+        media = sum(valores_analise) / quantidade_jogos
+        jogos_com_sucesso = sum(1 for qtd in valores_analise if qtd >= 1)
+        
+        print(f"    🏃‍♂️ Analisando {jogador}: {valores_analise} | Média: {media:.2f} | Sucesso: {jogos_com_sucesso}/3")
+        
         dados_chutes[jogador] = {"media": media, "jogos_com_sucesso": jogos_com_sucesso}
 
     if dados_chutes:
         melhor_chutador = max(dados_chutes, key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]))
         res_c = dados_chutes[melhor_chutador]
         
+        print(f"    ⭐ Melhor da partida: {melhor_chutador} (Média: {res_c['media']:.2f}, Sucesso: {res_c['jogos_com_sucesso']})")
+        
+        # Regra de corte
         if res_c["jogos_com_sucesso"] >= 2 or res_c["media"] >= 1.0:
+            print("    ✅ Jogador APROVADO para o listão!")
             mercados_aprovados.append({
                 "texto": f"Chutes no Alvo: {melhor_chutador} (Frequência: {res_c['jogos_com_sucesso']}/{quantidade_jogos}j | Méd: {res_c['media']:.1f})",
                 "chave": "CHUTES_ALVO"
             })
+        else:
+            print("    ❌ Jogador REPROVADO. Não atingiu a média de corte do robô.")
 
     return mercados_aprovados
