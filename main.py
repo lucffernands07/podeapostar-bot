@@ -504,15 +504,19 @@ def main():
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
                         # 5. Processamento Jogadores
-                        # Garantindo que passamos os dicionários de scouts esperados
-                        hist_chutes = s.get("historico_chutes", {})
-                        hist_faltas = s.get("historico_faltas", {}) # Caso seu módulo use, se não passe vazio
-                        
                         try:
                             if 'joggers' in globals():
-                                res_jogadores = joggers.verificar_destaques_jogadores(hist_chutes, hist_faltas, nome_liga=nome_comp)
+                                res_jogadores = joggers.verificar_destaques_jogadores(
+                                    historico_chutes=s.get("historico_chutes", {}),
+                                    quantidade_jogos=3,
+                                    nome_liga=nome_comp
+                                )
                             else:
-                                res_jogadores = jogadores.verificar_destaques_jogadores(hist_chutes, hist_faltas, nome_liga=nome_comp)
+                                res_jogadores = jogadores.verificar_destaques_jogadores(
+                                    historico_chutes=s.get("historico_chutes", {}),
+                                    quantidade_jogos=3,
+                                    nome_liga=nome_comp
+                                )
                         except Exception as e_jog:
                             print(f"  ⚠️ Erro no módulo de jogadores: {e_jog}")
                             res_jogadores = []
