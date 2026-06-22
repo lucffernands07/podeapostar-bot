@@ -539,8 +539,22 @@ def main():
                             res_cartoes = {"aprovado": False}
 
                         if res_cartoes.get("aprovado"):
-                            texto_cartao = f"Média Confronto Cartões: {res_cartoes['media_confronto']} (🟨 {res_cartoes['total_mandante']} x {res_cartoes['total_visitante']} 🟥)"
-                            mercados_para_processar.append({"texto": texto_cartao, "chave": "CARTOES_CONFRONTO"})
+                            media = res_cartoes.get('media_confronto', 0)
+                            
+                            # 🎴 Tradução da média para mercados tradicionais da Betano
+                            if media >= 4.0:
+                                mercado_formatado = "Cartões Totais: +4.5"
+                            elif media >= 3.0:
+                                mercado_formatado = "Cartões Totais: +2.5"
+                            elif media >= 2.0:
+                                mercado_formatado = "Cartões Totais: +1.5"
+                            elif media >= 1.0:
+                                mercado_formatado = "Cartões Totais: -3.5"
+                            else:
+                                mercado_formatado = "Cartões Totais: -2.5"
+
+                            # Adiciona ao listão com o novo formato visual que você pediu
+                            mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
 
                         # --- VALIDAÇÃO DE ODDS E FILTRAGEM ---
                         if mercados_para_processar:
