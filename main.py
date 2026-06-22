@@ -207,7 +207,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
 def pegar_scouts_avancados(driver, stats, t1, t2):
     """
     RASPAGEM 2: Varre as subpáginas dos últimos jogos na aba de jogadores.
-    Navega dinamicamente entre as abas 'Gerais' e 'Finalizações' para coletar Cartões e Chutes.
     """
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
@@ -246,8 +245,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                             "visitante_atual": visitante_atual,
                             "elemento": elemento_alvo
                         })
-                    except: 
-                        continue
+                    except: continue
             except Exception as e_coleta:
                 print(f"      ⚠️ Erro ao listar linhas para scouts: {e_coleta}")
                 continue
@@ -259,8 +257,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     
                     selector_linhas = f".h2h__section:nth-child({alvo['idx_secao']}) .h2h__row"
                     linhas_atualizadas = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
-                    if len(linhas_atualizadas) <= jogo_dados["idx"]: 
-                        continue
+                    if len(linhas_atualizadas) <= jogo_dados["idx"]: continue
                     
                     elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
                     mandante_atual = jogo_dados["mandante_atual"]
@@ -355,7 +352,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                             driver.execute_script("arguments[0].click();", elemento_aba_fin)
                         except: pass 
 
-                        # --- 🛡️ BLINDAGEM ---
                         wait.until(lambda d: any(
                             "FN" in el.text.upper() or "ALVO" in el.text.upper() or "SHOTS" in el.text.upper()
                             for el in d.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
@@ -392,8 +388,8 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     
                     jogo_global_index += 1
                 except: continue
-        except Exception as e:
-            print(f"      ⚠️ Erro na Raspagem 2: {e}")
+    except Exception as e:
+        print(f"      ⚠️ Erro na Raspagem 2: {e}")
             
     try:
         driver.close()
