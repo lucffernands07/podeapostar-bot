@@ -1,0 +1,78 @@
+name: 3. World Cup Bot Apostas (Sumário)
+
+on:
+  push:
+    paths:
+      - 'main.py'
+      - 'sumario_mercados.py'
+  schedule:
+    # 06:11 UTC corresponde às 03:11 de Brasília (GMT-3)
+    # Ótimo horário para varrer os sumários dos jogos da Copa do Mundo do dia
+    - cron: '11 6 * * *'
+  workflow_dispatch: 
+
+jobs:
+  run-wc-bot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+
+      - name: 🔒 Verificar se o bot da Copa já rodou hoje
+        id: check_run
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          HOJE=$(date +'%Y-%m-%d')
+          ARQUIVO="ranking/pendentes_copa.json"
+          
+          if [ -f "$ARQUIVO" ]; then
+            echo "🔍 Rodada Automática detectada. Verificando data do JSON da Copa..."
+            DATA_ARQUIVO=$(jq -r '.data_geracao' "$ARQUIVO")
+            echo "📅 Data no arquivo: $DATA_ARQUIVO | Data de hoje (UTC): $HOJE"
+            
+            if [ "$DATA_ARQUIVO" = "$HOJE" ]; then
+              echo "🚨 O bot da Copa já consolidou os dados hoje ($HOJE). Cancelando automação."
+              gh run cancel ${{ github.run_id }}
+              sleep 20
+              exit 0
+            fi
+          else
+            echo "ℹ️ Arquivo $ARQUIVO não encontrado. Seguindo com a automação da Copa."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Instalar dependencias
+        run: |
+          pip install -r requirements.txt
+
+      - name: 1. Executar Bot de Sumários da Copa do Mundo
+        timeout-minutes: 15
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+        run: python main.py
+
+      - name: 2. Salvar Dados da Copa no Repositório
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Salva o arquivo de controle específico deste novo bot
+          git add ranking/pendentes_copa.json
+          git add telegram/jogos_copa_*.json || echo "Nenhum arquivo de telegram específico gerado"
+          
+          git commit -m "Auto: Atualizando mercados do Sumário da Copa [skip ci]" || echo "Sem alterações para salvar"
+          
+          # Prevenção contra erros de lock ref/concorrência
+          git pull --rebase origin main
+          git push origin main
