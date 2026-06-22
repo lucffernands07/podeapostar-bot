@@ -206,8 +206,8 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
 
 def pegar_scouts_avancados(driver, stats, t1, t2):
     """
-    RASPAGEM 2: Aproveita a aba aberta no H2H e varre as subpáginas dos últimos
-    jogos coletando Chutes no Alvo e Cartões. Fecha a aba ao terminar.
+    RASPAGEM 2: Varre as subpáginas dos últimos jogos na aba 'gerais' 
+    coletando EXCLUSIVAMENTE Cartões (Amarelos e Vermelhos).
     """
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
@@ -286,6 +286,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     except: 
                         pass
 
+                    # 📂 Foco na aba gerais para cartões
                     url_gerais = f"{url_jogo_completa}/resumo/estatisticas-jogadores/gerais/"
                     driver.get(url_gerais)
                     
@@ -293,15 +294,14 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
                         time.sleep(1.5)
                         
-                        cabecalhos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeadCell'], .wcl-sortingButton_isgjY, th")
-                        indice_chutes, indice_amarelos, indice_vermelhos = -1, -1, -1
+                        # 🟢 Cabeçalhos limpos de tags duplicadas
+                        cabecalhos = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
+                        indice_amarelos, indice_vermelhos = -1, -1
                         
                         for idx_th, th in enumerate(cabecalhos):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
                             alias = str(th.get_attribute("data-analytics-alias")).upper()
                             
-                            if "REMATES" in texto_th or "CHUTES" in texto_th or alias == "SHOTS_ON_TARGET":
-                                indice_chutes = idx_th
                             if "AMARELO" in texto_th or alias == "YELLOW_CARDS" or texto_th == "CA":
                                 indice_amarelos = idx_th
                             if "VERMELHO" in texto_th or alias == "RED_CARDS" or texto_th == "CV":
@@ -339,18 +339,16 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 else:
                                     continue
 
-                                celulas_valores = lambda_linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01'], td, .wcl-table__bodyCell_")
+                                # 🟢 Células limpas (apenas TDs reais)
+                                celulas_valores = lambda_linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell']")
                                 if not celulas_valores: 
                                     continue
-
-                                chutes = 0
-                                if indice_chutes != -1 and len(celulas_valores) > indice_chutes:
-                                    val_chute = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_chutes]).strip()
-                                    chutes = 0 if val_chute in ["-", ""] or not val_chute.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_chute))
                                 
+                                # 🟢 Identifica índices reais dos cartões
                                 if indice_amarelos != -1 and indice_vermelhos != -1 and len(celulas_valores) > max(indice_amarelos, indice_vermelhos):
                                     idx_am, idx_vm = indice_amarelos, indice_vermelhos
                                 else:
+                                    # Fallback clássico (penúltima e última colunas) caso mude a estrutura de texto
                                     idx_am = len(celulas_valores) - 3 if len(celulas_valores) >= 3 else 0
                                     idx_vm = len(celulas_valores) - 2 if len(celulas_valores) >= 2 else 0
 
@@ -360,12 +358,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 amarelos = 0 if val_amarelo in ["-", ""] or not val_amarelo.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_amarelo))
                                 vermelhos = 0 if val_vermelho in ["-", ""] or not val_vermelho.replace(r'\D', '').isdigit() else int(re.sub(r'\D', '', val_vermelho))
                                 
-                                if nome_jogador not in stats["historico_chutes"]:
-                                    stats["historico_chutes"][nome_jogador] = []
-                                while len(stats["historico_chutes"][nome_jogador]) < jogo_global_index:
-                                    stats["historico_chutes"][nome_jogador].append(0)
-                                stats["historico_chutes"][nome_jogador].append(chutes)
-
                                 if nome_jogador not in dicionario_am: 
                                     dicionario_am[nome_jogador] = []
                                 while len(dicionario_am[nome_jogador]) < jogo_global_index: 
