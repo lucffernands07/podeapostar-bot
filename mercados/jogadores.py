@@ -19,21 +19,21 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
     if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
         return []
 
-    print(f"  ⚽ [MODULO JOGADORES] Iniciando análise para {nome_liga_limpo}. Dados recebidos: {historico_chutes}")
+    print(f"  ⚽ [MODULO JOGADORES] Iniciando análise para {nome_liga_limpo}.")
 
     mercados_aprovados = []
     dados_chutes = {}
     
     if not isinstance(historico_chutes, dict) or not historico_chutes:
-        print("  ⚠️ [MODULO JOGADORES] Dicionário de chutes está VAZIO ou inválido. A raspagem falhou ou não houve finalizações.")
+        print("  ⚠️ [MODULO JOGADORES] Dicionário de chutes está VAZIO ou inválido.")
         return mercados_aprovados
 
+    # 1. PROCESSAMENTO COMPLETO (Calcula todos os jogadores para garantir o melhor)
     for jogador, lista_valores in historico_chutes.items():
         if not isinstance(lista_valores, list):
             continue
             
         valores_copia = list(lista_valores)
-        
         while len(valores_copia) < quantidade_jogos:
             valores_copia.append(0)
             
@@ -42,10 +42,20 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
         media = sum(valores_analise) / quantidade_jogos
         jogos_com_sucesso = sum(1 for qtd in valores_analise if qtd >= 1)
         
-        print(f"    🏃‍♂️ Analisando {jogador}: {valores_analise} | Média: {media:.2f} | Sucesso: {jogos_com_sucesso}/3")
-        
-        dados_chutes[jogador] = {"media": media, "jogos_com_sucesso": jogos_com_sucesso}
+        dados_chutes[jogador] = {
+            "media": media, 
+            "jogos_com_sucesso": jogos_com_sucesso, 
+            "valores": valores_analise
+        }
 
+    # 2. LOG OTIMIZADO (Exibe apenas os 3 primeiros no terminal)
+    contagem_log = 0
+    for jogador, dados in dados_chutes.items():
+        if contagem_log < 3:
+            print(f"    🏃‍♂️ Analisando {jogador}: {dados['valores']} | Média: {dados['media']:.2f} | Sucesso: {dados['jogos_com_sucesso']}/3")
+            contagem_log += 1
+    
+    # 3. DEFINIÇÃO DO MELHOR (Baseado no dicionário completo processado)
     if dados_chutes:
         melhor_chutador = max(dados_chutes, key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]))
         res_c = dados_chutes[melhor_chutador]
