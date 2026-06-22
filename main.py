@@ -524,14 +524,15 @@ def main():
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
-                        # 6. Mercado de Cartões Coletivos
+                       # 6. Mercado de Cartões Coletivos
                         try:
                             res_cartoes = cartoes.analisar_dados_cartoes(
-                                s.get("historico_mandante_am", {}), 
-                                s.get("historico_mandante_vm", {}),
-                                s.get("historico_visitante_am", {}), 
-                                s.get("historico_visitante_vm", {}),
-                                nome_liga=nome_comp
+                                historico_mandante_am=s.get("historico_mandante_am", {}), 
+                                historico_mandante_vm=s.get("historico_mandante_vm", {}),
+                                historico_visitante_am=s.get("historico_visitante_am", {}), 
+                                historico_visitante_vm=s.get("historico_visitante_vm", {}),
+                                nome_liga=nome_comp,
+                                quantidade_jogos=3
                             )
                         except Exception as e_cart:
                             print(f"  ⚠️ Erro no módulo de cartões: {e_cart}")
