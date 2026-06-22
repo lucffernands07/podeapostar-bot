@@ -27,21 +27,12 @@
         "link_betano": "https://www.betano.bet.br/match-odds/Jordan-Algeria/83963560/"
     },
     {
-        "horario": "19:30",
-        "liga": "Brasileiro Serie C",
-        "time_casa": "Confiança",
-        "time_fora": "Guarani",
-        "mercado": "2X (70%)",
-        "odd": "1.45",
-        "link_betano": "https://www.betano.bet.br/match-odds/Confianca-SE-Guarani-SP/86496261/"
-    },
-    {
         "horario": "20:00",
         "liga": "Brasileirão Série B",
         "time_casa": "Ponte Preta",
         "time_fora": "Novorizontino",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.42",
+        "odd": "1.40",
         "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Gremio-Novorizontino/87512069/"
     },
     {
@@ -50,7 +41,7 @@
         "time_casa": "Ponte Preta",
         "time_fora": "Novorizontino",
         "mercado": "+2.5 Gols (85%)",
-        "odd": "2.25",
+        "odd": "2.20",
         "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Gremio-Novorizontino/87512069/"
     },
     {
