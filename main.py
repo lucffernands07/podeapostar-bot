@@ -260,6 +260,7 @@ def main():
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
+            # 1. ENVIO DO LISTÃO PARA VOCÊ
             meu_chat_id = os.getenv('CHAT_ID')
             if meu_chat_id:
                 cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
@@ -276,8 +277,8 @@ def main():
                 
                 enviar_telegram(cabecalho + corpo, meu_chat_id)
                 print("📨 Listão enviado.")
-
-            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
+    
+            # Preparação comum de dados
             cache_dados = {}
             for j in lista_para_filtros:
                 chave = f"{j['time_casa']}x{j['time_fora']}"
@@ -287,16 +288,25 @@ def main():
                     "horario": j.get("horario"),
                     "odd": j.get("odd")
                 }
-            
-            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
+    
+            # 2. ENVIO AUTOMÁTICO DO BINGO ELITE (Main.py)
             canal_id = os.getenv('CHANNEL_ID')
-
-            # --- SEGURANÇA NO ENVIO DO MENU ---
+            bilhete_elite = bingo357.montar_bilhete_elite_main(lista_para_filtros)
+            texto_elite = bingo357.formatar_para_telegram(bilhete_elite, cache_dados)
+            
+            if texto_elite and canal_id:
+                enviar_telegram("💰 *SUGESTÃO DE INVESTIMENTO - ELITE*\n\n" + texto_elite, canal_id)
+                print("📢 Bingo Elite enviado automaticamente.")
+    
+            # 3. ENVIO DO MENU INTERATIVO (Para os botões do canal)
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
+            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
+    
             if texto_bingos_final and canal_id:
                 try:
-                    msg_bingo_formatada = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_bingos_final
+                    msg_bingo_formatada = "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final
                     menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
-                    print("📢 Bingos enviados com botões para o Canal.")
+                    print("📢 Menu interativo enviado para o Canal.")
                 except Exception as e:
                     print(f"⚠️ Erro ao enviar menu para o canal: {e}")
             # ----------------------------------
