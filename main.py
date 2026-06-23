@@ -367,7 +367,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                             alias = str(th.get_attribute("data-analytics-alias")).upper()
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
                             if "SHOTS_ON_TARGET" in alias or "FINALIZAÇÕES NO ALVO" in texto_th or "FN" in texto_th:
-                                indice_chutes = idx_th
+                                indice_chutes = idx_th + 1
                                 print(f"  ✅ [DEBUG] Coluna encontrada via busca no índice: {idx_th}")
                                 break
                                 
