@@ -1,0 +1,83 @@
+[
+    {
+        "horario": "14:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Portugal",
+        "time_fora": "Uzbequistão",
+        "mercado": "Cartões Totais: +2.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Portugal-Uzbekistan/83963581/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Inglaterra",
+        "time_fora": "Gana",
+        "mercado": "Cartões Totais: -3.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/England-Ghana/83963625/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "América-MG",
+        "time_fora": "Criciúma",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.47",
+        "link_betano": "https://www.betano.bet.br/match-odds/America-MG-Criciuma-SC/87581867/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "América-MG",
+        "time_fora": "Criciúma",
+        "mercado": "Cartões Totais: -2.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/America-MG-Criciuma-SC/87581867/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Panamá",
+        "time_fora": "Croácia",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/Panama-Croatia/83963650/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Panamá",
+        "time_fora": "Croácia",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.80",
+        "link_betano": "https://www.betano.bet.br/match-odds/Panama-Croatia/83963650/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Panamá",
+        "time_fora": "Croácia",
+        "mercado": "Cartões Totais: -3.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Panama-Croatia/83963650/"
+    },
+    {
+        "horario": "23:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Colômbia",
+        "time_fora": "R. D. Congo",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/Colombia-DR-Congo/83963671/"
+    },
+    {
+        "horario": "23:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Colômbia",
+        "time_fora": "R. D. Congo",
+        "mercado": "Cartões Totais: -3.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Colombia-DR-Congo/83963671/"
+    }
+]

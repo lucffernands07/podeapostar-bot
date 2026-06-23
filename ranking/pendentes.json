@@ -1,75 +1,68 @@
 {
-    "data_geracao": "2026-06-22",
+    "data_geracao": "2026-06-23",
     "jogos": [
         {
-            "time_casa": "Ponte Preta",
-            "time_fora": "Novorizontino",
+            "time_casa": "América-MG",
+            "time_fora": "Criciúma",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/8zh4B2fm/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/lEgK7KgC/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Ponte Preta",
-            "time_fora": "Novorizontino",
-            "mercado": "+2.5 Gols (85%)",
-            "mercado_ranking": "+2.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/8zh4B2fm/#/resumo-de-jogo"
+            "time_casa": "América-MG",
+            "time_fora": "Criciúma",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lEgK7KgC/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Confiança",
-            "time_fora": "Guarani",
-            "mercado": "2X (70%)",
-            "mercado_ranking": "2X (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/YwDFYlaf/#/resumo-de-jogo"
+            "time_casa": "Portugal",
+            "time_fora": "Uzbequistão",
+            "mercado": "Cartões Totais: +2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: +2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/nRFcNx7D/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Nova Zelândia",
-            "time_fora": "Egito",
-            "mercado": "+1.5 Gols (70%)",
-            "mercado_ranking": "+1.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/QeaikheU/#/resumo-de-jogo"
+            "time_casa": "Inglaterra",
+            "time_fora": "Gana",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KhgvzGjJ/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Argentina",
-            "time_fora": "Áustria",
+            "time_casa": "Panamá",
+            "time_fora": "Croácia",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Cpq2Y2FE/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/CSkWyxM6/#/resumo-de-jogo"
         },
         {
-            "time_casa": "França",
-            "time_fora": "Iraque",
-            "mercado": "-4.5 Gols (85%)",
-            "mercado_ranking": "-4.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/KMRMTaNM/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Noruega",
-            "time_fora": "Senegal",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/xSUJLPV8/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Noruega",
-            "time_fora": "Senegal",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/xSUJLPV8/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Jordânia",
-            "time_fora": "Argélia",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/dx1FAaN7/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Jordânia",
-            "time_fora": "Argélia",
+            "time_casa": "Panamá",
+            "time_fora": "Croácia",
             "mercado": "+2.5 Gols (70%)",
             "mercado_ranking": "+2.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/dx1FAaN7/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/CSkWyxM6/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Panamá",
+            "time_fora": "Croácia",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/CSkWyxM6/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Colômbia",
+            "time_fora": "R. D. Congo",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/K0YnEaMq/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Colômbia",
+            "time_fora": "R. D. Congo",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/K0YnEaMq/#/resumo-de-jogo"
         }
     ]
 }
