@@ -351,7 +351,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                             elemento_aba_fin = driver.find_element(By.XPATH, "//a[contains(@href, 'finalizacoes')]")
                             driver.execute_script("arguments[0].click();", elemento_aba_fin)
                         except: pass 
-
+                    
                         wait.until(lambda d: any(
                             "FN" in el.text.upper() or "ALVO" in el.text.upper() or "SHOTS" in el.text.upper()
                             for el in d.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
@@ -366,20 +366,35 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                             if "FINALIZAÇÕES NO ALVO" in texto_th or texto_th == "FN":
                                 indice_chutes = idx_th
                                 break
-                                
-                                if indice_chutes == -1:
-                                    indice_chutes = 4 # Baseado nos seus prints, tente 4, se não for, teste 5
- 
+                        
+                        # O 'if' agora está fora do for, corrigindo o erro de lógica anterior
+                        if indice_chutes == -1:
+                            indice_chutes = 4 
+                    
                         linhas_dados_fin = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
                         for lambda_linha in linhas_dados_fin:
                             try:
                                 nome_element = lambda_linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN, [class*='playerName']")
                                 nome_jogador = driver.execute_script("return arguments[0].textContent;", nome_element).strip()
                                 if not nome_jogador or nome_jogador == "TODOS" or "JOGADOR" in nome_jogador.upper(): continue
+                                
                                 celulas_valores = lambda_linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell']")
                                 if not celulas_valores or len(celulas_valores) <= indice_chutes: continue
+                                
                                 val_chute = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_chutes]).strip()
-                                chutes = 0 if val_chute in ["-", ""] or not re.search(r'\d', val_chute) else int(re.sub(r'\D', '', val_chute))
+                                
+                                # LOGICA DE EXTRAÇÃO SEGURA:
+                                # Se for "-" ou vazio, é 0. Se tiver número, pega apenas o primeiro dígito.
+                                if val_chute in ["-", ""]:
+                                    chutes = 0
+                                else:
+                                    # Extrai apenas o primeiro número que aparecer, ignorando o restante da célula
+                                    match = re.search(r'\d+', val_chute)
+                                    chutes = int(match.group()) if match else 0
+                                
+                                # TRAVA: se por acaso pegar algo muito grande (erro de coluna), zera
+                                if chutes > 10: chutes = 0
+                    
                                 if nome_jogador not in stats["historico_chutes"]: stats["historico_chutes"][nome_jogador] = []
                                 while len(stats["historico_chutes"][nome_jogador]) < jogo_global_index: stats["historico_chutes"][nome_jogador].append(0)
                                 stats["historico_chutes"][nome_jogador].append(chutes)
