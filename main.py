@@ -292,11 +292,13 @@ def main():
             # 2. ENVIO AUTOMÁTICO DO BINGO ELITE (Main.py)
             canal_id = os.getenv('CHANNEL_ID')
             bilhete_elite = bingo357.montar_bilhete_elite_main(lista_para_filtros)
-            texto_elite = bingo357.formatar_para_telegram(bilhete_elite, cache_dados)
             
-            if texto_elite and canal_id:
-                enviar_telegram("💰 *SUGESTÃO DE INVESTIMENTO - ELITE*\n\n" + texto_elite, canal_id)
-                print("📢 Bingo Elite enviado automaticamente.")
+            # AQUI: Verifique se bilhete_elite não é None e se a lista não está vazia
+            if bilhete_elite and isinstance(bilhete_elite, list) and canal_id:
+                texto_elite = bingo357.formatar_para_telegram(bilhete_elite, cache_dados)
+                if texto_elite:
+                    enviar_telegram("💰 *SUGESTÃO DE INVESTIMENTO - ELITE*\n\n" + texto_elite, canal_id)
+                    print("📢 Bingo Elite enviado automaticamente.")
     
             # 3. ENVIO DO MENU INTERATIVO (Para os botões do canal)
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
