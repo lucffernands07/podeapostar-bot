@@ -1,6 +1,4 @@
-import os
 import time
-import logging
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -13,6 +11,10 @@ from testes.teste_ligas import TESTE_COMPETICOES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes 
 import odds  
 import bingo357  
+
+# Importações das funções de raspagem
+from funcoes.raspagem_h2h import pegar_estatisticas_h2h
+from funcoes.raspagem_scouts import pegar_scouts_avancados
 
 # Configuração de Logs Locais
 os.makedirs("logs", exist_ok=True)
@@ -125,31 +127,26 @@ def main():
                                 mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
                         except: pass
 
-                        # --- Validação e Filtro ---
-                        if mercados_para_processar:
-                            v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-                            for item in mercados_para_processar:
-                                m_texto, m_chave = item["texto"], item["chave"]
-                                valor_odd_str = v_odds.get(m_chave, "1.50") if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else "1.50"
-                                try:
-                                    odd_float = float(valor_odd_str.replace(',', '.'))
-                                    if odd_float >= 1.25:
-                                        lista_para_filtros.append({
-                                            "horario": h_br, "time_casa": t1, "time_fora": t2,
-                                            "mercado": m_texto, "odd": valor_odd_str, "liga": nome_comp
-                                        })
-                                        total_mercados += 1
-                                except ValueError: continue
-                except Exception as e:
-                    print(f"⚠️ Erro ao processar partida: {e}")
-                    continue
-
-        print(f"\n✅ Processamento concluído. {len(lista_para_filtros)} mercados encontrados em memória.")
+                        # --- PROCESSAMENTO FINAL (Apenas validação lógica) ---
+                        if lista_para_filtros:
+                            print(f"\n🧪 TESTE: {len(lista_para_filtros)} mercados coletados.")
+                            
+                            # Validação: Testa se o Bingo Elite processa essa lista sem erros
+                            bilhete_elite = bingo357.montar_bilhete_elite_main(lista_para_filtros)
+                            print(f"🧪 TESTE: Bingo Elite gerou {len(bilhete_elite) if bilhete_elite else 0} bilhetes.")
+                            
+                            # Validação: Testa se os Bingos estratégicos processam sem erros
+                            novos_bingos = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
+                            print(f"🧪 TESTE: Bingos Estratégicos gerou {len(novos_bingos) if novos_bingos else 0} conjuntos.")
+                            
+                        else:
+                            print("\n⚠️ Nenhum mercado passou nos filtros. Verifique o log de processamento.")
+    
     except Exception as e:
-        print(f"❌ Erro Crítico no Main: {e}")
+        print(f"❌ Erro Crítico no Teste: {e}")
     finally:
         try: driver.quit()
-        except: pass
+            except: pass
 
 if __name__ == "__main__":
     main()
