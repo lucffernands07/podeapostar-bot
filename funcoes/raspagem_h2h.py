@@ -154,5 +154,3 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         print(f"      ⚠️ Erro na Raspagem 1: {e}")
         
     return stats
-        
-    return stats
