@@ -363,12 +363,13 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         indice_chutes = -1
                         for idx_th, th in enumerate(cabecalhos_fin):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
-                            alias = str(th.get_attribute("data-analytics-alias")).upper()
-                            if "CHUTE" in texto_th or "ALVO" in texto_th or alias == "SHOTS_ON_TARGET" or texto_th == "FN":
+                            if "FINALIZAÇÕES NO ALVO" in texto_th or texto_th == "FN":
                                 indice_chutes = idx_th
                                 break
-                        if indice_chutes == -1: indice_chutes = 2 
-
+                                
+                                if indice_chutes == -1:
+                                    indice_chutes = 4 # Baseado nos seus prints, tente 4, se não for, teste 5
+ 
                         linhas_dados_fin = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
                         for lambda_linha in linhas_dados_fin:
                             try:
