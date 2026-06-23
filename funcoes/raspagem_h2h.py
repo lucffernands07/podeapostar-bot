@@ -1,3 +1,9 @@
+import time
+import re
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     """
     RASPAGEM 1: Abre a aba, acessa o H2H, captura o link Betano, gols, placares e resultados.
