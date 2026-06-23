@@ -228,4 +228,4 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
         driver.switch_to.window(driver.window_handles[0])
     except: pass
 
-return stats
+    return stats
