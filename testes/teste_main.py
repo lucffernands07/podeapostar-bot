@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Importações dos seus módulos
-from ligas import COMPETICOES
+from testes.teste_ligas import TESTE_COMPETICOES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes 
 import odds  
 import bingo357  
