@@ -104,6 +104,7 @@ def main():
                         s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
                         
+                        # Processamento de Mercados
                         mercados_para_processar = []
 
                         # 1. Gols
@@ -123,7 +124,7 @@ def main():
                             s["chance_dupla_pct"] = "90%"
                         else:
                             s["chance_dupla_pct"] = "80%"
-
+                        
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         for rc in res_cd:
                             tipo_cd = "1X" if "1X" in rc else "X2"
@@ -134,38 +135,30 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # 5. Processamento Jogadores
+                        # 5. Jogadores (mantenha o try/except para segurança)
                         try:
-                            if 'joggers' in globals():
-                                res_jogadores = joggers.verificar_destaques_jogadores(
-                                    historico_chutes=s.get("historico_chutes", {}),
-                                    quantidade_jogos=3,
-                                    nome_liga=nome_comp
-                                )
-                            else:
-                                res_jogadores = jogadores.verificar_destaques_jogadores(
-                                    historico_chutes=s.get("historico_chutes", {}),
-                                    quantidade_jogos=3,
-                                    nome_liga=nome_comp
-                                )
-                        except Exception as e_jog:
-                            print(f"  ⚠️ Erro no módulo de jogadores: {e_jog}")
-                            res_jogadores = []
+                            res_jogadores = jogadores.verificar_destaques_jogadores(
+                                historico_chutes=s.get("historico_chutes", {}),
+                                quantidade_jogos=3,
+                                nome_liga=nome_comp
+                            )
+                            for rj in res_jogadores:
+                                mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
+                        except: pass
 
-                        for rj in res_jogadores:
-                            mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
-
-                       # 6. Mercado de Cartões Coletivos
+                        # 6. Cartões
                         try:
                             res_cartoes = cartoes.analisar_dados_cartoes(
-                                historico_mandante_am=s.get("historico_mandante_am", {}), 
-                                historico_mandante_vm=s.get("historico_mandante_vm", {}),
-                                historico_visitante_am=s.get("historico_visitante_am", {}), 
-                                historico_visitante_vm=s.get("historico_visitante_vm", {}),
-                                nome_liga=nome_comp,
-                                quantidade_jogos=3
+                                s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}),
+                                s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}),
+                                nome_comp, 3
                             )
-                        except Exception as e_cart:
+                            if res_cartoes.get("aprovado"):
+                                media = res_cartoes.get('media_confronto', 0)
+                                # Lógica de cartões
+                                mercado_formatado = f"Cartões Totais: {'+4.5' if media >= 4.0 else '+2.5' if media >= 3.0 else '+1.5' if media >= 2.0 else '-3.5'}"
+                                mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
+                        except: pass
                             print(f"  ⚠️ Erro no módulo de cartões: {e_cart}")
                             res_cartoes = {"aprovado": False}
 
