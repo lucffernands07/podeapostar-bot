@@ -287,13 +287,19 @@ def main():
                     "horario": j.get("horario"),
                     "odd": j.get("odd")
                 }
+            
             texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
-
             canal_id = os.getenv('CHANNEL_ID')
+
+            # --- SEGURANÇA NO ENVIO DO MENU ---
             if texto_bingos_final and canal_id:
-                msg_bingo_formatada = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_bingos_final
-                menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
-                print("📢 Bingos enviados com botões para o Canal.")
+                try:
+                    msg_bingo_formatada = "💰 *SUGESTÕES DE INVESTIMENTO*\n\n" + texto_bingos_final
+                    menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
+                    print("📢 Bingos enviados com botões para o Canal.")
+                except Exception as e:
+                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
+            # ----------------------------------
 
             os.makedirs("ranking", exist_ok=True)
             caminho_p = "ranking/pendentes.json"
