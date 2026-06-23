@@ -361,15 +361,16 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         
                         cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
                         indice_chutes = -1
+                        
+                        # BUSCA TÉCNICA E VISUAL
                         for idx_th, th in enumerate(cabecalhos_fin):
+                            alias = str(th.get_attribute("data-analytics-alias")).upper()
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
-                            if "FINALIZAÇÕES NO ALVO" in texto_th or texto_th == "FN":
+                            if "SHOTS_ON_TARGET" in alias or "FINALIZAÇÕES NO ALVO" in texto_th or "FN" in texto_th:
                                 indice_chutes = idx_th
                                 break
-                        
-                        # O 'if' agora está fora do for, corrigindo o erro de lógica anterior
-                        if indice_chutes == -1:
-                            indice_chutes = 4 
+                    
+                        if indice_chutes == -1: indice_chutes = 4 
                     
                         linhas_dados_fin = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
                         for lambda_linha in linhas_dados_fin:
@@ -383,16 +384,12 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 
                                 val_chute = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_chutes]).strip()
                                 
-                                # LOGICA DE EXTRAÇÃO SEGURA:
-                                # Se for "-" ou vazio, é 0. Se tiver número, pega apenas o primeiro dígito.
                                 if val_chute in ["-", ""]:
                                     chutes = 0
                                 else:
-                                    # Extrai apenas o primeiro número que aparecer, ignorando o restante da célula
                                     match = re.search(r'\d+', val_chute)
                                     chutes = int(match.group()) if match else 0
                                 
-                                # TRAVA: se por acaso pegar algo muito grande (erro de coluna), zera
                                 if chutes > 10: chutes = 0
                     
                                 if nome_jogador not in stats["historico_chutes"]: stats["historico_chutes"][nome_jogador] = []
@@ -412,8 +409,8 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
         driver.switch_to.window(driver.window_handles[0])
     except: pass
         
-    return stats                                        
-
+    return stats
+                            
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
