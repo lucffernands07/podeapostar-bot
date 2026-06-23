@@ -12,12 +12,13 @@ from telegram import menus
 
 def processar_comando_direto(tipo_bruto):
     """
-    Lê a string unificada do novo Worker ("BINGO:3|HORA:3H|TIPO:ACERTOS")
-    e separa os 3 filtros reais para montar o bilhete exato.
+    Lê a string unificada e separa os filtros para montar o bilhete.
+    Ajustada para o novo padrão: Bingo 3 e 5 agora possuem modo Elite (denso) integrado.
     """
     config = {"bingo": 5, "horario": "DIA", "bilhete": "ACERTOS", "aviso": "", "modo_elite": False}
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
+    # Processamento para strings compostas (Worker)
     if "BINGO:" in tipo_limpo and "HORA:" in tipo_limpo:
         try:
             partes = tipo_limpo.split("|")
@@ -36,41 +37,41 @@ def processar_comando_direto(tipo_bruto):
             
             txt_janela = f"{config['horario']}" if config['horario'] != "DIA" else "Do Dia"
             txt_modo = "Mais acertos"
-            if config['bilhete'] == "ODDS":
-                txt_modo = "Maiores Odds"
-            elif config['bilhete'] == "AMBAS":
-                txt_modo = "Equilibrado"
+            if config['bilhete'] == "ODDS": txt_modo = "Maiores Odds"
+            elif config['bilhete'] == "AMBAS": txt_modo = "Equilibrado"
 
             txt_bingo = "✨ Elite" if config["modo_elite"] else config["bingo"]
-            config["aviso"] = (
-                f"🎲 Bingo: *{txt_bingo}*\n"
-                f"⏱️ Janela: *{txt_janela}*\n"
-                f"📊 Modo: *{txt_modo}*"
-            )
+            config["aviso"] = (f"🎲 Bingo: *{txt_bingo}*\n⏱️ Janela: *{txt_janela}*\n📊 Modo: *{txt_modo}*")
             return config
         except Exception as e:
             print(f"⚠️ Erro ao processar string composta ({e}), usando fallbacks...")
 
+    # Processamento para Callbacks dos Botões
     if "cb_bingo_" in tipo_limpo:
-        valor_b = tipo_limpo.split("_")[-1]
-        if valor_b.upper() == "ELITE":
-            config["bingo"] = 3
+        # Detecta se é o novo padrão ELITE (ex: cb_bingo_3_ELITE)
+        if "ELITE" in tipo_limpo.upper():
             config["modo_elite"] = True
-            config["aviso"] = f"🎲 Você escolheu: *✨ Bingo Elite (Multi-Mercados)*"
+            partes = tipo_limpo.split("_")
+            config["bingo"] = int(partes[2]) # Pega o número 3 ou 5
+            config["aviso"] = f"🎲 Você escolheu: *Bingo {config['bingo']} (Denso/Elite)*"
         else:
-            config["bingo"] = int(valor_b)
+            config["bingo"] = int(tipo_limpo.split("_")[-1])
             config["aviso"] = f"🎲 Você escolheu: *Bingo {config['bingo']}*"
+
     elif "cb_hora_" in tipo_limpo:
         config["horario"] = tipo_limpo.split("_")[-1]
         txt_h = config["horario"] if config["horario"] != "DIA" else "Do Dia"
         config["aviso"] = f"⏱️ Você escolheu a janela: *{txt_h}*"
+
     elif "cb_tipo_" in tipo_limpo:
         config["bilhete"] = tipo_limpo.split("_")[-1]
         txt_m = "Mais acertos"
         if config["bilhete"] == "ODDS": txt_m = "Maiores Odds"
         elif config["bilhete"] == "AMBAS": txt_m = "Equilibrado"
         config["aviso"] = f"📊 Você escolheu a estratégia: *{txt_m}*"
+    
     else:
+        # Fallback para comandos legados
         if "3" in tipo_limpo: config["bingo"] = 3
         elif "7" in tipo_limpo or "PRO" in tipo_limpo: config["bingo"] = 7
         elif "ELITE" in tipo_limpo.upper():
@@ -83,7 +84,6 @@ def processar_comando_direto(tipo_bruto):
         config["aviso"] = f"🚀 Processando comando recebido: *{txt_bingo}*"
 
     return config
-
 
 def executar():
     token = os.getenv('TELEGRAM_TOKEN')
