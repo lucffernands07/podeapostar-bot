@@ -1,25 +1,21 @@
 import os
 import time
-import re
-import requests
 import json
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Importação dos seus módulos
+# Módulos
 from ligas import COMPETICOES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes 
-import odds  
-import bingo357  
-import links
+import odds, bingo357
 from telegram import menus
 
+# Funções de raspagem
+from funcoes.raspagem_h2h import pegar_estatisticas_h2h
+from funcoes.raspagem_scouts import pegar_scouts_avancados
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
