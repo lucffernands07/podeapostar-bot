@@ -48,6 +48,40 @@ def carregar_ranking_pro():
         except: return []
     return []
 
+def montar_bilhete_elite_main(lista_jogos):
+    """
+    Estratégia Elite exclusiva para o main.py:
+    - Foca em densidade (jogos com mais mercados aprovados).
+    - Sempre envia exatamente 3 jogos (ou o máximo disponível se < 3).
+    """
+    if not lista_jogos: return None
+
+    # Agrupa por confronto para medir a densidade
+    confrontos = {}
+    for j in lista_jogos:
+        chave = f"{j['time_casa']}x{j['time_fora']}"
+        if chave not in confrontos: confrontos[chave] = []
+        confrontos[chave].append(j)
+
+    # Ordena pelo número de mercados aprovados por jogo (mais denso primeiro)
+    confrontos_densos = sorted(confrontos.items(), key=lambda x: len(x[1]), reverse=True)
+    
+    # Pega apenas os 3 primeiros confrontos
+    top_3_jogos = []
+    for chave, mercados in confrontos_densos[:3]:
+        # Adiciona todos os mercados daquele jogo selecionado
+        top_3_jogos.extend(mercados)
+    
+    # Monta a estrutura de bilhete que a função formatar_para_telegram espera
+    nome_bilhete = f"✨ BINGO ELITE - {len(confrontos_densos[:3])} JOGOS DENSOS"
+    
+    return [{
+        "id": "ELITE_MAIN",
+        "nome": nome_bilhete,
+        "jogos": top_3_jogos,
+        "aviso_escassez": ""
+    }]
+
 def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS", modo_elite=False):
     """
     Ordena e monta UM ÚNICO bilhete respeitando a estratégia escolhida,
