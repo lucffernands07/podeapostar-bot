@@ -151,11 +151,29 @@ def main():
                         if mercados_para_processar:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
                             for item in mercados_para_processar:
-                                valor_odd_str = v_odds.get(item["chave"], "1.50")
+                                raw_odd = v_odds.get(item["chave"], "1.50")
+                                
+                                # Tratamento seguro para converter odds textuais ou vazias
                                 try:
-                                    if float(valor_odd_str.replace(',', '.')) >= 1.25:
-                                        lista_para_filtros.append({"time_casa": t1, "time_fora": t2, "mercado": item["texto"], "odd": valor_odd_str, "liga": nome_comp})
-                                        total_mercados += 1
+                                    if isinstance(raw_odd, str):
+                                        # Remove vírgulas e converte
+                                        odd_float = float(raw_odd.replace(',', '.'))
+                                    else:
+                                        odd_float = float(raw_odd)
+                                except (ValueError, TypeError):
+                                    # Se for "Análise" ou outro texto, força 1.50
+                                    odd_float = 1.50
+                                    
+                                if odd_float >= 1.25:
+                                    lista_para_filtros.append({
+                                        "time_casa": t1, 
+                                        "time_fora": t2, 
+                                        "mercado": item["texto"], 
+                                        "odd": str(odd_float), 
+                                        "liga": nome_comp,
+                                        "horario": h_br # Certifique-se de ter essa variável
+                                    })
+                                    total_mercados += 1
                                 except: continue
 
         # --- PROCESSAMENTO FINAL (Fora do loop) ---
