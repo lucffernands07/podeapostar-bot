@@ -105,7 +105,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             return odd * pct
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: calcular_peso_equilibrado(x), reverse=True)
 
-    # 3. 🚀 CORTE POR JOGO (MODO DENSO/ELITE) VS CORTE POR MERCADO (TRADICIONAL)
+   # 3. 🚀 CORTE POR JOGO (MODO DENSO/ELITE) VS CORTE POR MERCADO (TRADICIONAL)
     if modo_elite:
         contagem_confrontos = {}
         for m in jogos_ordenados:
@@ -113,11 +113,17 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             contagem_confrontos[chave_jogo] = contagem_confrontos.get(chave_jogo, 0) + 1
         
         jogos_mais_densos = sorted(contagem_confrontos.keys(), key=lambda k: contagem_confrontos[k], reverse=True)
+        
+        # 🚀 CORREÇÃO AQUI: Usando qtd_alvo em vez de 3 fixo
         top_jogos = jogos_mais_densos[:qtd_alvo]
         
-        jogos_selecionados = [m for m in jogos_ordenados if f"{m['time_casa']}x{m['time_fora']}".lower().strip() in top_jogos]
+        jogos_selecionados = [
+            m for m in jogos_ordenados 
+            if f"{m['time_casa']}x{m['time_fora']}".lower().strip() in top_jogos
+        ]
         
         qtd_confrontos_real = len(top_jogos)
+        # 🚀 CORREÇÃO AQUI: Aviso dinâmico usando qtd_alvo
         if qtd_confrontos_real < qtd_alvo:
             aviso_escassez = f"\n⚠️ *Nota:* Foram solicitados {qtd_alvo} jogos, mas a janela só possuía {qtd_confrontos_real} disponíveis."
             
