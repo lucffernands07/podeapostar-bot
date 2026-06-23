@@ -358,19 +358,38 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         ))
                         
                         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
-                        
+                    
                         cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
                         indice_chutes = -1
                         
-                        # BUSCA TÉCNICA E VISUAL
+                        # 1. Tenta encontrar pelo Alias ou Nome
                         for idx_th, th in enumerate(cabecalhos_fin):
                             alias = str(th.get_attribute("data-analytics-alias")).upper()
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
                             if "SHOTS_ON_TARGET" in alias or "FINALIZAÇÕES NO ALVO" in texto_th or "FN" in texto_th:
                                 indice_chutes = idx_th
+                                print(f"  ✅ [DEBUG] Coluna encontrada via busca no índice: {idx_th}")
                                 break
-                    
-                        if indice_chutes == -1: indice_chutes = 4 
+                                
+                        # 2. SE NÃO ACHOU, testa índices conhecidos em vez de cravar no 4
+                        if indice_chutes == -1:
+                            print("  🔍 [DEBUG] Buscando coluna por tentativa e erro...")
+                            # Lista de índices que você sabe que costumam ser a coluna de chutes
+                            tentativas = [5, 6, 7, 8, 9, 10]
+                            for idx_teste in tentativas:
+                                if idx_teste < len(cabecalhos_fin):
+                                    val_teste = driver.execute_script("return arguments[0].textContent;", cabecalhos_fin[idx_teste]).strip().upper()
+                                    # Verifica se nesta coluna há um número ou se ela parece conter dados de chute
+                                    if "FINALIZAÇÕES" in val_teste or "ALVO" in val_teste or "SOT" in val_teste:
+                                        indice_chutes = idx_teste
+                                        print(f"  ✅ [DEBUG] Coluna encontrada via tentativa no índice: {idx_teste}")
+                                        break
+                                        
+                        # 3. Última salvaguarda
+                        if indice_chutes == -1:
+                            indice_chutes = 5 # O seu índice de confiança
+                            print(f"  ⚠️ [DEBUG] Não achou, usando fallback forçado: {indice_chutes}")
+ 
                     
                         linhas_dados_fin = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
                         for lambda_linha in linhas_dados_fin:
