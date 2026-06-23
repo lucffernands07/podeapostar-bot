@@ -1,30 +1,12 @@
 [
     {
-        "horario": "14:00",
+        "horario": "17:00",
         "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Portugal",
-        "time_fora": "Uzbequistão",
+        "time_casa": "Inglaterra",
+        "time_fora": "Gana",
         "mercado": "-4.5 Gols (85%)",
-        "odd": "1.29",
-        "link_betano": "https://www.betano.bet.br/match-odds/Portugal-Uzbekistan/83963581/"
-    },
-    {
-        "horario": "14:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Portugal",
-        "time_fora": "Uzbequistão",
-        "mercado": "Chutes no Alvo: B. Fernandes (Frequência: 2/3j | Méd: 0.7)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Portugal-Uzbekistan/83963581/"
-    },
-    {
-        "horario": "14:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Portugal",
-        "time_fora": "Uzbequistão",
-        "mercado": "Cartões Totais: +2.5",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Portugal-Uzbekistan/83963581/"
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/England-Ghana/83963625/"
     },
     {
         "horario": "17:00",
@@ -76,17 +58,8 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Panamá",
         "time_fora": "Croácia",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.25",
-        "link_betano": "https://www.betano.bet.br/match-odds/Panama-Croatia/83963650/"
-    },
-    {
-        "horario": "20:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Panamá",
-        "time_fora": "Croácia",
         "mercado": "+2.5 Gols (70%)",
-        "odd": "1.75",
+        "odd": "1.70",
         "link_betano": "https://www.betano.bet.br/match-odds/Panama-Croatia/83963650/"
     },
     {
@@ -104,7 +77,7 @@
         "time_casa": "Colômbia",
         "time_fora": "R. D. Congo",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.40",
+        "odd": "1.38",
         "link_betano": "https://www.betano.bet.br/match-odds/Colombia-DR-Congo/83963671/"
     },
     {
