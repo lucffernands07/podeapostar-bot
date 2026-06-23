@@ -113,7 +113,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             return odd * pct
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: calcular_peso_equilibrado(x), reverse=True)
 
-    # 3. 🚀 CORTE POR JOGO (SE FOR ELITE) VS CORTE POR MERCADO (TRADICIONAL)
+    # 3. 🚀 CORTE POR JOGO (SE FOR MODO DENSO/ELITE) VS CORTE POR MERCADO (TRADICIONAL)
     if modo_elite:
         contagem_confrontos = {}
         for m in jogos_ordenados:
@@ -121,26 +121,20 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             contagem_confrontos[chave_jogo] = contagem_confrontos.get(chave_jogo, 0) + 1
         
         jogos_mais_densos = sorted(contagem_confrontos.keys(), key=lambda k: contagem_confrontos[k], reverse=True)
-        top_3_jogos = jogos_mais_densos[:3]
+        # Pega a quantidade de jogos definida pelo qtd_alvo (ex: se clicou no Bingo 3, pega 3 jogos)
+        top_jogos = jogos_mais_densos[:qtd_alvo]
         
         jogos_selecionados = [
             m for m in jogos_ordenados 
-            if f"{m['time_casa']}x{m['time_fora']}".lower().strip() in top_3_jogos
+            if f"{m['time_casa']}x{m['time_fora']}".lower().strip() in top_jogos
         ]
         
-        qtd_confrontos_real = len(top_3_jogos)
-        aviso_escassez = ""
-        if qtd_confrontos_real < 3:
-            aviso_escassez = f"\n⚠️ *Nota:* Foram solicitados 3 jogos elite, mas a janela só possuía {qtd_confrontos_real} disponíveis."
-            
-        nome_bilhete = f"✨ BINGO ELITE DE {qtd_confrontos_real} JOGOS ({estrategia})"
+        qtd_confrontos_real = len(top_jogos)
+        nome_bilhete = f"✨ BINGO {qtd_alvo} (DENSO) - {qtd_confrontos_real} JOGOS ({estrategia})"
     else:
+        # Modo Tradicional (se algum dia precisar usar sem ser denso)
         jogos_selecionados = jogos_ordenados[:qtd_alvo]
         qtd_real = len(jogos_selecionados)
-        aviso_escassez = ""
-        if qtd_real < qtd_alvo:
-            aviso_escassez = f"\n⚠️ *Nota:* Foram solicitados {qtd_alvo} mercados, mas a janela só possuía {qtd_real} disponíveis."
-            
         traducao_modo = "MAIORES ODDS" if estrategia == "ODDS" else "MAIS ACERTOS" if estrategia == "ACERTOS" else "EQUILIBRADO"
         nome_bilhete = f"🔥 BINGO DE {qtd_real} MERCADOS ({traducao_modo})"
 
