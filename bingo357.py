@@ -50,15 +50,16 @@ def carregar_ranking_pro():
 
 def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS", modo_elite=False):
     """
-    Ordena e monta UM ÚNICO bilhete respeitando a estratégia escolhida.
+    Ordena e monta UM ÚNICO bilhete respeitando a estratégia escolhida,
+    garantindo que se houver menos jogos que qtd_alvo, ele pegue todos os disponíveis.
     """
     bilhetes = []
     lista_jogos = dados_entrada
-    aviso_escassez = "" # 🚀 CORREÇÃO: Inicialização obrigatória
+    aviso_escassez = ""
     
     if not lista_jogos: return bilhetes
 
-    # 1. Filtro de duplicidade (Dupla Chance vs Vitória)
+    # 1. Filtro de duplicidade (Mantido igual)
     jogos_agrupados = {}
     for jogo in lista_jogos:
         chave = f"{jogo['time_casa']}x{jogo['time_fora']}".lower().strip()
@@ -82,7 +83,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
                         if not m.get('odd') or m['odd'] == "N/A" or m['odd'] == "1.0": m['odd'] = "1.50"
                     lista_filtrada.append(m)
             
-    # 2. 📊 Aplicação das Estratégias de Ordenação
+    # 2. 📊 Aplicação das Estratégias de Ordenação (Mantido igual)
     if estrategia == "ODDS":
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: extrair_odd(x.get('odd', '1.50')), reverse=True)
     elif estrategia == "ACERTOS":
@@ -97,7 +98,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             if "confronto cartões" in mercado_txt.lower() or "cartões totais" in mercado_txt.lower() or "chutes" in mercado_txt.lower(): return 100
             return 50
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: pegar_assertividade(x), reverse=True)
-    else: # EQUILIBRADO
+    else:
         def calcular_peso_equilibrado(x):
             odd = extrair_odd(x.get('odd', '1.50'))
             mercado_txt = x.get('mercado', '')
@@ -105,7 +106,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             return odd * pct
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: calcular_peso_equilibrado(x), reverse=True)
 
-   # 3. 🚀 CORTE POR JOGO (MODO DENSO/ELITE) VS CORTE POR MERCADO (TRADICIONAL)
+    # 3. 🚀 CORTE AJUSTADO (ACEITA DE 1 A QTD_ALVO)
     if modo_elite:
         contagem_confrontos = {}
         for m in jogos_ordenados:
@@ -114,8 +115,8 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
         
         jogos_mais_densos = sorted(contagem_confrontos.keys(), key=lambda k: contagem_confrontos[k], reverse=True)
         
-        # 🚀 CORREÇÃO AQUI: Usando qtd_alvo em vez de 3 fixo
-        top_jogos = jogos_mais_densos[:qtd_alvo]
+        # Ajuste: Seleciona o MÍNIMO entre o que foi pedido (qtd_alvo) e o que existe
+        top_jogos = jogos_mais_densos[:min(len(jogos_mais_densos), qtd_alvo)]
         
         jogos_selecionados = [
             m for m in jogos_ordenados 
@@ -123,24 +124,18 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
         ]
         
         qtd_confrontos_real = len(top_jogos)
-        # 🚀 CORREÇÃO AQUI: Aviso dinâmico usando qtd_alvo
-        if qtd_confrontos_real < qtd_alvo:
-            aviso_escassez = f"\n⚠️ *Nota:* Foram solicitados {qtd_alvo} jogos, mas a janela só possuía {qtd_confrontos_real} disponíveis."
-            
-        nome_bilhete = f"✨ BINGO {qtd_alvo} (DENSO) - {qtd_confrontos_real} JOGOS ({estrategia})"
+        nome_bilhete = f"✨ BINGO {qtd_confrontos_real} (DENSO) - {qtd_confrontos_real} JOGOS ({estrategia})"
     else:
-        jogos_selecionados = jogos_ordenados[:qtd_alvo]
+        # Ajuste: Fatiamento dinâmico também no modo tradicional
+        jogos_selecionados = jogos_ordenados[:min(len(jogos_ordenados), qtd_alvo)]
         qtd_real = len(jogos_selecionados)
-        if qtd_real < qtd_alvo:
-            aviso_escassez = f"\n⚠️ *Nota:* Foram solicitados {qtd_alvo} mercados, mas a janela só possuía {qtd_real} disponíveis."
-            
         traducao_modo = "MAIORES ODDS" if estrategia == "ODDS" else "MAIS ACERTOS" if estrategia == "ACERTOS" else "EQUILIBRADO"
         nome_bilhete = f"🔥 BINGO DE {qtd_real} MERCADOS ({traducao_modo})"
 
-    # Ordena cronologicamente os jogos selecionados
+    # Ordena cronologicamente
     jogos_selecionados.sort(key=lambda x: x.get('horario', '00:00'))
 
-    # 4. Retorna o Bilhete Único estruturado
+    # 4. Retorna o Bilhete
     if jogos_selecionados:
         bilhetes.append({
             "id": "BINGO_CUSTOM", 
