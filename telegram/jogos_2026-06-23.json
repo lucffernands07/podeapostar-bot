@@ -4,8 +4,8 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Portugal",
         "time_fora": "Uzbequistão",
-        "mercado": "Chutes no Alvo: Samu Costa (Frequência: 2/3j | Méd: 12.0)",
-        "odd": "Análise",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.25",
         "link_betano": "https://www.betano.bet.br/match-odds/Portugal-Uzbekistan/83963581/"
     },
     {
@@ -16,15 +16,6 @@
         "mercado": "Cartões Totais: +2.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Portugal-Uzbekistan/83963581/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Inglaterra",
-        "time_fora": "Gana",
-        "mercado": "Chutes no Alvo: Kane H. (Frequência: 3/3j | Méd: 76.7)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/England-Ghana/83963625/"
     },
     {
         "horario": "17:00",
@@ -49,15 +40,6 @@
         "liga": "Brasileirão Série B",
         "time_casa": "América-MG",
         "time_fora": "Criciúma",
-        "mercado": "Chutes no Alvo: Segovia (Frequência: 1/3j | Méd: 37.3)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/America-MG-Criciuma-SC/87581867/"
-    },
-    {
-        "horario": "20:00",
-        "liga": "Brasileirão Série B",
-        "time_casa": "América-MG",
-        "time_fora": "Criciúma",
         "mercado": "Cartões Totais: -2.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/America-MG-Criciuma-SC/87581867/"
@@ -68,7 +50,7 @@
         "time_casa": "Panamá",
         "time_fora": "Croácia",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.27",
+        "odd": "1.28",
         "link_betano": "https://www.betano.bet.br/match-odds/Panama-Croatia/83963650/"
     },
     {
@@ -77,16 +59,7 @@
         "time_casa": "Panamá",
         "time_fora": "Croácia",
         "mercado": "+2.5 Gols (70%)",
-        "odd": "1.80",
-        "link_betano": "https://www.betano.bet.br/match-odds/Panama-Croatia/83963650/"
-    },
-    {
-        "horario": "20:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Panamá",
-        "time_fora": "Croácia",
-        "mercado": "Chutes no Alvo: Yirenkyi C. (Frequência: 1/3j | Méd: 33.0)",
-        "odd": "Análise",
+        "odd": "1.82",
         "link_betano": "https://www.betano.bet.br/match-odds/Panama-Croatia/83963650/"
     },
     {
@@ -105,15 +78,6 @@
         "time_fora": "R. D. Congo",
         "mercado": "+1.5 Gols (85%)",
         "odd": "1.44",
-        "link_betano": "https://www.betano.bet.br/match-odds/Colombia-DR-Congo/83963671/"
-    },
-    {
-        "horario": "23:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Colômbia",
-        "time_fora": "R. D. Congo",
-        "mercado": "Chutes no Alvo: Diaz L. (Frequência: 2/3j | Méd: 38.3)",
-        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Colombia-DR-Congo/83963671/"
     },
     {
