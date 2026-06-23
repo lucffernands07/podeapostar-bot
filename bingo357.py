@@ -49,36 +49,32 @@ def carregar_ranking_pro():
     return []
 
 def montar_bilhete_elite_main(lista_jogos):
-    """
-    Estratégia Elite exclusiva para o main.py:
-    - Foca em densidade (jogos com mais mercados aprovados).
-    - Sempre envia exatamente 3 jogos (ou o máximo disponível se < 3).
-    """
     if not lista_jogos: return None
 
-    # Agrupa por confronto para medir a densidade
+    # Agrupa por confronto
     confrontos = {}
     for j in lista_jogos:
         chave = f"{j['time_casa']}x{j['time_fora']}"
         if chave not in confrontos: confrontos[chave] = []
         confrontos[chave].append(j)
 
-    # Ordena pelo número de mercados aprovados por jogo (mais denso primeiro)
+    # Ordena pelos confrontos que possuem mais mercados (densidade)
+    # E pega apenas os 3 primeiros confrontos mais densos
     confrontos_densos = sorted(confrontos.items(), key=lambda x: len(x[1]), reverse=True)
+    top_3_confrontos = confrontos_densos[:3]
     
-    # Pega apenas os 3 primeiros confrontos
-    top_3_jogos = []
-    for chave, mercados in confrontos_densos[:3]:
-        # Adiciona todos os mercados daquele jogo selecionado
-        top_3_jogos.extend(mercados)
+    # Monta a lista plana de mercados para o formatador
+    jogos_selecionados = []
+    for chave, mercados in top_3_confrontos:
+        jogos_selecionados.extend(mercados)
     
-    # Monta a estrutura de bilhete que a função formatar_para_telegram espera
-    nome_bilhete = f"✨ BINGO ELITE - {len(confrontos_densos[:3])} JOGOS DENSOS"
+    # Verifica quantos jogos realmente temos (para o título)
+    qtd_jogos = len(top_3_confrontos)
     
     return [{
-        "id": "ELITE_MAIN",
-        "nome": nome_bilhete,
-        "jogos": top_3_jogos,
+        "id": "ELITE_DENSO",
+        "nome": f"🔥 BINGO DENSO (TOP {qtd_jogos} JOGOS)",
+        "jogos": jogos_selecionados,
         "aviso_escassez": ""
     }]
 
