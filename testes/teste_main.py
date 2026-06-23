@@ -118,75 +118,45 @@ def main():
                             mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
 
                         # 3. Chance Dupla
-                        if s.get("casa_vitorias_recente", 0) >= 4 or s.get("fora_vitorias_recente", 0) >= 4:
-                            s["chance_dupla_pct"] = "100%"
-                        elif s.get("casa_vitorias_recente", 0) == 3 or s.get("fora_vitorias_recente", 0) == 3:
-                            s["chance_dupla_pct"] = "90%"
-                        else:
-                            s["chance_dupla_pct"] = "80%"
-                        
+                        s["chance_dupla_pct"] = "100%" if s.get("casa_vitorias_recente", 0) >= 4 or s.get("fora_vitorias_recente", 0) >= 4 else "90%" if s.get("casa_vitorias_recente", 0) == 3 or s.get("fora_vitorias_recente", 0) == 3 else "80%"
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         for rc in res_cd:
-                            tipo_cd = "1X" if "1X" in rc else "X2"
-                            mercados_para_processar.append({"texto": rc, "chave": tipo_cd})
+                            mercados_para_processar.append({"texto": rc, "chave": "1X" if "1X" in rc else "X2"})
 
                         # 4. Vitória Casa
                         res_vc = vitoria_casa.verificar_vitoria_casa(s)
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # 5. Jogadores (mantenha o try/except para segurança)
+                        # 5. Jogadores
                         try:
-                            res_jogadores = jogadores.verificar_destaques_jogadores(
-                                historico_chutes=s.get("historico_chutes", {}),
-                                quantidade_jogos=3,
-                                nome_liga=nome_comp
-                            )
+                            res_jogadores = jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), 3, nome_comp)
                             for rj in res_jogadores:
                                 mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
                         except: pass
 
                         # 6. Cartões
                         try:
-                            res_cartoes = cartoes.analisar_dados_cartoes(
-                                s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}),
-                                s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}),
-                                nome_comp, 3
-                            )
+                            res_cartoes = cartoes.analisar_dados_cartoes(s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}), s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}), nome_comp, 3)
                             if res_cartoes.get("aprovado"):
                                 media = res_cartoes.get('media_confronto', 0)
-                                # Lógica de cartões
-                                mercado_formatado = f"Cartões Totais: {'+4.5' if media >= 4.0 else '+2.5' if media >= 3.0 else '+1.5' if media >= 2.0 else '-3.5'}"
-                                mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
+                                if media >= 4.0: m_fmt = "Cartões Totais: +4.5"
+                                elif media >= 3.0: m_fmt = "Cartões Totais: +2.5"
+                                elif media >= 2.0: m_fmt = "Cartões Totais: +1.5"
+                                else: m_fmt = "Cartões Totais: -2.5"
+                                mercados_para_processar.append({"texto": m_fmt, "chave": "CARTOES_CONFRONTO"})
                         except: pass
-                            print(f"  ⚠️ Erro no módulo de cartões: {e_cart}")
-                            res_cartoes = {"aprovado": False}
-
-                        if res_cartoes.get("aprovado"):
-                            media = res_cartoes.get('media_confronto', 0)
-                            
-                            # 🎴 Tradução da média para mercados tradicionais da Betano
-                            if media >= 4.0:
-                                mercado_formatado = "Cartões Totais: +4.5"
-                            elif media >= 3.0:
-                                mercado_formatado = "Cartões Totais: +2.5"
-                            elif media >= 2.0:
-                                mercado_formatado = "Cartões Totais: +1.5"
-                            elif media >= 1.0:
-                                mercado_formatado = "Cartões Totais: -3.5"
-                            else:
-                                mercado_formatado = "Cartões Totais: -2.5"
 
                         # Validação de Odds e adição na lista_para_filtros
                         if mercados_para_processar:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
                             for item in mercados_para_processar:
                                 valor_odd_str = v_odds.get(item["chave"], "1.50")
-                                if float(valor_odd_str.replace(',', '.')) >= 1.25:
-                                    lista_para_filtros.append({"time_casa": t1, "time_fora": t2, "mercado": item["texto"], "odd": valor_odd_str, "liga": nome_comp})
-                                    total_mercados += 1
-                except Exception:
-                    continue
+                                try:
+                                    if float(valor_odd_str.replace(',', '.')) >= 1.25:
+                                        lista_para_filtros.append({"time_casa": t1, "time_fora": t2, "mercado": item["texto"], "odd": valor_odd_str, "liga": nome_comp})
+                                        total_mercados += 1
+                                except: continue
 
         # --- PROCESSAMENTO FINAL (Fora do loop) ---
         if lista_para_filtros:
