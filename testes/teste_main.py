@@ -415,7 +415,7 @@ def main():
     total_mercados = 0 
 
     try:
-        for nome_comp, url in COMPETICOES.items():
+        for nome_comp, url in TESTE_COMPETICOES.items():
             if total_mercados >= 200: 
                 break 
             print(f"\n--- Analisando: {nome_comp} ---")
