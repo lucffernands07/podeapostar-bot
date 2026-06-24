@@ -6,11 +6,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Importações dos seus módulos
+# Importações dos seus módulos (Bingo removido)
 from testes.teste_ligas import TESTE_COMPETICOES as COMPETICOES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes
 import odds
-import bingo357
 
 # Importações das funções de raspagem
 from funcoes.raspagem_h2h import pegar_estatisticas_h2h
@@ -80,7 +79,6 @@ def main():
                         s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
                         
                         mercados_para_processar = []
-                        # ... (lógica de coleta de mercados simplificada para brevidade)
                         res_gols = gols.verificar_gols(s)
                         for rg in res_gols: mercados_para_processar.append({"texto": rg['mercado'], "chave": rg['tipo']})
 
@@ -93,7 +91,11 @@ def main():
                                 try:
                                     odd_float = float(valor_odd_str.replace(',', '.'))
                                     if odd_float >= 1.25:
-                                        lista_para_filtros.append({"time_casa": t1, "time_fora": t2, "mercado": item["texto"], "odd": valor_odd_str, "liga": nome_comp, "horario": h_br})
+                                        lista_para_filtros.append({
+                                            "time_casa": t1, "time_fora": t2, 
+                                            "mercado": item["texto"], "odd": valor_odd_str, 
+                                            "liga": nome_comp, "horario": h_br
+                                        })
                                         total_mercados += 1
                                 except ValueError: continue
                 except: continue
@@ -103,11 +105,11 @@ def main():
     finally:
         driver.quit()
 
-    # --- PROCESSAMENTO FINAL (Fora do try/for principal, alinhado corretamente) ---
+    # --- LISTAGEM FINAL NO TERMINAL ---
     if lista_para_filtros:
-        print(f"\n🧪 TESTE: {len(lista_para_filtros)} mercados coletados.")
-        bilhete_elite = bingo357.montar_bilhete_elite_main(lista_para_filtros)
-        print(f"🧪 Teste Bingo Elite: {len(bilhete_elite) if bilhete_elite else 0} bilhetes.")
+        print(f"\n🧪 TESTE FINALIZADO: {len(lista_para_filtros)} mercados encontrados.")
+        for m in lista_para_filtros:
+            print(f"[{m['liga']}] {m['time_casa']} x {m['time_fora']} | {m['mercado']} (@{m['odd']}) | {m['horario']}")
     else:
         print("\n⚠️ Nenhum mercado passou nos filtros.")
 
