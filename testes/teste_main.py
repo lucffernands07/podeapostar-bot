@@ -145,7 +145,18 @@ def main():
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
                         # 6. Mercado de Cartões
-                        res_cartoes = cartoes.analisar_dados_cartoes(s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}), s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}), nome_comp, 3)
+                        # Hack: Forçamos o nome da liga para o formato que o cartoes.py aceita (Mundo - Copa do Mundo)
+                        liga_cartoes = "Mundo - Copa do Mundo" if nome_comp == "Copa do Mundo" else nome_comp
+                        
+                        res_cartoes = cartoes.analisar_dados_cartoes(
+                            s.get("historico_mandante_am", {}), 
+                            s.get("historico_mandante_vm", {}), 
+                            s.get("historico_visitante_am", {}), 
+                            s.get("historico_visitante_vm", {}), 
+                            liga_cartoes, 
+                            3
+                        )
+                        
                         if res_cartoes.get("aprovado"):
                             media = res_cartoes.get('media_confronto', 0)
                             if media >= 4.0: m_fmt = "Cartões Totais: +4.5"
@@ -154,7 +165,9 @@ def main():
                             elif media >= 1.0: m_fmt = "Cartões Totais: -3.5"
                             else: m_fmt = "Cartões Totais: -2.5"
                             mercados_para_processar.append({"texto": m_fmt, "chave": "CARTOES_CONFRONTO"})
+                            
 
+                        
                         # --- VALIDAÇÃO DE ODDS E FILTRAGEM ---
                         if mercados_para_processar:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
