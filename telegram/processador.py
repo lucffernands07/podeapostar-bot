@@ -11,17 +11,11 @@ import bingo357
 from telegram import menus
 
 def processar_comando_direto(tipo_bruto):
-    """
-    Processamento rigoroso: O botão clica, o código obedece.
-    Sem forçar valores padrões no Fallback.
-    """
     config = {"bingo": 5, "horario": "DIA", "bilhete": "ACERTOS", "aviso": "", "modo_elite": False}
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
-    # 1. Processamento para Callbacks (O que o usuário clica)
     if "cb_bingo_" in tipo_limpo:
         partes = tipo_limpo.split("_")
-        # Pega exatamente o número do botão (ex: cb_bingo_5 -> 5)
         try:
             config["bingo"] = int(partes[2])
         except (IndexError, ValueError):
@@ -41,7 +35,6 @@ def processar_comando_direto(tipo_bruto):
         config["bilhete"] = tipo_limpo.split("_")[-1]
         config["aviso"] = f"📊 Estratégia: *{config['bilhete']}*"
     
-    # 2. Fallback (Apenas para comandos manuais, sem travas de bingo=3)
     else:
         if "3" in tipo_limpo: config["bingo"] = 3
         elif "5" in tipo_limpo: config["bingo"] = 5
@@ -71,8 +64,18 @@ def executar():
     with open(caminho_json, "r", encoding="utf-8") as f:
         jogos_banco = json.load(f)
 
+    # --- DEFINIÇÃO DOS LINKS (CORRIGINDO O NAMEERROR) ---
+    dict_cache_links = {}
+    for j in jogos_banco:
+        casa = j.get("time_casa")
+        fora = j.get("time_fora")
+        link_b = j.get("link_betano")
+        if casa and fora and link_b:
+            chave = f"{str(casa).strip().lower()}x{str(fora).strip().lower()}"
+            if chave not in dict_cache_links: dict_cache_links[chave] = {}
+            dict_cache_links[chave]["link_betano"] = link_b
+
     # --- PROCESSAMENTO ---
-    # Aqui passamos o qtd_alvo extraído diretamente do processar_comando_direto
     bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(
         jogos_banco, 
         qtd_alvo=config["bingo"], 
@@ -80,7 +83,12 @@ def executar():
         modo_elite=config["modo_elite"]
     )
     
-    texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links, aviso_menu=config["aviso"])
+    # Agora dict_cache_links existe e é passado com o cabeçalho aviso_menu
+    texto_final = bingo357.formatar_para_telegram(
+        bilhetes_gerados, 
+        dict_cache_links, 
+        aviso_menu=config["aviso"]
+    )
     
     menu_botoes = menus.extrair_markup_filtros() if hasattr(menus, 'extrair_markup_filtros') else None
 
