@@ -13,10 +13,10 @@ from telegram import menus
 def processar_comando_direto(tipo_bruto):
     """
     Lê a string unificada e separa os filtros para montar o bilhete.
-    Ajustada para garantir que o callback do botão sobrescreva qualquer padrão.
+    Ajustada para garantir que o número do bingo vindo do callback seja respeitado.
     """
-    # Inicializa com valores base
-    config = {"bingo": 3, "horario": "DIA", "bilhete": "ACERTOS", "aviso": "", "modo_elite": False}
+    # Inicializa com padrão 5 para evitar forçar 3
+    config = {"bingo": 5, "horario": "DIA", "bilhete": "ACERTOS", "aviso": "", "modo_elite": False}
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
     # 1. Processamento para strings compostas (Worker)
@@ -50,17 +50,17 @@ def processar_comando_direto(tipo_bruto):
     # 2. Processamento para Callbacks dos Botões
     if "cb_bingo_" in tipo_limpo:
         partes = tipo_limpo.split("_")
-        # Identifica se é modo ELITE (formato esperado: cb_bingo_X_ELITE ou cb_bingo_X)
+        # Extrai o número do bingo da posição 2 (ex: cb_bingo_5_ELITE -> partes[2] é 5)
+        # Usamos try/except para garantir que, se não houver número, ele mantenha o padrão
+        try:
+            config["bingo"] = int(partes[2])
+        except (IndexError, ValueError):
+            config["bingo"] = 5
+            
         if "ELITE" in tipo_limpo.upper():
             config["modo_elite"] = True
-            # Tenta pegar o número independente da posição, procurando por dígito
-            for p in partes:
-                if p.isdigit():
-                    config["bingo"] = int(p)
             config["aviso"] = f"🎲 Você escolheu: *Bingo {config['bingo']} (Denso/Elite)*"
         else:
-            # Pega o último elemento (o número do bingo)
-            config["bingo"] = int(partes[-1])
             config["aviso"] = f"🎲 Você escolheu: *Bingo {config['bingo']}*"
 
     elif "cb_hora_" in tipo_limpo:
@@ -75,7 +75,7 @@ def processar_comando_direto(tipo_bruto):
         elif config["bilhete"] == "AMBAS": txt_m = "Equilibrado"
         config["aviso"] = f"📊 Você escolheu a estratégia: *{txt_m}*"
     
-    # 3. Fallback (Caso não seja callback nem worker)
+    # 3. Fallback para comandos não formatados
     else:
         if "3" in tipo_limpo: config["bingo"] = 3
         elif "5" in tipo_limpo: config["bingo"] = 5
