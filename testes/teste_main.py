@@ -147,34 +147,36 @@ def main():
                                 mercados_para_processar.append({"texto": m_fmt, "chave": "CARTOES_CONFRONTO"})
                         except: pass
 
-                        # Validação de Odds e adição na lista_para_filtros
-                        if mercados_para_processar:
-                            v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-                            for item in mercados_para_processar:
-                                raw_odd = v_odds.get(item["chave"], "1.50")
+                        # Validação de Odds e adição na lista_para_filtros ---
+                        for item in mercados_para_processar:
+                            m_texto = item["texto"]
+                            m_chave = item["chave"]
+                            
+                            # Lógica idêntica à produção
+                            if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"]:
+                                valor_odd_str = "1.50"
+                            else:
+                                valor_odd_str = v_odds.get(m_chave, "N/A")
+                        
+                            try:
+                                odd_float = float(valor_odd_str.replace(',', '.'))
                                 
-                                # Tratamento seguro para converter odds textuais ou vazias
-                                try:
-                                    if isinstance(raw_odd, str):
-                                        # Remove vírgulas e converte
-                                        odd_float = float(raw_odd.replace(',', '.'))
-                                    else:
-                                        odd_float = float(raw_odd)
-                                except (ValueError, TypeError):
-                                    # Se for "Análise" ou outro texto, força 1.50
-                                    odd_float = 1.50
-                                    
+                                # Filtros de segurança da produção
+                                if "M45" in m_chave and odd_float >= 4.0: continue
+                                if m_chave == "CARTOES_CONFRONTO" and "0.0" in m_texto: continue
+                                if m_chave == "CHUTES_ALVO" and "0.0" in m_texto: continue
+                        
                                 if odd_float >= 1.25:
                                     lista_para_filtros.append({
-                                        "time_casa": t1, 
-                                        "time_fora": t2, 
-                                        "mercado": item["texto"], 
-                                        "odd": str(odd_float), 
+                                        "time_casa": t1, "time_fora": t2,
+                                        "mercado": m_texto, 
+                                        "odd": valor_odd_str, # Mantém a string original
                                         "liga": nome_comp,
-                                        "horario": h_br # Certifique-se de ter essa variável
+                                        "horario": h_br
                                     })
                                     total_mercados += 1
-                                except: continue
+                            except ValueError:
+                                continue
 
         # --- PROCESSAMENTO FINAL (Fora do loop) ---
         if lista_para_filtros:
