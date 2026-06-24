@@ -80,8 +80,7 @@ def executar():
         modo_elite=config["modo_elite"]
     )
     
-    # Formatação e Envio (mantendo sua lógica de links/menus)
-    texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, {}) # Cache simplificado se necessário
+    texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links, aviso_menu=config["aviso"])
     
     menu_botoes = menus.extrair_markup_filtros() if hasattr(menus, 'extrair_markup_filtros') else None
 
