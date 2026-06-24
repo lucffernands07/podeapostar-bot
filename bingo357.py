@@ -37,75 +37,36 @@ def prioridade_mercado(mercado_texto):
     return 7
 
 def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS", modo_elite=False):
-    """
-    Ordena e monta UM ÚNICO bilhete respeitando a estratégia e a quantidade pedida no menu.
-    """
     bilhetes = []
-    lista_jogos = dados_entrada
+    if not dados_entrada: return bilhetes
 
-    if not lista_jogos:
-        return bilhetes
-
-    # 1. Filtro de duplicidade
+    # Agrupa por confronto primeiro
     jogos_agrupados = {}
-    for jogo in lista_jogos:
+    for jogo in dados_entrada:
         chave = f"{jogo['time_casa']}x{jogo['time_fora']}".lower().strip()
-        if chave not in jogos_agrupados:
-            jogos_agrupados[chave] = []
+        if chave not in jogos_agrupados: jogos_agrupados[chave] = []
         jogos_agrupados[chave].append(jogo)
 
-    lista_filtrada = []
-    for chave, mercados in jogos_agrupados.items():
-        for m in mercados:
-            if "falta" in m['mercado'].lower():
-                continue
-            if "chutes" in m['mercado'].lower() or "cartã" in m['mercado'].lower() or "cartao" in m['mercado'].lower():
-                if not m.get('odd') or str(m['odd']) in ["N/A", "1.0"]:
-                    m['odd'] = "1.50"
-            lista_filtrada.append(m)
-
-    # 2. 📊 Ordenação
-    if estrategia == "ODDS":
-        jogos_ordenados = sorted(lista_filtrada, key=lambda x: extrair_odd(x.get('odd', '1.50')), reverse=True)
-    elif estrategia == "ACERTOS":
-        def pegar_assertividade(x):
-            mercado_txt = x.get('mercado', '')
-            if "%" in mercado_txt:
-                return extrair_porcentagem(mercado_txt)
-            if "5/5j" in mercado_txt or "confronto cartões" in mercado_txt.lower() or "cartões totais" in mercado_txt.lower() or "chutes" in mercado_txt.lower():
-                return 100
-            return 50
-        jogos_ordenados = sorted(lista_filtrada, key=lambda x: pegar_assertividade(x), reverse=True)
-    else:
-        def calcular_peso_equilibrado(x):
-            odd = extrair_odd(x.get('odd', '1.50'))
-            pct = extrair_porcentagem(x.get('mercado', '')) / 100.0 if "%" in x.get('mercado', '') else 0.7
-            return odd * pct
-        jogos_ordenados = sorted(lista_filtrada, key=lambda x: calcular_peso_equilibrado(x), reverse=True)
-
-    # 3. 🚀 SELEÇÃO DINÂMICA (RESPEITA QTD_ALVO)
+    # Ordena confrontos pela "densidade" se modo_elite, ou pela força da estratégia
+    # Aqui estamos pegando as chaves (jogos) e ordenando-as
+    lista_chaves = list(jogos_agrupados.keys())
+    
     if modo_elite:
-        contagem_confrontos = {}
-        for m in jogos_ordenados:
-            chave_jogo = f"{m['time_casa']}x{m['time_fora']}".lower().strip()
-            contagem_confrontos[chave_jogo] = contagem_confrontos.get(chave_jogo, 0) + 1
-
-        jogos_ordenados.sort(key=lambda m: contagem_confrontos[f"{m['time_casa']}x{m['time_fora']}".lower().strip()], reverse=True)
-        jogos_selecionados = jogos_ordenados[:qtd_alvo]
-        nome_bilhete = f"✨ BINGO {len(jogos_selecionados)} (DENSO) - {estrategia}"
+        # Ordena confrontos que possuem mais mercados (densos)
+        lista_chaves.sort(key=lambda k: len(jogos_agrupados[k]), reverse=True)
     else:
-        jogos_selecionados = jogos_ordenados[:qtd_alvo]
-        nome_bilhete = f"🔥 BINGO DE {len(jogos_selecionados)} JOGOS ({estrategia})"
+        # Ordena de forma aleatória ou pelo primeiro mercado do jogo (padrão)
+        pass 
 
-    # Ordena cronologicamente
-    jogos_selecionados.sort(key=lambda x: x.get('horario', '00:00'))
+    # Seleciona os confrontos até atingir a qtd_alvo
+    jogos_selecionados = []
+    for k in lista_chaves[:qtd_alvo]:
+        jogos_selecionados.extend(jogos_agrupados[k])
+    
+    nome_bilhete = f"✨ BINGO {min(len(lista_chaves), qtd_alvo)} ({'DENSO' if modo_elite else 'PADRÃO'}) - {estrategia}"
 
     if jogos_selecionados:
-        bilhetes.append({
-            "id": "BINGO_CUSTOM",
-            "nome": nome_bilhete,
-            "jogos": jogos_selecionados
-        })
+        bilhetes.append({"id": "BINGO_CUSTOM", "nome": nome_bilhete, "jogos": jogos_selecionados})
 
     return bilhetes
 
