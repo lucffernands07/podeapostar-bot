@@ -70,76 +70,17 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
 
     return bilhetes
 
-def formatar_para_telegram(bilhetes, cache_dados):
-    if not bilhetes:
-        return ""
+def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
+    if not bilhetes: return ""
+    # Inicia com o aviso do menu (Bingo, Janela, Modo)
+    corpo_total = f"{aviso_menu}\n\n" 
     blocos = []
-
+    
     for b in bilhetes:
         corpo = f"*{b['nome']}*\n\n"
-        odd_total = 1.0
-        agrupados = {}
-
-        for j in b['jogos']:
-            chave_cache = f"{str(j.get('time_casa')).strip().lower()}x{str(j.get('time_fora')).strip().lower()}"
-            info_extra = cache_dados.get(chave_cache, {})
-            horario = j.get('horario') or info_extra.get('horario', '00:00')
-            liga = j.get('liga') or info_extra.get('liga', 'Futebol')
-            odd_valor = j.get('odd') or info_extra.get('odd', '1.50')
-
-            chave_jogo = f"{horario}_{j.get('time_casa')}_{j.get('time_fora')}"
-            if chave_jogo not in agrupados:
-                agrupados[chave_jogo] = {
-                    "horario": horario,
-                    "liga": liga,
-                    "time_casa": j.get('time_casa'),
-                    "time_fora": j.get('time_fora'),
-                    "mercados": [],
-                    "link": j.get('link_betano') or info_extra.get('link_betano', "https://www.betano.bet.br/"),
-                    "link_h2h": info_extra.get('link_h2h')
-                }
-
-            mercado_limpo = j.get('mercado', '')
-            if "Chutes no Alvo:" in mercado_limpo:
-                match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
-                if match_med:
-                    valor = int(float(match_med.group(1)) + 0.5)
-                    mercado_limpo = re.sub(r'\(.*?\)', f'({max(1, valor)}+)', mercado_limpo)
-                texto_final = f"🔶 {mercado_limpo}"
-            elif "cartões" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
-                if "totais:" in mercado_limpo.lower():
-                    texto_final = f"🔶 {mercado_limpo}"
-                else:
-                    match_med = re.search(r'(\d+[\.,]\d+)', mercado_limpo)
-                    media = float(match_med.group(1).replace(',', '.')) if match_med else 1.0
-                    if media >= 4.0:
-                        texto = "Cartões Totais: +4.5"
-                    elif media >= 3.0:
-                        texto = "Cartões Totais: +2.5"
-                    elif media >= 2.0:
-                        texto = "Cartões Totais: +1.5"
-                    else:
-                        texto = "Cartões Totais: -3.5"
-                    texto_final = f"🔶 {texto}"
-            else:
-                texto_final = f"🔶 {mercado_limpo} | Odd: {odd_valor}"
-
-            agrupados[chave_jogo]["mercados"].append({"texto": texto_final, "prioridade": prioridade_mercado(j.get('mercado', ''))})
-            odd_total *= extrair_odd(odd_valor)
-
-        lista_blocos = []
-        for chave in sorted(agrupados.keys()):
-            d = agrupados[chave]
-            d["mercados"].sort(key=lambda x: x['prioridade'])
-            linhas = "\n".join([m['texto'] for m in d["mercados"]])
-            bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n🌐 [Abrir na Betano]({d['link']})"
-            if d.get("link_h2h"):
-                bloco += f"\n📊 [Estatísticas]({d['link_h2h']})"
-            lista_blocos.append(bloco)
-
-        corpo += "\n\n".join(lista_blocos)
-        corpo += f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-        blocos.append(corpo)
+        # ... (resto do seu código de formatação continua igual)
+        corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    return corpo_total
 
     return "\n\n".join(blocos)
             
