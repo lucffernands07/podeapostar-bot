@@ -72,32 +72,25 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
             return odd * pct
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: calcular_peso_equilibrado(x), reverse=True)
 
-    # 3. 🚀 SELEÇÃO DINÂMICA (RESPEITA QTD_ALVO)
+        # 3. 🚀 SELEÇÃO SEM TRAVAS (RESPEITA QTD_ALVO E MODO DENSIDADE)
     if modo_elite:
-        # Modo Denso: Prioriza jogos com mais mercados catalogados, mas mantendo o número (qtd_alvo)
+        # A densidade reordena os mercados para colocar os confrontos com mais 
+        # opções de mercado no topo da lista, aumentando a qualidade do bilhete.
         contagem_confrontos = {}
         for m in jogos_ordenados:
-            chave_jogo = f"{m['time_casa']}x{m['time_fora']}".lower().strip()
-            contagem_confrontos[chave_jogo] = contagem_confrontos.get(chave_jogo, 0) + 1
+            chave = f"{m['time_casa']}x{m['time_fora']}".lower().strip()
+            contagem_confrontos[chave] = contagem_confrontos.get(chave, 0) + 1
         
-        jogos_densos_ordenados = sorted(jogos_ordenados, key=lambda m: contagem_confrontos[f"{m['time_casa']}x{m['time_fora']}".lower().strip()], reverse=True)
-        jogos_selecionados = jogos_densos_ordenados[:qtd_alvo]
+        # Ordena a lista de mercados pela densidade do confronto
+        jogos_ordenados.sort(key=lambda m: contagem_confrontos[f"{m['time_casa']}x{m['time_fora']}".lower().strip()], reverse=True)
+        
+        # CORTE DIRETO: Pega os X primeiros mercados, não importa quantos jogos sejam.
+        jogos_selecionados = jogos_ordenados[:qtd_alvo]
         nome_bilhete = f"✨ BINGO {len(jogos_selecionados)} (DENSO) - {estrategia}"
     else:
+        # Modo tradicional: Apenas pega os X melhores mercados pela estratégia
         jogos_selecionados = jogos_ordenados[:qtd_alvo]
-        nome_bilhete = f"🔥 BINGO DE {len(jogos_selecionados)} JOGOS ({estrategia})"
-
-    # Ordena cronologicamente
-    jogos_selecionados.sort(key=lambda x: x.get('horario', '00:00'))
-
-    if jogos_selecionados:
-        bilhetes.append({
-            "id": "BINGO_CUSTOM", 
-            "nome": nome_bilhete, 
-            "jogos": jogos_selecionados
-        })
-
-    return bilhetes
+        nome_bilhete = f"🔥 BINGO DE {len(jogos_selecionados)} MERCADOS ({estrategia})"
 
 def formatar_para_telegram(bilhetes, cache_dados):
     if not bilhetes: return ""
