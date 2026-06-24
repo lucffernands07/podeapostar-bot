@@ -120,6 +120,3 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
-    
-    return "\n\n".join(blocos)
-            
