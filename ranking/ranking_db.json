@@ -46,7 +46,7 @@
         },
         "+1.5 GOLS (85%)": {
             "green": 98,
-            "red": 43
+            "red": 46
         },
         "+1.5 GOLS (100%)": {
             "green": 10,
@@ -54,7 +54,7 @@
         },
         "+2.5 GOLS (70%)": {
             "green": 38,
-            "red": 26
+            "red": 27
         },
         "+2.5 GOLS (85%)": {
             "green": 31,
@@ -83,9 +83,21 @@
         "-4.5 GOLS (85%)": {
             "green": 20,
             "red": 2
+        },
+        "CARTÕES TOTAIS: -2.5": {
+            "green": 0,
+            "red": 1
+        },
+        "CARTÕES TOTAIS: +2.5": {
+            "green": 1,
+            "red": 0
+        },
+        "CARTÕES TOTAIS: -3.5": {
+            "green": 0,
+            "red": 3
         }
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "22/06/2026 03:18"
+    "ultima_atualizacao": "24/06/2026 03:09"
 }
