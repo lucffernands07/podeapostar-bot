@@ -81,8 +81,11 @@ def processar_comando_direto(tipo_bruto):
         elif "5" in tipo_limpo: config["bingo"] = 5
         elif "7" in tipo_limpo or "PRO" in tipo_limpo: config["bingo"] = 7
         elif "ELITE" in tipo_limpo.upper():
-            config["bingo"] = 3
+            # Apenas ativa o modo, sem alterar o bingo
             config["modo_elite"] = True
+            # Se não foi definido um número antes, mantém o padrão 5
+            if config["bingo"] == 3: config["bingo"] = 5 
+
             
         if "ODDS" in tipo_limpo: config["bilhete"] = "ODDS"
         
