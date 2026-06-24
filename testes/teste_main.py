@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
-from testes.teste_ligaS import TESTE_COMPETICOES
+from testes.teste_ligas import TESTE_COMPETICOES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes 
 import odds, bingo357
 from telegram import menus
