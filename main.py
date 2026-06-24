@@ -50,7 +50,7 @@ def configurar_driver():
     driver.set_page_load_timeout(30) 
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
-                            
+                                        
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
@@ -60,7 +60,7 @@ def main():
     total_mercados = 0 
 
     try:
-        for nome_comp, url in COMPETICOES.items():
+        for nome_comp, url in TESTE_COMPETICOES.items():
             if total_mercados >= 200: 
                 break 
             print(f"\n--- Analisando: {nome_comp} ---")
@@ -84,28 +84,19 @@ def main():
             
             for el in elementos:
                 try:
-                    # 1. Tenta capturar o elemento de tempo de forma isolada e segura
                     try:
                         tempo_el = el.find_element(By.CSS_SELECTOR, ".event__time")
                         tempo_raw = tempo_el.text.strip()
                     except Exception:
-                        # Se o elemento sumiu (jogo ao vivo, encerrado, etc.), passa para o próximo sem estourar o log
                         continue
 
-                    # 2. Verifica se o texto é uma string de status/tempo extra em vez de horário válido
                     if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado"]):
                         continue
 
-                    # 3. Pega a última parte do texto do tempo para converter
                     partes_tempo = tempo_raw.split()
-                    if not partes_tempo:
-                        continue
-                        
+                    if not partes_tempo: continue
                     horario_str = partes_tempo[-1]
-                    
-                    # Garante que temos um formato de hora válido antes de fazer o strptime
-                    if ":" not in horario_str:
-                        continue
+                    if ":" not in horario_str: continue
 
                     h_obj = datetime.strptime(horario_str, "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
@@ -120,10 +111,8 @@ def main():
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
-                        
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         
-                        # EXECUÇÃO SEQUENCIAL DA RASPAGEM 1 E RASPAGEM 2
                         s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
                         
@@ -140,13 +129,6 @@ def main():
                             mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
 
                         # 3. Chance Dupla
-                        if s.get("casa_vitorias_recente", 0) >= 4 or s.get("fora_vitorias_recente", 0) >= 4:
-                            s["chance_dupla_pct"] = "100%"
-                        elif s.get("casa_vitorias_recente", 0) == 3 or s.get("fora_vitorias_recente", 0) == 3:
-                            s["chance_dupla_pct"] = "90%"
-                        else:
-                            s["chance_dupla_pct"] = "80%"
-
                         res_cd = chance_dupla.verificar_chance_dupla(s)
                         for rc in res_cd:
                             tipo_cd = "1X" if "1X" in rc else "X2"
@@ -158,211 +140,62 @@ def main():
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
                         # 5. Processamento Jogadores
-                        try:
-                            if 'joggers' in globals():
-                                res_jogadores = joggers.verificar_destaques_jogadores(
-                                    historico_chutes=s.get("historico_chutes", {}),
-                                    quantidade_jogos=3,
-                                    nome_liga=nome_comp
-                                )
-                            else:
-                                res_jogadores = jogadores.verificar_destaques_jogadores(
-                                    historico_chutes=s.get("historico_chutes", {}),
-                                    quantidade_jogos=3,
-                                    nome_liga=nome_comp
-                                )
-                        except Exception as e_jog:
-                            print(f"  ⚠️ Erro no módulo de jogadores: {e_jog}")
-                            res_jogadores = []
-
+                        res_jogadores = jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), 3, nome_comp)
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
-                       # 6. Mercado de Cartões Coletivos
-                        try:
-                            res_cartoes = cartoes.analisar_dados_cartoes(
-                                historico_mandante_am=s.get("historico_mandante_am", {}), 
-                                historico_mandante_vm=s.get("historico_mandante_vm", {}),
-                                historico_visitante_am=s.get("historico_visitante_am", {}), 
-                                historico_visitante_vm=s.get("historico_visitante_vm", {}),
-                                nome_liga=nome_comp,
-                                quantidade_jogos=3
-                            )
-                        except Exception as e_cart:
-                            print(f"  ⚠️ Erro no módulo de cartões: {e_cart}")
-                            res_cartoes = {"aprovado": False}
-
+                        # 6. Mercado de Cartões
+                        res_cartoes = cartoes.analisar_dados_cartoes(s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}), s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}), nome_comp, 3)
                         if res_cartoes.get("aprovado"):
                             media = res_cartoes.get('media_confronto', 0)
-                            
-                            # 🎴 Tradução da média para mercados tradicionais da Betano
-                            if media >= 4.0:
-                                mercado_formatado = "Cartões Totais: +4.5"
-                            elif media >= 3.0:
-                                mercado_formatado = "Cartões Totais: +2.5"
-                            elif media >= 2.0:
-                                mercado_formatado = "Cartões Totais: +1.5"
-                            elif media >= 1.0:
-                                mercado_formatado = "Cartões Totais: -3.5"
-                            else:
-                                mercado_formatado = "Cartões Totais: -2.5"
-
-                            # Adiciona ao listão com o novo formato visual que você pediu
-                            mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
+                            if media >= 4.0: m_fmt = "Cartões Totais: +4.5"
+                            elif media >= 3.0: m_fmt = "Cartões Totais: +2.5"
+                            elif media >= 2.0: m_fmt = "Cartões Totais: +1.5"
+                            elif media >= 1.0: m_fmt = "Cartões Totais: -3.5"
+                            else: m_fmt = "Cartões Totais: -2.5"
+                            mercados_para_processar.append({"texto": m_fmt, "chave": "CARTOES_CONFRONTO"})
 
                         # --- VALIDAÇÃO DE ODDS E FILTRAGEM ---
                         if mercados_para_processar:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-                            
                             for item in mercados_para_processar:
-                                m_texto = item["texto"]
-                                m_chave = item["chave"]
-                                
-                                if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"]:
-                                    valor_odd_str = "1.50"
-                                else:
-                                    valor_odd_str = v_odds.get(m_chave, "N/A")
-
+                                m_texto, m_chave = item["texto"], item["chave"]
+                                valor_odd_str = "1.50" if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else v_odds.get(m_chave, "N/A")
                                 try:
                                     odd_float = float(valor_odd_str.replace(',', '.'))
-                                    if "M45" in m_chave and odd_float >= 4.0:
-                                        continue 
-
-                                    # 🚀 NOVA TRAVA DE SEGURANÇA PARA MERCADOS ZERADOS
-                                    if m_chave == "CARTOES_CONFRONTO" and "0.0" in m_texto:
-                                        continue
-                                    if m_chave == "CHUTES_ALVO" and "0.0" in m_texto:
-                                        continue
-
                                     if odd_float >= 1.25:
                                         lista_para_filtros.append({
                                             "horario": h_br, "time_casa": t1, "time_fora": t2,
                                             "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else "Análise", "liga": nome_comp,
                                             "link_betano": s.get("link_betano")
                                         })
-                                        
                                         jogos_para_pendentes.append({
-                                            "time_casa": t1,
-                                            "time_fora": t2,
-                                            "mercado": m_texto,
+                                            "time_casa": t1, "time_fora": t2, "mercado": m_texto,
                                             "mercado_ranking": m_texto.upper(),
                                             "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
                                         })
-                                                
                                         total_mercados += 1
-                                except ValueError:
-                                    continue
+                                except ValueError: continue
                 except Exception as e:
                     print(f"⚠️ Erro ao processar partida: {e}")
                     continue
 
-        # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
-            # 1. ENVIO DO LISTÃO PARA VOCÊ
-            meu_chat_id = os.getenv('CHAT_ID')
-            if meu_chat_id:
-                cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
-                corpo = ""
-                for j in lista_para_filtros:
-                    bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
-                    
-                    if len(cabecalho + corpo + bloco) > 4000:
-                        enviar_telegram(cabecalho + corpo, meu_chat_id)
-                        cabecalho = "🎫 *LISTA (Continuação)*\n\n"
-                        corpo = bloco
-                    else:
-                        corpo += bloco
-                
-                enviar_telegram(cabecalho + corpo, meu_chat_id)
-                print("📨 Listão enviado.")
-    
-            # Preparação comum de dados
             cache_dados = {}
             for j in lista_para_filtros:
-                chave = f"{j['time_casa']}x{j['time_fora']}"
-                cache_dados[chave] = {
-                    "link": j.get("link_betano"),
-                    "liga": j.get("liga"),
-                    "horario": j.get("horario"),
-                    "odd": j.get("odd")
-                }
-    
-            # 2. ENVIO AUTOMÁTICO DO BINGO ELITE (Main.py)
+                chave = f"{str(j.get('time_casa')).strip().lower()}x{str(j.get('time_fora')).strip().lower()}"
+                cache_dados[chave] = {"link_betano": j.get("link_betano"), "liga": j.get("liga"), "horario": j.get("horario"), "odd": j.get("odd")}
+            for j in jogos_para_pendentes:
+                chave = f"{str(j.get('time_casa')).strip().lower()}x{str(j.get('time_fora')).strip().lower()}"
+                if chave in cache_dados: cache_dados[chave]["link_h2h"] = j.get("link_h2h")
+
             canal_id = os.getenv('CHANNEL_ID')
-            bilhete_elite = bingo357.montar_bilhete_elite_main(lista_para_filtros)
-            
-            # AQUI: Verifique se bilhete_elite não é None e se a lista não está vazia
-            if bilhete_elite and isinstance(bilhete_elite, list) and canal_id:
-                texto_elite = bingo357.formatar_para_telegram(bilhete_elite, cache_dados)
-                if texto_elite:
-                    enviar_telegram("💰 *SUGESTÃO DE INVESTIMENTO - ELITE*\n\n" + texto_elite, canal_id)
-                    print("📢 Bingo Elite enviado automaticamente.")
-    
-            # 3. ENVIO DO MENU INTERATIVO (Para os botões do canal)
-            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
-            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
-    
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros, qtd_alvo=5, estrategia="ACERTOS", modo_elite=True)
+            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados, aviso_menu="💰 *MENU DE BINGOS (TESTE)*")
             if texto_bingos_final and canal_id:
-                try:
-                    msg_bingo_formatada = "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final
-                    menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
-                    print("📢 Menu interativo enviado para o Canal.")
-                except Exception as e:
-                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
-            # ----------------------------------
-
-            os.makedirs("ranking", exist_ok=True)
-            caminho_p = "ranking/pendentes.json"
-            data_hoje = hoje_ref.strftime("%Y-%m-%d")
-            
-            pode_gravar = True 
-
-            if os.path.exists(caminho_p):
-                try:
-                    with open(caminho_p, 'r', encoding='utf-8') as f:
-                        conteudo = f.read().strip()
-                        if conteudo:
-                            dados_existentes = json.loads(conteudo)
-                            if dados_existentes.get("data_geracao") == data_hoje:
-                                if len(dados_existentes.get("jogos", [])) > 0:
-                                    pode_gravar = False
-                except (json.JSONDecodeError, Exception) as e:
-                    print(f"⚠️ Arquivo de ranking corrompido ou ilegível, resetando: {e}")
-                    pode_gravar = True
-
-            if pode_gravar and jogos_para_pendentes: 
-                dados_final = {
-                    "data_geracao": data_hoje,
-                    "jogos": jogos_para_pendentes 
-                }
-                with open(caminho_p, "w", encoding="utf-8") as f:
-                    json.dump(dados_final, f, indent=4, ensure_ascii=False)
-                print(f"✅ Ranking: Primeira execução do dia salva ({len(jogos_para_pendentes)} jogos).")
-            elif not pode_gravar:
-                print(f"🚫 BLOQUEIO: O Ranking de hoje ({data_hoje}) já foi consolidado na 1ª execução.")
-
-            os.makedirs("telegram", exist_ok=True)
-            caminho_banco = f"telegram/jogos_{data_hoje}.json"
-
-            dados_para_o_bot = []
-            for j in lista_para_filtros:
-                dados_para_o_bot.append({
-                    "horario": j.get("horario"),
-                    "liga": j.get("liga"),
-                    "time_casa": j.get("time_casa"),
-                    "time_fora": j.get("time_fora"),
-                    "mercado": j.get("mercado"),
-                    "odd": j.get("odd"),
-                    "link_betano": j.get("link_betano") 
-                })
-
-            with open(caminho_banco, "w", encoding="utf-8") as f:
-                json.dump(dados_para_o_bot, f, indent=4, ensure_ascii=False)
-
-            print(f"📂 Banco de dados do dia salvo para o Bot: {caminho_banco}")
-            print("✅ Processamento concluído com sucesso.")
+                menus.enviar_menu_bingo(canal_id, "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final)
 
     except Exception as e:
         print(f"❌ Erro Crítico no Main: {e}")
