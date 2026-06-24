@@ -3,8 +3,9 @@ name: Teste main bot de aposta
 on:
   push:
     paths:
-      - 'testes/teste_main.py'   # Dispara se você alterar qualquer arquivo na pasta testes
-  workflow_dispatch:  # Permite rodar manualmente no botão do GitHub
+      - 'testes/teste_main.py'
+      - 'testes/**'
+  workflow_dispatch:
 
 jobs:
   run-test-bot:
@@ -14,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout do repositorio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -25,12 +26,12 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: 1. Executar bot de Teste (Regra Nova Dupla Chance)
+      - name: 1. Executar bot de Teste
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-          # Note que não passei o CHANNEL_ID aqui para garantir que o teste nunca poste no canal
         run: |
-          # Adiciona a raiz do projeto ao PYTHONPATH para que o teste_main encontre os módulos originais
-          export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+          # Adiciona o diretório raiz ao PYTHONPATH para que os imports funcionem
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
           python testes/teste_main.py
+          
