@@ -13,12 +13,13 @@ from telegram import menus
 def processar_comando_direto(tipo_bruto):
     """
     Lê a string unificada e separa os filtros para montar o bilhete.
-    Ajustada para o novo padrão: Bingo 3 e 5 agora possuem modo Elite (denso) integrado.
+    Ajustada para garantir que o callback do botão sobrescreva qualquer padrão.
     """
-    config = {"bingo": 5, "horario": "DIA", "bilhete": "ACERTOS", "aviso": "", "modo_elite": False}
+    # Inicializa com valores base
+    config = {"bingo": 3, "horario": "DIA", "bilhete": "ACERTOS", "aviso": "", "modo_elite": False}
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
-    # Processamento para strings compostas (Worker)
+    # 1. Processamento para strings compostas (Worker)
     if "BINGO:" in tipo_limpo and "HORA:" in tipo_limpo:
         try:
             partes = tipo_limpo.split("|")
@@ -46,16 +47,20 @@ def processar_comando_direto(tipo_bruto):
         except Exception as e:
             print(f"⚠️ Erro ao processar string composta ({e}), usando fallbacks...")
 
-    # Processamento para Callbacks dos Botões
+    # 2. Processamento para Callbacks dos Botões
     if "cb_bingo_" in tipo_limpo:
-        # Detecta se é o novo padrão ELITE (ex: cb_bingo_3_ELITE)
+        partes = tipo_limpo.split("_")
+        # Identifica se é modo ELITE (formato esperado: cb_bingo_X_ELITE ou cb_bingo_X)
         if "ELITE" in tipo_limpo.upper():
             config["modo_elite"] = True
-            partes = tipo_limpo.split("_")
-            config["bingo"] = int(partes[2]) # Pega o número 3 ou 5
+            # Tenta pegar o número independente da posição, procurando por dígito
+            for p in partes:
+                if p.isdigit():
+                    config["bingo"] = int(p)
             config["aviso"] = f"🎲 Você escolheu: *Bingo {config['bingo']} (Denso/Elite)*"
         else:
-            config["bingo"] = int(tipo_limpo.split("_")[-1])
+            # Pega o último elemento (o número do bingo)
+            config["bingo"] = int(partes[-1])
             config["aviso"] = f"🎲 Você escolheu: *Bingo {config['bingo']}*"
 
     elif "cb_hora_" in tipo_limpo:
@@ -70,9 +75,10 @@ def processar_comando_direto(tipo_bruto):
         elif config["bilhete"] == "AMBAS": txt_m = "Equilibrado"
         config["aviso"] = f"📊 Você escolheu a estratégia: *{txt_m}*"
     
+    # 3. Fallback (Caso não seja callback nem worker)
     else:
-        # Fallback para comandos legados
         if "3" in tipo_limpo: config["bingo"] = 3
+        elif "5" in tipo_limpo: config["bingo"] = 5
         elif "7" in tipo_limpo or "PRO" in tipo_limpo: config["bingo"] = 7
         elif "ELITE" in tipo_limpo.upper():
             config["bingo"] = 3
