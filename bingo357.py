@@ -14,17 +14,11 @@ def extrair_porcentagem(texto_mercado):
 
 def extrair_odd(odd_str):
     try:
-        if not odd_str or odd_str == "N/A" or odd_str == "": 
-            return 1.50  # 🚀 INJETADO: Proteção base se a odd estiver vazia ou nula
-        
-        # 🚀 SEGURO: Se for a string de análise ou se for Chutes/Cartões sem odd estruturada, assume 1.50
-        if isinstance(odd_str, str) and ("Análise" in odd_str or "chutes" in odd_str.lower() or "cartã" in odd_str.lower() or "cartao" in odd_str.lower()): 
-            return 1.50
-            
+        if not odd_str or odd_str == "N/A" or odd_str == "": return 1.50
+        if isinstance(odd_str, str) and ("Análise" in odd_str or "chutes" in odd_str.lower() or "cartã" in odd_str.lower() or "cartao" in odd_str.lower()): return 1.50
         if isinstance(odd_str, (int, float)): return float(odd_str)
         return float(odd_str.replace(',', '.'))
-    except: 
-        return 1.50
+    except: return 1.50
 
 def prioridade_mercado(mercado_texto):
     m = str(mercado_texto).lower()
@@ -36,60 +30,16 @@ def prioridade_mercado(mercado_texto):
     if "chutes" in m or "média" in m or "cartões" in m or "cartao" in m: return 6
     return 7
 
-def carregar_ranking_pro():
-    """Lê o ranking pré-montado pelo ranking.py"""
-    if os.path.exists(PATH_RANKING_DIARIO):
-        try:
-            with open(PATH_RANKING_DIARIO, 'r', encoding='utf-8') as f:
-                conteudo = json.load(f)
-                if isinstance(conteudo, dict):
-                    return conteudo.get("mercados", [])
-                return conteudo 
-        except: return []
-    return []
-
-def montar_bilhete_elite_main(lista_jogos):
-    if not lista_jogos: return None
-
-    # Agrupa por confronto
-    confrontos = {}
-    for j in lista_jogos:
-        chave = f"{j['time_casa']}x{j['time_fora']}"
-        if chave not in confrontos: confrontos[chave] = []
-        confrontos[chave].append(j)
-
-    # Ordena pelos confrontos que possuem mais mercados (densidade)
-    # E pega apenas os 3 primeiros confrontos mais densos
-    confrontos_densos = sorted(confrontos.items(), key=lambda x: len(x[1]), reverse=True)
-    top_3_confrontos = confrontos_densos[:3]
-    
-    # Monta a lista plana de mercados para o formatador
-    jogos_selecionados = []
-    for chave, mercados in top_3_confrontos:
-        jogos_selecionados.extend(mercados)
-    
-    # Verifica quantos jogos realmente temos (para o título)
-    qtd_jogos = len(top_3_confrontos)
-    
-    return [{
-        "id": "ELITE_DENSO",
-        "nome": f"🔥 BINGO DENSO (TOP {qtd_jogos} JOGOS)",
-        "jogos": jogos_selecionados,
-        "aviso_escassez": ""
-    }]
-
 def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS", modo_elite=False):
     """
-    Ordena e monta UM ÚNICO bilhete respeitando a estratégia escolhida,
-    garantindo que se houver menos jogos que qtd_alvo, ele pegue todos os disponíveis.
+    Ordena e monta UM ÚNICO bilhete respeitando a estratégia e a quantidade pedida no menu.
     """
     bilhetes = []
     lista_jogos = dados_entrada
-    aviso_escassez = ""
     
     if not lista_jogos: return bilhetes
 
-    # 1. Filtro de duplicidade (Mantido igual)
+    # 1. Filtro de duplicidade
     jogos_agrupados = {}
     for jogo in lista_jogos:
         chave = f"{jogo['time_casa']}x{jogo['time_fora']}".lower().strip()
@@ -99,79 +49,52 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
     lista_filtrada = []
     for chave, mercados in jogos_agrupados.items():
         tem_dupla = any(re.search(r'\b(1x|x2|2x)\b', m['mercado'].lower()) for m in mercados)
-        if tem_dupla:
-            for m in mercados:
-                if "vitória" not in m['mercado'].lower() and "vitoria" not in m['mercado'].lower():
-                    if "falta" not in m['mercado'].lower():
-                        if "chutes" in m['mercado'].lower() or "cartã" in m['mercado'].lower() or "cartao" in m['mercado'].lower():
-                            if not m.get('odd') or m['odd'] == "N/A" or m['odd'] == "1.0": m['odd'] = "1.50"
-                        lista_filtrada.append(m)
-        else:
-            for m in mercados:
-                if "falta" not in m['mercado'].lower():
-                    if "chutes" in m['mercado'].lower() or "cartã" in m['mercado'].lower() or "cartao" in m['mercado'].lower():
-                        if not m.get('odd') or m['odd'] == "N/A" or m['odd'] == "1.0": m['odd'] = "1.50"
-                    lista_filtrada.append(m)
+        for m in mercados:
+            if "falta" in m['mercado'].lower(): continue
+            if "chutes" in m['mercado'].lower() or "cartã" in m['mercado'].lower() or "cartao" in m['mercado'].lower():
+                if not m.get('odd') or str(m['odd']) in ["N/A", "1.0"]: m['odd'] = "1.50"
+            lista_filtrada.append(m)
             
-    # 2. 📊 Aplicação das Estratégias de Ordenação (Mantido igual)
+    # 2. 📊 Ordenação
     if estrategia == "ODDS":
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: extrair_odd(x.get('odd', '1.50')), reverse=True)
     elif estrategia == "ACERTOS":
         def pegar_assertividade(x):
             mercado_txt = x.get('mercado', '')
             if "%" in mercado_txt: return extrair_porcentagem(mercado_txt)
-            if "5/5j" in mercado_txt: return 100
-            if "4/5j" in mercado_txt: return 80
-            if "3/5j" in mercado_txt: return 60
-            if "3/3j" in mercado_txt: return 100
-            if "2/3j" in mercado_txt: return 66
-            if "confronto cartões" in mercado_txt.lower() or "cartões totais" in mercado_txt.lower() or "chutes" in mercado_txt.lower(): return 100
+            if "5/5j" in mercado_txt or "confronto cartões" in mercado_txt.lower() or "cartões totais" in mercado_txt.lower() or "chutes" in mercado_txt.lower(): return 100
             return 50
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: pegar_assertividade(x), reverse=True)
     else:
         def calcular_peso_equilibrado(x):
             odd = extrair_odd(x.get('odd', '1.50'))
-            mercado_txt = x.get('mercado', '')
-            pct = extrair_porcentagem(mercado_txt) / 100.0 if "%" in mercado_txt else (1.0 if ("3/3j" in mercado_txt or "5/5j" in mercado_txt or "confronto cartões" in mercado_txt.lower() or "cartões totais" in mercado_txt.lower() or "chutes" in mercado_txt.lower()) else 0.66)
+            pct = extrair_porcentagem(x.get('mercado', '')) / 100.0 if "%" in x.get('mercado', '') else 0.7
             return odd * pct
         jogos_ordenados = sorted(lista_filtrada, key=lambda x: calcular_peso_equilibrado(x), reverse=True)
 
-    # 3. 🚀 CORTE AJUSTADO (ACEITA DE 1 A QTD_ALVO)
+    # 3. 🚀 SELEÇÃO DINÂMICA (RESPEITA QTD_ALVO)
     if modo_elite:
+        # Modo Denso: Prioriza jogos com mais mercados catalogados, mas mantendo o número (qtd_alvo)
         contagem_confrontos = {}
         for m in jogos_ordenados:
             chave_jogo = f"{m['time_casa']}x{m['time_fora']}".lower().strip()
             contagem_confrontos[chave_jogo] = contagem_confrontos.get(chave_jogo, 0) + 1
         
-        jogos_mais_densos = sorted(contagem_confrontos.keys(), key=lambda k: contagem_confrontos[k], reverse=True)
-        
-        # Ajuste: Seleciona o MÍNIMO entre o que foi pedido (qtd_alvo) e o que existe
-        top_jogos = jogos_mais_densos[:min(len(jogos_mais_densos), qtd_alvo)]
-        
-        jogos_selecionados = [
-            m for m in jogos_ordenados 
-            if f"{m['time_casa']}x{m['time_fora']}".lower().strip() in top_jogos
-        ]
-        
-        qtd_confrontos_real = len(top_jogos)
-        nome_bilhete = f"✨ BINGO {qtd_confrontos_real} (DENSO) - {qtd_confrontos_real} JOGOS ({estrategia})"
+        jogos_densos_ordenados = sorted(jogos_ordenados, key=lambda m: contagem_confrontos[f"{m['time_casa']}x{m['time_fora']}".lower().strip()], reverse=True)
+        jogos_selecionados = jogos_densos_ordenados[:qtd_alvo]
+        nome_bilhete = f"✨ BINGO {len(jogos_selecionados)} (DENSO) - {estrategia}"
     else:
-        # Ajuste: Fatiamento dinâmico também no modo tradicional
-        jogos_selecionados = jogos_ordenados[:min(len(jogos_ordenados), qtd_alvo)]
-        qtd_real = len(jogos_selecionados)
-        traducao_modo = "MAIORES ODDS" if estrategia == "ODDS" else "MAIS ACERTOS" if estrategia == "ACERTOS" else "EQUILIBRADO"
-        nome_bilhete = f"🔥 BINGO DE {qtd_real} MERCADOS ({traducao_modo})"
+        jogos_selecionados = jogos_ordenados[:qtd_alvo]
+        nome_bilhete = f"🔥 BINGO DE {len(jogos_selecionados)} JOGOS ({estrategia})"
 
     # Ordena cronologicamente
     jogos_selecionados.sort(key=lambda x: x.get('horario', '00:00'))
 
-    # 4. Retorna o Bilhete
     if jogos_selecionados:
         bilhetes.append({
             "id": "BINGO_CUSTOM", 
             "nome": nome_bilhete, 
-            "jogos": jogos_selecionados,
-            "aviso_escassez": aviso_escassez
+            "jogos": jogos_selecionados
         })
 
     return bilhetes
@@ -188,100 +111,54 @@ def formatar_para_telegram(bilhetes, cache_dados):
         for j in b['jogos']:
             chave_cache = f"{str(j.get('time_casa')).strip().lower()}x{str(j.get('time_fora')).strip().lower()}"
             info_extra = cache_dados.get(chave_cache, {})
-            
             horario = j.get('horario') or info_extra.get('horario', '00:00')
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
             odd_valor = j.get('odd') or info_extra.get('odd', '1.50')
             
-            link_final = j.get('link_betano') or info_extra.get('link_betano') or "https://www.betano.bet.br/"
-            link_h2h = info_extra.get('link_h2h', None)
-
             chave_jogo = f"{horario}_{j.get('time_casa')}_{j.get('time_fora')}"
             if chave_jogo not in agrupados:
                 agrupados[chave_jogo] = {
                     "horario": horario, "liga": liga,
-                    "time_casa": j.get('time_casa', 'Casa'),
-                    "time_fora": j.get('time_fora', 'Fora'),
-                    "mercados": [], "link": link_final,
-                    "link_h2h": link_h2h  
+                    "time_casa": j.get('time_casa'), "time_fora": j.get('time_fora'),
+                    "mercados": [], "link": j.get('link_betano') or info_extra.get('link_betano', "https://www.betano.bet.br/"),
+                    "link_h2h": info_extra.get('link_h2h')
                 }
             
             mercado_limpo = j.get('mercado', '')
-            
-            # 🚀 REGRA EXTRAÇÃO / ARREDONDAMENTO APENAS PARA CHUTES NO ALVO
             if "Chutes no Alvo:" in mercado_limpo:
                 match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
                 if match_med:
-                    media_num = float(match_med.group(1))
-                    valor_arredondado = int(media_num + 0.5)
-                    if valor_arredondado < 1: valor_arredondado = 1
-                    mercado_limpo = re.sub(r'\(.*?\)', f'({valor_arredondado}+)', mercado_limpo)
-                
-                texto_final_linha = f"🔶 {mercado_limpo}"
-                
-            # 🚀 REFORMULADO: NOVA REGRA DE PROCESSAMENTO DE CARTÕES GERAIS E COLETIVOS
+                    valor = int(float(match_med.group(1)) + 0.5)
+                    mercado_limpo = re.sub(r'\(.*?\)', f'({max(1, valor)}+)', mercado_limpo)
+                texto_final = f"🔶 {mercado_limpo}"
             elif "cartões" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
-                # Se o mercado já vier formatado do main como "Cartões Totais: +X.5", mantém intacto
-                if "totais:" in mercado_limpo.lower():
-                    texto_final_linha = f"🔶 {mercado_limpo}"
+                if "totais:" in mercado_limpo.lower(): texto_final = f"🔶 {mercado_limpo}"
                 else:
-                    # Captura qualquer padrão numérico de média (ex: "Média Confronto Cartões: 3.33")
-                    match_med = re.search(r'(?:cartões|Cartões|cartao|Cartao):\s*([\d.]+)', mercado_limpo)
-                    if match_med:
-                        media_num = float(match_med.group(1))
-                        
-                        # Aplicação exata da tabela de escalonamento solicitada
-                        if media_num >= 4.0:
-                            mercado_limpo = "Cartões Totais: +4.5"
-                        elif media_num >= 3.0:
-                            mercado_limpo = "Cartões Totais: +2.5"
-                        elif media_num >= 2.0:
-                            mercado_limpo = "Cartões Totais: +1.5"
-                        elif media_num >= 1.0:
-                            mercado_limpo = "Cartões Totais: -3.5"
-                        else:
-                            mercado_limpo = "Cartões Totais: -2.5"
-                    else:
-                        # Fallback de segurança se não achar números flutuantes
-                        mercado_limpo = "Cartões Totais: +1.5"
-                        
-                    texto_final_linha = f"🔶 {mercado_limpo}"
+                    match_med = re.search(r'(\d+[\.,]\d+)', mercado_limpo)
+                    media = float(match_med.group(1).replace(',','.')) if match_med else 1.0
+                    if media >= 4.0: texto = "Cartões Totais: +4.5"
+                    elif media >= 3.0: texto = "Cartões Totais: +2.5"
+                    elif media >= 2.0: texto = "Cartões Totais: +1.5"
+                    else: texto = "Cartões Totais: -3.5"
+                    texto_final = f"🔶 {texto}"
             else:
-                texto_final_linha = f"🔶 {mercado_limpo} | Odd: {odd_valor}"
+                texto_final = f"🔶 {mercado_limpo} | Odd: {odd_valor}"
 
-            agrupados[chave_jogo]["mercados"].append({
-                "texto": texto_final_linha,
-                "prioridade": prioridade_mercado(j.get('mercado', ''))
-            })
+            agrupados[chave_jogo]["mercados"].append({"texto": texto_final, "prioridade": prioridade_mercado(j.get('mercado', ''))})
             odd_total *= extrair_odd(odd_valor)
 
-        lista_blocos_jogos = []
+        lista_blocos = []
         for chave in sorted(agrupados.keys()):
-            dados = agrupados[chave]
-            dados["mercados"].sort(key=lambda x: x['prioridade'])
-            linhas_mercados = "\n".join([m['texto'] for m in dados["mercados"]])
-            
-            link_betano_limpo = dados['link'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
-            
-            bloco_jogo = (
-                f"⏱️ {dados['horario']} | {dados['liga']}\n"
-                f"🏟️ {dados['time_casa']} x {dados['time_fora']}\n"
-                f"{linhas_mercados}\n"
-                f"🌐 [Abrir na Betano]({link_betano_limpo})"
-            )
-            
-            if dados.get("link_h2h"):
-                link_h2h_limpo = dados['link_h2h'].replace(" ", "%20").replace("(", "%28").replace(")", "%29").strip()
-                bloco_jogo += f"\n📊 [Estatísticas]({link_h2h_limpo})"
+            d = agrupados[chave]
+            d["mercados"].sort(key=lambda x: x['prioridade'])
+            linhas = "\n".join([m['texto'] for m in d["mercados"]])
+            bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n🌐 [Abrir na Betano]({d['link']})"
+            if d.get("link_h2h"): bloco += f"\n📊 [Estatísticas]({d['link_h2h']})"
+            lista_blocos.append(bloco)
 
-            lista_blocos_jogos.append(bloco_jogo)
-
-        corpo += "\n\n".join(lista_blocos_jogos)
+        corpo += "\n\n".join(lista_blocos)
         corpo += f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-        
-        if b.get("aviso_escassez"):
-            corpo += b["aviso_escassez"]
-            
         blocos.append(corpo)
     
     return "\n\n".join(blocos)
+                                    
