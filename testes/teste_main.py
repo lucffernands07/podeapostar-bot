@@ -159,7 +159,7 @@ def main():
                         
                         if res_cartoes.get("aprovado"):
                             media = res_cartoes.get('media_confronto', 0)
-                            if media >= 4.0: m_fmt = "Cartões Totais: +4.5"
+                            if media >= 4.0: m_fmt = "Cartões Totais: +3.5"
                             elif media >= 3.0: m_fmt = "Cartões Totais: +2.5"
                             elif media >= 2.0: m_fmt = "Cartões Totais: +1.5"
                             elif media >= 1.0: m_fmt = "Cartões Totais: -3.5"
