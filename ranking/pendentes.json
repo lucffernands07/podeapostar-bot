@@ -1,96 +1,138 @@
 {
-    "data_geracao": "2026-06-24",
+    "data_geracao": "2026-06-25",
     "jogos": [
         {
-            "time_casa": "Bósnia e Herzegovina",
-            "time_fora": "Catar",
-            "mercado": "Cartões Totais: +4.5",
-            "mercado_ranking": "CARTÕES TOTAIS: +4.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jRyHEZGP/#/resumo-de-jogo"
+            "time_casa": "Cuiabá",
+            "time_fora": "Londrina",
+            "mercado": "Chutes no Alvo: Rodrigo Rodrigues (Frequência: 1/3j | Méd: 1.3)",
+            "mercado_ranking": "CHUTES NO ALVO: RODRIGO RODRIGUES (FREQUÊNCIA: 1/3J | MÉD: 1.3)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/U73jvhUj/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Suíça",
-            "time_fora": "Canadá",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/2wQjwkpp/#/resumo-de-jogo"
+            "time_casa": "Cuiabá",
+            "time_fora": "Londrina",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/U73jvhUj/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Suíça",
-            "time_fora": "Canadá",
-            "mercado": "Chutes no Alvo: Ndoye D. (Frequência: 3/3j | Méd: 2.3)",
-            "mercado_ranking": "CHUTES NO ALVO: NDOYE D. (FREQUÊNCIA: 3/3J | MÉD: 2.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/2wQjwkpp/#/resumo-de-jogo"
+            "time_casa": "Curaçao",
+            "time_fora": "Costa do Marfim",
+            "mercado": "Chutes no Alvo: Comenencia L. (Frequência: 2/3j | Méd: 0.7)",
+            "mercado_ranking": "CHUTES NO ALVO: COMENENCIA L. (FREQUÊNCIA: 2/3J | MÉD: 0.7)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/d2S1vysC/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Suíça",
-            "time_fora": "Canadá",
-            "mercado": "Cartões Totais: +2.5",
-            "mercado_ranking": "CARTÕES TOTAIS: +2.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/2wQjwkpp/#/resumo-de-jogo"
+            "time_casa": "Curaçao",
+            "time_fora": "Costa do Marfim",
+            "mercado": "Chutes no Alvo: Enner Valencia (Frequência: 1/3j | Méd: 1.7)",
+            "mercado_ranking": "CHUTES NO ALVO: ENNER VALENCIA (FREQUÊNCIA: 1/3J | MÉD: 1.7)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/d2S1vysC/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Escócia",
-            "time_fora": "Brasil",
-            "mercado": "Chutes no Alvo: Adams C. (Frequência: 2/3j | Méd: 1.3)",
-            "mercado_ranking": "CHUTES NO ALVO: ADAMS C. (FREQUÊNCIA: 2/3J | MÉD: 1.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/EgVZxtj1/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Escócia",
-            "time_fora": "Brasil",
-            "mercado": "Cartões Totais: +2.5",
-            "mercado_ranking": "CARTÕES TOTAIS: +2.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/EgVZxtj1/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Marrocos",
-            "time_fora": "Haiti",
-            "mercado": "-4.5 Gols (85%)",
-            "mercado_ranking": "-4.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/n7TsyKKD/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Marrocos",
-            "time_fora": "Haiti",
-            "mercado": "Chutes no Alvo: Saibari I. (Frequência: 3/3j | Méd: 1.0)",
-            "mercado_ranking": "CHUTES NO ALVO: SAIBARI I. (FREQUÊNCIA: 3/3J | MÉD: 1.0)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/n7TsyKKD/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Marrocos",
-            "time_fora": "Haiti",
+            "time_casa": "Curaçao",
+            "time_fora": "Costa do Marfim",
             "mercado": "Cartões Totais: +1.5",
             "mercado_ranking": "CARTÕES TOTAIS: +1.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/n7TsyKKD/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/d2S1vysC/#/resumo-de-jogo"
         },
         {
-            "time_casa": "África do Sul",
-            "time_fora": "Coreia do Sul",
-            "mercado": "Cartões Totais: +4.5",
-            "mercado_ranking": "CARTÕES TOTAIS: +4.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/4rr4ngNc/#/resumo-de-jogo"
+            "time_casa": "Equador",
+            "time_fora": "Alemanha",
+            "mercado": "Chutes no Alvo: Gonzalo Plata (Frequência: 2/3j | Méd: 1.3)",
+            "mercado_ranking": "CHUTES NO ALVO: GONZALO PLATA (FREQUÊNCIA: 2/3J | MÉD: 1.3)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zmvgtcCa/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Republica Tcheca",
-            "time_fora": "México",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/GCoIA5bf/#/resumo-de-jogo"
+            "time_casa": "Equador",
+            "time_fora": "Alemanha",
+            "mercado": "Chutes no Alvo: Angulo N. (Frequência: 2/3j | Méd: 0.7)",
+            "mercado_ranking": "CHUTES NO ALVO: ANGULO N. (FREQUÊNCIA: 2/3J | MÉD: 0.7)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zmvgtcCa/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Republica Tcheca",
-            "time_fora": "México",
-            "mercado": "Chutes no Alvo: Sadilek M. (Frequência: 2/3j | Méd: 1.0)",
-            "mercado_ranking": "CHUTES NO ALVO: SADILEK M. (FREQUÊNCIA: 2/3J | MÉD: 1.0)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/GCoIA5bf/#/resumo-de-jogo"
+            "time_casa": "Equador",
+            "time_fora": "Alemanha",
+            "mercado": "Cartões Totais: +1.5",
+            "mercado_ranking": "CARTÕES TOTAIS: +1.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zmvgtcCa/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Republica Tcheca",
-            "time_fora": "México",
+            "time_casa": "Japão",
+            "time_fora": "Suécia",
+            "mercado": "Chutes no Alvo: Kamada D. (Frequência: 2/3j | Méd: 0.7)",
+            "mercado_ranking": "CHUTES NO ALVO: KAMADA D. (FREQUÊNCIA: 2/3J | MÉD: 0.7)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Sl2xgtXi/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Japão",
+            "time_fora": "Suécia",
+            "mercado": "Chutes no Alvo: Nakamura K. (Frequência: 2/3j | Méd: 0.7)",
+            "mercado_ranking": "CHUTES NO ALVO: NAKAMURA K. (FREQUÊNCIA: 2/3J | MÉD: 0.7)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Sl2xgtXi/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Japão",
+            "time_fora": "Suécia",
             "mercado": "Cartões Totais: -3.5",
             "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/GCoIA5bf/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/Sl2xgtXi/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Tunísia",
+            "time_fora": "Países Baixos",
+            "mercado": "-4.5 Gols (70%)",
+            "mercado_ranking": "-4.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0lERfdRh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Tunísia",
+            "time_fora": "Países Baixos",
+            "mercado": "Chutes no Alvo: Ueda A. (Frequência: 1/3j | Méd: 1.0)",
+            "mercado_ranking": "CHUTES NO ALVO: UEDA A. (FREQUÊNCIA: 1/3J | MÉD: 1.0)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0lERfdRh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Tunísia",
+            "time_fora": "Países Baixos",
+            "mercado": "Cartões Totais: +1.5",
+            "mercado_ranking": "CARTÕES TOTAIS: +1.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0lERfdRh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Paraguai",
+            "time_fora": "Austrália",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lGmJTJSg/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Paraguai",
+            "time_fora": "Austrália",
+            "mercado": "Cartões Totais: +3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: +3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lGmJTJSg/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Turquia",
+            "time_fora": "EUA",
+            "mercado": "Chutes no Alvo: Guler A. (Frequência: 2/3j | Méd: 1.3)",
+            "mercado_ranking": "CHUTES NO ALVO: GULER A. (FREQUÊNCIA: 2/3J | MÉD: 1.3)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SCvmMa2U/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Turquia",
+            "time_fora": "EUA",
+            "mercado": "Chutes no Alvo: Bardakci A. (Frequência: 2/3j | Méd: 0.7)",
+            "mercado_ranking": "CHUTES NO ALVO: BARDAKCI A. (FREQUÊNCIA: 2/3J | MÉD: 0.7)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SCvmMa2U/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Turquia",
+            "time_fora": "EUA",
+            "mercado": "Cartões Totais: +1.5",
+            "mercado_ranking": "CARTÕES TOTAIS: +1.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SCvmMa2U/#/resumo-de-jogo"
         }
     ]
 }
