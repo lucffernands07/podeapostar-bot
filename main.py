@@ -190,31 +190,50 @@ def main():
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
-            # Envios Telegram...
+            # 1. ENVIO DO LISTÃO PARA VOCÊ
             meu_chat_id = os.getenv('CHAT_ID')
             if meu_chat_id:
                 cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
                 corpo = ""
                 for j in lista_para_filtros:
                     bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
+                    
                     if len(cabecalho + corpo + bloco) > 4000:
                         enviar_telegram(cabecalho + corpo, meu_chat_id)
-                        cabecalho = "🎫 *LISTA (Continuação)*\n\n"; corpo = bloco
-                    else: corpo += bloco
+                        cabecalho = "🎫 *LISTA (Continuação)*\n\n"
+                        corpo = bloco
+                    else:
+                        corpo += bloco
+                
                 enviar_telegram(cabecalho + corpo, meu_chat_id)
+                print("📨 Listão enviado.")
     
-            cache_dados = {f"{j['time_casa']}x{j['time_fora']}": {"link": j.get("link_betano"), "liga": j.get("liga"), "horario": j.get("horario"), "odd": j.get("odd")} for j in lista_para_filtros}
+            # Preparação comum de dados
+            cache_dados = {}
+            for j in lista_para_filtros:
+                chave = f"{j['time_casa']}x{j['time_fora']}"
+                cache_dados[chave] = {
+                    "link": j.get("link_betano"),
+                    "liga": j.get("liga"),
+                    "horario": j.get("horario"),
+                    "odd": j.get("odd")
+                }
     
+            # 2. ENVIO AUTOMÁTICO DO BINGO ELITE (Pulado para evitar erros)
+            print("📢 Pulando envio do Elite conforme solicitado.")
+    
+            # 3. ENVIO DO MENU INTERATIVO (Para os botões do canal)
             canal_id = os.getenv('CHANNEL_ID')
-            bilhete_elite = bingo357.montar_bilhete_elite_main(lista_para_filtros)
-            if bilhete_elite and canal_id:
-                texto_elite = bingo357.formatar_para_telegram(bilhete_elite, cache_dados)
-                if texto_elite: enviar_telegram("💰 *SUGESTÃO DE INVESTIMENTO - ELITE*\n\n" + texto_elite, canal_id)
-    
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
             texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
+    
             if texto_bingos_final and canal_id:
-                menus.enviar_menu_bingo(canal_id, "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final)
+                try:
+                    msg_bingo_formatada = "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final
+                    menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
+                    print("📢 Menu interativo enviado para o Canal.")
+                except Exception as e:
+                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
 
             # Gravação de arquivos
             os.makedirs("ranking", exist_ok=True)
