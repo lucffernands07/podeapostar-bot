@@ -223,10 +223,17 @@ def main():
                                     valor_odd_str = v_odds.get(m_chave, "N/A")
 
                                 try:
-                                    odd_float = float(valor_odd_str.replace(',', '.'))
-                                    if "M45" in m_chave and odd_float >= 4.0:
-                                        continue 
+                                    # Tenta converter a odd para número
+                                    odd_float = float(str(valor_odd_str).replace(',', '.'))
+                                except (ValueError, TypeError, AttributeError):
+                                    # Se falhar (ex: valor for "N/A"), mostra o erro e pula para o próximo
+                                    print(f"⚠️ Mercado descartado por erro de odd: {m_texto} | Valor: {valor_odd_str}")
+                                    continue 
 
+                                # --- MANTENDO SUA LÓGICA DE GOLS M45 ---
+                                if "M45" in m_chave and odd_float >= 4.0:
+                                    continue 
+            
                                     # 🚀 NOVA TRAVA DE SEGURANÇA PARA MERCADOS ZERADOS
                                     if m_chave == "CARTOES_CONFRONTO" and "0.0" in m_texto:
                                         continue
