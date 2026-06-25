@@ -83,6 +83,3 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
                 print(f"    ❌ Jogador {jogador} REPROVADO. Não atingiu a média de corte.")
 
     return mercados_aprovados
-
-
-    return mercados_aprovados
