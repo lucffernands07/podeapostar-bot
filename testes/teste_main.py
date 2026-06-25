@@ -1,21 +1,14 @@
 import os
-import time
-import json
-import requests
-from datetime import datetime, timedelta
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
+import sys
+import os
+# Adiciona o diretório raiz ao PYTHONPATH para que os imports funcionem igual ao main
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Módulos
-from testes.teste_ligas import TESTE_COMPETICOES
+# Agora os imports da raiz funcionarão perfeitamente:
+from ligas import COMPETICOES # Opcional: mantenha se quiser alternar entre elas
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes 
 import odds, bingo357
 from telegram import menus
-
-# Funções de raspagem
 from funcoes.raspagem_h2h import pegar_estatisticas_h2h
 from funcoes.raspagem_scouts import pegar_scouts_avancados
 
@@ -44,12 +37,15 @@ def configurar_driver():
     options.add_argument("--disable-gpu")
     options.add_argument("--blink-settings=imagesEnabled=false")
     options.add_argument("--window-size=1920,1080")
+    # Este argumento abaixo é o que separa um bot detectável de um que parece humano:
+    options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     driver.set_page_load_timeout(30) 
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
+
                             
 def main():
     driver = configurar_driver()
@@ -128,11 +124,15 @@ def main():
                         if res_btts:
                             mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
 
-                        # 3. Chance Dupla
+                        # 3. Chance Dupla (Lógica de segurança do principal)
+                        s["chance_dupla_pct"] = "80%" # Valor padrão
+                        if s.get("casa_vitorias_recente", 0) >= 4 or s.get("fora_vitorias_recente", 0) >= 4:
+                            s["chance_dupla_pct"] = "100%"
+                        elif s.get("casa_vitorias_recente", 0) == 3 or s.get("fora_vitorias_recente", 0) == 3:
+                            s["chance_dupla_pct"] = "90%"
+
                         res_cd = chance_dupla.verificar_chance_dupla(s)
-                        for rc in res_cd:
-                            tipo_cd = "1X" if "1X" in rc else "X2"
-                            mercados_para_processar.append({"texto": rc, "chave": tipo_cd})
+                        # ... resto do código de cd
 
                         # 4. Vitória Casa
                         res_vc = vitoria_casa.verificar_vitoria_casa(s)
@@ -193,22 +193,33 @@ def main():
                     print(f"⚠️ Erro ao processar partida: {e}")
                     continue
 
+        # --- PROCESSAMENTO E ENVIO FINAL (AJUSTADO PARA TESTE) ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
-            cache_dados = {}
-            for j in lista_para_filtros:
-                chave = f"{str(j.get('time_casa')).strip().lower()}x{str(j.get('time_fora')).strip().lower()}"
-                cache_dados[chave] = {"link_betano": j.get("link_betano"), "liga": j.get("liga"), "horario": j.get("horario"), "odd": j.get("odd")}
-            for j in jogos_para_pendentes:
-                chave = f"{str(j.get('time_casa')).strip().lower()}x{str(j.get('time_fora')).strip().lower()}"
-                if chave in cache_dados: cache_dados[chave]["link_h2h"] = j.get("link_h2h")
+            # 1. ENVIO DO LISTÃO APENAS NO PRIVADO
+            meu_chat_id = os.getenv('CHAT_ID') # Certifique-se de que essa variável está configurada
+            if meu_chat_id:
+                cabecalho = "🎫 *LISTÃO teste_main.py*\n\n"
+                corpo = ""
+                for j in lista_para_filtros:
+                    # Formato igual ao seu main principal para facilitar a leitura
+                    bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
+                    
+                    if len(cabecalho + corpo + bloco) > 4000:
+                        enviar_telegram(cabecalho + corpo, meu_chat_id)
+                        cabecalho = "🎫 *LISTÃO teste_main.py (Continuação)*\n\n"
+                        corpo = bloco
+                    else:
+                        corpo += bloco
+                
+                enviar_telegram(cabecalho + corpo, meu_chat_id)
+                print("📨 Listão teste_main.py enviado para o privado.")
+            else:
+                print("⚠️ Variável CHAT_ID não encontrada. Não foi possível enviar o listão.")
 
-            canal_id = os.getenv('CHANNEL_ID')
-            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros, qtd_alvo=5, estrategia="ACERTOS", modo_elite=True)
-            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados, aviso_menu="💰 *MENU DE BINGOS (TESTE)*")
-            if texto_bingos_final and canal_id:
-                menus.enviar_menu_bingo(canal_id, "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final)
+        else:
+            print("ℹ️ Nenhum mercado foi aprovado para envio nesta execução.")
 
     except Exception as e:
         print(f"❌ Erro Crítico no Main: {e}")
