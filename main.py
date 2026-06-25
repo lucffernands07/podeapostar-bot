@@ -196,7 +196,7 @@ def main():
                             
                             # 🎴 Tradução da média para mercados tradicionais da Betano
                             if media >= 4.0:
-                                mercado_formatado = "Cartões Totais: +4.5"
+                                mercado_formatado = "Cartões Totais: +3.5"
                             elif media >= 3.0:
                                 mercado_formatado = "Cartões Totais: +2.5"
                             elif media >= 2.0:
