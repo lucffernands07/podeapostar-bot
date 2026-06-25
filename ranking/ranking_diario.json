@@ -6,28 +6,28 @@
         "assertividade": 1.0
     },
     {
+        "mercado": "CARTÕES TOTAIS: +2.5",
+        "green": 5,
+        "red": 0,
+        "assertividade": 1.0
+    },
+    {
         "mercado": "+2.5 GOLS (100%)",
         "green": 3,
         "red": 0,
         "assertividade": 1.0
     },
     {
-        "mercado": "CARTÕES TOTAIS: +2.5",
-        "green": 3,
-        "red": 0,
-        "assertividade": 1.0
-    },
-    {
         "mercado": "CARTÕES TOTAIS: +1.5",
-        "green": 1,
+        "green": 2,
         "red": 0,
         "assertividade": 1.0
     },
     {
         "mercado": "-4.5 GOLS (85%)",
         "green": 20,
-        "red": 3,
-        "assertividade": 0.8695652173913043
+        "red": 4,
+        "assertividade": 0.8333333333333334
     },
     {
         "mercado": "1X (85%)",
@@ -43,9 +43,9 @@
     },
     {
         "mercado": "+1.5 GOLS (85%)",
-        "green": 100,
+        "green": 102,
         "red": 46,
-        "assertividade": 0.684931506849315
+        "assertividade": 0.6891891891891891
     },
     {
         "mercado": "+1.5 GOLS (100%)",
@@ -146,13 +146,13 @@
     {
         "mercado": "CARTÕES TOTAIS: -3.5",
         "green": 0,
-        "red": 4,
+        "red": 5,
         "assertividade": 0.0
     },
     {
         "mercado": "CARTÕES TOTAIS: +4.5",
         "green": 0,
-        "red": 2,
+        "red": 4,
         "assertividade": 0.0
     }
 ]
