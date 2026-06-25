@@ -15,27 +15,33 @@ def processar_comando_direto(tipo_bruto):
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
     if "cb_bingo_" in tipo_limpo:
+        # Formato esperado: cb_bingo_3_ELITE ou cb_bingo_5
         partes = tipo_limpo.split("_")
         try:
+            # O número está na posição 2 (cb=0, bingo=1, 3 ou 5=2)
             config["bingo"] = int(partes[2])
         except (IndexError, ValueError):
             config["bingo"] = 5
             
         if "ELITE" in tipo_limpo.upper():
             config["modo_elite"] = True
-            config["aviso"] = f"🎲 Bingo: *{config['bingo']} (Elite/Denso)*"
+            config["aviso"] = f"🚀 Comando: *Bingo {config['bingo']} Elite*"
         else:
-            config["aviso"] = f"🎲 Bingo: *{config['bingo']}*"
+            config["modo_elite"] = False
+            config["aviso"] = f"🚀 Comando: *Bingo {config['bingo']}*"
 
     elif "cb_hora_" in tipo_limpo:
+        # Formato esperado: cb_hora_3H
         config["horario"] = tipo_limpo.split("_")[-1]
         config["aviso"] = f"⏱️ Janela: *{config['horario']}*"
 
     elif "cb_tipo_" in tipo_limpo:
+        # Formato esperado: cb_tipo_ODDS
         config["bilhete"] = tipo_limpo.split("_")[-1]
         config["aviso"] = f"📊 Estratégia: *{config['bilhete']}*"
     
     else:
+        # Fallback para comandos de texto simples
         if "3" in tipo_limpo: config["bingo"] = 3
         elif "5" in tipo_limpo: config["bingo"] = 5
         elif "7" in tipo_limpo: config["bingo"] = 7
@@ -44,6 +50,7 @@ def processar_comando_direto(tipo_bruto):
         config["aviso"] = f"🚀 Comando: *Bingo {config['bingo']} {'Elite' if config['modo_elite'] else ''}*"
 
     return config
+
 
 def executar():
     token = os.getenv('TELEGRAM_TOKEN')
