@@ -58,38 +58,6 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
     bilhetes = []
     if not dados_entrada: return bilhetes
 
-    # 1. Agrupa
-    jogos_agrupados = {}
-    for jogo in dados_entrada:
-        chave = f"{jogo['time_casa']}x{jogo['time_fora']}".lower().strip()
-        if chave not in jogos_agrupados: jogos_agrupados[chave] = []
-        jogos_agrupados[chave].append(jogo)
-
-    # 2. Ordena
-    lista_chaves = sorted(jogos_agrupados.keys(), key=lambda k: len(jogos_agrupados[k]), reverse=True)
-    
-    # 3. SEGREDOS: Usa EXATAMENTE a qtd_alvo que vier do parâmetro
-    jogos_selecionados = []
-    contador_jogos = 0
-    
-    for chave in lista_chaves:
-        if contador_jogos >= qtd_alvo: # <-- Aqui é onde o corte acontece
-            break
-        jogos_selecionados.extend(jogos_agrupados[chave])
-        contador_jogos += 1
-    
-    # Nome dinâmico para o botão refletir o que foi gerado
-    nome_bilhete = f"✨ BINGO {contador_jogos} JOGOS - {estrategia}"
-
-    if jogos_selecionados:
-        bilhetes.append({"id": "BINGO_CUSTOM", "nome": nome_bilhete, "jogos": jogos_selecionados})
-
-    return bilhetes
-
-def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS", modo_elite=False):
-    bilhetes = []
-    if not dados_entrada: return bilhetes
-
     # 1. Agrupa todos os mercados por confronto
     jogos_agrupados = {}
     for jogo in dados_entrada:
