@@ -89,22 +89,21 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
         if chave not in jogos_agrupados: jogos_agrupados[chave] = []
         jogos_agrupados[chave].append(jogo)
 
-    # 2. Ordena os jogos pelo número de mercados (os mais densos primeiro)
+    # 2. Ordena os jogos pelo número de mercados
     lista_chaves = sorted(jogos_agrupados.keys(), key=lambda k: len(jogos_agrupados[k]), reverse=True)
     
-    # 3. Monta o bilhete focando em pegar TODOS os mercados dos jogos mais densos
+    # 3. Monta o bilhete respeitando a qtd_alvo enviada
     jogos_selecionados = []
     contador_jogos = 0
     
+    # Pegamos apenas até a qtd_alvo desejada
     for chave in lista_chaves:
         if contador_jogos >= qtd_alvo:
             break
-            
-        # Adiciona TODOS os mercados encontrados para este jogo
         jogos_selecionados.extend(jogos_agrupados[chave])
         contador_jogos += 1
     
-    nome_bilhete = f"✨ BINGO {contador_jogos} JOGOS (TOTAL DENSO) - {estrategia}"
+    nome_bilhete = f"✨ BINGO {contador_jogos} JOGOS (DENSO) - {estrategia}"
 
     if jogos_selecionados:
         bilhetes.append({"id": "BINGO_CUSTOM", "nome": nome_bilhete, "jogos": jogos_selecionados})
