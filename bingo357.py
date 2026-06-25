@@ -40,30 +40,29 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
     bilhetes = []
     if not dados_entrada: return bilhetes
 
-    # Agrupa por confronto primeiro
+    # 1. Agrupa todos os mercados por jogo
     jogos_agrupados = {}
     for jogo in dados_entrada:
         chave = f"{jogo['time_casa']}x{jogo['time_fora']}".lower().strip()
         if chave not in jogos_agrupados: jogos_agrupados[chave] = []
         jogos_agrupados[chave].append(jogo)
 
-    # Ordena confrontos pela "densidade" se modo_elite, ou pela força da estratégia
-    # Aqui estamos pegando as chaves (jogos) e ordenando-as
-    lista_chaves = list(jogos_agrupados.keys())
+    # 2. Ordena os jogos pelo número de mercados (os mais densos primeiro)
+    lista_chaves = sorted(jogos_agrupados.keys(), key=lambda k: len(jogos_agrupados[k]), reverse=True)
     
-    if modo_elite:
-        # Ordena confrontos que possuem mais mercados (densos)
-        lista_chaves.sort(key=lambda k: len(jogos_agrupados[k]), reverse=True)
-    else:
-        # Ordena de forma aleatória ou pelo primeiro mercado do jogo (padrão)
-        pass 
-
-    # Seleciona os confrontos até atingir a qtd_alvo
+    # 3. Monta o bilhete focando em pegar TODOS os mercados dos jogos mais densos
     jogos_selecionados = []
-    for k in lista_chaves[:qtd_alvo]:
-        jogos_selecionados.extend(jogos_agrupados[k])
+    contador_jogos = 0
     
-    nome_bilhete = f"✨ BINGO {min(len(lista_chaves), qtd_alvo)} ({'DENSO' if modo_elite else 'PADRÃO'}) - {estrategia}"
+    for chave in lista_chaves:
+        if contador_jogos >= qtd_alvo:
+            break
+            
+        # Adiciona TODOS os mercados encontrados para este jogo
+        jogos_selecionados.extend(jogos_agrupados[chave])
+        contador_jogos += 1
+    
+    nome_bilhete = f"✨ BINGO {contador_jogos} JOGOS (TOTAL DENSO) - {estrategia}"
 
     if jogos_selecionados:
         bilhetes.append({"id": "BINGO_CUSTOM", "nome": nome_bilhete, "jogos": jogos_selecionados})
