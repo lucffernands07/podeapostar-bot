@@ -111,8 +111,11 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
     return bilhetes
 
 def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
-    if not bilhetes:
-        return ""
+    if not bilhetes: return ""
+    
+    # Cabeçalho padrão caso o aviso_menu esteja vazio
+    cabecalho_fixo = aviso_menu if aviso_menu else "💰 *SUGESTÃO DE BINGOS DO DIA*"
+    corpo_total = f"{cabecalho_fixo}\n\n"
     
     # Inicia com o aviso do menu
     corpo_total = f"{aviso_menu}\n\n"
