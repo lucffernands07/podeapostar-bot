@@ -35,7 +35,6 @@ def enviar_telegram(mensagem, chat_id_destino):
     except Exception as e:
         print(f"Erro Telegram: {e}")
 
-
 def configurar_driver():
     options = Options()
     options.add_argument("--headless=new")
@@ -50,7 +49,7 @@ def configurar_driver():
     driver.set_page_load_timeout(30) 
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
-                            
+
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
@@ -197,7 +196,7 @@ def main():
                             
                             # 🎴 Tradução da média para mercados tradicionais da Betano
                             if media >= 4.0:
-                                mercado_formatado = "Cartões Totais: +4.5"
+                                mercado_formatado = "Cartões Totais: +3.5"
                             elif media >= 3.0:
                                 mercado_formatado = "Cartões Totais: +2.5"
                             elif media >= 2.0:
