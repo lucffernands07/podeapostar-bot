@@ -28,13 +28,19 @@ def extrair_odd(odd_str):
 
 def prioridade_mercado(mercado_texto):
     m = str(mercado_texto).lower()
+    
     if "gols" in m: return 1
     if "1x" in m: return 2
-    if "ambas" in m: return 3
-    if "vitória" in m or "vitoria" in m: return 4
-    if "2x" in m or "x2" in m: return 5
-    if "chutes" in m or "média" in m or "cartões" in m or "cartao" in m: return 6
-    return 7
+    
+    # Usando 3 e 3.1, garantimos que eles fiquem juntos após o 1X
+    if "chute" in m: return 3 
+    
+    if "cartão" in m or "cartao" in m: return 4
+    if "vitória" in m or "vitoria" in m: return 5
+    if "ambas" in m: return 6
+    if "2x" in m or "x2" in m: return 7
+    
+    return 8
 
 def carregar_ranking_pro():
     """Lê o ranking pré-montado pelo ranking.py"""
