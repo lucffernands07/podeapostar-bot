@@ -17,14 +17,14 @@ def extrair_porcentagem(texto_mercado):
 def extrair_odd(odd_str):
     try:
         if not odd_str or odd_str == "N/A" or odd_str == "":
-            return 1.50
+            return 1.30
         if isinstance(odd_str, str) and ("Análise" in odd_str or "chutes" in odd_str.lower() or "cartã" in odd_str.lower() or "cartao" in odd_str.lower()):
-            return 1.50
+            return 1.30
         if isinstance(odd_str, (int, float)):
             return float(odd_str)
         return float(odd_str.replace(',', '.'))
     except:
-        return 1.50
+        return 1.30
 
 def prioridade_mercado(mercado_texto):
     m = str(mercado_texto).lower()
