@@ -55,21 +55,34 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
             print(f"    🏃‍♂️ Analisando {jogador}: {dados['valores']} | Média: {dados['media']:.2f} | Sucesso: {dados['jogos_com_sucesso']}/3")
             contagem_log += 1
     
-    # 3. DEFINIÇÃO DO MELHOR (Baseado no dicionário completo processado)
+    # 3. DEFINIÇÃO DOS MELHORES (Baseado no dicionário completo processado)
     if dados_chutes:
-        melhor_chutador = max(dados_chutes, key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]))
-        res_c = dados_chutes[melhor_chutador]
+        # Ordenamos todos os jogadores pelo sucesso e depois pela média, pegando os 2 melhores
+        jogadores_ordenados = sorted(
+            dados_chutes.keys(), 
+            key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]), 
+            reverse=True
+        )
         
-        print(f"    ⭐ Melhor da partida: {melhor_chutador} (Média: {res_c['media']:.2f}, Sucesso: {res_c['jogos_com_sucesso']})")
+        # Pega os 2 primeiros da lista (se existirem)
+        top_2_jogadores = jogadores_ordenados[:2]
         
-        # Regra de corte
-        if res_c["jogos_com_sucesso"] >= 2 or res_c["media"] >= 1.0:
-            print("    ✅ Jogador APROVADO para o listão!")
-            mercados_aprovados.append({
-                "texto": f"Chutes no Alvo: {melhor_chutador} (Frequência: {res_c['jogos_com_sucesso']}/{quantidade_jogos}j | Méd: {res_c['media']:.1f})",
-                "chave": "CHUTES_ALVO"
-            })
-        else:
-            print("    ❌ Jogador REPROVADO. Não atingiu a média de corte do robô.")
+        for jogador in top_2_jogadores:
+            res_c = dados_chutes[jogador]
+            
+            print(f"    ⭐ Destaque encontrado: {jogador} (Média: {res_c['media']:.2f}, Sucesso: {res_c['jogos_com_sucesso']})")
+            
+            # Regra de corte aplicada individualmente para cada um dos dois
+            if res_c["jogos_com_sucesso"] >= 2 or res_c["media"] >= 1.0:
+                print(f"    ✅ Jogador {jogador} APROVADO para o listão!")
+                mercados_aprovados.append({
+                    "texto": f"Chutes no Alvo: {jogador} (Frequência: {res_c['jogos_com_sucesso']}/{quantidade_jogos}j | Méd: {res_c['media']:.1f})",
+                    "chave": "CHUTES_ALVO"
+                })
+            else:
+                print(f"    ❌ Jogador {jogador} REPROVADO. Não atingiu a média de corte.")
+
+    return mercados_aprovados
+
 
     return mercados_aprovados
