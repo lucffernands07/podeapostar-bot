@@ -17,7 +17,7 @@ from telegram import menus
 
 # Funções de raspagem
 from funcoes.raspagem_h2h import pegar_estatisticas_h2h
-from funcoes.raspagem_scouts import pegar_scouts_avancados
+from testes.teste_raspagem_scouts import pegar_scouts_avancados
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
