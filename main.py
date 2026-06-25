@@ -216,8 +216,10 @@ def main():
                     "link": j.get("link_betano"),
                     "liga": j.get("liga"),
                     "horario": j.get("horario"),
-                    "odd": j.get("odd")
+                    "odd": j.get("odd"),
+                    "link_h2h": j.get("link_h2h") # Agora ele pega o link que você inseriu no loop
                 }
+
     
             # 2. ENVIO AUTOMÁTICO DO BINGO ELITE (Pulado para evitar erros)
             print("📢 Pulando envio do Elite conforme solicitado.")
