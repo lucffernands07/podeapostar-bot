@@ -79,40 +79,48 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         hash_visitante_topo = img_v.get_attribute("src").split('/')[-1]
                     except: pass
 
-                    # 🎯 PASSO 2: Coleta de Chutes (Filtro por Hash implementado aqui)
+                    # 🎯 PASSO 2: Coleta de Chutes (Com espera e clique resiliente)
                     url_finalizacoes = f"{url_jogo_completa}/resumo/estatisticas-jogadores/finalizacoes/"
                     driver.get(url_finalizacoes)
                     
                     try:
-                        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .fp-playerName_E6lgN")))
+                        # Força uma pequena rolagem e espera para garantir a renderização dos elementos
+                        driver.execute_script("window.scrollTo(0, 300);")
+                        time.sleep(1.5)
+                        
+                        # Espera flexível pelos cabeçalhos ou pelas células de jogadores
+                        wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .fp-playerName_E6lgN")) > 0)
                         
                         cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
-                        indice_chutes = 5 # Padrão
+                        indice_chutes = 5  # Fallback seguro
                         for idx_th, th in enumerate(cabecalhos_fin):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
-                            if "ALVO" in texto_th or "FN" in texto_th or "SHOTS" in texto_th:
+                            if any(x in texto_th for x in ["ALVO", "FN", "SHOTS", "SOT", "FINALIZAÇÕES"]):
                                 indice_chutes = idx_th
                                 break
                     
                         linhas_dados_fin = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
                         for lambda_linha in linhas_dados_fin:
                             try:
-                                nome_element = lambda_linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN, [class*='playerName']")
+                                # Busca o elemento do nome de forma tolerante a variações estruturais
+                                try:
+                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN, [class*='playerName'], [data-testid='wcl-playerCell']")
+                                except:
+                                    continue
+                                    
                                 nome_jogador = driver.execute_script("return arguments[0].textContent;", nome_element).strip()
                                 if not nome_jogador or nome_jogador == "TODOS": continue
                                 
-                                # Lógica de Filtro por Hash
+                                # Lógica de Filtro por Hash para garantir que o jogador é do confronto atual
                                 try:
                                     img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
                                     hash_linha = img_linha.get_attribute("src").split('/')[-1]
                                     
-                                    # Determina qual time daquele jogo histórico é
                                     time_identificado = ""
                                     if hash_linha == hash_mandante_topo: time_identificado = mandante_atual
                                     elif hash_linha == hash_visitante_topo: time_identificado = visitante_atual
-                                    else: continue # Jogador não pertence a nenhum dos times deste jogo
+                                    else: continue 
                                     
-                                    # Validação: Só registra se for um dos times do jogo de hoje (t1 ou t2)
                                     if not (t1.upper() in time_identificado.upper() or t2.upper() in time_identificado.upper()):
                                         continue
                                 except: continue
@@ -128,7 +136,8 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 stats["historico_chutes"][nome_jogador].append(chutes)
                             except: continue
                     except Exception as e_passo2:
-                        print(f" ⚠️ Erro ao carregar aba de finalizações: {e_passo2}")
+                        print(f" ⚠️ Erro ao processar dados de finalizações nesta partida: {e_passo2}")
+
                     
                     jogo_global_index += 1
                 except: continue
