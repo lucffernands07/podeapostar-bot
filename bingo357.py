@@ -121,7 +121,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
 def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
     if not bilhetes: return ""
     
-    # 🚀 CABEÇALHO FLEXÍVEL: Usa o aviso_menu se existir, senão usa o padrão
+    # 🚀 CABEÇALHO FLEXÍVEL
     titulo_principal = aviso_menu if aviso_menu else "🚀 *MENU DE BINGOS DISPONÍVEIS*"
     corpo_total = f"{titulo_principal}\n\n"
     
@@ -132,7 +132,6 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         
         # Agrupa os jogos do bilhete
         for j in b.get('jogos', []):
-            # Garante que as chaves existam para evitar erros de leitura
             t1 = str(j.get('time_casa', 'Desconhecido')).strip().lower()
             t2 = str(j.get('time_fora', 'Desconhecido')).strip().lower()
             chave_cache = f"{t1}x{t2}"
@@ -151,13 +150,28 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     "link_h2h": info_extra.get('link_h2h')
                 }
             
-            # Formatação segura de mercados
+            # --- NOVA LÓGICA DE FORMATAÇÃO VISUAL ---
             mercado_limpo = j.get('mercado', '')
-            texto_final = f"🔶 {mercado_limpo} | Odd: {odd_valor}"
+            
+            if "chute" in mercado_limpo.lower():
+                # Tenta extrair Nome e Médias
+                match_nome = re.search(r':\s*([^(\n]+)', mercado_limpo)
+                match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
+                nome = match_nome.group(1).strip() if match_nome else "Jogador"
+                med = match_med.group(1) if match_med else "N/A"
+                texto_final = f"🔶 Chutes no gol: {nome} | Méd: {med}"
+            
+            elif "cartão" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
+                # Remove textos extras ou odds de análise
+                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}"
+            
+            else:
+                # Mantém o padrão original para outros mercados
+                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}"
             
             agrupados[chave_jogo]["mercados"].append({
                 "texto": texto_final, 
-                "prioridade": prioridade_mercado(mercado_limpo)
+                "prioridade": prioridade_mercado(j.get('mercado', ''))
             })
             odd_total *= extrair_odd(odd_valor)
 
