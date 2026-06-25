@@ -36,6 +36,48 @@ def prioridade_mercado(mercado_texto):
     if "chutes" in m or "média" in m or "cartões" in m or "cartao" in m: return 6
     return 7
 
+def carregar_ranking_pro():
+    """Lê o ranking pré-montado pelo ranking.py"""
+    if os.path.exists(PATH_RANKING_DIARIO):
+        try:
+            with open(PATH_RANKING_DIARIO, 'r', encoding='utf-8') as f:
+                conteudo = json.load(f)
+                if isinstance(conteudo, dict):
+                    return conteudo.get("mercados", [])
+                return conteudo 
+        except: return []
+    return []
+
+def montar_bilhete_elite_main(lista_jogos):
+    if not lista_jogos: return None
+
+    # Agrupa por confronto
+    confrontos = {}
+    for j in lista_jogos:
+        chave = f"{j['time_casa']}x{j['time_fora']}"
+        if chave not in confrontos: confrontos[chave] = []
+        confrontos[chave].append(j)
+
+    # Ordena pelos confrontos que possuem mais mercados (densidade)
+    # E pega apenas os 3 primeiros confrontos mais densos
+    confrontos_densos = sorted(confrontos.items(), key=lambda x: len(x[1]), reverse=True)
+    top_3_confrontos = confrontos_densos[:3]
+    
+    # Monta a lista plana de mercados para o formatador
+    jogos_selecionados = []
+    for chave, mercados in top_3_confrontos:
+        jogos_selecionados.extend(mercados)
+    
+    # Verifica quantos jogos realmente temos
+    qtd_jogos = len(top_3_confrontos)
+    
+    return [{
+        "id": "ELITE_DENSO",
+        "nome": f"🔥 BINGO DENSO (TOP {qtd_jogos} JOGOS)",
+        "jogos": jogos_selecionados,
+        "aviso_escassez": ""
+    }]
+
 def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS", modo_elite=False):
     bilhetes = []
     if not dados_entrada: return bilhetes
