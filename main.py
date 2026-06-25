@@ -209,7 +209,7 @@ def main():
                             # Adiciona ao listão com o novo formato visual que você pediu
                             mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
 
-                        # --- VALIDAÇÃO DE ODDS E FILTRAGEM ---
+                                                # --- VALIDAÇÃO DE ODDS E FILTRAGEM ---
                         if mercados_para_processar:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
                             
@@ -222,40 +222,44 @@ def main():
                                 else:
                                     valor_odd_str = v_odds.get(m_chave, "N/A")
 
+                                # Tenta converter a odd para número
                                 try:
-                                    # Tenta converter a odd para número
                                     odd_float = float(str(valor_odd_str).replace(',', '.'))
                                 except (ValueError, TypeError, AttributeError):
-                                    # Se falhar (ex: valor for "N/A"), mostra o erro e pula para o próximo
                                     print(f"⚠️ Mercado descartado por erro de odd: {m_texto} | Valor: {valor_odd_str}")
                                     continue 
 
                                 # --- MANTENDO SUA LÓGICA DE GOLS M45 ---
                                 if "M45" in m_chave and odd_float >= 4.0:
                                     continue 
-            
-                                    # 🚀 NOVA TRAVA DE SEGURANÇA PARA MERCADOS ZERADOS
-                                    if m_chave == "CARTOES_CONFRONTO" and "0.0" in m_texto:
-                                        continue
-                                    if m_chave == "CHUTES_ALVO" and "0.0" in m_texto:
-                                        continue
 
-                                    if odd_float >= 1.25:
-                                        lista_para_filtros.append({
-                                            "horario": h_br, "time_casa": t1, "time_fora": t2,
-                                            "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else "Análise", "liga": nome_comp,
-                                            "link_betano": s.get("link_betano")
-                                        })
-                                        
-                                        jogos_para_pendentes.append({
-                                            "time_casa": t1,
-                                            "time_fora": t2,
-                                            "mercado": m_texto,
-                                            "mercado_ranking": m_texto.upper(),
-                                            "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
-                                        })
-                                                
-                                        total_mercados += 1
+                                # 🚀 NOVA TRAVA DE SEGURANÇA PARA MERCADOS ZERADOS
+                                if m_chave == "CARTOES_CONFRONTO" and "0.0" in m_texto:
+                                    continue
+                                if m_chave == "CHUTES_ALVO" and "0.0" in m_texto:
+                                    continue
+
+                                # Validação final e adição à lista
+                                if odd_float >= 1.25:
+                                    lista_para_filtros.append({
+                                        "horario": h_br, 
+                                        "time_casa": t1, 
+                                        "time_fora": t2,
+                                        "mercado": m_texto, 
+                                        "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else "Análise", 
+                                        "liga": nome_comp,
+                                        "link_betano": s.get("link_betano")
+                                    })
+                                    
+                                    jogos_para_pendentes.append({
+                                        "time_casa": t1,
+                                        "time_fora": t2,
+                                        "mercado": m_texto,
+                                        "mercado_ranking": m_texto.upper(),
+                                        "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
+                                    })
+                                            
+                                    total_mercados += 1
                                 except ValueError:
                                     continue
                 except Exception as e:
