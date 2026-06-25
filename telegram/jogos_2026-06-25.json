@@ -1,82 +1,10 @@
 [
     {
-        "horario": "17:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Curaçao",
-        "time_fora": "Costa do Marfim",
-        "mercado": "Chutes no Alvo: Comenencia L. (Frequência: 2/3j | Méd: 0.7)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Curacao-Ivory-Coast/83964133/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Curaçao",
-        "time_fora": "Costa do Marfim",
-        "mercado": "Chutes no Alvo: Enner Valencia (Frequência: 1/3j | Méd: 1.7)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Curacao-Ivory-Coast/83964133/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Curaçao",
-        "time_fora": "Costa do Marfim",
-        "mercado": "Cartões Totais: +1.5",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Curacao-Ivory-Coast/83964133/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Equador",
-        "time_fora": "Alemanha",
-        "mercado": "Chutes no Alvo: Gonzalo Plata (Frequência: 2/3j | Méd: 1.3)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Ecuador-Germany/83963753/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Equador",
-        "time_fora": "Alemanha",
-        "mercado": "Chutes no Alvo: Angulo N. (Frequência: 2/3j | Méd: 0.7)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Ecuador-Germany/83963753/"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Equador",
-        "time_fora": "Alemanha",
-        "mercado": "Cartões Totais: +1.5",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Ecuador-Germany/83963753/"
-    },
-    {
         "horario": "20:00",
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Japão",
         "time_fora": "Suécia",
-        "mercado": "Chutes no Alvo: Kamada D. (Frequência: 2/3j | Méd: 0.7)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Japan-Sweden/83964134/"
-    },
-    {
-        "horario": "20:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Japão",
-        "time_fora": "Suécia",
-        "mercado": "Chutes no Alvo: Nakamura K. (Frequência: 2/3j | Méd: 0.7)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Japan-Sweden/83964134/"
-    },
-    {
-        "horario": "20:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Japão",
-        "time_fora": "Suécia",
-        "mercado": "Cartões Totais: -3.5",
+        "mercado": "Cartões Totais: -2.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Japan-Sweden/83964134/"
     },
@@ -86,7 +14,7 @@
         "time_casa": "Tunísia",
         "time_fora": "Países Baixos",
         "mercado": "-4.5 Gols (70%)",
-        "odd": "1.34",
+        "odd": "1.36",
         "link_betano": "https://www.betano.bet.br/match-odds/Tunisia-Netherlands/83963755/"
     },
     {
@@ -94,27 +22,9 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Tunísia",
         "time_fora": "Países Baixos",
-        "mercado": "Chutes no Alvo: Ueda A. (Frequência: 1/3j | Méd: 1.0)",
+        "mercado": "Cartões Totais: -2.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Tunisia-Netherlands/83963755/"
-    },
-    {
-        "horario": "20:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Tunísia",
-        "time_fora": "Países Baixos",
-        "mercado": "Cartões Totais: +1.5",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Tunisia-Netherlands/83963755/"
-    },
-    {
-        "horario": "20:30",
-        "liga": "Brasileirão Série B",
-        "time_casa": "Cuiabá",
-        "time_fora": "Londrina",
-        "mercado": "Chutes no Alvo: Rodrigo Rodrigues (Frequência: 1/3j | Méd: 1.3)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Cuiaba-MT-Londrina-PR/87839684/"
     },
     {
         "horario": "20:30",
@@ -139,7 +49,7 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Paraguai",
         "time_fora": "Austrália",
-        "mercado": "Cartões Totais: +3.5",
+        "mercado": "Cartões Totais: -2.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Paraguay-Australia/83963787/"
     },
@@ -148,25 +58,7 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Turquia",
         "time_fora": "EUA",
-        "mercado": "Chutes no Alvo: Guler A. (Frequência: 2/3j | Méd: 1.3)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/T-rkiye-USA/83964175/"
-    },
-    {
-        "horario": "23:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Turquia",
-        "time_fora": "EUA",
-        "mercado": "Chutes no Alvo: Bardakci A. (Frequência: 2/3j | Méd: 0.7)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/T-rkiye-USA/83964175/"
-    },
-    {
-        "horario": "23:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Turquia",
-        "time_fora": "EUA",
-        "mercado": "Cartões Totais: +1.5",
+        "mercado": "Cartões Totais: -2.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/T-rkiye-USA/83964175/"
     }
