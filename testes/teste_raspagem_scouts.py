@@ -148,7 +148,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         driver.execute_script("window.scrollTo(0, 300);")
                         time.sleep(1.5)
                         
-                        wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .fp-playerName_E6lgN")) > 0)
+                        wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], [class*='playerName']")) > 0)
                         
                         cabecalhos_atq = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
                         indice_faltas = 5  # Fallback seguro
@@ -162,7 +162,8 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         for lambda_linha in linhas_dados_atq:
                             try:
                                 try:
-                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN, [class*='playerName'], [data-testid='wcl-playerCell']")
+                                    # 🟢 Ajustado com a ordem correta e tolerante de seletores para abas secundárias
+                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], .fp-playerName_E6lgN")
                                 except: continue
                                     
                                 nome_jogador = driver.execute_script("return arguments[0].textContent;", nome_element).strip()
@@ -206,4 +207,4 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
     except: pass
 
     return stats
-      
+                    
