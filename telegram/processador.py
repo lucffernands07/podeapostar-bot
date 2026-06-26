@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import requests
+import re  # 🟢 Importado para capturar os números com precisão
 from datetime import datetime, timedelta
 
 # --- AJUSTE DE CAMINHO ---
@@ -15,20 +16,16 @@ def processar_comando_direto(tipo_bruto):
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
     if "cb_bingo_" in tipo_limpo:
-        # Formato esperado: cb_bingo_3_ELITE ou cb_bingo_5_ELITE
-        partes = tipo_limpo.split("_")
-        try:
-            # O número está na posição 2 (cb=0, bingo=1, 3 ou 5=2)
-            config["bingo"] = int(partes[2])
-        except (IndexError, ValueError):
+        # 🟢 CORREÇÃO COM REGEX: Não importa se é "cb_bingo_3" ou "cb_bingo_3_ELITE", pega o número perfeitamente
+        numeros = re.findall(r'\d+', tipo_limpo)
+        if numeros:
+            config["bingo"] = int(numeros[0])
+        else:
             config["bingo"] = 5
             
-        if "ELITE" in tipo_limpo.upper():
-            config["modo_elite"] = True
-            config["aviso"] = f"🚀 Comando: *Bingo {config['bingo']} Elite*"
-        else:
-            config["modo_elite"] = False
-            config["aviso"] = f"🚀 Comando: *Bingo {config['bingo']}*"
+        # Como no menus.py você quer que o Bingo 3 e 5 sejam sempre Densos (Elite) por padrão:
+        config["modo_elite"] = True
+        config["aviso"] = f"🚀 Comando: *Bingo {config['bingo']} Elite*"
 
     elif "cb_hora_" in tipo_limpo:
         # Formato esperado: cb_hora_3H
@@ -46,11 +43,8 @@ def processar_comando_direto(tipo_bruto):
         elif "5" in tipo_limpo: config["bingo"] = 5
         elif "7" in tipo_limpo: config["bingo"] = 7
         
-        # 🟢 CORRIGIDO: Garante que o modo ELITE vindo dos botões densos também sincronize o número correto
-        if "ELITE" in tipo_limpo.upper(): 
+        if "ELITE" in tipo_limpo.upper() or "cb_bingo_" in tipo_limpo: 
             config["modo_elite"] = True
-            if "3" in tipo_limpo: config["bingo"] = 3
-            elif "5" in tipo_limpo: config["bingo"] = 5
             
         if "ODDS" in tipo_limpo: config["bilhete"] = "ODDS"
         config["aviso"] = f"🚀 Comando: *Bingo {config['bingo']} {'Elite' if config['modo_elite'] else ''}*"
@@ -91,7 +85,7 @@ def executar():
     # --- PROCESSAMENTO ---
     bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(
         jogos_banco, 
-        qtd_alvo=config["bingo"],  # Agora recebe 3 ou 5 redondinho do botão!
+        qtd_alvo=config["bingo"],  
         estrategia=config["bilhete"].upper(),
         modo_elite=config["modo_elite"]
     )
@@ -111,4 +105,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-    
+            
