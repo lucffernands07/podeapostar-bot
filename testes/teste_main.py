@@ -143,8 +143,30 @@ def main():
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
-                        # Jogadores (Faltas Sofridas) 🟢 ADICIONADO AQUI
-                        res_faltas = jogadores.verificar_destaques_faltas(s.get("historico_faltas", {}), 3, nome_comp)
+                                                # --- SEÇÃO DE JOGADORES AJUSTADA ---
+                        # Resgata de forma segura os elencos/nomes mapeados do scraper para casa e fora
+                        elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
+                        elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
+
+                        # Jogadores (Chutes no Alvo) 🟢 AGORA PASSANDO OS ELENCOS
+                        res_jogadores = jogadores.verificar_destaques_jogadores(
+                            s.get("historico_chutes", {}), 
+                            3, 
+                            nome_comp,
+                            elenco_casa=elenco_casa_disponivel,
+                            elenco_fora=elenco_fora_disponivel
+                        )
+                        for rj in res_jogadores:
+                            mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
+
+                        # Jogadores (Faltas Sofridas) 🟢 AGORA PASSANDO OS ELENCOS
+                        res_faltas = jogadores.verificar_destaques_faltas(
+                            s.get("historico_faltas", {}), 
+                            3, 
+                            nome_comp,
+                            elenco_casa=elenco_casa_disponivel,
+                            elenco_fora=elenco_fora_disponivel
+                        )
                         for rf in res_faltas:
                             mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave']})
 
