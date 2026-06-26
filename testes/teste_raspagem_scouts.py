@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
- def pegar_scouts_avancados(driver, stats, t1, t2):
+def pegar_scouts_avancados(driver, stats, t1, t2):
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
         try:
@@ -60,7 +60,7 @@ from selenium.webdriver.support import expected_conditions as EC
                 
                 for jogo_idx in range(min(3, len(linhas_confrontos))):
                     try:
-                        elemento_alvo = linhas_confrontos[jogo_idx] # 🟢 CORRIGIDO AQUI (Removido o double bind quebrado)
+                        elemento_alvo = linhas_confrontos[jogo_idx]
                         partes_texto = elemento_alvo.text.split('\n')
                         mandante_atual = partes_texto[2].strip() if len(partes_texto) > 2 else ""
                         visitante_atual = partes_texto[3].strip() if len(partes_texto) > 3 else ""
@@ -227,4 +227,4 @@ from selenium.webdriver.support import expected_conditions as EC
     except: pass
 
     return stats
-                            
+                 
