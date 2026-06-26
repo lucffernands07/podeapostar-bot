@@ -13,6 +13,12 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
         except: pass
         return stats
 
+    # Garante que as chaves de histórico existam no dicionário de retorno
+    if "historico_chutes" not in stats:
+        stats["historico_chutes"] = {}
+    if "historico_faltas" not in stats:
+        stats["historico_faltas"] = {}
+
     try:
         wait = WebDriverWait(driver, 10)
         jogo_global_index = 0
@@ -84,15 +90,13 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     driver.get(url_finalizacoes)
                     
                     try:
-                        # Força uma pequena rolagem e espera para garantir a renderização dos elementos
                         driver.execute_script("window.scrollTo(0, 300);")
                         time.sleep(1.5)
                         
-                        # Espera flexível pelos cabeçalhos ou pelas células de jogadores
                         wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .fp-playerName_E6lgN")) > 0)
                         
                         cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
-                        indice_chutes = 5  # Fallback seguro
+                        indice_chutes = 5  
                         for idx_th, th in enumerate(cabecalhos_fin):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
                             if any(x in texto_th for x in ["ALVO", "FN", "SHOTS", "SOT", "FINALIZAÇÕES"]):
@@ -102,16 +106,13 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         linhas_dados_fin = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
                         for lambda_linha in linhas_dados_fin:
                             try:
-                                # Busca o elemento do nome de forma tolerante a variações estruturais
                                 try:
                                     nome_element = lambda_linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN, [class*='playerName'], [data-testid='wcl-playerCell']")
-                                except:
-                                    continue
+                                except: continue
                                     
                                 nome_jogador = driver.execute_script("return arguments[0].textContent;", nome_element).strip()
                                 if not nome_jogador or nome_jogador == "TODOS": continue
                                 
-                                # Lógica de Filtro por Hash para garantir que o jogador é do confronto atual
                                 try:
                                     img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
                                     hash_linha = img_linha.get_attribute("src").split('/')[-1]
@@ -138,6 +139,62 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     except Exception as e_passo2:
                         print(f" ⚠️ Erro ao processar dados de finalizações nesta partida: {e_passo2}")
 
+
+                    # 🎯 PASSO 3: Coleta de Faltas Sofridas (Aba Ataque)
+                    url_ataque = f"{url_jogo_completa}/resumo/estatisticas-jogadores/ataque/"
+                    driver.get(url_ataque)
+                    
+                    try:
+                        driver.execute_script("window.scrollTo(0, 300);")
+                        time.sleep(1.5)
+                        
+                        wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], [class*='playerName']")) > 0)
+                        
+                        cabecalhos_atq = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
+                        indice_faltas = 5  # Fallback seguro
+                        for idx_th, th in enumerate(cabecalhos_atq):
+                            texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
+                            if any(x in texto_th for x in ["SOFRIDAS", "FALTAS SOFRIDAS", "FOULS SUFFERED", "FS"]):
+                                indice_faltas = idx_th
+                                break
+                    
+                        linhas_dados_atq = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+                        for lambda_linha in linhas_dados_atq:
+                            try:
+                                try:
+                                    # 🟢 Ajustado com a ordem correta e tolerante de seletores para abas secundárias
+                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], .fp-playerName_E6lgN")
+                                except: continue
+                                    
+                                nome_jogador = driver.execute_script("return arguments[0].textContent;", nome_element).strip()
+                                if not nome_jogador or nome_jogador == "TODOS": continue
+                                
+                                try:
+                                    img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
+                                    hash_linha = img_linha.get_attribute("src").split('/')[-1]
+                                    
+                                    time_identificado = ""
+                                    if hash_linha == hash_mandante_topo: time_identificado = mandante_atual
+                                    elif hash_linha == hash_visitante_topo: time_identificado = visitante_atual
+                                    else: continue 
+                                    
+                                    if not (t1.upper() in time_identificado.upper() or t2.upper() in time_identificado.upper()):
+                                        continue
+                                except: continue
+
+                                celulas_valores = lambda_linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell']")
+                                if len(celulas_valores) <= indice_faltas: continue
+                                
+                                val_falta = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_faltas]).strip()
+                                faltas_sof = int(re.search(r'\d+', val_falta).group()) if re.search(r'\d+', val_falta) else 0
+                    
+                                if nome_jogador not in stats["historico_faltas"]: stats["historico_faltas"][nome_jogador] = []
+                                while len(stats["historico_faltas"][nome_jogador]) < jogo_global_index: stats["historico_faltas"][nome_jogador].append(0)
+                                stats["historico_faltas"][nome_jogador].append(faltas_sof)
+                            except: continue
+                    except Exception as e_passo3:
+                        print(f" ⚠️ Erro ao processar dados de faltas sofridas nesta partida: {e_passo3}")
+
                     
                     jogo_global_index += 1
                 except: continue
@@ -150,4 +207,4 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
     except: pass
 
     return stats
-                                
+                    
