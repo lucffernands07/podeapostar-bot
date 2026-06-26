@@ -70,7 +70,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
     # 2. Ordena os confrontos pelo número de mercados (mais densos primeiro)
     lista_chaves = sorted(jogos_agrupados.keys(), key=lambda k: len(jogos_agrupados[k]), reverse=True)
     
-    # 3. Monta o bilhete pegando os jogos até atingir a qtd_alvo
+    # 3. Monta o bilhete pegando os jogos até atingir a qtd_alvo de confrontos
     jogos_selecionados = []
     contador_jogos = 0
     
@@ -78,16 +78,25 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
         if contador_jogos >= qtd_alvo:
             break
             
-        # Adicionamos TODOS os mercados do confronto, sem filtrar ou limitar.
-        jogos_selecionados.extend(jogos_agrupados[chave])
+        # Pega o mercado principal do confronto para garantir que 1 jogo = 1 palpite
+        if modo_elite and len(jogos_agrupados[chave]) > 0:
+            # Se for elite, adiciona apenas o primeiro mercado (o mais relevante) para não inflar o bilhete
+            jogos_selecionados.append(jogos_agrupados[chave][0])
+        else:
+            # Caso contrário, mantém o comportamento padrão
+            jogos_selecionados.extend(jogos_agrupados[chave])
+            
         contador_jogos += 1
     
-    nome_bilhete = f"✨ BINGO {contador_jogos} JOGOS - {estrategia}"
+    # 🟢 CORREÇÃO CRUCIAL: Garante que a contagem do nome do bilhete reflita os palpites reais
+    total_palpites = len(jogos_selecionados)
+    nome_bilhete = f"✨ BINGO {total_palpites} JOGOS - {estrategia}"
 
     if jogos_selecionados:
         bilhetes.append({"id": "BINGO_CUSTOM", "nome": nome_bilhete, "jogos": jogos_selecionados})
 
     return bilhetes
+
 
 def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
     if not bilhetes: return ""
