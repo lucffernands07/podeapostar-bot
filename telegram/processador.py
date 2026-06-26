@@ -15,7 +15,7 @@ def processar_comando_direto(tipo_bruto):
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
     if "cb_bingo_" in tipo_limpo:
-        # Formato esperado: cb_bingo_3_ELITE ou cb_bingo_5
+        # Formato esperado: cb_bingo_3_ELITE ou cb_bingo_5_ELITE
         partes = tipo_limpo.split("_")
         try:
             # O número está na posição 2 (cb=0, bingo=1, 3 ou 5=2)
@@ -45,7 +45,13 @@ def processar_comando_direto(tipo_bruto):
         if "3" in tipo_limpo: config["bingo"] = 3
         elif "5" in tipo_limpo: config["bingo"] = 5
         elif "7" in tipo_limpo: config["bingo"] = 7
-        if "ELITE" in tipo_limpo.upper(): config["modo_elite"] = True
+        
+        # 🟢 CORRIGIDO: Garante que o modo ELITE vindo dos botões densos também sincronize o número correto
+        if "ELITE" in tipo_limpo.upper(): 
+            config["modo_elite"] = True
+            if "3" in tipo_limpo: config["bingo"] = 3
+            elif "5" in tipo_limpo: config["bingo"] = 5
+            
         if "ODDS" in tipo_limpo: config["bilhete"] = "ODDS"
         config["aviso"] = f"🚀 Comando: *Bingo {config['bingo']} {'Elite' if config['modo_elite'] else ''}*"
 
@@ -71,7 +77,7 @@ def executar():
     with open(caminho_json, "r", encoding="utf-8") as f:
         jogos_banco = json.load(f)
 
-    # --- DEFINIÇÃO DOS LINKS (CORRIGINDO O NAMEERROR) ---
+    # --- DEFINIÇÃO DOS LINKS ---
     dict_cache_links = {}
     for j in jogos_banco:
         casa = j.get("time_casa")
@@ -85,12 +91,11 @@ def executar():
     # --- PROCESSAMENTO ---
     bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(
         jogos_banco, 
-        qtd_alvo=config["bingo"], 
+        qtd_alvo=config["bingo"],  # Agora recebe 3 ou 5 redondinho do botão!
         estrategia=config["bilhete"].upper(),
         modo_elite=config["modo_elite"]
     )
     
-    # Agora dict_cache_links existe e é passado com o cabeçalho aviso_menu
     texto_final = bingo357.formatar_para_telegram(
         bilhetes_gerados, 
         dict_cache_links, 
