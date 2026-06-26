@@ -138,11 +138,6 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # Jogadores (Chutes no Alvo)
-                        res_jogadores = jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), 3, nome_comp)
-                        for rj in res_jogadores:
-                            mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
-
                         # --- SEÇÃO DE JOGADORES AJUSTADA ---
                         # Resgata de forma segura os elencos/nomes mapeados do scraper para casa e fora
                         elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
