@@ -18,7 +18,8 @@ def extrair_odd(odd_str):
     try:
         if not odd_str or odd_str == "N/A" or odd_str == "":
             return 1.30
-        if isinstance(odd_str, str) and ("Análise" in odd_str or "chutes" in odd_str.lower() or "cartã" in odd_str.lower() or "cartao" in odd_str.lower()):
+        # 🟢 CORRIGIDO: Adicionado "falta" para assumir odd padrão na multiplicação do Bingo
+        if isinstance(odd_str, str) and ("Análise" in odd_str or "chutes" in odd_str.lower() or "falta" in odd_str.lower() or "cartã" in odd_str.lower() or "cartao" in odd_str.lower()):
             return 1.30
         if isinstance(odd_str, (int, float)):
             return float(odd_str)
@@ -32,8 +33,9 @@ def prioridade_mercado(mercado_texto):
     if "gols" in m: return 1
     if "1x" in m: return 2
     
-    # Usando 3 e 3.1, garantimos que eles fiquem juntos após o 1X
+    # 🟢 CORRIGIDO: Agrupando chutes e faltas na mesma faixa de prioridade de scout de jogador
     if "chute" in m: return 3 
+    if "falta" in m: return 3.1
     
     if "cartão" in m or "cartao" in m: return 4
     if "vitória" in m or "vitoria" in m: return 5
@@ -76,7 +78,6 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
         if contador_jogos >= qtd_alvo:
             break
             
-        # AQUI ESTÁ A MUDANÇA: 
         # Adicionamos TODOS os mercados do confronto, sem filtrar ou limitar.
         jogos_selecionados.extend(jogos_agrupados[chave])
         contador_jogos += 1
@@ -116,13 +117,19 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     "time_casa": j.get('time_casa'), "time_fora": j.get('time_fora'),
                     "mercados": [], 
                     "link": j.get('link_betano') or info_extra.get('link', "https://www.betano.bet.br/"),
-                    # Captura o link que vem do cache
                     "link_h2h": info_extra.get('link_h2h') 
                 }
             
             mercado_limpo = j.get('mercado', '')
-            # ... (sua lógica de chutes e cartões permanece idêntica aqui)
-            if "chute" in mercado_limpo.lower():
+            
+            # 🟢 CORRIGIDO: Identificação e formatação do mercado de Faltas Sofridas
+            if "falta" in mercado_limpo.lower():
+                match_nome = re.search(r':\s*([^(\n]+)', mercado_limpo)
+                match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
+                nome = match_nome.group(1).strip() if match_nome else "Jogador"
+                med = match_med.group(1) if match_med else "N/A"
+                texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {med}"
+            elif "chute" in mercado_limpo.lower():
                 match_nome = re.search(r':\s*([^(\n]+)', mercado_limpo)
                 match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
@@ -147,7 +154,6 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             
             bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n🌐 [Abrir na Betano]({d['link']})"
             
-            # Aqui é onde o link aparece:
             if d.get("link_h2h"): 
                 bloco += f"\n📊 [Estatísticas]({d['link_h2h']})"
             lista_blocos.append(bloco)
@@ -155,3 +161,4 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
+                
