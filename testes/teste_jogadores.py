@@ -85,9 +85,92 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
     return mercados_aprovados
 
 
+def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None):
+    """
+    Analisa os destaques de chutes, garantindo 1 jogador do Mandante e 1 do Visitante sem duplicar.
+    """
+    if isinstance(quantidade_jogos, dict):
+        quantidade_jogos = 3
+
+    nome_liga_limpo = nome_liga.strip() if nome_liga else ""
+    if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
+        return []
+
+    mercados_aprovados = []
+    dados_chutes = {}
+    
+    if not isinstance(historico_chutes, dict) or not historico_chutes:
+        return mercados_aprovados
+
+    # 1. PROCESSAMENTO COMPLETO
+    for jogador, lista_valores in historico_chutes.items():
+        if not isinstance(lista_valores, list):
+            continue
+            
+        valores_copia = list(lista_valores)
+        while len(valores_copia) < quantidade_jogos:
+            valores_copia.append(0)
+            
+        valores_analise = valores_copia[:quantidade_jogos]
+        media = sum(valores_analise) / quantidade_jogos
+        jogos_com_sucesso = sum(1 for qtd in valores_analise if qtd >= 1)
+        
+        # Identifica o time com fallback dinâmico
+        time_pertence = "casa"
+        if elenco_fora and jogador in elenco_fora:
+            time_pertence = "fora"
+        elif elenco_casa and jogador in elenco_casa:
+            time_pertence = "casa"
+
+        dados_chutes[jogador] = {
+            "media": media, 
+            "jogos_com_sucesso": jogos_com_sucesso, 
+            "valores": valores_analise,
+            "time": time_pertence
+        }
+
+    if dados_chutes:
+        jogadores_ordenados = sorted(
+            dados_chutes.keys(), 
+            key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]), 
+            reverse=True
+        )
+        
+        # SELEÇÃO SEPARADA POR TIME
+        top_casa = [j for j in jogadores_ordenados if dados_chutes[j]["time"] == "casa"]
+        top_fora = [j for j in jogadores_ordenados if dados_chutes[j]["time"] == "fora"]
+        
+        selecionados = []
+        
+        # 🟢 CORREÇÃO DO FALLBACK: Se não houver mapeamento de elencos reais e as listas falharem...
+        if not elenco_casa and not elenco_fora:
+            # Pegamos estritamente o 1º melhor do ranking geral
+            if jogadores_ordenados:
+                selecionados.append(jogadores_ordenados[0])
+            # E o 2º melhor do ranking geral (desde que exista e não seja o mesmo cara!)
+            if len(jogadores_ordenados) > 1:
+                selecionados.append(jogadores_ordenados[1])
+        else:
+            # Se temos os elencos, pega o melhor de cada lado com segurança
+            if top_casa: selecionados.append(top_casa[0])
+            if top_fora: selecionados.append(top_fora[0])
+
+        # Remove qualquer duplicata residual por segurança absoluta
+        selecionados = list(dict.fromkeys(selecionados))
+        
+        for jogador in selecionados:
+            res_c = dados_chutes[jogador]
+            if res_c["jogos_com_sucesso"] >= 2 or res_c["media"] >= 1.0:
+                mercados_aprovados.append({
+                    "texto": f"Chutes no Alvo: {jogador} (Frequência: {res_c['jogos_com_sucesso']}/{quantidade_jogos}j | Méd: {res_c['media']:.1f})",
+                    "chave": "CHUTES_ALVO"
+                })
+
+    return mercados_aprovados
+
 def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None):
     """
-    Garante o melhor de faltas do mandante e o melhor do visitante no confronto.
+    Garante o melhor de faltas do mandante e o melhor do visitante sem duplicações.
     """
     if isinstance(quantidade_jogos, dict):
         quantidade_jogos = 3
@@ -137,14 +220,19 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
         top_casa = [j for j in jogadores_ordenados if dados_faltas[j]["time"] == "casa"]
         top_fora = [j for j in jogadores_ordenados if dados_faltas[j]["time"] == "fora"]
 
-        if not elenco_casa and not elenco_fora:
-            metade = len(jogadores_ordenados) // 2
-            top_casa = jogadores_ordenados[:metade]
-            top_fora = jogadores_ordenados[metade:]
-
         selecionados = []
-        if top_casa: selecionados.append(top_casa[0])
-        if top_fora: selecionados.append(top_fora[0])
+        
+        # 🟢 CORREÇÃO DO FALLBACK
+        if not elenco_casa and not elenco_fora:
+            if jogadores_ordenados:
+                selecionados.append(jogadores_ordenados[0])
+            if len(jogadores_ordenados) > 1:
+                selecionados.append(jogadores_ordenados[1])
+        else:
+            if top_casa: selecionados.append(top_casa[0])
+            if top_fora: selecionados.append(top_fora[0])
+
+        selecionados = list(dict.fromkeys(selecionados))
         
         for jogador in selecionados:
             res_f = dados_faltas[jogador]
@@ -155,8 +243,6 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
                 })
 
     return mercados_aprovados
-
-
 
 def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None):
     """
