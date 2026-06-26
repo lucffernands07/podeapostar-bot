@@ -6,38 +6,58 @@ PASTA_TELEGRAM = "telegram"
 
 def extrair_markup_filtros(escolhas=None):
     """
-    Menu ajustado:
-    - Bingo 3 e 5 com modo denso (Elite) por padrão.
+    Menu dinâmico ajustado:
+    - Lê o dicionário 'escolhas' vindo do Cloudflare/Bot.
+    - Se não houver escolhas, assume o padrão estável.
+    - Coloca marcadores visuais e injeta o estado no botão de disparo.
     """
+    if not escolhas:
+        escolhas = {"bingo": "5", "horario": "DIA", "bilhete": "ACERTOS"}
+
+    # Extrai as strings salvando o estado atual
+    b_atual = str(escolhas.get("bingo", "5"))
+    h_atual = str(escolhas.get("horario", "DIA"))
+    t_atual = str(escolhas.get("bilhete", "ACERTOS"))
+
+    # 🟢 O SEGREDO: O botão de disparo agora leva as variáveis compactadas
+    # permitindo que o Cloudflare as leia e envie ao processador.py
+    callback_disparo = f"cb_acao_GERAR_B{b_atual}_{h_atual}_{t_atual}"
+
     return {
         "inline_keyboard": [
-            # --- NOVO BOTÃO NO TOPO ---
+            # --- BOTÃO NO TOPO ---
             [
                 {"text": "📊 RANKING DE MERCADOS ✅⛔", "callback_data": "cb_ver_ranking"}
             ],
-            # --- SEÇÃO 1: BINGOS (Bingo 3 e 5 serão DENSOS) ---
-            [{"text": "✅ Escolha um bingo:", "callback_data": "ignore"}],
+            # --- SEÇÃO 1: BINGOS (Ganha marcação dinâmica) ---
+            [{"text": f"✅ Escolha um bingo (Ativo: {b_atual} Jogos):", "callback_data": "ignore"}],
             [
-                {"text": "Bingo 3 (Denso)", "callback_data": "cb_bingo_3_ELITE"},
-                {"text": "Bingo 5 (Denso)", "callback_data": "cb_bingo_5_ELITE"}
+                {
+                    "text": "🟢 Bingo 3 (Denso)" if b_atual == "3" else "Bingo 3 (Denso)", 
+                    "callback_data": "cb_bingo_3_ELITE"
+                },
+                {
+                    "text": "🟢 Bingo 5 (Denso)" if b_atual == "5" else "Bingo 5 (Denso)", 
+                    "callback_data": "cb_bingo_5_ELITE"
+                }
             ],
             # --- SEÇÃO 2: HORÁRIOS ---
-            [{"text": "✅ Escolha uma janela:", "callback_data": "ignore"}],
+            [{"text": f"✅ Escolha uma janela (Ativa: {h_atual}):", "callback_data": "ignore"}],
             [
-                {"text": "Janela 3H", "callback_data": "cb_hora_3H"},
-                {"text": "Janela 5H", "callback_data": "cb_hora_5H"},
-                {"text": "Do Dia", "callback_data": "cb_hora_DIA"}
+                {"text": "✨ Janela 3H" if h_atual == "3H" else "Janela 3H", "callback_data": "cb_hora_3H"},
+                {"text": "✨ Janela 5H" if h_atual == "5H" else "Janela 5H", "callback_data": "cb_hora_5H"},
+                {"text": "✨ Do Dia" if h_atual == "DIA" else "Do Dia", "callback_data": "cb_hora_DIA"}
             ],
             # --- SEÇÃO 3: ESTRATÉGIA ---
-            [{"text": "✅ Escolha um modo:", "callback_data": "ignore"}],
+            [{"text": f"✅ Escolha um modo (Ativo: {t_atual}):", "callback_data": "ignore"}],
             [
-                {"text": "Maiores Odds", "callback_data": "cb_tipo_ODDS"},
-                {"text": "Mais acertos", "callback_data": "cb_tipo_ACERTOS"},
-                {"text": "Equilibrado", "callback_data": "cb_tipo_AMBAS"}
+                {"text": "🔥 Maiores Odds" if t_atual == "ODDS" else "Maiores Odds", "callback_data": "cb_tipo_ODDS"},
+                {"text": "🔥 Mais acertos" if t_atual == "ACERTOS" else "Mais acertos", "callback_data": "cb_tipo_ACERTOS"},
+                {"text": "🔥 Equilibrado" if t_atual == "AMBAS" else "Equilibrado", "callback_data": "cb_tipo_AMBAS"}
             ],
-            # --- BOTÃO DE DISPARO DEFINITIVO ---
+            # --- BOTÃO DE DISPARO DEFINITIVO COM ESTADO EMBUTIDO ---
             [
-                {"text": "🚀 GERAR BILHETE", "callback_data": "cb_acao_GERAR"}
+                {"text": "🚀 GERAR BILHETE", "callback_data": callback_disparo}
             ]
         ]
     }
@@ -81,9 +101,8 @@ def enviar_menu_bingo(chat_id, texto):
 
 def atualizar_menu_inline(chat_id, message_id, texto, escolhas_atuais):
     """
-    Função utilitária para o seu script que escuta cliques no Telegram.
-    Sempre que clicarem num botão, chame essa função passando as novas escolhas
-    para atualizar os botões na tela usando 'editMessageReplyMarkup'.
+    Função utilitária recuperada do commit histórico.
+    Atualiza os botões inline em tempo real refletindo a escolha do usuário.
     """
     token = os.getenv('TELEGRAM_TOKEN')
     url = f"https://api.telegram.org/bot{token}/editMessageReplyMarkup"
@@ -98,3 +117,4 @@ def atualizar_menu_inline(chat_id, message_id, texto, escolhas_atuais):
         requests.post(url, json=payload)
     except Exception as e:
         print(f"❌ Erro ao atualizar os botões dinâmicos: {e}")
+                
