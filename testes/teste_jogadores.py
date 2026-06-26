@@ -10,72 +10,74 @@ LIGAS_ELITE_JOGADORES = [
     "Mundo - Amistoso Internacional"
 ]
 
-def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_liga=""):
+def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None):
     """
-    Analisa os destaques de chutes, tratando falhas de forma resiliente
-    para não travar a execução principal.
+    Analisa os destaques de chutes, garantindo 1 jogador do Mandante e 1 do Visitante.
     """
-    # Prevenção contra tipos incorretos
     if isinstance(quantidade_jogos, dict):
         quantidade_jogos = 3
 
     nome_liga_limpo = nome_liga.strip() if nome_liga else ""
-    
-    # Validação de liga
     if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
         return []
 
     mercados_aprovados = []
     dados_chutes = {}
     
-    # Validação de dados de entrada
     if not isinstance(historico_chutes, dict) or not historico_chutes:
         return mercados_aprovados
 
     # 1. PROCESSAMENTO COMPLETO
-    # Limitamos a 30 jogadores para garantir performance no Actions
-    itens_processar = list(historico_chutes.items())[:30]
-    
-    for jogador, lista_valores in itens_processar:
+    for jogador, lista_valores in historico_chutes.items():
         if not isinstance(lista_valores, list):
             continue
             
         valores_copia = list(lista_valores)
-        # Normalização de dados (preenche com 0 se faltar jogo)
         while len(valores_copia) < quantidade_jogos:
             valores_copia.append(0)
             
         valores_analise = valores_copia[:quantidade_jogos]
-            
         media = sum(valores_analise) / quantidade_jogos
         jogos_com_sucesso = sum(1 for qtd in valores_analise if qtd >= 1)
         
+        # Identifica o time (se os elencos forem passados, senão divide por ordem de aparição)
+        time_pertence = "casa"
+        if elenco_fora and jogador in elenco_fora:
+            time_pertence = "fora"
+        elif elenco_casa and jogador in elenco_casa:
+            time_pertence = "casa"
+
         dados_chutes[jogador] = {
             "media": media, 
-            "jogos_com_sucesso": jogos_com_sucesso, 
-            "valores": valores_analise
+            "jogos_com_sucesso": games_sucesso := jogos_com_sucesso, 
+            "valores": valores_analise,
+            "time": time_pertence
         }
 
-    # 2. DEFINIÇÃO DOS MELHORES (Baseado no dicionário completo processado)
     if dados_chutes:
-        # Ordenamos todos os jogadores pelo sucesso e depois pela média
+        # Ordena por sucesso e média
         jogadores_ordenados = sorted(
             dados_chutes.keys(), 
             key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]), 
             reverse=True
         )
         
-        # Pega até 2 primeiros (se só existir 1, pegará 1, sem erros)
-        top_jogadores = jogadores_ordenados[:2]
+        # 🟢 SELEÇÃO BALANCEADA: Pega o melhor de cada lado
+        top_casa = [j for j in jogadores_ordenados if dados_chutes[j]["time"] == "casa"]
+        top_fora = [j for j in jogadores_ordenados if dados_chutes[j]["time"] == "fora"]
         
-        for jogador in top_jogadores:
-            # Segurança extra: garante que o jogador ainda existe no dicionário processado
-            if jogador not in dados_chutes:
-                continue
-                
+        # Se os elencos não vieram definidos por parâmetro, dividimos a lista original ao meio como fallback de segurança
+        if not elenco_casa and not elenco_fora:
+            metade = len(jogadores_ordenados) // 2
+            top_casa = jogadores_ordenados[:metade]
+            top_fora = jogadores_ordenados[metade:]
+
+        selecionados = []
+        if top_casa: selecionados.append(top_casa[0])
+        if top_fora: selecionados.append(top_fora[0])
+        
+        for jogador in selecionados:
             res_c = dados_chutes[jogador]
-            
-            # Regra de corte aplicada individualmente para cada um dos dois
             if res_c["jogos_com_sucesso"] >= 2 or res_c["media"] >= 1.0:
                 mercados_aprovados.append({
                     "texto": f"Chutes no Alvo: {jogador} (Frequência: {res_c['jogos_com_sucesso']}/{quantidade_jogos}j | Méd: {res_c['media']:.1f})",
@@ -85,49 +87,48 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
     return mercados_aprovados
 
 
-def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga=""):
+def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None):
     """
-    Analisa os dados de faltas sofridas e seleciona apenas o jogador 
-    com a melhor média de faltas sofridas no confronto.
+    Garante o melhor de faltas do mandante e o melhor do visitante no confronto.
     """
-    # Prevenção contra tipos incorretos
     if isinstance(quantidade_jogos, dict):
         quantidade_jogos = 3
 
     nome_liga_limpo = nome_liga.strip() if nome_liga else ""
-    
-    # Validação de liga
     if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
         return []
 
     mercados_aprovados = []
     dados_faltas = {}
     
-    # Validação de dados de entrada
     if not isinstance(historico_faltas, dict) or not historico_faltas:
         return mercados_aprovados
 
     # 1. PROCESSAMENTO DE MÉDIAS
-    itens_processar = list(historico_faltas.items())[:30]
-    
-    for jogador, lista_valores in itens_processar:
+    for jogador, lista_valores in historico_faltas.items():
         if not isinstance(lista_valores, list):
             continue
             
         valores_copia = list(lista_valores)
-        # Normalização de dados (preenche com 0 se faltar jogo)
         while len(valores_copia) < quantidade_jogos:
             valores_copia.append(0)
             
         valores_analise = valores_copia[:quantidade_jogos]
         media = sum(valores_analise) / quantidade_jogos
         
+        time_pertence = "casa"
+        if elenco_fora and jogador in elenco_fora:
+            time_pertence = "fora"
+        elif elenco_casa and jogador in elenco_casa:
+            time_pertence = "casa"
+
         dados_faltas[jogador] = {
             "media": media,
-            "valores": valores_analise
+            "valores": valores_analise,
+            "time": time_pertence
         }
 
-    # 2. SELEÇÃO DO MELHOR DO DIA (Apenas o jogador com a maior média do confronto)
+    # 2. SELEÇÃO BALANCEADA (1 Mandante + 1 Visitante)
     if dados_faltas:
         jogadores_ordenados = sorted(
             dados_faltas.keys(), 
@@ -135,15 +136,25 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
             reverse=True
         )
         
-        melhor_jogador = jogadores_ordenados[0]
-        res_f = dados_faltas[melhor_jogador]
+        top_casa = [j for j in jogadores_ordenados if dados_faltas[j]["time"] == "casa"]
+        top_fora = [j for j in jogadores_ordenados if dados_faltas[j]["time"] == "fora"]
+
+        if not elenco_casa and not elenco_fora:
+            metade = len(jogadores_ordenados) // 2
+            top_casa = jogadores_ordenados[:metade]
+            top_fora = jogadores_ordenados[metade:]
+
+        selecionados = []
+        if top_casa: selecionados.append(top_casa[0])
+        if top_fora: selecionados.append(top_fora[0])
         
-        # Filtro de corte: Só valida se a média do cara for maior que 0.5 faltas sofridas por jogo
-        if res_f["media"] > 0.5:
-            mercados_aprovados.append({
-                "texto": f"Faltas Sofridas: {melhor_jogador} (Méd: {res_f['media']:.1f})",
-                "chave": "FALTAS_SOFRIDAS"
-            })
+        for jogador in selecionados:
+            res_f = dados_faltas[jogador]
+            if res_f["media"] > 0.5:
+                mercados_aprovados.append({
+                    "texto": f"Faltas Sofridas: {jogador} (Méd: {res_f['media']:.1f})",
+                    "chave": "FALTAS_SOFRIDAS"
+                })
 
     return mercados_aprovados
     
