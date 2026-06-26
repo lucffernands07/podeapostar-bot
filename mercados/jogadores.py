@@ -2,6 +2,7 @@
 LIGAS_ELITE_JOGADORES = [
     "Brasileirão Série A", "Copa do Brasil", "Libertadores", "Sul-Americana",
     "Brasileirão Série B", "Argentina - Liga Profesional", "Mundo - Copa do Mundo",
+    "Copa do Mundo",
     "Champions League", "Inglaterra - Premier League", "Espanha - LaLiga",
     "Alemanha - Bundesliga", "Italia - Serie A", "França - Ligue 1",
     "Europa - League", "Inglaterra - FA Cup", "Espanha - Copa del Rey",
@@ -80,6 +81,69 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
                     "texto": f"Chutes no Alvo: {jogador} (Frequência: {res_c['jogos_com_sucesso']}/{quantidade_jogos}j | Méd: {res_c['media']:.1f})",
                     "chave": "CHUTES_ALVO"
                 })
+
+    return mercados_aprovados
+
+
+def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga=""):
+    """
+    Analisa os dados de faltas sofridas e seleciona apenas o jogador 
+    com a melhor média de faltas sofridas no confronto.
+    """
+    # Prevenção contra tipos incorretos
+    if isinstance(quantidade_jogos, dict):
+        quantidade_jogos = 3
+
+    nome_liga_limpo = nome_liga.strip() if nome_liga else ""
+    
+    # Validação de liga
+    if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
+        return []
+
+    mercados_aprovados = []
+    dados_faltas = {}
+    
+    # Validação de dados de entrada
+    if not isinstance(historico_faltas, dict) or not historico_faltas:
+        return mercados_aprovados
+
+    # 1. PROCESSAMENTO DE MÉDIAS
+    itens_processar = list(historico_faltas.items())[:30]
+    
+    for jogador, lista_valores in itens_processar:
+        if not isinstance(lista_valores, list):
+            continue
+            
+        valores_copia = list(lista_valores)
+        # Normalização de dados (preenche com 0 se faltar jogo)
+        while len(valores_copia) < quantidade_jogos:
+            valores_copia.append(0)
+            
+        valores_analise = valores_copia[:quantidade_jogos]
+        media = sum(valores_analise) / quantidade_jogos
+        
+        dados_faltas[jogador] = {
+            "media": media,
+            "valores": valores_analise
+        }
+
+    # 2. SELEÇÃO DO MELHOR DO DIA (Apenas o jogador com a maior média do confronto)
+    if dados_faltas:
+        jogadores_ordenados = sorted(
+            dados_faltas.keys(), 
+            key=lambda k: dados_faltas[k]["media"], 
+            reverse=True
+        )
+        
+        melhor_jogador = jogadores_ordenados[0]
+        res_f = dados_faltas[melhor_jogador]
+        
+        # Filtro de corte: Só valida se a média do cara for maior que 0.5 faltas sofridas por jogo
+        if res_f["media"] > 0.5:
+            mercados_aprovados.append({
+                "texto": f"Faltas Sofridas: {melhor_jogador} (Méd: {res_f['media']:.1f})",
+                "chave": "FALTAS_SOFRIDAS"
+            })
 
     return mercados_aprovados
     
