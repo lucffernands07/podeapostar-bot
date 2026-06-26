@@ -138,12 +138,12 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                                                # Jogadores (Chutes no Alvo)
+                        # Jogadores (Chutes no Alvo)
                         res_jogadores = jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), 3, nome_comp)
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
-                                                # --- SEÇÃO DE JOGADORES AJUSTADA ---
+                        # --- SEÇÃO DE JOGADORES AJUSTADA ---
                         # Resgata de forma segura os elencos/nomes mapeados do scraper para casa e fora
                         elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
                         elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
@@ -181,6 +181,15 @@ def main():
                             else: mercado_formatado = "Cartões Totais: -2.5"
                             mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
 
+                        # 🟢 TRAVA ANTI-DUPLICADOS (Limpa mercados idênticos antes de rodar as odds)
+                        mercados_unicos = []
+                        textos_vistos = set()
+                        for item in mercados_para_processar:
+                            if item["texto"] not in textos_vistos:
+                                mercados_unicos.append(item)
+                                textos_vistos.add(item["texto"])
+                        mercados_para_processar = mercados_unicos
+
                         # --- VALIDAÇÃO DE ODDS ---
                         if mercados_para_processar:
                             v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
@@ -210,6 +219,7 @@ def main():
                                         "mercado_ranking": m_texto.upper(), "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
                                     })
                                     total_mercados += 1
+                                    
                 except Exception as e:
                     print(f"⚠️ Erro ao processar partida: {e}")
                     continue
