@@ -138,10 +138,15 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # Jogadores
+                                                # Jogadores (Chutes no Alvo)
                         res_jogadores = jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), 3, nome_comp)
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
+
+                        # Jogadores (Faltas Sofridas) 🟢 ADICIONADO AQUI
+                        res_faltas = jogadores.verificar_destaques_faltas(s.get("historico_faltas", {}), 3, nome_comp)
+                        for rf in res_faltas:
+                            mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave']})
 
                         # Cartões
                         res_cartoes = cartoes.analisar_dados_cartoes(s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}), s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}), nome_comp, 3)
