@@ -12,45 +12,51 @@ import bingo357
 from telegram import menus
 
 def processar_comando_direto(tipo_bruto):
+    # Padrão começa em 5 se nada for detectado
     config = {"bingo": 5, "horario": "DIA", "bilhete": "ACERTOS", "aviso": "", "modo_elite": False}
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
-    if "cb_bingo_" in tipo_limpo:
-        # 🟢 CORREÇÃO COM REGEX: Não importa se é "cb_bingo_3" ou "cb_bingo_3_ELITE", pega o número perfeitamente
-        numeros = re.findall(r'\d+', tipo_limpo)
-        if numeros:
-            config["bingo"] = int(numeros[0])
-        else:
-            config["bingo"] = 5
-            
-        # Como no menus.py você quer que o Bingo 3 e 5 sejam sempre Densos (Elite) por padrão:
+    # 🟢 CAPTURA DIRETA DO BOTÃO (Idêntico ao comportamento do dia 24)
+    if "cb_bingo_3" in tipo_limpo or tipo_limpo == "3":
+        config["bingo"] = 3
         config["modo_elite"] = True
-        config["aviso"] = f"🚀 Comando: *Bingo {config['bingo']} Elite*"
+        config["aviso"] = "🚀 Comando: *Bingo 3 Elite*"
+        return config
+    elif "cb_bingo_5" in tipo_limpo or tipo_limpo == "5":
+        config["bingo"] = 5
+        config["modo_elite"] = True
+        config["aviso"] = "🚀 Comando: *Bingo 5 Elite*"
+        return config
 
-    elif "cb_hora_" in tipo_limpo:
-        # Formato esperado: cb_hora_3H
+    # Se a chamada vier com o formato compactado de ações
+    if "cb_acao_GERAR_" in tipo_limpo:
+        partes = tipo_limpo.split("_")
+        try:
+            if "B3" in partes[3]: config["bingo"] = 3
+            elif "B5" in partes[3]: config["bingo"] = 5
+            config["horario"] = partes[4]
+            config["bilhete"] = partes[5]
+            config["modo_elite"] = True
+            config["aviso"] = f"🚀 Comando: *Bingo {config['bingo']} Elite*"
+            return config
+        except:
+            pass
+
+    # Tratamento dos botões secundários (Janela / Tipo de bilhete)
+    if "cb_hora_" in tipo_limpo:
         config["horario"] = tipo_limpo.split("_")[-1]
         config["aviso"] = f"⏱️ Janela: *{config['horario']}*"
-
     elif "cb_tipo_" in tipo_limpo:
-        # Formato esperado: cb_tipo_ODDS
         config["bilhete"] = tipo_limpo.split("_")[-1]
         config["aviso"] = f"📊 Estratégia: *{config['bilhete']}*"
-    
     else:
-        # Fallback para comandos de texto simples
         if "3" in tipo_limpo: config["bingo"] = 3
         elif "5" in tipo_limpo: config["bingo"] = 5
-        elif "7" in tipo_limpo: config["bingo"] = 7
-        
-        if "ELITE" in tipo_limpo.upper() or "cb_bingo_" in tipo_limpo: 
-            config["modo_elite"] = True
-            
+        if "ELITE" in tipo_limpo.upper(): config["modo_elite"] = True
         if "ODDS" in tipo_limpo: config["bilhete"] = "ODDS"
         config["aviso"] = f"🚀 Comando: *Bingo {config['bingo']} {'Elite' if config['modo_elite'] else ''}*"
 
     return config
-
 
 def executar():
     token = os.getenv('TELEGRAM_TOKEN')
