@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-def pegar_scouts_avancados(driver, stats, t1, t2):
+ def pegar_scouts_avancados(driver, stats, t1, t2):
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
         try:
@@ -13,14 +13,37 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
         except: pass
         return stats
 
-    # Garante que as chaves de histórico existam no dicionário de retorno
-    if "historico_chutes" not in stats:
-        stats["historico_chutes"] = {}
-    if "historico_faltas" not in stats:
-        stats["historico_faltas"] = {}
+    # Garante que todas as chaves necessárias existam no retorno
+    if "historico_chutes" not in stats: stats["historico_chutes"] = {}
+    if "historico_faltas" not in stats: stats["historico_faltas"] = {}
+    if "elenco_mandante" not in stats: stats["elenco_mandante"] = []
+    if "elenco_visitante" not in stats: stats["elenco_visitante"] = []
 
+    wait = WebDriverWait(driver, 10)
+
+    # 🟢 CAPTURA OS ELENCOS DIRETO NA ABA DE ESCALAÇÕES DO CONFRONTO ATUAL
     try:
-        wait = WebDriverWait(driver, 10)
+        url_escalacoes = driver.current_url.replace("/h2h/overall", "/escalacoes")
+        if "/escalacoes" in url_escalacoes:
+            driver.get(url_escalacoes)
+            time.sleep(2.5)
+            
+            # Pega todos os nomes de jogadores que pertencem ao bloco da esquerda (Mandante)
+            jogadores_casa = driver.find_elements(By.CSS_SELECTOR, ".lf__side--home .lf__participantName, [class*='home'] [class*='participantName']")
+            for j in jogadores_casa:
+                nome = driver.execute_script("return arguments[0].textContent;", j).strip()
+                if nome: stats["elenco_mandante"].append(nome)
+                
+            # Pega todos os nomes de jogadores que pertencem ao bloco da direita (Visitante)
+            jogadores_fora = driver.find_elements(By.CSS_SELECTOR, ".lf__side--away .lf__participantName, [class*='away'] [class*='participantName']")
+            for j in jogadores_fora:
+                nome = driver.execute_script("return arguments[0].textContent;", j).strip()
+                if nome: stats["elenco_visitante"].append(nome)
+    except Exception as e_elenco:
+        print(f"      ⚠️ Não foi possível mapear elencos da partida: {e_elenco}")
+
+    # Retorna para o fluxo normal do H2H para pegar o histórico anterior
+    try:
         jogo_global_index = 0
         secoes_alvo_scouts = [
             {"tipo": "MANDANTE", "idx_secao": 1},
@@ -37,7 +60,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                 
                 for jogo_idx in range(min(3, len(linhas_confrontos))):
                     try:
-                        elemento_alvo = linhas_confrontos[jogo_idx]
+                        elemento_alvo = linhas_confrontos[jogo_idx] # 🟢 CORRIGIDO AQUI (Removido o double bind quebrado)
                         partes_texto = elemento_alvo.text.split('\n')
                         mandante_atual = partes_texto[2].strip() if len(partes_texto) > 2 else ""
                         visitante_atual = partes_texto[3].strip() if len(partes_texto) > 3 else ""
@@ -85,7 +108,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         hash_visitante_topo = img_v.get_attribute("src").split('/')[-1]
                     except: pass
 
-                    # 🎯 PASSO 2: Coleta de Chutes (Com espera e clique resiliente)
+                    # 🎯 PASSO 2: Coleta de Chutes
                     url_finalizacoes = f"{url_jogo_completa}/resumo/estatisticas-jogadores/finalizacoes/"
                     driver.get(url_finalizacoes)
                     
@@ -139,8 +162,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     except Exception as e_passo2:
                         print(f" ⚠️ Erro ao processar dados de finalizações nesta partida: {e_passo2}")
 
-
-                    # 🎯 PASSO 3: Coleta de Faltas Sofridas (Aba Ataque)
+                    # 🎯 PASSO 3: Coleta de Faltas Sofridas
                     url_ataque = f"{url_jogo_completa}/resumo/estatisticas-jogadores/ataque/"
                     driver.get(url_ataque)
                     
@@ -151,7 +173,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], [class*='playerName']")) > 0)
                         
                         cabecalhos_atq = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
-                        indice_faltas = 5  # Fallback seguro
+                        indice_faltas = 5  
                         for idx_th, th in enumerate(cabecalhos_atq):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
                             if any(x in texto_th for x in ["SOFRIDAS", "FALTAS SOFRIDAS", "FOULS SUFFERED", "FS"]):
@@ -162,7 +184,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         for lambda_linha in linhas_dados_atq:
                             try:
                                 try:
-                                    # 🟢 Ajustado com a ordem correta e tolerante de seletores para abas secundárias
                                     nome_element = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], .fp-playerName_E6lgN")
                                 except: continue
                                     
@@ -195,7 +216,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     except Exception as e_passo3:
                         print(f" ⚠️ Erro ao processar dados de faltas sofridas nesta partida: {e_passo3}")
 
-                    
                     jogo_global_index += 1
                 except: continue
     except Exception as e:
@@ -207,4 +227,4 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
     except: pass
 
     return stats
-                    
+                            
