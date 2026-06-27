@@ -122,19 +122,15 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             
             mercado_limpo = j.get('mercado', '')
             
-            # 🟢 CORRIGIDO: Identificação e formatação do mercado de Faltas Sofridas
+            # 🟢 CORREÇÃO: Tratamento cirúrgico para evitar duplicar a média que já vem pronta
             if "falta" in mercado_limpo.lower():
-                match_nome = re.search(r':\s*([^(\n]+)', mercado_limpo)
-                match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
-                nome = match_nome.group(1).strip() if match_nome else "Jogador"
-                med = match_med.group(1) if match_med else "N/A"
-                texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {med}"
+                # Corta o "Faltas Sofridas:" da frente e usa o resto do texto inteiro que já está pronto
+                conteudo = mercado_limpo.split(':', 1)[1].strip() if ":" in mercado_limpo else mercado_limpo
+                texto_final = f"🔶 Faltas sofridas: {conteudo}"
             elif "chute" in mercado_limpo.lower():
-                match_nome = re.search(r':\s*([^(\n]+)', mercado_limpo)
-                match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
-                nome = match_nome.group(1).strip() if match_nome else "Jogador"
-                med = match_med.group(1) if match_med else "N/A"
-                texto_final = f"🔶 Chutes no gol: {nome} | Méd: {med}"
+                # Corta o "Chutes no gol:" da frente e usa o resto do texto inteiro que já está pronto
+                conteudo = mercado_limpo.split(':', 1)[1].strip() if ":" in mercado_limpo else mercado_limpo
+                texto_final = f"🔶 Chutes no gol: {conteudo}"
             elif "cartão" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
                 texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}"
             else:
@@ -150,7 +146,9 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         for chave in sorted(agrupados.keys()):
             d = agrupados[chave]
             d["mercados"].sort(key=lambda x: x['prioridade'])
-            linhas = "\n".join([m['texto'] for m in d["mercados"]])
+            
+            # 🟢 DINAMISMO VISUAL: Linhas envelopadas em ``` para reduzir a fonte no Telegram
+            linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
             
             bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n🌐 [Abrir na Betano]({d['link']})"
             
@@ -161,4 +159,3 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
-                
