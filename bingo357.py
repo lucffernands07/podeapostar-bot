@@ -18,7 +18,6 @@ def extrair_odd(odd_str):
     try:
         if not odd_str or odd_str == "N/A" or odd_str == "":
             return 1.30
-        # 🟢 CORRIGIDO: Adicionado "falta" para assumir odd padrão na multiplicação do Bingo
         if isinstance(odd_str, str) and ("Análise" in odd_str or "chutes" in odd_str.lower() or "falta" in odd_str.lower() or "cartã" in odd_str.lower() or "cartao" in odd_str.lower()):
             return 1.30
         if isinstance(odd_str, (int, float)):
@@ -32,11 +31,8 @@ def prioridade_mercado(mercado_texto):
     
     if "gols" in m: return 1
     if "1x" in m: return 2
-    
-    # 🟢 CORRIGIDO: Agrupando chutes e faltas na mesma faixa de prioridade de scout de jogador
     if "chute" in m: return 3 
     if "falta" in m: return 3.1
-    
     if "cartão" in m or "cartao" in m: return 4
     if "vitória" in m or "vitoria" in m: return 5
     if "ambas" in m: return 6
@@ -56,7 +52,7 @@ def carregar_ranking_pro():
         except: return []
     return []
 
-def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS", modo_elite=False):
+def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"):
     bilhetes = []
     if not dados_entrada: return bilhetes
 
@@ -70,7 +66,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
     # 2. Ordena os confrontos pelo número de mercados (mais densos primeiro)
     lista_chaves = sorted(jogos_agrupados.keys(), key=lambda k: len(jogos_agrupados[k]), reverse=True)
     
-    # 🟢 CORREÇÃO: Fatiamos a lista de chaves exatamente no tamanho do alvo (Ex: se pedir 5, pega 5)
+    # Fatiamos a lista de chaves exatamente no tamanho do alvo
     chaves_selecionadas = lista_chaves[:qtd_alvo]
     
     jogos_selecionados = []
@@ -123,7 +119,6 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                 match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
                 
-                # 🟢 AJUSTE DA SIGLA: Coloca a sigla (ex: ARG) entre parênteses (ARG)
                 match_sigla = re.match(r'^([A-ZÀ-Ú]+)\s+(.+)$', nome)
                 if match_sigla:
                     nome = f"({match_sigla.group(1)}) {match_sigla.group(2)}"
@@ -136,7 +131,6 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                 match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
                 
-                # 🟢 AJUSTE DA SIGLA: Coloca a sigla (ex: ARG) entre parênteses (ARG)
                 match_sigla = re.match(r'^([A-ZÀ-Ú]+)\s+(.+)$', nome)
                 if match_sigla:
                     nome = f"({match_sigla.group(1)}) {match_sigla.group(2)}"
@@ -158,7 +152,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         lista_blocos = []
         for chave in sorted(agrupados.keys()):
             d = agrupados[chave]
-            d["mercados"].sort(key=lambda x: x['prioridade'])
+            d["mercados"].sort(key=lambda x: x['best_score'] if 'best_score' in x else x['prioridade'])
             
             linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
             
