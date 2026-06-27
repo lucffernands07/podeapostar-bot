@@ -6,8 +6,8 @@ PASTA_TELEGRAM = "telegram"
 
 def extrair_markup_filtros(escolhas=None):
     """
-    Menu ajustado:
-    - Bingo 3 e 5 com modo denso (Elite) por padrão.
+    Gera o teclado de botões para o Telegram.
+    Totalmente simplificado e baseado em números diretos (3 e 5).
     """
     return {
         "inline_keyboard": [
@@ -15,11 +15,11 @@ def extrair_markup_filtros(escolhas=None):
             [
                 {"text": "📊 RANKING DE MERCADOS ✅⛔", "callback_data": "cb_ver_ranking"}
             ],
-            # --- SEÇÃO 1: BINGOS (Bingo 3 e 5 serão DENSOS) ---
+            # --- SEÇÃO 1: BINGOS (Bingo 3 e 5 puros) ---
             [{"text": "✅ Escolha um bingo:", "callback_data": "ignore"}],
             [
-                {"text": "Bingo 3 (Denso)", "callback_data": "cb_bingo_3_ELITE"},
-                {"text": "Bingo 5 (Denso)", "callback_data": "cb_bingo_5_ELITE"}
+                {"text": "Bingo 3", "callback_data": "cb_bingo_3"},
+                {"text": "Bingo 5", "callback_data": "cb_bingo_5"}
             ],
             # --- SEÇÃO 2: HORÁRIOS ---
             [{"text": "✅ Escolha uma janela:", "callback_data": "ignore"}],
