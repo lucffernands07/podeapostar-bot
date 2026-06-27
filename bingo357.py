@@ -110,7 +110,8 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
             odd_valor = j.get('odd') or info_extra.get('odd', '1.50')
             
-            chave_jogo = f"{horario}_{t1}_{t2}"
+            # 🟢 CHAVE BLINDADA: Usamos os nomes dos times diretos para evitar colisão de horários iguais
+            chave_jogo = f"{t1}_{t2}"
             if chave_jogo not in agrupados:
                 agrupados[chave_jogo] = {
                     "horario": horario, "liga": liga,
@@ -122,13 +123,10 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             
             mercado_limpo = j.get('mercado', '')
             
-            # 🟢 CORREÇÃO: Tratamento cirúrgico para evitar duplicar a média que já vem pronta
             if "falta" in mercado_limpo.lower():
-                # Corta o "Faltas Sofridas:" da frente e usa o resto do texto inteiro que já está pronto
                 conteudo = mercado_limpo.split(':', 1)[1].strip() if ":" in mercado_limpo else mercado_limpo
                 texto_final = f"🔶 Faltas sofridas: {conteudo}"
             elif "chute" in mercado_limpo.lower():
-                # Corta o "Chutes no gol:" da frente e usa o resto do texto inteiro que já está pronto
                 conteudo = mercado_limpo.split(':', 1)[1].strip() if ":" in mercado_limpo else mercado_limpo
                 texto_final = f"🔶 Chutes no gol: {conteudo}"
             elif "cartão" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
@@ -142,12 +140,13 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             })
             odd_total *= extrair_odd(odd_valor)
 
+        # 🟢 ORDENAÇÃO POR HORÁRIO DO JOGO: Garante a ordem cronológica correta na mensagem do canal
         lista_blocos = []
-        for chave in sorted(agrupados.keys()):
-            d = agrupados[chave]
+        confrontos_ordenados = sorted(agrupados.values(), key=lambda x: x['horario'])
+        
+        for d in confrontos_ordenados:
             d["mercados"].sort(key=lambda x: x['prioridade'])
             
-            # 🟢 DINAMISMO VISUAL: Linhas envelopadas em ``` para reduzir a fonte no Telegram
             linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
             
             bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n🌐 [Abrir na Betano]({d['link']})"
