@@ -142,25 +142,34 @@ def main():
                         # Resgata de forma segura os elencos/nomes mapeados do scraper para casa e fora
                         elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
                         elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
+                        
+                        # Resgata os nomes dos times para gerar as siglas (Ex: "Jordânia", "Argentina")
+                        # ⚠️ Ajuste as chaves abaixo se o seu dicionário usar nomes diferentes (ex: "home", "away")
+                        nome_time_casa = s.get("time_casa") or s.get("home") or "MANDANTE"
+                        nome_time_fora = s.get("time_fora") or s.get("away") or "VISITANTE"
 
-                        # Jogadores (Chutes no Alvo) 🟢 AGORA PASSANDO OS ELENCOS
+                        # Jogadores (Chutes no Alvo) 🟢 PASSANDO OS ELENCOS E NOMES DOS TIMES
                         res_jogadores = jogadores.verificar_destaques_jogadores(
                             s.get("historico_chutes", {}), 
                             3, 
                             nome_comp,
                             elenco_casa=elenco_casa_disponivel,
-                            elenco_fora=elenco_fora_disponivel
+                            elenco_fora=elenco_fora_disponivel,
+                            nome_casa=nome_time_casa,
+                            nome_fora=nome_time_fora
                         )
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
-                        # Jogadores (Faltas Sofridas) 🟢 AGORA PASSANDO OS ELENCOS
+                        # Jogadores (Faltas Sofridas) 🟢 PASSANDO OS ELENCOS E NOMES DOS TIMES
                         res_faltas = jogadores.verificar_destaques_faltas(
                             s.get("historico_faltas", {}), 
                             3, 
                             nome_comp,
                             elenco_casa=elenco_casa_disponivel,
-                            elenco_fora=elenco_fora_disponivel
+                            elenco_fora=elenco_fora_disponivel,
+                            nome_casa=nome_time_casa,
+                            nome_fora=nome_time_fora
                         )
                         for rf in res_faltas:
                             mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave']})
