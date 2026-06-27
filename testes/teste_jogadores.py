@@ -106,7 +106,6 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
             if res_c["jogos_com_sucesso"] >= 2 or res_c["media"] >= 1.0:
                 # 🟢 CORREÇÃO: Pega dinamicamente a sigla do país mandante/visitante real
                 sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CAS")
-                nome_formatado = limpar_nome_jogador(jogador)
 
                 mercados_aprovados.append({
                     "texto": f"Chutes no gol: {sigla} {nome_formatado} | Méd: {res_c['media']:.1f}",
