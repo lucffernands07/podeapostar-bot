@@ -1,306 +1,250 @@
 {
-    "data_geracao": "2026-06-26",
+    "data_geracao": "2026-06-27",
     "jogos": [
         {
-            "time_casa": "Novorizontino",
-            "time_fora": "Vila Nova",
-            "mercado": "Chutes no Alvo: RobsonAtacante (Frequência: 1/3j | Méd: 1.7)",
-            "mercado_ranking": "CHUTES NO ALVO: ROBSONATACANTE (FREQUÊNCIA: 1/3J | MÉD: 1.7)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/GpHXYdhB/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Novorizontino",
-            "time_fora": "Vila Nova",
-            "mercado": "Chutes no Alvo: Maykon JesusLateral (Frequência: 1/3j | Méd: 1.3)",
-            "mercado_ranking": "CHUTES NO ALVO: MAYKON JESUSLATERAL (FREQUÊNCIA: 1/3J | MÉD: 1.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/GpHXYdhB/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Novorizontino",
-            "time_fora": "Vila Nova",
-            "mercado": "Faltas Sofridas: RômuloMeia-atacante (Méd: 1.3)",
-            "mercado_ranking": "FALTAS SOFRIDAS: RÔMULOMEIA-ATACANTE (MÉD: 1.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/GpHXYdhB/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Novorizontino",
-            "time_fora": "Vila Nova",
-            "mercado": "Cartões Totais: -2.5",
-            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/GpHXYdhB/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Paraguai",
-            "time_fora": "Austrália",
+            "time_casa": "Croácia",
+            "time_fora": "Gana",
             "mercado": "+1.5 Gols (70%)",
             "mercado_ranking": "+1.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lGmJTJSg/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/6mbbuBSb/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Paraguai",
-            "time_fora": "Austrália",
-            "mercado": "Chutes no Alvo: Enciso J.Atacante (Frequência: 2/3j | Méd: 1.0)",
-            "mercado_ranking": "CHUTES NO ALVO: ENCISO J.ATACANTE (FREQUÊNCIA: 2/3J | MÉD: 1.0)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lGmJTJSg/#/resumo-de-jogo"
+            "time_casa": "Croácia",
+            "time_fora": "Gana",
+            "mercado": "Chutes no gol: CRO Budimir A. | Méd: 1.3",
+            "mercado_ranking": "CHUTES NO GOL: CRO BUDIMIR A. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6mbbuBSb/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Paraguai",
-            "time_fora": "Austrália",
-            "mercado": "Chutes no Alvo: Gomez D.Ponta (Frequência: 1/3j | Méd: 1.3)",
-            "mercado_ranking": "CHUTES NO ALVO: GOMEZ D.PONTA (FREQUÊNCIA: 1/3J | MÉD: 1.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lGmJTJSg/#/resumo-de-jogo"
+            "time_casa": "Croácia",
+            "time_fora": "Gana",
+            "mercado": "Chutes no gol: GAN Senaya M. | Méd: 1.0",
+            "mercado_ranking": "CHUTES NO GOL: GAN SENAYA M. | MÉD: 1.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6mbbuBSb/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Paraguai",
-            "time_fora": "Austrália",
-            "mercado": "Faltas Sofridas: Enciso J.Atacante (Méd: 2.0)",
-            "mercado_ranking": "FALTAS SOFRIDAS: ENCISO J.ATACANTE (MÉD: 2.0)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lGmJTJSg/#/resumo-de-jogo"
+            "time_casa": "Croácia",
+            "time_fora": "Gana",
+            "mercado": "Faltas Sofridas: CRO Baturina M. | Méd: 2.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: CRO BATURINA M. | MÉD: 2.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6mbbuBSb/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Paraguai",
-            "time_fora": "Austrália",
+            "time_casa": "Croácia",
+            "time_fora": "Gana",
+            "mercado": "Faltas Sofridas: GAN Ayew J. | Méd: 2.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: GAN AYEW J. | MÉD: 2.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6mbbuBSb/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Croácia",
+            "time_fora": "Gana",
             "mercado": "Cartões Totais: -2.5",
             "mercado_ranking": "CARTÕES TOTAIS: -2.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lGmJTJSg/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/6mbbuBSb/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Turquia",
-            "time_fora": "EUA",
-            "mercado": "Chutes no Alvo: Bardakci A.Zagueiro (Frequência: 3/3j | Méd: 1.0)",
-            "mercado_ranking": "CHUTES NO ALVO: BARDAKCI A.ZAGUEIRO (FREQUÊNCIA: 3/3J | MÉD: 1.0)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/SCvmMa2U/#/resumo-de-jogo"
+            "time_casa": "Panamá",
+            "time_fora": "Inglaterra",
+            "mercado": "-4.5 Gols (70%)",
+            "mercado_ranking": "-4.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/YZajsXcn/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Turquia",
-            "time_fora": "EUA",
-            "mercado": "Chutes no Alvo: Calhanoglu H.Meio-campista (Frequência: 2/3j | Méd: 3.7)",
-            "mercado_ranking": "CHUTES NO ALVO: CALHANOGLU H.MEIO-CAMPISTA (FREQUÊNCIA: 2/3J | MÉD: 3.7)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/SCvmMa2U/#/resumo-de-jogo"
+            "time_casa": "Panamá",
+            "time_fora": "Inglaterra",
+            "mercado": "Chutes no gol: PAN Harvey C. | Méd: 1.0",
+            "mercado_ranking": "CHUTES NO GOL: PAN HARVEY C. | MÉD: 1.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/YZajsXcn/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Turquia",
-            "time_fora": "EUA",
-            "mercado": "Faltas Sofridas: Guler A.Meia-atacante (Méd: 2.7)",
-            "mercado_ranking": "FALTAS SOFRIDAS: GULER A.MEIA-ATACANTE (MÉD: 2.7)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/SCvmMa2U/#/resumo-de-jogo"
+            "time_casa": "Panamá",
+            "time_fora": "Inglaterra",
+            "mercado": "Chutes no gol: ING Kane H. | Méd: 2.0",
+            "mercado_ranking": "CHUTES NO GOL: ING KANE H. | MÉD: 2.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/YZajsXcn/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Turquia",
-            "time_fora": "EUA",
+            "time_casa": "Panamá",
+            "time_fora": "Inglaterra",
+            "mercado": "Faltas Sofridas: PAN Murillo M. | Méd: 1.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: PAN MURILLO M. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/YZajsXcn/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Panamá",
+            "time_fora": "Inglaterra",
+            "mercado": "Faltas Sofridas: ING Anderson E. | Méd: 2.7",
+            "mercado_ranking": "FALTAS SOFRIDAS: ING ANDERSON E. | MÉD: 2.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/YZajsXcn/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Panamá",
+            "time_fora": "Inglaterra",
             "mercado": "Cartões Totais: -2.5",
             "mercado_ranking": "CARTÕES TOTAIS: -2.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/SCvmMa2U/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/YZajsXcn/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Noruega",
-            "time_fora": "França",
-            "mercado": "+2.5 Gols (85%)",
-            "mercado_ranking": "+2.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bsJSJ30L/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Noruega",
-            "time_fora": "França",
-            "mercado": "Chutes no Alvo: E. HaalandAtacante (Frequência: 3/3j | Méd: 3.7)",
-            "mercado_ranking": "CHUTES NO ALVO: E. HAALANDATACANTE (FREQUÊNCIA: 3/3J | MÉD: 3.7)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bsJSJ30L/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Noruega",
-            "time_fora": "França",
-            "mercado": "Chutes no Alvo: M. OdegaardMeio-campista (Frequência: 2/3j | Méd: 1.3)",
-            "mercado_ranking": "CHUTES NO ALVO: M. ODEGAARDMEIO-CAMPISTA (FREQUÊNCIA: 2/3J | MÉD: 1.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bsJSJ30L/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Noruega",
-            "time_fora": "França",
-            "mercado": "Faltas Sofridas: E. HaalandAtacante (Méd: 1.0)",
-            "mercado_ranking": "FALTAS SOFRIDAS: E. HAALANDATACANTE (MÉD: 1.0)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bsJSJ30L/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Noruega",
-            "time_fora": "França",
-            "mercado": "Cartões Totais: -2.5",
-            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bsJSJ30L/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Senegal",
-            "time_fora": "Iraque",
-            "mercado": "Chutes no Alvo: Sarr I.Ponta (Frequência: 2/3j | Méd: 3.0)",
-            "mercado_ranking": "CHUTES NO ALVO: SARR I.PONTA (FREQUÊNCIA: 2/3J | MÉD: 3.0)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/j5IhOwop/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Senegal",
-            "time_fora": "Iraque",
-            "mercado": "Chutes no Alvo: Jackson N.Atacante (Frequência: 2/3j | Méd: 1.3)",
-            "mercado_ranking": "CHUTES NO ALVO: JACKSON N.ATACANTE (FREQUÊNCIA: 2/3J | MÉD: 1.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/j5IhOwop/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Senegal",
-            "time_fora": "Iraque",
-            "mercado": "Faltas Sofridas: Niakhate M.Zagueiro (Méd: 2.0)",
-            "mercado_ranking": "FALTAS SOFRIDAS: NIAKHATE M.ZAGUEIRO (MÉD: 2.0)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/j5IhOwop/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Senegal",
-            "time_fora": "Iraque",
-            "mercado": "Cartões Totais: -2.5",
-            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/j5IhOwop/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Cabo Verde",
-            "time_fora": "Arábia Saudita",
+            "time_casa": "Colômbia",
+            "time_fora": "Portugal",
             "mercado": "+1.5 Gols (85%)",
             "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/487Xar9k/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/vL2qotaK/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Cabo Verde",
-            "time_fora": "Arábia Saudita",
-            "mercado": "+2.5 Gols (70%)",
-            "mercado_ranking": "+2.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/487Xar9k/#/resumo-de-jogo"
+            "time_casa": "Colômbia",
+            "time_fora": "Portugal",
+            "mercado": "Chutes no gol: COL Puerta G. | Méd: 2.3",
+            "mercado_ranking": "CHUTES NO GOL: COL PUERTA G. | MÉD: 2.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vL2qotaK/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Cabo Verde",
-            "time_fora": "Arábia Saudita",
-            "mercado": "Chutes no Alvo: Mendes R.Ponta (Frequência: 2/3j | Méd: 1.0)",
-            "mercado_ranking": "CHUTES NO ALVO: MENDES R.PONTA (FREQUÊNCIA: 2/3J | MÉD: 1.0)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/487Xar9k/#/resumo-de-jogo"
+            "time_casa": "Colômbia",
+            "time_fora": "Portugal",
+            "mercado": "Chutes no gol: POR Ronaldo C. | Méd: 4.7",
+            "mercado_ranking": "CHUTES NO GOL: POR RONALDO C. | MÉD: 4.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vL2qotaK/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Cabo Verde",
-            "time_fora": "Arábia Saudita",
-            "mercado": "Chutes no Alvo: Borges D.Zagueiro (Frequência: 2/3j | Méd: 0.7)",
-            "mercado_ranking": "CHUTES NO ALVO: BORGES D.ZAGUEIRO (FREQUÊNCIA: 2/3J | MÉD: 0.7)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/487Xar9k/#/resumo-de-jogo"
+            "time_casa": "Colômbia",
+            "time_fora": "Portugal",
+            "mercado": "Faltas Sofridas: COL Diaz L. | Méd: 2.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: COL DIAZ L. | MÉD: 2.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vL2qotaK/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Cabo Verde",
-            "time_fora": "Arábia Saudita",
-            "mercado": "Faltas Sofridas: Lopes Cabral S.Lateral (Méd: 2.3)",
-            "mercado_ranking": "FALTAS SOFRIDAS: LOPES CABRAL S.LATERAL (MÉD: 2.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/487Xar9k/#/resumo-de-jogo"
+            "time_casa": "Colômbia",
+            "time_fora": "Portugal",
+            "mercado": "Faltas Sofridas: POR Nuno Mendes | Méd: 2.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: POR NUNO MENDES | MÉD: 2.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vL2qotaK/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Cabo Verde",
-            "time_fora": "Arábia Saudita",
+            "time_casa": "Colômbia",
+            "time_fora": "Portugal",
             "mercado": "Cartões Totais: -2.5",
             "mercado_ranking": "CARTÕES TOTAIS: -2.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/487Xar9k/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/vL2qotaK/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Uruguai",
-            "time_fora": "Espanha",
-            "mercado": "+1.5 Gols (70%)",
-            "mercado_ranking": "+1.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/8xM154oS/#/resumo-de-jogo"
+            "time_casa": "R. D. Congo",
+            "time_fora": "Uzbequistão",
+            "mercado": "Chutes no gol: RDC Bakambu C. | Méd: 1.3",
+            "mercado_ranking": "CHUTES NO GOL: RDC BAKAMBU C. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hEWfCwid/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Uruguai",
-            "time_fora": "Espanha",
-            "mercado": "Chutes no Alvo: Ugarte M.Meio-campista (Frequência: 3/3j | Méd: 1.3)",
-            "mercado_ranking": "CHUTES NO ALVO: UGARTE M.MEIO-CAMPISTA (FREQUÊNCIA: 3/3J | MÉD: 1.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/8xM154oS/#/resumo-de-jogo"
+            "time_casa": "R. D. Congo",
+            "time_fora": "Uzbequistão",
+            "mercado": "Chutes no gol: UZB Fayzullaev A. | Méd: 1.0",
+            "mercado_ranking": "CHUTES NO GOL: UZB FAYZULLAEV A. | MÉD: 1.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hEWfCwid/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Uruguai",
-            "time_fora": "Espanha",
-            "mercado": "Chutes no Alvo: Valverde F.Meio-campista (Frequência: 2/3j | Méd: 3.3)",
-            "mercado_ranking": "CHUTES NO ALVO: VALVERDE F.MEIO-CAMPISTA (FREQUÊNCIA: 2/3J | MÉD: 3.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/8xM154oS/#/resumo-de-jogo"
+            "time_casa": "R. D. Congo",
+            "time_fora": "Uzbequistão",
+            "mercado": "Faltas Sofridas: RDC Mbemba Ch. | Méd: 1.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: RDC MBEMBA CH. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hEWfCwid/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Uruguai",
-            "time_fora": "Espanha",
-            "mercado": "Faltas Sofridas: Araujo M.Ponta (Méd: 2.0)",
-            "mercado_ranking": "FALTAS SOFRIDAS: ARAUJO M.PONTA (MÉD: 2.0)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/8xM154oS/#/resumo-de-jogo"
+            "time_casa": "R. D. Congo",
+            "time_fora": "Uzbequistão",
+            "mercado": "Faltas Sofridas: UZB Fayzullaev A. | Méd: 2.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: UZB FAYZULLAEV A. | MÉD: 2.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hEWfCwid/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Uruguai",
-            "time_fora": "Espanha",
+            "time_casa": "R. D. Congo",
+            "time_fora": "Uzbequistão",
             "mercado": "Cartões Totais: -2.5",
             "mercado_ranking": "CARTÕES TOTAIS: -2.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/8xM154oS/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/hEWfCwid/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Egito",
-            "time_fora": "Irã",
-            "mercado": "+1.5 Gols (70%)",
-            "mercado_ranking": "+1.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/OjRH5DuB/#/resumo-de-jogo"
+            "time_casa": "Argélia",
+            "time_fora": "Áustria",
+            "mercado": "Chutes no gol: ARG Chaibi F. | Méd: 1.7",
+            "mercado_ranking": "CHUTES NO GOL: ARG CHAIBI F. | MÉD: 1.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4rOtRK7l/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Egito",
-            "time_fora": "Irã",
-            "mercado": "Chutes no Alvo: ZizoAtacante (Frequência: 3/3j | Méd: 1.0)",
-            "mercado_ranking": "CHUTES NO ALVO: ZIZOATACANTE (FREQUÊNCIA: 3/3J | MÉD: 1.0)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/OjRH5DuB/#/resumo-de-jogo"
+            "time_casa": "Argélia",
+            "time_fora": "Áustria",
+            "mercado": "Chutes no gol: ÁUS Sabitzer M. | Méd: 2.3",
+            "mercado_ranking": "CHUTES NO GOL: ÁUS SABITZER M. | MÉD: 2.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4rOtRK7l/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Egito",
-            "time_fora": "Irã",
-            "mercado": "Chutes no Alvo: Marmoush O.Atacante (Frequência: 2/3j | Méd: 2.7)",
-            "mercado_ranking": "CHUTES NO ALVO: MARMOUSH O.ATACANTE (FREQUÊNCIA: 2/3J | MÉD: 2.7)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/OjRH5DuB/#/resumo-de-jogo"
+            "time_casa": "Argélia",
+            "time_fora": "Áustria",
+            "mercado": "Faltas Sofridas: ARG Bensebaini R. | Méd: 1.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: ARG BENSEBAINI R. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4rOtRK7l/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Egito",
-            "time_fora": "Irã",
-            "mercado": "Faltas Sofridas: Marmoush O.Atacante (Méd: 2.3)",
-            "mercado_ranking": "FALTAS SOFRIDAS: MARMOUSH O.ATACANTE (MÉD: 2.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/OjRH5DuB/#/resumo-de-jogo"
+            "time_casa": "Argélia",
+            "time_fora": "Áustria",
+            "mercado": "Faltas Sofridas: ÁUS Schmid R. | Méd: 1.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: ÁUS SCHMID R. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4rOtRK7l/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Egito",
-            "time_fora": "Irã",
+            "time_casa": "Argélia",
+            "time_fora": "Áustria",
             "mercado": "Cartões Totais: -2.5",
             "mercado_ranking": "CARTÕES TOTAIS: -2.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/OjRH5DuB/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/4rOtRK7l/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Nova Zelândia",
-            "time_fora": "Bélgica",
+            "time_casa": "Jordânia",
+            "time_fora": "Argentina",
             "mercado": "-4.5 Gols (85%)",
             "mercado_ranking": "-4.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jwT97ZAb/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/KAnAWtpR/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Nova Zelândia",
-            "time_fora": "Bélgica",
-            "mercado": "Chutes no Alvo: Singh S.Meia-atacante (Frequência: 3/3j | Méd: 1.7)",
-            "mercado_ranking": "CHUTES NO ALVO: SINGH S.MEIA-ATACANTE (FREQUÊNCIA: 3/3J | MÉD: 1.7)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jwT97ZAb/#/resumo-de-jogo"
+            "time_casa": "Jordânia",
+            "time_fora": "Argentina",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KAnAWtpR/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Nova Zelândia",
-            "time_fora": "Bélgica",
-            "mercado": "Chutes no Alvo: Wood Ch.Atacante (Frequência: 2/3j | Méd: 1.7)",
-            "mercado_ranking": "CHUTES NO ALVO: WOOD CH.ATACANTE (FREQUÊNCIA: 2/3J | MÉD: 1.7)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jwT97ZAb/#/resumo-de-jogo"
+            "time_casa": "Jordânia",
+            "time_fora": "Argentina",
+            "mercado": "Chutes no gol: JOR Olwan A. | Méd: 2.0",
+            "mercado_ranking": "CHUTES NO GOL: JOR OLWAN A. | MÉD: 2.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KAnAWtpR/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Nova Zelândia",
-            "time_fora": "Bélgica",
-            "mercado": "Faltas Sofridas: Cacace L.Lateral (Méd: 2.3)",
-            "mercado_ranking": "FALTAS SOFRIDAS: CACACE L.LATERAL (MÉD: 2.3)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jwT97ZAb/#/resumo-de-jogo"
+            "time_casa": "Jordânia",
+            "time_fora": "Argentina",
+            "mercado": "Chutes no gol: ARG Messi L. | Méd: 4.7",
+            "mercado_ranking": "CHUTES NO GOL: ARG MESSI L. | MÉD: 4.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KAnAWtpR/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Nova Zelândia",
-            "time_fora": "Bélgica",
+            "time_casa": "Jordânia",
+            "time_fora": "Argentina",
+            "mercado": "Faltas Sofridas: JOR Al Rashdan N. | Méd: 1.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: JOR AL RASHDAN N. | MÉD: 1.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KAnAWtpR/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Jordânia",
+            "time_fora": "Argentina",
+            "mercado": "Faltas Sofridas: ARG Messi L. | Méd: 1.7",
+            "mercado_ranking": "FALTAS SOFRIDAS: ARG MESSI L. | MÉD: 1.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KAnAWtpR/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Jordânia",
+            "time_fora": "Argentina",
             "mercado": "Cartões Totais: -2.5",
             "mercado_ranking": "CARTÕES TOTAIS: -2.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jwT97ZAb/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/KAnAWtpR/#/resumo-de-jogo"
         }
     ]
 }
