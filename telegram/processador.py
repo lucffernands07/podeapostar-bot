@@ -22,35 +22,45 @@ def processar_comando_direto(tipo_bruto):
     config = {"bingo": 3, "horario": "DIA", "bilhete": "ACERTOS", "aviso": "", "modo_elite": False}
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
-    # 1. Processamento para strings compostas (Worker / Automatizado)
+    # 1. PROCESSAMENTO DE CALLBACKS DO TELEGRAM (Maior Prioridade)
+    if "cb_bingo_" in tipo_limpo:
+        partes = tipo_limpo.split("_")
+        for p in partes:
+            if p.isdigit():
+                config["bingo"] = int(p)
+                break
+        config["modo_elite"] = "ELITE" in tipo_limpo.upper() and config["bingo"] == 5
+        config["aviso"] = f"🎲 Escolheu: *Bingo {config['bingo']}*"
+        print(f"✅ Configuração gerada por callback direto: {config}")
+        return config
+
+    # 2. PROCESSAMENTO PARA STRINGS COMPOSTAS (Worker / Automatizado)
     if "BINGO:" in tipo_limpo and "HORA:" in tipo_limpo:
         try:
             partes = tipo_limpo.split("|")
             print(f"⚙️ A processar comando composto. Partes detetadas: {partes}")
+            
+            valor_b = ""
             for parte in partes:
                 if parte.startswith("BINGO:"):
-                    valor_b = parte.split(":")[1]
-                    
-                    if "ELITE" in valor_b.upper():
-                        config["modo_elite"] = True
-                        digitos = "".join([c for c in valor_b if c.isdigit()])
-                        if digitos:
-                            config["bingo"] = int(digitos)
-                        else:
-                            config["bingo"] = 5  
-                            print("🚨 [ALERTA] Não veio número no Bingo Elite composto! Assumido 5.")
-                    else:
-                        digitos = "".join([c for c in valor_b if c.isdigit()])
-                        if digitos:
-                            config["bingo"] = int(digitos)
-                        else:
-                            config["bingo"] = 3
-                        
+                    valor_b = parte.split(":")[1].upper()
                 elif parte.startswith("HORA:"):
                     config["horario"] = parte.split(":")[1]
                 elif parte.startswith("TIPO:"):
                     config["bilhete"] = parte.split(":")[1]
-            
+
+            # Prioridade total para extração de números para evitar inversão
+            digitos = "".join([c for c in valor_b if c.isdigit()])
+            if digitos:
+                config["bingo"] = int(digitos)
+                # Se for especificado um número diferente de 5, desativa o modo elite para respeitar o clique
+                config["modo_elite"] = (config["bingo"] == 5)
+            elif "ELITE" in valor_b:
+                config["modo_elite"] = True
+                config["bingo"] = 5
+            else:
+                config["bingo"] = 3
+
             txt_janela = f"{config['horario']}" if config['horario'] != "DIA" else "Do Dia"
             txt_modo = "Mais acertos"
             if config['bilhete'] == "ODDS": txt_modo = "Maiores Odds"
@@ -63,67 +73,25 @@ def processar_comando_direto(tipo_bruto):
         except Exception as e:
             print(f"⚠️ Erro ao processar string composta ({e}), a usar fallbacks...")
 
-    # 2. Processamento para Callbacks dos Botões do Telegram
-    if "cb_bingo_" in tipo_limpo:
-        partes = tipo_limpo.split("_")
-        numero_detectado = False
-        
-        # Procura qualquer dígito nas partes do callback de forma direta
-        for p in partes:
-            if p.isdigit():
-                config["bingo"] = int(p)
-                numero_detectado = True
-                break
-        
-        if "ELITE" in tipo_limpo.upper():
-            config["modo_elite"] = True
-            if not numero_detectado:
-                config["bingo"] = 5
-            config["aviso"] = f"🎲 Escolheu: *Bingo {config['bingo']} (Denso/Elite)*"
-        else:
-            if not numero_detectado:
-                config["bingo"] = 3
-            config["aviso"] = f"🎲 Escolheu: *Bingo {config['bingo']}*"
-        
-        print(f"✅ Configuração gerada por callback de bingo: {config}")
-
-    elif "cb_hora_" in tipo_limpo:
-        config["horario"] = tipo_limpo.split("_")[-1]
-        txt_h = config["horario"] if config["horario"] != "DIA" else "Do Dia"
-        config["aviso"] = f"⏱️ Escolheu a janela: *{txt_h}*"
-        print(f"✅ Configuração gerada por callback de hora: {config}")
-
-    elif "cb_tipo_" in tipo_limpo:
-        config["bilhete"] = tipo_limpo.split("_")[-1]
-        txt_m = "Mais acertos"
-        if config["bilhete"] == "ODDS": txt_m = "Maiores Odds"
-        elif config["bilhete"] == "AMBAS": txt_m = "Equilibrado"
-        config["aviso"] = f"📊 Escolheu a estratégia: *{txt_m}*"
-        print(f"✅ Configuração gerada por callback de tipo: {config}")
-    
-    # 3. Fallback Geral (Garante a captura exata de qualquer string solta)
+    # 3. FALLBACK GERAL
+    digitos_soltos = "".join([c for c in tipo_limpo if c.isdigit()])
+    if digitos_soltos:
+        config["bingo"] = int(digitos_soltos)
+        config["modo_elite"] = (config["bingo"] == 5 and "ELITE" in tipo_limpo.upper())
+    elif "ELITE" in tipo_limpo.upper():
+        config["modo_elite"] = True
+        config["bingo"] = 5
     else:
-        print("⚠️ Comando não reconhecido como callback padrão. A aplicar lógica de varredura...")
+        config["bingo"] = 3
         
-        # 🟢 CORREÇÃO CRÍTICA DO FALLBACK: Captura direta dos dígitos do texto para não inverter 3 e 5
-        digitos_soltos = "".join([c for c in tipo_limpo if c.isdigit()])
-        
-        if "ELITE" in tipo_limpo.upper():
-            config["modo_elite"] = True
-            config["bingo"] = int(digitos_soltos) if digitos_soltos else 5
-        else:
-            config["bingo"] = int(digitos_soltos) if digitos_soltos else 3
-            
-        if "ODDS" in tipo_limpo: config["bilhete"] = "ODDS"
-        
-        txt_bingo = "✨ Elite" if config["modo_elite"] else config["bingo"]
-        config["aviso"] = f"🚀 A processar comando recebido: *{txt_bingo}*"
-        print(f"✅ Configuração gerada por fallback geral: {config}")
-
+    if "ODDS" in tipo_limpo: config["bilhete"] = "ODDS"
+    
+    txt_bingo = "✨ Elite" if config["modo_elite"] else config["bingo"]
+    config["aviso"] = f"🚀 A processar comando recebido: *{txt_bingo}*"
+    print(f"✅ Configuração gerada por fallback geral: {config}")
     return config
 
 def executar():
-    # ... (o resto da função executar permanece exatamente igual ao que já tinhas)
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
     tipo_bruto = os.getenv('TIPO_BINGO', '')
@@ -205,16 +173,13 @@ def executar():
             if int(h_partes[0]) < 4 and agora_br.hour > 20:
                 hora_jogo += timedelta(days=1)
             
-            estado_filtro = "APROVADO"
             if filtro_hora != "DIA" and "H" in filtro_hora:
                 try:
                     horas_limite = int(filtro_hora.replace("H", ""))
                     if hora_jogo > agora_br + timedelta(hours=horas_limite) or hora_jogo < agora_br - timedelta(minutes=15):
-                        estado_filtro = "REJEITADO (Fora da Janela de Horas)"
                         continue
                 except: pass
             elif filtro_hora != "DIA" and hora_jogo < agora_br - timedelta(minutes=15):
-                estado_filtro = "REJEITADO (Jogo já Iniciou / Passado)"
                 continue
                 
             j["datetime_real"] = hora_jogo
