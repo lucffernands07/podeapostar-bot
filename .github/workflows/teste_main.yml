@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - 'testes/teste_main.py'
-      - 'testes/**'
   workflow_dispatch:
 
 jobs:
