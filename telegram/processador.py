@@ -99,7 +99,7 @@ def executar():
     config = processar_comando_direto(tipo_bruto)
     qtd_alvo = config["bingo"]
     filtro_hora = config["horario"]
-    estrategia = config["bilhete"].strip().upper() 
+    estrategia = config["bilhete"].strip().upper() # Força ficar em maiúsculo (ODDS, ACERTOS, AMBAS)
 
     msg_aguarde = f"{config['aviso']}\n\n⏳ *Buscando os melhores jogos no banco de dados, aguarde um instante...*"
     url_msg = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -128,6 +128,7 @@ def executar():
     # 🚀 MAPEAMENTO UNIFICADO DE LINKS (Betano + H2H)
     dict_cache_links = {}
 
+    # Passo A: Pega os links da Betano salvos no banco de dados do dia
     for j in jogos_banco:
         casa = j.get("time_casa")
         fora = j.get("time_fora")
@@ -138,6 +139,7 @@ def executar():
                 dict_cache_links[chave_confronto] = {}
             dict_cache_links[chave_confronto]["link_betano"] = link_b
 
+    # Passo B: Cruza e adiciona os links H2H do pendentes.json se existirem
     if os.path.exists(caminho_pendentes):
         try:
             with open(caminho_pendentes, "r", encoding="utf-8") as f:
@@ -156,14 +158,11 @@ def executar():
         except Exception as e:
             print(f"⚠️ Erro ao processar links H2H do pendentes.json: {e}")
 
-    # 🟢 O BLOCO ENTRA EXATAMENTE AQUI, SUBSTIUINDO O FILTRO ANTIGO:
     jogos_validos_horario = []
     for j in jogos_banco:
         try:
             h_partes = j['horario'].split(":")
-            # Usa o ano, mês e dia atuais da data de referência gerada
-            ano_j, mes_j, dia_j = map(int, data_hoje.split("-"))
-            hora_jogo = datetime(ano_j, mes_j, dia_j, int(h_partes[0]), int(h_partes[1]), 0)
+            hora_jogo = agora_br.replace(hour=int(h_partes[0]), minute=int(h_partes[1]), second=0, microsecond=0)
             
             if int(h_partes[0]) < 4 and agora_br.hour > 20:
                 hora_jogo += timedelta(days=1)
@@ -174,22 +173,19 @@ def executar():
                     if hora_jogo > agora_br + timedelta(hours=horas_limite) or hora_jogo < agora_br - timedelta(minutes=15):
                         continue
                 except: pass
-            # 🟢 CORREÇÃO: Se for filtro do DIA, aceita todos os jogos salvos no JSON sem cortar os de horário próximo/passado
-            elif filtro_hora != "DIA" and hora_jogo < agora_br - timedelta(minutes=15):
+            elif hora_jogo < agora_br - timedelta(minutes=15):
                 continue
                 
             j["datetime_real"] = hora_jogo
             jogos_validos_horario.append(j)
-        except Exception as e:
-            print(f"⚠️ Erro ao calcular horário do jogo: {e}")
+        except:
             if filtro_hora == "DIA": 
                 jogos_validos_horario.append(j)
-
-    # -----------------------------------------------------------------
 
     jogos_validos_horario.sort(key=lambda x: x.get("datetime_real", agora_br))
 
     # --- PROCESSAMENTO DOS BILHETES ---
+    # 🚀 Injetado o parâmetro modo_elite que informa se deve priorizar jogos com alta densidade de mercados
     bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(
         jogos_validos_horario, 
         qtd_alvo=qtd_alvo, 
@@ -197,6 +193,7 @@ def executar():
         modo_elite=config.get("modo_elite", False)
     )
     
+    # Repassa o cache contendo os dicionários de links limpos
     texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links)
 
     # --- ENVIO DOS RESULTADOS OU AVISO DE ERRO ---
@@ -218,6 +215,7 @@ def executar():
         except Exception as e:
             print(f"⚠️ Erro ao enviar os bilhetes formatados para o Telegram: {e}")
     else:
+        # Aviso personalizado quando não encontra jogos no listão
         msg_erro = f"{config['aviso']}\n\n⚠️😢 Não foi encontrado bilhete com esse filtro. Tente outra janela, bingo ou tente amanhã."
         try:
             payload = {
@@ -230,10 +228,9 @@ def executar():
                 payload["reply_markup"] = menu_botoes
 
             requests.post(url_msg, json=payload)
-            print("⚠️ Extrato de erro enviado.")
+            print("⚠️ Aviso de 'Não foi encontrado bilhete' enviado com o Menu anexado!")
         except Exception as e:
-            print(f"⚠️ Erro ao enviar aviso de erro: {e}")
-    
+            print(f"⚠️ Erro ao enviar aviso de erro para o Telegram: {e}")
 
 if __name__ == "__main__":
     executar()
