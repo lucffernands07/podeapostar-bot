@@ -122,7 +122,7 @@ def processar_comando_direto(tipo_bruto):
 
     return config
 
-def ejecutar():
+def executar():
     # ... (o resto da função executar permanece exatamente igual ao que já tinhas)
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
