@@ -234,7 +234,7 @@ def main():
             # 1. ENVIO DO LISTÃO PARA VOCÊ
             meu_chat_id = os.getenv('CHAT_ID')
             if meu_chat_id:
-                cabecalho = "🎫 *LISTA TESTE DE MERCADOS DO DIA*\n\n"
+                cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
                 corpo = ""
                 for j in lista_para_filtros:
                     bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
@@ -257,16 +257,25 @@ def main():
                     "link": j.get("link_betano"),
                     "liga": j.get("liga"),
                     "horario": j.get("horario"),
-                    "odd": j.get("odd"),
-                    "link_h2h": j.get("link_h2h") # Agora ele pega o link que você inseriu no loop
+                    "odd": j.get("odd")
                 }
-
     
             # 2. ENVIO AUTOMÁTICO DO BINGO ELITE (Pulado para evitar erros)
             print("📢 Pulando envio do Elite conforme solicitado.")
     
-            # 3. ENVIO DO MENU INTERATIVO (Para os botões do canal) DESATIVADO PARA TESTES
-            
+            # 3. ENVIO DO MENU INTERATIVO (Para os botões do canal)
+            canal_id = os.getenv('CHANNEL_ID')
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
+            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
+    
+            if texto_bingos_final and canal_id:
+                try:
+                    msg_bingo_formatada = "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final
+                    menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
+                    print("📢 Menu interativo enviado para o Canal.")
+                except Exception as e:
+                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
+
             # Gravação de arquivos
             os.makedirs("ranking", exist_ok=True)
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
