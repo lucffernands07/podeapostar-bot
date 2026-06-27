@@ -96,7 +96,6 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         odd_total = 1.0
         agrupados = {}
         
-        # 🟢 CORREÇÃO: Usamos enumerate para gerar um ID sequencial único por mercado, evitando colisões
         for idx, j in enumerate(b.get('jogos', [])):
             t1 = str(j.get('time_casa', 'Desconhecido')).strip().lower()
             t2 = str(j.get('time_fora', 'Desconhecido')).strip().lower()
@@ -107,14 +106,13 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
             odd_valor = j.get('odd') or info_extra.get('odd', '1.50')
             
-            # 🟢 CHAVE BLINDADA: Evita que jogos do mesmo horário (Ex: 20:30) se sobrescrevam
             chave_jogo = f"{horario}_{t1}_{t2}"
             if chave_jogo not in agrupados:
                 agrupados[chave_jogo] = {
                     "horario": horario, "liga": liga,
                     "time_casa": j.get('time_casa'), "time_fora": j.get('time_fora'),
                     "mercados": [], 
-                    "link": j.get('link_betano') or info_extra.get('link', "https://www.betano.bet.br/"),
+                    "link": j.get('link_betano') or info_extra.get('link', "[https://www.betano.bet.br/](https://www.betano.bet.br/)"),
                     "link_h2h": info_extra.get('link_h2h') 
                 }
             
@@ -147,7 +145,9 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         for chave in sorted(agrupados.keys()):
             d = agrupados[chave]
             d["mercados"].sort(key=lambda x: x['prioridade'])
-            linhas = "\n".join([m['texto'] for m in d["mercados"]])
+            
+            # Caixa cinza / fonte pequena ativada aqui
+            linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
             
             bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n🌐 [Abrir na Betano]({d['link']})"
             
@@ -158,4 +158,4 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
-            
+        
