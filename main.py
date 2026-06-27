@@ -10,14 +10,15 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
-from ligas import COMPETICOES
-from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes 
+from testes.teste_ligas import TESTE_COMPETICOES
+from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, cartoes 
+from testes import teste_jogadores as jogadores
 import odds, bingo357
 from telegram import menus
 
 # Funções de raspagem
 from funcoes.raspagem_h2h import pegar_estatisticas_h2h
-from funcoes.raspagem_scouts import pegar_scouts_avancados
+from testes.teste_raspagem_scouts import pegar_scouts_avancados
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -59,7 +60,7 @@ def main():
     total_mercados = 0 
 
     try:
-        for nome_comp, url in COMPETICOES.items():
+        for nome_comp, url in TESTE_COMPETICOES.items():
             if total_mercados >= 200: 
                 break 
             print(f"\n--- Analisando: {nome_comp} ---")
@@ -137,13 +138,38 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                                                # Jogadores (Chutes no Alvo)
-                        res_jogadores = jogadores.verificar_destaques_jogadores(s.get("historico_chutes", {}), 3, nome_comp)
+                        # --- SEÇÃO DE JOGADORES AJUSTADA (USANDO T1 E T2 DIRETOS) ---
+                        # Resgata de forma segura os elencos/nomes mapeados do scraper para casa e fora
+                        elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
+                        elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
+                        
+                        # 🟢 SOLUÇÃO: Usa as variáveis t1 e t2 que já possuem os nomes reais dos times!
+                        nome_time_casa = t1 if t1 else "MANDANTE"
+                        nome_time_fora = t2 if t2 else "VISITANTE"
+
+                        # Jogadores (Chutes no Alvo) 
+                        res_jogadores = jogadores.verificar_destaques_jogadores(
+                            s.get("historico_chutes", {}), 
+                            3, 
+                            nome_comp,
+                            elenco_casa=elenco_casa_disponivel,
+                            elenco_fora=elenco_fora_disponivel,
+                            nome_casa=nome_time_casa,
+                            nome_fora=nome_time_fora
+                        )
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
-                        # Jogadores (Faltas Sofridas) 🟢 ADICIONADO AQUI
-                        res_faltas = jogadores.verificar_destaques_faltas(s.get("historico_faltas", {}), 3, nome_comp)
+                        # Jogadores (Faltas Sofridas) 
+                        res_faltas = jogadores.verificar_destaques_faltas(
+                            s.get("historico_faltas", {}), 
+                            3, 
+                            nome_comp,
+                            elenco_casa=elenco_casa_disponivel,
+                            elenco_fora=elenco_fora_disponivel,
+                            nome_casa=nome_time_casa,
+                            nome_fora=nome_time_fora
+                        )
                         for rf in res_faltas:
                             mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave']})
 
@@ -157,6 +183,15 @@ def main():
                             elif media >= 1.0: mercado_formatado = "Cartões Totais: -3.5"
                             else: mercado_formatado = "Cartões Totais: -2.5"
                             mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
+
+                        # 🟢 TRAVA ANTI-DUPLICADOS (Limpa mercados idênticos antes de rodar as odds)
+                        mercados_unicos = []
+                        textos_vistos = set()
+                        for item in mercados_para_processar:
+                            if item["texto"] not in textos_vistos:
+                                mercados_unicos.append(item)
+                                textos_vistos.add(item["texto"])
+                        mercados_para_processar = mercados_unicos
 
                         # --- VALIDAÇÃO DE ODDS ---
                         if mercados_para_processar:
@@ -187,6 +222,7 @@ def main():
                                         "mercado_ranking": m_texto.upper(), "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
                                     })
                                     total_mercados += 1
+                                    
                 except Exception as e:
                     print(f"⚠️ Erro ao processar partida: {e}")
                     continue
@@ -198,7 +234,7 @@ def main():
             # 1. ENVIO DO LISTÃO PARA VOCÊ
             meu_chat_id = os.getenv('CHAT_ID')
             if meu_chat_id:
-                cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
+                cabecalho = "🎫 *LISTA TESTE DE MERCADOS DO DIA*\n\n"
                 corpo = ""
                 for j in lista_para_filtros:
                     bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
@@ -229,19 +265,8 @@ def main():
             # 2. ENVIO AUTOMÁTICO DO BINGO ELITE (Pulado para evitar erros)
             print("📢 Pulando envio do Elite conforme solicitado.")
     
-            # 3. ENVIO DO MENU INTERATIVO (Para os botões do canal)
-            canal_id = os.getenv('CHANNEL_ID')
-            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
-            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
-    
-            if texto_bingos_final and canal_id:
-                try:
-                    msg_bingo_formatada = "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final
-                    menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
-                    print("📢 Menu interativo enviado para o Canal.")
-                except Exception as e:
-                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
-
+            # 3. ENVIO DO MENU INTERATIVO (Para os botões do canal) DESATIVADO PARA TESTES
+            
             # Gravação de arquivos
             os.makedirs("ranking", exist_ok=True)
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
