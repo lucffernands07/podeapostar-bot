@@ -143,12 +143,19 @@ def main():
                         elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
                         elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
                         
-                        # Resgata os nomes dos times para gerar as siglas (Ex: "Jordânia", "Argentina")
-                        # ⚠️ Ajuste as chaves abaixo se o seu dicionário usar nomes diferentes (ex: "home", "away")
-                        nome_time_casa = s.get("time_casa") or s.get("home") or "MANDANTE"
-                        nome_time_fora = s.get("time_fora") or s.get("away") or "VISITANTE"
+                        # 🟢 Pega a string do confronto (Ex: "Jordânia x Argentina" ou "Argélia x Áustria")
+                        # ⚠️ Substitua s.get("confronto") pela chave exata que você usa para printar o estádio 🏟️ se for diferente
+                        confronto_texto = s.get("confronto") or s.get("jogo") or s.get("nome") or ""
+                        
+                        # Separa os nomes dinamicamente cortando no " x "
+                        nome_time_casa = "MANDANTE"
+                        nome_time_fora = "VISITANTE"
+                        if " x " in confronto_texto:
+                            partes = confronto_texto.split(" x ")
+                            nome_time_casa = partes[0].strip()
+                            nome_time_fora = partes[1].strip()
 
-                        # Jogadores (Chutes no Alvo) 🟢 PASSANDO OS ELENCOS E NOMES DOS TIMES
+                        # Jogadores (Chutes no Alvo) 🟢 PASSANDO OS ELENCOS E NOMES DOS TIMES CORRIGIDOS
                         res_jogadores = jogadores.verificar_destaques_jogadores(
                             s.get("historico_chutes", {}), 
                             3, 
@@ -161,7 +168,7 @@ def main():
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
-                        # Jogadores (Faltas Sofridas) 🟢 PASSANDO OS ELENCOS E NOMES DOS TIMES
+                        # Jogadores (Faltas Sofridas) 🟢 PASSANDO OS ELENCOS E NOMES DOS TIMES CORRIGIDOS
                         res_faltas = jogadores.verificar_destaques_faltas(
                             s.get("historico_faltas", {}), 
                             3, 
