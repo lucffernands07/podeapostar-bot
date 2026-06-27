@@ -70,15 +70,19 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
     # 2. Ordena os confrontos pelo número de mercados (mais densos primeiro)
     lista_chaves = sorted(jogos_agrupados.keys(), key=lambda k: len(jogos_agrupados[k]), reverse=True)
     
-    # 🟢 CORREÇÃO: Fatiamos a lista de chaves exatamente no tamanho do alvo (Ex: se pedir 5, pega 5)
-    chaves_selecionadas = lista_chaves[:qtd_alvo]
-    
+    # 3. Monta o bilhete pegando os jogos até atingir a qtd_alvo
     jogos_selecionados = []
-    for chave in chaves_selecionadas:
-        jogos_selecionados.extend(jogos_agrupados[chave])
+    contador_jogos = 0
     
-    total_reais = len(chaves_selecionadas)
-    nome_bilhete = f"✨ BINGO {total_reais} JOGOS - {estrategia.upper()}"
+    for chave in lista_chaves:
+        if contador_jogos >= qtd_alvo:
+            break
+            
+        # Adicionamos TODOS os mercados do confronto, sem filtrar ou limitar.
+        jogos_selecionados.extend(jogos_agrupados[chave])
+        contador_jogos += 1
+    
+    nome_bilhete = f"✨ BINGO {contador_jogos} JOGOS - {estrategia}"
 
     if jogos_selecionados:
         bilhetes.append({"id": "BINGO_CUSTOM", "nome": nome_bilhete, "jogos": jogos_selecionados})
@@ -96,7 +100,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         odd_total = 1.0
         agrupados = {}
         
-        for idx, j in enumerate(b.get('jogos', [])):
+        for j in b.get('jogos', []):
             t1 = str(j.get('time_casa', 'Desconhecido')).strip().lower()
             t2 = str(j.get('time_fora', 'Desconhecido')).strip().lower()
             chave_cache = f"{t1}x{t2}"
@@ -112,12 +116,13 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     "horario": horario, "liga": liga,
                     "time_casa": j.get('time_casa'), "time_fora": j.get('time_fora'),
                     "mercados": [], 
-                    "link": j.get('link_betano') or info_extra.get('link', "[https://www.betano.bet.br/](https://www.betano.bet.br/)"),
+                    "link": j.get('link_betano') or info_extra.get('link', "https://www.betano.bet.br/"),
                     "link_h2h": info_extra.get('link_h2h') 
                 }
             
             mercado_limpo = j.get('mercado', '')
             
+            # 🟢 CORRIGIDO: Identificação e formatação do mercado de Faltas Sofridas
             if "falta" in mercado_limpo.lower():
                 match_nome = re.search(r':\s*([^(\n]+)', mercado_limpo)
                 match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
@@ -145,9 +150,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         for chave in sorted(agrupados.keys()):
             d = agrupados[chave]
             d["mercados"].sort(key=lambda x: x['prioridade'])
-            
-            # Caixa cinza / fonte pequena ativada aqui
-            linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
+            linhas = "\n".join([m['texto'] for m in d["mercados"]])
             
             bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n🌐 [Abrir na Betano]({d['link']})"
             
@@ -158,4 +161,4 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
-        
+                
