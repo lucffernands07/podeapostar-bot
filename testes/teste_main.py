@@ -138,24 +138,16 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # --- SEÇÃO DE JOGADORES AJUSTADA ---
+                        # --- SEÇÃO DE JOGADORES AJUSTADA (USANDO T1 E T2 DIRETOS) ---
                         # Resgata de forma segura os elencos/nomes mapeados do scraper para casa e fora
                         elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
                         elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
                         
-                        # 🟢 Pega a string do confronto (Ex: "Jordânia x Argentina" ou "Argélia x Áustria")
-                        # ⚠️ Substitua s.get("confronto") pela chave exata que você usa para printar o estádio 🏟️ se for diferente
-                        confronto_texto = s.get("confronto") or s.get("jogo") or s.get("nome") or ""
-                        
-                        # Separa os nomes dinamicamente cortando no " x "
-                        nome_time_casa = "MANDANTE"
-                        nome_time_fora = "VISITANTE"
-                        if " x " in confronto_texto:
-                            partes = confronto_texto.split(" x ")
-                            nome_time_casa = partes[0].strip()
-                            nome_time_fora = partes[1].strip()
+                        # 🟢 SOLUÇÃO: Usa as variáveis t1 e t2 que já possuem os nomes reais dos times!
+                        nome_time_casa = t1 if t1 else "MANDANTE"
+                        nome_time_fora = t2 if t2 else "VISITANTE"
 
-                        # Jogadores (Chutes no Alvo) 🟢 PASSANDO OS ELENCOS E NOMES DOS TIMES CORRIGIDOS
+                        # Jogadores (Chutes no Alvo) 
                         res_jogadores = jogadores.verificar_destaques_jogadores(
                             s.get("historico_chutes", {}), 
                             3, 
@@ -168,7 +160,7 @@ def main():
                         for rj in res_jogadores:
                             mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
-                        # Jogadores (Faltas Sofridas) 🟢 PASSANDO OS ELENCOS E NOMES DOS TIMES CORRIGIDOS
+                        # Jogadores (Faltas Sofridas) 
                         res_faltas = jogadores.verificar_destaques_faltas(
                             s.get("historico_faltas", {}), 
                             3, 
