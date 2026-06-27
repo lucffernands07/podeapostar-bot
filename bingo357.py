@@ -70,19 +70,15 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
     # 2. Ordena os confrontos pelo número de mercados (mais densos primeiro)
     lista_chaves = sorted(jogos_agrupados.keys(), key=lambda k: len(jogos_agrupados[k]), reverse=True)
     
-    # 3. Monta o bilhete pegando os jogos até atingir a qtd_alvo
+    # 🟢 CORREÇÃO: Fatiamos a lista de chaves exatamente no tamanho do alvo (Ex: se pedir 5, pega 5)
+    chaves_selecionadas = lista_chaves[:qtd_alvo]
+    
     jogos_selecionados = []
-    contador_jogos = 0
-    
-    for chave in lista_chaves:
-        if contador_jogos >= qtd_alvo:
-            break
-            
-        # Adicionamos TODOS os mercados do confronto, sem filtrar ou limitar.
+    for chave in chaves_selecionadas:
         jogos_selecionados.extend(jogos_agrupados[chave])
-        contador_jogos += 1
     
-    nome_bilhete = f"✨ BINGO {contador_jogos} JOGOS - {estrategia}"
+    total_reais = len(chaves_selecionadas)
+    nome_bilhete = f"✨ BINGO {total_reais} JOGOS - {estrategia.upper()}"
 
     if jogos_selecionados:
         bilhetes.append({"id": "BINGO_CUSTOM", "nome": nome_bilhete, "jogos": jogos_selecionados})
@@ -100,7 +96,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         odd_total = 1.0
         agrupados = {}
         
-        for j in b.get('jogos', []):
+        for idx, j in enumerate(b.get('jogos', [])):
             t1 = str(j.get('time_casa', 'Desconhecido')).strip().lower()
             t2 = str(j.get('time_fora', 'Desconhecido')).strip().lower()
             chave_cache = f"{t1}x{t2}"
@@ -122,19 +118,32 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             
             mercado_limpo = j.get('mercado', '')
             
-            # 🟢 CORRIGIDO: Identificação e formatação do mercado de Faltas Sofridas
             if "falta" in mercado_limpo.lower():
-                match_nome = re.search(r':\s*([^(\n]+)', mercado_limpo)
+                match_nome = re.search(r':\s*([^|\n]+)', mercado_limpo)
                 match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
+                
+                # 🟢 AJUSTE DA SIGLA: Coloca a sigla (ex: ARG) entre parênteses (ARG)
+                match_sigla = re.match(r'^([A-ZÀ-Ú]+)\s+(.+)$', nome)
+                if match_sigla:
+                    nome = f"({match_sigla.group(1)}) {match_sigla.group(2)}"
+                    
                 med = match_med.group(1) if match_med else "N/A"
                 texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {med}"
+                
             elif "chute" in mercado_limpo.lower():
-                match_nome = re.search(r':\s*([^(\n]+)', mercado_limpo)
+                match_nome = re.search(r':\s*([^|\n]+)', mercado_limpo)
                 match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
+                
+                # 🟢 AJUSTE DA SIGLA: Coloca a sigla (ex: ARG) entre parênteses (ARG)
+                match_sigla = re.match(r'^([A-ZÀ-Ú]+)\s+(.+)$', nome)
+                if match_sigla:
+                    nome = f"({match_sigla.group(1)}) {match_sigla.group(2)}"
+                    
                 med = match_med.group(1) if match_med else "N/A"
                 texto_final = f"🔶 Chutes no gol: {nome} | Méd: {med}"
+                
             elif "cartão" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
                 texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}"
             else:
@@ -150,7 +159,8 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         for chave in sorted(agrupados.keys()):
             d = agrupados[chave]
             d["mercados"].sort(key=lambda x: x['prioridade'])
-            linhas = "\n".join([m['texto'] for m in d["mercados"]])
+            
+            linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
             
             bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n🌐 [Abrir na Betano]({d['link']})"
             
@@ -161,4 +171,3 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
-                
