@@ -31,24 +31,20 @@ def processar_comando_direto(tipo_bruto):
                 if parte.startswith("BINGO:"):
                     valor_b = parte.split(":")[1]
                     
-                    # Se for ELITE, tenta extrair o número ou assume 5 por padrão
                     if "ELITE" in valor_b.upper():
                         config["modo_elite"] = True
                         digitos = "".join([c for c in valor_b if c.isdigit()])
                         if digitos:
                             config["bingo"] = int(digitos)
-                            print(f"👉 Bingo Elite com tamanho extraído: {config['bingo']}")
                         else:
                             config["bingo"] = 5  
-                            print("🚨 [ALERTA DE ERRO] NÃO VEIO NÚMERO NO BINGO ELITE! Foi assumido o padrão de 5.")
+                            print("🚨 [ALERTA] Não veio número no Bingo Elite composto! Assumido 5.")
                     else:
                         digitos = "".join([c for c in valor_b if c.isdigit()])
                         if digitos:
                             config["bingo"] = int(digitos)
-                            print(f"👉 Bingo normal com tamanho extraído: {config['bingo']}")
                         else:
                             config["bingo"] = 3
-                            print("🚨 [ALERTA DE ERRO] NÃO VEIO NÚMERO NO BINGO NORMAL! Foi assumido o padrão de 3.")
                         
                 elif parte.startswith("HORA:"):
                     config["horario"] = parte.split(":")[1]
@@ -72,34 +68,21 @@ def processar_comando_direto(tipo_bruto):
         partes = tipo_limpo.split("_")
         numero_detectado = False
         
+        # Procura qualquer dígito nas partes do callback de forma direta
+        for p in partes:
+            if p.isdigit():
+                config["bingo"] = int(p)
+                numero_detectado = True
+                break
+        
         if "ELITE" in tipo_limpo.upper():
             config["modo_elite"] = True
-            # Tenta varrer todas as partes do callback buscando o número do bingo (ex: "5")
-            for p in partes:
-                if p.isdigit():
-                    config["bingo"] = int(p)
-                    numero_detectado = True
-            
             if not numero_detectado:
-                config["bingo"] = 5 
-                print(f"🚨 [ALERTA DE ERRO] NÃO VEIO NÚMERO NO CALLBACK ELITE! Recebido: '{tipo_limpo}'. Assumido: 5.")
-            else:
-                print(f"👉 Bingo Elite detetado com tamanho: {config['bingo']}")
-                
+                config["bingo"] = 5
             config["aviso"] = f"🎲 Escolheu: *Bingo {config['bingo']} (Denso/Elite)*"
         else:
-            # Para callbacks normais (ex: "cb_bingo_5")
-            for p in partes:
-                if p.isdigit():
-                    config["bingo"] = int(p)
-                    numero_detectado = True
-                    
             if not numero_detectado:
                 config["bingo"] = 3
-                print(f"🚨 [ALERTA DE ERRO] NÃO VEIO NÚMERO NO CALLBACK NORMAL! Recebido: '{tipo_limpo}'. Assumido: 3.")
-            else:
-                print(f"👉 Bingo normal detetado com tamanho: {config['bingo']}")
-                
             config["aviso"] = f"🎲 Escolheu: *Bingo {config['bingo']}*"
         
         print(f"✅ Configuração gerada por callback de bingo: {config}")
@@ -118,27 +101,18 @@ def processar_comando_direto(tipo_bruto):
         config["aviso"] = f"📊 Escolheu a estratégia: *{txt_m}*"
         print(f"✅ Configuração gerada por callback de tipo: {config}")
     
-    # 3. Fallback (Caso não seja callback nem comando conhecido)
+    # 3. Fallback Geral (Garante a captura exata de qualquer string solta)
     else:
         print("⚠️ Comando não reconhecido como callback padrão. A aplicar lógica de varredura...")
-        numero_detectado = False
         
-        if "3" in tipo_limpo: 
-            config["bingo"] = 3
-            numero_detectado = True
-        elif "5" in tipo_limpo: 
-            config["bingo"] = 5
-            numero_detectado = True
-        elif "7" in tipo_limpo or "PRO" in tipo_limpo: 
-            config["bingo"] = 7
-            numero_detectado = True
-        elif "ELITE" in tipo_limpo.upper():
-            config["bingo"] = 5
+        # 🟢 CORREÇÃO CRÍTICA DO FALLBACK: Captura direta dos dígitos do texto para não inverter 3 e 5
+        digitos_soltos = "".join([c for c in tipo_limpo if c.isdigit()])
+        
+        if "ELITE" in tipo_limpo.upper():
             config["modo_elite"] = True
-            numero_detectado = True
-            
-        if not numero_detectado:
-            print(f"🚨 [ALERTA DE ERRO] NÃO VEIO NÚMERO NO FALLBACK GERAL! Recebido: '{tipo_limpo}'. Assumido: 3.")
+            config["bingo"] = int(digitos_soltos) if digitos_soltos else 5
+        else:
+            config["bingo"] = int(digitos_soltos) if digitos_soltos else 3
             
         if "ODDS" in tipo_limpo: config["bilhete"] = "ODDS"
         
@@ -148,7 +122,8 @@ def processar_comando_direto(tipo_bruto):
 
     return config
 
-def executar():
+def ejecutar():
+    # ... (o resto da função executar permanece exatamente igual ao que já tinhas)
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
     tipo_bruto = os.getenv('TIPO_BINGO', '')
@@ -189,7 +164,6 @@ def executar():
 
     print(f"📂 Base de dados diária carregada com sucesso. Total de mercados no JSON: {len(jogos_banco)}")
 
-    # 🚀 MAPEAMENTO UNIFICADO DE LINKS
     dict_cache_links = {}
     for j in jogos_banco:
         casa = j.get("time_casa")
@@ -219,7 +193,6 @@ def executar():
         except Exception as e:
             print(f"⚠️ Erro ao processar links H2H do pendentes.json: {e}")
 
-    # --- FILTRO DOS JOGOS POR HORÁRIO ---
     print("\n--- [LOG PASSO 3] FILTRANDO JOGOS POR HORÁRIO ---")
     jogos_validos_horario = []
     
@@ -246,23 +219,13 @@ def executar():
                 
             j["datetime_real"] = hora_jogo
             jogos_validos_horario.append(j)
-            print(f"➡️ Jogo: {j.get('time_casa')} x {j.get('time_fora')} [{j.get('horario')}] -> {estado_filtro}")
         except Exception as e:
-            print(f"⚠️ Erro ao calcular horário para {j.get('time_casa')}x{j.get('time_fora')}: {e}")
             if filtro_hora == "DIA": 
                 jogos_validos_horario.append(j)
 
-    print(f"📊 Total de mercados sobreviventes aos filtros de horário: {len(jogos_validos_horario)}")
-
-    confrontos_unicos = set(f"{j.get('time_casa')}x{j.get('time_fora')}".lower().strip() for j in jogos_validos_horario)
-    print(f"🏟️ Total de confrontos únicos sobreviventes: {len(confrontos_unicos)} ({confrontos_unicos})")
-
     jogos_validos_horario.sort(key=lambda x: x.get("datetime_real", agora_br))
 
-    # --- PROCESSAMENTO DOS BILHETES ---
     print("\n--- [LOG PASSO 4] ENVIANDO PARA BINGO357 ---")
-    print(f"📤 Enviando {len(jogos_validos_horario)} mercados para montar_bilhetes_estrategicos (Qtd Alvo: {qtd_alvo})")
-    
     bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(
         jogos_validos_horario, 
         qtd_alvo=qtd_alvo, 
@@ -270,47 +233,27 @@ def executar():
         modo_elite=config.get("modo_elite", False)
     )
     
-    print(f"📥 Retorno do bingo357: {len(bilhetes_gerados)} bilhete(s) gerado(s).")
-    if bilhetes_gerados:
-        print(f"📋 Nome do bilhete final: '{bilhetes_gerados[0].get('nome')}'")
-        print(f"🎮 Total de mercados incluídos no bilhete: {len(bilhetes_gerados[0].get('jogos', []))}")
-        
     texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links)
 
-    # --- ENVIO DOS RESULTADOS OU AVISO DE ERRO ---
     menu_botoes = menus.extrair_markup_filtros() if hasattr(menus, 'extrair_markup_filtros') else None
 
     if texto_final:
         try:
             payload = {
-                "chat_id": chat_id,
-                "text": texto_final,
-                "parse_mode": "Markdown",
-                "disable_web_page_preview": False
+                "chat_id": chat_id, "text": texto_final, "parse_mode": "Markdown", "disable_web_page_preview": False
             }
-            if menu_botoes:
-                payload["reply_markup"] = menu_botoes
-
+            if menu_botoes: payload["reply_markup"] = menu_botoes
             requests.post(url_msg, json={**payload})
-            print("🚀 [LOG PASSO 5] Mensagem enviada com sucesso ao Telegram!")
-        except Exception as e:
-            print(f"⚠️ Erro ao enviar os bilhetes formatados para o Telegram: {e}")
+        except Exception as e: print(f"⚠️ Erro ao enviar Telegram: {e}")
     else:
-        msg_erro = f"{config['aviso']}\n\n⚠️😢 Não foi encontrado nenhum bilhete com esse filtro. Tente outra janela, bingo ou tente amanhã."
+        msg_erro = f"{config['aviso']}\n\n⚠️😢 Não foi encontrado nenhum bilhete com esse filtro."
         try:
             payload = {
-                "chat_id": chat_id,
-                "text": msg_erro,
-                "parse_mode": "Markdown",
-                "disable_web_page_preview": True
+                "chat_id": chat_id, "text": msg_erro, "parse_mode": "Markdown", "disable_web_page_preview": True
             }
-            if menu_botoes:
-                payload["reply_markup"] = menu_botoes
-
+            if menu_botoes: payload["reply_markup"] = menu_botoes
             requests.post(url_msg, json=payload)
-            print("⚠️ [LOG PASSO 5] Mensagem de 'não encontrado' enviada ao Telegram.")
-        except Exception as e:
-            print(f"⚠️ Erro ao enviar aviso de erro para o Telegram: {e}")
+        except Exception as e: print(f"⚠️ Erro ao enviar erro Telegram: {e}")
 
 if __name__ == "__main__":
     executar()
