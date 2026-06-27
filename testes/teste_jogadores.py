@@ -29,9 +29,9 @@ def limpar_nome_jogador(nome_completo):
             nome_limpo = nome_limpo[:-len(posicao)].strip()
     return nome_limpo
 
-def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None, confronto_string=""):
+def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
     """
-    Analisa os destaques de chutes, gerando as siglas exatas das 3 primeiras letras de cada país.
+    Analisa os destaques de chutes recebendo os nomes tratados dos times enviados pelo main.py.
     """
     if isinstance(quantidade_jogos, dict):
         quantidade_jogos = 3
@@ -39,13 +39,6 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
     nome_liga_limpo = nome_liga.strip() if nome_liga else ""
     if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
         return []
-
-    # 🟢 EXTRAÇÃO DINÂMICA DOS TIMES
-    nome_casa, nome_fora = "MANDANTE", "VISITANTE"
-    if confronto_string and " x " in confronto_string:
-        partes = confronto_string.split(" x ")
-        nome_casa = partes[0].strip()
-        nome_fora = partes[1].strip()
 
     mercados_aprovados = []
     dados_chutes = {}
@@ -104,8 +97,8 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
         for jogador, lado in selecionados:
             res_c = dados_chutes[jogador]
             if res_c["jogos_com_sucesso"] >= 2 or res_c["media"] >= 1.0:
-                # 🟢 CORREÇÃO: Pega dinamicamente a sigla do país mandante/visitante real
                 sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CAS")
+                nome_formatado = limpar_nome_jogador(jogador)
 
                 mercados_aprovados.append({
                     "texto": f"Chutes no gol: {sigla} {nome_formatado} | Méd: {res_c['media']:.1f}",
@@ -114,9 +107,9 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
 
     return mercados_aprovados
 
-def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None, confronto_string=""):
+def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
     """
-    Analisa os destaques de faltas sofridas, gerando as siglas exatas das 3 primeiras letras de cada país.
+    Analisa os destaques de faltas sofridas recebendo os nomes tratados dos times enviados pelo main.py.
     """
     if isinstance(quantidade_jogos, dict):
         quantidade_jogos = 3
@@ -124,13 +117,6 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
     nome_liga_limpo = nome_liga.strip() if nome_liga else ""
     if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
         return []
-
-    # 🟢 EXTRAÇÃO DINÂMICA DOS TIMES
-    nome_casa, nome_fora = "MANDANTE", "VISITANTE"
-    if confronto_string and " x " in confronto_string:
-        partes = confronto_string.split(" x ")
-        nome_casa = partes[0].strip()
-        nome_fora = partes[1].strip()
 
     mercados_aprovados = []
     dados_faltas = {}
@@ -187,7 +173,6 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
         for jogador, lado in selecionados:
             res_f = dados_faltas[jogador]
             if res_f["media"] > 0.5:
-                # 🟢 CORREÇÃO: Pega dinamicamente a sigla do país mandante/visitante real
                 sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CAS")
                 nome_formatado = limpar_nome_jogador(jogador)
 
@@ -197,80 +182,5 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
                 })
 
     return mercados_aprovados
-
-def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
-    """
-    Analisa os destaques de faltas sofridas, inserindo a sigla do time (ex: JOR, ARG) e removendo a posição.
-    """
-    if isinstance(quantidade_jogos, dict):
-        quantidade_jogos = 3
-
-    nome_liga_limpo = nome_liga.strip() if nome_liga else ""
-    if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
-        return []
-
-    mercados_aprovados = []
-    dados_faltas = {}
     
-    if not isinstance(historico_faltas, dict) or not historico_faltas:
-        return mercados_aprovados
-
-    for jogador, lista_valores in historico_faltas.items():
-        if not isinstance(lista_valores, list):
-            continue
-            
-        valores_copia = list(lista_valores)
-        
-        time_pertence = "casa"
-        if len(valores_copia) > quantidade_jogos:
-            meio = len(valores_copia) // 2
-            if sum(valores_copia[meio:]) > 0 and sum(valores_copia[:meio]) == 0:
-                time_pertence = "fora"
-            valores_analise = valores_copia[:quantidade_jogos] if time_pertence == "casa" else valores_copia[meio:meio+quantidade_jogos]
-        else:
-            if elenco_fora and jogador in elenco_fora:
-                time_pertence = "fora"
-            elif elenco_casa and jogador in elenco_casa:
-                time_pertence = "casa"
-            valores_analise = valores_copia
-
-        while len(valores_analise) < quantidade_jogos:
-            valores_analise.append(0)
-            
-        valores_analise = valores_analise[:quantidade_jogos]
-        media = sum(valores_analise) / quantidade_jogos
-        
-        dados_faltas[jogador] = {
-            "media": media,
-            "time": time_pertence
-        }
-
-    if dados_faltas:
-        jogadores_casa = [j for j in dados_faltas.keys() if dados_faltas[j]["time"] == "casa"]
-        jogadores_fora = [j for j in dados_faltas.keys() if dados_faltas[j]["time"] == "fora"]
-        
-        if not jogadores_fora and len(jogadores_casa) > 1:
-            geral_ordenado = sorted(dados_faltas.keys(), key=lambda k: dados_faltas[k]["media"], reverse=True)
-            jogadores_casa = [geral_ordenado[0]]
-            jogadores_fora = [geral_ordenado[1]]
-
-        top_casa = sorted(jogadores_casa, key=lambda k: dados_faltas[k]["media"], reverse=True)
-        top_fora = sorted(jogadores_fora, key=lambda k: dados_faltas[k]["media"], reverse=True)
-
-        selecionados = []
-        if top_casa: selecionados.append((top_casa[0], "casa"))
-        if top_fora: selecionados.append((top_fora[0], "fora"))
-        
-        for jogador, lado in selecionados:
-            res_f = dados_faltas[jogador]
-            if res_f["media"] > 0.5:
-                sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CASA")
-                nome_formatado = limpar_nome_jogador(jogador)
-
-                mercados_aprovados.append({
-                    "texto": f"Faltas Sofridas: {sigla} {nome_formatado} | Méd: {res_f['media']:.1f}",
-                    "chave": "FALTAS_SOFRIDAS"
-                })
-
-    return mercados_aprovados
         
