@@ -10,9 +10,28 @@ LIGAS_ELITE_JOGADORES = [
     "Mundo - Amistoso Internacional"
 ]
 
-def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None):
+def gerar_sigla_time(nome_time, padrao="TIM"):
+    """Gera uma sigla de 3 letras em maiúsculo para o time (Ex: Jordânia -> JOR)"""
+    if not nome_time or not isinstance(nome_time, str):
+        return padrao
+    # Limpa espaços e pega as 3 primeiras letras em maiúsculo
+    nome_limpo = nome_time.strip().replace(" ", "").replace(".", "")
+    if len(nome_limpo) >= 3:
+        return nome_limpo[:3].upper()
+    return nome_limpo.upper()
+
+def limpar_nome_jogador(nome_completo):
+    """Remove posições como 'Atacante', 'Ponta', 'Meio-campista' do final do nome."""
+    posicoes = ["Atacante", "Ponta", "Meio-campista", "Meia-atacante", "Lateral", "Zagueiro", "Ala", "Goleiro"]
+    nome_limpo = nome_completo
+    for posicao in posicoes:
+        if nome_limpo.endswith(posicao):
+            nome_limpo = nome_limpo[:-len(posicao)].strip()
+    return nome_limpo
+
+def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
     """
-    Analisa os destaques de chutes, GARANTINDO o melhor do Mandante e o melhor do Visitante.
+    Analisa os destaques de chutes, inserindo a sigla do time (ex: JOR, ARG) e removendo a posição.
     """
     if isinstance(quantidade_jogos, dict):
         quantidade_jogos = 3
@@ -33,18 +52,13 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
             
         valores_copia = list(lista_valores)
         
-        # 🟢 IDENTIFICAÇÃO DO TIME POR POSIÇÃO NO HISTÓRICO (À prova de falhas)
-        # Se a lista tem mais elementos que a quantidade de jogos (ex: 6 posições),
-        # significa que os jogos do visitante estão no final da lista.
         time_pertence = "casa"
         if len(valores_copia) > quantidade_jogos:
-            # Se a soma da segunda metade for maior ou se os primeiros jogos forem zerados
             meio = len(valores_copia) // 2
             if sum(valores_copia[meio:]) > 0 and sum(valores_copia[:meio]) == 0:
                 time_pertence = "fora"
             valores_analise = valores_copia[:quantidade_jogos] if time_pertence == "casa" else valores_copia[meio:meio+quantidade_jogos]
         else:
-            # Fallback por strings de elenco se a lista for curta
             if elenco_fora and jogador in elenco_fora:
                 time_pertence = "fora"
             elif elenco_casa and jogador in elenco_casa:
@@ -65,44 +79,39 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
         }
 
     if dados_chutes:
-        # Separa os jogadores em duas listas reais baseado no time identificado
         jogadores_casa = [j for j in dados_chutes.keys() if dados_chutes[j]["time"] == "casa"]
         jogadores_fora = [j for j in dados_chutes.keys() if dados_chutes[j]["time"] == "fora"]
         
-        # 🟢 SE NINGUÉM CAIU NO FORA (Sinal de que elencos falharam e a lista veio unificada de tamanho curto)
-        # Forçamos uma separação real por amostragem pareada, e não cortando a pior metade
         if not jogadores_fora and len(jogadores_casa) > 1:
-            # Ordena geral
             geral_ordenado = sorted(dados_chutes.keys(), key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]), reverse=True)
-            # O primeiro vai para a casa, o segundo melhor vai para o visitante para garantir o confronto
             jogadores_casa = [geral_ordenado[0]]
             jogadores_fora = [geral_ordenado[1]]
 
-        # Ordena cada lado de forma independente pelos melhores desempenhos
         top_casa = sorted(jogadores_casa, key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]), reverse=True)
         top_fora = sorted(jogadores_fora, key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]), reverse=True)
 
         selecionados = []
-        if top_casa: selecionados.append(top_casa[0])
-        if top_fora: selecionados.append(top_fora[0])
+        if top_casa: selecionados.append((top_casa[0], "casa"))
+        if top_fora: selecionados.append((top_fora[0], "fora"))
         
-        # Remove duplicados redundantes
-        selecionados = list(dict.fromkeys(selecionados))
-
-        for jogador in selecionados:
+        for jogador, lado in selecionados:
             res_c = dados_chutes[jogador]
             if res_c["jogos_com_sucesso"] >= 2 or res_c["media"] >= 1.0:
+                # Gera as siglas dinâmicas (Ex: ARG, JOR)
+                sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CASA")
+                nome_formatado = limpar_nome_jogador(jogador)
+
                 mercados_aprovados.append({
-                    "texto": f"Chutes no Alvo: {jogador} (Frequência: {res_c['jogos_com_sucesso']}/{quantidade_jogos}j | Méd: {res_c['media']:.1f})",
+                    "texto": f"Chutes no gol: {sigla} {nome_formatado} | Méd: {res_c['media']:.1f}",
                     "chave": "CHUTES_ALVO"
                 })
 
     return mercados_aprovados
 
 
-def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None):
+def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
     """
-    Garante o melhor de faltas do mandante e o melhor do visitante sem misturar os rankings.
+    Analisa os destaques de faltas sofridas, inserindo a sigla do time (ex: JOR, ARG) e removendo a posição.
     """
     if isinstance(quantidade_jogos, dict):
         quantidade_jogos = 3
@@ -151,7 +160,6 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
         jogadores_casa = [j for j in dados_faltas.keys() if dados_faltas[j]["time"] == "casa"]
         jogadores_fora = [j for j in dados_faltas.keys() if dados_faltas[j]["time"] == "fora"]
         
-        # Força separação justa se o mapeamento de time falhar completamente
         if not jogadores_fora and len(jogadores_casa) > 1:
             geral_ordenado = sorted(dados_faltas.keys(), key=lambda k: dados_faltas[k]["media"], reverse=True)
             jogadores_casa = [geral_ordenado[0]]
@@ -161,16 +169,17 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
         top_fora = sorted(jogadores_fora, key=lambda k: dados_faltas[k]["media"], reverse=True)
 
         selecionados = []
-        if top_casa: selecionados.append(top_casa[0])
-        if top_fora: selecionados.append(top_fora[0])
+        if top_casa: selecionados.append((top_casa[0], "casa"))
+        if top_fora: selecionados.append((top_fora[0], "fora"))
         
-        selecionados = list(dict.fromkeys(selecionados))
-
-        for jogador in selecionados:
+        for jogador, lado in selecionados:
             res_f = dados_faltas[jogador]
             if res_f["media"] > 0.5:
+                sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CASA")
+                nome_formatado = limpar_nome_jogador(jogador)
+
                 mercados_aprovados.append({
-                    "texto": f"Faltas Sofridas: {jogador} (Méd: {res_f['media']:.1f})",
+                    "texto": f"Faltas Sofridas: {sigla} {nome_formatado} | Méd: {res_f['media']:.1f}",
                     "chave": "FALTAS_SOFRIDAS"
                 })
 
