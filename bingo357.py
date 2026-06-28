@@ -103,7 +103,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             odd_valor = j.get('odd') or info_extra.get('odd', '1.50')
             
             chave_jogo = f"{horario}_{t1}_{t2}"
-            if chave_jogo not in agrupados:
+            if KEY := chave_jogo not in agrupados:
                 agrupados[chave_jogo] = {
                     "horario": horario, "liga": liga,
                     "time_casa": j.get('time_casa'), "time_fora": j.get('time_fora'),
@@ -124,7 +124,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     nome = f"({match_sigla.group(1)}) {match_sigla.group(2)}"
                     
                 med = match_med.group(1) if match_med else "N/A"
-                texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {med}"
+                texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {med} @{odd_valor}"
                 
             elif "chute" in mercado_limpo.lower():
                 match_nome = re.search(r':\s*([^|\n]+)', mercado_limpo)
@@ -136,12 +136,12 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     nome = f"({match_sigla.group(1)}) {match_sigla.group(2)}"
                     
                 med = match_med.group(1) if match_med else "N/A"
-                texto_final = f"🔶 Chutes no gol: {nome} | Méd: {med}"
+                texto_final = f"🔶 Chutes no gol: {nome} | Méd: {med} @{odd_valor}"
                 
             elif "cartão" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
-                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}"
+                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()} @{odd_valor}"
             else:
-                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}"
+                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()} @{odd_valor}"
             
             agrupados[chave_jogo]["mercados"].append({
                 "texto": texto_final, 
@@ -165,3 +165,4 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
+            
