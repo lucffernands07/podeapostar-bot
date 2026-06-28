@@ -151,7 +151,7 @@ def executar():
         except Exception as e:
             print(f"⚠️ Erro ao processar links H2H do pendentes.json: {e}")
 
-    print("\n--- [LOG PASSO 3] FILTRANDO JOGOS POR HORÁRIO ---")
+        print("\n--- [LOG PASSO 3] FILTRANDO JOGOS POR HORÁRIO ---")
     jogos_validos_horario = []
     
     for j in jogos_banco:
@@ -163,15 +163,19 @@ def executar():
             if int(h_partes[0]) < 4 and agora_br.hour > 20:
                 hora_jogo += timedelta(days=1)
             
-            estado_filtro = "APROVADO"
+            # 🟢 TRAVA DOS 15 MINUTOS: Se o jogo começou há MAIS de 15 minutos atrás, descarta.
+            # Ex: Se agora é 16:16 e o jogo foi 16:00, (16:16 - 15 min = 16:01). 16:00 < 16:01 -> DESCARTA!
+            if hora_jogo < (agora_br - timedelta(minutes=15)):
+                continue
+
+            # Filtros de janela futuros (Ex: Janela de 3H)
             if filtro_hora != "DIA" and "H" in filtro_hora:
                 try:
                     horas_limite = int(filtro_hora.replace("H", ""))
-                    if hora_jogo > agora_br + timedelta(hours=horas_limite) or hora_jogo < agora_br - timedelta(minutes=15):
+                    if hora_jogo > agora_br + timedelta(hours=horas_limite):
                         continue
-                except: pass
-            elif filtro_hora != "DIA" and hora_jogo < agora_br - timedelta(minutes=15):
-                continue
+                except: 
+                    pass
                 
             j["datetime_real"] = hora_jogo
             jogos_validos_horario.append(j)
