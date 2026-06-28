@@ -1,11 +1,164 @@
 [
     {
         "horario": "16:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Cianorte",
+        "time_fora": "São Joseense",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "1.70",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cianorte-FC-PR-Independente-Futebol-Sao-Joseense-PR/87840457/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Marcílio Dias",
+        "time_fora": "Cascavel",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.07",
+        "link_betano": "https://www.betano.bet.br/match-odds/Marcilio-Dias-FC-Cascavel-PR/87840389/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Noroeste",
+        "time_fora": "Portuguesa-RJ",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/Noroeste-SP-Portuguesa-RJ/87524714/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Noroeste",
+        "time_fora": "Portuguesa-RJ",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.98",
+        "link_betano": "https://www.betano.bet.br/match-odds/Noroeste-SP-Portuguesa-RJ/87524714/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Athletic Club",
+        "time_fora": "Avaí",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.47",
+        "link_betano": "https://www.betano.bet.br/match-odds/Athletic-Club-MG-Avai-SC/87839693/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Athletic Club",
+        "time_fora": "Avaí",
+        "mercado": "Chutes no gol: AVA Jean Lucas | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Athletic-Club-MG-Avai-SC/87839693/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Athletic Club",
+        "time_fora": "Avaí",
+        "mercado": "Faltas Sofridas: AVA William | Méd: 1.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Athletic-Club-MG-Avai-SC/87839693/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Athletic Club",
+        "time_fora": "Avaí",
+        "mercado": "Cartões Totais: -2.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Athletic-Club-MG-Avai-SC/87839693/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Atlético-GO",
+        "time_fora": "Ponte Preta",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.30",
+        "link_betano": "https://www.betano.bet.br/match-odds/Atletico-GO-Ponte-Preta-SP/87918707/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Atlético-GO",
+        "time_fora": "Ponte Preta",
+        "mercado": "Faltas Sofridas: PON Diego Tavares | Méd: 1.7",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Atletico-GO-Ponte-Preta-SP/87918707/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Atlético-GO",
+        "time_fora": "Ponte Preta",
+        "mercado": "Cartões Totais: -2.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Atletico-GO-Ponte-Preta-SP/87918707/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Juventude",
+        "time_fora": "Ceará",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.50",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Ceara-SC-CE/87839685/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Juventude",
+        "time_fora": "Ceará",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "2.01",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Ceara-SC-CE/87839685/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Juventude",
+        "time_fora": "Ceará",
+        "mercado": "Chutes no gol: JUV Alisson Safira | Méd: 1.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Ceara-SC-CE/87839685/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Juventude",
+        "time_fora": "Ceará",
+        "mercado": "Faltas Sofridas: JUV Raí | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Ceara-SC-CE/87839685/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Juventude",
+        "time_fora": "Ceará",
+        "mercado": "Faltas Sofridas: CEA SanchezDefensor | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Ceara-SC-CE/87839685/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Juventude",
+        "time_fora": "Ceará",
+        "mercado": "Cartões Totais: -2.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Ceara-SC-CE/87839685/"
+    },
+    {
+        "horario": "16:00",
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "África do Sul",
         "time_fora": "Canadá",
         "mercado": "+1.5 Gols (85%)",
-        "odd": "1.37",
+        "odd": "1.42",
         "link_betano": "https://www.betano.bet.br/match-odds/South-Africa-Canada/87999976/"
     },
     {
@@ -14,7 +167,7 @@
         "time_casa": "África do Sul",
         "time_fora": "Canadá",
         "mercado": "Vitória Casa (85%)",
-        "odd": "5.50",
+        "odd": "5.00",
         "link_betano": "https://www.betano.bet.br/match-odds/South-Africa-Canada/87999976/"
     },
     {
@@ -61,5 +214,194 @@
         "mercado": "Cartões Totais: -2.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/South-Africa-Canada/87999976/"
+    },
+    {
+        "horario": "16:30",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Manauara",
+        "time_fora": "Independência",
+        "mercado": "-4.5 Gols (100%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Manauara-AM-Independencia-FC-AC/87840407/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Ferroviário",
+        "time_fora": "Central",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/Ferroviario-Central-SC-PE/87518943/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Porto Velho",
+        "time_fora": "São Raimundo-RR",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.28",
+        "link_betano": "https://www.betano.bet.br/match-odds/Porto-Velho-Sao-Raimundo-RR/87840418/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Porto Velho",
+        "time_fora": "São Raimundo-RR",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.85",
+        "link_betano": "https://www.betano.bet.br/match-odds/Porto-Velho-Sao-Raimundo-RR/87840418/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Treze",
+        "time_fora": "Jacuipense",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/Treze-Jacuipense-BA/87840429/"
+    },
+    {
+        "horario": "18:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Guaporé",
+        "time_fora": "Monte Roraima",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Guapore-RO-Monte-Roraima/87840417/"
+    },
+    {
+        "horario": "18:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Guaporé",
+        "time_fora": "Monte Roraima",
+        "mercado": "+2.5 Gols (85%)",
+        "odd": "1.83",
+        "link_betano": "https://www.betano.bet.br/match-odds/Guapore-RO-Monte-Roraima/87840417/"
+    },
+    {
+        "horario": "18:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Guaporé",
+        "time_fora": "Monte Roraima",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.65",
+        "link_betano": "https://www.betano.bet.br/match-odds/Guapore-RO-Monte-Roraima/87840417/"
+    },
+    {
+        "horario": "18:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Luverdense",
+        "time_fora": "Ceilândia",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.40",
+        "link_betano": "https://www.betano.bet.br/match-odds/Luverdense-MT-Ceilandia-Esporte-Clube-DF/87678585/"
+    },
+    {
+        "horario": "18:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Luverdense",
+        "time_fora": "Ceilândia",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.07",
+        "link_betano": "https://www.betano.bet.br/match-odds/Luverdense-MT-Ceilandia-Esporte-Clube-DF/87678585/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Fortaleza",
+        "time_fora": "Sport",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Sport-Recife-PE/87839701/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Fortaleza",
+        "time_fora": "Sport",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.00",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Sport-Recife-PE/87839701/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Fortaleza",
+        "time_fora": "Sport",
+        "mercado": "Chutes no gol: FOR Miritello J. B. | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Sport-Recife-PE/87839701/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Fortaleza",
+        "time_fora": "Sport",
+        "mercado": "Chutes no gol: SPO Rodriguinho | Méd: 1.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Sport-Recife-PE/87839701/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Fortaleza",
+        "time_fora": "Sport",
+        "mercado": "Cartões Totais: -2.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Sport-Recife-PE/87839701/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Náutico",
+        "time_fora": "Goiás",
+        "mercado": "+1.5 Gols (85%)",
+        "odd": "1.34",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nautico-PE-Goi-s-GO/87839705/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Náutico",
+        "time_fora": "Goiás",
+        "mercado": "Chutes no gol: NÁU Vinícius | Méd: 2.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nautico-PE-Goi-s-GO/87839705/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Náutico",
+        "time_fora": "Goiás",
+        "mercado": "Chutes no gol: GOI Brayann | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nautico-PE-Goi-s-GO/87839705/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Náutico",
+        "time_fora": "Goiás",
+        "mercado": "Faltas Sofridas: NÁU Victor Andrade | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nautico-PE-Goi-s-GO/87839705/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Náutico",
+        "time_fora": "Goiás",
+        "mercado": "Faltas Sofridas: GOI Brayann | Méd: 1.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nautico-PE-Goi-s-GO/87839705/"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Náutico",
+        "time_fora": "Goiás",
+        "mercado": "Cartões Totais: -2.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nautico-PE-Goi-s-GO/87839705/"
     }
 ]

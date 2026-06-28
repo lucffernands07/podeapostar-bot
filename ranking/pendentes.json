@@ -2,6 +2,272 @@
     "data_geracao": "2026-06-28",
     "jogos": [
         {
+            "time_casa": "Athletic Club",
+            "time_fora": "Avaí",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lCUvXzNN/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Athletic Club",
+            "time_fora": "Avaí",
+            "mercado": "Chutes no gol: AVA Jean Lucas | Méd: 1.0",
+            "mercado_ranking": "CHUTES NO GOL: AVA JEAN LUCAS | MÉD: 1.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lCUvXzNN/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Athletic Club",
+            "time_fora": "Avaí",
+            "mercado": "Faltas Sofridas: AVA William | Méd: 1.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: AVA WILLIAM | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lCUvXzNN/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Athletic Club",
+            "time_fora": "Avaí",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lCUvXzNN/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Atlético-GO",
+            "time_fora": "Ponte Preta",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KEB4md74/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Atlético-GO",
+            "time_fora": "Ponte Preta",
+            "mercado": "Faltas Sofridas: PON Diego Tavares | Méd: 1.7",
+            "mercado_ranking": "FALTAS SOFRIDAS: PON DIEGO TAVARES | MÉD: 1.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KEB4md74/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Atlético-GO",
+            "time_fora": "Ponte Preta",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KEB4md74/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Juventude",
+            "time_fora": "Ceará",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dEex2eMc/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Juventude",
+            "time_fora": "Ceará",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dEex2eMc/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Juventude",
+            "time_fora": "Ceará",
+            "mercado": "Chutes no gol: JUV Alisson Safira | Méd: 1.3",
+            "mercado_ranking": "CHUTES NO GOL: JUV ALISSON SAFIRA | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dEex2eMc/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Juventude",
+            "time_fora": "Ceará",
+            "mercado": "Faltas Sofridas: JUV Raí | Méd: 2.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: JUV RAÍ | MÉD: 2.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dEex2eMc/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Juventude",
+            "time_fora": "Ceará",
+            "mercado": "Faltas Sofridas: CEA SanchezDefensor | Méd: 1.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: CEA SANCHEZDEFENSOR | MÉD: 1.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dEex2eMc/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Juventude",
+            "time_fora": "Ceará",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dEex2eMc/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Fortaleza",
+            "time_fora": "Sport",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Cl8dkIxh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Fortaleza",
+            "time_fora": "Sport",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Cl8dkIxh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Fortaleza",
+            "time_fora": "Sport",
+            "mercado": "Chutes no gol: FOR Miritello J. B. | Méd: 2.0",
+            "mercado_ranking": "CHUTES NO GOL: FOR MIRITELLO J. B. | MÉD: 2.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Cl8dkIxh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Fortaleza",
+            "time_fora": "Sport",
+            "mercado": "Chutes no gol: SPO Rodriguinho | Méd: 1.3",
+            "mercado_ranking": "CHUTES NO GOL: SPO RODRIGUINHO | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Cl8dkIxh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Fortaleza",
+            "time_fora": "Sport",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Cl8dkIxh/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Náutico",
+            "time_fora": "Goiás",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bPCKqE6T/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Náutico",
+            "time_fora": "Goiás",
+            "mercado": "Chutes no gol: NÁU Vinícius | Méd: 2.3",
+            "mercado_ranking": "CHUTES NO GOL: NÁU VINÍCIUS | MÉD: 2.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bPCKqE6T/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Náutico",
+            "time_fora": "Goiás",
+            "mercado": "Chutes no gol: GOI Brayann | Méd: 1.0",
+            "mercado_ranking": "CHUTES NO GOL: GOI BRAYANN | MÉD: 1.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bPCKqE6T/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Náutico",
+            "time_fora": "Goiás",
+            "mercado": "Faltas Sofridas: NÁU Victor Andrade | Méd: 2.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: NÁU VICTOR ANDRADE | MÉD: 2.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bPCKqE6T/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Náutico",
+            "time_fora": "Goiás",
+            "mercado": "Faltas Sofridas: GOI Brayann | Méd: 1.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: GOI BRAYANN | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bPCKqE6T/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Náutico",
+            "time_fora": "Goiás",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bPCKqE6T/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Cianorte",
+            "time_fora": "São Joseense",
+            "mercado": "Vitória Casa (85%)",
+            "mercado_ranking": "VITÓRIA CASA (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hIxNTOoe/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Marcílio Dias",
+            "time_fora": "Cascavel",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/z5YxLf3N/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Noroeste",
+            "time_fora": "Portuguesa-RJ",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/02CRdNFs/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Noroeste",
+            "time_fora": "Portuguesa-RJ",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/02CRdNFs/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Manauara",
+            "time_fora": "Independência",
+            "mercado": "-4.5 Gols (100%)",
+            "mercado_ranking": "-4.5 GOLS (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lIcDqibU/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Ferroviário",
+            "time_fora": "Central",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ATDLTSpI/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Porto Velho",
+            "time_fora": "São Raimundo-RR",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SQyog4VQ/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Porto Velho",
+            "time_fora": "São Raimundo-RR",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SQyog4VQ/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Treze",
+            "time_fora": "Jacuipense",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rJuriHat/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Guaporé",
+            "time_fora": "Monte Roraima",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AmjcrmH8/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Guaporé",
+            "time_fora": "Monte Roraima",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AmjcrmH8/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Guaporé",
+            "time_fora": "Monte Roraima",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AmjcrmH8/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Luverdense",
+            "time_fora": "Ceilândia",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fRWMOx4b/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Luverdense",
+            "time_fora": "Ceilândia",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fRWMOx4b/#/resumo-de-jogo"
+        },
+        {
             "time_casa": "África do Sul",
             "time_fora": "Canadá",
             "mercado": "+1.5 Gols (85%)",
