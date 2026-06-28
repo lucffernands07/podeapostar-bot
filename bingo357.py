@@ -114,12 +114,12 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             
             mercado_limpo = j.get('mercado', '')
             
-            # Condições da ODD tratadas aqui
+            # Ajustado para trocar o @ pela sigla ODD
             sufixo_odd = ""
             if "Análise" in odd_valor:
                 sufixo_odd = ""
             elif odd_valor:
-                sufixo_odd = f" @{odd_valor}"
+                sufixo_odd = f" ODD {odd_valor}"
             
             if "falta" in mercado_limpo.lower():
                 match_nome = re.search(r':\s*([^|\n]+)', mercado_limpo)
@@ -172,4 +172,4 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
-            
+                    
