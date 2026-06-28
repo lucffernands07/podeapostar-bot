@@ -11,6 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
 from ligas import COMPETICOES
+from mercados.jogadores import LIGAS_ELITE_JOGADORES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, cartoes, jogadores
 import odds, bingo357
 from telegram import menus
@@ -111,11 +112,18 @@ def main():
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
-                        
+
+                        # Correção para raspagem pesada quando não tiver LIGAS_ELITE_JOGADORES
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         
                         s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
-                        s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
+                        
+                        # 🟢 Só roda a raspagem pesada de scouts se a liga atual for Elite ou Série B
+                        if nome_comp in LIGAS_ELITE_JOGADORES:
+                            s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
+                        else:
+                            print(f"⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
+                            s = s_inicial  # Mantém os dados de gols/btts do H2H e evita o timeout
                         
                         mercados_para_processar = []
 
