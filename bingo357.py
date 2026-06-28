@@ -100,7 +100,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             
             horario = j.get('horario') or info_extra.get('horario', '00:00')
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
-            odd_valor = j.get('odd') or info_extra.get('odd', '1.50')
+            odd_valor = str(j.get('odd') or info_extra.get('odd', '1.50')).strip()
             
             chave_jogo = f"{horario}_{t1}_{t2}"
             if chave_jogo not in agrupados:
@@ -114,6 +114,13 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             
             mercado_limpo = j.get('mercado', '')
             
+            # Condições da ODD tratadas aqui
+            sufixo_odd = ""
+            if "Análise" in odd_valor:
+                sufixo_odd = ""
+            elif odd_valor:
+                sufixo_odd = f" @{odd_valor}"
+            
             if "falta" in mercado_limpo.lower():
                 match_nome = re.search(r':\s*([^|\n]+)', mercado_limpo)
                 match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
@@ -124,7 +131,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     nome = f"({match_sigla.group(1)}) {match_sigla.group(2)}"
                     
                 med = match_med.group(1) if match_med else "N/A"
-                texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {med}"
+                texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {med}{sufixo_odd}"
                 
             elif "chute" in mercado_limpo.lower():
                 match_nome = re.search(r':\s*([^|\n]+)', mercado_limpo)
@@ -136,12 +143,12 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     nome = f"({match_sigla.group(1)}) {match_sigla.group(2)}"
                     
                 med = match_med.group(1) if match_med else "N/A"
-                texto_final = f"🔶 Chutes no gol: {nome} | Méd: {med}"
+                texto_final = f"🔶 Chutes no gol: {nome} | Méd: {med}{sufixo_odd}"
                 
             elif "cartão" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
-                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}"
+                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}{sufixo_odd}"
             else:
-                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}"
+                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}{sufixo_odd}"
             
             agrupados[chave_jogo]["mercados"].append({
                 "texto": texto_final, 
@@ -165,3 +172,4 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
+            
