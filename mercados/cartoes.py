@@ -68,13 +68,25 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
             if soma_jogador > 0:
                 relatorio_jogadores += f"  👤 {jogador.ljust(25)} ➔ Média Real: {media_real:.2f} cartões/jogo {jogos_reais} (Am: {am_reais} | Vm: {vm_reais})\n"
 
-    # --- 🚀 NOVA LÓGICA DE CÁLCULO DE MÉDIA MATEMÁTICA COLETIVA ---
-    # Em vez de dividir o total bruto por 6, calculamos a média isolada de cada time por 3 e somamos.
+        # --- 🚀 NOVA LÓGICA DE CÁLCULO DE MÉDIA MATEMÁTICA COLETIVA ---
     media_mandante = total_cartoes_mandante / quantidade_jogos if quantidade_jogos > 0 else 0
     media_visitante = total_cartoes_visitante / quantidade_jogos if quantidade_jogos > 0 else 0
     
     media_geral_confronto = media_mandante + media_visitante
     total_geral_confronto = total_cartoes_mandante + total_cartoes_visitante
+
+    # 📊 REGRA DE AJUSTE DOS VALORES DA LINHA (.5)
+    # Define uma linha de corte matemática padrão (Ex: 4.0 cartões no jogo)
+    if media_geral_confronto >= 4.0:
+        # Tendência: MAIS CARTÕES -> Diminui 1 na linha de segurança
+        # Ex: Se a média deu 4.5, vira +3.5. Se deu 3.5, vira +2.5
+        valor_ajustado = max(1.5, round(media_geral_confronto - 0.5) - 1.0) + 0.5
+        texto_mercado = f"+{valor_ajustado}"
+    else:
+        # Tendência: MENOS CARTÕES -> Aumenta 1 na linha de segurança
+        # Ex: Se a média deu 3.5, vira -4.5. Se deu 2.5, vira -3.5
+        valor_ajustado = round(media_geral_confronto + 0.5) + 1.0 + 0.5
+        texto_mercado = f"-{valor_ajustado}"
 
     # Retorna o sumário executivo mastigado para o seu bot e para os logs do main
     return {
@@ -83,6 +95,7 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
         "total_visitante": total_cartoes_visitante,
         "total_confronto": total_geral_confronto,
         "media_confronto": round(media_geral_confronto, 2),
+        "linha_cartoes": texto_mercado, # 🟢 Retorna a string pronta Ex: "-3.5" ou "+2.5"
         "log_detalhado_jogadores": relatorio_jogadores
     }
-    
+
