@@ -1,0 +1,194 @@
+{
+    "data_geracao": "2026-06-29",
+    "jogos": [
+        {
+            "time_casa": "Democrata-GV",
+            "time_fora": "Ivinhema",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/IwPWq0hD/#/resumo-de-jogo",
+            "odd_casa": "1.53",
+            "odd_fora": "6.30"
+        },
+        {
+            "time_casa": "Democrata-GV",
+            "time_fora": "Ivinhema",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/IwPWq0hD/#/resumo-de-jogo",
+            "odd_casa": "1.53",
+            "odd_fora": "6.30"
+        },
+        {
+            "time_casa": "Brasil",
+            "time_fora": "Japão",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/f7ENGzPc/#/resumo-de-jogo",
+            "odd_casa": "1.67",
+            "odd_fora": "5.50"
+        },
+        {
+            "time_casa": "Brasil",
+            "time_fora": "Japão",
+            "mercado": "Chutes no gol: BRA Vinicius Junior | Méd: 4.0",
+            "mercado_ranking": "CHUTES NO GOL: BRA VINICIUS JUNIOR | MÉD: 4.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/f7ENGzPc/#/resumo-de-jogo",
+            "odd_casa": "1.67",
+            "odd_fora": "5.50"
+        },
+        {
+            "time_casa": "Brasil",
+            "time_fora": "Japão",
+            "mercado": "Chutes no gol: JAP Ueda A. | Méd: 2.3",
+            "mercado_ranking": "CHUTES NO GOL: JAP UEDA A. | MÉD: 2.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/f7ENGzPc/#/resumo-de-jogo",
+            "odd_casa": "1.67",
+            "odd_fora": "5.50"
+        },
+        {
+            "time_casa": "Brasil",
+            "time_fora": "Japão",
+            "mercado": "Faltas Sofridas: BRA Vinicius Junior | Méd: 2.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: BRA VINICIUS JUNIOR | MÉD: 2.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/f7ENGzPc/#/resumo-de-jogo",
+            "odd_casa": "1.67",
+            "odd_fora": "5.50"
+        },
+        {
+            "time_casa": "Brasil",
+            "time_fora": "Japão",
+            "mercado": "Faltas Sofridas: JAP Ueda A. | Méd: 1.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: JAP UEDA A. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/f7ENGzPc/#/resumo-de-jogo",
+            "odd_casa": "1.67",
+            "odd_fora": "5.50"
+        },
+        {
+            "time_casa": "Brasil",
+            "time_fora": "Japão",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/f7ENGzPc/#/resumo-de-jogo",
+            "odd_casa": "1.67",
+            "odd_fora": "5.50"
+        },
+        {
+            "time_casa": "Alemanha",
+            "time_fora": "Paraguai",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2y2UKhp1/#/resumo-de-jogo",
+            "odd_casa": "1.33",
+            "odd_fora": "9.00"
+        },
+        {
+            "time_casa": "Alemanha",
+            "time_fora": "Paraguai",
+            "mercado": "Chutes no gol: ALE Nmecha F. | Méd: 2.7",
+            "mercado_ranking": "CHUTES NO GOL: ALE NMECHA F. | MÉD: 2.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2y2UKhp1/#/resumo-de-jogo",
+            "odd_casa": "1.33",
+            "odd_fora": "9.00"
+        },
+        {
+            "time_casa": "Alemanha",
+            "time_fora": "Paraguai",
+            "mercado": "Chutes no gol: PAR Enciso J. | Méd: 1.7",
+            "mercado_ranking": "CHUTES NO GOL: PAR ENCISO J. | MÉD: 1.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2y2UKhp1/#/resumo-de-jogo",
+            "odd_casa": "1.33",
+            "odd_fora": "9.00"
+        },
+        {
+            "time_casa": "Alemanha",
+            "time_fora": "Paraguai",
+            "mercado": "Faltas Sofridas: ALE Musiala J. | Méd: 3.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: ALE MUSIALA J. | MÉD: 3.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2y2UKhp1/#/resumo-de-jogo",
+            "odd_casa": "1.33",
+            "odd_fora": "9.00"
+        },
+        {
+            "time_casa": "Alemanha",
+            "time_fora": "Paraguai",
+            "mercado": "Faltas Sofridas: PAR Enciso J. | Méd: 2.7",
+            "mercado_ranking": "FALTAS SOFRIDAS: PAR ENCISO J. | MÉD: 2.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2y2UKhp1/#/resumo-de-jogo",
+            "odd_casa": "1.33",
+            "odd_fora": "9.00"
+        },
+        {
+            "time_casa": "Alemanha",
+            "time_fora": "Paraguai",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2y2UKhp1/#/resumo-de-jogo",
+            "odd_casa": "1.33",
+            "odd_fora": "9.00"
+        },
+        {
+            "time_casa": "Países Baixos",
+            "time_fora": "Marrocos",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/S0MygXWj/#/resumo-de-jogo",
+            "odd_casa": "2.30",
+            "odd_fora": "3.50"
+        },
+        {
+            "time_casa": "Países Baixos",
+            "time_fora": "Marrocos",
+            "mercado": "Ambas Marcam: Sim (100%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/S0MygXWj/#/resumo-de-jogo",
+            "odd_casa": "2.30",
+            "odd_fora": "3.50"
+        },
+        {
+            "time_casa": "Países Baixos",
+            "time_fora": "Marrocos",
+            "mercado": "Chutes no gol: PAÍ Gakpo C. | Méd: 3.0",
+            "mercado_ranking": "CHUTES NO GOL: PAÍ GAKPO C. | MÉD: 3.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/S0MygXWj/#/resumo-de-jogo",
+            "odd_casa": "2.30",
+            "odd_fora": "3.50"
+        },
+        {
+            "time_casa": "Países Baixos",
+            "time_fora": "Marrocos",
+            "mercado": "Chutes no gol: MAR Hakimi A. | Méd: 3.3",
+            "mercado_ranking": "CHUTES NO GOL: MAR HAKIMI A. | MÉD: 3.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/S0MygXWj/#/resumo-de-jogo",
+            "odd_casa": "2.30",
+            "odd_fora": "3.50"
+        },
+        {
+            "time_casa": "Países Baixos",
+            "time_fora": "Marrocos",
+            "mercado": "Faltas Sofridas: PAÍ Reijnders T. | Méd: 1.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: PAÍ REIJNDERS T. | MÉD: 1.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/S0MygXWj/#/resumo-de-jogo",
+            "odd_casa": "2.30",
+            "odd_fora": "3.50"
+        },
+        {
+            "time_casa": "Países Baixos",
+            "time_fora": "Marrocos",
+            "mercado": "Faltas Sofridas: MAR Hakimi A. | Méd: 3.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: MAR HAKIMI A. | MÉD: 3.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/S0MygXWj/#/resumo-de-jogo",
+            "odd_casa": "2.30",
+            "odd_fora": "3.50"
+        },
+        {
+            "time_casa": "Países Baixos",
+            "time_fora": "Marrocos",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/S0MygXWj/#/resumo-de-jogo",
+            "odd_casa": "2.30",
+            "odd_fora": "3.50"
+        }
+    ]
+}
