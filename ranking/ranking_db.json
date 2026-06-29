@@ -10,7 +10,7 @@
         },
         "VITORIA CASA (85%)": {
             "green": 0,
-            "red": 18
+            "red": 21
         },
         "1X (70%)": {
             "green": 11,
@@ -41,12 +41,12 @@
             "red": 7
         },
         "+1.5 GOLS (70%)": {
-            "green": 60,
+            "green": 62,
             "red": 25
         },
         "+1.5 GOLS (85%)": {
-            "green": 102,
-            "red": 48
+            "green": 107,
+            "red": 51
         },
         "+1.5 GOLS (100%)": {
             "green": 10,
@@ -58,22 +58,22 @@
         },
         "+2.5 GOLS (85%)": {
             "green": 32,
-            "red": 21
+            "red": 22
         },
         "+2.5 GOLS (100%)": {
             "green": 3,
             "red": 0
         },
         "AMBAS MARCAM: SIM (80%)": {
-            "green": 64,
-            "red": 64
+            "green": 68,
+            "red": 66
         },
         "AMBAS MARCAM: SIM (100%)": {
-            "green": 38,
-            "red": 32
+            "green": 39,
+            "red": 33
         },
         "-4.5 GOLS (100%)": {
-            "green": 7,
+            "green": 8,
             "red": 0
         },
         "-4.5 GOLS (70%)": {
@@ -86,7 +86,7 @@
         },
         "CARTÕES TOTAIS: -2.5": {
             "green": 0,
-            "red": 16
+            "red": 22
         },
         "CARTÕES TOTAIS: +2.5": {
             "green": 5,
@@ -107,5 +107,5 @@
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "28/06/2026 07:09"
+    "ultima_atualizacao": "29/06/2026 08:24"
 }
