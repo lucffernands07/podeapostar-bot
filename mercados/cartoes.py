@@ -68,24 +68,32 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
             if soma_jogador > 0:
                 relatorio_jogadores += f"  👤 {jogador.ljust(25)} ➔ Média Real: {media_real:.2f} cartões/jogo {jogos_reais} (Am: {am_reais} | Vm: {vm_reais})\n"
 
-    # --- 🚀 NOVA LÓGICA DE CÁLCULO DE MÉDIA MATEMÁTICA COLETIVA ---
+        # --- CÁLCULO DAS MÉDIAS REAIS ---
     media_mandante = total_cartoes_mandante / quantidade_jogos if quantidade_jogos > 0 else 0
     media_visitante = total_cartoes_visitante / quantidade_jogos if quantidade_jogos > 0 else 0
-    
     media_geral_confronto = media_mandante + media_visitante
-    total_geral_confronto = total_cartoes_mandante + total_cartoes_visitante
 
-    # 📊 REGRA DE AJUSTE DOS VALORES DA LINHA (.5) DIRETO NA FONTE
+    # 📊 DEFINIÇÃO DA LINHA BASE FLUTUANTE (VALOR NUMÉRICO COM SINAL COMERCIAL)
     if media_geral_confronto >= 4.0:
-        # Tendência: MAIS CARTÕES -> Diminui 1 na linha de segurança
-        # Ex: Média real deu 4.5 -> Sugerido +4.5 -> Vira +3.5
-        valor_ajustado = max(1.5, round(media_geral_confronto - 0.5) - 1.0) + 0.5
-        texto_mercado = f"Cartões Totais: +{valor_ajustado}"
+        linha_base = 3.5  # Representa +3.5
+        sinal = "+"
+    elif media_geral_confronto >= 3.0:
+        linha_base = 2.5  # Representa +2.5
+        sinal = "+"
+    elif media_geral_confronto >= 2.0:
+        linha_base = -3.5 # Representa -3.5
+        sinal = "-"
     else:
-        # Tendência: MENOS CARTÕES -> Aumenta 1 na linha de segurança
-        # Ex: Média real deu 2.5 -> Sugerido -2.5 -> Vira -3.5
-        valor_ajustado = round(media_geral_confronto + 0.5) + 1.0 + 0.5
-        texto_mercado = f"Cartões Totais: -{valor_ajustado}"
+        linha_base = -2.5 # Representa -2.5
+        sinal = "-"
+
+    # 🟢 SUA REGRA MATEMÁTICA PERFEITA: Subtrai 1.0 de qualquer linha!
+    if sinal == "-":
+        linha_final = linha_base - 1.0  # Ex: -2.5 - 1 = -3.5
+        texto_mercado = f"Cartões Totais: {linha_final}"
+    else:
+        linha_final = linha_base - 1.0  # Ex: 3.5 - 1 = 2.5
+        texto_mercado = f"Cartões Totais: +{linha_final}"
 
     # Retorna o dicionário no formato padrão consumido pelo banco de dados do bot
     return {
