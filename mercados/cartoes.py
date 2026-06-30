@@ -68,7 +68,7 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
             if soma_jogador > 0:
                 relatorio_jogadores += f"  👤 {jogador.ljust(25)} ➔ Média Real: {media_real:.2f} cartões/jogo {jogos_reais} (Am: {am_reais} | Vm: {vm_reais})\n"
 
-        # --- CÁLCULO DAS MÉDIAS REAIS ---
+    # --- CÁLCULO DAS MÉDIAS REAIS ---
     media_mandante = total_cartoes_mandante / quantidade_jogos if quantidade_jogos > 0 else 0
     media_visitante = total_cartoes_visitante / quantidade_jogos if quantidade_jogos > 0 else 0
     media_geral_confronto = media_mandante + media_visitante
@@ -100,9 +100,8 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
         "aprovado": True,
         "total_mandante": total_cartoes_mandante,
         "total_visitante": total_cartoes_visitante,
-        "total_confronto": total_geral_confronto,
+        "total_confronto": total_cartoes_mandante + total_cartoes_visitante, # 🟢 Corrigido aqui!
         "media_confronto": round(media_geral_confronto, 2),
-        "mercado": texto_mercado, # 🟢 Modificado de 'linha_cartoes' para 'mercado' com texto completo!
+        "mercado": texto_mercado, 
         "log_detalhado_jogadores": relatorio_jogadores
     }
-    
