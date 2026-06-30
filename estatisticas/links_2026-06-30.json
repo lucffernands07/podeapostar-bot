@@ -1,0 +1,203 @@
+{
+    "data_geracao": "2026-06-30",
+    "jogos": [
+        {
+            "time_casa": "Botafogo-SP",
+            "time_fora": "CRB",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rXIPzJNb/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.40"
+        },
+        {
+            "time_casa": "Caxias",
+            "time_fora": "Anápolis",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tOhaom0c/#/resumo-de-jogo",
+            "odd_casa": "1.52",
+            "odd_fora": "6.60"
+        },
+        {
+            "time_casa": "Volta Redonda",
+            "time_fora": "Amazonas",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EH0DNq8j/#/resumo-de-jogo",
+            "odd_casa": "1.95",
+            "odd_fora": "4.90"
+        },
+        {
+            "time_casa": "Costa do Marfim",
+            "time_fora": "Noruega",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tx2IC6G7/#/resumo-de-jogo",
+            "odd_casa": "3.40",
+            "odd_fora": "2.15"
+        },
+        {
+            "time_casa": "Costa do Marfim",
+            "time_fora": "Noruega",
+            "mercado": "Chutes no gol: COS Fofana S. | Méd: 0.7",
+            "mercado_ranking": "CHUTES NO GOL: COS FOFANA S. | MÉD: 0.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tx2IC6G7/#/resumo-de-jogo",
+            "odd_casa": "3.40",
+            "odd_fora": "2.15"
+        },
+        {
+            "time_casa": "Costa do Marfim",
+            "time_fora": "Noruega",
+            "mercado": "Chutes no gol: NOR E. Haaland | Méd: 2.3",
+            "mercado_ranking": "CHUTES NO GOL: NOR E. HAALAND | MÉD: 2.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tx2IC6G7/#/resumo-de-jogo",
+            "odd_casa": "3.40",
+            "odd_fora": "2.15"
+        },
+        {
+            "time_casa": "Costa do Marfim",
+            "time_fora": "Noruega",
+            "mercado": "Faltas Sofridas: COS Inao Oulai C. | Méd: 0.7",
+            "mercado_ranking": "FALTAS SOFRIDAS: COS INAO OULAI C. | MÉD: 0.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tx2IC6G7/#/resumo-de-jogo",
+            "odd_casa": "3.40",
+            "odd_fora": "2.15"
+        },
+        {
+            "time_casa": "Costa do Marfim",
+            "time_fora": "Noruega",
+            "mercado": "Faltas Sofridas: NOR Schjelderup A. | Méd: 0.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: NOR SCHJELDERUP A. | MÉD: 0.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tx2IC6G7/#/resumo-de-jogo",
+            "odd_casa": "3.40",
+            "odd_fora": "2.15"
+        },
+        {
+            "time_casa": "Costa do Marfim",
+            "time_fora": "Noruega",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tx2IC6G7/#/resumo-de-jogo",
+            "odd_casa": "3.40",
+            "odd_fora": "2.15"
+        },
+        {
+            "time_casa": "França",
+            "time_fora": "Suécia",
+            "mercado": "-4.5 Gols (70%)",
+            "mercado_ranking": "-4.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UN3MMEFl/#/resumo-de-jogo",
+            "odd_casa": "1.25",
+            "odd_fora": "11.00"
+        },
+        {
+            "time_casa": "França",
+            "time_fora": "Suécia",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UN3MMEFl/#/resumo-de-jogo",
+            "odd_casa": "1.25",
+            "odd_fora": "11.00"
+        },
+        {
+            "time_casa": "França",
+            "time_fora": "Suécia",
+            "mercado": "Ambas Marcam: Sim (80%)",
+            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UN3MMEFl/#/resumo-de-jogo",
+            "odd_casa": "1.25",
+            "odd_fora": "11.00"
+        },
+        {
+            "time_casa": "França",
+            "time_fora": "Suécia",
+            "mercado": "Chutes no gol: FRA Mbappe K. | Méd: 4.3",
+            "mercado_ranking": "CHUTES NO GOL: FRA MBAPPE K. | MÉD: 4.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UN3MMEFl/#/resumo-de-jogo",
+            "odd_casa": "1.25",
+            "odd_fora": "11.00"
+        },
+        {
+            "time_casa": "França",
+            "time_fora": "Suécia",
+            "mercado": "Chutes no gol: SUÉ Gyökeres V. | Méd: 2.7",
+            "mercado_ranking": "CHUTES NO GOL: SUÉ GYÖKERES V. | MÉD: 2.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UN3MMEFl/#/resumo-de-jogo",
+            "odd_casa": "1.25",
+            "odd_fora": "11.00"
+        },
+        {
+            "time_casa": "França",
+            "time_fora": "Suécia",
+            "mercado": "Faltas Sofridas: FRA Mbappe K. | Méd: 0.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: FRA MBAPPE K. | MÉD: 0.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UN3MMEFl/#/resumo-de-jogo",
+            "odd_casa": "1.25",
+            "odd_fora": "11.00"
+        },
+        {
+            "time_casa": "França",
+            "time_fora": "Suécia",
+            "mercado": "Faltas Sofridas: SUÉ Elanga A. | Méd: 0.7",
+            "mercado_ranking": "FALTAS SOFRIDAS: SUÉ ELANGA A. | MÉD: 0.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UN3MMEFl/#/resumo-de-jogo",
+            "odd_casa": "1.25",
+            "odd_fora": "11.00"
+        },
+        {
+            "time_casa": "França",
+            "time_fora": "Suécia",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UN3MMEFl/#/resumo-de-jogo",
+            "odd_casa": "1.25",
+            "odd_fora": "11.00"
+        },
+        {
+            "time_casa": "México",
+            "time_fora": "Equador",
+            "mercado": "Chutes no gol: MÉX Quinones J. | Méd: 2.3",
+            "mercado_ranking": "CHUTES NO GOL: MÉX QUINONES J. | MÉD: 2.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fydIxpfR/#/resumo-de-jogo",
+            "odd_casa": "2.25",
+            "odd_fora": "3.75"
+        },
+        {
+            "time_casa": "México",
+            "time_fora": "Equador",
+            "mercado": "Chutes no gol: EQU Enner Valencia | Méd: 2.3",
+            "mercado_ranking": "CHUTES NO GOL: EQU ENNER VALENCIA | MÉD: 2.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fydIxpfR/#/resumo-de-jogo",
+            "odd_casa": "2.25",
+            "odd_fora": "3.75"
+        },
+        {
+            "time_casa": "México",
+            "time_fora": "Equador",
+            "mercado": "Faltas Sofridas: MÉX Quinones J. | Méd: 1.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: MÉX QUINONES J. | MÉD: 1.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fydIxpfR/#/resumo-de-jogo",
+            "odd_casa": "2.25",
+            "odd_fora": "3.75"
+        },
+        {
+            "time_casa": "México",
+            "time_fora": "Equador",
+            "mercado": "Faltas Sofridas: EQU Enner Valencia | Méd: 1.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: EQU ENNER VALENCIA | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fydIxpfR/#/resumo-de-jogo",
+            "odd_casa": "2.25",
+            "odd_fora": "3.75"
+        },
+        {
+            "time_casa": "México",
+            "time_fora": "Equador",
+            "mercado": "Cartões Totais: -2.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -2.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fydIxpfR/#/resumo-de-jogo",
+            "odd_casa": "2.25",
+            "odd_fora": "3.75"
+        }
+    ]
+}
