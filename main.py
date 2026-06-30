@@ -181,15 +181,21 @@ def main():
                             mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave']})
 
                         # Cartões
-                        res_cartoes = cartoes.analisar_dados_cartoes(s.get("historico_mandante_am", {}), s.get("historico_mandante_vm", {}), s.get("historico_visitante_am", {}), s.get("historico_visitante_vm", {}), nome_comp, 3)
-                        if res_cartoes.get("aprovado"):
-                            media = res_cartoes.get('media_confronto', 0)
-                            if media >= 4.0: mercado_formatado = "Cartões Totais: +3.5"
-                            elif media >= 3.0: mercado_formatado = "Cartões Totais: +2.5"
-                            elif media >= 2.0: mercado_formatado = "Cartões Totais: +1.5"
-                            elif media >= 1.0: mercado_formatado = "Cartões Totais: -3.5"
-                            else: mercado_formatado = "Cartões Totais: -2.5"
-                            mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
+                        res_cartoes = cartoes.analisar_dados_cartoes(
+                            s.get("historico_mandante_am", {}), 
+                            s.get("historico_mandante_vm", {}), 
+                            s.get("historico_visitante_am", {}), 
+                            s.get("historico_visitante_vm", {}), 
+                            nome_comp, 
+                            3
+                        )
+                        if res_cartoes and res_cartoes.get("aprovado"):
+                            # 🟢 Pega o mercado perfeitamente calculado e ajustado vindo direto do cartoes.py
+                            mercado_formatado = res_cartoes.get("mercado")
+                            
+                            # Evita problemas caso retorne vazio por algum motivo de segurança
+                            if mercado_formatado:
+                                mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
 
                         # 🟢 TRAVA ANTI-DUPLICADOS (Limpa mercados idênticos antes de rodar as odds)
                         mercados_unicos = []
