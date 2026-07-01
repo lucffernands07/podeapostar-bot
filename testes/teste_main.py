@@ -31,7 +31,7 @@ def enviar_telegram(mensagem, chat_id_destino):
     try:
         requests.post(url, data={
             "chat_id": chat_id_destino, 
-            "text": message,
+            "text": mensagem,  # 🎯 Corrigido aqui: mudado de message para mensagem
             "parse_mode": "Markdown",
             "disable_web_page_preview": True
         })
