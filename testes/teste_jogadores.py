@@ -1,3 +1,5 @@
+import re
+
 # 🟢 LISTA BRANCA: Apenas ligas de elite que comprovadamente abrem mercados de jogadores na Betano
 LIGAS_ELITE_JOGADORES = [
     "Brasileirão Série A", "Copa do Brasil", "Libertadores", "Sul-Americana",
@@ -69,11 +71,15 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
             valores_analise.append(0)
             
         valores_analise = valores_analise[:quantidade_jogos]
-        media = sum(valores_analise) / quantidade_jogos
+        media_real = sum(valores_analise) / quantidade_jogos
+        
+        # 🟢 SUBTRAÇÃO NO FINAL DA MÉDIA: Remove 1.0 direto da média real calculada
+        media_ajustada = media_real - 1.0
+        
         jogos_com_sucesso = sum(1 for qtd in valores_analise if qtd >= 1)
         
         dados_chutes[jogador] = {
-            "media": media, 
+            "media": media_ajustada, 
             "jogos_com_sucesso": jogos_com_sucesso, 
             "time": time_pertence
         }
@@ -96,14 +102,18 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
         
         for jogador, lado in selecionados:
             res_c = dados_chutes[jogador]
-            if res_c["jogos_com_sucesso"] >= 2 or res_c["media"] >= 1.0:
-                sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CAS")
-                nome_formatado = limpar_nome_jogador(jogador)
+            
+            # 🛑 TRAVA DE DESCARTE: De 0.0 a 0.9 (menor que 1.0) descarta o jogador do bilhete
+            if res_c["media"] < 1.0:
+                continue
 
-                mercados_aprovados.append({
-                    "texto": f"Chutes no gol: {sigla} {nome_formatado} | Méd: {res_c['media']:.1f}",
-                    "chave": "CHUTES_ALVO"
-                })
+            sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CAS")
+            nome_formatated = limpar_nome_jogador(jogador)
+
+            mercados_aprovados.append({
+                "texto": f"Chutes no gol: {sigla} {nome_formatated} | Méd: {res_c['media']:.1f}",
+                "chave": "CHUTES_ALVO"
+            })
 
     return mercados_aprovados
 
@@ -137,7 +147,7 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
                 time_pertence = "fora"
             valores_analise = valores_copia[:quantidade_jogos] if time_pertence == "casa" else valores_copia[meio:meio+quantidade_jogos]
         else:
-            if elenco_fora and jogador in elenco_fora:
+            if elenco_fora and player in elenco_fora: # Mantendo consistência do seu mapeamento interno
                 time_pertence = "fora"
             elif elenco_casa and jogador in elenco_casa:
                 time_pertence = "casa"
@@ -147,10 +157,13 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
             valores_analise.append(0)
             
         valores_analise = valores_analise[:quantidade_jogos]
-        media = sum(valores_analise) / quantidade_jogos
+        media_real = sum(valores_analise) / quantidade_jogos
+        
+        # 🟢 SUBTRAÇÃO NO FINAL DA MÉDIA: Remove 1.0 direto da média real calculada
+        media_ajustada = media_real - 1.0
         
         dados_faltas[jogador] = {
-            "media": media,
+            "media": media_ajustada,
             "time": time_pertence
         }
 
@@ -172,15 +185,18 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
         
         for jogador, lado in selecionados:
             res_f = dados_faltas[jogador]
-            if res_f["media"] > 0.5:
-                sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CAS")
-                nome_formatado = limpar_nome_jogador(jogador)
+            
+            # 🛑 TRAVA DE DESCARTE: De 0.0 a 0.9 (menor que 1.0) descarta o jogador do bilhete
+            if res_f["media"] < 1.0:
+                continue
 
-                mercados_aprovados.append({
-                    "texto": f"Faltas Sofridas: {sigla} {nome_formatado} | Méd: {res_f['media']:.1f}",
-                    "chave": "FALTAS_SOFRIDAS"
-                })
+            sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CAS")
+            nome_formatated = limpar_nome_jogador(jogador)
+
+            mercados_aprovados.append({
+                "texto": f"Faltas Sofridas: {sigla} {nome_formatated} | Méd: {res_f['media']:.1f}",
+                "chave": "FALTAS_SOFRIDAS"
+            })
 
     return mercados_aprovados
-    
-        
+            
