@@ -102,7 +102,7 @@ def main():
                     h_obj = datetime.strptime(horario_str, "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    aceitar = False
+                    aceitar = true
                     if amanha_no_site in tempo_raw:
                         if h_obj.hour <= 3: aceitar = True
                     elif "." not in tempo_raw:
