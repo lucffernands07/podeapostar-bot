@@ -123,10 +123,19 @@ def main():
                     horario_str = partes_tempo[-1]
                     if ":" not in horario_str: continue
 
-                    h_obj = datetime.strptime(horario_str, "%H:%M")
+                                        h_obj = datetime.strptime(horario_str, "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    aceitar = True
+                    # 🎯 Filtro de segurança idêntico ao main principal reativado
+                    aceitar = False
+                    if amanha_no_site in tempo_raw:
+                        if h_obj.hour <= 3: aceitar = True
+                    elif "." not in tempo_raw:
+                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
+
+                    if not aceitar:
+                        print(f"      ⏩ Ignorado: Jogo fora da janela de horário válida ({tempo_raw})")
+                        continue
 
                     if aceitar:
                         # Busca os times por seletores mais abrangentes ou por classe parcial
