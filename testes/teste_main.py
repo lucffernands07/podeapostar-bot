@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
-from testes.teste_ligas import TESTE_COMPETICOES
+from ligas import COMPETICOES
 from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
 from testes import teste_cartoes as cartoes
@@ -62,7 +62,7 @@ def main():
     total_mercados = 0 
 
     try:
-        for nome_comp, url in TESTE_COMPETICOES.items():
+        for nome_comp, url in COMPETICOES.items():
             if total_mercados >= 200: 
                 break 
             print(f"\n--- Analisando: {nome_comp} ---")
