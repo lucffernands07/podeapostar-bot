@@ -11,8 +11,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
 from testes.teste_ligas import TESTE_COMPETICOES
-from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, cartoes 
-from testes import teste_jogadores as jogadores
+from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
+from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
+from testes import cartoes, jogadores
 import odds, bingo357
 from telegram import menus
 
@@ -102,7 +103,7 @@ def main():
                     h_obj = datetime.strptime(horario_str, "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    aceitar = true
+                    aceitar = False
                     if amanha_no_site in tempo_raw:
                         if h_obj.hour <= 3: aceitar = True
                     elif "." not in tempo_raw:
@@ -112,29 +113,19 @@ def main():
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
-                        
+
+                        # Correção para raspagem pesada quando não tiver LIGAS_ELITE_JOGADORES
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         
                         s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
-                        s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
                         
-                        # 🔍 ================= BLOCK DE LOGS DOS JOGADORES (DEBUG CHUTES) =================
-                        print(f"\n🔍 [LOG DEBUG] Partida: {t1} x {t2} (ID: {id_jogo})")
-                        historico_chutes_partida = s.get("historico_chutes", {})
-                        
-                        if not historico_chutes_partida:
-                            print("❌ Nenhum histórico de chutes encontrado para esta partida no JSON gerado.")
+                        # 🟢 Só roda a raspagem pesada de scouts se a liga atual for Elite ou Série B
+                        if nome_comp in LIGAS_ELITE_JOGADORES:
+                            s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
                         else:
-                            for jogador, lista_chutes in historico_chutes_partida.items():
-                                if len(lista_chutes) > 0:
-                                    soma_chutes = sum(lista_chutes)
-                                    jogos_validos = len(lista_chutes)
-                                    media_bruta = soma_chutes / jogos_validos
-                                    media_final = media_bruta - 1.0
-                                    print(f"   🎯 Chute no gol: {jogador} {lista_chutes} | Média Bruta: {media_bruta:.2f} - 1.0 | Média Final: {media_final:.1f}")
-                        print("==================================================================\n")
-                        # ================================================================================
-
+                            print(f"⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
+                            s = s_inicial  # Mantém os dados de gols/btts do H2H e evita o timeout
+                        
                         mercados_para_processar = []
 
                         # Gols, BTTS, CD, Vitoria
@@ -155,10 +146,12 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # --- SEÇÃO DE JOGADORES AJUSTADA ---
+                        # --- SEÇÃO DE JOGADORES AJUSTADA (USANDO T1 E T2 DIRETOS) ---
+                        # Resgata de forma segura os elencos/nomes mapeados do scraper para casa e fora
                         elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
                         elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
                         
+                        # 🟢 SOLUÇÃO: Usa as variáveis t1 e t2 que já possuem os nomes reais dos times!
                         nome_time_casa = t1 if t1 else "MANDANTE"
                         nome_time_fora = t2 if t2 else "VISITANTE"
 
@@ -198,11 +191,14 @@ def main():
                             3
                         )
                         if res_cartoes and res_cartoes.get("aprovado"):
+                            # 🟢 Pega o mercado perfeitamente calculado e ajustado vindo direto do cartoes.py
                             mercado_formatado = res_cartoes.get("mercado")
+                            
+                            # Evita problemas caso retorne vazio por algum motivo de segurança
                             if mercado_formatado:
                                 mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
 
-                        # TRAVA ANTI-DUPLICADOS
+                        # 🟢 TRAVA ANTI-DUPLICADOS (Limpa mercados idênticos antes de rodar as odds)
                         mercados_unicos = []
                         textos_vistos = set()
                         for item in mercados_para_processar:
@@ -244,7 +240,7 @@ def main():
                 except Exception as e:
                     print(f"⚠️ Erro ao processar partida: {e}")
                     continue
-
+                    
         # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
