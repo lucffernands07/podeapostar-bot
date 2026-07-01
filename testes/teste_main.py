@@ -13,7 +13,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from testes.teste_ligas import TESTE_COMPETICOES
 from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
-from testes import teste_cartoes, teste_jogadores
+from testes import teste_cartoes as cartoes
+from testes import teste_jogadores as jogadores
 import odds, bingo357
 from telegram import menus
 
@@ -30,7 +31,7 @@ def enviar_telegram(mensagem, chat_id_destino):
     try:
         requests.post(url, data={
             "chat_id": chat_id_destino, 
-            "text": mensagem,
+            "text": message,
             "parse_mode": "Markdown",
             "disable_web_page_preview": True
         })
@@ -68,8 +69,18 @@ def main():
             
             try:
                 driver.get(url)
-                time.sleep(4)
+                time.sleep(5)
+                
+                # 🔍 DIAGNÓSTICO 1: Verificar integridade da página
+                print(f"📄 Título da página carregada: {driver.title}")
+                
                 elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+                if not elementos:
+                    # Fallback estratégico para layouts alternativos do Flashscore
+                    elementos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
+                
+                print(f"📊 Total de jogos encontrados na página: {len(elementos)}")
+                
             except Exception as e:
                 if "invalid session id" in str(e).lower() or "session" in str(e).lower():
                     print("⚠️ Sessão do Chrome caiu! Reiniciando o navegador...")
@@ -77,8 +88,10 @@ def main():
                     except: pass
                     driver = configurar_driver() 
                     driver.get(url)
-                    time.sleep(4)
+                    time.sleep(5)
                     elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+                    if not elementos:
+                        elementos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
                 else:
                     print(f"⚠️ Erro ao carregar liga {nome_comp}: {e}")
                     continue
@@ -103,29 +116,35 @@ def main():
                     h_obj = datetime.strptime(horario_str, "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    aceitar = False
-                    if amanha_no_site in tempo_raw:
-                        if h_obj.hour <= 3: aceitar = True
-                    elif "." not in tempo_raw:
-                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
+                    # 🎯 DIAGNÓSTICO 2: Forçado para depurar a extração de scouts do dia atual
+                    aceitar = True
 
                     if aceitar:
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
-
-                        # Correção para raspagem pesada quando não tiver LIGAS_ELITE_JOGADORES
+                        
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         
                         s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
+                        s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
                         
-                        # 🟢 Só roda a raspagem pesada de scouts se a liga atual for Elite ou Série B
-                        if nome_comp in LIGAS_ELITE_JOGADORES:
-                            s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
+                        # 🔍 DIAGNÓSTICO 3: LOG DETALHADO DA RASPAGEM DOS SCOUTS DO JOGADOR
+                        print(f"\n🔍 [LOG SCRAPING] Partida: {t1} x {t2} (ID: {id_jogo})")
+                        historico_chutes_partida = s.get("historico_chutes", {})
+                        
+                        if not historico_chutes_partida:
+                            print("❌ Nenhum histórico de chutes mapeado nesta partida dentro do objeto final do scraper.")
                         else:
-                            print(f"⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
-                            s = s_inicial  # Mantém os dados de gols/btts do H2H e evita o timeout
-                        
+                            for jogador, lista_chutes in historico_chutes_partida.items():
+                                if len(lista_chutes) > 0:
+                                    soma_chutes = sum(lista_chutes)
+                                    jogos_validos = len(lista_chutes)
+                                    media_bruta = soma_chutes / jogos_validos
+                                    media_final = media_bruta - 1.0
+                                    print(f"   🎯 Chute no gol: ({nome_comp[:3].upper()}) {jogador} {lista_chutes} média {media_bruta:.1f} -1 | média final {media_final:.1f}")
+                        print("==================================================================\n")
+
                         mercados_para_processar = []
 
                         # Gols, BTTS, CD, Vitoria
@@ -146,12 +165,10 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # --- SEÇÃO DE JOGADORES AJUSTADA (USANDO T1 E T2 DIRETOS) ---
-                        # Resgata de forma segura os elencos/nomes mapeados do scraper para casa e fora
+                        # --- SEÇÃO DE JOGADORES ---
                         elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
                         elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
                         
-                        # 🟢 SOLUÇÃO: Usa as variáveis t1 e t2 que já possuem os nomes reais dos times!
                         nome_time_casa = t1 if t1 else "MANDANTE"
                         nome_time_fora = t2 if t2 else "VISITANTE"
 
@@ -191,14 +208,11 @@ def main():
                             3
                         )
                         if res_cartoes and res_cartoes.get("aprovado"):
-                            # 🟢 Pega o mercado perfeitamente calculado e ajustado vindo direto do cartoes.py
                             mercado_formatado = res_cartoes.get("mercado")
-                            
-                            # Evita problemas caso retorne vazio por algum motivo de segurança
                             if mercado_formatado:
                                 mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
 
-                        # 🟢 TRAVA ANTI-DUPLICADOS (Limpa mercados idênticos antes de rodar as odds)
+                        # TRAVA ANTI-DUPLICADOS
                         mercados_unicos = []
                         textos_vistos = set()
                         for item in mercados_para_processar:
@@ -229,7 +243,8 @@ def main():
                                     lista_para_filtros.append({
                                         "horario": h_br, "time_casa": t1, "time_fora": t2,
                                         "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else "Análise", "liga": nome_comp,
-                                        "link_betano": s.get("link_betano")
+                                        "link_betano": s.get("link_betano"),
+                                        "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
                                     })
                                     jogos_para_pendentes.append({
                                         "time_casa": t1, "time_fora": t2, "mercado": m_texto,
@@ -240,8 +255,8 @@ def main():
                 except Exception as e:
                     print(f"⚠️ Erro ao processar partida: {e}")
                     continue
-                    
-        # --- PROCESSAMENTO E ENVIO FINAL ---
+
+        # --- PROCESSAMENTO E ENVIO FINAL TESTE_MAIN ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
@@ -273,7 +288,7 @@ def main():
                     "link_h2h": j.get("link_h2h")
                 }
 
-            print("📢 Pulando envio do Elite conforme solicitado.")
+            print("📢 Pulando envio do Elite conforme solicitado nos testes.")
             
             os.makedirs("ranking", exist_ok=True)
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
@@ -282,6 +297,8 @@ def main():
             os.makedirs("telegram", exist_ok=True)
             with open(f"telegram/jogos_{hoje_ref.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
                 json.dump([{"horario": j.get("horario"), "liga": j.get("liga"), "time_casa": j.get("time_casa"), "time_fora": j.get("time_fora"), "mercado": j.get("mercado"), "odd": j.get("odd"), "link_betano": j.get("link_betano")} for j in lista_para_filtros], f, indent=4, ensure_ascii=False)
+        else:
+            print("⚠️ Nenhuma partida qualificada entrou na 'lista_para_filtros'.")
 
     except Exception as e:
         print(f"❌ Erro Crítico no Main: {e}")
