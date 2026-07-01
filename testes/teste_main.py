@@ -118,6 +118,23 @@ def main():
                         s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
                         
+                        # 🔍 ================= BLOCK DE LOGS DOS JOGADORES (DEBUG CHUTES) =================
+                        print(f"\n🔍 [LOG DEBUG] Partida: {t1} x {t2} (ID: {id_jogo})")
+                        historico_chutes_partida = s.get("historico_chutes", {})
+                        
+                        if not historico_chutes_partida:
+                            print("❌ Nenhum histórico de chutes encontrado para esta partida no JSON gerado.")
+                        else:
+                            for jogador, lista_chutes in historico_chutes_partida.items():
+                                if len(lista_chutes) > 0:
+                                    soma_chutes = sum(lista_chutes)
+                                    jogos_validos = len(lista_chutes)
+                                    media_bruta = soma_chutes / jogos_validos
+                                    media_final = media_bruta - 1.0
+                                    print(f"   🎯 Chute no gol: {jogador} {lista_chutes} | Média Bruta: {media_bruta:.2f} - 1.0 | Média Final: {media_final:.1f}")
+                        print("==================================================================\n")
+                        # ================================================================================
+
                         mercados_para_processar = []
 
                         # Gols, BTTS, CD, Vitoria
@@ -138,12 +155,10 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # --- SEÇÃO DE JOGADORES AJUSTADA (USANDO T1 E T2 DIRETOS) ---
-                        # Resgata de forma segura os elencos/nomes mapeados do scraper para casa e fora
+                        # --- SEÇÃO DE JOGADORES AJUSTADA ---
                         elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
                         elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
                         
-                        # 🟢 SOLUÇÃO: Usa as variáveis t1 e t2 que já possuem os nomes reais dos times!
                         nome_time_casa = t1 if t1 else "MANDANTE"
                         nome_time_fora = t2 if t2 else "VISITANTE"
 
@@ -183,14 +198,11 @@ def main():
                             3
                         )
                         if res_cartoes and res_cartoes.get("aprovado"):
-                            # 🟢 Pega o mercado perfeitamente calculado e ajustado vindo direto do cartoes.py
                             mercado_formatado = res_cartoes.get("mercado")
-                            
-                            # Evita problemas caso retorne vazio por algum motivo de segurança
                             if mercado_formatado:
                                 mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
 
-                        # 🟢 TRAVA ANTI-DUPLICADOS (Limpa mercados idênticos antes de rodar as odds)
+                        # TRAVA ANTI-DUPLICADOS
                         mercados_unicos = []
                         textos_vistos = set()
                         for item in mercados_para_processar:
@@ -237,7 +249,6 @@ def main():
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
-            # 1. ENVIO DO LISTÃO PARA VOCÊ
             meu_chat_id = os.getenv('CHAT_ID')
             if meu_chat_id:
                 cabecalho = "🎫 *LISTA TESTE DE MERCADOS DO DIA*\n\n"
@@ -255,7 +266,6 @@ def main():
                 enviar_telegram(cabecalho + corpo, meu_chat_id)
                 print("📨 Listão enviado.")
     
-            # Preparação comum de dados
             cache_dados = {}
             for j in lista_para_filtros:
                 chave = f"{j['time_casa']}x{j['time_fora']}"
@@ -264,16 +274,11 @@ def main():
                     "liga": j.get("liga"),
                     "horario": j.get("horario"),
                     "odd": j.get("odd"),
-                    "link_h2h": j.get("link_h2h") # Agora ele pega o link que você inseriu no loop
+                    "link_h2h": j.get("link_h2h")
                 }
 
-    
-            # 2. ENVIO AUTOMÁTICO DO BINGO ELITE (Pulado para evitar erros)
             print("📢 Pulando envio do Elite conforme solicitado.")
-    
-            # 3. ENVIO DO MENU INTERATIVO (Para os botões do canal) DESATIVADO PARA TESTES
             
-            # Gravação de arquivos
             os.makedirs("ranking", exist_ok=True)
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
                 json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d"), "jogos": jogos_para_pendentes}, f, indent=4, ensure_ascii=False)
@@ -290,4 +295,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-                
