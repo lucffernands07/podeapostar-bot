@@ -122,7 +122,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         indice_chutes = 5  
                         for idx_th, th in enumerate(cabecalhos_fin):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
-                            if any(x in texto_th for x in ["ALVO", "FN", "SHOTS", "SOT", "FINALIZAÇÕES"]):
+                            if any(x in texto_th for x in ["ALVO", "FN", "SHOTS", "SOT"]):
                                 indice_chutes = idx_th
                                 break
                     
