@@ -96,12 +96,22 @@ def main():
                     print(f"⚠️ Erro ao carregar liga {nome_comp}: {e}")
                     continue
             
-            for el in elementos:
+            print(f"DEBUG: Iniciando varredura nos {len(elementos)} elementos encontrados...")
+            for idx, el in enumerate(elementos):
                 try:
+                    # Captura todo o texto contido dentro do bloco do jogo para inspecionarmos
+                    texto_completo_elemento = el.text.replace('\n', ' | ').strip()
+                    print(f"   🔹 Jogo [{idx+1}]: {texto_completo_elemento}")
+                    
                     try:
-                        tempo_el = el.find_element(By.CSS_SELECTOR, ".event__time")
-                        tempo_raw = tempo_el.text.strip()
-                    except Exception:
+                        # Tenta achar o tempo por seletores alternativos comuns do Flashscore
+                        tempo_el = el.find_elements(By.CSS_SELECTOR, ".event__time, .event__stage, .wcl-scores-rows_scores-rows_3N-Zp")
+                        if not tempo_el:
+                            print(f"      ⚠️ Falha: Não achou seletor de tempo no Jogo {idx+1}")
+                            continue
+                        tempo_raw = tempo_el[0].text.strip()
+                    except Exception as e_tempo:
+                        print(f"      ⚠️ Erro ao buscar tempo no Jogo {idx+1}: {e_tempo}")
                         continue
 
                     if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado"]):
@@ -116,11 +126,15 @@ def main():
                     h_obj = datetime.strptime(horario_str, "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    # 🎯 DIAGNÓSTICO 2: Forçado para depurar a extração de scouts do dia atual
                     aceitar = True
 
                     if aceitar:
-                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                        # Busca os times por seletores mais abrangentes ou por classe parcial
+                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name'], .event__participant")
+                        if len(times) < 2:
+                            print(f"      ⚠️ Falha: Achou apenas {len(times)} times no Jogo {idx+1}")
+                            continue
+                            
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         id_jogo = el.get_attribute('id').split('_')[-1]
                         
