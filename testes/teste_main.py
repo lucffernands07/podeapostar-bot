@@ -13,7 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from testes.teste_ligas import TESTE_COMPETICOES
 from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
-from testes import cartoes, jogadores
+from testes import teste_cartoes, teste_jogadores
 import odds, bingo357
 from telegram import menus
 
