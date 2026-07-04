@@ -45,7 +45,7 @@
             "red": 25
         },
         "+1.5 GOLS (85%)": {
-            "green": 117,
+            "green": 119,
             "red": 51
         },
         "+1.5 GOLS (100%)": {
@@ -94,7 +94,7 @@
         },
         "CARTÕES TOTAIS: -3.5": {
             "green": 0,
-            "red": 18
+            "red": 21
         },
         "CARTÕES TOTAIS: +4.5": {
             "green": 0,
@@ -107,5 +107,5 @@
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "03/07/2026 06:39"
+    "ultima_atualizacao": "04/07/2026 06:27"
 }
