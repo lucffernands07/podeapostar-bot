@@ -29,7 +29,7 @@ def enviar_telegram(mensagem, chat_id_destino):
     try:
         requests.post(url, data={
             "chat_id": chat_id_destino, 
-            "text": mensagem,
+            "text": message,
             "parse_mode": "Markdown",
             "disable_web_page_preview": True
         })
@@ -96,12 +96,17 @@ def main():
                     texto_bruto_jogo = el.text.replace('\n', ' | ').strip()
                     print(f"   🔹 Elemento [{idx+1}]: {texto_bruto_jogo}")
 
+                    # 🛠️ CAPTURA ATUALIZADA DO HORÁRIO
                     try:
-                        tempo_el = el.find_element(By.CSS_SELECTOR, ".event__time")
+                        tempo_el = el.find_element(By.CSS_SELECTOR, "span[class*='dateContent'], .event__stageTime, .event__time")
                         tempo_raw = tempo_el.text.strip()
                     except Exception:
-                        print(f"      ⏩ Pulado: Não encontrou elemento de tempo (.event__time)")
+                        print(f"      ⏩ Pulado: Não encontrou nenhum elemento de tempo.")
                         continue
+
+                    # Se o texto vier com o botão "Preview" colado (ex: "17:00Preview"), limpa e deixa só a hora
+                    if "Preview" in tempo_raw:
+                        tempo_raw = tempo_raw.replace("Preview", "").strip()
 
                     if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado"]):
                         print(f"      ⏩ Pulado: Status ao vivo/encerrado detectado ({tempo_raw})")
@@ -131,7 +136,30 @@ def main():
                             print(f"      ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
                             continue
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        id_jogo = el.get_attribute('id').split('_')[-1]
+                        
+                        # 🛠️ CAPTURA ATUALIZADA DO ID DO JOGO (Pega do Preview ou usa fallbacks antigos)
+                        id_jogo = None
+                        try:
+                            link_el = el.find_element(By.CSS_SELECTOR, "a.icon--preview")
+                            url_jogo = link_el.get_attribute('href')
+                            if "mid=" in url_jogo:
+                                id_jogo = url_jogo.split("mid=")[-1].split("&")[0]
+                        except Exception:
+                            pass
+
+                        if not id_jogo:
+                            try:
+                                link_el = el.find_element(By.CSS_SELECTOR, "a.eventRowLink")
+                                id_jogo = link_el.get_attribute('id').split('_')[-1]
+                            except Exception:
+                                try:
+                                    id_jogo = el.get_attribute('id').split('_')[-1]
+                                except Exception:
+                                    continue
+
+                        if not id_jogo or len(id_jogo) < 3:
+                            print(f"      ⚠️ Falha: ID do jogo inválido ou não encontrado.")
+                            continue
 
                         print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando análise de mercados...")
 
@@ -320,3 +348,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+                            
