@@ -1,152 +1,68 @@
 {
-    "data_geracao": "2026-07-05",
+    "data_geracao": "2026-07-06",
     "jogos": [
         {
-            "time_casa": "Náutico",
-            "time_fora": "Juventude",
+            "time_casa": "Botafogo-SP",
+            "time_fora": "Avaí",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/URgp0ZjA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Vila Nova",
+            "time_fora": "São Bernardo",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KhfdbYxK/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Ivinhema",
+            "time_fora": "ASA",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/I7xuIe97/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Portugal",
+            "time_fora": "Espanha",
             "mercado": "+1.5 Gols (70%)",
             "mercado_ranking": "+1.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/I5H4hrk1/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Náutico",
-            "time_fora": "Juventude",
-            "mercado": "2X (70%)",
-            "mercado_ranking": "2X (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/I5H4hrk1/#/resumo-de-jogo"
+            "time_casa": "Portugal",
+            "time_fora": "Espanha",
+            "mercado": "Chutes no gol: POR Ronaldo C. | Méd: 1.3",
+            "mercado_ranking": "CHUTES NO GOL: POR RONALDO C. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Náutico",
-            "time_fora": "Juventude",
+            "time_casa": "Portugal",
+            "time_fora": "Espanha",
+            "mercado": "Chutes no gol: ESP Oyarzabal M. | Méd: 1.3",
+            "mercado_ranking": "CHUTES NO GOL: ESP OYARZABAL M. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Portugal",
+            "time_fora": "Espanha",
+            "mercado": "Faltas Sofridas: POR Nuno Mendes | Méd: 1.7",
+            "mercado_ranking": "FALTAS SOFRIDAS: POR NUNO MENDES | MÉD: 1.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Portugal",
+            "time_fora": "Espanha",
             "mercado": "Cartões Totais: -3.5",
             "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/I5H4hrk1/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Ypiranga",
-            "time_fora": "Paysandu",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/zqXR8sbL/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Ypiranga",
-            "time_fora": "Paysandu",
-            "mercado": "Ambas Marcam: Sim (80%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (80%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/zqXR8sbL/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Anápolis",
-            "time_fora": "Botafogo-PB",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/zPtYn0y2/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Brasil",
-            "time_fora": "Noruega",
-            "mercado": "+2.5 Gols (85%)",
-            "mercado_ranking": "+2.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/tpOhKWcC/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Brasil",
-            "time_fora": "Noruega",
-            "mercado": "Ambas Marcam: Sim (100%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/tpOhKWcC/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Brasil",
-            "time_fora": "Noruega",
-            "mercado": "Chutes no gol: BRA Vinicius Junior | Méd: 2.0",
-            "mercado_ranking": "CHUTES NO GOL: BRA VINICIUS JUNIOR | MÉD: 2.0",
-            "link_h2h": "https://www.flashscore.com.br/jogo/tpOhKWcC/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Brasil",
-            "time_fora": "Noruega",
-            "mercado": "Faltas Sofridas: BRA Vinicius Junior | Méd: 1.3",
-            "mercado_ranking": "FALTAS SOFRIDAS: BRA VINICIUS JUNIOR | MÉD: 1.3",
-            "link_h2h": "https://www.flashscore.com.br/jogo/tpOhKWcC/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Brasil",
-            "time_fora": "Noruega",
+            "time_casa": "EUA",
+            "time_fora": "Bélgica",
             "mercado": "Cartões Totais: -3.5",
             "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/tpOhKWcC/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "México",
-            "time_fora": "Inglaterra",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bc27lzfo/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "México",
-            "time_fora": "Inglaterra",
-            "mercado": "Chutes no gol: ING Kane H. | Méd: 1.0",
-            "mercado_ranking": "CHUTES NO GOL: ING KANE H. | MÉD: 1.0",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bc27lzfo/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "México",
-            "time_fora": "Inglaterra",
-            "mercado": "Faltas Sofridas: ING Guehi M. | Méd: 2.3",
-            "mercado_ranking": "FALTAS SOFRIDAS: ING GUEHI M. | MÉD: 2.3",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bc27lzfo/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "México",
-            "time_fora": "Inglaterra",
-            "mercado": "Cartões Totais: -3.5",
-            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bc27lzfo/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Aktobe",
-            "time_fora": "Zhetysu",
-            "mercado": "2X (70%)",
-            "mercado_ranking": "2X (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/rFyjPxNk/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Atyrau",
-            "time_fora": "Kaspij Aktau",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/rZRqoKq9/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Kaisar",
-            "time_fora": "Ertis Pavlodar",
-            "mercado": "+1.5 Gols (70%)",
-            "mercado_ranking": "+1.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/UkQiqbEL/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Kaisar",
-            "time_fora": "Ertis Pavlodar",
-            "mercado": "Ambas Marcam: Sim (100%)",
-            "mercado_ranking": "AMBAS MARCAM: SIM (100%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/UkQiqbEL/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Kaisar",
-            "time_fora": "Ertis Pavlodar",
-            "mercado": "1X (85%)",
-            "mercado_ranking": "1X (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/UkQiqbEL/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Kaisar",
-            "time_fora": "Ertis Pavlodar",
-            "mercado": "Vitória Casa (85%)",
-            "mercado_ranking": "VITÓRIA CASA (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/UkQiqbEL/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/xhRXm8PG/#/resumo-de-jogo"
         }
     ]
 }
