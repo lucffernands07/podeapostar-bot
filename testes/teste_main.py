@@ -16,9 +16,10 @@ from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, cartoes, jo
 import odds, bingo357
 from telegram import menus
 
-# Funções de raspagem
+# Funções de raspagem e Novo Módulo de Escanteios
 from funcoes.raspagem_h2h import pegar_estatisticas_h2h
 from testes.teste_raspagem_scouts import pegar_scouts_avancados
+from testes.teste_escanteios import analisar_dados_escanteios as analisar_escanteios
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -29,7 +30,7 @@ def enviar_telegram(mensagem, chat_id_destino):
     try:
         requests.post(url, data={
             "chat_id": chat_id_destino, 
-            "text": mensagem,                  # 🟢 Corrigido aqui para "mensagem"
+            "text": mensagem,                  
             "parse_mode": "Markdown",
             "disable_web_page_preview": True
         })
@@ -67,12 +68,10 @@ def main():
             
             try:
                 driver.get(url)
-                time.sleep(6)  # Aumentado para 6s para garantir renderização do JS
+                time.sleep(6)  
                 
-                # 🔍 DIAGNÓSTICO 1: Validar se a página realmente carregou algo
                 elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
                 if not elementos:
-                    # Fallback caso a classe mude ou seja id dinâmico
                     elementos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
                 
                 print(f"📊 Total de elementos encontrados na página: {len(elementos)}")
@@ -92,11 +91,9 @@ def main():
             
             for idx, el in enumerate(elementos):
                 try:
-                    # 🔍 DIAGNÓSTICO 2: Print bruto do texto contido no bloco do jogo
                     texto_bruto_jogo = el.text.replace('\n', ' | ').strip()
                     print(f"   🔹 Elemento [{idx+1}]: {texto_bruto_jogo}")
 
-                    # 🛠️ CAPTURA ATUALIZADA DO HORÁRIO
                     try:
                         tempo_el = el.find_element(By.CSS_SELECTOR, "span[class*='dateContent'], .event__stageTime, .event__time")
                         tempo_raw = tempo_el.text.strip()
@@ -104,7 +101,6 @@ def main():
                         print(f"      ⏩ Pulado: Não encontrou nenhum elemento de tempo.")
                         continue
 
-                    # Se o texto vier com o botão "Preview" colado (ex: "17:00Preview"), limpa e deixa só a hora
                     if "Preview" in tempo_raw:
                         tempo_raw = tempo_raw.replace("Preview", "").strip()
 
@@ -127,7 +123,6 @@ def main():
                     elif "." not in tempo_raw:
                         if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
 
-                    # 🔍 DIAGNÓSTICO 3: Exibe o resultado do filtro de data e horário
                     print(f"      ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
 
                     if aceitar:
@@ -137,7 +132,6 @@ def main():
                             continue
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         
-                        # 🛠️ CAPTURA ATUALIZADA DO ID DO JOGO (Pega do Preview ou usa fallbacks antigos)
                         id_jogo = None
                         try:
                             link_el = el.find_element(By.CSS_SELECTOR, "a.icon--preview")
@@ -163,17 +157,15 @@ def main():
 
                         print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando análise de mercados...")
 
-                        # Correção para raspagem pesada quando não tiver LIGAS_ELITE_JOGADORES
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         
                         s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
-                        # Só roda a raspagem pesada de scouts se a liga atual for Elite ou Série B
                         if nome_comp in LIGAS_ELITE_JOGADORES:
                             s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
-                            s = s_inicial  # Mantém os dados de gols/btts do H2H e evita o timeout
+                            s = s_inicial  
                         
                         mercados_para_processar = []
 
@@ -195,7 +187,7 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # --- SEÇÃO DE JOGADORES AJUSTADA (USANDO T1 E T2 DIRETOS) ---
+                        # --- SEÇÃO DE JOGADORES ---
                         elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
                         elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
                         
@@ -242,6 +234,19 @@ def main():
                             if mercado_formatado:
                                 mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
 
+                        # 🟢 --- SEÇÃO DE PROCESSAMENTO DE ESCANTEIOS VIA MÓDULO ---
+                        res_escanteios = analisar_escanteios(
+                            s.get("cantos_mandante_h2h", []), 
+                            s.get("cantos_visitante_h2h", []), 
+                            nome_comp, 
+                            3
+                        )
+                        if res_escanteios and res_escanteios.get("aprovado"):
+                            mercado_cantos_formatado = res_escanteios.get("mercado")
+                            if mercado_cantos_formatado:
+                                print(res_escanteios.get("log_detalhado_cantos"))
+                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_OVER"})
+
                         # TRAVA ANTI-DUPLICADOS
                         mercados_unicos = []
                         textos_vistos = set()
@@ -257,7 +262,11 @@ def main():
                             
                             for item in mercados_para_processar:
                                 m_texto, m_chave = item["texto"], item["chave"]
-                                valor_odd_str = "1.50" if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else v_odds.get(m_chave, "N/A")
+                                
+                                if m_chave == "CANTOS_OVER":
+                                    valor_odd_str = "1.35"
+                                else:
+                                    valor_odd_str = "1.50" if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else v_odds.get(m_chave, "N/A")
 
                                 try:
                                     odd_float = float(str(valor_odd_str).replace(',', '.'))
@@ -348,4 +357,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                            
+            
