@@ -1,0 +1,86 @@
+{
+    "data_geracao": "2026-07-06",
+    "jogos": [
+        {
+            "time_casa": "Botafogo-SP",
+            "time_fora": "Avaí",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/URgp0ZjA/#/resumo-de-jogo",
+            "odd_casa": "1.86",
+            "odd_fora": "4.50"
+        },
+        {
+            "time_casa": "Vila Nova",
+            "time_fora": "São Bernardo",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/KhfdbYxK/#/resumo-de-jogo",
+            "odd_casa": "1.91",
+            "odd_fora": "4.10"
+        },
+        {
+            "time_casa": "Ivinhema",
+            "time_fora": "ASA",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/I7xuIe97/#/resumo-de-jogo",
+            "odd_casa": "4.05",
+            "odd_fora": "2.00"
+        },
+        {
+            "time_casa": "Portugal",
+            "time_fora": "Espanha",
+            "mercado": "+1.5 Gols (70%)",
+            "mercado_ranking": "+1.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo",
+            "odd_casa": "4.00",
+            "odd_fora": "1.95"
+        },
+        {
+            "time_casa": "Portugal",
+            "time_fora": "Espanha",
+            "mercado": "Chutes no gol: POR Ronaldo C. | Méd: 1.3",
+            "mercado_ranking": "CHUTES NO GOL: POR RONALDO C. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo",
+            "odd_casa": "4.00",
+            "odd_fora": "1.95"
+        },
+        {
+            "time_casa": "Portugal",
+            "time_fora": "Espanha",
+            "mercado": "Chutes no gol: ESP Oyarzabal M. | Méd: 1.3",
+            "mercado_ranking": "CHUTES NO GOL: ESP OYARZABAL M. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo",
+            "odd_casa": "4.00",
+            "odd_fora": "1.95"
+        },
+        {
+            "time_casa": "Portugal",
+            "time_fora": "Espanha",
+            "mercado": "Faltas Sofridas: POR Nuno Mendes | Méd: 1.7",
+            "mercado_ranking": "FALTAS SOFRIDAS: POR NUNO MENDES | MÉD: 1.7",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo",
+            "odd_casa": "4.00",
+            "odd_fora": "1.95"
+        },
+        {
+            "time_casa": "Portugal",
+            "time_fora": "Espanha",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo",
+            "odd_casa": "4.00",
+            "odd_fora": "1.95"
+        },
+        {
+            "time_casa": "EUA",
+            "time_fora": "Bélgica",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xhRXm8PG/#/resumo-de-jogo",
+            "odd_casa": "2.50",
+            "odd_fora": "2.75"
+        }
+    ]
+}
