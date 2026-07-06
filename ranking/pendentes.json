@@ -2,27 +2,6 @@
     "data_geracao": "2026-07-06",
     "jogos": [
         {
-            "time_casa": "Botafogo-SP",
-            "time_fora": "Avaí",
-            "mercado": "Cartões Totais: -3.5",
-            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/URgp0ZjA/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Vila Nova",
-            "time_fora": "São Bernardo",
-            "mercado": "Cartões Totais: -3.5",
-            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/KhfdbYxK/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Ivinhema",
-            "time_fora": "ASA",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/I7xuIe97/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Portugal",
             "time_fora": "Espanha",
             "mercado": "+1.5 Gols (70%)",
