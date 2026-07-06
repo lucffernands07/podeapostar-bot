@@ -10,9 +10,11 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
-from ligas import COMPETICOES
-from mercados.jogadores import LIGAS_ELITE_JOGADORES
-from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, cartoes, jogadores
+from testes.teste_ligas import TESTE_COMPETICOES as COMPETICOES
+from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
+from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
+from testes import teste_cartoes as cartoes
+from testes import teste_jogadores as jogadores
 import odds, bingo357
 from telegram import menus
 
@@ -285,13 +287,13 @@ def main():
                     print(f"⚠️ Erro ao processar partida no loop interno: {e}")
                     continue
 
-        # --- PROCESSAMENTO E ENVIO FINAL ---
+        # --- PROCESSAMENTO E ENVIO FINAL TESTE_MAIN ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
             meu_chat_id = os.getenv('CHAT_ID')
             if meu_chat_id:
-                cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
+                cabecalho = "🎫 *LISTA TESTE DE MERCADOS DO DIA*\n\n"
                 corpo = ""
                 for j in lista_para_filtros:
                     bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
@@ -313,23 +315,12 @@ def main():
                     "link": j.get("link_betano"),
                     "liga": j.get("liga"),
                     "horario": j.get("horario"),
-                    "odd": j.get("odd")
+                    "odd": j.get("odd"),
+                    "link_h2h": j.get("link_h2h")
                 }
-    
-            print("📢 Pulando envio do Elite conforme solicitado.")
-    
-            canal_id = os.getenv('CHANNEL_ID')
-            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
-            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
-    
-            if texto_bingos_final and canal_id:
-                try:
-                    msg_bingo_formatada = "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final
-                    menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
-                    print("📢 Menu interativo enviado para o Canal.")
-                except Exception as e:
-                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
 
+            print("📢 Pulando envio do Elite conforme solicitado nos testes.")
+            
             os.makedirs("ranking", exist_ok=True)
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
                 json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d"), "jogos": jogos_para_pendentes}, f, indent=4, ensure_ascii=False)
@@ -338,7 +329,7 @@ def main():
             with open(f"telegram/jogos_{hoje_ref.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
                 json.dump([{"horario": j.get("horario"), "liga": j.get("liga"), "time_casa": j.get("time_casa"), "time_fora": j.get("time_fora"), "mercado": j.get("mercado"), "odd": j.get("odd"), "link_betano": j.get("link_betano")} for j in lista_para_filtros], f, indent=4, ensure_ascii=False)
         else:
-            print("⚠️ Nenhuma partida qualificada entrou na 'lista_para_filtros' após varrer os elementos.")
+            print("⚠️ Nenhuma partida qualificada entrou na 'lista_para_filtros'.")
 
     except Exception as e:
         print(f"❌ Erro Crítico no Main: {e}")
