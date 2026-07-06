@@ -10,11 +10,9 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
-from testes.teste_ligas import TESTE_COMPETICOES as COMPETICOES
-from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
-from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
-from testes import teste_cartoes as cartoes
-from testes import teste_jogadores as jogadores
+from ligas import COMPETICOES
+from mercados.jogadores import LIGAS_ELITE_JOGADORES
+from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, cartoes, jogadores
 import odds, bingo357
 from telegram import menus
 
@@ -31,7 +29,7 @@ def enviar_telegram(mensagem, chat_id_destino):
     try:
         requests.post(url, data={
             "chat_id": chat_id_destino, 
-            "text": mensagem,  # 🎯 Corrigido aqui: mudado de message para mensagem
+            "text": mensagem,                  # 🟢 Corrigido aqui para "mensagem"
             "parse_mode": "Markdown",
             "disable_web_page_preview": True
         })
@@ -69,17 +67,15 @@ def main():
             
             try:
                 driver.get(url)
-                time.sleep(5)
+                time.sleep(6)  # Aumentado para 6s para garantir renderização do JS
                 
-                # 🔍 DIAGNÓSTICO 1: Verificar integridade da página
-                print(f"📄 Título da página carregada: {driver.title}")
-                
+                # 🔍 DIAGNÓSTICO 1: Validar se a página realmente carregou algo
                 elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
                 if not elementos:
-                    # Fallback estratégico para layouts alternativos do Flashscore
+                    # Fallback caso a classe mude ou seja id dinâmico
                     elementos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
                 
-                print(f"📊 Total de jogos encontrados na página: {len(elementos)}")
+                print(f"📊 Total de elementos encontrados na página: {len(elementos)}")
                 
             except Exception as e:
                 if "invalid session id" in str(e).lower() or "session" in str(e).lower():
@@ -88,33 +84,32 @@ def main():
                     except: pass
                     driver = configurar_driver() 
                     driver.get(url)
-                    time.sleep(5)
+                    time.sleep(6)
                     elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-                    if not elementos:
-                        elementos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
                 else:
                     print(f"⚠️ Erro ao carregar liga {nome_comp}: {e}")
                     continue
             
-            print(f"DEBUG: Iniciando varredura nos {len(elementos)} elementos encontrados...")
             for idx, el in enumerate(elementos):
                 try:
-                    # Captura todo o texto contido dentro do bloco do jogo para inspecionarmos
-                    texto_completo_elemento = el.text.replace('\n', ' | ').strip()
-                    print(f"   🔹 Jogo [{idx+1}]: {texto_completo_elemento}")
-                    
+                    # 🔍 DIAGNÓSTICO 2: Print bruto do texto contido no bloco do jogo
+                    texto_bruto_jogo = el.text.replace('\n', ' | ').strip()
+                    print(f"   🔹 Elemento [{idx+1}]: {texto_bruto_jogo}")
+
+                    # 🛠️ CAPTURA ATUALIZADA DO HORÁRIO
                     try:
-                        # Tenta achar o tempo por seletores alternativos comuns do Flashscore
-                        tempo_el = el.find_elements(By.CSS_SELECTOR, ".event__time, .event__stage, .wcl-scores-rows_scores-rows_3N-Zp")
-                        if not tempo_el:
-                            print(f"      ⚠️ Falha: Não achou seletor de tempo no Jogo {idx+1}")
-                            continue
-                        tempo_raw = tempo_el[0].text.strip()
-                    except Exception as e_tempo:
-                        print(f"      ⚠️ Erro ao buscar tempo no Jogo {idx+1}: {e_tempo}")
+                        tempo_el = el.find_element(By.CSS_SELECTOR, "span[class*='dateContent'], .event__stageTime, .event__time")
+                        tempo_raw = tempo_el.text.strip()
+                    except Exception:
+                        print(f"      ⏩ Pulado: Não encontrou nenhum elemento de tempo.")
                         continue
 
+                    # Se o texto vier com o botão "Preview" colado (ex: "17:00Preview"), limpa e deixa só a hora
+                    if "Preview" in tempo_raw:
+                        tempo_raw = tempo_raw.replace("Preview", "").strip()
+
                     if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado"]):
+                        print(f"      ⏩ Pulado: Status ao vivo/encerrado detectado ({tempo_raw})")
                         continue
 
                     partes_tempo = tempo_raw.split()
@@ -126,48 +121,60 @@ def main():
                     h_obj = datetime.strptime(horario_str, "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    # 🎯 FILTRO DE DATA RESTAURADO IGUAL AO MAIN PRINCIPAL
                     aceitar = False
                     if amanha_no_site in tempo_raw:
                         if h_obj.hour <= 3: aceitar = True
                     elif "." not in tempo_raw:
                         if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
 
-                    if not aceitar:
-                        print(f"      ⏩ Ignorado: Jogo fora da janela de horário válida ({tempo_raw})")
-                        continue
+                    # 🔍 DIAGNÓSTICO 3: Exibe o resultado do filtro de data e horário
+                    print(f"      ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
 
                     if aceitar:
-                        # Busca os times por seletores mais abrangentes ou por classe parcial
-                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name'], .event__participant")
+                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         if len(times) < 2:
-                            print(f"      ⚠️ Falha: Achou apenas {len(times)} times no Jogo {idx+1}")
+                            print(f"      ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
                             continue
-                            
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        id_jogo = el.get_attribute('id').split('_')[-1]
                         
+                        # 🛠️ CAPTURA ATUALIZADA DO ID DO JOGO (Pega do Preview ou usa fallbacks antigos)
+                        id_jogo = None
+                        try:
+                            link_el = el.find_element(By.CSS_SELECTOR, "a.icon--preview")
+                            url_jogo = link_el.get_attribute('href')
+                            if "mid=" in url_jogo:
+                                id_jogo = url_jogo.split("mid=")[-1].split("&")[0]
+                        except Exception:
+                            pass
+
+                        if not id_jogo:
+                            try:
+                                link_el = el.find_element(By.CSS_SELECTOR, "a.eventRowLink")
+                                id_jogo = link_el.get_attribute('id').split('_')[-1]
+                            except Exception:
+                                try:
+                                    id_jogo = el.get_attribute('id').split('_')[-1]
+                                except Exception:
+                                    continue
+
+                        if not id_jogo or len(id_jogo) < 3:
+                            print(f"      ⚠️ Falha: ID do jogo inválido ou não encontrado.")
+                            continue
+
+                        print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando análise de mercados...")
+
+                        # Correção para raspagem pesada quando não tiver LIGAS_ELITE_JOGADORES
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         
                         s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
-                        s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
                         
-                        # 🔍 DIAGNÓSTICO 3: LOG DETALHADO DA RASPAGEM DOS SCOUTS DO JOGADOR
-                        print(f"\n🔍 [LOG SCRAPING] Partida: {t1} x {t2} (ID: {id_jogo})")
-                        historico_chutes_partida = s.get("historico_chutes", {})
-                        
-                        if not historico_chutes_partida:
-                            print("❌ Nenhum histórico de chutes mapeado nesta partida dentro do objeto final do scraper.")
+                        # Só roda a raspagem pesada de scouts se a liga atual for Elite ou Série B
+                        if nome_comp in LIGAS_ELITE_JOGADORES:
+                            s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
                         else:
-                            for jogador, lista_chutes in historico_chutes_partida.items():
-                                if len(lista_chutes) > 0:
-                                    soma_chutes = sum(lista_chutes)
-                                    jogos_validos = len(lista_chutes)
-                                    media_bruta = soma_chutes / jogos_validos
-                                    media_final = media_bruta - 1.0
-                                    print(f"   🎯 Chute no gol: ({nome_comp[:3].upper()}) {jogador} {lista_chutes} média {media_bruta:.1f} -1 | média final {media_final:.1f}")
-                        print("==================================================================\n")
-
+                            print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
+                            s = s_inicial  # Mantém os dados de gols/btts do H2H e evita o timeout
+                        
                         mercados_para_processar = []
 
                         # Gols, BTTS, CD, Vitoria
@@ -188,7 +195,7 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # --- SEÇÃO DE JOGADORES ---
+                        # --- SEÇÃO DE JOGADORES AJUSTADA (USANDO T1 E T2 DIRETOS) ---
                         elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
                         elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
                         
@@ -255,7 +262,7 @@ def main():
                                 try:
                                     odd_float = float(str(valor_odd_str).replace(',', '.'))
                                 except (ValueError, TypeError, AttributeError):
-                                    print(f"⚠️ Descartado (Odd inválida): {m_texto} | Valor: {valor_odd_str}")
+                                    print(f"      ⚠️ Descartado (Odd inválida): {m_texto} | Valor: {valor_odd_str}")
                                     continue 
 
                                 if "M45" in m_chave and odd_float >= 4.0: continue 
@@ -266,8 +273,7 @@ def main():
                                     lista_para_filtros.append({
                                         "horario": h_br, "time_casa": t1, "time_fora": t2,
                                         "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else "Análise", "liga": nome_comp,
-                                        "link_betano": s.get("link_betano"),
-                                        "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
+                                        "link_betano": s.get("link_betano")
                                     })
                                     jogos_para_pendentes.append({
                                         "time_casa": t1, "time_fora": t2, "mercado": m_texto,
@@ -276,16 +282,16 @@ def main():
                                     total_mercados += 1
                                     
                 except Exception as e:
-                    print(f"⚠️ Erro ao processar partida: {e}")
+                    print(f"⚠️ Erro ao processar partida no loop interno: {e}")
                     continue
 
-        # --- PROCESSAMENTO E ENVIO FINAL TESTE_MAIN ---
+        # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
             meu_chat_id = os.getenv('CHAT_ID')
             if meu_chat_id:
-                cabecalho = "🎫 *LISTA TESTE DE MERCADOS DO DIA*\n\n"
+                cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
                 corpo = ""
                 for j in lista_para_filtros:
                     bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
@@ -307,12 +313,23 @@ def main():
                     "link": j.get("link_betano"),
                     "liga": j.get("liga"),
                     "horario": j.get("horario"),
-                    "odd": j.get("odd"),
-                    "link_h2h": j.get("link_h2h")
+                    "odd": j.get("odd")
                 }
+    
+            print("📢 Pulando envio do Elite conforme solicitado.")
+    
+            canal_id = os.getenv('CHANNEL_ID')
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
+            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
+    
+            if texto_bingos_final and canal_id:
+                try:
+                    msg_bingo_formatada = "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final
+                    menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
+                    print("📢 Menu interativo enviado para o Canal.")
+                except Exception as e:
+                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
 
-            print("📢 Pulando envio do Elite conforme solicitado nos testes.")
-            
             os.makedirs("ranking", exist_ok=True)
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
                 json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d"), "jogos": jogos_para_pendentes}, f, indent=4, ensure_ascii=False)
@@ -321,7 +338,7 @@ def main():
             with open(f"telegram/jogos_{hoje_ref.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
                 json.dump([{"horario": j.get("horario"), "liga": j.get("liga"), "time_casa": j.get("time_casa"), "time_fora": j.get("time_fora"), "mercado": j.get("mercado"), "odd": j.get("odd"), "link_betano": j.get("link_betano")} for j in lista_para_filtros], f, indent=4, ensure_ascii=False)
         else:
-            print("⚠️ Nenhuma partida qualificada entrou na 'lista_para_filtros'.")
+            print("⚠️ Nenhuma partida qualificada entrou na 'lista_para_filtros' após varrer os elementos.")
 
     except Exception as e:
         print(f"❌ Erro Crítico no Main: {e}")
@@ -331,4 +348,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-            
+                            
