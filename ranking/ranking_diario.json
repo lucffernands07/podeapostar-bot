@@ -36,16 +36,16 @@
         "assertividade": 0.7647058823529411
     },
     {
-        "mercado": "+1.5 GOLS (70%)",
-        "green": 64,
-        "red": 27,
-        "assertividade": 0.7032967032967034
-    },
-    {
         "mercado": "+1.5 GOLS (85%)",
         "green": 122,
         "red": 52,
         "assertividade": 0.7011494252873564
+    },
+    {
+        "mercado": "+1.5 GOLS (70%)",
+        "green": 64,
+        "red": 28,
+        "assertividade": 0.6956521739130435
     },
     {
         "mercado": "+1.5 GOLS (100%)",
@@ -146,7 +146,7 @@
     {
         "mercado": "CARTÕES TOTAIS: -3.5",
         "green": 0,
-        "red": 24,
+        "red": 26,
         "assertividade": 0.0
     },
     {
