@@ -1,47 +1,54 @@
 {
-    "data_geracao": "2026-07-06",
+    "data_geracao": "2026-07-07",
     "jogos": [
         {
-            "time_casa": "Portugal",
-            "time_fora": "Espanha",
-            "mercado": "+1.5 Gols (70%)",
-            "mercado_ranking": "+1.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo"
+            "time_casa": "Argentina",
+            "time_fora": "Egito",
+            "mercado": "+1.5 Gols (100%)",
+            "mercado_ranking": "+1.5 GOLS (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bodsDyte/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Portugal",
-            "time_fora": "Espanha",
-            "mercado": "Chutes no gol: POR Ronaldo C. | Méd: 1.3",
-            "mercado_ranking": "CHUTES NO GOL: POR RONALDO C. | MÉD: 1.3",
-            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo"
+            "time_casa": "Argentina",
+            "time_fora": "Egito",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bodsDyte/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Portugal",
-            "time_fora": "Espanha",
-            "mercado": "Chutes no gol: ESP Oyarzabal M. | Méd: 1.3",
-            "mercado_ranking": "CHUTES NO GOL: ESP OYARZABAL M. | MÉD: 1.3",
-            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo"
+            "time_casa": "Argentina",
+            "time_fora": "Egito",
+            "mercado": "Faltas Sofridas: EGI Marmoush O. | Méd: 1.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: EGI MARMOUSH O. | MÉD: 1.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bodsDyte/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Portugal",
-            "time_fora": "Espanha",
-            "mercado": "Faltas Sofridas: POR Nuno Mendes | Méd: 1.7",
-            "mercado_ranking": "FALTAS SOFRIDAS: POR NUNO MENDES | MÉD: 1.7",
-            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Portugal",
-            "time_fora": "Espanha",
+            "time_casa": "Argentina",
+            "time_fora": "Egito",
             "mercado": "Cartões Totais: -3.5",
             "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/tbTsReVa/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/bodsDyte/#/resumo-de-jogo"
         },
         {
-            "time_casa": "EUA",
-            "time_fora": "Bélgica",
+            "time_casa": "Suíça",
+            "time_fora": "Colômbia",
+            "mercado": "Faltas Sofridas: SUÍ Xhaka G. | Méd: 2.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: SUÍ XHAKA G. | MÉD: 2.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EmgOlMbT/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Suíça",
+            "time_fora": "Colômbia",
+            "mercado": "Faltas Sofridas: COL Puerta G. | Méd: 1.3",
+            "mercado_ranking": "FALTAS SOFRIDAS: COL PUERTA G. | MÉD: 1.3",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EmgOlMbT/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Suíça",
+            "time_fora": "Colômbia",
             "mercado": "Cartões Totais: -3.5",
             "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/xhRXm8PG/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/EmgOlMbT/#/resumo-de-jogo"
         }
     ]
 }

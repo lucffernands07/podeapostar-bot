@@ -1,0 +1,65 @@
+[
+    {
+        "horario": "13:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Argentina",
+        "time_fora": "Egito",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Egypt/88488619/"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Argentina",
+        "time_fora": "Egito",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "1.98",
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Egypt/88488619/"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Argentina",
+        "time_fora": "Egito",
+        "mercado": "Faltas Sofridas: EGI Marmoush O. | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Egypt/88488619/"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Argentina",
+        "time_fora": "Egito",
+        "mercado": "Cartões Totais: -3.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Egypt/88488619/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Suíça",
+        "time_fora": "Colômbia",
+        "mercado": "Faltas Sofridas: SUÍ Xhaka G. | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Switzerland-Colombia/88494497/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Suíça",
+        "time_fora": "Colômbia",
+        "mercado": "Faltas Sofridas: COL Puerta G. | Méd: 1.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Switzerland-Colombia/88494497/"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Suíça",
+        "time_fora": "Colômbia",
+        "mercado": "Cartões Totais: -3.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Switzerland-Colombia/88494497/"
+    }
+]
