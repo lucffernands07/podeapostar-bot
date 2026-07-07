@@ -10,18 +10,15 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
-from testes.teste_ligas import TESTE_COMPETICOES as COMPETICOES
-from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
-from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
-from testes import teste_cartoes as cartoes
-from testes import teste_jogadores as jogadores
-from testes.teste_escanteios import analisar_dados_escanteios as analisar_escanteios
+fromligas import COMPETICOES
+from mercados.jogadores import LIGAS_ELITE_JOGADORES
+from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes
 import odds, bingo357
 from telegram import menus
 
 # Funções de raspagem
 from funcoes.raspagem_h2h import pegar_estatisticas_h2h
-from testes.teste_raspagem_scouts import pegar_scouts_avancados
+from funcoes.raspagem_scouts import pegar_scouts_avancados
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
