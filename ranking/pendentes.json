@@ -2,34 +2,6 @@
     "data_geracao": "2026-07-07",
     "jogos": [
         {
-            "time_casa": "Argentina",
-            "time_fora": "Egito",
-            "mercado": "+1.5 Gols (100%)",
-            "mercado_ranking": "+1.5 GOLS (100%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bodsDyte/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Argentina",
-            "time_fora": "Egito",
-            "mercado": "+2.5 Gols (70%)",
-            "mercado_ranking": "+2.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bodsDyte/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Argentina",
-            "time_fora": "Egito",
-            "mercado": "Faltas Sofridas: EGI Marmoush O. | Méd: 1.0",
-            "mercado_ranking": "FALTAS SOFRIDAS: EGI MARMOUSH O. | MÉD: 1.0",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bodsDyte/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Argentina",
-            "time_fora": "Egito",
-            "mercado": "Cartões Totais: -3.5",
-            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bodsDyte/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Suíça",
             "time_fora": "Colômbia",
             "mercado": "Faltas Sofridas: SUÍ Xhaka G. | Méd: 2.0",
