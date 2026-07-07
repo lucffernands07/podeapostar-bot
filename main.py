@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
-fromligas import COMPETICOES
+from ligas import COMPETICOES
 from mercados.jogadores import LIGAS_ELITE_JOGADORES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes
 import odds, bingo357
