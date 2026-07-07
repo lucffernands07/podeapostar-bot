@@ -1,10 +1,10 @@
 import re
 
 # 🟢 LISTA BRANCA: Apenas ligas de elite que comprovadamente abrem mercados de jogadores na Betano
-LIGAS_ELITE_CARTOES = [
+LIGAS_ELITE_JOGADORES = [
     "Brasileirão Série A", "Copa do Brasil", "Libertadores", "Sul-Americana",
     "Brasileirão Série B", "Argentina - Liga Profesional", "Mundo - Copa do Mundo",
-    "Champions League", "Inglaterra - Premier League", "Espanha - LaLiga",
+    "Europa - Champions League", "Inglaterra - Premier League", "Espanha - LaLiga",
     "Alemanha - Bundesliga", "Italia - Serie A", "França - Ligue 1",
     "Europa - League", "Inglaterra - FA Cup", "Espanha - Copa del Rey",
     "Alemanha - DFB Pokal", "Portugal - Primeira Liga", "Países Baixos - Eredivisie",
