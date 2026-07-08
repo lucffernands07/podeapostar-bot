@@ -1,26 +1,82 @@
 {
-    "data_geracao": "2026-07-07",
+    "data_geracao": "2026-07-08",
     "jogos": [
         {
-            "time_casa": "Suíça",
-            "time_fora": "Colômbia",
-            "mercado": "Faltas Sofridas: SUÍ Xhaka G. | Méd: 2.0",
-            "mercado_ranking": "FALTAS SOFRIDAS: SUÍ XHAKA G. | MÉD: 2.0",
-            "link_h2h": "https://www.flashscore.com.br/jogo/EmgOlMbT/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Suíça",
-            "time_fora": "Colômbia",
-            "mercado": "Faltas Sofridas: COL Puerta G. | Méd: 1.3",
-            "mercado_ranking": "FALTAS SOFRIDAS: COL PUERTA G. | MÉD: 1.3",
-            "link_h2h": "https://www.flashscore.com.br/jogo/EmgOlMbT/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Suíça",
-            "time_fora": "Colômbia",
+            "time_casa": "Ponte Preta",
+            "time_fora": "Criciúma",
             "mercado": "Cartões Totais: -3.5",
             "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/EmgOlMbT/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/URuShC0s/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Kairat Almaty (Kaz)",
+            "time_fora": "Sutjeska (Mne)",
+            "mercado": "-4.5 Gols (85%)",
+            "mercado_ranking": "-4.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jDdtMR3t/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Kairat Almaty (Kaz)",
+            "time_fora": "Sutjeska (Mne)",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jDdtMR3t/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Flora (Est)",
+            "time_fora": "Iberia 1999 (Geo)",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jwbWPU57/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Flora (Est)",
+            "time_fora": "Iberia 1999 (Geo)",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jwbWPU57/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "ML Vitebsk (Blr)",
+            "time_fora": "Univ. Craiova (Rou)",
+            "mercado": "+1.5 Gols (85%)",
+            "mercado_ranking": "+1.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/OQEVJdvA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "ML Vitebsk (Blr)",
+            "time_fora": "Univ. Craiova (Rou)",
+            "mercado": "+2.5 Gols (85%)",
+            "mercado_ranking": "+2.5 GOLS (85%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/OQEVJdvA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "ML Vitebsk (Blr)",
+            "time_fora": "Univ. Craiova (Rou)",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/OQEVJdvA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Petrocub (Mda)",
+            "time_fora": "KF Egnatia (Alb)",
+            "mercado": "+1.5 Gols (100%)",
+            "mercado_ranking": "+1.5 GOLS (100%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fiEO3plC/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Petrocub (Mda)",
+            "time_fora": "KF Egnatia (Alb)",
+            "mercado": "+2.5 Gols (70%)",
+            "mercado_ranking": "+2.5 GOLS (70%)",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fiEO3plC/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Petrocub (Mda)",
+            "time_fora": "KF Egnatia (Alb)",
+            "mercado": "Cartões Totais: -3.5",
+            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fiEO3plC/#/resumo-de-jogo"
         }
     ]
 }
