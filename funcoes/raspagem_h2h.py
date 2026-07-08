@@ -48,7 +48,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         try:
             print(f"      🔗 Capturando link Betano para {t1} x {t2}...")
             # Presume que o seu módulo 'links' importado cuida dessa extração
-            import links 
             stats["link_betano"] = links.extrair_url_betano(driver)
         except Exception as e_link:
             print(f"      ⚠️ Erro ao capturar link Betano inicial: {e_link}")
