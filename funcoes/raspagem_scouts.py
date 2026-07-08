@@ -13,7 +13,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
         except: pass
         return stats
 
-    # Garante que todas as chaves necessárias existam no retorno
     if "historico_chutes" not in stats: stats["historico_chutes"] = {}
     if "historico_faltas" not in stats: stats["historico_faltas"] = {}
     if "elenco_mandante" not in stats: stats["elenco_mandante"] = []
@@ -21,35 +20,33 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
 
     wait = WebDriverWait(driver, 10)
 
-    # 🟢 CAPTURA OS ELENCOS DIRETO NA ABA DE ESCALAÇÕES DO CONFRONTO ATUAL
+    # 🟢 CAPTURA DE ELENCOS ATUALIZADA E RESILIENTE
     try:
         url_escalacoes = driver.current_url.replace("/h2h/overall", "/escalacoes")
         if "/escalacoes" in url_escalacoes:
             driver.get(url_escalacoes)
             time.sleep(2.5)
             
-            # Pega todos os nomes de jogadores que pertencem ao bloco da esquerda (Mandante)
-            jogadores_casa = driver.find_elements(By.CSS_SELECTOR, ".lf__side--home .lf__participantName, [class*='home'] [class*='participantName']")
+            # Busca genérica por participantes na coluna da esquerda e direita
+            jogadores_casa = driver.find_elements(By.CSS_SELECTOR, "[class*='home'] [class*='participantName'], .lf__side--home [class*='participantName']")
             for j in jogadores_casa:
                 nome = driver.execute_script("return arguments[0].textContent;", j).strip()
-                if nome: stats["elenco_mandante"].append(nome)
+                if nome and nome not in stats["elenco_mandante"]: stats["elenco_mandante"].append(nome)
                 
-            # Pega todos os nomes de jogadores que pertencem ao bloco da direita (Visitante)
-            jogadores_fora = driver.find_elements(By.CSS_SELECTOR, ".lf__side--away .lf__participantName, [class*='away'] [class*='participantName']")
+            jogadores_fora = driver.find_elements(By.CSS_SELECTOR, "[class*='away'] [class*='participantName'], .lf__side--away [class*='participantName']")
             for j in jogadores_fora:
                 nome = driver.execute_script("return arguments[0].textContent;", j).strip()
-                if nome: stats["elenco_visitante"].append(nome)
+                if nome and nome not in stats["elenco_visitante"]: stats["elenco_visitante"].append(nome)
     except Exception as e_elenco:
         print(f"      ⚠️ Não foi possível mapear elencos da partida: {e_elenco}")
 
-    # Retorna para o fluxo normal do H2H para pegar o histórico anterior
-    try:
-        jogo_global_index = 0
-        secoes_alvo_scouts = [
-            {"tipo": "MANDANTE", "idx_secao": 1},
-            {"tipo": "VISITANTE", "idx_secao": 2}
-        ]
+    jogo_global_index = 0
+    secoes_alvo_scouts = [
+        {"tipo": "MANDANTE", "idx_secao": 1},
+        {"tipo": "VISITANTE", "idx_secao": 2}
+    ]
 
+    try:
         for alvo in secoes_alvo_scouts:
             lista_urls_jogos = []
             try:
@@ -61,15 +58,15 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                 for jogo_idx in range(min(3, len(linhas_confrontos))):
                     try:
                         elemento_alvo = linhas_confrontos[jogo_idx]
-                        partes_texto = elemento_alvo.text.split('\n')
-                        mandante_atual = partes_texto[2].strip() if len(partes_texto) > 2 else ""
-                        visitante_atual = partes_texto[3].strip() if len(partes_texto) > 3 else ""
+                        
+                        # 🟢 CORREÇÃO 1: Evita quebra posicional do .text usando seletores de classe estáveis
+                        mandante_atual = elemento_alvo.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text.strip()
+                        visitante_atual = elemento_alvo.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text.strip()
                         
                         lista_urls_jogos.append({
                             "idx": jogo_idx,
                             "mandante_atual": mandante_atual,
-                            "visitante_atual": visitante_atual,
-                            "elemento": elemento_alvo
+                            "visitante_atual": visitante_atual
                         })
                     except: continue
             except Exception as e_coleta:
@@ -92,19 +89,17 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     url_anterior = driver.current_url
                     driver.execute_script("arguments[0].click();", elemento_alvo)
                     
-                    try:
-                        WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
+                    try: WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
                     except: pass
                         
                     time.sleep(2.5)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
 
-                    # Captura os hashes dos logos do jogo (Mandante/Visitante deste jogo histórico)
                     hash_mandante_topo, hash_visitante_topo = "", ""
                     try:
-                        img_m = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__homeLogo img.participant__image")
+                        img_m = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__homeLogo img.participant__image, [class*='homeLogo'] img")
                         hash_mandante_topo = img_m.get_attribute("src").split('/')[-1]
-                        img_v = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__awayLogo img.participant__image")
+                        img_v = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__awayLogo img.participant__image, [class*='awayLogo'] img")
                         hash_visitante_topo = img_v.get_attribute("src").split('/')[-1]
                     except: pass
 
@@ -116,13 +111,10 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         driver.execute_script("window.scrollTo(0, 300);")
                         time.sleep(1.5)
                         
-                        wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .fp-playerName_E6lgN")) > 0)
-                        
                         cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
                         indice_chutes = 5  
                         for idx_th, th in enumerate(cabecalhos_fin):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
-                            # Só aceita se tiver ALVO ou TARGET, mas ignora se tiver "XG" ou "XGOT" no texto
                             if any(x in texto_th for x in ["ALVO", "TARGET"]) and not any(x in texto_th for x in ["XG", "XGOT"]):
                                 indice_chutes = idx_th
                                 break
@@ -138,7 +130,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 if not nome_jogador or nome_jogador == "TODOS": continue
                                 
                                 try:
-                                    img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
+                                    img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='teamLogo'] img, [class*='wcl-teamLogo'] img")
                                     hash_linha = img_linha.get_attribute("src").split('/')[-1]
                                     
                                     time_identificado = ""
@@ -161,7 +153,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 stats["historico_chutes"][nome_jogador].append(chutes)
                             except: continue
                     except Exception as e_passo2:
-                        print(f" ⚠️ Erro ao processar dados de finalizações nesta partida: {e_passo2}")
+                        print(f" ⚠️ Erro ao processar dados de finalizações: {e_passo2}")
 
                     # 🎯 PASSO 3: Coleta de Faltas Sofridas
                     url_ataque = f"{url_jogo_completa}/resumo/estatisticas-jogadores/ataque/"
@@ -170,8 +162,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     try:
                         driver.execute_script("window.scrollTo(0, 300);")
                         time.sleep(1.5)
-                        
-                        wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], [class*='playerName']")) > 0)
                         
                         cabecalhos_atq = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
                         indice_faltas = 5  
@@ -192,7 +182,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 if not nome_jogador or nome_jogador == "TODOS": continue
                                 
                                 try:
-                                    img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img")
+                                    img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='teamLogo'] img, [class*='wcl-teamLogo'] img")
                                     hash_linha = img_linha.get_attribute("src").split('/')[-1]
                                     
                                     time_identificado = ""
@@ -215,12 +205,18 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 stats["historico_faltas"][nome_jogador].append(faltas_sof)
                             except: continue
                     except Exception as e_passo3:
-                        print(f" ⚠️ Erro ao processar dados de faltas sofridas nesta partida: {e_passo3}")
+                        print(f" ⚠️ Erro ao processar dados de faltas sofridas: {e_passo3}")
 
                     jogo_global_index += 1
                 except: continue
     except Exception as e:
-        print(f"      ⚠️ Erro na Raspagem: {e}")
+        print(f"      ⚠️ Erro Crítico na Raspagem Geral: {e}")
+
+    # 🟢 CORREÇÃO 3: Preenche com 0 os arrays mais curtos para garantir simetria em todos os jogadores no final
+    for jogador, lista in stats["historico_chutes"].items():
+        while len(lista) < jogo_global_index: lista.append(0)
+    for jogador, lista in stats["historico_faltas"].items():
+        while len(lista) < jogo_global_index: lista.append(0)
             
     try:
         driver.close()
@@ -228,4 +224,4 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
     except: pass
 
     return stats
-                 
+    
