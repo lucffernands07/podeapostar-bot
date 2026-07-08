@@ -14,8 +14,8 @@ from testes.teste_ligas import TESTE_COMPETICOES as COMPETICOES
 from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
 from testes.teste_cartoes import LIGAS_ELITE_JOGADORES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
-from testes.teste_cartoes as cartoes
-from testes.teste_jogadores as jogadores
+from testes import teste_cartoes as cartoes
+from testes import teste_jogadores as jogadores
 import odds, bingo357
 from telegram import menus
 
