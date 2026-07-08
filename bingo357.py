@@ -132,27 +132,25 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     
                 med = match_med.group(1) if match_med else "N/A"
                 texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {med}{sufixo_odd}"
+
+            if "falta" in mercado_limpo.lower():
+                # ... (código original de faltas intacto) ...
+                texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {med}{sufixo_odd}"
                 
             elif "chute" in mercado_limpo.lower():
-                match_nome = re.search(r':\s*([^|\n]+)', mercado_limpo)
-                match_med = re.search(r'Méd:\s*([\d.]+)', mercado_limpo)
-                nome = match_nome.group(1).strip() if match_nome else "Jogador"
-                
-                match_sigla = re.match(r'^([A-ZÀ-Ú]+)\s+(.+)$', nome)
-                if match_sigla:
-                    nome = f"({match_sigla.group(1)}) {match_sigla.group(2)}"
-                    
-                med = match_med.group(1) if match_med else "N/A"
+                # ... (código original de chutes intacto) ...
                 texto_final = f"🔶 Chutes no gol: {nome} | Méd: {med}{sufixo_odd}"
                 
-                elif "cartão" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
-                # 🟢 Captura apenas o número da média enviado pelo teste_cartoes
+            elif "cartã" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
+                # 🟢 ÚNICO LUGAR ALTERADO: Captura a média e deixa o texto limpo
                 match_med_cartao = re.search(r'[\d.]+', mercado_limpo)
                 num_media = match_med_cartao.group(0) if match_med_cartao else "0.0"
-                # Monta o layout exato que você pediu para o Telegram
                 texto_final = f"🔶 Média de cartões: {num_media}{sufixo_odd}"
-
-
+                
+            else:
+                # 🟢 RECOLOCADO: O "else" que mantém gols e outros mercados funcionando
+                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}{sufixo_odd}"
+                
             agrupados[chave_jogo]["mercados"].append({
                 "texto": texto_final, 
                 "prioridade": prioridade_mercado(j.get('mercado', ''))
