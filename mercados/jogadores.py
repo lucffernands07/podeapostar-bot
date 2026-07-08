@@ -1,6 +1,7 @@
 import re
 
 # 🟢 LISTA BRANCA: Apenas ligas de elite que comprovadamente abrem mercados de jogadores na Betano
+# 🟢 LISTA BRANCA: Apenas ligas de elite que comprovadamente abrem mercados de jogadores na Betano
 LIGAS_ELITE_JOGADORES = [
     "Brasileirão Série A", "Copa do Brasil", "Libertadores", "Sul-Americana",
     "Brasileirão Série B", "Argentina - Liga Profesional", "Mundo - Copa do Mundo",
@@ -146,7 +147,7 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
                 time_pertence = "fora"
             valores_analise = valores_copia[:quantidade_jogos] if time_pertence == "casa" else valores_copia[meio:meio+quantidade_jogos]
         else:
-            if elenco_fora and player in elenco_fora: # Mantendo consistência do seu mapeamento interno
+            if elenco_fora and jogador in elenco_fora:  # 🟢 Corrigido de 'player' para 'jogador'
                 time_pertence = "fora"
             elif elenco_casa and jogador in elenco_casa:
                 time_pertence = "casa"
