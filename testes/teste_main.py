@@ -20,7 +20,7 @@ import odds, bingo357
 from telegram import menus
 
 # Funções de raspagem e Novo Módulo de Escanteios
-from funcoes.raspagem_h2h import pegar_estatisticas_h2h
+from testes.teste_raspagem_h2h import pegar_estatisticas_h2h
 from testes.teste_raspagem_scouts import pegar_scouts_avancados
 from testes.teste_escanteios import analisar_dados_escanteios as analisar_escanteios
 
