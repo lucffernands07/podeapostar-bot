@@ -10,11 +10,9 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
-from testes.teste_ligas import TESTE_COMPETICOES as COMPETICOES
-from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
-from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
-from testes import teste_cartoes as cartoes
-from testes import teste_jogadores as jogadores
+from ligas import COMPETICOES
+from mercados.jogadores import LIGAS_ELITE_JOGADORES
+from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes
 import odds, bingo357
 from telegram import menus
 
