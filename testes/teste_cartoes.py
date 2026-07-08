@@ -73,8 +73,8 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
     media_visitante = total_cartoes_visitante / quantidade_jogos if quantidade_jogos > 0 else 0
     media_geral_confronto = media_mandante + media_visitante
 
-    # 🟢 NOVO FORMATO: Define o mercado focado puramente na Média Geral do Confronto
-    texto_mercado = f"Média de cartões: {media_geral_confronto:.1f}"
+    # 🟢 Texto limpo e sem acento para evitar qualquer erro de encoding no bot
+    texto_mercado = f"Media de cartao: {media_geral_confronto:.1f}"
 
     return {
         "aprovado": True,
@@ -85,5 +85,3 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
         "mercado": texto_mercado, 
         "log_detalhado_jogadores": relatorio_jogadores
     }
-
-
