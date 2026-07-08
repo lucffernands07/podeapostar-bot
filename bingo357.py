@@ -145,13 +145,14 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                 med = match_med.group(1) if match_med else "N/A"
                 texto_final = f"🔶 Chutes no gol: {nome} | Méd: {med}{sufixo_odd}"
                 
-            elif "cartão" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
-                # 🟢 Formatação limpa e direta para exibir exatamente "🔶 Média de cartões: X.X"
-                texto_final = f"🔶 {mercado_limpo}{sufixo_odd}"
-            else:
-                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}{sufixo_odd}"
+                elif "cartão" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
+                # 🟢 Captura apenas o número da média enviado pelo teste_cartoes
+                match_med_cartao = re.search(r'[\d.]+', mercado_limpo)
+                num_media = match_med_cartao.group(0) if match_med_cartao else "0.0"
+                # Monta o layout exato que você pediu para o Telegram
+                texto_final = f"🔶 Média de cartões: {num_media}{sufixo_odd}"
 
-            
+
             agrupados[chave_jogo]["mercados"].append({
                 "texto": texto_final, 
                 "prioridade": prioridade_mercado(j.get('mercado', ''))
