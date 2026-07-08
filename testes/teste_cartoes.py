@@ -73,35 +73,17 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
     media_visitante = total_cartoes_visitante / quantidade_jogos if quantidade_jogos > 0 else 0
     media_geral_confronto = media_mandante + media_visitante
 
-    # 📊 DEFINIÇÃO DA LINHA BASE FLUTUANTE (VALOR NUMÉRICO COM SINAL COMERCIAL)
-    if media_geral_confronto >= 4.0:
-        linha_base = 3.5  # Representa +3.5
-        sinal = "+"
-    elif media_geral_confronto >= 3.0:
-        linha_base = 2.5  # Representa +2.5
-        sinal = "+"
-    elif media_geral_confronto >= 2.0:
-        linha_base = -3.5 # Representa -3.5
-        sinal = "-"
-    else:
-        linha_base = -2.5 # Representa -2.5
-        sinal = "-"
+    # 🟢 NOVO FORMATO: Define o mercado focado puramente na Média Geral do Confronto
+    texto_mercado = f"Média de cartões: {media_geral_confronto:.1f}"
 
-    # 🟢 SUA REGRA MATEMÁTICA PERFEITA: Subtrai 1.0 de qualquer linha!
-    if sinal == "-":
-        linha_final = linha_base - 1.0  # Ex: -2.5 - 1 = -3.5
-        texto_mercado = f"Cartões Totais: {linha_final}"
-    else:
-        linha_final = linha_base - 1.0  # Ex: 3.5 - 1 = 2.5
-        texto_mercado = f"Cartões Totais: +{linha_final}"
-
-    # Retorna o dicionário no formato padrão consumido pelo banco de dados do bot
     return {
         "aprovado": True,
         "total_mandante": total_cartoes_mandante,
         "total_visitante": total_cartoes_visitante,
-        "total_confronto": total_cartoes_mandante + total_cartoes_visitante, # 🟢 Corrigido aqui!
+        "total_confronto": total_cartoes_mandante + total_cartoes_visitante, 
         "media_confronto": round(media_geral_confronto, 2),
         "mercado": texto_mercado, 
         "log_detalhado_jogadores": relatorio_jogadores
-            }
+    }
+
+
