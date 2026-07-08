@@ -129,18 +129,21 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                             
                             stats[f"h2h_geral_res_{i+1}"] = res_geral
 
-                        # Garante a perspectiva fixa do Mandante nos confrontos diretos
-                        if t1.lower() in n_fora_h2h.lower():
-                            continue 
-
+                        # 🟢 Tratamento inteligente sem dar 'continue'
                         stats["h2h_jogos"] += 1
-                        res_h2h = "E"
-                        if g1 > g2:
-                            res_h2h = "V"
-                            stats["h2h_vitorias_t1"] += 1
-                        elif g1 < g2:
-                            res_h2h = "D"
-                            stats["h2h_vitorias_t2"] += 1
+                        
+                        if g1 == g2:
+                            res_h2h = "E"
+                            stats["h2h_empates"] += 1
+                        else:
+                            # Verifica quem de fato ganhou o jogo baseado no t1
+                            t1_ganhou = (t1.lower() in n_casa_h2h.lower() and g1 > g2) or (t1.lower() in n_fora_h2h.lower() and g2 > g1)
+                            if t1_ganhou:
+                                res_h2h = "V"
+                                stats["h2h_vitorias_t1"] += 1
+                            else:
+                                res_h2h = "D"
+                                stats["h2h_vitorias_t2"] += 1
                         
                         if stats["h2h_res_1"] == "":
                             stats["h2h_res_1"] = res_h2h
