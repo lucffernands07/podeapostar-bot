@@ -104,4 +104,4 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
         "media_confronto": round(media_geral_confronto, 2),
         "mercado": texto_mercado, 
         "log_detalhado_jogadores": relatorio_jogadores
-    }
+            }
