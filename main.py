@@ -12,13 +12,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 # Módulos
 from ligas import COMPETICOES
 from mercados.jogadores import LIGAS_ELITE_JOGADORES
+from mercados.cartoes import LIGAS_ELITE_CARTOES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes
 import odds, bingo357
 from telegram import menus
 
 # Funções de raspagem
 from funcoes.raspagem_h2h import pegar_estatisticas_h2h
-from testes.teste_raspagem_scouts import pegar_scouts_avancados
+from funcoes.raspagem_scouts import pegar_scouts_avancados
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
