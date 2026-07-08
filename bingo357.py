@@ -146,9 +146,11 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                 texto_final = f"🔶 Chutes no gol: {nome} | Méd: {med}{sufixo_odd}"
                 
             elif "cartão" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
-                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}{sufixo_odd}"
+                # 🟢 Formatação limpa e direta para exibir exatamente "🔶 Média de cartões: X.X"
+                texto_final = f"🔶 {mercado_limpo}{sufixo_odd}"
             else:
                 texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}{sufixo_odd}"
+
             
             agrupados[chave_jogo]["mercados"].append({
                 "texto": texto_final, 
