@@ -35,7 +35,6 @@ def pegar_estatisticas_coletivas(driver, stats):
                 
                 for jogo_idx in range(min(3, len(linhas_confrontos))):
                     try:
-                        elemento_alvo = linhas_confrontos[jogo_idx]
                         lista_urls_jogos.append({
                             "idx": jogo_idx
                         })
@@ -64,27 +63,28 @@ def pegar_estatisticas_coletivas(driver, stats):
                     time.sleep(2.5)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
 
-                    # 🎯 PASSO ATUALIZADO: Nova rota de estatísticas totais do Flashscore
+                    # 🎯 Sua URL que abre exatamente a tela do print:
                     url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas/total/"
                     driver.get(url_stats_geral)
-                    time.sleep(2.0)
+                    time.sleep(2.5) # Garante o carregamento dos Destaques na tela
 
                     cantos_jogo_total = 0
 
-                    # 🚨 NOVOS SELETORES COMPATÍVEIS COM O NOVO HTML (VIA XPATH)
+                    # 🚨 NOVO MÉTODO DE EXTRAÇÃO BASEADO NO SEU PRINT E HTML VALIDADO
                     try:
-                        # Busca o elemento de texto que contém "Escanteios" usando o data-testid
+                        # 1. Localiza diretamente o span com o texto "Escanteios"
                         elemento_categoria = driver.find_element(
                             By.XPATH, 
                             "//span[@data-testid='wcl-scores-simple-text-01' and (text()='Escanteios' or text()='Escanteio' or text()='Corner Kicks' or text()='Corners')]"
                         )
                         
-                        # Sobe um nível para pegar a linha correspondente desta estatística
+                        # 2. Sobe para a div pai que engloba a linha inteira da estatística
                         linha_estatistica = elemento_categoria.find_element(By.XPATH, "./..")
                         
-                        # Captura todos os spans irmãos de valor dentro dessa linha específica
+                        # 3. Pega todos os spans que usam o mesmo data-testid dentro dessa linha
                         valores = linha_estatistica.find_elements(By.XPATH, ".//span[@data-testid='wcl-scores-simple-text-01']")
                         
+                        # Estrutura esperada: [Span_Valor_Casa, Span_Texto_Escanteios, Span_Valor_Fora]
                         if len(valores) >= 3:
                             val_casa = valores[0].text.strip()
                             val_fora = valores[2].text.strip()
@@ -93,10 +93,10 @@ def pegar_estatisticas_coletivas(driver, stats):
                             cantos_fora = int(val_fora) if val_fora.isdigit() else 0
                             
                             cantos_jogo_total = cantos_casa + cantos_fora
-                            print(f"      📊 [RASPAGEM] Cantos coletados no jogo: {cantos_casa} (Casa) + {cantos_fora} (Fora) = Total: {cantos_jogo_total}")
+                            print(f"      📊 [Estatísticas] Cantos coletados: {cantos_casa} (Casa) + {cantos_fora} (Fora) = Total: {cantos_jogo_total}")
                     
                     except Exception as e_passo_cantos:
-                        print(f"      ⚠️ Linha de escanteios não localizada ou indisponível para este jogo.")
+                        print(f"      ⚠️ Não encontrou a linha de Escanteios nessa URL do jogo.")
 
                     # Adiciona ao array correspondente do time atual do dia
                     if alvo["tipo"] == "MANDANTE":
@@ -118,4 +118,4 @@ def pegar_estatisticas_coletivas(driver, stats):
     except: pass
 
     return stats
-    
+            
