@@ -13,9 +13,13 @@ def pegar_estatisticas_coletivas(driver, stats):
         except: pass
         return stats
 
-    # Inicialização dos arrays para guardar o total de cantos de cada um dos últimos 3 jogos
+    # Inicialização dos arrays para Escanteios (H2H)
     if "cantos_mandante_h2h" not in stats: stats["cantos_mandante_h2h"] = []
     if "cantos_visitante_h2h" not in stats: stats["cantos_visitante_h2h"] = []
+    
+    # 🚨 NOVO: Inicialização dos arrays para Cartões Amarelos (H2H)
+    if "cartoes_mandante_h2h" not in stats: stats["cartoes_mandante_h2h"] = []
+    if "cartoes_visitante_h2h" not in stats: stats["cartoes_visitante_h2h"] = []
 
     wait = WebDriverWait(driver, 10)
 
@@ -54,7 +58,6 @@ def pegar_estatisticas_coletivas(driver, stats):
                     
                     elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
 
-                    # 🟢 IGUAL AO SCOUT: Clica e espera a URL mudar dinamicamente
                     url_anterior = driver.current_url
                     driver.execute_script("arguments[0].click();", elemento_alvo)
                     
@@ -62,24 +65,23 @@ def pegar_estatisticas_coletivas(driver, stats):
                     except: pass
                         
                     time.sleep(2.5)
-                    
-                    # 🟢 IGUAL AO SCOUT: Captura a URL real onde o navegador caiu (com nome dos times)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
 
-                    # 🎯 PASSO CORRIGIDO: Monta a URL estritamente igual à do seu print usando a base real
                     url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas/total/"
                     driver.get(url_stats_geral)
-                    time.sleep(2.5)
+                    time.sleep(2.0)
 
                     cantos_jogo_total = 0
+                    cartoes_jogo_total = 0
 
-                    # 🚨 EXTRAÇÃO COM TEXTCONTENT E INDEXAÇÃO DINÂMICA (IGUAL AO SCOUT)
                     try:
+                        # Pega todos os spans com a classe unificada de texto da tabela
                         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
                         
                         for idx, span in enumerate(todos_spans):
                             texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
                             
+                            # 1. Captura de Escanteios
                             if texto_elemento in ["ESCANTEIOS", "ESCANTEIO", "CORNER KICKS", "CORNERS"]:
                                 if idx > 0 and (idx + 1) < len(todos_spans):
                                     val_casa = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
@@ -87,25 +89,40 @@ def pegar_estatisticas_coletivas(driver, stats):
                                     
                                     cantos_casa = int(re.search(r'\d+', val_casa).group()) if re.search(r'\d+', val_casa) else 0
                                     cantos_fora = int(re.search(r'\d+', val_fora).group()) if re.search(r'\d+', val_fora) else 0
-                                    
                                     cantos_jogo_total = cantos_casa + cantos_fora
-                                    print(f"      📊 [SUCESSO] Cantos coletados no H2H: {cantos_casa} + {cantos_fora} = Total: {cantos_jogo_total}")
-                                    break
-                    
-                    except Exception as e_passo_cantos:
-                        print(f"      ⚠️ Erro ao processar escanteios no jogo passado: {e_passo_cantos}")
+                            
+                            # 2. 🚨 NOVO: Captura de Cartões Amarelos
+                            elif texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
+                                if idx > 0 and (idx + 1) < len(todos_spans):
+                                    val_casa_card = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                                    val_fora_card = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                                    
+                                    cartoes_casa = int(re.search(r'\d+', val_casa_card).group()) if re.search(r'\d+', val_casa_card) else 0
+                                    cartoes_fora = int(re.search(r'\d+', val_fora_card).group()) if re.search(r'\d+', val_fora_card) else 0
+                                    cartoes_jogo_total = cartoes_casa + cartoes_fora
 
+                        print(f"      📊 [DADOS COLETADOS] Cantos: {cantos_jogo_total} | Cartões Amarelos: {cartoes_jogo_total}")
+                    
+                    except Exception as e_passo_stats:
+                        print(f"      ⚠️ Erro ao processar dados de estatísticas via JS: {e_passo_stats}")
+
+                    # Adiciona aos arrays correspondentes do time alvo
                     if alvo["tipo"] == "MANDANTE":
                         stats["cantos_mandante_h2h"].append(cantos_jogo_total)
+                        stats["cartoes_mandante_h2h"].append(cartoes_jogo_total)
                     else:
                         stats["cantos_visitante_h2h"].append(cantos_jogo_total)
+                        stats["cartoes_visitante_h2h"].append(cartoes_jogo_total)
 
                 except: continue
     except Exception as e:
         print(f"      ⚠️ Erro Crítico na Raspagem Coletiva Geral: {e}")
 
+    # Garante simetria para escanteios e cartões preenchendo com 0 se faltar algum jogo
     while len(stats["cantos_mandante_h2h"]) < 3: stats["cantos_mandante_h2h"].append(0)
     while len(stats["cantos_visitante_h2h"]) < 3: stats["cantos_visitante_h2h"].append(0)
+    while len(stats["cartoes_mandante_h2h"]) < 3: stats["cartoes_mandante_h2h"].append(0)
+    while len(stats["cartoes_visitante_h2h"]) < 3: stats["cartoes_visitante_h2h"].append(0)
             
     try:
         driver.close()
