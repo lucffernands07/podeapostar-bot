@@ -188,10 +188,29 @@ def main():
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
                         # ----------------------------------------------------------
-                        # FASE 2: RASPAGEM DE SCOUTS (JOGADORES) - SÓ SE LIGA ELITE
+                        # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (ESCANTEIOS)
+                        # ----------------------------------------------------------
+                        print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios)...")
+                        s = pegar_estatisticas_coletivas(driver, s)
+
+                        res_escanteios = analisar_dados_escanteios(
+                            s.get("cantos_mandante_h2h", []), 
+                            s.get("cantos_visitante_h2h", []), 
+                            nome_comp, 
+                            3
+                        )
+                        if res_escanteios and res_escanteios.get("aprovado"):
+                            mercado_cantos_formatado = res_escanteios.get("mercado")
+                            if mercado_cantos_formatado:
+                                chave_cantos = "CANTOS_UNDER" if "Menos" in mercado_cantos_formatado else "CANTOS_OVER"
+                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": chave_cantos})
+                                print(f"         ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
+
+                        # ----------------------------------------------------------
+                        # FASE 3: RASPAGEM DE SCOUTS (JOGADORES) - SÓ SE LIGA ELITE
                         # ----------------------------------------------------------
                         if nome_comp in LIGAS_ELITE_JOGADORES:
-                            print(f"      🎯 [FASE 2] Buscando Scouts Avançados (Chutes/Faltas)...")
+                            print(f"      🎯 [FASE 3] Buscando Scouts Avançados (Chutes/Faltas)...")
                             s = pegar_scouts_avancados(driver, s, t1, t2)
                             
                             elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
@@ -219,28 +238,7 @@ def main():
                                 mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave']})
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
-
-                        # ----------------------------------------------------------
-                        # FASE 3: NOVA RASPAGEM DE ESTATÍSTICAS COLETIVAS (ESCANTEIOS)
-                        # ----------------------------------------------------------
-                        print(f"      📊 [FASE 3] Buscando Estatísticas Coletivas (Escanteios)...")
-                        s = pegar_estatisticas_coletivas(driver, s)
-
-                        # Executa a validação de escanteios usando as listas coletadas
-                        res_escanteios = analisar_dados_escanteios(
-                            s.get("cantos_mandante_h2h", []), 
-                            s.get("cantos_visitante_h2h", []), 
-                            nome_comp, 
-                            3
-                        )
-                        if res_escanteios and res_escanteios.get("aprovado"):
-                            mercado_cantos_formatado = res_escanteios.get("mercado")
-                            if mercado_cantos_formatado:
-                                # Define a chave correspondente às odds para os cantos
-                                chave_cantos = "CANTOS_UNDER" if "Menos" in mercado_cantos_formatado else "CANTOS_OVER"
-                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": chave_cantos})
-                                print(f"         ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
-
+                            
                         # TRAVA ANTI-DUPLICADOS
                         mercados_unicos = []
                         textos_vistos = set()
