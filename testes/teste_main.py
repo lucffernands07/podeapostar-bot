@@ -255,9 +255,12 @@ def main():
                         textos_vistos = set()
                         for item in mercados_para_processar:
                             if item["texto"] not in textos_vistos:
-                                mercados_unicos.append(item)
+                                markets_unicos.append(item)
                                 textos_vistos.add(item["texto"])
                         mercados_para_processar = mercados_unicos
+                        
+                        # Log de auditoria para acompanhar no GitHub Actions
+                        print(f"      🔍 Mercados pré-aprovados antes das odds: {[m['texto'] for m in mercados_para_processar]}")
 
                         # --- VALIDAÇÃO DE ODDS ---
                         if mercados_para_processar:
@@ -278,8 +281,11 @@ def main():
                                     continue 
 
                                 if "M45" in m_chave and odd_float >= 4.0: continue 
-                                if m_chave == "CARTOES_CONFRONTO" and "0.0" in m_texto: continue
-                                if m_chave == "CHUTES_ALVO" and "0.0" in m_texto: continue
+                                
+                                # 🟢 CORREÇÃO CRÍTICA: Validação estrita para evitar que "2.0" ou "3.0" sejam pegos pelo "0.0"
+                                texto_limpo = m_texto.strip()
+                                if m_chave == "CARTOES_CONFRONTO" and (texto_limpo == "0.0" or texto_limpo.startswith("0.0")): continue
+                                if m_chave == "CHUTES_ALVO" and (texto_limpo == "0.0" or texto_limpo.startswith("0.0")): continue
 
                                 if odd_float >= 1.25:
                                     lista_para_filtros.append({
@@ -360,4 +366,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-            
+                
