@@ -1,5 +1,3 @@
-#testes/teste_main.py
-
 import os
 import time
 import json
@@ -11,19 +9,19 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Módulos
+# Módulos de Teste
 from testes.teste_ligas import TESTE_COMPETICOES as COMPETICOES
 from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
+from testes.teste_escanteios import analisar_dados_escanteios
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
 from testes import teste_jogadores as jogadores
 import odds, bingo357
 from telegram import menus
 
-# Funções de raspagem e novos validadores
+# Funções de raspagem
 from testes.teste_raspagem_h2h import pegar_estatisticas_h2h
 from testes.teste_raspagem_scouts import pegar_scouts_avancados
 from testes.teste_raspagem_estatisticas import pegar_estatisticas_coletivas
-from testes.teste_escanteios import analisar_dados_escanteios
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -165,25 +163,25 @@ def main():
                         # FASE 1: RASPAGEM H2H E FILTRO DE MERCADOS PRINCIPAIS
                         # ----------------------------------------------------------
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
-                        s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
+                        s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
                         mercados_para_processar = []
 
                         # Gols, BTTS, CD, Vitoria
-                        res_gols = gols.verificar_gols(s)
+                        res_gols = gols.verificar_gols(s_inicial)
                         for rg in res_gols:
                             mercados_para_processar.append({"texto": rg['mercado'], "chave": rg['tipo']})
 
-                        res_btts = ambos_marcam.verificar_btts(s)
+                        res_btts = ambos_marcam.verificar_btts(s_inicial)
                         if res_btts:
                             mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
 
-                        res_cd = chance_dupla.verificar_chance_dupla(s)
+                        res_cd = chance_dupla.verificar_chance_dupla(s_inicial)
                         for rc in res_cd:
                             tipo_cd = "1X" if "1X" in rc else "X2"
                             mercados_para_processar.append({"texto": rc, "chave": tipo_cd})
 
-                        res_vc = vitoria_casa.verificar_vitoria_casa(s)
+                        res_vc = vitoria_casa.verificar_vitoria_casa(s_inicial)
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
@@ -191,7 +189,7 @@ def main():
                         # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (ESCANTEIOS)
                         # ----------------------------------------------------------
                         print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios)...")
-                        s = pegar_estatisticas_coletivas(driver, s)
+                        s = pegar_estatisticas_coletivas(driver, s_inicial)
 
                         res_escanteios = analisar_dados_escanteios(
                             s.get("cantos_mandante_h2h", []), 
@@ -238,7 +236,7 @@ def main():
                                 mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave']})
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
-                            
+
                         # TRAVA ANTI-DUPLICADOS
                         mercados_unicos = []
                         textos_vistos = set()
@@ -253,12 +251,27 @@ def main():
 
                         # --- VALIDAÇÃO DE ODDS ---
                         if mercados_para_processar:
-                            v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
+                            try:
+                                v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
+                            except Exception as e_odds:
+                                if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
+                                    print("      ⚠️ [RECUPERAÇÃO] Driver caiu antes das odds! Reiniciando navegador...")
+                                    try: driver.quit()
+                                    except: pass
+                                    driver = configurar_driver()
+                                    try:
+                                        driver.get(f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo")
+                                        time.sleep(3)
+                                        v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
+                                    except:
+                                        v_odds = {}
+                                else:
+                                    v_odds = {}
                             
                             for item in mercados_para_processar:
                                 m_texto, m_chave = item["texto"], item["chave"]
                                 
-                                # Odds fixas e estimadas para estatísticas que não ficam na grade inicial de odds
+                                # Mapeia as chaves virtuais e fixas de análise para evitar quebras por N/A
                                 if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CANTOS_OVER", "CANTOS_UNDER"]:
                                     valor_odd_str = "1.50" 
                                 else:
@@ -288,7 +301,13 @@ def main():
                                     total_mercados += 1
                                     
                 except Exception as e:
-                    print(f"⚠️ Erro ao processar partida no loop interno: {e}")
+                    if "invalid session id" in str(e).lower() or "session" in str(e).lower():
+                        print("⚠️ [CRÍTICO] Sessão inválida detectada no loop interno. Reiniciando driver...")
+                        try: driver.quit()
+                        except: pass
+                        driver = configurar_driver()
+                    else:
+                        print(f"⚠️ Erro ao processar partida no loop interno: {e}")
                     continue
 
         # --- PROCESSAMENTO E ENVIO FINAL ---
@@ -354,4 +373,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                        
+                    
