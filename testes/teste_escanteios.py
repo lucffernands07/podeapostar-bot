@@ -29,9 +29,17 @@ def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_li
         print(f"⏩ [HISTÓRICO INCOMPLETO] Dados de escanteios insuficientes para o confronto.")
         return {"aprovado": False}
 
-    # Separa as últimas N partidas coletadas
-    jogos_mandante_total = cantos_mandante_h2h[:quantidade_jogos]
-    jogos_visitante_total = cantos_visitante_h2h[:quantidade_jogos]
+    # 🚨 BLINDAGEM: Converte todos os valores extraídos para INT limpando possíveis espaços ou strings
+    try:
+        jogos_mandante_total = [int(str(x).strip()) for x in cantos_mandante_h2h[:quantidade_jogos]]
+        jogos_visitante_total = [int(str(x).strip()) for x in cantos_visitante_h2h[:quantidade_jogos]]
+    except Exception as e_conv:
+        print(f"⚠️ [ERRO CONVERSÃO] Erro ao converter dados de cantos para números: {e_conv}")
+        return {"aprovado": False}
+
+    # Se mesmo após a conversão, as listas retornarem apenas zeros, criamos um log de aviso
+    if sum(jogos_mandante_total) == 0 and sum(jogos_visitante_total) == 0:
+        print(f"⚠️ [AVISO] Listas de escanteios vieram zeradas da raspagem! Mandante: {jogos_mandante_total} | Visitante: {jogos_visitante_total}")
 
     # --- CÁLCULO DAS MÉDIAS REAIS ---
     total_cantos_acumulados = sum(jogos_mandante_total) + sum(jogos_visitante_total)
