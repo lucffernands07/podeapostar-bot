@@ -1,3 +1,5 @@
+#testes/teste_cartoes.py
+
 import re
 
 # 🟢 LISTA BRANCA: Apenas ligas de elite que comprovadamente abrem mercados de jogadores na Betano
@@ -73,8 +75,14 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
     media_visitante = total_cartoes_visitante / quantidade_jogos if quantidade_jogos > 0 else 0
     media_geral_confronto = media_mandante + media_visitante
 
-    # 🟢 Texto limpo e sem acento para evitar qualquer erro de encoding no bot
-    texto_mercado = f"Media de cartao: {media_geral_confronto:.1f}"
+    # 🟢 DEFINIÇÃO COMERCIAL DA LINHA DE CARTÕES (Compatível com a Betano)
+    # Se a média total do confronto for alta, buscamos o Over (Mais de). Se for muito baixa, mantemos o Under (Menos de).
+    if media_geral_confronto >= 4.5:
+        texto_mercado = "Cartões Totais: +3.5"
+    elif media_geral_confronto >= 3.5:
+        texto_mercado = "Cartões Totais: +2.5"
+    else:
+        texto_mercado = "Cartões Totais: -3.5"
 
     return {
         "aprovado": True,
@@ -84,4 +92,5 @@ def analisar_dados_cartoes(historico_mandante_am, historico_mandante_vm, histori
         "media_confronto": round(media_geral_confronto, 2),
         "mercado": texto_mercado, 
         "log_detalhado_jogadores": relatorio_jogadores
-    }
+                }
+    
