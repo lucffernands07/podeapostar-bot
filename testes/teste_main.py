@@ -12,17 +12,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 # Módulos
 from testes.teste_ligas import TESTE_COMPETICOES as COMPETICOES
 from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
-from testes.teste_cartoes import LIGAS_ELITE_CARTOES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
-from testes import teste_cartoes as cartoes
 from testes import teste_jogadores as jogadores
 import odds, bingo357
 from telegram import menus
 
-# Funções de raspagem e Novo Módulo de Escanteios
+# Funções de raspagem
 from testes.teste_raspagem_h2h import pegar_estatisticas_h2h
 from testes.teste_raspagem_scouts import pegar_scouts_avancados
-from testes.teste_escanteios import analisar_dados_escanteios as analisar_escanteios
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -223,39 +220,12 @@ def main():
                         for rf in res_faltas:
                             mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave']})
 
-                        # Cartões
-                        res_cartoes = cartoes.analisar_dados_cartoes(
-                            s.get("historico_mandante_am", {}), 
-                            s.get("historico_mandante_vm", {}), 
-                            s.get("historico_visitante_am", {}), 
-                            s.get("historico_visitante_vm", {}), 
-                            nome_comp, 
-                            3
-                        )
-                        if res_cartoes and res_cartoes.get("aprovado"):
-                            mercado_formatado = res_cartoes.get("mercado")
-                            if mercado_formatado:
-                                mercados_para_processar.append({"texto": mercado_formatado, "chave": "CARTOES_CONFRONTO"})
-
-                        # 🟢 --- SEÇÃO DE PROCESSAMENTO DE ESCANTEIOS VIA MÓDULO ---
-                        res_escanteios = analisar_escanteios(
-                            s.get("cantos_mandante_h2h", []), 
-                            s.get("cantos_visitante_h2h", []), 
-                            nome_comp, 
-                            3
-                        )
-                        if res_escanteios and res_escanteios.get("aprovado"):
-                            mercado_cantos_formatado = res_escanteios.get("mercado")
-                            if mercado_cantos_formatado:
-                                print(res_escanteios.get("log_detalhado_cantos"))
-                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_OVER"})
-
                         # TRAVA ANTI-DUPLICADOS
                         mercados_unicos = []
                         textos_vistos = set()
                         for item in mercados_para_processar:
                             if item["texto"] not in textos_vistos:
-                                mercados_unicos.append(item)  # 🟢 Corrigido aqui!
+                                mercados_unicos.append(item)
                                 textos_vistos.add(item["texto"])
                         mercados_para_processar = mercados_unicos
 
@@ -269,10 +239,7 @@ def main():
                             for item in mercados_para_processar:
                                 m_texto, m_chave = item["texto"], item["chave"]
                                 
-                                if m_chave == "CANTOS_OVER":
-                                    valor_odd_str = "1.35"
-                                else:
-                                    valor_odd_str = "1.50" if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else v_odds.get(m_chave, "N/A")
+                                valor_odd_str = "1.50" if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"] else v_odds.get(m_chave, "N/A")
 
                                 try:
                                     odd_float = float(str(valor_odd_str).replace(',', '.'))
@@ -282,15 +249,14 @@ def main():
 
                                 if "M45" in m_chave and odd_float >= 4.0: continue 
                                 
-                                # 🟢 CORREÇÃO CRÍTICA: Validação estrita para evitar que "2.0" ou "3.0" sejam pegos pelo "0.0"
+                                # Validação estrita para evitar que "2.0" ou "3.0" sejam pegos pelo "0.0"
                                 texto_limpo = m_texto.strip()
-                                if m_chave == "CARTOES_CONFRONTO" and (texto_limpo == "0.0" or texto_limpo.startswith("0.0")): continue
                                 if m_chave == "CHUTES_ALVO" and (texto_limpo == "0.0" or texto_limpo.startswith("0.0")): continue
 
                                 if odd_float >= 1.25:
                                     lista_para_filtros.append({
                                         "horario": h_br, "time_casa": t1, "time_fora": t2,
-                                        "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"] else "Análise", "liga": nome_comp,
+                                        "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"] else "Análise", "liga": nome_comp,
                                         "link_betano": s.get("link_betano")
                                     })
                                     jogos_para_pendentes.append({
@@ -366,4 +332,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                
+                    
