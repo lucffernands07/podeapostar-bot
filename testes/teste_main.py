@@ -1,3 +1,5 @@
+#testes/teste_main.py
+
 import os
 import time
 import json
@@ -17,9 +19,11 @@ from testes import teste_jogadores as jogadores
 import odds, bingo357
 from telegram import menus
 
-# Funções de raspagem
+# Funções de raspagem e novos validadores
 from testes.teste_raspagem_h2h import pegar_estatisticas_h2h
 from testes.teste_raspagem_scouts import pegar_scouts_avancados
+from testes.teste_raspagem_estatisticas import pegar_estatisticas_coletivas
+from testes.teste_escanteios import analisar_dados_escanteios
 
 def enviar_telegram(mensagem, chat_id_destino):
     token = os.getenv('TELEGRAM_TOKEN')
@@ -155,17 +159,13 @@ def main():
                             print(f"      ⚠️ Falha: ID do jogo inválido ou não encontrado.")
                             continue
 
-                        print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando análise de mercados...")
+                        print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
 
+                        # ----------------------------------------------------------
+                        # FASE 1: RASPAGEM H2H E FILTRO DE MERCADOS PRINCIPAIS
+                        # ----------------------------------------------------------
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
-                        
-                        s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
-                        
-                        if nome_comp in LIGAS_ELITE_JOGADORES:
-                            s = pegar_scouts_avancados(driver, s_inicial, t1, t2)
-                        else:
-                            print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
-                            s = s_inicial  
+                        s = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
                         mercados_para_processar = []
 
@@ -187,38 +187,59 @@ def main():
                         for rv in res_vc:
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
-                        # --- SEÇÃO DE JOGADORES ---
-                        elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
-                        elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
-                        
-                        nome_time_casa = t1 if t1 else "MANDANTE"
-                        nome_time_fora = t2 if t2 else "VISITANTE"
+                        # ----------------------------------------------------------
+                        # FASE 2: RASPAGEM DE SCOUTS (JOGADORES) - SÓ SE LIGA ELITE
+                        # ----------------------------------------------------------
+                        if nome_comp in LIGAS_ELITE_JOGADORES:
+                            print(f"      🎯 [FASE 2] Buscando Scouts Avançados (Chutes/Faltas)...")
+                            s = pegar_scouts_avancados(driver, s, t1, t2)
+                            
+                            elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
+                            elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
+                            
+                            nome_time_casa = t1 if t1 else "MANDANTE"
+                            nome_time_fora = t2 if t2 else "VISITANTE"
 
-                        # Jogadores (Chutes no Alvo) 
-                        res_jogadores = jogadores.verificar_destaques_jogadores(
-                            s.get("historico_chutes", {}), 
-                            3, 
-                            nome_comp,
-                            elenco_casa=elenco_casa_disponivel,
-                            elenco_fora=elenco_fora_disponivel,
-                            nome_casa=nome_time_casa,
-                            nome_fora=nome_time_fora
-                        )
-                        for rj in res_jogadores:
-                            mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
+                            # Jogadores (Chutes no Alvo) 
+                            res_jogadores = jogadores.verificar_destaques_jogadores(
+                                s.get("historico_chutes", {}), 3, nome_comp,
+                                elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
+                                nome_casa=nome_time_casa, nome_fora=nome_time_fora
+                            )
+                            for rj in res_jogadores:
+                                mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
-                        # Jogadores (Faltas Sofridas) 
-                        res_faltas = jogadores.verificar_destaques_faltas(
-                            s.get("historico_faltas", {}), 
-                            3, 
-                            nome_comp,
-                            elenco_casa=elenco_casa_disponivel,
-                            elenco_fora=elenco_fora_disponivel,
-                            nome_casa=nome_time_casa,
-                            nome_fora=nome_time_fora
+                            # Jogadores (Faltas Sofridas) 
+                            res_faltas = jogadores.verificar_destaques_faltas(
+                                s.get("historico_faltas", {}), 3, nome_comp,
+                                elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
+                                nome_casa=nome_time_casa, nome_fora=nome_time_fora
+                            )
+                            for rf in res_faltas:
+                                mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave']})
+                        else:
+                            print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
+
+                        # ----------------------------------------------------------
+                        # FASE 3: NOVA RASPAGEM DE ESTATÍSTICAS COLETIVAS (ESCANTEIOS)
+                        # ----------------------------------------------------------
+                        print(f"      📊 [FASE 3] Buscando Estatísticas Coletivas (Escanteios)...")
+                        s = pegar_estatisticas_coletivas(driver, s)
+
+                        # Executa a validação de escanteios usando as listas coletadas
+                        res_escanteios = analisar_dados_escanteios(
+                            s.get("cantos_mandante_h2h", []), 
+                            s.get("cantos_visitante_h2h", []), 
+                            nome_comp, 
+                            3
                         )
-                        for rf in res_faltas:
-                            mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave']})
+                        if res_escanteios and res_escanteios.get("aprovado"):
+                            mercado_cantos_formatado = res_escanteios.get("mercado")
+                            if mercado_cantos_formatado:
+                                # Define a chave correspondente às odds para os cantos
+                                chave_cantos = "CANTOS_UNDER" if "Menos" in mercado_cantos_formatado else "CANTOS_OVER"
+                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": chave_cantos})
+                                print(f"         ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
 
                         # TRAVA ANTI-DUPLICADOS
                         mercados_unicos = []
@@ -239,7 +260,11 @@ def main():
                             for item in mercados_para_processar:
                                 m_texto, m_chave = item["texto"], item["chave"]
                                 
-                                valor_odd_str = "1.50" if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"] else v_odds.get(m_chave, "N/A")
+                                # Odds fixas e estimadas para estatísticas que não ficam na grade inicial de odds
+                                if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CANTOS_OVER", "CANTOS_UNDER"]:
+                                    valor_odd_str = "1.50" 
+                                else:
+                                    valor_odd_str = v_odds.get(m_chave, "N/A")
 
                                 try:
                                     odd_float = float(str(valor_odd_str).replace(',', '.'))
@@ -249,14 +274,13 @@ def main():
 
                                 if "M45" in m_chave and odd_float >= 4.0: continue 
                                 
-                                # Validação estrita para evitar que "2.0" ou "3.0" sejam pegos pelo "0.0"
                                 texto_limpo = m_texto.strip()
                                 if m_chave == "CHUTES_ALVO" and (texto_limpo == "0.0" or texto_limpo.startswith("0.0")): continue
 
                                 if odd_float >= 1.25:
                                     lista_para_filtros.append({
                                         "horario": h_br, "time_casa": t1, "time_fora": t2,
-                                        "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"] else "Análise", "liga": nome_comp,
+                                        "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CANTOS_OVER", "CANTOS_UNDER"] else "Análise", "liga": nome_comp,
                                         "link_betano": s.get("link_betano")
                                     })
                                     jogos_para_pendentes.append({
@@ -332,4 +356,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                    
+                        
