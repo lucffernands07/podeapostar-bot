@@ -255,10 +255,10 @@ def main():
                         textos_vistos = set()
                         for item in mercados_para_processar:
                             if item["texto"] not in textos_vistos:
-                                markets_unicos.append(item)
+                                mercados_unicos.append(item)  # 🟢 Corrigido aqui!
                                 textos_vistos.add(item["texto"])
                         mercados_para_processar = mercados_unicos
-                        
+
                         # Log de auditoria para acompanhar no GitHub Actions
                         print(f"      🔍 Mercados pré-aprovados antes das odds: {[m['texto'] for m in mercados_para_processar]}")
 
