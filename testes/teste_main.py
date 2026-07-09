@@ -191,7 +191,7 @@ def main():
                         print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios)...")
                         s = pegar_estatisticas_coletivas(driver, s_inicial)
 
-                        res_escanteios = analisar_dados_escanteios(
+                        res_escanteios = teste_escanteios.analisar_dados_escanteios(
                             s.get("cantos_mandante_h2h", []), 
                             s.get("cantos_visitante_h2h", []), 
                             nome_comp, 
@@ -200,7 +200,7 @@ def main():
                         if res_escanteios and res_escanteios.get("aprovado"):
                             mercado_cantos_formatado = res_escanteios.get("mercado")
                             if mercado_cantos_formatado:
-                                chave_cantos = "CANTOS_UNDER" if "Menos" in mercado_cantos_formatado else "CANTOS_OVER"
+                                chave_cantos = "CANTOS_OVER"  # Ou uma chave genérica como "CANTOS_MEDIA"
                                 mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": chave_cantos})
                                 print(f"         ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
 
