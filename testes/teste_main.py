@@ -291,7 +291,7 @@ def main():
                                 if odd_float >= 1.25:
                                     lista_para_filtros.append({
                                         "horario": h_br, "time_casa": t1, "time_fora": t2,
-                                        "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CANTOS_OVER", "CANTOS_UNDER"] else "Análise", "liga": nome_comp,
+                                        "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA"] else "Análise", "liga": nome_comp,
                                         "link_betano": s.get("link_betano")
                                     })
                                     jogos_para_pendentes.append({
