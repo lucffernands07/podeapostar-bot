@@ -13,8 +13,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 from testes.teste_ligas import TESTE_COMPETICOES as COMPETICOES
 from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
-from testes import teste_jogadores as jogadores
+from testes import teste_jogadores
 from testes import teste_escanteios
+from testes import teste_cartoes
 import odds, bingo357
 from telegram import menus
 
@@ -186,11 +187,12 @@ def main():
                             mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
 
                         # ----------------------------------------------------------
-                        # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (ESCANTEIOS)
+                        # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (ESCANTEIOS E CARTÕES)
                         # ----------------------------------------------------------
-                        print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios)...")
+                        print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios/Cartões)...")
                         s = pegar_estatisticas_coletivas(driver, s_inicial)
 
+                        # --- PROCESSAMENTO DE ESCANTEIOS ---
                         res_escanteios = teste_escanteios.analisar_dados_escanteios(
                             s.get("cantos_mandante_h2h", []), 
                             s.get("cantos_visitante_h2h", []), 
@@ -200,9 +202,21 @@ def main():
                         if res_escanteios and res_escanteios.get("aprovado"):
                             mercado_cantos_formatado = res_escanteios.get("mercado")
                             if mercado_cantos_formatado:
-                                # Definimos uma chave padrão estática, pois agora é apenas exibição informativa de média
                                 mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA"})
                                 print(f"         ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
+
+                        # --- 🚨 NOVO: PROCESSAMENTO DE CARTÕES AMARELOS ---
+                        res_cartoes = teste_cartoes.analisar_dados_cartoes(
+                            s.get("cartoes_mandante_h2h", []),
+                            s.get("cartoes_visitante_h2h", []),
+                            nome_comp,
+                            3
+                        )
+                        if res_cartoes and res_cartoes.get("aprovado"):
+                            mercado_cartoes_formatado = res_cartoes.get("mercado")
+                            if mercado_cartoes_formatado:
+                                mercados_para_processar.append({"texto": mercado_cartoes_formatado, "chave": "CARTOES_CONFRONTO"})
+                                print(f"         ✅ Mercado de Cartões Qualificado: {mercado_cartoes_formatado}")
 
                         # ----------------------------------------------------------
                         # FASE 3: RASPAGEM DE SCOUTS (JOGADORES) - SÓ SE LIGA ELITE
@@ -218,7 +232,7 @@ def main():
                             nome_time_fora = t2 if t2 else "VISITANTE"
 
                             # Jogadores (Chutes no Alvo) 
-                            res_jogadores = jogadores.verificar_destaques_jogadores(
+                            res_jogadores = teste_jogadores.verificar_destaques_jogadores(
                                 s.get("historico_chutes", {}), 3, nome_comp,
                                 elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
@@ -227,7 +241,7 @@ def main():
                                 mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
 
                             # Jogadores (Faltas Sofridas) 
-                            res_faltas = jogadores.verificar_destaques_faltas(
+                            res_faltas = teste_jogadores.verificar_destaques_faltas(
                                 s.get("historico_faltas", {}), 3, nome_comp,
                                 elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
