@@ -54,6 +54,7 @@ def pegar_estatisticas_coletivas(driver, stats):
                     
                     elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
 
+                    # 🟢 IGUAL AO SCOUT: Clica e espera a URL mudar dinamicamente
                     url_anterior = driver.current_url
                     driver.execute_script("arguments[0].click();", elemento_alvo)
                     
@@ -61,43 +62,39 @@ def pegar_estatisticas_coletivas(driver, stats):
                     except: pass
                         
                     time.sleep(2.5)
+                    
+                    # 🟢 IGUAL AO SCOUT: Captura a URL real onde o navegador caiu (com nome dos times)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
 
-                    # 🎯 PASSO: Acessa a URL de estatísticas totais (idêntica ao print)
+                    # 🎯 PASSO CORRIGIDO: Monta a URL estritamente igual à do seu print usando a base real
                     url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas/total/"
                     driver.get(url_stats_geral)
-                    time.sleep(2.0)
+                    time.sleep(2.5)
 
                     cantos_jogo_total = 0
 
-                    # 🚨 MODELO DE EXTRAÇÃO SEGUINDO A LÓGICA DO SCOUT AVANÇADO (VIA TEXTCONTENT E JS)
+                    # 🚨 EXTRAÇÃO COM TEXTCONTENT E INDEXAÇÃO DINÂMICA (IGUAL AO SCOUT)
                     try:
-                        # Varre todos os spans de estatística da página para evitar travas de XPath estático
                         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
                         
                         for idx, span in enumerate(todos_spans):
-                            # Captura o texto exato via JavaScript (evita falha de renderização headless)
                             texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
                             
-                            # Se achou a palavra-chave na linha
                             if texto_elemento in ["ESCANTEIOS", "ESCANTEIO", "CORNER KICKS", "CORNERS"]:
-                                # No layout do Flashscore, o valor Casa está 1 elemento ANTES e o Visitante está 1 elemento DEPOIS
                                 if idx > 0 and (idx + 1) < len(todos_spans):
                                     val_casa = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
                                     val_fora = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
                                     
-                                    # Extrai apenas os dígitos numéricos (segurança extra do re do scout)
                                     cantos_casa = int(re.search(r'\d+', val_casa).group()) if re.search(r'\d+', val_casa) else 0
                                     cantos_fora = int(re.search(r'\d+', val_fora).group()) if re.search(r'\d+', val_fora) else 0
                                     
                                     cantos_jogo_total = cantos_casa + cantos_fora
-                                    print(f"      📊 [JS-SUCCESS] Cantos obtidos via textContent: {cantos_casa} (Casa) + {cantos_fora} (Fora) = Total: {cantos_jogo_total}")
+                                    print(f"      📊 [SUCESSO] Cantos coletados no H2H: {cantos_casa} + {cantos_fora} = Total: {cantos_jogo_total}")
                                     break
                     
                     except Exception as e_passo_cantos:
-                        print(f"      ⚠️ Erro ao processar dados de escanteios via JavaScript: {e_passo_cantos}")
+                        print(f"      ⚠️ Erro ao processar escanteios no jogo passado: {e_passo_cantos}")
 
-                    # Adiciona ao array correspondente do time atual do dia
                     if alvo["tipo"] == "MANDANTE":
                         stats["cantos_mandante_h2h"].append(cantos_jogo_total)
                     else:
@@ -107,7 +104,6 @@ def pegar_estatisticas_coletivas(driver, stats):
     except Exception as e:
         print(f"      ⚠️ Erro Crítico na Raspagem Coletiva Geral: {e}")
 
-    # Garante simetria preenchendo com 0 caso algum jogo não tenha tido estatística coletada de cantos
     while len(stats["cantos_mandante_h2h"]) < 3: stats["cantos_mandante_h2h"].append(0)
     while len(stats["cantos_visitante_h2h"]) < 3: stats["cantos_visitante_h2h"].append(0)
             
@@ -117,4 +113,4 @@ def pegar_estatisticas_coletivas(driver, stats):
     except: pass
 
     return stats
-    
+                    
