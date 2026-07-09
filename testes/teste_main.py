@@ -200,8 +200,8 @@ def main():
                         if res_escanteios and res_escanteios.get("aprovado"):
                             mercado_cantos_formatado = res_escanteios.get("mercado")
                             if mercado_cantos_formatado:
-                                chave_cantos = "CANTOS_OVER"  # Ou uma chave genérica como "CANTOS_MEDIA"
-                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": chave_cantos})
+                                # Definimos uma chave padrão estática, pois agora é apenas exibição informativa de média
+                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA"})
                                 print(f"         ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
 
                         # ----------------------------------------------------------
