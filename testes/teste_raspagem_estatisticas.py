@@ -1,5 +1,3 @@
-#testes/teste_raspagem_estatisticas.py
-
 import time
 import re
 from selenium.webdriver.common.by import By
@@ -66,31 +64,39 @@ def pegar_estatisticas_coletivas(driver, stats):
                     time.sleep(2.5)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
 
-                    # 🎯 PASSO: Coleta de Escanteios na aba de Estatísticas do Confronto
-                    url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas-jogo/0"
+                    # 🎯 PASSO ATUALIZADO: Nova rota de estatísticas totais do Flashscore
+                    url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas/total/"
                     driver.get(url_stats_geral)
                     time.sleep(2.0)
 
                     cantos_jogo_total = 0
 
+                    # 🚨 NOVOS SELETORES COMPATÍVEIS COM O NOVO HTML (VIA XPATH)
                     try:
-                        linhas_estatisticas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-statisticsRow'], .stat__row")
-                        for linha in linhas_estatisticas:
-                            try:
-                                categoria = linha.find_element(By.CSS_SELECTOR, "[class*='categoryName'], .stat__categoryName").text.strip().upper()
-                                
-                                if any(x in categoria for x in ["ESCANTEIOS", "CORNER KICKS", "CORNERS"]):
-                                    val_casa = linha.find_element(By.CSS_SELECTOR, "[class*='homeValue'], .stat__homeValue").text.strip()
-                                    val_fora = linha.find_element(By.CSS_SELECTOR, "[class*='awayValue'], .stat__awayValue").text.strip()
-                                    
-                                    cantos_casa = int(val_casa) if val_casa.isdigit() else 0
-                                    cantos_fora = int(val_fora) if val_fora.isdigit() else 0
-                                    
-                                    cantos_jogo_total = cantos_casa + cantos_fora
-                                    break  # Encontrou a linha de escanteios, pode parar o loop interno
-                            except: continue
+                        # Busca o elemento de texto que contém "Escanteios" usando o data-testid
+                        elemento_categoria = driver.find_element(
+                            By.XPATH, 
+                            "//span[@data-testid='wcl-scores-simple-text-01' and (text()='Escanteios' or text()='Escanteio' or text()='Corner Kicks' or text()='Corners')]"
+                        )
+                        
+                        # Sobe um nível para pegar a linha correspondente desta estatística
+                        linha_estatistica = elemento_categoria.find_element(By.XPATH, "./..")
+                        
+                        # Captura todos os spans irmãos de valor dentro dessa linha específica
+                        valores = linha_estatistica.find_elements(By.XPATH, ".//span[@data-testid='wcl-scores-simple-text-01']")
+                        
+                        if len(valores) >= 3:
+                            val_casa = valores[0].text.strip()
+                            val_fora = valores[2].text.strip()
+                            
+                            cantos_casa = int(val_casa) if val_casa.isdigit() else 0
+                            cantos_fora = int(val_fora) if val_fora.isdigit() else 0
+                            
+                            cantos_jogo_total = cantos_casa + cantos_fora
+                            print(f"      📊 [RASPAGEM] Cantos coletados no jogo: {cantos_casa} (Casa) + {cantos_fora} (Fora) = Total: {cantos_jogo_total}")
+                    
                     except Exception as e_passo_cantos:
-                        print(f" ⚠️ Erro ao processar dados de escanteios: {e_passo_cantos}")
+                        print(f"      ⚠️ Linha de escanteios não localizada ou indisponível para este jogo.")
 
                     # Adiciona ao array correspondente do time atual do dia
                     if alvo["tipo"] == "MANDANTE":
@@ -112,4 +118,4 @@ def pegar_estatisticas_coletivas(driver, stats):
     except: pass
 
     return stats
-              
+    
