@@ -272,7 +272,7 @@ def main():
                                 m_texto, m_chave = item["texto"], item["chave"]
                                 
                                 # Mapeia as chaves virtuais e fixas de análise para evitar quebras por N/A
-                                if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CANTOS_OVER", "CANTOS_UNDER"]:
+                                if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA"]:
                                     valor_odd_str = "1.50" 
                                 else:
                                     valor_odd_str = v_odds.get(m_chave, "N/A")
