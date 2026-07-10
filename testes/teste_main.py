@@ -162,35 +162,69 @@ def main():
 
                         # ----------------------------------------------------------
                         # FASE 1: RASPAGEM H2H E FILTRO DE MERCADOS PRINCIPAIS
-                        # ----------------------------------------------------------
+                        # ----------------------------------------------------------                                             
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         s_inicial = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
-                        mercados_para_processar = []
+                        mercados_fase1 = []
 
                         # Gols, BTTS, CD, Vitoria
                         res_gols = gols.verificar_gols(s_inicial)
                         for rg in res_gols:
-                            mercados_para_processar.append({"texto": rg['mercado'], "chave": rg['tipo']})
+                            mercados_fase1.append({"texto": rg['mercado'], "chave": rg['tipo']})
 
                         res_btts = ambos_marcam.verificar_btts(s_inicial)
                         if res_btts:
-                            mercados_para_processar.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
+                            mercados_fase1.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
 
                         res_cd = chance_dupla.verificar_chance_dupla(s_inicial)
                         for rc in res_cd:
                             tipo_cd = "1X" if "1X" in rc else "X2"
-                            mercados_para_processar.append({"texto": rc, "chave": tipo_cd})
+                            mercados_fase1.append({"texto": rc, "chave": tipo_cd})
 
                         res_vc = vitoria_casa.verificar_vitoria_casa(s_inicial)
                         for rv in res_vc:
-                            mercados_para_processar.append({"texto": rv, "chave": "VITORIA_CASA"})
+                            mercados_fase1.append({"texto": rv, "chave": "VITORIA_CASA"})
+
+                        # 🚨 CAPTURA IMEDIATA DAS ODDS DA FASE 1 (Com o driver intacto)
+                        v_odds = {}
+                        if mercados_fase1:
+                            try:
+                                v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
+                            except Exception as e_odds:
+                                print(f"      ⚠️ Erro ao capturar odds da Fase 1: {e_odds}")
+                                if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
+                                    try: driver.quit()
+                                    except: pass
+                                    driver = configurar_driver()
+
+                        # Lista unificada que guardará todos os mercados aprovados e validados do jogo
+                        mercados_para_processar = []
+
+                        # Processa e valida os mercados da Fase 1 usando o retorno fresco das odds reais
+                        for item in mercados_fase1:
+                            m_texto, m_chave = item["texto"], item["chave"]
+                            valor_odd_str = v_odds.get(m_chave, "N/A")
+                            
+                            try:
+                                odd_float = float(str(valor_odd_str).replace(',', '.'))
+                                if odd_float >= 1.20: # Mantendo o seu critério de limite mínimo de 1.20
+                                    if "M45" in m_chave and odd_float >= 4.0: continue
+                                    mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": valor_odd_str})
+                                else:
+                                    print(f"      ⚠️ Descartado (Odd baixa): {m_texto} | Valor: {valor_odd_str}")
+                            except:
+                                print(f"      ⚠️ Descartado (Sem Odd / N/A): {m_texto}")
 
                         # ----------------------------------------------------------
                         # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (ESCANTEIOS E CARTÕES)
                         # ----------------------------------------------------------
                         print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios/Cartões)...")
-                        s = pegar_estatisticas_coletivas(driver, s_inicial)
+                        try:
+                            s = pegar_estatisticas_coletivas(driver, s_inicial)
+                        except Exception as e_f2:
+                            print(f"      ⚠️ Erro na Fase 2, usando dicionário inicial: {e_f2}")
+                            s = s_inicial
 
                         # --- PROCESSAMENTO DE ESCANTEIOS ---
                         res_escanteios = teste_escanteios.analisar_dados_escanteios(
@@ -202,10 +236,10 @@ def main():
                         if res_escanteios and res_escanteios.get("aprovado"):
                             mercado_cantos_formatado = res_escanteios.get("mercado")
                             if mercado_cantos_formatado:
-                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA"})
+                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA", "odd": "Análise"})
                                 print(f"         ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
 
-                        # --- 🚨 NOVO: PROCESSAMENTO DE CARTÕES AMARELOS ---
+                        # --- PROCESSAMENTO DE CARTÕES AMARELOS ---
                         res_cartoes = teste_cartoes.analisar_dados_cartoes(
                             s.get("cartoes_mandante_h2h", []),
                             s.get("cartoes_visitante_h2h", []),
@@ -215,7 +249,7 @@ def main():
                         if res_cartoes and res_cartoes.get("aprovado"):
                             mercado_cartoes_formatado = res_cartoes.get("mercado")
                             if mercado_cartoes_formatado:
-                                mercados_para_processar.append({"texto": mercado_cartoes_formatado, "chave": "CARTOES_CONFRONTO"})
+                                mercados_para_processar.append({"texto": mercado_cartoes_formatado, "chave": "CARTOES_CONFRONTO", "odd": "Análise"})
                                 print(f"         ✅ Mercado de Cartões Qualificado: {mercado_cartoes_formatado}")
 
                         # ----------------------------------------------------------
@@ -223,7 +257,10 @@ def main():
                         # ----------------------------------------------------------
                         if nome_comp in LIGAS_ELITE_JOGADORES:
                             print(f"      🎯 [FASE 3] Buscando Scouts Avançados (Chutes/Faltas)...")
-                            s = pegar_scouts_avancados(driver, s, t1, t2)
+                            try:
+                                s = pegar_scouts_avancados(driver, s, t1, t2)
+                            except Exception as e_f3:
+                                print(f"      ⚠️ Erro na Fase 3: {e_f3}")
                             
                             elenco_casa_disponivel = s.get("elenco_mandante") or s.get("jogadores_mandante")
                             elenco_fora_disponivel = s.get("elenco_visitante") or s.get("jogadores_visitante")
@@ -238,7 +275,7 @@ def main():
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
                             )
                             for rj in res_jogadores:
-                                mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave']})
+                                mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave'], "odd": "Análise"})
 
                             # Jogadores (Faltas Sofridas) 
                             res_faltas = teste_jogadores.verificar_destaques_faltas(
@@ -247,7 +284,7 @@ def main():
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
                             )
                             for rf in res_faltas:
-                                mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave']})
+                                mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave'], "odd": "Análise"})
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
 
@@ -260,59 +297,29 @@ def main():
                                 textos_vistos.add(item["texto"])
                         mercados_para_processar = mercados_unicos
 
-                        # Log de auditoria para acompanhar no GitHub Actions
-                        print(f"      🔍 Mercados pré-aprovados antes das odds: {[m['texto'] for m in mercados_para_processar]}")
+                        # Log de auditoria atualizado
+                        print(f"      🔍 Mercados finais aprovados para o listão: {[m['texto'] for m in mercados_para_processar]}")
 
-                        # --- VALIDAÇÃO DE ODDS ---
-                        if mercados_para_processar:
-                            try:
-                                v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-                            except Exception as e_odds:
-                                if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
-                                    print("      ⚠️ [RECUPERAÇÃO] Driver caiu antes das odds! Reiniciando navegador...")
-                                    try: driver.quit()
-                                    except: pass
-                                    driver = configurar_driver()
-                                    try:
-                                        driver.get(f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo")
-                                        time.sleep(3)
-                                        v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-                                    except:
-                                        v_odds = {}
-                                else:
-                                    v_odds = {}
+                        # --- ALIMENTAÇÃO DA LISTA FINAL DO TELEGRAM ---
+                        for item in mercados_para_processar:
+                            m_texto, m_chave, m_odd = item["texto"], item["chave"], item["odd"]
                             
-                            for item in mercados_para_processar:
-                                m_texto, m_chave = item["texto"], item["chave"]
-                                
-                                # Mapeia as chaves virtuais e fixas de análise para evitar quebras por N/A
-                                if m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA"]:
-                                    valor_odd_str = "1.50" 
-                                else:
-                                    valor_odd_str = v_odds.get(m_chave, "N/A")
+                            texto_limpo = m_texto.strip()
+                            if m_chave == "CHUTES_ALVO" and (texto_limpo == "0.0" or texto_limpo.startswith("0.0")): continue
 
-                                try:
-                                    odd_float = float(str(valor_odd_str).replace(',', '.'))
-                                except (ValueError, TypeError, AttributeError):
-                                    print(f"      ⚠️ Descartado (Odd inválida): {m_texto} | Valor: {valor_odd_str}")
-                                    continue 
+                            # Ajusta dinamicamente para o log se o mercado for de análise estática
+                            odd_para_lista = m_odd if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA"] else "Análise"
 
-                                if "M45" in m_chave and odd_float >= 4.0: continue 
-                                
-                                texto_limpo = m_texto.strip()
-                                if m_chave == "CHUTES_ALVO" and (texto_limpo == "0.0" or texto_limpo.startswith("0.0")): continue
-
-                                if odd_float >= 1.20:
-                                    lista_para_filtros.append({
-                                        "horario": h_br, "time_casa": t1, "time_fora": t2,
-                                        "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA"] else "Análise", "liga": nome_comp,
-                                        "link_betano": s.get("link_betano")
-                                    })
-                                    jogos_para_pendentes.append({
-                                        "time_casa": t1, "time_fora": t2, "mercado": m_texto,
-                                        "mercado_ranking": m_texto.upper(), "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
-                                    })
-                                    total_mercados += 1
+                            lista_para_filtros.append({
+                                "horario": h_br, "time_casa": t1, "time_fora": t2,
+                                "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
+                                "link_betano": s.get("link_betano")
+                            })
+                            jogos_para_pendentes.append({
+                                "time_casa": t1, "time_fora": t2, "mercado": m_texto,
+                                "mercado_ranking": m_texto.upper(), "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
+                            })
+                            total_mercados += 1
                                     
                 except Exception as e:
                     if "invalid session id" in str(e).lower() or "session" in str(e).lower():
