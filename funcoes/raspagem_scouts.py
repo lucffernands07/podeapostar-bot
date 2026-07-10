@@ -1,3 +1,5 @@
+#testes/teste_raspagem_scouts.py
+
 import time
 import re
 from selenium.webdriver.common.by import By
@@ -27,7 +29,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
             driver.get(url_escalacoes)
             time.sleep(2.5)
             
-            # Busca genérica por participantes na coluna da esquerda e direita
             jogadores_casa = driver.find_elements(By.CSS_SELECTOR, "[class*='home'] [class*='participantName'], .lf__side--home [class*='participantName']")
             for j in jogadores_casa:
                 nome = driver.execute_script("return arguments[0].textContent;", j).strip()
@@ -59,7 +60,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     try:
                         elemento_alvo = linhas_confrontos[jogo_idx]
                         
-                        # 🟢 CORREÇÃO 1: Evita quebra posicional do .text usando seletores de classe estáveis
                         mandante_atual = elemento_alvo.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text.strip()
                         visitante_atual = elemento_alvo.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text.strip()
                         
@@ -212,7 +212,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
     except Exception as e:
         print(f"      ⚠️ Erro Crítico na Raspagem Geral: {e}")
 
-    # 🟢 CORREÇÃO 3: Preenche com 0 os arrays mais curtos para garantir simetria em todos os jogadores no final
+    # 🟢 CORREÇÃO 3: Preenche com 0 os arrays mais curtos para garantir simetria total
     for jogador, lista in stats["historico_chutes"].items():
         while len(lista) < jogo_global_index: lista.append(0)
     for jogador, lista in stats["historico_faltas"].items():
@@ -224,4 +224,4 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
     except: pass
 
     return stats
-    
+                
