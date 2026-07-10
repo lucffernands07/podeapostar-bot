@@ -1,0 +1,38 @@
+[
+    {
+        "horario": "16:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Espanha",
+        "time_fora": "Bélgica",
+        "mercado": "Faltas Sofridas: BÉL Vanaken H. | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Spain-Belgium/88656108/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Espanha",
+        "time_fora": "Bélgica",
+        "mercado": "Cartões Totais: -3.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Spain-Belgium/88656108/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Juventude",
+        "time_fora": "Vila Nova",
+        "mercado": "Cartões Totais: -3.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Vila-Nova-GO/88706366/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Sport",
+        "time_fora": "Botafogo-SP",
+        "mercado": "Cartões Totais: -3.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Sport-Recife-PE-Botafogo-SP/88706533/"
+    }
+]

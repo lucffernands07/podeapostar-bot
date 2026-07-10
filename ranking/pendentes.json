@@ -1,110 +1,33 @@
 {
-    "data_geracao": "2026-07-09",
+    "data_geracao": "2026-07-10",
     "jogos": [
         {
-            "time_casa": "França",
-            "time_fora": "Marrocos",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jJ5yWPhU/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "França",
-            "time_fora": "Marrocos",
-            "mercado": "+2.5 Gols (70%)",
-            "mercado_ranking": "+2.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jJ5yWPhU/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "França",
-            "time_fora": "Marrocos",
-            "mercado": "Chutes no gol: FRA Mbappe K. | Méd: 2.3",
-            "mercado_ranking": "CHUTES NO GOL: FRA MBAPPE K. | MÉD: 2.3",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jJ5yWPhU/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "França",
-            "time_fora": "Marrocos",
-            "mercado": "Faltas Sofridas: FRA Olise M. | Méd: 1.0",
-            "mercado_ranking": "FALTAS SOFRIDAS: FRA OLISE M. | MÉD: 1.0",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jJ5yWPhU/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "França",
-            "time_fora": "Marrocos",
-            "mercado": "Faltas Sofridas: MAR Rahimi S. | Méd: 1.0",
-            "mercado_ranking": "FALTAS SOFRIDAS: MAR RAHIMI S. | MÉD: 1.0",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jJ5yWPhU/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "França",
-            "time_fora": "Marrocos",
+            "time_casa": "Juventude",
+            "time_fora": "Vila Nova",
             "mercado": "Cartões Totais: -3.5",
             "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jJ5yWPhU/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/r9IvKlat/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Qarabag (Aze)",
-            "time_fora": "Vestri (Ice)",
-            "mercado": "-4.5 Gols (70%)",
-            "mercado_ranking": "-4.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/6BubAnvH/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Qarabag (Aze)",
-            "time_fora": "Vestri (Ice)",
+            "time_casa": "Sport",
+            "time_fora": "Botafogo-SP",
             "mercado": "Cartões Totais: -3.5",
             "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/6BubAnvH/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/fVUN17qC/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Dyn. Kiev (Ukr)",
-            "time_fora": "U. Cluj (Rou)",
+            "time_casa": "Espanha",
+            "time_fora": "Bélgica",
+            "mercado": "Faltas Sofridas: BÉL Vanaken H. | Méd: 1.0",
+            "mercado_ranking": "FALTAS SOFRIDAS: BÉL VANAKEN H. | MÉD: 1.0",
+            "link_h2h": "https://www.flashscore.com.br/jogo/MHGPEKi5/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Espanha",
+            "time_fora": "Bélgica",
             "mercado": "Cartões Totais: -3.5",
             "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/OUKVOogA/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "S. Tiraspol (Mda)",
-            "time_fora": "Aluminij (Slo)",
-            "mercado": "+1.5 Gols (85%)",
-            "mercado_ranking": "+1.5 GOLS (85%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/pKZy34Wj/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "S. Tiraspol (Mda)",
-            "time_fora": "Aluminij (Slo)",
-            "mercado": "Cartões Totais: -3.5",
-            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/pKZy34Wj/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "CSKA Sofia (Bul)",
-            "time_fora": "Derry City (Nir)",
-            "mercado": "+2.5 Gols (70%)",
-            "mercado_ranking": "+2.5 GOLS (70%)",
-            "link_h2h": "https://www.flashscore.com.br/jogo/SKWu3Pml/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "CSKA Sofia (Bul)",
-            "time_fora": "Derry City (Nir)",
-            "mercado": "Cartões Totais: -3.5",
-            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/SKWu3Pml/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Hajduk Split (Cro)",
-            "time_fora": "Zilina (Svk)",
-            "mercado": "Cartões Totais: -3.5",
-            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/2soB4H7e/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Vojvodina (Srb)",
-            "time_fora": "Ferencvaros (Hun)",
-            "mercado": "Cartões Totais: -3.5",
-            "mercado_ranking": "CARTÕES TOTAIS: -3.5",
-            "link_h2h": "https://www.flashscore.com.br/jogo/OOs2A7eE/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/MHGPEKi5/#/resumo-de-jogo"
         }
     ]
 }
