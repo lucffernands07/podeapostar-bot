@@ -4,9 +4,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 def capturar_todas_as_odds(driver, id_jogo):
-    # 1. Adicionamos a chave GOLS_M45 aqui no dicionário inicial
+    # 1. Adicionado GOLS_M35 com valor padrão "N/A"
     res = {
-        "GOLS_15": "N/A", "GOLS_25": "N/A", "GOLS_M45": "N/A", 
+        "GOLS_15": "N/A", "GOLS_25": "N/A", "GOLS_M35": "N/A", "GOLS_M45": "N/A", 
         "BTTS": "N/A", "1X": "N/A", "X2": "N/A",
         "VITORIA_CASA": "N/A"
     }
@@ -46,11 +46,12 @@ def capturar_todas_as_odds(driver, id_jogo):
             WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
             time.sleep(2)
             
-            # Mapeamento para o loop
+            # Mapeamento para o loop incluindo o alvo 3.5 apontando para a coluna 1 (Abaixo)
             mercados_alvo = {
-                "1.5": {"chave": "GOLS_15", "col": 0}, # Acima
-                "2.5": {"chave": "GOLS_25", "col": 0}, # Acima
-                "4.5": {"chave": "GOLS_M45", "col": 1}  # Abaixo (O que faltava!)
+                "1.5": {"chave": "GOLS_15", "col": 0},  # Acima
+                "2.5": {"chave": "GOLS_25", "col": 0},  # Acima
+                "3.5": {"chave": "GOLS_M35", "col": 1}, # 🚨 NOVO: Abaixo
+                "4.5": {"chave": "GOLS_M45", "col": 1}  # Abaixo
             }
 
             for valor, config in mercados_alvo.items():
@@ -93,4 +94,4 @@ def capturar_todas_as_odds(driver, id_jogo):
         driver.switch_to.window(driver.window_handles[0])
     
     return res
-    
+            
