@@ -5,10 +5,7 @@ def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_li
     Processa os históricos de escanteios totais coletados na nova raspagem.
     Retorna estritamente o valor médio final combinado dos últimos jogos.
     """
-    nome_liga_limpo = nome_liga.strip() if nome_liga else ""
-    
-    # 🚫 TRAVA DE LIGA ELITE REMOVIDA DAQUI! 
-    # Agora analisa escanteios para qualquer campeonato que venha da raspagem.
+    nome_liga_limpo = nome_liga.strip() if nome_liga else "Liga Não Informada"
 
     # Garante que possuímos a amostragem completa de jogos passados exigida
     if len(cantos_mandante_h2h) < quantidade_jogos or len(cantos_visitante_h2h) < quantidade_jogos:
