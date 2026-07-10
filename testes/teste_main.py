@@ -214,18 +214,26 @@ def main():
 
                         for item in mercados_fase1:
                             m_texto, m_chave = item["texto"], item["chave"]
-                            valor_odd_str = v_odds.get(m_chave, "N/A")
+                            
+                            # LÓGICA DE FALLBACK IGUAL AO SEU CÓDIGO ANTIGO
+                            if m_chave == "CANTOS_OVER":
+                                valor_odd_str = "1.35"
+                            elif m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"]:
+                                valor_odd_str = "1.50"
+                            else:
+                                # Se não achar a odd de Gols, BTTS ou Chance Dupla na API, atribui 1.50 por padrão para não quebrar
+                                valor_odd_str = v_odds.get(m_chave, "1.50")
                             
                             try:
                                 odd_float = float(str(valor_odd_str).replace(',', '.'))
                                 if odd_float >= 1.20:
                                     if "M45" in m_chave and odd_float >= 4.0: continue
-                                    mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": valor_odd_str})
+                                    mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": str(odd_float)})
                                 else:
                                     print(f"      ⚠️ Descartado (Odd baixa): {m_texto} | Valor: {valor_odd_str}")
-                            except:
-                                print(f"      ⚠️ Descartado (Sem Odd / N/A): {m_texto}")
-
+                            except Exception as e_conv:
+                                print(f"      ⚠️ Erro ao converter odd para float ({m_texto}): {e_conv}")
+                                
                         # ----------------------------------------------------------
                         # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (ESCANTEIOS E CARTÕES)
                         # ----------------------------------------------------------
