@@ -302,7 +302,7 @@ def main():
                                 texto_limpo = m_texto.strip()
                                 if m_chave == "CHUTES_ALVO" and (texto_limpo == "0.0" or texto_limpo.startswith("0.0")): continue
 
-                                if odd_float >= 1.25:
+                                if odd_float >= 1.20:
                                     lista_para_filtros.append({
                                         "horario": h_br, "time_casa": t1, "time_fora": t2,
                                         "mercado": m_texto, "odd": valor_odd_str if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA"] else "Análise", "liga": nome_comp,
