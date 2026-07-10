@@ -19,6 +19,7 @@ def verificar_ultimo_jogo(gols_placar_texto, alvo):
         
         if alvo == 1.5: return g_t >= 2
         if alvo == 2.5: return g_t >= 3
+        if alvo == 3.5: return g_t <= 3  # 🚨 INTEGRADO: Máximo 3 gols
         if alvo == 4.5: return g_t <= 4
     except:
         return False
@@ -64,6 +65,7 @@ def verificar_gols(s):
 
     # Mapeamento e cálculo das porcentagens de cada mercado seguindo os novos critérios
     pct_m45 = calcular_porcentagem_gols(s.get("casa_45_under", 0), s.get("fora_45_under", 0), u_h2h, 4.5)
+    pct_m35 = calcular_porcentagem_gols(s.get("casa_35_under", 0), s.get("fora_35_under", 0), u_h2h, 3.5) # 🚨 NOVO
     pct_15  = calcular_porcentagem_gols(s.get("casa_15", 0), s.get("fora_15", 0), u_h2h, 1.5)
     pct_25  = calcular_porcentagem_gols(s.get("casa_25", 0), s.get("fora_25", 0), u_h2h, 2.5)
 
@@ -72,6 +74,9 @@ def verificar_gols(s):
     # Adiciona os mercados válidos com suas respectivas porcentagens corrigidas
     if pct_m45 > 0:
         mercados_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
+        
+    if pct_m35 > 0: # 🚨 NOVO
+        mercados_aprovados.append({"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"})
         
     if pct_15 > 0:
         mercados_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
