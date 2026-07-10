@@ -1,28 +1,14 @@
 import re
 
-# 🟢 LISTA BRANCA: Ligas qualificadas para análise de estatísticas de equipe
-LIGAS_ELITE_ESCANTEIOS = [
-    "Brasileirão Série A", "Copa do Brasil", "Libertadores", "Sul-Americana",
-    "Brasileirão Série B", "Argentina - Liga Profesional", "Mundo - Copa do Mundo",
-    "Champions League", "Inglaterra - Premier League", "Espanha - LaLiga",
-    "Alemanha - Bundesliga", "Italia - Serie A", "França - Ligue 1",
-    "Europa - League", "Inglaterra - FA Cup", "Espanha - Copa del Rey",
-    "Alemanha - DFB Pokal", "Portugal - Primeira Liga", "Países Baixos - Eredivisie",
-    "Mundo - Amistoso Internacional"
-]
-
 def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_liga="", quantidade_jogos=3):
     """
     Processa os históricos de escanteios totais coletados na nova raspagem.
     Retorna estritamente o valor médio final combinado dos últimos jogos.
     """
-    # 🚀 TRAVA DE LIGA ELITE
     nome_liga_limpo = nome_liga.strip() if nome_liga else ""
     
-    if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_ESCANTEIOS:
-        liga_print = nome_liga_limpo if nome_liga_limpo else "NOME_DA_LIGA_VAZIO"
-        print(f"⏩ [TRAVA] Pulando análise de escanteios para a liga '{liga_print}' (Não é considerada liga Elite).")
-        return {"aprovado": False}
+    # 🚫 TRAVA DE LIGA ELITE REMOVIDA DAQUI! 
+    # Agora analisa escanteios para qualquer campeonato que venha da raspagem.
 
     # Garante que possuímos a amostragem completa de jogos passados exigida
     if len(cantos_mandante_h2h) < quantidade_jogos or len(cantos_visitante_h2h) < quantidade_jogos:
