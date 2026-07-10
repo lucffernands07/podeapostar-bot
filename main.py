@@ -243,7 +243,7 @@ def main():
                         except Exception as e_f2:
                             print(f"      ⚠️ Erro na Fase 2, mantendo dados iniciais: {e_f2}")
 
-                        res_escanteios = teste_escanteios.analisar_dados_escanteios(
+                        res_escanteios = escanteios.analisar_dados_escanteios(
                             dados_jogo.get("cantos_mandante_h2h", []), 
                             dados_jogo.get("cantos_visitante_h2h", []), 
                             nome_comp, 
