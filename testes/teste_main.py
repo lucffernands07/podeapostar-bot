@@ -323,10 +323,11 @@ def main():
                                     
                 except Exception as e:
                     if "invalid session id" in str(e).lower() or "session" in str(e).lower():
-                        print("⚠️ [CRÍTICO] Sessão inválida detectada no loop interno. Reiniciando driver...")
+                        print("⚠️ [CRÍTICO] Sessão inválida detectada no loop de elementos. Derrubando driver e pulando para a próxima liga...")
                         try: driver.quit()
                         except: pass
                         driver = configurar_driver()
+                        break # 🌟 Isso vai parar o loop dessa liga morta e ir para a próxima de cabeça erguida!
                     else:
                         print(f"⚠️ Erro ao processar partida no loop interno: {e}")
                     continue
