@@ -33,7 +33,7 @@ def enviar_telegram(mensagem, chat_id_destino):
     try:
         requests.post(url, data={
             "chat_id": chat_id_destino, 
-            "text": mensagem,                  
+            "text": message,                  
             "parse_mode": "Markdown",
             "disable_web_page_preview": True
         })
@@ -375,10 +375,8 @@ def main():
                             except Exception:
                                 # Fallback crítico se até a principal se perdeu por instabilidade do Chrome
                                 print("⚠️ Falha ao alternar para a aba principal. Forçando recarregamento.")
-                                try:
-                                    driver.quit()
-                                except Exception:
-                                    pass
+                                try: driver.quit()
+                                except: pass
                                 driver = configurar_driver()
                                 driver.get(url)
                                 time.sleep(6)
@@ -390,8 +388,11 @@ def main():
                                 time.sleep(4)
                             except Exception:
                                 pass
-                    
-        # --- PROCESSAMENTO E ENVIO FINAL ---
+                except Exception as e_jogo:
+                    print(f"❌ Erro ao processar o jogo {id_jogo}: {e_jogo}")
+                    continue
+
+        # --- PROCESSAMENTO E ENVIO FINAL (AGORA NO ESCOPO CORRETO DO TRY PRINCIPAL) ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
