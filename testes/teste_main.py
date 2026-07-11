@@ -385,7 +385,8 @@ def main():
                             except:
                                 pass
                     continue
-                    
+
+        # === 🟢 INDENTAÇÃO CORRIGIDA: ESTA PARTE SÓ RODA DEPOIS DE VARRER TODAS AS LIGAS ===
         # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
