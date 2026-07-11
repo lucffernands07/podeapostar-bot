@@ -93,43 +93,52 @@ def main():
                     continue
             
             aba_principal = driver.current_window_handle
-            total_elementos = len(elementos)
             
             # Controle para não duplicar o mesmo jogo no JSON de pendentes
             ids_jogos_salvos_pendentes = set()
             
-            for idx in range(total_elementos):
+            # 🟢 AJUSTE DE CONTROLE: Inicializamos o índice manualmente para controlar o avanço dinâmico
+            idx = 0
+            while True:
                 try:
+                    # Recaptura os elementos vivos da página a cada volta do driver.back()
                     elementos_vivos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
                     if not elementos_vivos:
                         elementos_vivos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
                     
+                    # 🟢 Condição de parada do loop: se o índice atingir ou passar o total de elementos vivos, encerra a liga
                     if idx >= len(elementos_vivos):
                         break
                         
                     el = elementos_vivos[idx]
                     texto_bruto_jogo = el.text.replace('\n', ' | ').strip()
-                    print(f"     🔹 Elemento [{idx+1}]: {texto_bruto_jogo}")
+                    print(f"      🔹 Elemento [{idx+1}]: {texto_bruto_jogo}")
 
                     try:
                         tempo_el = el.find_element(By.CSS_SELECTOR, "span[class*='dateContent'], .event__stageTime, .event__time")
                         tempo_raw = tempo_el.text.strip()
                     except Exception:
-                        print(f"      ⏩ Pulado: Não encontrou nenhum elemento de tempo.")
+                        print(f"       ⏩ Pulado: Não encontrou nenhum elemento de tempo.")
+                        idx += 1  # Incrementa para avaliar o próximo na próxima volta
                         continue
 
                     if "Preview" in tempo_raw:
                         tempo_raw = tempo_raw.replace("Preview", "").strip()
 
                     if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado"]):
-                        print(f"      ⏩ Pulado: Status ao vivo/encerrado detectado ({tempo_raw})")
+                        print(f"       ⏩ Pulado: Status ao vivo/encerrado detectado ({tempo_raw})")
+                        idx += 1
                         continue
 
                     partes_tempo = tempo_raw.split()
-                    if not partes_tempo: continue
+                    if not partes_tempo: 
+                        idx += 1
+                        continue
                         
                     horario_str = partes_tempo[-1]
-                    if ":" not in horario_str: continue
+                    if ":" not in horario_str: 
+                        idx += 1
+                        continue
 
                     h_obj = datetime.strptime(horario_str, "%H:%M")
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
@@ -141,10 +150,11 @@ def main():
                         if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
 
                     if aceitar:
-                        print(f"      ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
+                        print(f"       ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         if len(times) < 2:
-                            print(f"      ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
+                            print(f"       ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
+                            idx += 1
                             continue
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         
@@ -165,13 +175,15 @@ def main():
                                 try:
                                     id_jogo = el.get_attribute('id').split('_')[-1]
                                 except Exception:
+                                    idx += 1
                                     continue
 
                         if not id_jogo or len(id_jogo) < 3:
-                            print(f"      ⚠️ Falha: ID do jogo inválido ou não encontrado.")
+                            print(f"       ⚠️ Falha: ID do jogo inválido ou não encontrado.")
+                            idx += 1
                             continue
 
-                        print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
+                        print(f"       ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
                     
                         # ----------------------------------------------------------
                         # FASE 1: RASPAGEM H2H E FILTRO DE MERCADOS PRINCIPAIS
