@@ -343,8 +343,7 @@ def main():
                                 })
                                 total_mercados += 1
 
-
-                        # 🌟 RETORNO SEGURO PARA A ABA PRINCIPAL DA LIGA
+                        # 🌟 RETORNO SEGURO PARA A LISTAGEM DA LIGA
                         if len(driver.window_handles) > 1:
                             todas_abas = driver.window_handles[:]
                             for aba in todas_abas:
@@ -353,6 +352,10 @@ def main():
                                     driver.close()
                             driver.switch_to.window(aba_principal)
                             time.sleep(1)
+                        else:
+                            # Se navegou na mesma aba, volta para a tela anterior da listagem
+                            driver.back()
+                            time.sleep(2)
 
                 except Exception as e:
                     print(f"⚠️ Erro ao processar partida no loop interno (Index {idx+1}): {e}")
@@ -374,8 +377,15 @@ def main():
                                 driver.switch_to.window(aba_principal)
                             except:
                                 pass
+                        else:
+                            # Força o retorno em caso de falha para não perder o resto da liga
+                            try:
+                                driver.back()
+                                time.sleep(2)
+                            except:
+                                pass
                     continue
-
+                    
         # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
