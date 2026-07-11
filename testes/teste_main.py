@@ -101,7 +101,7 @@ def main():
                     elementos_vivos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
                     if not elementos_vivos:
                         elementos_vivos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
-                    
+                        
                     if idx >= len(elementos_vivos):
                         break
                         
@@ -197,7 +197,13 @@ def main():
                             continue
 
                         print(f"        ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
-                    
+                        
+                        # ====================================================================
+                        # 🔥 ABRE UMA NOVA ABA PARA NÃO PERDER OS ELEMENTOS DA LISTAGEM PRINCIPAL
+                        # ====================================================================
+                        driver.execute_script("window.open('');")
+                        driver.switch_to.window(driver.window_handles[-1])
+                        
                         # FASE 1: RASPAGEM H2H E FILTRO DE MERCADOS PRINCIPAIS
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         dados_jogo = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
@@ -270,10 +276,10 @@ def main():
                             3
                         )
                         if res_escanteios and res_escanteios.get("aprovado"):
-                            mercado_cantos_formatado = res_escanteios.get("mercado")
-                            if mercado_cantos_formatado:
-                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA", "odd": "Análise"})
-                                print(f"            ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
+                            id_mercado_cantos_formatado = res_escanteios.get("mercado")
+                            if id_mercado_cantos_formatado:
+                                mercados_para_processar.append({"texto": id_mercado_cantos_formatado, "chave": "CANTOS_MEDIA", "odd": "Análise"})
+                                print(f"            ✅ Mercado de Cantos Qualificado: {id_mercado_cantos_formatado}")
 
                         res_cartoes = teste_cartoes.analisar_dados_cartoes(
                             dados_jogo.get("cartoes_mandante_h2h", []),
@@ -358,16 +364,15 @@ def main():
                                 })
                                 total_mercados += 1
 
-                        # RETORNO SEGURO PARA A LISTAGEM DA LIGA
+                        # ====================================================================
+                        # 🏁 RETORNO SEGURO: FECHA A ABA ATUAL E VOLTA PARA A PRINCIPAL DA LIGA
+                        # ====================================================================
                         if len(driver.window_handles) > 1:
-                            todas_abas = driver.window_handles[:]
-                            for aba in todas_abas:
-                                if aba != aba_principal:
-                                    driver.switch_to.window(aba)
-                                    driver.close()
-                            driver.switch_to.window(aba_principal)
+                            driver.close() # Fecha a aba do jogo que acabou de ser analisado
+                            driver.switch_to.window(aba_principal) # Foca de volta na lista
                             time.sleep(1)
                         else:
+                            # Caso de contingência se a aba extra não tiver aberto por algum motivo
                             driver.back()
                             time.sleep(2)
 
@@ -392,6 +397,7 @@ def main():
                         continue 
                         
                     else:
+                        # Se der erro no meio da raspagem, garante o fechamento das abas órfãs
                         if len(driver.window_handles) > 1:
                             try:
                                 todas_abas = driver.window_handles[:]
