@@ -1,4 +1,11 @@
 #testes/teste_raspagem_scouts.py
+import time
+import re
+import links
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 def pegar_scouts_avancados(driver, stats, t1, t2):
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
