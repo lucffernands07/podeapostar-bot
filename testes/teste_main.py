@@ -356,47 +356,40 @@ def main():
                                 })
                                 total_mercados += 1
 
-                        # Retorno seguro para a aba principal
-                        if len(driver.window_handles) > 1:
-                            driver.close()
-                            driver.switch_to.window(aba_principal)
-                            time.sleep(1)
-                        else:
-                            driver.back()
-                            time.sleep(2)
-
-                    else:
-                        print(f"        ⏩ Pulado: Jogo fora da janela de horário aceita.")
-
-                except Exception as e:
-                    print(f"⚠️ Erro ao processar partida ID {id_jogo}: {e}")
-                    
-                    if "invalid session id" in str(e).lower() or "session" in str(e).lower():
-                        print("⚠️ [CRÍTICO] Sessão inválida detectada. Reiniciando driver...")
-                        try: driver.quit()
-                        except: pass
+                        # --- RETORNO SEGURO E BLINDADO PARA A ABA PRINCIPAL ---
+                        abas_abertas = driver.window_handles
                         
-                        driver = configurar_driver()
-                        driver.get(url)
-                        time.sleep(6)
-                        aba_principal = driver.current_window_handle
-                        continue 
-                        
-                    else:
-                        if len(driver.window_handles) > 1:
-                            try:
-                                todas_abas = driver.window_handles[:]
-                                for aba in todas_abas:
-                                    if aba != aba_principal:
+                        # Se houver mais de uma aba, fecha as extras e volta para a principal
+                        if len(abas_abertas) > 1:
+                            for aba in abas_abertas:
+                                if aba != aba_principal:
+                                    try:
                                         driver.switch_to.window(aba)
                                         driver.close()
-                                driver.switch_to.window(aba_principal)
-                            except: pass
-                        else:
+                                    except Exception:
+                                        pass # Se já estava fechada pelas funções internas, ignora de forma segura
+                            
                             try:
-                                driver.back()
-                                time.sleep(2)
-                            except: pass
+                                driver.switch_to.window(aba_principal)
+                                time.sleep(1)
+                            except Exception:
+                                # Fallback crítico se até a principal se perdeu por instabilidade do Chrome
+                                print("⚠️ Falha ao alternar para a aba principal. Forçando recarregamento.")
+                                try:
+                                    driver.quit()
+                                except Exception:
+                                    pass
+                                driver = configurar_driver()
+                                driver.get(url)
+                                time.sleep(6)
+                                aba_principal = driver.current_window_handle
+                        else:
+                            # Caso as funções de scouts tenham navegado na mesma aba em vez de abrir uma nova
+                            try:
+                                driver.get(url)
+                                time.sleep(4)
+                            except Exception:
+                                pass
                     
         # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
