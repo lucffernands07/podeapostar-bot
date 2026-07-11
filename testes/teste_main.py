@@ -246,7 +246,7 @@ def main():
                         except Exception as e_f2:
                             print(f"      ⚠️ Erro na Fase 2, mantendo dados iniciais: {e_f2}")
 
-                        res_escanteios = teste_escanteios.analisar_dados_escanteios(
+                        res_escanteios = escanteios.analisar_dados_escanteios(
                             dados_jogo.get("cantos_mandante_h2h", []), 
                             dados_jogo.get("cantos_visitante_h2h", []), 
                             nome_comp, 
@@ -258,7 +258,7 @@ def main():
                                 mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA", "odd": "Análise"})
                                 print(f"           ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
 
-                        res_cartoes = teste_cartoes.analisar_dados_cartoes(
+                        res_cartoes = cartoes.analisar_dados_cartoes(
                             dados_jogo.get("cartoes_mandante_h2h", []),
                             dados_jogo.get("cartoes_visitante_h2h", []),
                             nome_comp,
@@ -288,7 +288,7 @@ def main():
                             nome_time_casa = t1 if t1 else "MANDANTE"
                             nome_time_fora = t2 if t2 else "VISITANTE"
 
-                            res_jogadores = teste_jogadores.verificar_destaques_jogadores(
+                            res_jogadores = jogadores.verificar_destaques_jogadores(
                                 dados_jogo.get("historico_chutes", {}), 3, nome_comp,
                                 elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
@@ -296,7 +296,7 @@ def main():
                             for rj in res_jogadores:
                                 mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave'], "odd": "Análise"})
 
-                            res_faltas = teste_jogadores.verificar_destaques_faltas(
+                            res_faltas = jogadores.verificar_destaques_faltas(
                                 dados_jogo.get("historico_faltas", {}), 3, nome_comp,
                                 elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
