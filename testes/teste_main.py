@@ -344,6 +344,7 @@ def main():
                                 })
                                 total_mercados += 1
 
+
                         # 🌟 RETORNO SEGURO PARA A ABA PRINCIPAL DA LIGA
                         if len(driver.window_handles) > 1:
                             todas_abas = driver.window_handles[:]
