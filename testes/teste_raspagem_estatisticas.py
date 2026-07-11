@@ -8,7 +8,7 @@ def pegar_estatisticas_coletivas(driver, stats):
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
         try:
-            driver.close()
+            # 🚫 REMOVIDO driver.close() para não quebrar a sessão
             driver.switch_to.window(driver.window_handles[0])
         except: pass
         return stats
@@ -17,7 +17,7 @@ def pegar_estatisticas_coletivas(driver, stats):
     if "cantos_mandante_h2h" not in stats: stats["cantos_mandante_h2h"] = []
     if "cantos_visitante_h2h" not in stats: stats["cantos_visitante_h2h"] = []
     
-    # 🚨 NOVO: Inicialização dos arrays para Cartões Amarelos (H2H)
+    # Inicialização dos arrays para Cartões Amarelos (H2H)
     if "cartoes_mandante_h2h" not in stats: stats["cartoes_mandante_h2h"] = []
     if "cartoes_visitante_h2h" not in stats: stats["cartoes_visitante_h2h"] = []
 
@@ -64,12 +64,19 @@ def pegar_estatisticas_coletivas(driver, stats):
                     try: WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
                     except: pass
                         
-                    time.sleep(2.5)
+                    time.sleep(1.5)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
 
                     url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas/total/"
                     driver.get(url_stats_geral)
-                    time.sleep(2.0)
+                    
+                    # ⚡ CORREÇÃO 1: Espera inteligente para a tabela de estatísticas carregar na tela
+                    try:
+                        WebDriverWait(driver, 6).until(
+                            EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']"))
+                        )
+                    except Exception:
+                        print(f"      ⏱️ [TIMEOUT] Estatísticas demoraram para aparecer no jogo index {jogo_dados['idx']}.")
 
                     cantos_jogo_total = 0
                     cartoes_jogo_total = 0
@@ -91,7 +98,7 @@ def pegar_estatisticas_coletivas(driver, stats):
                                     cantos_fora = int(re.search(r'\d+', val_fora).group()) if re.search(r'\d+', val_fora) else 0
                                     cantos_jogo_total = cantos_casa + cantos_fora
                             
-                            # 2. 🚨 NOVO: Captura de Cartões Amarelos
+                            # 2. Captura de Cartões Amarelos
                             elif texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
                                 if idx > 0 and (idx + 1) < len(todos_spans):
                                     val_casa_card = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
@@ -125,7 +132,7 @@ def pegar_estatisticas_coletivas(driver, stats):
     while len(stats["cartoes_visitante_h2h"]) < 3: stats["cartoes_visitante_h2h"].append(0)
             
     try:
-        driver.close()
+        # ⚡ CORREÇÃO 2: REMOVIDO driver.close() para manter a sessão do navegador aberta para as próximas fases!
         driver.switch_to.window(driver.window_handles[0])
     except: pass
 
