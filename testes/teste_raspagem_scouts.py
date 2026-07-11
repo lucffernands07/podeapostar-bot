@@ -9,11 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 def pegar_scouts_avancados(driver, stats, t1, t2):
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
-        try:
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-        except: pass
-        return stats
+        return stats  # 🚨 CORREÇÃO: Removido close/switch_to precoce
 
     if "historico_chutes" not in stats: stats["historico_chutes"] = {}
     if "historico_faltas" not in stats: stats["historico_faltas"] = {}
@@ -40,7 +36,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
     except Exception as e_elenco:
         print(f"      ⚠️ Não foi possível mapear elencos: {e_elenco}")
 
-    # ⚡ OTIMIZAÇÃO: Mapear metadados dos jogos em lote antes de iterar nas estatísticas profundas
     jogos_scouts = []
     try:
         driver.get(url_h2h_base)
@@ -76,7 +71,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
     except Exception as e_coleta:
         print(f"      ⚠️ Erro ao listar linhas para scouts: {e_coleta}")
 
-    # Processamento linear de Scouts Avançados
     jogo_global_index = 0
     for jogo in jogos_scouts:
         try:
@@ -84,7 +78,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
             mandante_atual = jogo["mandante_atual"]
             visitante_atual = jogo["visitante_atual"]
             
-            # Captura hashes de logo (Acessando a página principal do resumo do jogo)
             driver.get(url_jogo_completa)
             time.sleep(1)
             hash_mandante_topo, hash_visitante_topo = "", ""
@@ -183,10 +176,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
     for jogador, lista in stats["historico_faltas"].items():
         while len(lista) < jogo_global_index: lista.append(0)
 
-    try:
-        driver.close()
-        driver.switch_to.window(driver.window_handles[0])
-    except: pass
-
+    # 🚨 CORREÇÃO: Deixamos a aba aberta. O main fecha e dá o switch para o handle principal.
     return stats
                 
