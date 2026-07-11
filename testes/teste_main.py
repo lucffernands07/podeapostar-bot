@@ -93,20 +93,15 @@ def main():
                     continue
             
             aba_principal = driver.current_window_handle
-            
-            # Controle para não duplicar o mesmo jogo no JSON de pendentes
             ids_jogos_salvos_pendentes = set()
-            
-            # Ajuste de controle: inicialização manual do índice para avanço dinâmico
             idx = 0
+            
             while True:
                 try:
-                    # Recaptura os elementos vivos da página a cada iteração (evita Stale Element)
                     elementos_vivos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
                     if not elementos_vivos:
                         elementos_vivos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
                     
-                    # Condição de parada segura do loop
                     if idx >= len(elementos_vivos):
                         break
                         
@@ -118,7 +113,7 @@ def main():
                         tempo_el = el.find_element(By.CSS_SELECTOR, "span[class*='dateContent'], .event__stageTime, .event__time")
                         tempo_raw = tempo_el.text.strip()
                     except Exception:
-                        print(f"       ⏩ Pulado: Não encontrou nenhum elemento de tempo.")
+                        print(f"        ⏩ Pulado: Não encontrou nenhum elemento de tempo.")
                         idx += 1  
                         continue
 
@@ -126,7 +121,7 @@ def main():
                         tempo_raw = tempo_raw.replace("Preview", "").strip()
 
                     if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado"]):
-                        print(f"       ⏩ Pulado: Status ao vivo/encerrado detectado ({tempo_raw})")
+                        print(f"        ⏩ Pulado: Status ao vivo/encerrado detectado ({tempo_raw})")
                         idx += 1
                         continue
 
@@ -150,10 +145,10 @@ def main():
                         if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
 
                     if aceitar:
-                        print(f"       ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
+                        print(f"        ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         if len(times) < 2:
-                            print(f"       ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
+                            print(f"        ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
                             idx += 1
                             continue
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
@@ -179,15 +174,13 @@ def main():
                                     continue
 
                         if not id_jogo or len(id_jogo) < 3:
-                            print(f"       ⚠️ Falha: ID do jogo inválido ou não encontrado.")
+                            print(f"        ⚠️ Falha: ID do jogo inválido ou não encontrado.")
                             idx += 1
                             continue
 
-                        print(f"       ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
+                        print(f"        ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
                     
-                        # ----------------------------------------------------------
                         # FASE 1: RASPAGEM H2H E FILTRO DE MERCADOS PRINCIPAIS
-                        # ----------------------------------------------------------                               
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         dados_jogo = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
@@ -243,9 +236,7 @@ def main():
                             except Exception as e_conv:
                                 print(f"      ⚠️ Erro ao converter odd para float ({m_texto}): {e_conv}")
                                 
-                        # ----------------------------------------------------------
                         # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS
-                        # ----------------------------------------------------------
                         print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios/Cartões)...")
                         try:
                             dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
@@ -264,7 +255,7 @@ def main():
                             mercado_cantos_formatado = res_escanteios.get("mercado")
                             if mercado_cantos_formatado:
                                 mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA", "odd": "Análise"})
-                                print(f"           ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
+                                print(f"            ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
 
                         res_cartoes = teste_cartoes.analisar_dados_cartoes(
                             dados_jogo.get("cartoes_mandante_h2h", []),
@@ -276,11 +267,9 @@ def main():
                             mercado_cartoes_formatado = res_cartoes.get("mercado")
                             if mercado_cartoes_formatado:
                                 mercados_para_processar.append({"texto": mercado_cartoes_formatado, "chave": "CARTOES_CONFRONTO", "odd": "Análise"})
-                                print(f"           ✅ Mercado de Cartões Qualificado: {mercado_cartoes_formatado}")
+                                print(f"            ✅ Mercado de Cartões Qualificado: {mercado_cartoes_formatado}")
 
-                        # ----------------------------------------------------------
                         # FASE 3: RASPAGEM DE SCOUTS (JOGADORES) - SÓ SE LIGA ELITE
-                        # ----------------------------------------------------------
                         if nome_comp in LIGAS_ELITE_JOGADORES:
                             print(f"      🎯 [FASE 3] Buscando Scouts Avançados (Chutes/Faltas)...")
                             try:
@@ -351,7 +340,7 @@ def main():
                                 })
                                 total_mercados += 1
 
-                        # 🌟 RETORNO SEGURO PARA A LISTAGEM DA LIGA
+                        # RETORNO SEGURO PARA A LISTAGEM DA LIGA
                         if len(driver.window_handles) > 1:
                             todas_abas = driver.window_handles[:]
                             for aba in todas_abas:
@@ -364,31 +353,24 @@ def main():
                             driver.back()
                             time.sleep(2)
 
-                        # Incrementa o índice após concluir a análise completa com sucesso
                         idx += 1
 
                     else:
-                        # 🟢 SALVA DO LOOP INFINITO: Incrementa e pula se o jogo estiver fora da janela de horário
-                        print(f"       ⏩ Pulado: Jogo fora da janela de horário aceita.")
+                        print(f"        ⏩ Pulado: Jogo fora da janela de horário aceita.")
                         idx += 1
 
                 except Exception as e:
                     print(f"⚠️ Erro ao processar partida no loop interno (Index {idx+1}): {e}")
                     
                     if "invalid session id" in str(e).lower() or "session" in str(e).lower():
-                        print("⚠️ [CRÍTICO] Sessão inválida detectada no loop interno. Reiniciando driver e recarregando a liga...")
+                        print("⚠️ [CRÍTICO] Sessão inválida detectada no loop interno. Reiniciando driver...")
                         try: driver.quit()
                         except: pass
                         
-                        # 1. Reinicia o navegador do zero
                         driver = configurar_driver()
-                        
-                        # 2. Força o driver a abrir a mesma liga de onde parou
                         driver.get(url)
                         time.sleep(6)
                         aba_principal = driver.current_window_handle
-                        
-                        # 3. Faz o loop 'while True' recomeçar AGORA (mantendo o idx atual)
                         continue 
                         
                     else:
@@ -400,21 +382,17 @@ def main():
                                         driver.switch_to.window(aba)
                                         driver.close()
                                 driver.switch_to.window(aba_principal)
-                            except:
-                                pass
+                            except: pass
                         else:
                             try:
                                 driver.back()
                                 time.sleep(2)
-                            except:
-                                pass
+                            except: pass
                         
-                        # 🟢 SALVA DO LOOP INFINITO EM EXCEÇÃO INTERNA: Avança o índice para não tentar o mesmo elemento que quebrou
                         idx += 1
                     continue
                     
-        # === 🟢 INDENTAÇÃO CORRIGIDA: ESTA PARTE SÓ RODA DEPOIS DE VARRER TODAS AS LIGAS ===
-        # --- PROCESSAMENTO E ENVIO FINAL ---
+        # --- PROCESSAMENTO E ENVIO FINAL (Fora do loop das ligas) ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
