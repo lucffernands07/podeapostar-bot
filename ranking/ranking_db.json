@@ -103,9 +103,13 @@
         "CARTÕES TOTAIS: +1.5": {
             "green": 2,
             "red": 0
+        },
+        "LISTÃO GERAL": {
+            "green": 0,
+            "red": 1
         }
     },
     "pendentes": {},
     "processados": [],
-    "ultima_atualizacao": "09/07/2026 03:53"
+    "ultima_atualizacao": "11/07/2026 05:47"
 }

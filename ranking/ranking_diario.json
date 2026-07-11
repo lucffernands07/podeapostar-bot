@@ -154,5 +154,11 @@
         "green": 0,
         "red": 4,
         "assertividade": 0.0
+    },
+    {
+        "mercado": "LISTÃO GERAL",
+        "green": 0,
+        "red": 1,
+        "assertividade": 0.0
     }
 ]
