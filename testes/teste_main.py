@@ -94,27 +94,58 @@ def main():
             
             aba_principal = driver.current_window_handle
             ids_jogos_salvos_pendentes = set()
-            idx = 0
             
-            while True:
+            # --- SOLUÇÃO AQUI: CAPTURA PRÉVIA DE TODOS OS IDS DE JOGOS DA LIGA ---
+            lista_ids_jogos = []
+            for el in elementos:
+                id_jogo = None
                 try:
-                    elementos_vivos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
-                    if not elementos_vivos:
-                        elementos_vivos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
-                        
-                    if idx >= len(elementos_vivos):
-                        break
-                        
-                    el = elementos_vivos[idx]
+                    link_el = el.find_element(By.CSS_SELECTOR, "a.icon--preview")
+                    url_jogo = link_el.get_attribute('href')
+                    if "mid=" in url_jogo:
+                        id_jogo = url_jogo.split("mid=")[-1].split("&")[0]
+                except Exception:
+                    pass
+
+                if not id_jogo:
+                    try:
+                        link_el = el.find_element(By.CSS_SELECTOR, "a.eventRowLink")
+                        id_jogo = link_el.get_attribute('id').split('_')[-1]
+                    except Exception:
+                        try:
+                            id_jogo = el.get_attribute('id').split('_')[-1]
+                        except Exception:
+                            continue
+                
+                if id_jogo and len(id_jogo) >= 3 and id_jogo not in lista_ids_jogos:
+                    lista_ids_jogos.append(id_jogo)
+            
+            print(f"🆔 IDs únicos encontrados para processamento seguro: {lista_ids_jogos}")
+
+            # --- ITERAÇÃO SEGURA BASEADA NOS IDS CAPTURADOS ---
+            for id_jogo in lista_ids_jogos:
+                try:
+                    # Recupera o elemento atualizado do DOM usando o ID fixo
+                    selector_id = f"g_1_{id_jogo}"
+                    try:
+                        el = driver.find_element(By.ID, selector_id)
+                    except Exception:
+                        # Fallback caso o Flashscore use outra estrutura de ID visual
+                        elementos_vivos = driver.find_elements(By.CSS_SELECTOR, f"[id*='{id_jogo}']")
+                        if elementos_vivos:
+                            el = elementos_vivos[0]
+                        else:
+                            print(f"⚠️ Elemento visual para o ID {id_jogo} não foi localizado nesta passada. Pulando.")
+                            continue
+
                     texto_bruto_jogo = el.text.replace('\n', ' | ').strip()
-                    print(f"      🔹 Elemento [{idx+1}]: {texto_bruto_jogo}")
+                    print(f"      🔹 Processando Jogo [ID: {id_jogo}]: {texto_bruto_jogo}")
 
                     try:
                         tempo_el = el.find_element(By.CSS_SELECTOR, "span[class*='dateContent'], .event__stageTime, .event__time")
                         tempo_raw = tempo_el.text.strip()
                     except Exception:
                         print(f"        ⏩ Pulado: Não encontrou nenhum elemento de tempo.")
-                        idx += 1  
                         continue
 
                     if "Preview" in tempo_raw:
@@ -122,39 +153,29 @@ def main():
 
                     if any(termo in tempo_raw for termo in ["Pên.", "Prorr.", "Enc.", "Intervalo", "Adiado"]):
                         print(f"        ⏩ Pulado: Status ao vivo/encerrado detectado ({tempo_raw})")
-                        idx += 1
                         continue
 
                     partes_tempo = tempo_raw.split()
                     if not partes_tempo: 
-                        idx += 1
                         continue
                         
                     horario_str = partes_tempo[-1]
                     if ":" not in horario_str: 
-                        idx += 1
                         continue
 
-                    # --- FILTRO ROBUSTO DE DATA E HORA (MÁXIMO ATÉ AMANHÃ) ---
+                    # --- FILTRO ROBUSTO DE DATA E HORA ---
                     h_obj = datetime.strptime(horario_str, "%H:%M")
                     
-                    # Identifica a data correta baseada no texto do Flashscore
                     if "." in tempo_raw:
-                        # Extrai o dia e mês do site (ex: "12.07.")
                         data_site_str = tempo_raw.split()[0] + str(hoje_ref.year)
                         data_jogo_utc = datetime.strptime(data_site_str, "%d.%m.%Y")
                     else:
-                        # Se não tem ponto, o site assume que o jogo é hoje (no fuso UTC deles)
                         data_jogo_utc = hoje_ref
 
-                    # Junta a data com o horário para ter o momento UTC exato
                     data_hora_utc = data_jogo_utc.replace(hour=h_obj.hour, minute=h_obj.minute, second=0, microsecond=0)
-                    
-                    # Converte diretamente para o Horário de Brasília (-3 horas)
                     data_hora_br = data_hora_utc - timedelta(hours=3)
                     h_br = data_hora_br.strftime("%H:%M")
                     
-                    # Define os limites reais de análise (De hoje a partir das 07:00 até amanhã às 23:59)
                     inicio_limite = hoje_ref.replace(hour=7, minute=0, second=0, microsecond=0)
                     fim_limite = (hoje_ref + timedelta(days=1)).replace(hour=23, minute=59, second=0, microsecond=0)
 
@@ -167,40 +188,12 @@ def main():
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         if len(times) < 2:
                             print(f"        ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
-                            idx += 1
                             continue
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
                         
-                        id_jogo = None
-                        try:
-                            link_el = el.find_element(By.CSS_SELECTOR, "a.icon--preview")
-                            url_jogo = link_el.get_attribute('href')
-                            if "mid=" in url_jogo:
-                                id_jogo = url_jogo.split("mid=")[-1].split("&")[0]
-                        except Exception:
-                            pass
-
-                        if not id_jogo:
-                            try:
-                                link_el = el.find_element(By.CSS_SELECTOR, "a.eventRowLink")
-                                id_jogo = link_el.get_attribute('id').split('_')[-1]
-                            except Exception:
-                                try:
-                                    id_jogo = el.get_attribute('id').split('_')[-1]
-                                except Exception:
-                                    idx += 1
-                                    continue
-
-                        if not id_jogo or len(id_jogo) < 3:
-                            print(f"        ⚠️ Falha: ID do jogo inválido ou não encontrado.")
-                            idx += 1
-                            continue
-
                         print(f"        ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
                         
-                        # ====================================================================
-                        # 🔥 ABRE UMA NOVA ABA PARA NÃO PERDER OS ELEMENTOS DA LISTAGEM PRINCIPAL
-                        # ====================================================================
+                        # Abre nova aba para análise profunda
                         driver.execute_script("window.open('');")
                         driver.switch_to.window(driver.window_handles[-1])
                         
@@ -242,7 +235,6 @@ def main():
 
                         for item in mercados_fase1:
                             m_texto, m_chave = item["texto"], item["chave"]
-                            
                             if m_chave == "CANTOS_OVER":
                                 valor_odd_str = "1.35"
                             elif m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"]:
@@ -332,7 +324,7 @@ def main():
                         textos_vistos = set()
                         for item in mercados_para_processar:
                             if item["texto"] not in textos_vistos:
-                                mercados_unicos.append(item)
+                                markets_unicos.append(item)
                                 textos_vistos.add(item["texto"])
                         mercados_para_processar = mercados_unicos
 
@@ -364,29 +356,23 @@ def main():
                                 })
                                 total_mercados += 1
 
-                        # ====================================================================
-                        # 🏁 RETORNO SEGURO: FECHA A ABA ATUAL E VOLTA PARA A PRINCIPAL DA LIGA
-                        # ====================================================================
+                        # Retorno seguro para a aba principal
                         if len(driver.window_handles) > 1:
-                            driver.close() # Fecha a aba do jogo que acabou de ser analisado
-                            driver.switch_to.window(aba_principal) # Foca de volta na lista
+                            driver.close()
+                            driver.switch_to.window(aba_principal)
                             time.sleep(1)
                         else:
-                            # Caso de contingência se a aba extra não tiver aberto por algum motivo
                             driver.back()
                             time.sleep(2)
 
-                        idx += 1
-
                     else:
                         print(f"        ⏩ Pulado: Jogo fora da janela de horário aceita.")
-                        idx += 1
 
                 except Exception as e:
-                    print(f"⚠️ Erro ao processar partida no loop interno (Index {idx+1}): {e}")
+                    print(f"⚠️ Erro ao processar partida ID {id_jogo}: {e}")
                     
-                    if "invalid session id" in str(e).lower():
-                        print("⚠️ [CRÍTICO] Sessão real inválida detectada no loop interno. Reiniciando driver...")
+                    if "invalid session id" in str(e).lower() or "session" in str(e).lower():
+                        print("⚠️ [CRÍTICO] Sessão inválida detectada. Reiniciando driver...")
                         try: driver.quit()
                         except: pass
                         
@@ -394,29 +380,25 @@ def main():
                         driver.get(url)
                         time.sleep(6)
                         aba_principal = driver.current_window_handle
-                        # Não avançamos o idx aqui pois o driver morreu por completo e a página resetou
                         continue 
                         
                     else:
-                        # Se deu erro no meio da raspagem (ex: aba fechada por engano pelas funções internas)
-                        # Garante que limpa as abas órfãs e volta para a principal de forma segura
-                        try:
-                            janelas_abertas = driver.window_handles
-                            if len(janelas_abertas) > 1:
-                                for aba in janelas_abertas:
+                        if len(driver.window_handles) > 1:
+                            try:
+                                todas_abas = driver.window_handles[:]
+                                for aba in todas_abas:
                                     if aba != aba_principal:
                                         driver.switch_to.window(aba)
                                         driver.close()
                                 driver.switch_to.window(aba_principal)
-                        except Exception as e_abas:
-                            print(f"⚠️ Erro ao tentar recuperar abas após falha: {e_abas}")
-                        
-                        # 🚨 CORREÇÃO CRÍTICA: Avança o índice para nunca entrar em loop infinito
-                        idx += 1
-                        time.sleep(1)
-                        continue
+                            except: pass
+                        else:
+                            try:
+                                driver.back()
+                                time.sleep(2)
+                            except: pass
                     
-        # --- PROCESSAMENTO E ENVIO FINAL (Fora do loop das ligas) ---
+        # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
@@ -463,19 +445,17 @@ def main():
 
             os.makedirs("ranking", exist_ok=True)
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
-                json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d"), "jogos": jogos_para_pendentes}, f, indent=4, ensure_ascii=False)
-            
-            os.makedirs("telegram", exist_ok=True)
-            with open(f"telegram/jogos_{hoje_ref.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
-                json.dump([{"horario": j.get("horario"), "liga": j.get("liga"), "time_casa": j.get("time_casa"), "time_fora": j.get("time_fora"), "mercado": j.get("mercado"), "odd": j.get("odd"), "link_betano": j.get("link_betano")} for j in lista_para_filtros], f, indent=4, ensure_ascii=False)
-        else:
-            print("⚠️ Nenhuma partida qualificada entrou na 'lista_para_filtros' após varrer os elementos.")
+                json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d %H:%M:%S"), "jogos": jogos_para_pendentes}, f, ensure_ascii=False, indent=4)
+            print("💾 JSON de pendentes atualizado com sucesso.")
 
-    except Exception as e:
-        print(f"❌ Erro Crítico no Main: {e}")
+    except Exception as e_main:
+        print(f"❌ Erro crítico na execução principal: {e_main}")
     finally:
-        try: driver.quit()
-        except: pass
+        try:
+            driver.quit()
+            print("🔒 Navegador fechado com segurança.")
+        except:
+            pass
 
 if __name__ == "__main__":
     main()
