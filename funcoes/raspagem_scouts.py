@@ -1,4 +1,4 @@
-#testes/teste_raspagem_scouts.py
+#funcoes/raspagem_scouts.py
 
 import time
 import re
