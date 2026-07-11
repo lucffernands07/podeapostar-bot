@@ -8,17 +8,12 @@ from selenium.webdriver.support import expected_conditions as EC
 def pegar_estatisticas_coletivas(driver, stats):
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
-        try: driver.switch_to.window(driver.window_handles[0])
-        except: pass
-        return stats
+        return stats  # 🚨 CORREÇÃO: Removido switch_to manual
 
-    # Inicialização dos arrays
     for chave in ["cantos_mandante_h2h", "cantos_visitante_h2h", "cartoes_mandante_h2h", "cartoes_visitante_h2h"]:
         if chave not in stats: stats[chave] = []
 
     wait = WebDriverWait(driver, 10)
-    
-    # ⚡ OTIMIZAÇÃO: Coleta as URLs diretamente sem cliques artificiais
     urls_por_tipo = {"MANDANTE": [], "VISITANTE": []}
     
     try:
@@ -36,10 +31,6 @@ def pegar_estatisticas_coletivas(driver, stats):
             
             for linha in linhas[:3]:
                 try:
-                    # Captura o ID/link diretamente mapeado no elemento clicável ou na linha
-                    # Geralmente as linhas do Flashscore possuem o ID do jogo na classe ou atributo, 
-                    # ou podemos obter simulando o clique em lote ou pegando a tag 'a' se houver.
-                    # Caso a div não tenha link explícito, usamos uma abertura limpa e rápida:
                     url_anterior = driver.current_url
                     driver.execute_script("arguments[0].click();", linha)
                     try: WebDriverWait(driver, 5).until(lambda d: d.current_url != url_anterior)
@@ -48,7 +39,6 @@ def pegar_estatisticas_coletivas(driver, stats):
                     url_jogo = driver.current_url.split("?")[0].strip("/")
                     urls_por_tipo[alvo["tipo"]].append(url_jogo)
                     
-                    # Volta imediatamente para pegar o próximo sem quebrar o estado
                     driver.get(url_h2h_base)
                     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, selector_linhas)))
                 except:
@@ -56,7 +46,6 @@ def pegar_estatisticas_coletivas(driver, stats):
     except Exception as e_coleta:
         print(f"      ⚠️ Erro ao coletar URLs de estatísticas: {e_coleta}")
 
-    # Processamento linear direto (Sem ir e voltar da Home H2H)
     for tipo, urls in urls_por_tipo.items():
         for url_jogo in urls:
             try:
@@ -104,10 +93,8 @@ def pegar_estatisticas_coletivas(driver, stats):
             except:
                 continue
 
-    # Garante simetria
     for chave in ["cantos_mandante_h2h", "cantos_visitante_h2h", "cartoes_mandante_h2h", "cartoes_visitante_h2h"]:
         while len(stats[chave]) < 3: stats[chave].append(0)
 
-    try: driver.switch_to.window(driver.window_handles[0])
-    except: pass
+    # 🚨 CORREÇÃO: Removido driver.close() e switch_to d daqui. O main gerencia isso no final de tudo.
     return stats
