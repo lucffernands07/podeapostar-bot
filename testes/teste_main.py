@@ -22,7 +22,7 @@ from telegram import menus
 # Funções de raspagem e Novo Módulo de Escanteios
 from testes.teste_raspagem_h2h import pegar_estatisticas_h2h
 from testes.teste_raspagem_scouts import pegar_scouts_avancados
-from testes.raspagem_estatisticas import pegar_estatisticas_coletivas
+from testes.teste_raspagem_estatisticas import pegar_estatisticas_coletivas
 
 
 def enviar_telegram(mensagem, chat_id_destino):
