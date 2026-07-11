@@ -387,4 +387,21 @@ def main():
                     menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
                     print("📢 Menu interativo enviado para o Canal.")
                 except Exception as e:
-                    print(f"⚠️ Erro ao enviar menu
+                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
+
+            os.makedirs("ranking", exist_ok=True)
+            with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
+                json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d %H:%M:%S"), "jogos": jogos_para_pendentes}, f, ensure_ascii=False, indent=4)
+            print("💾 JSON de pendentes atualizado com sucesso.")
+
+    except Exception as e_main:
+        print(f"❌ Erro crítico na execução principal: {e_main}")
+    finally:
+        try:
+            driver.quit()
+            print("🔒 Navegador fechado com segurança.")
+        except:
+            pass
+
+if __name__ == "__main__":
+    main()
