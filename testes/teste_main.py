@@ -97,16 +97,16 @@ def main():
             # Controle para não duplicar o mesmo jogo no JSON de pendentes
             ids_jogos_salvos_pendentes = set()
             
-            # 🟢 AJUSTE DE CONTROLE: Inicializamos o índice manualmente para controlar o avanço dinâmico
+            # Ajuste de controle: inicialização manual do índice para avanço dinâmico
             idx = 0
             while True:
                 try:
-                    # Recaptura os elementos vivos da página a cada volta do driver.back()
+                    # Recaptura os elementos vivos da página a cada iteração (evita Stale Element)
                     elementos_vivos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
                     if not elementos_vivos:
                         elementos_vivos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
                     
-                    # 🟢 Condição de parada do loop: se o índice atingir ou passar o total de elementos vivos, encerra a liga
+                    # Condição de parada segura do loop
                     if idx >= len(elementos_vivos):
                         break
                         
@@ -119,7 +119,7 @@ def main():
                         tempo_raw = tempo_el.text.strip()
                     except Exception:
                         print(f"       ⏩ Pulado: Não encontrou nenhum elemento de tempo.")
-                        idx += 1  # Incrementa para avaliar o próximo na próxima volta
+                        idx += 1  
                         continue
 
                     if "Preview" in tempo_raw:
@@ -226,13 +226,11 @@ def main():
                         for item in mercados_fase1:
                             m_texto, m_chave = item["texto"], item["chave"]
                             
-                            # LÓGICA DE FALLBACK IGUAL AO SEU CÓDIGO ANTIGO
                             if m_chave == "CANTOS_OVER":
                                 valor_odd_str = "1.35"
                             elif m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"]:
                                 valor_odd_str = "1.50"
                             else:
-                                # Se não achar a odd de Gols, BTTS ou Chance Dupla na API, atribui 1.50 por padrão para não quebrar
                                 valor_odd_str = v_odds.get(m_chave, "1.50")
                             
                             try:
@@ -246,11 +244,10 @@ def main():
                                 print(f"      ⚠️ Erro ao converter odd para float ({m_texto}): {e_conv}")
                                 
                         # ----------------------------------------------------------
-                        # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (ESCANTEIOS E CARTÕES)
+                        # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS
                         # ----------------------------------------------------------
                         print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios/Cartões)...")
                         try:
-                            # Atualiza o dicionário existente sem perder dados anteriores
                             dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
                             if dados_coletivos and isinstance(dados_coletivos, dict):
                                 dados_jogo.update(dados_coletivos)
@@ -330,7 +327,6 @@ def main():
 
                         # ALIMENTAÇÃO DA LISTA FINAL
                         if mercados_para_processar:
-                            # Adiciona uma única vez a partida no JSON de pendentes de resultados
                             if id_jogo not in ids_jogos_salvos_pendentes:
                                 jogos_para_pendentes.append({
                                     "time_casa": t1, 
@@ -365,9 +361,16 @@ def main():
                             driver.switch_to.window(aba_principal)
                             time.sleep(1)
                         else:
-                            # Se navegou na mesma aba, volta para a tela anterior da listagem
                             driver.back()
                             time.sleep(2)
+
+                        # Incrementa o índice após concluir a análise completa com sucesso
+                        idx += 1
+
+                    else:
+                        # 🟢 SALVA DO LOOP INFINITO: Incrementa e pula se o jogo estiver fora da janela de horário
+                        print(f"       ⏩ Pulado: Jogo fora da janela de horário aceita.")
+                        idx += 1
 
                 except Exception as e:
                     print(f"⚠️ Erro ao processar partida no loop interno (Index {idx+1}): {e}")
@@ -390,14 +393,16 @@ def main():
                             except:
                                 pass
                         else:
-                            # Força o retorno em caso de falha para não perder o resto da liga
                             try:
                                 driver.back()
                                 time.sleep(2)
                             except:
                                 pass
+                        
+                        # 🟢 SALVA DO LOOP INFINITO EM EXCEÇÃO INTERNA: Avança o índice para não tentar o mesmo elemento que quebrou
+                        idx += 1
                     continue
-
+                    
         # === 🟢 INDENTAÇÃO CORRIGIDA: ESTA PARTE SÓ RODA DEPOIS DE VARRER TODAS AS LIGAS ===
         # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
