@@ -8,8 +8,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     """
-    RASPAGEM 1: Abre a aba, acessa o H2H, captura o link Betano, gols, placares e resultados.
-    MANTÉM A ABA ABERTA para o main avaliar se vale a pena continuar para os scouts avançados.
+    RASPAGEM 1: Acessa o H2H na aba secundária já aberta pelo main, 
+    captura o link Betano, gols, placares e resultados.
     """
     stats = {
         "link_betano": None,
@@ -24,42 +24,35 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "h2h_placar_1": None, "h2h_placar_2": None,   
         "pular_gols": False,
         "url_h2h_base": None,
-        # Inicializados vazios por segurança caso o jogo não passe nos filtros iniciais
         "historico_chutes": {}, 
         "historico_mandante_am": {}, "historico_mandante_vm": {},
         "historico_visitante_am": {}, "historico_visitante_vm": {}
     }
     
-    # Abre o confronto em uma nova aba
-    driver.execute_script(f"window.open('{url_jogo}', '_blank');")
-    driver.switch_to.window(driver.window_handles[-1])
+    # 🚨 CORREÇÃO: Não abre nova janela aqui! O main já fez isso.
+    driver.get(url_jogo)
     
     try:
         wait = WebDriverWait(driver, 15)
         
-        # Clica na aba H2H do Flashscore
         h2h_tab = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
         
-        # Aguarda dinamicamente as seções H2H carregarem
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
         stats["url_h2h_base"] = driver.current_url
 
-        # --- CAPTURA DO LINK DA BETANO ---
         try:
-            print(f"       🔗 Capturando link Betano para {t1} x {t2}...")
+            print(f"        🔗 Capturando link Betano para {t1} x {t2}...")
             stats["link_betano"] = links.extrair_url_betano(driver)
         except Exception as e_link:
             print(f"      ⚠️ Erro ao capturar link Betano inicial: {e_link}")
         
-        # Varre as seções buscando e rolando dinamicamente até elas
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
 
         for idx, secao in enumerate(secoes[:3]): 
             driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", secao)
             
             if idx == 2: 
-                # Tenta expandir para ver mais confrontos diretos se o botão existir
                 try:
                     seletor_btn = "span[data-testid='wcl-scores-caption-05']"
                     botao_mais = secao.find_element(By.CSS_SELECTOR, seletor_btn)
@@ -79,21 +72,18 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     n_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text.strip()
                     res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text.strip()
                     
-                    # Salva placares textuais recentes para o relatório
                     if idx == 0 and i == 0: stats["t1_placar_1"] = res_texto
                     if idx == 1 and i == 0: stats["t2_placar_1"] = res_texto
                     if idx == 2:
                         if i == 0: stats["h2h_placar_1"] = res_texto
                         if i == 1: stats["h2h_placar_2"] = res_texto
 
-                    # Extrai os gols numéricos do placar
                     numeros_placar = re.findall(r'\d+', res_texto)
                     if len(numeros_placar) < 2: 
                         continue
                     g1, g2 = int(numeros_placar[0]), int(numeros_placar[1])
                     total = g1 + g2
 
-                    # Seções 0 (Mandante) e 1 (Visitante)
                     if idx < 2: 
                         prefixo = "casa" if idx == 0 else "fora"
                         t_ref = t1 if idx == 0 else t2
@@ -101,7 +91,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         if i == 0: stats[f"ultimo_gols_{prefixo}"] = total
                         if total > 1.5: stats[f"{prefixo}_15"] += 1
                         if total > 2.5: stats[f"{prefixo}_25"] += 1
-                        if total <= 3: stats[f"{prefixo}_35_under"] += 1   # 🎯 ADICIONADO: Filtro Menos 3.5 gols
+                        if total <= 3: stats[f"{prefixo}_35_under"] += 1   
                         if total <= 4: stats[f"{prefixo}_45_under"] += 1 
                         if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
                         
@@ -116,7 +106,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         
                         if i == 0: stats[f"t{idx+1}_resultado_1"] = res_atual
                  
-                    # Seção 2 (Confronto Direto H2H Histórico)
                     elif idx == 2: 
                         if i < 5:
                             res_geral = "EMPATE"
