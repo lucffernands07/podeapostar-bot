@@ -135,14 +135,24 @@ def main():
                         idx += 1
                         continue
 
+                    # --- NOVA VALIDAÇÃO DE HORÁRIO BR INFAÍVEL ---
                     h_obj = datetime.strptime(horario_str, "%H:%M")
-                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
+                    # Se o texto indicar que o jogo é em data futura (contém ponto ou " de "),
+                    # ajustamos o h_obj para o dia seguinte antes do cálculo
+                    if any(caractere in tempo_raw for caractere in [".", " de "]) and h_obj.hour <= 5:
+                        # Jogo na madrugada UTC (noite do Brasil do dia anterior)
+                        horario_br_obj = h_obj - timedelta(hours=3)
+                    else:
+                        horario_br_obj = h_obj - timedelta(hours=3)
+                        
+                    h_br = horario_br_obj.strftime("%H:%M")
+                    
+                    # Uma única regra clara: Aceita qualquer jogo cujo Horário de Brasília 
+                    # esteja entre 07:00 da manhã e 23:59 da noite.
                     aceitar = False
-                    if amanha_no_site in tempo_raw:
-                        if h_obj.hour <= 3: aceitar = True
-                    elif "." not in tempo_raw:
-                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
+                    if 7 <= horario_br_obj.hour <= 23:
+                        aceitar = True
 
                     if aceitar:
                         print(f"        ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
