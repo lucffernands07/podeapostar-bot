@@ -1,5 +1,4 @@
 #testes/teste_raspagem_scouts.py
-
 import time
 import re
 from selenium.webdriver.common.by import By
