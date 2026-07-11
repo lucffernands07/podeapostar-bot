@@ -1,137 +1,74 @@
 [
     {
-        "horario": "09:00",
-        "liga": "Cazaquistão - Primeira Liga",
-        "time_casa": "Ertis Pavlodar",
-        "time_fora": "Zhenis",
-        "mercado": "Média Escanteios: 6.0",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/FC-Irtysh-Pavlodar-FC-Zhenis/88553161/"
-    },
-    {
-        "horario": "09:00",
-        "liga": "Cazaquistão - Primeira Liga",
-        "time_casa": "Ertis Pavlodar",
-        "time_fora": "Zhenis",
-        "mercado": "Média Cartões: 7.3",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/FC-Irtysh-Pavlodar-FC-Zhenis/88553161/"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Brasileiro Serie C",
-        "time_casa": "Caxias",
-        "time_fora": "Floresta",
-        "mercado": "+1.5 Gols (70%)",
-        "odd": "1.4",
-        "link_betano": "https://www.betano.bet.br/match-odds/Caxias-RS-Floresta/87539659/"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Brasileiro Serie C",
-        "time_casa": "Caxias",
-        "time_fora": "Floresta",
-        "mercado": "Média Escanteios: 12.5",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Caxias-RS-Floresta/87539659/"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Brasileiro Serie C",
-        "time_casa": "Caxias",
-        "time_fora": "Floresta",
-        "mercado": "Média Cartões: 10.3",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Caxias-RS-Floresta/87539659/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Portuguesa",
-        "time_fora": "Marcílio Dias",
-        "mercado": "+1.5 Gols (70%)",
+        "horario": "22:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Argentina",
+        "time_fora": "Suíça",
+        "mercado": "+1.5 Gols (100%)",
         "odd": "1.42",
-        "link_betano": "https://www.betano.bet.br/match-odds/Portuguesa-de-Desportos-SP-Marcilio-Dias/88445997/"
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Switzerland/88703633/"
     },
     {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Portuguesa",
-        "time_fora": "Marcílio Dias",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "2.32",
-        "link_betano": "https://www.betano.bet.br/match-odds/Portuguesa-de-Desportos-SP-Marcilio-Dias/88445997/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Portuguesa",
-        "time_fora": "Marcílio Dias",
-        "mercado": "Média Escanteios: 6.3",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Portuguesa-de-Desportos-SP-Marcilio-Dias/88445997/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Brasileiro Serie D",
-        "time_casa": "Portuguesa",
-        "time_fora": "Marcílio Dias",
-        "mercado": "Média Cartões: 0.0",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Portuguesa-de-Desportos-SP-Marcilio-Dias/88445997/"
-    },
-    {
-        "horario": "18:00",
+        "horario": "22:00",
         "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Noruega",
-        "time_fora": "Inglaterra",
-        "mercado": "+1.5 Gols (85%)",
-        "odd": "1.24",
-        "link_betano": "https://www.betano.bet.br/match-odds/Norway-England/88603196/"
+        "time_casa": "Argentina",
+        "time_fora": "Suíça",
+        "mercado": "+2.5 Gols (70%)",
+        "odd": "2.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Switzerland/88703633/"
     },
     {
-        "horario": "18:00",
+        "horario": "22:00",
         "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Noruega",
-        "time_fora": "Inglaterra",
-        "mercado": "+2.5 Gols (85%)",
-        "odd": "1.72",
-        "link_betano": "https://www.betano.bet.br/match-odds/Norway-England/88603196/"
+        "time_casa": "Argentina",
+        "time_fora": "Suíça",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "1.7",
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Switzerland/88703633/"
     },
     {
-        "horario": "18:00",
+        "horario": "22:00",
         "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Noruega",
-        "time_fora": "Inglaterra",
-        "mercado": "Média Escanteios: 11.3",
+        "time_casa": "Argentina",
+        "time_fora": "Suíça",
+        "mercado": "Média Escanteios: 9.3",
         "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Norway-England/88603196/"
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Switzerland/88703633/"
     },
     {
-        "horario": "18:00",
+        "horario": "22:00",
         "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Noruega",
-        "time_fora": "Inglaterra",
-        "mercado": "Média Cartões: 5.0",
+        "time_casa": "Argentina",
+        "time_fora": "Suíça",
+        "mercado": "Média Cartões: 6.3",
         "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Norway-England/88603196/"
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Switzerland/88703633/"
     },
     {
-        "horario": "18:00",
+        "horario": "22:00",
         "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Noruega",
-        "time_fora": "Inglaterra",
-        "mercado": "Chutes no gol: ING Kane H. | Méd: 1.0",
+        "time_casa": "Argentina",
+        "time_fora": "Suíça",
+        "mercado": "Chutes no gol: ARG Messi L. | Méd: 2.0",
         "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Norway-England/88603196/"
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Switzerland/88703633/"
     },
     {
-        "horario": "18:00",
+        "horario": "22:00",
         "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Noruega",
-        "time_fora": "Inglaterra",
-        "mercado": "Faltas Sofridas: ING Konsa E. | Méd: 1.3",
+        "time_casa": "Argentina",
+        "time_fora": "Suíça",
+        "mercado": "Faltas Sofridas: ARG Messi L. | Méd: 1.7",
         "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Norway-England/88603196/"
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Switzerland/88703633/"
+    },
+    {
+        "horario": "22:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Argentina",
+        "time_fora": "Suíça",
+        "mercado": "Faltas Sofridas: SUÍ Xhaka G. | Méd: 2.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentina-Switzerland/88703633/"
     }
 ]

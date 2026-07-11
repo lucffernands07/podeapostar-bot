@@ -2,32 +2,11 @@
     "data_geracao": "2026-07-11",
     "jogos": [
         {
-            "time_casa": "Caxias",
-            "time_fora": "Floresta",
+            "time_casa": "Argentina",
+            "time_fora": "Suíça",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/naY3JXBt/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Portuguesa",
-            "time_fora": "Marcílio Dias",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/OC1oTjH8/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Noruega",
-            "time_fora": "Inglaterra",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/UyLHmWuh/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Ertis Pavlodar",
-            "time_fora": "Zhenis",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/fTBMs6fE/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/Wv4IS6zg/#/resumo-de-jogo"
         }
     ]
 }
