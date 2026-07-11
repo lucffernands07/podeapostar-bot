@@ -376,11 +376,21 @@ def main():
                     print(f"⚠️ Erro ao processar partida no loop interno (Index {idx+1}): {e}")
                     
                     if "invalid session id" in str(e).lower() or "session" in str(e).lower():
-                        print("⚠️ [CRÍTICO] Sessão inválida detectada no loop interno. Derrubando driver...")
+                        print("⚠️ [CRÍTICO] Sessão inválida detectada no loop interno. Reiniciando driver e recarregando a liga...")
                         try: driver.quit()
                         except: pass
+                        
+                        # 1. Reinicia o navegador do zero
                         driver = configurar_driver()
-                        break 
+                        
+                        # 2. Força o driver a abrir a mesma liga de onde parou
+                        driver.get(url)
+                        time.sleep(6)
+                        aba_principal = driver.current_window_handle
+                        
+                        # 3. Faz o loop 'while True' recomeçar AGORA (mantendo o idx atual)
+                        continue 
+                        
                     else:
                         if len(driver.window_handles) > 1:
                             try:
