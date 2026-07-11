@@ -135,23 +135,31 @@ def main():
                         idx += 1
                         continue
 
-                    # --- NOVA VALIDAÇÃO DE HORÁRIO BR INFAÍVEL ---
+                    # --- FILTRO ROBUSTO DE DATA E HORA (MÁXIMO ATÉ AMANHÃ) ---
                     h_obj = datetime.strptime(horario_str, "%H:%M")
                     
-                    # Se o texto indicar que o jogo é em data futura (contém ponto ou " de "),
-                    # ajustamos o h_obj para o dia seguinte antes do cálculo
-                    if any(caractere in tempo_raw for caractere in [".", " de "]) and h_obj.hour <= 5:
-                        # Jogo na madrugada UTC (noite do Brasil do dia anterior)
-                        horario_br_obj = h_obj - timedelta(hours=3)
+                    # Identifica a data correta baseada no texto do Flashscore
+                    if "." in tempo_raw:
+                        # Extrai o dia e mês do site (ex: "12.07.")
+                        data_site_str = tempo_raw.split()[0] + str(hoje_ref.year)
+                        data_jogo_utc = datetime.strptime(data_site_str, "%d.%m.%Y")
                     else:
-                        horario_br_obj = h_obj - timedelta(hours=3)
-                        
-                    h_br = horario_br_obj.strftime("%H:%M")
+                        # Se não tem ponto, o site assume que o jogo é hoje (no fuso UTC deles)
+                        data_jogo_utc = hoje_ref
+
+                    # Junta a data com o horário para ter o momento UTC exato
+                    data_hora_utc = data_jogo_utc.replace(hour=h_obj.hour, minute=h_obj.minute, second=0, microsecond=0)
                     
-                    # Uma única regra clara: Aceita qualquer jogo cujo Horário de Brasília 
-                    # esteja entre 07:00 da manhã e 23:59 da noite.
+                    # Converte diretamente para o Horário de Brasília (-3 horas)
+                    data_hora_br = data_hora_utc - timedelta(hours=3)
+                    h_br = data_hora_br.strftime("%H:%M")
+                    
+                    # Define os limites reais de análise (De hoje a partir das 07:00 até amanhã às 23:59)
+                    inicio_limite = hoje_ref.replace(hour=7, minute=0, second=0, microsecond=0)
+                    fim_limite = (hoje_ref + timedelta(days=1)).replace(hour=23, minute=59, second=0, microsecond=0)
+
                     aceitar = False
-                    if 7 <= horario_br_obj.hour <= 23:
+                    if inicio_limite <= data_hora_br <= fim_limite:
                         aceitar = True
 
                     if aceitar:
