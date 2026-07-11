@@ -1,3 +1,4 @@
+#testes/teste_raspagem_estatisticas.py
 import time
 import re
 from selenium.webdriver.common.by import By
