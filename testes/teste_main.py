@@ -140,9 +140,8 @@ def main():
                     elif "." not in tempo_raw:
                         if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
 
-                    print(f"      ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
-
                     if aceitar:
+                        print(f"      ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         if len(times) < 2:
                             print(f"      ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
@@ -173,7 +172,7 @@ def main():
                             continue
 
                         print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
-
+                    
                         # ----------------------------------------------------------
                         # FASE 1: RASPAGEM H2H E FILTRO DE MERCADOS PRINCIPAIS
                         # ----------------------------------------------------------                               
