@@ -385,8 +385,8 @@ def main():
                 except Exception as e:
                     print(f"⚠️ Erro ao processar partida no loop interno (Index {idx+1}): {e}")
                     
-                    if "invalid session id" in str(e).lower() or "session" in str(e).lower():
-                        print("⚠️ [CRÍTICO] Sessão inválida detectada no loop interno. Reiniciando driver...")
+                    if "invalid session id" in str(e).lower():
+                        print("⚠️ [CRÍTICO] Sessão real inválida detectada no loop interno. Reiniciando driver...")
                         try: driver.quit()
                         except: pass
                         
@@ -394,27 +394,27 @@ def main():
                         driver.get(url)
                         time.sleep(6)
                         aba_principal = driver.current_window_handle
+                        # Não avançamos o idx aqui pois o driver morreu por completo e a página resetou
                         continue 
                         
                     else:
-                        # Se der erro no meio da raspagem, garante o fechamento das abas órfãs
-                        if len(driver.window_handles) > 1:
-                            try:
-                                todas_abas = driver.window_handles[:]
-                                for aba in todas_abas:
+                        # Se deu erro no meio da raspagem (ex: aba fechada por engano pelas funções internas)
+                        # Garante que limpa as abas órfãs e volta para a principal de forma segura
+                        try:
+                            janelas_abertas = driver.window_handles
+                            if len(janelas_abertas) > 1:
+                                for aba in janelas_abertas:
                                     if aba != aba_principal:
                                         driver.switch_to.window(aba)
                                         driver.close()
                                 driver.switch_to.window(aba_principal)
-                            except: pass
-                        else:
-                            try:
-                                driver.back()
-                                time.sleep(2)
-                            except: pass
+                        except Exception as e_abas:
+                            print(f"⚠️ Erro ao tentar recuperar abas após falha: {e_abas}")
                         
+                        # 🚨 CORREÇÃO CRÍTICA: Avança o índice para nunca entrar em loop infinito
                         idx += 1
-                    continue
+                        time.sleep(1)
+                        continue
                     
         # --- PROCESSAMENTO E ENVIO FINAL (Fora do loop das ligas) ---
         if lista_para_filtros:
