@@ -1,9 +1,9 @@
-name: Teste jogadores
+name: Teste Scouts Isolado 
 
 on:
   push:
     paths:
-      - 'testes/teste_jogadores.py'
+      - 'testes/teste_scout_isolado.py'
   workflow_dispatch:
 
 jobs:
@@ -25,8 +25,8 @@ jobs:
           pip install selenium webdriver-manager requests
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Rodar Teste jogadores
+      - name: Rodar Teste Scouts Isolado 
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-        run: python testes/teste_jogadores.py
+        run: python testes/teste_scout_isolado.py
