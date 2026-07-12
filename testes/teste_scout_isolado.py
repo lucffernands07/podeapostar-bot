@@ -3,99 +3,83 @@ import re
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 def rodar_teste_isolado():
     chrome_options = Options()
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--window-size=1920,1080")
+    # Forçamos uma tela ultra-larga para o Flashscore abrir a tabela desktop completa sem esconder colunas
+    chrome_options.add_argument("--window-size=2560,1440")
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
     driver = webdriver.Chrome(options=chrome_options)
-    wait = WebDriverWait(driver, 12)
     
-    # Passamos a URL apontando direto para a sub-seção estrutural das estatísticas
-    url_jogo_base = "https://www.flashscore.com.br/jogo/futebol/crb-QHa3bLrj/londrina-pr-xdhbBEVA/#/resumo/estatisticas-jogadores/finalizacoes"
+    # URL direta usando a estrutura SPA padrão do site
+    url_chutes = "https://www.flashscore.com.br/jogo/futebol/crb-QHa3bLrj/londrina-pr-xdhbBEVA/#/resumo/estatisticas-jogadores/finalizacoes"
     
-    print("\n🚀 INICIANDO TESTE ISOLADO DIRETURBO COM RENDERIZAÇÃO SPA\n" + "="*60)
+    print("\n🚀 INICIANDO TESTE COM VIEWPORT EXPANDIDO (MATEI A CHARADA)\n" + "="*60)
     
     try:
-        print(f"[PASSO 1] Abrindo jogo com âncora hash SPA: {url_jogo_base}")
-        driver.get(url_jogo_base)
-        time.sleep(4.0) # Tempo para o script interno do Flashscore reagir à URL
+        print(f"[PASSO 1] Carregando a página de Finalizações...")
+        driver.get(url_chutes)
+        time.sleep(5.0) # Tempo extra para carregar os scripts internos da tabela
         
-        # Tentativa de clique nos botões de abas usando classes exclusivas estruturais (wcl-tab)
-        # O Flashscore usa botões de alternância estilizados com textos específicos
-        print("[PASSO 2] Validando se o contêiner de estatísticas individuais está visível...")
+        # 1. Mapeamento de Cabeçalhos de forma agressiva (procurando qualquer tag com texto)
+        elementos_topo = driver.find_elements(By.CSS_SELECTOR, "[class*='TableHead'], [class*='tableHead'], th, div")
         
-        try:
-            # Seleciona via XPath contendo o texto independente se está em caixa alta ou baixa
-            sub_aba_jogadores = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(translate(text(), 'JOGADORES', 'jogadores'), 'jogadores')] | //button[contains(translate(text(), 'JOGADORES', 'jogadores'), 'jogadores')] | //*[@data-testid='wcl-tab-player-statistics']")))
-            driver.execute_script("arguments[0].click();", sub_aba_jogadores)
-            print("   ✅ Botão ou Aba 'Jogadores' acionado com sucesso!")
-            time.sleep(2.0)
-        except Exception as e_aba:
-            print(f"   ⚠️ Forçando clique alternativo via seletor de classe dinâmico: {e_aba}")
-            # Se falhar o texto puro, tentamos buscar elementos de tab genéricos do layout wcl
-            tabs = driver.find_elements(By.CSS_SELECTOR, "[class*='tab'], [class*='Tab'], button")
-            for t in tabs:
-                texto_t = t.text.strip().upper()
-                if "JOGADOR" in texto_t or "PLAYER" in texto_t:
-                    driver.execute_script("arguments[0].click();", t)
-                    print(f"   ✅ Aba acionada via varredura de botões ('{texto_t}')")
-                    time.sleep(2.0)
-                    break
+        cabecalhos_textos = []
+        indice_chutes = -1
+        
+        # Vamos descobrir qual posição está o "Total de finalizações" ou "Finalizações no alvo"
+        idx_atual = 0
+        for el in elementos_topo:
+            try:
+                txt = el.text.strip()
+                if txt and len(txt) < 50 and txt not in cabecalhos_textos:
+                    cabecalhos_textos.append(txt)
+                    # Procurando os termos exatos que aparecem no seu print
+                    if any(x in txt.upper() for x in ["TOTAL DE FINALIZAÇÕES", "FINALIZAÇÕES NO ALVO", "FINALIZAÇÕES"]):
+                        if indice_chutes == -1: 
+                            indice_chutes = idx_atual
+                            print(f"🎯 Coluna Alvo Detectada: '{txt}' no índice virtual {indice_chutes}")
+                    idx_atual += 1
+            except: pass
 
-        # --- PROCESSAMENTO DO FILTRO ATIVO ---
-        print("\n[PASSO 3] Buscando os seletores de dados reais (Chutes)...")
+        # 2. Captura das linhas de jogadores por seletores genéricos de Grid/Linha do Flashscore
+        # Testando tanto seletores clássicos quanto baseados em classes comuns de linha
+        linhas = driver.find_elements(By.CSS_SELECTOR, "[class*='row_'], [class*='Row_'], [data-testid*='row'], tr, [class*='playerRow']")
+        print(f"\n📊 Linhas brutas encontradas por seletores de estrutura: {len(linhas)}")
         
-        # Forçamos a rolagem para ativar o Lazy Loading do Flashscore de tabelas internas
-        driver.execute_script("window.scrollTo(0, 350);")
-        time.sleep(2.0)
+        # Se falhar, tentamos capturar os blocos de nomes de jogadores diretamente
+        jogadores_encontrados = driver.find_elements(By.CSS_SELECTOR, "[class*='playerName'], [class*='playerCell'], [class*='participant']")
+        print(f"👤 Elementos contendo nomes de atletas na árvore: {len(jogadores_encontrados)}")
         
-        cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], [class^='wcl-tableHeadCell_'], .wcl-tableHeadCell_")
-        print(f"📊 Cabeçalhos detectados: {len(cabecalhos_fin)}")
-        
-        indice_chutes = 5
-        for idx, th in enumerate(cabecalhos_fin):
-            texto = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
-            if any(x in texto for x in ["ALVO", "TARGET", "NO GOL", "CHUTES", "FIN"]):
-                indice_chutes = idx
-                print(f"   👉 Coluna detectada no índice {indice_chutes} | Texto: '{texto}'")
-                break
-                
-        # Captura agressiva incluindo tabelas e TRs puras geradas pela renderização
-        linhas_fin = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, [class^='wcl-table__row_'], [data-testid='wcl-tableRow'], .wcl-table__row_")
-        print(f"📊 Total de linhas identificadas: {len(linhas_fin)}")
-        
-        if len(linhas_fin) == 0:
-            # Se mesmo assim der 0, pegamos o HTML interno do container principal pra decifrar a nova tag
-            print("🚨 ERRO: Continuou trazendo 0 linhas.")
-            container_estat = driver.find_elements(By.CSS_SELECTOR, "[id*='statistics'], [class*='statistics'], [data-testid*='table']")
-            if container_estat:
-                print(f"🔍 [DEBUG] HTML do container estrutural:\n{container_estat[0].get_attribute('innerHTML')[:500]}")
-            else:
-                print(f"🔍 [DEBUG] Estrutura do body atual:\n{driver.page_source[:500]}")
-        else:
-            print("\n📋 Capturas efetuadas com sucesso:")
-            for linha in linhas_fin[:5]:
+        if len(jogadores_encontrados) > 0:
+            print("\n📋 Mapeando os primeiros atletas e buscando seus valores de chute:")
+            for idx, jog in enumerate(jogadores_encontrados[:5]):
                 try:
-                    nome_el = linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], [class^='fp-playerName_'], .fp-playerName_")
-                    nome = driver.execute_script("return arguments[0].textContent;", nome_el).strip()
-                    celulas = linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell'], [class^='wcl-tableBodyCell_']")
-                    valor = driver.execute_script("return arguments[0].textContent;", celulas[indice_chutes]).strip() if len(celulas) > indice_chutes else "0"
-                    print(f"   👤 {nome} -> {valor}")
-                except: pass
+                    nome_atleta = jog.text.strip()
+                    if not nome_atleta or "TODOS" in nome_atleta.upper(): continue
+                    
+                    # Subimos um nível ou buscamos elementos irmãos para achar os números na mesma linha
+                    linha_pai = jog.find_element(By.XPATH, "./ancestor::div[contains(@class, 'row') or contains(@class, 'Row') or @data-testid][1] | ./ancestor::tr[1]")
+                    celulas = linha_pai.find_elements(By.CSS_SELECTOR, "[class*='Cell'], td, div")
+                    
+                    valores_linha = [c.text.strip() for c in celulas if c.text.strip()]
+                    print(f"   👉 Atleta: {nome_atleta} | Todos os valores da linha: {valores_linha}")
+                except Exception as e_linha:
+                    print(f"   ⚠️ Erro ao ler linha do atleta {idx}: {e_linha}")
+        else:
+            print("🚨 Ainda trouxe zero. Vamos cuspir um pedaço estrutural do body:")
+            print(driver.find_element(By.TAG_NAME, "body").text[:400])
 
     except Exception as e:
-        print(f"\n❌ Erro Crítico: {e}")
+        print(f"\n❌ Erro Geral no Teste: {e}")
     finally:
         driver.quit()
-        print("\n🏁 FIM DO TESTE")
+        print("\n🏁 FIM DO TESTE #22")
 
 if __name__ == "__main__":
     rodar_teste_isolado()
-            
+                
