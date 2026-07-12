@@ -1,4 +1,4 @@
-#testes/teste_raspagem_scouts.py
+# testes/teste_raspagem_scouts.py
 
 import time
 import re
@@ -7,12 +7,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 def pegar_scouts_avancados(driver, stats, t1, t2):
+    # Tenta obter a URL base do H2H de forma segura
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
-        try:
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-        except: pass
+        # Se não achar no dicionário, tenta usar a URL atual antes que ela mude
+        url_h2h_base = driver.current_url if "h2h" in driver.current_url else None
+
+    if not url_h2h_base:
+        # 🟢 CORRIGIDO: Retorna sem fechar a janela principal
         return stats
 
     if "historico_chutes" not in stats: stats["historico_chutes"] = {}
@@ -24,7 +26,8 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
 
     # 🟢 CAPTURA DE ELENCOS ATUALIZADA E RESILIENTE
     try:
-        url_escalacoes = driver.current_url.replace("/h2h/overall", "/escalacoes")
+        # Garante a substituição a partir da URL principal correta
+        url_escalacoes = url_h2h_base.replace("/h2h/overall", "/escalacoes")
         if "/escalacoes" in url_escalacoes:
             driver.get(url_escalacoes)
             time.sleep(2.5)
@@ -212,16 +215,12 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
     except Exception as e:
         print(f"      ⚠️ Erro Crítico na Raspagem Geral: {e}")
 
-    # 🟢 CORREÇÃO 3: Preenche com 0 os arrays mais curtos para garantir simetria total
     for jogador, lista in stats["historico_chutes"].items():
         while len(lista) < jogo_global_index: lista.append(0)
     for jogador, lista in stats["historico_faltas"].items():
         while len(lista) < jogo_global_index: lista.append(0)
             
-    try:
-        driver.close()
-        driver.switch_to.window(driver.window_handles[0])
-    except: pass
+    # 🟢 CORRIGIDO: Removido driver.close() final para não quebrar a sessão do loop principal
 
     return stats
-                
+                        
