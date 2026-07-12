@@ -9,51 +9,60 @@ def rodar_teste_isolado():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=2560,1440")
+    
+    # Camuflagem para evitar bloqueio headless
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_experimental_option('useAutomationExtension', False)
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
     driver = webdriver.Chrome(options=chrome_options)
     
-    # 🔒 URL FIXA E LITERAL (Sem nenhuma edição ou montagem)
-    url_obrigatoria = "https://www.flashscore.com.br/jogo/futebol/crb-QHa3bLrj/londrina-pr-xdhbBEVA/resumo/estatisticas-jogadores/finalizacoes/"
+    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+        "source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
+    })
     
-    print("\n🎯 INICIANDO TESTE #39 (URL FIXA E ASSESTADA DIRETO DA SUA MENSAGEM)\n" + "="*60)
-    print(f"🔗 Acessando exatamente: {url_obrigatoria}")
+    # 🎯 A URL EXATA DO SEU PRINT (Londrina primeiro, jogo encerrado de 04/07)
+    url_real_do_print = "https://www.flashscore.com.br/jogo/futebol/londrina-pr-xdhbBEVA/crb-QHa3bLrj/resumo/estatisticas-jogadores/finalizacoes/"
+    
+    print("\nCORREÇÃO 🎯 INICIANDO TESTE #41 (URL CORRIGIDA E FIEL AO PRINT DO CELULAR)\n" + "="*60)
+    print(f"🔗 URL Alvo na Log: {url_real_do_print}")
+    print("="*60)
     
     try:
-        driver.get(url_obrigatoria)
-        print("   Aguardando 6 segundos para o carregamento completo...")
-        time.sleep(6.0) 
+        driver.get(url_real_do_print)
+        print("   Aguardando 7 segundos para carregamento dos dados...")
+        time.sleep(7.0) 
         
-        # Raspagem direta baseada nos seletores do seu celular
+        # Seletores mapeados por você no HTML
         jogadores = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
         valores = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell']")
         
-        print(f"\n📊 Leitura do DOM terminada:")
-        print(f"   👤 Elementos 'wcl-playerCell' (Jogadores): {len(jogadores)}")
-        print(f"   🔢 Elementos 'wcl-tableBodyCell' (Valores): {len(valores)}")
+        print(f"\n📊 Verificação pós-acesso:")
+        print(f"   👤 Jogadores encontrados ('wcl-playerCell'): {len(jogadores)}")
+        print(f"   🔢 Valores encontrados ('wcl-tableBodyCell'): {len(valores)}")
         
         if len(jogadores) > 0:
-            print("\n📋 LISTANDO OS DADOS ENCONTRADOS:")
+            print("\n📋 DADOS COLETADOS COM SUCESSO:")
             print("-" * 60)
             colunas = len(valores) // len(jogadores) if len(jogadores) > 0 else 0
             
-            for idx, jog in enumerate(jogadores[:12]):
+            for idx, jog in enumerate(jogadores[:10]):
                 nome = jog.text.split("\n")[0]
                 if not nome or "TODOS" in nome.upper(): continue
                 
                 inicio = idx * colunas
                 fim = inicio + colunas
                 seus_numeros = [v.text.strip() for v in valores[inicio:fim]]
-                
-                print(f"   👤 {nome:<22} | Colunas Numéricas: {seus_numeros}")
+                print(f"   👤 {nome:<22} | Dados: {seus_numeros}")
         else:
-            print("🚨 A página carregou, mas a árvore retornou 0 jogadores.")
+            print("🚨 A página abriu a URL correta, mas a tabela veio zerada no modo headless.")
             
     except Exception as e:
-        print(f"\n❌ Erro durante a execução: {e}")
+        print(f"\n❌ Erro executivo: {e}")
     finally:
         driver.quit()
-        print("\n" + "="*60 + "\n🏁 FIM DO TESTE #39")
+        print("\n🏁 FIM DO TESTE #41")
 
 if __name__ == "__main__":
     rodar_teste_isolado()
