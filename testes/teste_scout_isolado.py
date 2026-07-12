@@ -15,55 +15,68 @@ def rodar_teste_isolado():
     
     url_chutes = "https://www.flashscore.com.br/jogo/futebol/crb-QHa3bLrj/londrina-pr-xdhbBEVA/#/resumo/estatisticas-jogadores/finalizacoes"
     
-    print("\n🚀 INICIANDO TESTE #25 (SELETORES CIRÚRGICOS DO SEU CELULAR)\n" + "="*60)
+    print("\n🚀 INICIANDO TESTE #28 (SINCRONIZAÇÃO MATRIZ DE DADOS COMPLETA)\n" + "="*60)
     
     try:
         print(f"[PASSO 1] Carregando a página de Finalizações...")
         driver.get(url_chutes)
         time.sleep(6.0) 
         
-        # 🎯 Buscando diretamente pelo data-testid que você extraiu no celular!
-        celulas_jogadores = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
-        print(f"📊 Células de jogadores detectadas: {len(celulas_jogadores)}")
+        # 1. Buscamos todas as linhas ou contêineres principais da tabela
+        # Usando a classe de linha que você pescou no elemento: fp-tableRow_d4-E5 -> pegamos o prefixo 'fp-tableRow'
+        linhas_tabela = driver.find_elements(By.CSS_SELECTOR, "tr, [class*='table__row_'], [class*='tableRow'], [class*='fp-tableRow']")
+        print(f"📊 Total de estruturas de linhas detectadas: {len(linhas_tabela)}")
         
-        print("\n📋 EXTRAINDO SCOUTS POR LINHA COMPLETA:")
+        print("\n📋 MAPEANDO JOGADORES E VALORES DIRETAMENTE:")
         print("-" * 60)
         
         contagem = 0
-        for celula in celulas_jogadores:
+        for linha in linhas_tabela:
             try:
-                # Extrai o nome do jogador usando a classe exata do seu HTML
-                nome_el = celula.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN, [class*='fp-playerName']")
-                nome_jogador = driver.execute_script("return arguments[0].textContent;", nome_el).strip()
-                
-                # Para pegar os números daquela linha, subimos para o elemento pai (o bloco da linha inteira)
-                linha_pai = celula.find_element(By.XPATH, "./..")
-                
-                # Pegamos todas as células de valor/números irmãs dentro desse mesmo pai
-                celulas_valores = linha_pai.find_elements(By.CSS_SELECTOR, "[class*='tableBodyCell_'], [class*='Cell']")
-                valores = [c.text.strip() for c in celulas_valores if c.text.strip() and c.text.strip() != nome_jogador]
-                
-                # Se o método acima não trouxer texto, usamos o text bruto do pai limpando o nome
-                if not valores:
-                    texto_bruto_pai = linha_pai.text.replace(nome_jogador, "").replace("Atacante", "").replace("Defensor", "").replace("Meio-campista", "").replace("Goleiro", "").replace("Ponta", "").replace("Lateral", "")
-                    valores = [v.strip() for v in texto_bruto_pai.split("\n") if v.strip()]
-
-                if nome_jogador:
-                    print(f"   👤 Jogador: {nome_jogador:<25} | Números Encontrados: {valores}")
-                    contagem += 1
+                # Procura o nome do jogador dentro daquela linha específica usando o seu primeiro achado
+                jogador_el = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
+                if not jogador_el:
+                    continue
                     
-            except Exception as e_linha:
+                nome_jogador = jogador_el[0].text.split("\n")[0]
+                if not nome_jogador or "TODOS" in nome_jogador.upper():
+                    continue
+                
+                # Procura todas as células de valor dentro dessa MESMA linha usando o seu segundo achado!
+                celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_44gsS")
+                valores = [c.text.strip() for c in celulas_valores if c.text.strip()]
+                
+                if nome_jogador and valores:
+                    print(f"   👤 Jogador: {nome_jogador:<22} | Valores da Linha: {valores}")
+                    contagem += 1
+            except:
                 continue
                 
         if contagem == 0:
-            print("🚨 O seletor achou os jogadores, mas falhou ao mapear os números laterais.")
+            print("⚠️ Linhas estruturais vazias. Tentando leitura global de células por proximidade...")
+            # Fallback seguro caso o Flashscore separe os blocos em tabelas distintas no modo headless
+            jogadores_globais = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
+            valores_globais = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell']")
+            print(f"   Total de Jogadores: {len(jogadores_globais)} | Total de Valores Numéricos: {len(valores_globais)}")
+            
+            if len(jogadores_globais) > 0 and len(valores_globais) > 0:
+                print("   ✅ Fazendo mapeamento por pareamento de Grid...")
+                # Como cada jogador costuma ter um número fixo de colunas (ex: 8 colunas nos seus prints), 
+                # dividimos os valores proporcionalmente
+                colunas_por_jogador = len(valores_globais) // len(jogadores_globais)
+                for idx, jog in enumerate(jogadores_globais[:5]):
+                    nome = jog.text.split("\n")[0]
+                    inicio = idx * colunas_por_jogador
+                    fim = inicio + colunas_por_jogador
+                    meus_valores = [v.text.strip() for v in valores_globais[inicio:fim]]
+                    print(f"   👤 {nome:<22} | Pareado: {meus_valores}")
 
     except Exception as e:
         print(f"\n❌ Erro Geral no Teste: {e}")
     finally:
         driver.quit()
-        print("\n🏁 FIM DO TESTE #25")
+        print("\n🏁 FIM DO TESTE #28")
 
 if __name__ == "__main__":
     rodar_teste_isolado()
-    
+                    
