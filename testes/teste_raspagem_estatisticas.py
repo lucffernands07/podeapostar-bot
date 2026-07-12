@@ -1,4 +1,4 @@
-#testes/teste_raspagem_estatisticas.py
+# testes/teste_raspagem_estatisticas.py
 import time
 import re
 from selenium.webdriver.common.by import By
@@ -8,17 +8,14 @@ from selenium.webdriver.support import expected_conditions as EC
 def pegar_estatisticas_coletivas(driver, stats):
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
-        try:
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-        except: pass
+        # 🟢 REMOVIDO: driver.close() daqui, pois causava o fechamento prematuro
         return stats
 
     # Inicialização dos arrays para Escanteios (H2H)
     if "cantos_mandante_h2h" not in stats: stats["cantos_mandante_h2h"] = []
     if "cantos_visitante_h2h" not in stats: stats["cantos_visitante_h2h"] = []
     
-    # 🚨 NOVO: Inicialização dos arrays para Cartões Amarelos (H2H)
+    # Inicialização dos arrays para Cartões Amarelos (H2H)
     if "cartoes_mandante_h2h" not in stats: stats["cartoes_mandante_h2h"] = []
     if "cartoes_visitante_h2h" not in stats: stats["cartoes_visitante_h2h"] = []
 
@@ -76,13 +73,11 @@ def pegar_estatisticas_coletivas(driver, stats):
                     cartoes_jogo_total = 0
 
                     try:
-                        # Pega todos os spans com a classe unificada de texto da tabela
                         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
                         
                         for idx, span in enumerate(todos_spans):
                             texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
                             
-                            # 1. Captura de Escanteios
                             if texto_elemento in ["ESCANTEIOS", "ESCANTEIO", "CORNER KICKS", "CORNERS"]:
                                 if idx > 0 and (idx + 1) < len(todos_spans):
                                     val_casa = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
@@ -92,7 +87,6 @@ def pegar_estatisticas_coletivas(driver, stats):
                                     cantos_fora = int(re.search(r'\d+', val_fora).group()) if re.search(r'\d+', val_fora) else 0
                                     cantos_jogo_total = cantos_casa + cantos_fora
                             
-                            # 2. 🚨 NOVO: Captura de Cartões Amarelos
                             elif texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
                                 if idx > 0 and (idx + 1) < len(todos_spans):
                                     val_casa_card = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
@@ -107,7 +101,6 @@ def pegar_estatisticas_coletivas(driver, stats):
                     except Exception as e_passo_stats:
                         print(f"      ⚠️ Erro ao processar dados de estatísticas via JS: {e_passo_stats}")
 
-                    # Adiciona aos arrays correspondentes do time alvo
                     if alvo["tipo"] == "MANDANTE":
                         stats["cantos_mandante_h2h"].append(cantos_jogo_total)
                         stats["cartoes_mandante_h2h"].append(cartoes_jogo_total)
@@ -119,16 +112,12 @@ def pegar_estatisticas_coletivas(driver, stats):
     except Exception as e:
         print(f"      ⚠️ Erro Crítico na Raspagem Coletiva Geral: {e}")
 
-    # Garante simetria para escanteios e cartões preenchendo com 0 se faltar algum jogo
     while len(stats["cantos_mandante_h2h"]) < 3: stats["cantos_mandante_h2h"].append(0)
     while len(stats["cantos_visitante_h2h"]) < 3: stats["cantos_visitante_h2h"].append(0)
     while len(stats["cartoes_mandante_h2h"]) < 3: stats["cartoes_mandante_h2h"].append(0)
     while len(stats["cartoes_visitante_h2h"]) < 3: stats["cartoes_visitante_h2h"].append(0)
             
-    try:
-        driver.close()
-        driver.switch_to.window(driver.window_handles[0])
-    except: pass
+    # 🟢 REMOVIDO: driver.close() e switch_to do final para manter a sessão viva para a Fase 3
 
     return stats
-                    
+    
