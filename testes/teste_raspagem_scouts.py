@@ -111,37 +111,40 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         img_v = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__awayLogo img.participant__image, [class*='awayLogo'] img")
                         hash_visitante_topo = img_v.get_attribute("src").split('/')[-1]
                     except: pass
-
-                    # 🎯 PASSO 2: Coleta de Chutes
+                    
+                    # 🎯 PASSO 2: Coleta de Chutes (Corrigido para nova estrutura)
                     url_finalizacoes = f"{url_jogo_completa}/resumo/estatisticas-jogadores/finalizacoes/"
                     print(f"         [RASPAGEM 3] Navegando para Finalizações: {url_finalizacoes}")
                     driver.get(url_finalizacoes)
                     
                     try:
                         driver.execute_script("window.scrollTo(0, 300);")
-                        time.sleep(1.5)
+                        time.sleep(2.0) # Um pouquinho mais de tempo para renderizar a tabela
                         
-                        cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
+                        # Captura cabeçalhos antigos ou novos com data-testid
+                        cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .wcl-tableHeadCell_")
                         indice_chutes = 5  
                         for idx_th, th in enumerate(cabecalhos_fin):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
-                            if any(x in texto_th for x in ["ALVO", "TARGET"]) and not any(x in texto_th for x in ["XG", "XGOT"]):
+                            if any(x in texto_th for x in ["ALVO", "TARGET", "NO GOL"]) and not any(x in texto_th for x in ["XG", "XGOT"]):
                                 indice_chutes = idx_th
                                 break
                     
-                        linhas_dados_fin = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+                        # Seleção robusta das linhas da tabela
+                        linhas_dados_fin = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
                         print(f"         [RASPAGEM 3] Linhas de dados de chutes achadas: {len(linhas_dados_fin)}")
+                        
                         for lambda_linha in linhas_dados_fin:
                             try:
                                 try:
-                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, ".fp-playerName_E6lgN, [class*='playerName'], [data-testid='wcl-playerCell']")
+                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], .fp-playerName_")
                                 except: continue
                                     
                                 nome_jogador = driver.execute_script("return arguments[0].textContent;", nome_element).strip()
                                 if not nome_jogador or nome_jogador == "TODOS": continue
                                 
                                 try:
-                                    img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='teamLogo'] img, [class*='wcl-teamLogo'] img")
+                                    img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='teamLogo'] img, [class*='wcl-teamLogo'] img, img")
                                     hash_linha = img_linha.get_attribute("src").split('/')[-1]
                                     
                                     time_identificado = ""
@@ -153,7 +156,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                         continue
                                 except: continue
 
-                                celulas_valores = lambda_linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell']")
+                                celulas_valores = lambda_linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")
                                 if len(celulas_valores) <= indice_chutes: continue
                                 
                                 val_chute = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_chutes]).strip()
@@ -166,16 +169,16 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     except Exception as e_passo2:
                         print(f"         ⚠️ Erro ao processar finalizações: {e_passo2}")
 
-                    # 🎯 PASSO 3: Coleta de Faltas
+                    # 🎯 PASSO 3: Coleta de Faltas (Corrigido para nova estrutura)
                     url_ataque = f"{url_jogo_completa}/resumo/estatisticas-jogadores/ataque/"
                     print(f"         [RASPAGEM 3] Navegando para Ataque: {url_ataque}")
                     driver.get(url_ataque)
                     
                     try:
                         driver.execute_script("window.scrollTo(0, 300);")
-                        time.sleep(1.5)
+                        time.sleep(2.0)
                         
-                        cabecalhos_atq = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell']")
+                        cabecalhos_atq = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .wcl-tableHeadCell_")
                         indice_faltas = 5  
                         for idx_th, th in enumerate(cabecalhos_atq):
                             texto_th = driver.execute_script("return arguments[0].textContent;", th).strip().upper()
@@ -183,19 +186,21 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 indice_faltas = idx_th
                                 break
                     
-                        linhas_dados_atq = driver.find_elements(By.CSS_SELECTOR, "tr, .wcl-table__row_")
+                        # Seleção robusta das linhas da tabela
+                        linhas_dados_atq = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
                         print(f"         [RASPAGEM 3] Linhas de dados de ataque achadas: {len(linhas_dados_atq)}")
+                        
                         for lambda_linha in linhas_dados_atq:
                             try:
                                 try:
-                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], .fp-playerName_E6lgN")
+                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], .fp-playerName_")
                                 except: continue
                                     
                                 nome_jogador = driver.execute_script("return arguments[0].textContent;", nome_element).strip()
                                 if not nome_jogador or nome_jogador == "TODOS": continue
                                 
                                 try:
-                                    img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='teamLogo'] img, [class*='wcl-teamLogo'] img")
+                                    img_linha = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='teamLogo'] img, [class*='wcl-teamLogo'] img, img")
                                     hash_linha = img_linha.get_attribute("src").split('/')[-1]
                                     
                                     time_identificado = ""
@@ -207,7 +212,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                         continue
                                 except: continue
 
-                                celulas_valores = lambda_linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell']")
+                                celulas_valores = lambda_linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")
                                 if len(celulas_valores) <= indice_faltas: continue
                                 
                                 val_falta = driver.execute_script("return arguments[0].textContent;", celulas_valores[indice_faltas]).strip()
@@ -219,7 +224,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                             except: continue
                     except Exception as e_passo3:
                         print(f"         ⚠️ Erro ao processar faltas sofridas: {e_passo3}")
-
                     jogo_global_index += 1
                 except Exception as e_loop_jogo:
                     print(f"         ⚠️ Erro no loop do jogo histórico: {e_loop_jogo}")
