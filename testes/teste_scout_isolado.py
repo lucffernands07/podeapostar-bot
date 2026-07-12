@@ -1,4 +1,5 @@
 import time
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -8,66 +9,61 @@ def rodar_teste_isolado():
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    # Voltamos para a tela gigante que abriu o DOM com sucesso no teste retrasado
     chrome_options.add_argument("--window-size=2560,1440")
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
     driver = webdriver.Chrome(options=chrome_options)
     
-    # URL alvo direta para a rota de estatísticas
-    url_chutes = "https://www.flashscore.com.br/jogo/futebol/crb-QHa3bLrj/londrina-pr-xdhbBEVA/#/resumo/estatisticas-jogadores/finalizacoes"
+    # Usando a URL de estatísticas totais (idêntica à estratégia de cartões)
+    url_stats_geral = "https://www.flashscore.com.br/jogo/futebol/crb-QHa3bLrj/londrina-pr-xdhbBEVA/#/resumo/estatisticas/total"
     
-    print("\n🚀 INICIANDO TESTE #31 (FORÇAR ROTA DESKTOP VIA JAVASCRIPT CORRETO)\n" + "="*60)
+    print("\n🎯 INICIANDO TESTE #33 (MÉTODO DE CARTÕES PARA FINALIZAÇÕES COLETIVAS)\n" + "="*60)
     
     try:
-        print(f"[PASSO 1] Forçando o carregamento direto da rota...")
-        driver.get(url_chutes)
-        time.sleep(6.0) # Tempo maior para o script interno montar os blocos congelados
+        print(f"[PASSO 1] Carregando a página de Estatísticas Totais...")
+        driver.get(url_stats_geral)
+        time.sleep(4.0)
         
-        # Como o site separa a coluna congelada dos valores, buscamos as células de forma global
-        # usando os dois data-testids idênticos aos que você confirmou no celular!
-        jogadores_globais = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
-        valores_globais = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell']")
+        finalizacoes_totais_jogo = 0
+        finalizacoes_no_alvo_jogo = 0
         
-        print(f"\n📊 Resultado da varredura direta:")
-        print(f"   👤 Elementos de jogadores encontrados: {len(jogadores_globais)}")
-        print(f"   🔢 Elementos de valores numéricos encontrados: {len(valores_globais)}")
+        # Captura todos os blocos de texto idênticos ao método de cartões
+        todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
+        print(f"📊 Elementos de texto mapeados na página: {len(todos_spans)}")
         
-        if len(jogadores_globais) > 0:
-            print("\n📋 MAPEAMENTO POR PAREAMENTO DE MATRIZ DE SCROLL:")
-            print("-" * 60)
+        for idx, span in enumerate(todos_spans):
+            texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
             
-            # Como vimos no seu print, existem colunas numéricas sequenciais para cada linha de atleta.
-            # Vamos calcular dinamicamente a proporção de células numéricas por jogador:
-            colunas_por_jogador = len(valores_globais) // len(jogadores_globais) if len(jogadores_globais) > 0 else 0
-            print(f"   ℹ️ Colunas numéricas detectadas por atleta: {colunas_por_jogador}\n")
+            # Buscando os termos coletivos de chutes
+            if texto_elemento in ["TOTAL DE FINALIZAÇÕES", "FINALIZAÇÕES", "TOTAL ATTEMPTS", "REMATES"]:
+                if idx > 0 and (idx + 1) < len(todos_spans):
+                    val_casa = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                    val_fora = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                    
+                    chutes_casa = int(re.search(r'\d+', val_casa).group()) if re.search(r'\d+', val_casa) else 0
+                    chutes_fora = int(re.search(r'\d+', val_fora).group()) if re.search(r'\d+', val_fora) else 0
+                    finalizacoes_totais_jogo = chutes_casa + chutes_fora
+                    print(f"   🔥 [DETECTADO] Total de Finalizações -> Mandante: {chutes_casa} | Visitante: {chutes_fora} (Total: {finalizacoes_totais_jogo})")
             
-            for idx, jog in enumerate(jogadores_globais[:10]):
-                try:
-                    nome = jog.text.split("\n")[0]
-                    if not nome or "TODOS" in nome.upper(): continue
+            elif texto_elemento in ["FINALIZAÇÕES NO ALVO", "CHUTES NO GOL", "SHOTS ON GOAL", "REMATES À BALIZA"]:
+                if idx > 0 and (idx + 1) < len(todos_spans):
+                    val_casa_alvo = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                    val_fora_alvo = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
                     
-                    # Fatiamos o array de valores correspondente ao índice do jogador na tela
-                    inicio = idx * colunas_por_jogador
-                    fim = inicio + colunas_por_jogador
-                    meus_valores = [v.text.strip() for v in valores_globais[inicio:fim] if v.text.strip()]
-                    
-                    print(f"   👤 {nome:<22} | Valores coletados: {meus_valores}")
-                except Exception as e_print:
-                    print(f"   ⚠️ Erro ao parear índice {idx}: {e_print}")
-        else:
-            print("\n🔄 Tentativa de Fallback agressiva: Buscando por classes derivadas...")
-            jogadores_classe = driver.find_elements(By.CSS_SELECTOR, "[class*='playerCell']")
-            valores_classe = driver.find_elements(By.CSS_SELECTOR, "[class*='tableBodyCell']")
-            print(f"   👤 Por classe (jogadores): {len(jogadores_classe)}")
-            print(f"   🔢 Por classe (valores): {len(valores_classe)}")
+                    alvo_casa = int(re.search(r'\d+', val_casa_alvo).group()) if re.search(r'\d+', val_casa_alvo) else 0
+                    alvo_fora = int(re.search(r'\d+', val_fora_alvo).group()) if re.search(r'\d+', val_fora_alvo) else 0
+                    finalizacoes_no_alvo_jogo = alvo_casa + alvo_fora
+                    print(f"   🎯 [DETECTADO] Finalizações no Alvo -> Mandante: {alvo_casa} | Visitante: {alvo_fora} (Total: {finalizacoes_no_alvo_jogo})")
+
+        print("-" * 60)
+        print(f"🚀 SCOUTS COLETIVOS FINAIS: Totais: {finalizacoes_totais_jogo} | No Alvo: {finalizacoes_no_alvo_jogo}")
 
     except Exception as e:
-        print(f"\n❌ Erro Geral no Teste: {e}")
+        print(f"\n❌ Erro ao processar dados pelo método de cartões: {e}")
     finally:
         driver.quit()
-        print("\n" + "="*60 + "\n🏁 FIM DO TESTE #31")
+        print("\n🏁 FIM DO TESTE #33")
 
 if __name__ == "__main__":
     rodar_teste_isolado()
-    
+                
