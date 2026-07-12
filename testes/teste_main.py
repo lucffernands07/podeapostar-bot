@@ -281,10 +281,14 @@ def main():
                                 print(f"           ✅ Mercado de Cartões Qualificado: {mercado_cartoes_formatado}")
 
                         # ----------------------------------------------------------
-                        # FASE 3: RASPAGEM DE SCOUTS (JOGADORES) - SÓ SE LIGA ELITE
+                        # FASE 3: RASPAGEM DE SCOUTS (JOGADORES) - DEBBUG ATIVADO
                         # ----------------------------------------------------------
+                        print(f"      🔍 [DEBUG FASE 3] Validando Liga: '{nome_comp}'")
+                        print(f"      🔍 [DEBUG FASE 3] Está na lista Elite? {nome_comp in LIGAS_ELITE_JOGADORES}")
+                        
                         if nome_comp in LIGAS_ELITE_JOGADORES:
                             print(f"      🎯 [FASE 3] Buscando Scouts Avançados (Chutes/Faltas)...")
+                            print(f"      🔗 [DEBUG URL MÃE] Enviando para a Fase 3: {dados_jogo.get('url_h2h_base')}")
                             
                             try:
                                 _ = driver.current_window_handle
@@ -303,11 +307,7 @@ def main():
                                 if dados_scouts and isinstance(dados_scouts, dict):
                                     dados_jogo.update(dados_scouts)
                             except Exception as e_f3:
-                                print(f"      ⚠️ Erro na Fase 3: {e_f3}")
-                                if "invalid session id" in str(e_f3).lower() or "session" in str(e_f3).lower():
-                                    try: driver.quit()
-                                    except: pass
-                                    driver = configurar_driver()
+                                print(f"      ⚠️ Erro crítico na execução da Fase 3 no Main: {e_f3}")
                             
                             elenco_casa_disponivel = dados_jogo.get("elenco_mandante") or dados_jogo.get("jogadores_mandante")
                             elenco_fora_disponivel = dados_jogo.get("elenco_visitante") or dados_jogo.get("jogadores_visitante")
@@ -332,6 +332,7 @@ def main():
                                 mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave'], "odd": "Análise"})
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
+
                 
                         # ALIMENTAÇÃO DA LISTA FINAL
                         if mercados_para_processar:
