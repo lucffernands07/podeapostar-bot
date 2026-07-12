@@ -137,7 +137,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         for lambda_linha in linhas_dados_fin:
                             try:
                                 try:
-                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], .fp-playerName_")
+                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], [class^='fp-playerName_']")
                                 except: continue
                                     
                                 nome_jogador = driver.execute_script("return arguments[0].textContent;", nome_element).strip()
@@ -193,7 +193,7 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         for lambda_linha in linhas_dados_atq:
                             try:
                                 try:
-                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], .fp-playerName_")
+                                    nome_element = lambda_linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], [class^='fp-playerName_']")
                                 except: continue
                                     
                                 nome_jogador = driver.execute_script("return arguments[0].textContent;", nome_element).strip()
