@@ -271,51 +271,72 @@ def main():
                                 print(f"           ✅ Mercado de Cartões Qualificado: {mercado_cartoes_formatado}")
 
                         # ----------------------------------------------------------
+                        # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (ESCANTEIOS E CARTÕES)
+                        # ----------------------------------------------------------
+                        print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios/Cartões)...")
+                        try:
+                            dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
+                            if dados_coletivos and isinstance(dados_coletivos, dict):
+                                dados_jogo.update(dados_coletivos)
+                        except Exception as e_f2:
+                            print(f"      ⚠️ Erro na Fase 2: {e_f2}")
+                            # 🔄 Se o driver morreu na Fase 2, recupera antes de ir para os escanteios/cartões
+                            if "invalid session id" in str(e_f2).lower() or "session" in str(e_f2).lower():
+                                print("      🔄 Recuperando driver após queda na Fase 2...")
+                                try: driver.quit()
+                                except: pass
+                                driver = configurar_driver()
+
+                        # (Seu código de análise de escanteios e cartões continua igual...)
+                        res_escanteios = escanteios.analisar_dados_escanteios(
+                            dados_jogo.get("cantos_mandante_h2h", []), 
+                            dados_jogo.get("cantos_visitante_h2h", []), 
+                            nome_comp, 
+                            3
+                        )
+                        if res_escanteios and res_escanteios.get("aprovado"):
+                            mercado_cantos_formatado = res_escanteios.get("mercado")
+                            if mercado_cantos_formatado:
+                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA", "odd": "Análise"})
+                                print(f"           ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
+
+                        res_cartoes = cartoes.analisar_dados_cartoes(
+                            dados_jogo.get("cartoes_mandante_h2h", []),
+                            dados_jogo.get("cartoes_visitante_h2h", []),
+                            nome_comp,
+                            3
+                        )
+                        if res_cartoes and res_cartoes.get("aprovado"):
+                            mercado_cartoes_formatado = res_cartoes.get("mercado")
+                            if mercado_cartoes_formatado:
+                                mercados_para_processar.append({"texto": mercado_cartoes_formatado, "chave": "CARTOES_CONFRONTO", "odd": "Análise"})
+                                print(f"           ✅ Mercado de Cartões Qualificado: {mercado_cartoes_formatado}")
+
+                        # ----------------------------------------------------------
                         # FASE 3: RASPAGEM DE SCOUTS (JOGADORES) - SÓ SE LIGA ELITE
                         # ----------------------------------------------------------
                         if nome_comp in LIGAS_ELITE_JOGADORES:
                             print(f"      🎯 [FASE 3] Buscando Scouts Avançados (Chutes/Faltas)...")
+                            
+                            # 🛡️ TRAVA DE SEGURANÇA: Garante que o driver está vivo antes de entrar na Fase 3
+                            try:
+                                _ = driver.current_window_handle
+                            except Exception:
+                                print("      ⚠️ [CORREÇÃO] Driver detectado como morto antes da Fase 3. Reiniciando...")
+                                try: driver.quit()
+                                except: pass
+                                driver = configurar_driver()
+
                             try:
                                 dados_scouts = pegar_scouts_avancados(driver, dados_jogo, t1, t2)
                                 if dados_scouts and isinstance(dados_scouts, dict):
                                     dados_jogo.update(dados_scouts)
                             except Exception as e_f3:
                                 print(f"      ⚠️ Erro na Fase 3: {e_f3}")
-                            
-                            elenco_casa_disponivel = dados_jogo.get("elenco_mandante") or dados_jogo.get("jogadores_mandante")
-                            elenco_fora_disponivel = dados_jogo.get("elenco_visitante") or dados_jogo.get("jogadores_visitante")
-                            
-                            nome_time_casa = t1 if t1 else "MANDANTE"
-                            nome_time_fora = t2 if t2 else "VISITANTE"
-
-                            res_jogadores = jogadores.verificar_destaques_jogadores(
-                                dados_jogo.get("historico_chutes", {}), 3, nome_comp,
-                                elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
-                                nome_casa=nome_time_casa, nome_fora=nome_time_fora
-                            )
-                            for rj in res_jogadores:
-                                mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave'], "odd": "Análise"})
-
-                            res_faltas = jogadores.verificar_destaques_faltas(
-                                dados_jogo.get("historico_faltas", {}), 3, nome_comp,
-                                elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
-                                nome_casa=nome_time_casa, nome_fora=nome_time_fora
-                            )
-                            for rf in res_faltas:
-                                mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave'], "odd": "Análise"})
-                        else:
-                            print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
-
-                        # TRAVA ANTI-DUPLICADOS DE MERCADO
-                        mercados_unicos = []
-                        textos_vistos = set()
-                        for item in mercados_para_processar:
-                            if item["texto"] not in textos_vistos:
-                                mercados_unicos.append(item)
-                                textos_vistos.add(item["texto"])
-                        mercados_para_processar = mercados_unicos
-
-                        print(f"      🔍 Mercados finais aprovados para o listão: {[m['texto'] for m in mercados_para_processar]}")
+                                if "invalid session id" in str(e_f3).lower() or "session" in str(e_f3).lower():
+                                    try: driver.quit()
+                                    except: pass
+                                    driver = configurar_driver()
 
                         # ALIMENTAÇÃO DA LISTA FINAL
                         if mercados_para_processar:
