@@ -2,81 +2,69 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 def rodar_teste_isolado():
     chrome_options = Options()
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--window-size=2560,1440")
-    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    # Voltamos para uma resolução mobile/responsiva similar ao seu celular para ativar o layout do print
+    chrome_options.add_argument("--window-size=412,915") 
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Linux; Android 13; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36")
     
     driver = webdriver.Chrome(options=chrome_options)
+    wait = WebDriverWait(driver, 15)
     
-    url_chutes = "https://www.flashscore.com.br/jogo/futebol/crb-QHa3bLrj/londrina-pr-xdhbBEVA/#/resumo/estatisticas-jogadores/finalizacoes"
+    # URL limpa do jogo para forçar o carregamento inicial da casca
+    url_jogo = "https://www.flashscore.com.br/jogo/futebol/crb-QHa3bLrj/londrina-pr-xdhbBEVA/#/resumo"
     
-    print("\n🚀 INICIANDO TESTE #28 (SINCRONIZAÇÃO MATRIZ DE DADOS COMPLETA)\n" + "="*60)
+    print("\n🚀 INICIANDO TESTE #29 (EMULAÇÃO MOBILE + CLIQUE NA BARRA VERMELHA)\n" + "="*60)
     
     try:
-        print(f"[PASSO 1] Carregando a página de Finalizações...")
-        driver.get(url_chutes)
-        time.sleep(6.0) 
+        print(f"[PASSO 1] Carregando a URL base do jogo...")
+        driver.get(url_jogo)
+        time.sleep(4.0)
         
-        # 1. Buscamos todas as linhas ou contêineres principais da tabela
-        # Usando a classe de linha que você pescou no elemento: fp-tableRow_d4-E5 -> pegamos o prefixo 'fp-tableRow'
-        linhas_tabela = driver.find_elements(By.CSS_SELECTOR, "tr, [class*='table__row_'], [class*='tableRow'], [class*='fp-tableRow']")
-        print(f"📊 Total de estruturas de linhas detectadas: {len(linhas_tabela)}")
+        print("[PASSO 2] Tentando clicar no botão 'ESTATÍSTICAS DE JOGADOR'...")
+        # XPath preciso buscando o texto idêntico ao do seu print na barra superior
+        try:
+            botao_scout = wait.until(EC.element_to_be_clickable((By.XPATH, "//*[contains(text(), 'ESTATÍSTICAS DE JOGADOR') or contains(text(), 'ESTATÍSTICAS DE JOGADORES') or contains(text(), 'Jogadores')]")))
+            driver.execute_script("arguments[0].click();", botao_scout)
+            print("   ✅ Botão clicado via texto!")
+            time.sleep(3.0)
+        except Exception as e_clique:
+            print(f"   ⚠️ Falha no clique por texto puro: {e_clique}")
+            print("   🔄 Tentando clicar em qualquer sub-aba de estatísticas disponível...")
+            abas = driver.find_elements(By.CSS_SELECTOR, "[class*='tab'], button, a")
+            for aba in abas:
+                txt_aba = aba.text.strip().upper()
+                if "JOGADOR" in txt_aba or "ESTATÍSTICA" in txt_aba:
+                    driver.execute_script("arguments[0].click();", aba)
+                    print(f"   ✅ Clicou na aba alternativa: '{txt_aba}'")
+                    time.sleep(3.0)
+                    break
+
+        # [PASSO 3] Validação final usando seus seletores confirmados
+        jogadores = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
+        valores = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell']")
         
-        print("\n📋 MAPEANDO JOGADORES E VALORES DIRETAMENTE:")
-        print("-" * 60)
+        print(f"\n📊 Resultado pós-clique em ambiente emulado:")
+        print(f"   👤 Jogadores identificados: {len(jogadores)}")
+        print(f"   🔢 Células numéricas identificadas: {len(valores)}")
         
-        contagem = 0
-        for linha in linhas_tabela:
-            try:
-                # Procura o nome do jogador dentro daquela linha específica usando o seu primeiro achado
-                jogador_el = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
-                if not jogador_el:
-                    continue
-                    
-                nome_jogador = jogador_el[0].text.split("\n")[0]
-                if not nome_jogador or "TODOS" in nome_jogador.upper():
-                    continue
-                
-                # Procura todas as células de valor dentro dessa MESMA linha usando o seu segundo achado!
-                celulas_valores = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_44gsS")
-                valores = [c.text.strip() for c in celulas_valores if c.text.strip()]
-                
-                if nome_jogador and valores:
-                    print(f"   👤 Jogador: {nome_jogador:<22} | Valores da Linha: {valores}")
-                    contagem += 1
-            except:
-                continue
-                
-        if contagem == 0:
-            print("⚠️ Linhas estruturais vazias. Tentando leitura global de células por proximidade...")
-            # Fallback seguro caso o Flashscore separe os blocos em tabelas distintas no modo headless
-            jogadores_globais = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
-            valores_globais = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell']")
-            print(f"   Total de Jogadores: {len(jogadores_globais)} | Total de Valores Numéricos: {len(valores_globais)}")
-            
-            if len(jogadores_globais) > 0 and len(valores_globais) > 0:
-                print("   ✅ Fazendo mapeamento por pareamento de Grid...")
-                # Como cada jogador costuma ter um número fixo de colunas (ex: 8 colunas nos seus prints), 
-                # dividimos os valores proporcionalmente
-                colunas_por_jogador = len(valores_globais) // len(jogadores_globais)
-                for idx, jog in enumerate(jogadores_globais[:5]):
-                    nome = jog.text.split("\n")[0]
-                    inicio = idx * colunas_por_jogador
-                    fim = inicio + colunas_por_jogador
-                    meus_valores = [v.text.strip() for v in valores_globais[inicio:fim]]
-                    print(f"   👤 {nome:<22} | Pareado: {meus_valores}")
+        if len(jogadores) > 0:
+            print("\n📋 Primeiras amostras capturadas:")
+            for idx, jog in enumerate(jogadores[:3]):
+                print(f"   👉 Atleta {idx+1}: {jog.text.replace('\n', ' | ')}")
 
     except Exception as e:
-        print(f"\n❌ Erro Geral no Teste: {e}")
+        print(f"\n❌ Erro Geral no Fluxo: {e}")
     finally:
         driver.quit()
-        print("\n🏁 FIM DO TESTE #28")
+        print("\n🏁 FIM DO TESTE #29")
 
 if __name__ == "__main__":
     rodar_teste_isolado()
-                    
+        
