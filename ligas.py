@@ -5,7 +5,6 @@ COMPETICOES = {
     "Libertadores": "https://www.flashscore.com.br/futebol/america-do-sul/copa-libertadores/jogos/",
     "Sul-Americana": "https://www.flashscore.com.br/futebol/america-do-sul/copa-sul-americana/jogos/",
     "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/brasileirao-serie-b/jogos/",
-    "Brasileirão Série C": "https://www.flashscore.com.br/futebol/brasil/brasileirao-serie-c/jogos/",
     "Brasileiro Serie C": "https://www.flashscore.com.br/futebol/brasil/serie-c/jogos/",
     "Brasileiro Serie D": "https://www.flashscore.com.br/futebol/brasil/serie-d/jogos/",
     "Argentina - Liga Profesional": "https://www.flashscore.com.br/futebol/argentina/liga-profesional/jogos/",
