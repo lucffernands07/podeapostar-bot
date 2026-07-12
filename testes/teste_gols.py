@@ -41,10 +41,10 @@ def testar_jogo_especifico():
         time.sleep(4) # Tempo de segurança para renderização das tabelas
         
         stats = {
-            "casa_15": 0, "casa_25": 0, "casa_45_under": 0,
-            "fora_15": 0, "fora_25": 0, "fora_45_under": 0,
+            "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0, # 🟢 Adicionado casa_35_under
+            "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0, # 🟢 Adicionado fora_35_under
             "ultimo_gols_casa": 0, "ultimo_gols_fora": 0,
-            "h2h_placar_1": "" # Nova chave essencial para a regra
+            "h2h_placar_1": "" 
         }
 
         secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
@@ -71,6 +71,7 @@ def testar_jogo_especifico():
                     
                     if total > 1.5: stats[f"{prefixo}_15"] += 1
                     if total > 2.5: stats[f"{prefixo}_25"] += 1
+                    if total <= 3: stats[f"{prefixo}_35_under"] += 1 # 🟢 Nova contagem de -3.5 gols
                     if total <= 4: stats[f"{prefixo}_45_under"] += 1
 
         # --- PARTE 2: RASPAR O ÚLTIMO CONFRONTO DIRETO (H2H TABELA 3) ---
@@ -89,14 +90,26 @@ def testar_jogo_especifico():
         print("\n--- RESUMO DO DICIONÁRIO ENVIADO ---")
         print(stats)
 
-        # --- PARTE 3: SIMULAÇÃO E LOGS DE VALIDAÇÃO DOS 3 MERCADOS ---
+        # --- PARTE 3: SIMULAÇÃO E LOGS DE VALIDAÇÃO DOS MERCADOS ---
         print("\n--- LOGS DETALHADOS DE VALIDAÇÃO (PASSO A PASSO) ---")
         u_h2h = stats["h2h_placar_1"]
         
-        # Simulação manual para gerar logs visuais no terminal antes do veredito
-        for alvo, nome_m in [(4.5, "-4.5 Under"), (1.5, "+1.5 Over"), (2.5, "+2.5 Over")]:
-            pref_c = "casa_45_under" if alvo == 4.5 else f"casa_{str(alvo).replace('.','')}"
-            pref_f = "fora_45_under" if alvo == 4.5 else f"fora_{str(alvo).replace('.','')}"
+        # Lista atualizada com o novo mercado de 3.5 gols incluído no loop de log
+        mercados_para_validar = [
+            (4.5, "-4.5 Under"), 
+            (3.5, "-3.5 Under"), # 🟢 Novo mercado mapeado aqui
+            (1.5, "+1.5 Over"), 
+            (2.5, "+2.5 Over")
+        ]
+        
+        for alvo, nome_m in mercados_para_validar:
+            # Tratamento dinâmico do nome das chaves com base na sua estrutura
+            if alvo in [3.5, 4.5]:
+                pref_c = "casa_35_under" if alvo == 3.5 else "casa_45_under"
+                pref_f = "fora_35_under" if alvo == 3.5 else "fora_45_under"
+            else:
+                pref_c = f"casa_{str(alvo).replace('.','')}"
+                pref_f = f"fora_{str(alvo).replace('.','')}"
             
             c_val = stats.get(pref_c, 0)
             f_val = stats.get(pref_f, 0)
@@ -131,4 +144,4 @@ def testar_jogo_especifico():
 
 if __name__ == "__main__":
     testar_jogo_especifico()
-            
+        
