@@ -66,14 +66,20 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                 for jogo_idx in range(min(3, len(linhas_confrontos))):
                     try:
                         elemento_alvo = linhas_confrontos[jogo_idx]
+                        
+                        # Captura dinamicamente o link nativo diretamente do atributo href da linha (.h2h__row)
+                        url_confronto_completa = elemento_alvo.get_attribute("href")
+                        
                         mandante_atual = elemento_alvo.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text.strip()
                         visitante_atual = elemento_alvo.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text.strip()
                         
-                        lista_urls_jogos.append({
-                            "idx": jogo_idx,
-                            "mandante_atual": mandante_atual,
-                            "visitante_atual": visitante_atual
-                        })
+                        if url_confronto_completa:
+                            lista_urls_jogos.append({
+                                "idx": jogo_idx,
+                                "url_confronto": url_confronto_completa,
+                                "mandante_atual": mandante_atual,
+                                "visitante_atual": visitante_atual
+                            })
                     except Exception as e_row:
                         print(f"         ⚠️ Erro na linha index {jogo_idx}: {e_row}")
                         continue
@@ -84,25 +90,20 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
             print(f"         [RASPAGEM 3] Total de jogos históricos mapeados para processar: {len(lista_urls_jogos)}")
             for jogo_dados in lista_urls_jogos:
                 try:
-                    driver.get(url_h2h_base)
-                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-                    
-                    selector_linhas = f".h2h__section:nth-child({alvo['idx_secao']}) .h2h__row"
-                    linhas_atualizadas = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
-                    elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
-                    
+                    url_origem_h2h = jogo_dados["url_confronto"]
                     mandante_atual = jogo_dados["mandante_atual"]
                     visitante_atual = jogo_dados["visitante_atual"]
 
-                    url_anterior = driver.current_url
-                    driver.execute_script("arguments[0].click();", elemento_alvo)
-                    
-                    try: WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
-                    except: pass
-                        
-                    time.sleep(2.5)
-                    url_jogo_completa = driver.current_url.split("?")[0].strip("/")
-                    print(f"         [RASPAGEM 3] Entrou no jogo histórico: {url_jogo_completa}")
+                    # Divide a URL para garantir isolar o link limpo e resgatar o parâmetro mid de forma segura
+                    url_base_limpa = url_origem_h2h.split("?")[0].strip("/")
+                    mid_param = ""
+                    if "mid=" in url_origem_h2h:
+                        mid_param = "mid=" + url_origem_h2h.split("mid=")[1].split("&")[0]
+
+                    # Primeiro precisamos carregar o resumo para mapear as imagens do topo e registrar os hashes
+                    url_resumo_topo = f"{url_base_limpa}/resumo/?{mid_param}" if mid_param else f"{url_base_limpa}/resumo"
+                    driver.get(url_resumo_topo)
+                    time.sleep(2.0)
 
                     hash_mandante_topo, hash_visitante_topo = "", ""
                     try:
@@ -112,16 +113,19 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                         hash_visitante_topo = img_v.get_attribute("src").split('/')[-1]
                     except: pass
                     
-                    # 🎯 PASSO 2: Coleta de Chutes (Corrigido para nova estrutura)
-                    url_finalizacoes = f"{url_jogo_completa}/resumo/estatisticas-jogadores/finalizacoes/"
+                    # 🎯 PASSO 2: Coleta de Chutes (Montada blindada usando o MID capturado)
+                    if mid_param:
+                        url_finalizacoes = f"{url_base_limpa}/resumo/estatisticas-jogadores/finalizacoes/?{mid_param}"
+                    else:
+                        url_finalizacoes = f"{url_base_limpa}/resumo/estatisticas-jogadores/finalizacoes/"
+                        
                     print(f"         [RASPAGEM 3] Navegando para Finalizações: {url_finalizacoes}")
                     driver.get(url_finalizacoes)
                     
                     try:
                         driver.execute_script("window.scrollTo(0, 300);")
-                        time.sleep(2.0) # Um pouquinho mais de tempo para renderizar a tabela
+                        time.sleep(2.0)
                         
-                        # Captura cabeçalhos antigos ou novos com data-testid
                         cabecalhos_fin = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .wcl-tableHeadCell_")
                         indice_chutes = 5  
                         for idx_th, th in enumerate(cabecalhos_fin):
@@ -130,7 +134,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 indice_chutes = idx_th
                                 break
                     
-                        # Seleção robusta das linhas da tabela
                         linhas_dados_fin = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
                         print(f"         [RASPAGEM 3] Linhas de dados de chutes achadas: {len(linhas_dados_fin)}")
                         
@@ -169,8 +172,12 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                     except Exception as e_passo2:
                         print(f"         ⚠️ Erro ao processar finalizações: {e_passo2}")
 
-                    # 🎯 PASSO 3: Coleta de Faltas (Corrigido para nova estrutura)
-                    url_ataque = f"{url_jogo_completa}/resumo/estatisticas-jogadores/ataque/"
+                    # 🎯 PASSO 3: Coleta de Faltas (Montada blindada usando o MID capturado)
+                    if mid_param:
+                        url_ataque = f"{url_base_limpa}/resumo/estatisticas-jogadores/ataque/?{mid_param}"
+                    else:
+                        url_ataque = f"{url_base_limpa}/resumo/estatisticas-jogadores/ataque/"
+                        
                     print(f"         [RASPAGEM 3] Navegando para Ataque: {url_ataque}")
                     driver.get(url_ataque)
                     
@@ -186,7 +193,6 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                                 indice_faltas = idx_th
                                 break
                     
-                        # Seleção robusta das linhas da tabela
                         linhas_dados_atq = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
                         print(f"         [RASPAGEM 3] Linhas de dados de ataque achadas: {len(linhas_dados_atq)}")
                         
@@ -238,6 +244,4 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
 
     print(f"         [RASPAGEM 3] Finalizada com sucesso. Jogos processados: {jogo_global_index}")
     return stats
-                            
-                                            
-                                
+    
