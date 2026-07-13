@@ -221,10 +221,11 @@ def main():
                         for item in mercados_fase1:
                             m_texto, m_chave = item["texto"], item["chave"]
                             
-                            if m_chave == "CANTOS_OVER":
-                                valor_odd_str = "1.35"
-                            elif m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO"]:
-                                valor_odd_str = "1.50"
+                            # Modifique o bloco de atribuição de odd padrão para cobrir os scouts de jogadores vindos da Fase 3
+                            if m_chave in ["CANTOS_OVER", "CANTOS_MEDIA", "CARTOES_CONFRONTO"]:
+                                valor_odd_str = "1.30"
+                            elif m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"] or "JOGADOR" in m_chave or "SCOUT" in m_chave:
+                                valor_odd_str = "1.30"  # Garante 1.30 para casar com o que você injetou na Fase 3
                             else:
                                 valor_odd_str = v_odds.get(m_chave, "1.50")
                             
@@ -305,7 +306,10 @@ def main():
                             try:
                                 # Garante o retorno à URL mãe limpa antes de ir para os scouts avançados
                                 driver.get(dados_jogo["url_h2h_base"])
-                                time.sleep(2)
+                                time.sleep(3) # Aumente para 3 segundos para dar tempo do DOM estabilizar no loop do Main
+                                
+                                # Força um scroll rápido para ativar scripts em background do Flashscore (Lazy Loading)
+                                driver.execute_script("window.scrollTo(0, 300);")
                                 
                                 dados_scouts = pegar_scouts_avancados(driver, dados_jogo, t1, t2)
                                 if dados_scouts and isinstance(dados_scouts, dict):
@@ -358,7 +362,9 @@ def main():
                                 texto_limpo = m_texto.strip()
                                 texto_lower = texto_limpo.lower()
                                 
-                                if m_chave == "CHUTES_ALVO" and (texto_limpo == "0.0" or texto_limpo.startswith("0.0")): continue
+                                if "0.0" in texto_limpo and any(t in texto_lower for t in ["chute", "falta"]):
+                                    print(f"⏩ Ignorando scout zerado: {texto_limpo}")
+                                    continue
 
                                 # ------------------------------------------------------------------
                                 # CONVERSÃO DINÂMICA: GERA "Análise" PARA OCULTAR EM BINGO357
