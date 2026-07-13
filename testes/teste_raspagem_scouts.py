@@ -63,9 +63,10 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
                 linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
                 print(f"         [RASPAGEM 3] Linhas encontradas na seção: {len(linhas_confrontos)}")
                 
-                for jogo_idx in range(min(3, len(linhas_confrontos))):
+                # 🟢 AJUSTADO: Mudado de 3 para 5 para coletar a amostragem correta
+                for jogo_idx in range(min(5, len(linhas_confrontos))):
                     try:
-                        elemento_alvo = linhas_confrontos[jogo_idx]
+                        elemento_alvo = lines_confrontos = linhas_confrontos[jogo_idx]
                         
                         # Captura dinamicamente o link nativo diretamente do atributo href da linha (.h2h__row)
                         url_confronto_completa = elemento_alvo.get_attribute("href")
@@ -244,4 +245,4 @@ def pegar_scouts_avancados(driver, stats, t1, t2):
 
     print(f"         [RASPAGEM 3] Finalizada com sucesso. Jogos processados: {jogo_global_index}")
     return stats
-    
+        
