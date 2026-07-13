@@ -30,12 +30,14 @@ def limpar_nome_jogador(nome_completo):
             nome_limpo = nome_limpo[:-len(posicao)].strip()
     return nome_limpo
 
-def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
+def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=5, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
     """
     Analisa os destaques de chutes recebendo os nomes tratados dos times enviados pelo main.py.
+    Amostragem alterada para 5 jogos e sem o desconto de -1.
     """
-    if isinstance(quantidade_jogos, dict):
-        quantidade_jogos = 3
+    # Se o main enviar um dicionário ou se for mantido o padrão antigo de 3, força para 5
+    if isinstance(quantidade_jogos, dict) or quantidade_jogos == 3:
+        quantidade_jogos = 5
 
     nome_liga_limpo = nome_liga.strip() if nome_liga else ""
     if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
@@ -72,13 +74,10 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
         valores_analise = valores_analise[:quantidade_jogos]
         media_real = sum(valores_analise) / quantidade_jogos
         
-        # 🟢 SUBTRAÇÃO NO FINAL DA MÉDIA: Remove 1.0 direto da média real calculada
-        media_ajustada = media_real - 1.0
-        
         jogos_com_sucesso = sum(1 for qtd in valores_analise if qtd >= 1)
         
         dados_chutes[jogador] = {
-            "media": media_ajustada, 
+            "media": media_real, # 🟢 Mantida a média real, sem desconto de -1.0
             "jogos_com_sucesso": jogos_com_sucesso, 
             "time": time_pertence
         }
@@ -102,7 +101,7 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
         for jogador, lado in selecionados:
             res_c = dados_chutes[jogador]
             
-            # 🛑 TRAVA DE DESCARTE: De 0.0 a 0.9 (menor que 1.0) descarta o jogador do bilhete
+            # 🛑 TRAVA DE DESCARTE: Se a média real for menor que 1.0 descarta o jogador do bilhete
             if res_c["media"] < 1.0:
                 continue
 
@@ -116,12 +115,13 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=3, nome_lig
 
     return mercados_aprovados
 
-def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
+def verificar_destaques_faltas(historico_faltas, quantidade_jogos=5, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
     """
     Analisa os destaques de faltas sofridas recebendo os nomes tratados dos times enviados pelo main.py.
+    Amostragem alterada para 5 jogos e sem o desconto de -1.
     """
-    if isinstance(quantidade_jogos, dict):
-        quantidade_jogos = 3
+    if isinstance(quantidade_jogos, dict) or quantidade_jogos == 3:
+        quantidade_jogos = 5
 
     nome_liga_limpo = nome_liga.strip() if nome_liga else ""
     if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
@@ -146,7 +146,7 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
                 time_pertence = "fora"
             valores_analise = valores_copia[:quantidade_jogos] if time_pertence == "casa" else valores_copia[meio:meio+quantidade_jogos]
         else:
-            if elenco_fora and jogador in elenco_fora:  # 🟢 Corrigido de 'player' para 'jogador'
+            if elenco_fora and jogador in elenco_fora:
                 time_pertence = "fora"
             elif elenco_casa and jogador in elenco_casa:
                 time_pertence = "casa"
@@ -158,11 +158,8 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
         valores_analise = valores_analise[:quantidade_jogos]
         media_real = sum(valores_analise) / quantidade_jogos
         
-        # 🟢 SUBTRAÇÃO NO FINAL DA MÉDIA: Remove 1.0 direto da média real calculada
-        media_ajustada = media_real - 1.0
-        
         dados_faltas[jogador] = {
-            "media": media_ajustada,
+            "media": media_real, # 🟢 Mantida a média real, sem desconto de -1.0
             "time": time_pertence
         }
 
@@ -185,7 +182,7 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
         for jogador, lado in selecionados:
             res_f = dados_faltas[jogador]
             
-            # 🛑 TRAVA DE DESCARTE: De 0.0 a 0.9 (menor que 1.0) descarta o jogador do bilhete
+            # 🛑 TRAVA DE DESCARTE: Se a média real for menor que 1.0 descarta o jogador do bilhete
             if res_f["media"] < 1.0:
                 continue
 
@@ -198,4 +195,4 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=3, nome_liga="
             })
 
     return mercados_aprovados
-            
+        
