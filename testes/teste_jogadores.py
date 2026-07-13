@@ -1,3 +1,4 @@
+#testes/teste_jogadores.py
 import re
 
 # 🟢 LISTA BRANCA: Apenas ligas de elite que comprovadamente abrem mercados de jogadores na Betano
