@@ -304,11 +304,8 @@ def main():
                                 driver = configurar_driver()
 
                             try:
-                                # Garante o retorno à URL mãe limpa antes de ir para os scouts avançados
                                 driver.get(dados_jogo["url_h2h_base"])
-                                time.sleep(3) # Aumente para 3 segundos para dar tempo do DOM estabilizar no loop do Main
-                                
-                                # Força um scroll rápido para ativar scripts em background do Flashscore (Lazy Loading)
+                                time.sleep(3) 
                                 driver.execute_script("window.scrollTo(0, 300);")
                                 
                                 dados_scouts = pegar_scouts_avancados(driver, dados_jogo, t1, t2)
@@ -323,45 +320,33 @@ def main():
                             nome_time_casa = t1 if t1 else "MANDANTE"
                             nome_time_fora = t2 if t2 else "VISITANTE"
 
+                            # Processamento de Chutes
                             res_jogadores = jogadores.verificar_destaques_jogadores(
                                 dados_jogo.get("historico_chutes", {}), 5, nome_comp,
                                 elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
                             )
                             for rj in res_jogadores:
-                                # 🟢 AJUSTADO: Mudado de "Análise" para "1.30"
                                 mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave'], "odd": "1.30"})
+                                # Salva no Bingo
+                                jogos_para_pendentes.append({"time_casa": t1, "time_fora": t2, "mercado": rj['texto'], "odd": "1.30", "liga": nome_comp})
+                                print(f"           ✅ Mercado de Chutes Qualificado: {rj['texto']}")
 
+                            # Processamento de Faltas
                             res_faltas = jogadores.verificar_destaques_faltas(
                                 dados_jogo.get("historico_faltas", {}), 5, nome_comp,
                                 elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
                             )
                             for rf in res_faltas:
-                                # 🟢 AJUSTADO: Mudado de "Análise" para "1.30"
                                 mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave'], "odd": "1.30"})
+                                # Salva no Bingo
+                                jogos_para_pendentes.append({"time_casa": t1, "time_fora": t2, "mercado": rf['texto'], "odd": "1.30", "liga": nome_comp})
+                                print(f"           ✅ Mercado de Faltas Qualificado: {rf['texto']}")
+                        
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
 
-                            # --- BLOCO DE SALVAMENTO PARA O BINGO357 ---
-                            for rj in res_jogadores:
-                                jogo_scout = {
-                                    "time_casa": t1, "time_fora": t2,
-                                    "mercado": rj['texto'], "odd": "1.30", "liga": nome_comp
-                                }
-                                jogos_para_pendentes.append(jogo_scout)
-                                print(f"           ✅ Mercado de Chutes Qualificado: {rj['texto']}")
-
-                            for rf in res_faltas:
-                                jogo_scout = {
-                                    "time_casa": t1, "time_fora": t2,
-                                    "mercado": rf['texto'], "odd": "1.30", "liga": nome_comp
-                                }
-                                jogos_para_pendentes.append(jogo_scout)
-                                print(f"           ✅ Mercado de Faltas Qualificado: {rf['texto']}")
-                                
-
-                            
                         # ALIMENTAÇÃO DA LISTA FINAL
                         if mercados_para_processar:
                             # Adiciona uma única vez a partida no JSON de pendentes de resultados
