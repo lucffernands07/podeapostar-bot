@@ -92,7 +92,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         odd_total = 1.0
         agrupados = {}
         
-            for idx, j in enumerate(b.get('jogos', [])):
+        for idx, j in enumerate(b.get('jogos', [])):
             print(f"[DEBUG] Processando: {j.get('mercado')} | Jogo: {j.get('time_casa')} x {j.get('time_fora')}")
             
             t1 = str(j.get('time_casa', 'Desconhecido')).strip().lower()
