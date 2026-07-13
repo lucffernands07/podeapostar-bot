@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-def rodar_teste_isolado():
+def rodar_teste_finalizacoes():
     chrome_options = Options()
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
@@ -16,55 +16,87 @@ def rodar_teste_isolado():
     driver = webdriver.Chrome(options=chrome_options)
     wait = WebDriverWait(driver, 15)
     
-    # 🔗 A URL do H2H que você enviou
-    url_h2h = "https://www.flashscore.com.br/jogo/futebol/crb-QHa3bLrj/goias-hfAZyE0t/h2h/total/"
+    # 🔗 URL do jogo mais recente do histórico (América-MG x Cuiabá)
+    url_finalizacoes = "https://www.flashscore.com.br/jogo/futebol/america-mg-xUT0Bp8o/cuiaba-zVvjqDOo/resumo/estatisticas-jogadores/finalizacoes/?mid=QVKCjMJD"
     
-    print("\n🔍 INICIANDO TESTE #43 (CAÇA AO 'mid' NAS LINHAS DO H2H)\n" + "="*60)
-    print(f"🔗 Analisando histórico em: {url_h2h}")
+    print("\n🔥 TESTE ISOLADO: EXTRAÇÃO DE FINALIZAÇÕES NO ALVO (JOGO MAIS RECENTE)\n" + "="*70)
+    print(f"🔗 Acessando: {url_finalizacoes}")
     
     try:
-        driver.get(url_h2h)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-        time.sleep(3.0)
+        driver.get(url_finalizacoes)
+        time.sleep(4.0) # Tempo de garantia para carregamento dos elementos dinâmicos
         
-        # Captura as linhas brutas do H2H (as divs que englobam o HTML que você mandou)
-        linhas_h2h = driver.find_elements(By.CSS_SELECTOR, ".h2h__row")
-        print(f"📊 Linhas de confrontos encontradas no H2H: {len(linhas_h2h)}\n")
+        # 1️⃣ Captura os hashes dos escudos do topo do jogo para saber quem é Mandante e Visitante
+        hash_casa, hash_fora = "", ""
+        try:
+            hash_casa = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__homeLogo img.participant__image, [class*='homeLogo'] img").get_attribute("src").split('/')[-1]
+            hash_fora = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__awayLogo img.participant__image, [class*='awayLogo'] img").get_attribute("src").split('/')[-1]
+            print(f"🛡️  Mapeamento de Escudos do Jogo:")
+            print(f"    🏠 Hash Mandante (Casa): {hash_casa}")
+            print(f"    🚀 Hash Visitante (Fora): {hash_fora}\n")
+        except Exception as e_hash:
+            print(f"⚠️ Não conseguiu ler os hashes do topo: {e_hash}")
+
+        # 2️⃣ Localiza a coluna exata de "Finalizações no Alvo" dinamicamente
+        cabecalhos = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .wcl-tableHeadCell_")
+        indice_alvo = -1
         
-        print("📝 INSPEÇÃO DOS ATRIBUTOS DAS 5 PRIMEIRAS LINHAS:")
-        print("-" * 60)
+        for idx, th in enumerate(cabecalhos):
+            txt = th.text.strip().upper()
+            if any(x in txt for x in ["ALVO", "TARGET", "NO GOL"]) and not any(x in txt for x in ["XG", "XGOT"]):
+                indice_alvo = idx
+                print(f"🎯 Coluna identificada: '{txt}' encontrada no Índice [{idx}]")
+                break
+                
+        if indice_alvo == -1:
+            print("⚠️ Coluna de finalizações no alvo não foi detectada por texto. Usando padrão Índice [5].")
+            indice_alvo = 5
+
+        # 3️⃣ Varre todas as linhas de jogadores na tabela e exibe os valores
+        linhas = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
+        print(f"\n📊 Total de linhas brutas encontradas na tabela: {len(linhas)}")
+        print("-" * 70)
         
-        for idx, linha in enumerate(linhas_h2h[:5]):
-            # Vamos extrair tudo o que essa linha pai possui no HTML para achar o ID oculto
-            html_id = linha.get_attribute("id")
-            html_class = linha.get_attribute("class")
-            html_data_id = list(driver.execute_script("""
-                var items = {};
-                for (index = 0; index < arguments[0].attributes.length; ++index) {
-                    items[arguments[0].attributes[index].name] = arguments[0].attributes[index].value;
-                };
-                return items;
-            """, linha).items())
-            
-            # Tenta buscar também se existe algum link interno oculto ali dentro
-            link_interno = "Não encontrado"
+        contagem_impressos = 0
+        for linha in linhas:
             try:
-                tag_a = linha.find_element(By.XPATH, "./preceding-sibling::a | .//a | ..")
-                link_interno = tag_a.get_attribute("href")
-            except: pass
-            
-            print(f"📈 [LINHA JOGO #{idx+1}]")
-            print(f"   🆔 Atributo 'id' direto: '{html_id}'")
-            print(f"   👥 Todos os Atributos: {html_data_id}")
-            print(f"   🔗 Link associado (href): {link_interno}")
-            print("-" * 40)
-            
+                # Localiza o nome do jogador
+                nome_element = linha.find_element(By.CSS_SELECTOR, "[class*='playerName'], [data-testid='wcl-playerCell'], [class^='fp-playerName_']")
+                nome_jogador = nome_element.text.strip()
+                if not nome_jogador or nome_jogador == "TODOS": 
+                    continue
+                
+                # Identifica o escudo do time na própria linha do jogador
+                img_linha = linha.find_element(By.CSS_SELECTOR, "[class*='teamLogo'] img, [class*='wcl-teamLogo'] img, img")
+                hash_linha = img_linha.get_attribute("src").split('/')[-1]
+                
+                # Define se o jogador pertence ao Mandante ou Visitante pelo hash do escudo
+                if hash_linha == hash_casa:
+                    time_pertencente = "MANDANTE"
+                elif hash_linha == hash_fora:
+                    time_pertencente = "VISITANTE"
+                else:
+                    time_pertencente = f"DESCONHECIDO (Hash: {hash_linha})"
+                
+                # Captura todas as células da linha para pegar o valor da coluna correta
+                celulas = linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")
+                
+                if len(celulas) > indice_alvo:
+                    valor_chute_alvo = celulas[indice_alvo].text.strip()
+                    print(f"👤 Jogador: {nome_jogador.ljust(22)} | 👥 Time: {time_pertencente.ljust(11)} | 🎯 Chutes no Alvo: {valor_chute_alvo}")
+                    contagem_impressos += 1
+            except:
+                continue
+
+        print("-" * 70)
+        print(f"✅ Extração finalizada. Total de jogadores válidos printados: {contagem_impressos}")
+
     except Exception as e:
-        print(f"\n❌ Erro ao caçar atributos no H2H: {e}")
+        print(f"\n❌ Erro crítico durante a execução do teste: {e}")
     finally:
         driver.quit()
-        print("\n🏁 FIM DO TESTE #43")
+        print("\n🏁 FIM DO TESTE ISOLADO")
 
 if __name__ == "__main__":
-    rodar_teste_isolado()
+    rodar_teste_finalizacoes()
     
