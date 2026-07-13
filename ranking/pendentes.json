@@ -1,40 +1,26 @@
 {
-    "data_geracao": "2026-07-12",
+    "data_geracao": "2026-07-13",
     "jogos": [
         {
-            "time_casa": "Operário",
-            "time_fora": "Novorizontino",
+            "time_casa": "América-MG",
+            "time_fora": "Londrina",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/IVpjm8UI/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/A5srkUa6/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Barra-SC",
-            "time_fora": "Santa Cruz",
+            "time_casa": "Itabaiana",
+            "time_fora": "Brusque",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/hdyCHBtg/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/Gdiv3CRa/#/resumo-de-jogo"
         },
         {
-            "time_casa": "São Luiz",
-            "time_fora": "Velo Clube",
+            "time_casa": "América-RN",
+            "time_fora": "Trem",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/zkvTJRMc/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Ind. Rivadavia",
-            "time_fora": "Tigre",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/ddEqTC7l/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Ulytau",
-            "time_fora": "Kaisar",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/6k48Y1H0/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/4CK9EWpI/#/resumo-de-jogo"
         }
     ]
 }

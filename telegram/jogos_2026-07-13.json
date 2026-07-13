@@ -1,0 +1,74 @@
+[
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "América-MG",
+        "time_fora": "Londrina",
+        "mercado": "Média Escanteios: 0.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/America-MG-Londrina-PR/88706799/"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "América-MG",
+        "time_fora": "Londrina",
+        "mercado": "Média Cartões: 0.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/America-MG-Londrina-PR/88706799/"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Itabaiana",
+        "time_fora": "Brusque",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.46",
+        "link_betano": "https://www.betano.bet.br/match-odds/AO-de-Itabaiana-SE-Brusque-SC/88325340/"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Itabaiana",
+        "time_fora": "Brusque",
+        "mercado": "Média Escanteios: 12.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/AO-de-Itabaiana-SE-Brusque-SC/88325340/"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Itabaiana",
+        "time_fora": "Brusque",
+        "mercado": "Média Cartões: 8.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/AO-de-Itabaiana-SE-Brusque-SC/88325340/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "América-RN",
+        "time_fora": "Trem",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "2.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/America-RN-Trem-AP/88409998/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "América-RN",
+        "time_fora": "Trem",
+        "mercado": "Média Escanteios: 2.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/America-RN-Trem-AP/88409998/"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "América-RN",
+        "time_fora": "Trem",
+        "mercado": "Média Cartões: 0.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/America-RN-Trem-AP/88409998/"
+    }
+]
