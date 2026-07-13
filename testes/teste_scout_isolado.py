@@ -120,7 +120,8 @@ def rodar_teste_completo_h2h():
         for png, time_nome in dicionario_escudos.items():
             print(f"    • {png} ➔ {time_nome}")
             
-        lista_final_links = list(links_jogos_historico)
+        # 🎯 AJUSTE FINAL: Limita a lista de links para no máximo 10 jogos únicos combinados
+        lista_final_links = list(links_jogos_historico)[:10]
         print(f"\n🔗 Total de jogos únicos para varrer (máximo 10): {len(lista_final_links)}")
         print("-" * 80)
 
