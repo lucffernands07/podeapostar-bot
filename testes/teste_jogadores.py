@@ -1,4 +1,5 @@
 #testes/teste_jogadores.py
+
 import re
 
 # 🟢 LISTA BRANCA: Apenas ligas de elite que comprovadamente abrem mercados de jogadores na Betano
@@ -16,7 +17,6 @@ def gerar_sigla_time(nome_time, padrao="TIM"):
     """Gera uma sigla de 3 letras em maiúsculo para o time (Ex: Jordânia -> JOR)"""
     if not nome_time or not isinstance(nome_time, str):
         return padrao
-    # Limpa espaços e pega as 3 primeiras letras em maiúsculo
     nome_limpo = nome_time.strip().replace(" ", "").replace(".", "")
     if len(nome_limpo) >= 3:
         return nome_limpo[:3].upper()
@@ -33,10 +33,9 @@ def limpar_nome_jogador(nome_completo):
 
 def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=5, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
     """
-    Analisa os destaques de chutes recebendo os nomes tratados dos times enviados pelo main.py.
-    Amostragem alterada para 5 jogos e sem o desconto de -1.
+    Analisa os destaques de chutes baseando-se nos elencos capturados.
+    Filtra os últimos 5 jogos reais do jogador.
     """
-    # Se o main enviar um dicionário ou se for mantido o padrão antigo de 3, força para 5
     if isinstance(quantidade_jogos, dict) or quantidade_jogos == 3:
         quantidade_jogos = 5
 
@@ -50,35 +49,37 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=5, nome_lig
     if not isinstance(historico_chutes, dict) or not historico_chutes:
         return mercados_aprovados
 
+    elenco_casa_set = set(elenco_casa) if elenco_casa else set()
+    elenco_fora_set = set(elenco_fora) if elenco_fora else set()
+
     for jogador, lista_valores in historico_chutes.items():
-        if not isinstance(lista_valores, list):
+        if not isinstance(lista_valores, list) or not lista_valores:
             continue
             
-        valores_copia = list(lista_valores)
-        
-        time_pertence = "casa"
-        if len(valores_copia) > quantidade_jogos:
-            meio = len(valores_copia) // 2
-            if sum(valores_copia[meio:]) > 0 and sum(valores_copia[:meio]) == 0:
-                time_pertence = "fora"
-            valores_analise = valores_copia[:quantidade_jogos] if time_pertence == "casa" else valores_copia[meio:meio+quantidade_jogos]
+        # Define a qual time o jogador pertence usando os elencos reais
+        if jogador in elenco_fora_set:
+            time_pertence = "fora"
+        elif jogador in elenco_casa_set:
+            time_pertence = "casa"
         else:
-            if elenco_fora and jogador in elenco_fora:
-                time_pertence = "fora"
-            elif elenco_casa and jogador in elenco_casa:
-                time_pertence = "casa"
-            valores_analise = valores_copia
+            # Fallback seguro caso não ache em nenhum elenco explicitamente
+            continue
 
+        # Como as listas estão alinhadas com o index global de 10 jogos,
+        # pegamos os valores válidos (diferentes de zero se ele não jogou, ou simplesmente os últimos do histórico)
+        valores_filtrados = [v for v in lista_valores if v is not None]
+        
+        # Pega os últimos N jogos que o robô processou para este jogador
+        valores_analise = valores_filtrados[-quantidade_jogos:] if len(valores_filtrados) >= quantidade_jogos else valores_filtrados
+        
         while len(valores_analise) < quantidade_jogos:
             valores_analise.append(0)
             
-        valores_analise = valores_analise[:quantidade_jogos]
         media_real = sum(valores_analise) / quantidade_jogos
-        
         jogos_com_sucesso = sum(1 for qtd in valores_analise if qtd >= 1)
         
         dados_chutes[jogador] = {
-            "media": media_real, # 🟢 Mantida a média real, sem desconto de -1.0
+            "media": media_real,
             "jogos_com_sucesso": jogos_com_sucesso, 
             "time": time_pertence
         }
@@ -87,11 +88,6 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=5, nome_lig
         jogadores_casa = [j for j in dados_chutes.keys() if dados_chutes[j]["time"] == "casa"]
         jogadores_fora = [j for j in dados_chutes.keys() if dados_chutes[j]["time"] == "fora"]
         
-        if not jogadores_fora and len(jogadores_casa) > 1:
-            geral_ordenado = sorted(dados_chutes.keys(), key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]), reverse=True)
-            jogadores_casa = [geral_ordenado[0]]
-            jogadores_fora = [geral_ordenado[1]]
-
         top_casa = sorted(jogadores_casa, key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]), reverse=True)
         top_fora = sorted(jogadores_fora, key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]), reverse=True)
 
@@ -102,8 +98,8 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=5, nome_lig
         for jogador, lado in selecionados:
             res_c = dados_chutes[jogador]
             
-            # 🛑 TRAVA DE DESCARTE: Se a média real for menor que 1.0 descarta o jogador do bilhete
-            if res_c["media"] < 1.0:
+            # 🛑 TRAVA DE SEGURANÇA: Média real >= 1.0 E sucesso em pelo menos 3 dos 5 jogos
+            if res_c["media"] < 1.0 or res_c["jogos_com_sucesso"] < 3:
                 continue
 
             sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CAS")
@@ -118,8 +114,8 @@ def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=5, nome_lig
 
 def verificar_destaques_faltas(historico_faltas, quantidade_jogos=5, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
     """
-    Analisa os destaques de faltas sofridas recebendo os nomes tratados dos times enviados pelo main.py.
-    Amostragem alterada para 5 jogos e sem o desconto de -1.
+    Analisa os destaques de faltas sofridas baseando-se nos elencos capturados.
+    Ordenação e travas idênticas ao mercado de chutes.
     """
     if isinstance(quantidade_jogos, dict) or quantidade_jogos == 3:
         quantidade_jogos = 5
@@ -134,33 +130,32 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=5, nome_liga="
     if not isinstance(historico_faltas, dict) or not historico_faltas:
         return mercados_aprovados
 
+    elenco_casa_set = set(elenco_casa) if elenco_casa else set()
+    elenco_fora_set = set(elenco_fora) if elenco_fora else set()
+
     for jogador, lista_valores in historico_faltas.items():
-        if not isinstance(lista_valores, list):
+        if not isinstance(lista_valores, list) or not lista_valores:
             continue
             
-        valores_copia = list(lista_valores)
-        
-        time_pertence = "casa"
-        if len(valores_copia) > quantidade_jogos:
-            meio = len(valores_copia) // 2
-            if sum(valores_copia[meio:]) > 0 and sum(valores_copia[:meio]) == 0:
-                time_pertence = "fora"
-            valores_analise = valores_copia[:quantidade_jogos] if time_pertence == "casa" else valores_copia[meio:meio+quantidade_jogos]
+        if jogador in elenco_fora_set:
+            time_pertence = "fora"
+        elif jogador in elenco_casa_set:
+            time_pertence = "casa"
         else:
-            if elenco_fora and jogador in elenco_fora:
-                time_pertence = "fora"
-            elif elenco_casa and jogador in elenco_casa:
-                time_pertence = "casa"
-            valores_analise = valores_copia
+            continue
+
+        valores_filtrados = [v for v in lista_valores if v is not None]
+        valores_analise = valores_filtrados[-quantidade_jogos:] if len(valores_filtrados) >= quantidade_jogos else valores_filtrados
 
         while len(valores_analise) < quantidade_jogos:
             valores_analise.append(0)
             
-        valores_analise = valores_analise[:quantidade_jogos]
         media_real = sum(valores_analise) / quantidade_jogos
+        jogos_com_sucesso = sum(1 for qtd in valores_analise if qtd >= 1)
         
         dados_faltas[jogador] = {
-            "media": media_real, # 🟢 Mantida a média real, sem desconto de -1.0
+            "media": media_real,
+            "jogos_com_sucesso": jogos_com_sucesso,
             "time": time_pertence
         }
 
@@ -168,13 +163,9 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=5, nome_liga="
         jogadores_casa = [j for j in dados_faltas.keys() if dados_faltas[j]["time"] == "casa"]
         jogadores_fora = [j for j in dados_faltas.keys() if dados_faltas[j]["time"] == "fora"]
         
-        if not jogadores_fora and len(jogadores_casa) > 1:
-            geral_ordenado = sorted(dados_faltas.keys(), key=lambda k: dados_faltas[k]["media"], reverse=True)
-            jogadores_casa = [geral_ordenado[0]]
-            jogadores_fora = [geral_ordenado[1]]
-
-        top_casa = sorted(jogadores_casa, key=lambda k: dados_faltas[k]["media"], reverse=True)
-        top_fora = sorted(jogadores_fora, key=lambda k: dados_faltas[k]["media"], reverse=True)
+        # 🟢 Ajustado para ordenar por sucesso e depois por média, igual aos chutes
+        top_casa = sorted(jogadores_casa, key=lambda k: (dados_faltas[k]["jogos_com_sucesso"], dados_faltas[k]["media"]), reverse=True)
+        top_fora = sorted(jogadores_fora, key=lambda k: (dados_faltas[k]["jogos_com_sucesso"], dados_faltas[k]["media"]), reverse=True)
 
         selecionados = []
         if top_casa: selecionados.append((top_casa[0], "casa"))
@@ -183,8 +174,8 @@ def verificar_destaques_faltas(historico_faltas, quantidade_jogos=5, nome_liga="
         for jogador, lado in selecionados:
             res_f = dados_faltas[jogador]
             
-            # 🛑 TRAVA DE DESCARTE: Se a média real for menor que 1.0 descarta o jogador do bilhete
-            if res_f["media"] < 1.0:
+            # 🛑 TRAVA DE SEGURANÇA: Média real >= 1.0 E sucesso em pelo menos 3 dos 5 jogos
+            if res_f["media"] < 1.0 or res_f["jogos_com_sucesso"] < 3:
                 continue
 
             sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CAS")
