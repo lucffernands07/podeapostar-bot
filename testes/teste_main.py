@@ -1,3 +1,5 @@
+#teste/teste_main.py
+
 import os
 import time
 import json
@@ -354,9 +356,23 @@ def main():
                             for item in mercados_para_processar:
                                 m_texto, m_chave, m_odd = item["texto"], item["chave"], item["odd"]
                                 texto_limpo = m_texto.strip()
+                                texto_lower = texto_limpo.lower()
+                                
                                 if m_chave == "CHUTES_ALVO" and (texto_limpo == "0.0" or texto_limpo.startswith("0.0")): continue
 
-                                odd_para_lista = m_odd if m_chave not in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA"] else "Análise"
+                                # ------------------------------------------------------------------
+                                # CONVERSÃO DINÂMICA: GERA "Análise" PARA OCULTAR EM BINGO357
+                                # ------------------------------------------------------------------
+                                # Verifica se pertence aos mercados de scouts/estatísticas coletivas ou de jogadores
+                                eh_scout = (
+                                    m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA"] or
+                                    any(term in texto_lower for term in ["chute", "falta", "cartã", "cartao", "escanteio", "cantos"])
+                                )
+
+                                # Se for scout, ele vai para a lista salvo como "Análise" (o bingo357 lerá e ocultará a odd na listagem)
+                                # Se não for scout (Gols, Ambas Marcam), mantém a odd numérica capturada originalmente.
+                                odd_para_lista = "Análise" if eh_scout else m_odd
+                                # ------------------------------------------------------------------
 
                                 lista_para_filtros.append({
                                     "horario": h_br, "time_casa": t1, "time_fora": t2,
@@ -364,7 +380,7 @@ def main():
                                     "link_betano": dados_jogo.get("link_betano")
                                 })
                                 total_mercados += 1
-
+                                
                         # 🌟 RETORNO SEGURO PARA A ABA PRINCIPAL DA LIGA
                         if len(driver.window_handles) > 1:
                             todas_abas = driver.window_handles[:]
