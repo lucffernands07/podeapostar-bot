@@ -92,13 +92,15 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         odd_total = 1.0
         agrupados = {}
         
-        for idx, j in enumerate(b.get('jogos', [])):
+            for idx, j in enumerate(b.get('jogos', [])):
+            print(f"[DEBUG] Processando: {j.get('mercado')} | Jogo: {j.get('time_casa')} x {j.get('time_fora')}")
+            
             t1 = str(j.get('time_casa', 'Desconhecido')).strip().lower()
             t2 = str(j.get('time_fora', 'Desconhecido')).strip().lower()
             chave_cache = f"{t1}x{t2}"
             info_extra = cache_dados.get(chave_cache, {})
             
-            horario = j.get('horario') or info_extra.get('horario', '00:00')
+            horario = j.get('horario') or info_extra.get('horario') or "00:00"
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
             odd_valor = str(j.get('odd') or info_extra.get('odd', '1.50')).strip()
             
@@ -109,7 +111,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     "time_casa": j.get('time_casa'), "time_fora": j.get('time_fora'),
                     "mercados": [], 
                     "link": j.get('link_betano') or info_extra.get('link', "https://www.betano.bet.br/"),
-                    "link_h2h": info_extra.get('link_h2h') 
+                    "link_h2h": j.get('link_h2h') 
                 }
             
             mercado_limpo = j.get('mercado', '')
