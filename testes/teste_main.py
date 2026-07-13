@@ -265,7 +265,8 @@ def main():
                         if res_escanteios and res_escanteios.get("aprovado"):
                             mercado_cantos_formatado = res_escanteios.get("mercado")
                             if mercado_cantos_formatado:
-                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA", "odd": "Análise"})
+                                # 🟢 AJUSTADO: Mudado de "Análise" para "1.30"
+                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA", "odd": "1.30"})
                                 print(f"           ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
 
                         res_cartoes = cartoes.analisar_dados_cartoes(
@@ -277,7 +278,8 @@ def main():
                         if res_cartoes and res_cartoes.get("aprovado"):
                             mercado_cartoes_formatado = res_cartoes.get("mercado")
                             if mercado_cartoes_formatado:
-                                mercados_para_processar.append({"texto": mercado_cartoes_formatado, "chave": "CARTOES_CONFRONTO", "odd": "Análise"})
+                                # 🟢 AJUSTADO: Mudado de "Análise" para "1.30"
+                                mercados_para_processar.append({"texto": mercado_cartoes_formatado, "chave": "CARTOES_CONFRONTO", "odd": "1.30"})
                                 print(f"           ✅ Mercado de Cartões Qualificado: {mercado_cartoes_formatado}")
 
                         # ----------------------------------------------------------
@@ -296,7 +298,7 @@ def main():
                                 print("      ⚠️ [CORREÇÃO] Driver morto antes da Fase 3. Reiniciando...")
                                 try: driver.quit()
                                 except: pass
-                                driver = configurando_driver()
+                                driver = configurar_driver()
 
                             try:
                                 # Garante o retorno à URL mãe limpa antes de ir para os scouts avançados
@@ -315,26 +317,27 @@ def main():
                             nome_time_casa = t1 if t1 else "MANDANTE"
                             nome_time_fora = t2 if t2 else "VISITANTE"
 
-                            # 🟢 AJUSTADO: Alterado de 3 para 5 para a análise de chutes
                             res_jogadores = jogadores.verificar_destaques_jogadores(
                                 dados_jogo.get("historico_chutes", {}), 5, nome_comp,
                                 elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
                             )
                             for rj in res_jogadores:
-                                mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave'], "odd": "Análise"})
+                                # 🟢 AJUSTADO: Mudado de "Análise" para "1.30"
+                                mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave'], "odd": "1.30"})
 
-                            # 🟢 AJUSTADO: Alterado de 3 para 5 para a análise de faltas
                             res_faltas = jogadores.verificar_destaques_faltas(
                                 dados_jogo.get("historico_faltas", {}), 5, nome_comp,
                                 elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
                             )
                             for rf in res_faltas:
-                                mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave'], "odd": "Análise"})
+                                # 🟢 AJUSTADO: Mudado de "Análise" para "1.30"
+                                mercados_para_processar.append({"texto": rf['texto'], "chave": rf['chave'], "odd": "1.30"})
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
 
+                            
                         # ALIMENTAÇÃO DA LISTA FINAL
                         if mercados_para_processar:
                             # Adiciona uma única vez a partida no JSON de pendentes de resultados
