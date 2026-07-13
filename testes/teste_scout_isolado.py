@@ -26,16 +26,20 @@ def rodar_teste_finalizacoes():
         driver.get(url_finalizacoes)
         time.sleep(4.0) # Tempo de garantia para carregamento dos elementos dinâmicos
         
-        # 1️⃣ Captura os hashes dos escudos do topo do jogo para saber quem é Mandante e Visitante
-        hash_casa, hash_fora = "", ""
+        # 1️⃣ Captura os nomes reais dos times do topo para comparação de texto posterior
+        nome_casa_topo = ""
+        nome_fora_topo = ""
         try:
-            hash_casa = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__homeLogo img.participant__image, [class*='homeLogo'] img").get_attribute("src").split('/')[-1]
-            hash_fora = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__awayLogo img.participant__image, [class*='awayLogo'] img").get_attribute("src").split('/')[-1]
-            print(f"🛡️  Mapeamento de Escudos do Jogo:")
-            print(f"    🏠 Hash Mandante (Casa): {hash_casa}")
-            print(f"    🚀 Hash Visitante (Fora): {hash_fora}\n")
-        except Exception as e_hash:
-            print(f"⚠️ Não conseguiu ler os hashes do topo: {e_hash}")
+            nome_casa_topo = driver.find_element(By.CSS_SELECTOR, "[class*='homeParticipant'] [class*='participantName'], [class*='teamName'].home").text.strip().upper()
+            nome_fora_topo = driver.find_element(By.CSS_SELECTOR, "[class*='awayParticipant'] [class*='participantName'], [class*='teamName'].away").text.strip().upper()
+            print(f"📋 Times Identificados no Topo do Jogo Histórico:")
+            print(f"   🏠 Mandante: {nome_casa_topo}")
+            print(f"   🚀 Visitante: {nome_fora_topo}\n")
+        except:
+            # Fallback caso os seletores de texto do topo falhem (definidos com base na URL do confronto)
+            nome_casa_topo = "AMÉRICA-MG"
+            nome_fora_topo = "CUIABÁ"
+            print(f"⚠️  Não foi possível ler os nomes do topo por texto. Usando padrões da URL: {nome_casa_topo} x {nome_fora_topo}\n")
 
         # 2️⃣ Localiza a coluna exata de "Finalizações no Alvo" dinamicamente
         cabecalhos = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .wcl-tableHeadCell_")
@@ -66,20 +70,34 @@ def rodar_teste_finalizacoes():
                 if not nome_jogador or nome_jogador == "TODOS": 
                     continue
                 
-                # Identifica o escudo do time na própria linha do jogador
-                img_linha = linha.find_element(By.CSS_SELECTOR, "[class*='teamLogo'] img, [class*='wcl-teamLogo'] img, img")
-                hash_linha = img_linha.get_attribute("src").split('/')[-1]
+                # Identifica o escudo/elemento do time na própria linha do jogador
+                img_linha = linha.find_element(By.CSS_SELECTOR, "img.participant__image, [class*='teamLogo'] img, [class*='wcl-teamLogo'] img, img")
                 
-                # Define se o jogador pertence ao Mandante ou Visitante pelo hash do escudo
-                if hash_linha == hash_casa:
-                    time_pertencente = "MANDANTE"
-                elif hash_linha == hash_fora:
-                    time_pertencente = "VISITANTE"
-                else:
-                    time_pertencente = f"DESCONHECIDO (Hash: {hash_linha})"
+                # 🟢 ESTRATÉGIA A: Validação pelo atributo 'alt' ou 'title' (Conforme print do Edit HTML)
+                alt_time = img_linha.get_attribute("alt") or img_linha.get_attribute("title") or ""
+                alt_time = alt_time.strip().upper()
                 
+                time_pertencente = "DESCONHECIDO"
+                
+                if alt_time:
+                    if alt_time in nome_casa_topo or nome_casa_topo in alt_time:
+                        time_pertencente = "MANDANTE"
+                    elif alt_time in nome_fora_topo or nome_fora_topo in alt_time:
+                        time_pertencente = "VISITANTE"
+                
+                # 🟢 ESTRATÉGIA B (FALLBACK): Se o 'alt' vier vazio, valida pela estrutura de classes CSS (home/away)
+                if time_pertencente == "DESCONHECIDO":
+                    # Busca a classe do container da imagem ou da linha completa
+                    classe_logo = img_linha.find_element(By.XPATH, "..").get_attribute("class").lower()
+                    classe_linha = linha.get_attribute("class").lower()
+                    
+                    if "home" in classe_logo or "home" in classe_linha or "casa" in classe_linha:
+                        time_pertencente = "MANDANTE"
+                    elif "away" in classe_logo or "away" in classe_linha or "fora" in classe_linha or "visitante" in classe_linha:
+                        time_pertencente = "VISITANTE"
+
                 # Captura todas as células da linha para pegar o valor da coluna correta
-                celulas = linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")
+                celulas = Web_Cells = linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")
                 
                 if len(celulas) > indice_alvo:
                     valor_chute_alvo = celulas[indice_alvo].text.strip()
@@ -99,4 +117,4 @@ def rodar_teste_finalizacoes():
 
 if __name__ == "__main__":
     rodar_teste_finalizacoes()
-    
+                    
