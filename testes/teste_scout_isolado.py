@@ -16,50 +16,37 @@ def rodar_teste_finalizacoes():
     driver = webdriver.Chrome(options=chrome_options)
     wait = WebDriverWait(driver, 15)
     
+    # URL do jogo histórico
     url_finalizacoes = "https://www.flashscore.com.br/jogo/futebol/america-mg-xUT0Bp8o/cuiaba-zVvjqDOo/resumo/estatisticas-jogadores/finalizacoes/?mid=QVKCjMJD"
     
-    print("\n🔥 TESTE ISOLADO V5: EXTRAÇÃO POR ARQUIVO DE IMAGEM IDÊNTICO\n" + "="*70)
+    print("\n🔥 TESTE ISOLADO V6: MAIS RECENTE COMPARANDO PNG DIRETO\n" + "="*70)
     print(f"🔗 Acessando: {url_finalizacoes}")
     
     try:
         driver.get(url_finalizacoes)
-        time.sleep(4.0) # Garantia de carregamento
+        time.sleep(4.0)
         
-        # 1️⃣ Captura o nome do arquivo final (.png) do escudo do topo
-        arquivo_casa_topo = ""
-        arquivo_fora_topo = ""
-        try:
-            src_casa = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__homeLogo img, [class*='homeLogo'] img").get_attribute("src") or ""
-            src_fora = driver.find_element(By.CSS_SELECTOR, ".fixedHeaderDuel__awayLogo img, [class*='awayLogo'] img").get_attribute("src") or ""
-            
-            # Pega exatamente o nome do arquivo (ex: nHqWQgSo.png)
-            arquivo_casa_topo = src_casa.split('/')[-1] if src_casa else ""
-            arquivo_fora_topo = src_fora.split('/')[-1] if src_fora else ""
-            
-            print(f"🛡️  Arquivos de Escudo Mapeados no Topo do Confronto:")
-            print(f"    🏠 Mandante (Casa): '{arquivo_casa_topo}'")
-            print(f"    🚀 Visitante (Fora): '{arquivo_fora_topo}'\n")
-        except Exception as e_topo:
-            print(f"⚠️ Não conseguiu ler imagens do topo: {e_topo}")
-            # Fallback baseado no seu print real caso mude algo no cabeçalho
-            arquivo_casa_topo = "Eut0HLfM-nHqWQgSo.png" 
-            arquivo_fora_topo = "COoi5ag5-CWl52SGk.png"
+        # 🟢 REFERÊNCIA DE HOJE: Simulando os arquivos salvos do confronto principal antes de abrir os históricos
+        # Como visto no seu log, o robô já sabe esses dois valores perfeitamente:
+        arquivo_mandante_hoje = "COoi5ag5-CWl52SGk.png"  # Cuiabá no histórico (ou América no principal)
+        arquivo_visitante_hoje = "Eut0HLfM-nHqWQgSo.png" # América no histórico (ou Cuiabá no principal)
+        
+        print(f"📌 Imagens de Referência Salvas (Jogo Principal):")
+        print(f"   🏠 Mandante Principal: {arquivo_mandante_hoje}")
+        print(f"   🚀 Visitante Principal: {arquivo_visitante_hoje}\n")
 
-        # 2️⃣ Localiza a coluna de "Finalizações no Alvo" dinamicamente
+        # 1️⃣ Localiza a coluna de "Finalizações no Alvo"
         cabecalhos = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .wcl-tableHeadCell_")
         indice_alvo = -1
-        
         for idx, th in enumerate(cabecalhos):
             txt = th.text.strip().upper()
             if any(x in txt for x in ["ALVO", "TARGET", "NO GOL"]) and not any(x in txt for x in ["XG", "XGOT"]):
                 indice_alvo = idx
                 print(f"🎯 Coluna identificada no Índice [{idx}]")
                 break
-                
-        if indice_alvo == -1:
-            indice_alvo = 5
+        if indice_alvo == -1: indice_alvo = 5
 
-        # 3️⃣ Varre todas as linhas de jogadores na tabela
+        # 2️⃣ Varre a tabela de jogadores
         linhas = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
         print(f"\n📊 Total de linhas brutas encontradas na tabela: {len(linhas)}")
         print("-" * 70)
@@ -73,22 +60,22 @@ def rodar_teste_finalizacoes():
                 if not nome_jogador or nome_jogador == "TODOS": 
                     continue
                 
-                # Procura a div/img do logotipo dentro da linha usando a classe que você achou no print
-                img_linha = linha.find_element(By.CSS_SELECTOR, "[class*='wcl-teamLogo'] img, [class*='teamLogo'] img, img.participant__image, img")
+                # 🟢 CORREÇÃO DOS SELETORES: Busca a img especificamente dentro do container do logotipo do time 
+                # Isso impede o robô de pegar por engano a foto do rosto do atleta
+                img_linha = linha.find_element(By.CSS_SELECTOR, "div[class*='teamLogo'] img, [class*='wcl-teamLogo'] img, div[class*='assetContainer'] img")
                 src_linha = img_linha.get_attribute("src") or ""
                 arquivo_linha = src_linha.split('/')[-1] if src_linha else ""
                 
                 time_pertencente = "DESCONHECIDO"
                 
-                # Validação cirúrgica: se o nome do arquivo da linha bater com o do topo
-                if arquivo_linha and arquivo_linha == arquivo_casa_topo:
+                # Compara direto o arquivo coletado na linha com as referências que você já guardou antes
+                if arquivo_linha and arquivo_linha == arquivo_mandante_hoje:
                     time_pertencente = "MANDANTE"
-                elif arquivo_linha and arquivo_linha == arquivo_fora_topo:
+                elif arquivo_linha and arquivo_linha == arquivo_visitante_hoje:
                     time_pertencente = "VISITANTE"
                 
-                # Captura todas as células da linha para pegar o valor do scout
+                # Captura os scouts daquela linha
                 celulas = linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")
-                
                 if len(celulas) > indice_alvo:
                     valor_chute_alvo = celulas[indice_alvo].text.strip()
                     print(f"👤 Jogador: {nome_jogador.ljust(22)} | 👥 Time: {time_pertencente.ljust(11)} | 🎯 Chutes no Alvo: {valor_chute_alvo}")
