@@ -343,6 +343,24 @@ def main():
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
 
+                            # --- BLOCO DE SALVAMENTO PARA O BINGO357 ---
+                            for rj in res_jogadores:
+                                jogo_scout = {
+                                    "time_casa": t1, "time_fora": t2,
+                                    "mercado": rj['texto'], "odd": "1.30", "liga": nome_comp
+                                }
+                                jogos_para_pendentes.append(jogo_scout)
+                                print(f"           ✅ Mercado de Chutes Qualificado: {rj['texto']}")
+
+                            for rf in res_faltas:
+                                jogo_scout = {
+                                    "time_casa": t1, "time_fora": t2,
+                                    "mercado": rf['texto'], "odd": "1.30", "liga": nome_comp
+                                }
+                                jogos_para_pendentes.append(jogo_scout)
+                                print(f"           ✅ Mercado de Faltas Qualificado: {rf['texto']}")
+                                
+
                             
                         # ALIMENTAÇÃO DA LISTA FINAL
                         if mercados_para_processar:
