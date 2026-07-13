@@ -296,7 +296,7 @@ def main():
                                 print("      ⚠️ [CORREÇÃO] Driver morto antes da Fase 3. Reiniciando...")
                                 try: driver.quit()
                                 except: pass
-                                driver = configurar_driver()
+                                driver = configurando_driver()
 
                             try:
                                 # Garante o retorno à URL mãe limpa antes de ir para os scouts avançados
@@ -315,16 +315,18 @@ def main():
                             nome_time_casa = t1 if t1 else "MANDANTE"
                             nome_time_fora = t2 if t2 else "VISITANTE"
 
+                            # 🟢 AJUSTADO: Alterado de 3 para 5 para a análise de chutes
                             res_jogadores = jogadores.verificar_destaques_jogadores(
-                                dados_jogo.get("historico_chutes", {}), 3, nome_comp,
+                                dados_jogo.get("historico_chutes", {}), 5, nome_comp,
                                 elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
                             )
                             for rj in res_jogadores:
                                 mercados_para_processar.append({"texto": rj['texto'], "chave": rj['chave'], "odd": "Análise"})
 
+                            # 🟢 AJUSTADO: Alterado de 3 para 5 para a análise de faltas
                             res_faltas = jogadores.verificar_destaques_faltas(
-                                dados_jogo.get("historico_faltas", {}), 3, nome_comp,
+                                dados_jogo.get("historico_faltas", {}), 5, nome_comp,
                                 elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
                                 nome_casa=nome_time_casa, nome_fora=nome_time_fora
                             )
@@ -333,7 +335,6 @@ def main():
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
 
-                
                         # ALIMENTAÇÃO DA LISTA FINAL
                         if mercados_para_processar:
                             # Adiciona uma única vez a partida no JSON de pendentes de resultados
