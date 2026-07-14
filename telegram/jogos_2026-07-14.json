@@ -1,0 +1,56 @@
+[
+    {
+        "horario": "12:00",
+        "liga": "Europa - Champions League",
+        "time_casa": "KuPS (Fin)",
+        "time_fora": "Vardar (Mkd)",
+        "mercado": "-4.5 Gols (85%)",
+        "odd": "1.24",
+        "link_betano": "https://www.betano.bet.br/match-odds/Kuopio-PS-Vardar-Skopje/88872354/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Europa - Champions League",
+        "time_casa": "KuPS (Fin)",
+        "time_fora": "Vardar (Mkd)",
+        "mercado": "Média Escanteios: 4.2",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Kuopio-PS-Vardar-Skopje/88872354/"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Europa - Champions League",
+        "time_casa": "KuPS (Fin)",
+        "time_fora": "Vardar (Mkd)",
+        "mercado": "Média Cartões: 0.7",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Kuopio-PS-Vardar-Skopje/88872354/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "França",
+        "time_fora": "Espanha",
+        "mercado": "+1.5 Gols (70%)",
+        "odd": "1.3",
+        "link_betano": "https://www.betano.bet.br/match-odds/France-Spain/88864407/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "França",
+        "time_fora": "Espanha",
+        "mercado": "Média Escanteios: 9.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/France-Spain/88864407/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "França",
+        "time_fora": "Espanha",
+        "mercado": "Média Cartões: 4.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/France-Spain/88864407/"
+    }
+]

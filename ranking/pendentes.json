@@ -1,26 +1,19 @@
 {
-    "data_geracao": "2026-07-13",
+    "data_geracao": "2026-07-14",
     "jogos": [
         {
-            "time_casa": "América-MG",
-            "time_fora": "Londrina",
+            "time_casa": "França",
+            "time_fora": "Espanha",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/A5srkUa6/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/pU0PQ9nR/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Itabaiana",
-            "time_fora": "Brusque",
+            "time_casa": "KuPS (Fin)",
+            "time_fora": "Vardar (Mkd)",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Gdiv3CRa/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "América-RN",
-            "time_fora": "Trem",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/4CK9EWpI/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/MwGG56Ja/#/resumo-de-jogo"
         }
     ]
 }
