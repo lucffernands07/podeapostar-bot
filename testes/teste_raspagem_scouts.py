@@ -5,12 +5,29 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
     url_final = f"{url_base}/resumo/estatisticas-jogadores/{mercado}/?mid={mid_param}"
     mercado_nome = "Chutes no gol" if mercado == "finalizacoes" else "Faltas sofridas"
     
+    print(f"  ➡️ Analisando {mercado.upper()}: {url_final}")
+    
     try:
         driver.get(url_final)
-        time.sleep(3.0)
+        time.sleep(4.0) # Tempo dinâmico para garantir o carregamento da tabela
         
-        indice_alvo = 5 if mercado == "ataque" else 6
+        # --- DESCOBERTA DINÂMICA DO ÍNDICE DA COLUNA ---
+        indice_alvo = 5 if mercado == "ataque" else 6 # Fallback padrão seu
+        
+        headers = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeaderCell']")
+        if headers:
+            textos_headers = [h.text.strip().lower() for h in headers]
+            # O primeiro Header costuma ser 'jogador', então mapeamos as colunas de estatísticas seguintes
+            for idx, texto in enumerate(textos_headers):
+                if mercado == "finalizacoes" and ("chutes no gol" in texto or "chutes ao gol" in texto or "finalizações no gol" in texto):
+                    indice_alvo = idx - 1 # Remove 1 pois a lista wcl-tableBodyCell não inclui o nome do jogador
+                    break
+                elif mercado == "ataque" and ("faltas sofridas" in texto or "sofridas" in texto):
+                    indice_alvo = idx - 1
+                    break
+        
         linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableRow']")
+        print(f"     📊 Linhas encontradas na tabela: {len(linhas)}")
         
         for linha in linhas:
             try:
@@ -27,10 +44,10 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
                 valor_txt = celulas[indice_alvo].text.strip() if len(celulas) > indice_alvo else "0"
                 qtd = int(valor_txt) if valor_txt.isdigit() else 0
                 
+                # LOG DE AUDITORIA COMPLETO DURANTE A VARREDURA
+                print(f"     👤 Jogador: {nome_jogador:20} | EscudoID: {arquivo_linha} | Time: {time_real} | {mercado_nome}: {qtd}")
+                
                 if time_real != "DESCONHECIDO" and qtd > 0:
-                    # LOG DOS SCOUTS EXATAMENTE COMO PEDIDO
-                    print(f"     👤 Jogador: {nome_jogador:20} | Time: {time_real:10} | {mercado_nome}: {qtd}")
-                    
                     if nome_jogador not in acumulador_scouts:
                         acumulador_scouts[nome_jogador] = {"time": time_real, "chutes": 0, "c_jogos": 0, "faltas": 0, "f_jogos": 0}
                     
@@ -42,7 +59,7 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
                         acumulador_scouts[nome_jogador]["f_jogos"] += 1
             except: continue
     except Exception as e:
-        pass # Omitido para não poluir a sua log limpa
+        print(f"  ⚠️ Erro na extração da aba {mercado}: {e}")
 
 def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     url_h2h_mae = dados_jogo.get("url_h2h_base")
@@ -65,7 +82,7 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
             print(f"{src} ➔ {nome}")
         except: continue
 
-    # Capturando os blocos de últimos jogos (Mandante = Bloco 0, Visitante = Bloco 1)
+    # Separação dos blocos H2H (5 do mandante e 5 do visitante)
     secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
     links_t1 = []
     links_t2 = []
@@ -74,7 +91,6 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
         links_t1 = [l.get_attribute("href") for l in secoes[0].find_elements(By.CSS_SELECTOR, "a.h2h__row")][:5]
         links_t2 = [l.get_attribute("href") for l in secoes[1].find_elements(By.CSS_SELECTOR, "a.h2h__row")][:5]
     else:
-        # Fallback de segurança se a página mudar
         todos_links = [l.get_attribute("href") for l in driver.find_elements(By.CSS_SELECTOR, "a.h2h__row")]
         links_t1 = todos_links[:5]
         links_t2 = todos_links[5:10] if len(todos_links) >= 10 else []
@@ -82,45 +98,47 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     print("\nlog: A url dos últimos 5 jogos do mandante como os jogos casa x visitante juntos e os scouts de cada jogador")
     acumulador = {}
     
-    # Processa os 5 jogos do Mandante (T1)
+    # Processa histórico do Mandante (T1)
     for i, url_jogo in enumerate(links_t1, 1):
-        print(f"\n{t1} {i}/{len(links_t1)}: {url_jogo}")
+        print(f"\n{t1} {i}/{len(links_t1)}:")
         mid = url_jogo.split("?mid=")[1] if "?mid=" in url_jogo else ""
         url_base = url_jogo.split("/?")[0].rstrip('/')
         extrair_scouts_por_aba(driver, url_base, mid, "finalizacoes", dicionario_escudos, acumulador)
         extrair_scouts_por_aba(driver, url_base, mid, "ataque", dicionario_escudos, acumulador)
 
-    # Processa os 5 jogos do Visitante (T2)
+    # Processa histórico do Visitante (T2)
     for i, url_jogo in enumerate(links_t2, 1):
-        print(f"\n{t2} {i}/{len(links_t2)}: {url_jogo}")
+        print(f"\n{t2} {i}/{len(links_t2)}:")
         mid = url_jogo.split("?mid=")[1] if "?mid=" in url_jogo else ""
         url_base = url_jogo.split("/?")[0].rstrip('/')
         extrair_scouts_por_aba(driver, url_base, mid, "finalizacoes", dicionario_escudos, acumulador)
         extrair_scouts_por_aba(driver, url_base, mid, "ataque", dicionario_escudos, acumulador)
 
-    # Impressão do Resultado Final Estruturado
+    # --- IMPRESSÃO DO CÁLCULO DAS MÉDIAS NO FORMATO EXATO SOLICITADO ---
     print("\n" + "="*50)
     for time_alvo in [t1, t2]:
         print(f"{time_alvo.capitalize()}:")
         jogadores = {k: v for k, v in acumulador.items() if v['time'] == time_alvo.upper()}
         
-        # Guardar logs em listas para imprimir Chutes e Faltas separadamente e organizados
-        log_chutes = []
-        log_faltas = []
+        # Agrupadores por mercado para organizar a saída exatamente como no modelo
+        linhas_chutes = []
+        linhas_faltas = []
         
         for nome, d in jogadores.items():
-            m_c = d['chutes'] / d['c_jogos'] if d['c_jogos'] > 0 else 0
-            m_f = d['faltas'] / d['f_jogos'] if d['f_jogos'] > 0 else 0
+            media_chutes = d['chutes'] / d['c_jogos'] if d['c_jogos'] > 0 else 0
+            media_faltas = d['faltas'] / d['f_jogos'] if d['f_jogos'] > 0 else 0
             
-            # Se a média for 1.0 ou mais, ela entra (como no seu exemplo do Mbappe com 1.0)
-            if m_c >= 1.0: 
-                log_chutes.append(f"Chutes no gol: {nome} média {m_c:.1f}")
-            if m_f >= 1.0: 
-                log_faltas.append(f"Faltas sofridas: {nome} média {m_f:.1f}")
-                
-        for linha in log_chutes:
-            print(linha)
-        for linha in log_faltas:
-            print(linha)
-
+            # Condição estrita: se a média for <= 1.0, desconsidera do resultado
+            if media_chutes > 1.0:
+                linhas_chutes.append(f"Chutes no gol: {nome} média {media_chutes:.1f}")
+            if media_faltas > 1.0:
+                linhas_faltas.append(f"Faltas sofridas: {nome} média {media_faltas:.1f}")
+        
+        # Imprime primeiro todos os de chutes do time, depois todas as faltas do time
+        for l in lines_chutes:
+            print(l)
+        for l in lines_faltas:
+            print(l)
+            
+    print("="*50)
     return dados_jogo
