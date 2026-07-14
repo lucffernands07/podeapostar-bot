@@ -1,114 +1,101 @@
+# testes/teste_raspagem_scouts.py
 import time
-import re
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
-def pegar_scouts_avancados(driver, stats, t1, t2):
-    url_h2h_base = stats.get("url_h2h_base")
-    print(f"         [RASPAGEM 3] Iniciou. URL Recebida: {url_h2h_base}")
-
-    if not url_h2h_base:
-        url_h2h_base = driver.current_url if "h2h" in driver.current_url else None
-
-    if not url_h2h_base:
-        print("         🚨 [RASPAGEM 3] Abortando: URL inválida!")
-        return stats
-
-    if "historico_chutes" not in stats: stats["historico_chutes"] = {}
-    if "historico_faltas" not in stats: stats["historico_faltas"] = {}
-
-    wait = WebDriverWait(driver, 15)
-    dicionario_escudos = {}
-    links_jogos_historico = set()
-
-    # 🟢 1. MAPEAMENTO DE ESCUDOS E LINKS VIA H2H MÃE
+def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escudos, acumulador_scouts):
+    """
+    Função Operária: Foca em uma aba específica, extrai a tabela de jogadores 
+    e atualiza o acumulador por referência.
+    """
+    url_final = f"{url_base}/resumo/estatisticas-jogadores/{mercado}/?mid={mid_param}"
     try:
-        driver.get(url_h2h_base)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")))
+        driver.get(url_final)
+        time.sleep(3.5) # Aguarda renderização da tabela
         
-        blocos_h2h = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
-        for bloco in blocos_h2h[:2]:
-            linhas_jogos = bloco.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")
-            for linha_jogo in linhas_jogos[:5]:
-                href = linha_jogo.get_attribute("href")
-                if href: links_jogos_historico.add(href)
+        # Definição dos termos de busca baseados no mercado
+        termos_busca = ["ALVO", "TARGET", "NO GOL"] if mercado == "finalizacoes" else ["SOFRIDAS", "SUFFERED", "FALTAS SOF"]
+        
+        # Identificação dinâmica da coluna
+        cabecalhos = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .wcl-tableHeadCell_")
+        indice_alvo = -1
+        for idx, th in enumerate(cabecalhos):
+            txt = th.text.strip().upper()
+            if any(x in txt for x in termos_busca) and not any(x in txt for x in ["XG", "XGOT", "COMETIDAS", "FOULS"]):
+                indice_alvo = idx
+                break
+        
+        if indice_alvo == -1:
+            indice_alvo = 5 if mercado == "finalizacoes" else 4
+
+        linhas = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
+        
+        for linha in linhas:
+            try:
+                celula_jogador = linha.find_element(By.CSS_SELECTOR, "td[class*='isSticky'], td[class*='fitContent'], [data-testid='wcl-playerCell']")
+                nome_jogador = celula_jogador.find_element(By.CSS_SELECTOR, "[class*='fp-playerName'], [class*='playerName']").text.strip()
                 
-                participantes = linha_jogo.find_elements(By.CSS_SELECTOR, "[class*='wcl-matchRow-participant'], .h2h__participant")
-                for p in participantes:
-                    try:
-                        img_el = p.find_element(By.CSS_SELECTOR, "img")
-                        src_img = img_el.get_attribute("src") or ""
-                        nome_arquivo = src_img.split('/')[-1] if src_img else ""
-                        nome_time = p.text.strip().upper()
-                        if nome_arquivo and nome_time: dicionario_escudos[nome_arquivo] = nome_time
-                    except: continue
-        print(f"         [RASPAGEM 3] Mapeados {len(dicionario_escudos)} escudos.")
+                if not nome_jogador or nome_jogador == "TODOS": continue
+                
+                img_logo = celula_jogador.find_element(By.CSS_SELECTOR, "div[class*='wcl-teamLogo'] img, div.wcl-teamLogo_sFhMr img")
+                arquivo_linha = img_logo.get_attribute("src").split('/')[-1]
+                time_real = dicionario_escudos.get(arquivo_linha, "DESCONHECIDO")
+                
+                if time_real == "DESCONHECIDO": continue
+                
+                celulas = linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")
+                if len(celulas) > indice_alvo:
+                    valor_txt = celulas[indice_alvo].text.strip()
+                    qtd = int(valor_txt) if valor_txt.isdigit() else 0
+                    
+                    if nome_jogador not in acumulador_scouts:
+                        acumulador_scouts[nome_jogador] = {"time": time_real, "chutes_total": 0, "chutes_jogos": 0, "faltas_total": 0, "faltas_jogos": 0}
+                    
+                    if mercado == "finalizacoes":
+                        acumulador_scouts[nome_jogador]["chutes_total"] += qtd
+                        acumulador_scouts[nome_jogador]["chutes_jogos"] += 1
+                    else:
+                        acumulador_scouts[nome_jogador]["faltas_total"] += qtd
+                        acumulador_scouts[nome_jogador]["faltas_jogos"] += 1
+            except: continue
     except Exception as e:
-        print(f"         🚨 Erro ao listar H2H: {e}")
-        return stats
+        print(f"  ⚠️ Erro ao processar aba {mercado}: {e}")
 
-    lista_final_links = list(links_jogos_historico)[:10]
-    jogo_global_index = 0
+def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
+    """
+    Função Gerente: Orquestra o H2H, mapeia times e chama a extração.
+    """
+    if "historico_chutes" not in dados_jogo: dados_jogo["historico_chutes"] = {}
+    if "historico_faltas" not in dados_jogo: dados_jogo["historico_faltas"] = {}
 
-    # 🟢 2. PROCESSAMENTO DOS MERCADOS
-    for url_jogo in lista_final_links:
-        try:
-            mid_param = url_jogo.split("?mid=")[1] if "?mid=" in url_jogo else ""
-            url_base = url_jogo.split("?mid=")[0].rstrip('/')
+    dicionario_escudos = {}
+    try:
+        participantes = driver.find_elements(By.CSS_SELECTOR, "[class*='wcl-matchRow-participant']")
+        for p in participantes:
+            img = p.find_element(By.CSS_SELECTOR, "img")
+            src = img.get_attribute("src").split('/')[-1]
+            dicionario_escudos[src] = p.text.strip().upper()
+    except: pass
 
-            for mercado in ["finalizacoes", "ataque"]:
-                url_final = f"{url_base}/resumo/estatisticas-jogadores/{mercado}/?mid={mid_param}"
-                driver.get(url_final)
-                
-                # Aguarda a tabela renderizar
-                try:
-                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")))
-                except:
-                    continue
+    links_historico = []
+    try:
+        blocos = driver.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")
+        for link in blocos[:5]: # Regra dos 5 jogos
+            href = link.get_attribute("href")
+            if href: links_historico.append(href)
+    except: pass
 
-                termos_busca = ["ALVO", "TARGET", "NO GOL"] if mercado == "finalizacoes" else ["SOFRIDAS", "SUFFERED", "FALTAS SOF"]
-                chave_stats = "historico_chutes" if mercado == "finalizacoes" else "historico_faltas"
-                indice_alvo = 5 if mercado == "finalizacoes" else 4
+    acumulador = {}
+    for url_jogo in links_historico:
+        if not url_jogo: continue
+        mid = url_jogo.split("?mid=")[1] if "?mid=" in url_jogo else ""
+        url_base = url_jogo.split("/#")[0].rstrip('/')
+        
+        # Chama a função operária para cada mercado
+        extrair_scouts_por_aba(driver, url_base, mid, "finalizacoes", dicionario_escudos, acumulador)
+        extrair_scouts_por_aba(driver, url_base, mid, "ataque", dicionario_escudos, acumulador)
 
-                linhas = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], .wcl-table__row_, [data-testid='wcl-tableRow']")
-                
-                for linha in linhas:
-                    try:
-                        celula_jogador = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
-                        nome_jogador = celula_jogador.text.strip()
-                        if not nome_jogador or "TODOS" in nome_jogador: continue
-                        
-                        img_logo = linha.find_element(By.CSS_SELECTOR, "img")
-                        arquivo_linha = img_logo.get_attribute("src").split('/')[-1]
-                        time_real = dicionario_escudos.get(arquivo_linha, "")
-                        
-                        # DEBUG: Se não encontrar jogador, descomente a linha abaixo
-                        # print(f"DEBUG: Comparando {t1}/{t2} com {time_real}")
-                        
-                        if not any(t.upper() in time_real.upper() for t in [t1, t2]): continue
-
-                        celulas = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")
-                        valor_txt = celulas[indice_alvo].text.strip()
-                        qtd = int(re.search(r'\d+', valor_txt).group()) if re.search(r'\d+', valor_txt) else 0
-                        
-                        if nome_jogador not in stats[chave_stats]: stats[chave_stats][nome_jogador] = []
-                        while len(stats[chave_stats][nome_jogador]) < jogo_global_index: stats[chave_stats][nome_jogador].append(0)
-                        stats[chave_stats][nome_jogador].append(qtd)
-                    except: continue
-
-            jogo_global_index += 1
-            print(f"         [RASPAGEM 3] Jogo [{jogo_global_index}/{len(lista_final_links)}] ok.")
-            time.sleep(1.5) # Respiro para o Flashscore não bloquear
-        except Exception as e_jogo:
-            print(f"         ⚠️ Erro no jogo histórico: {e_jogo}")
-            continue
-
-    # 🟢 3. COMPATIBILIZAÇÃO
-    for jogador, lista in stats["historico_chutes"].items():
-        while len(lista) < jogo_global_index: lista.append(0)
-    for jogador, lista in stats["historico_faltas"].items():
-        while len(lista) < jogo_global_index: lista.append(0)
-
-    return stats
-            
+    dados_jogo["historico_chutes"] = acumulador
+    dados_jogo["historico_faltas"] = acumulador
+    
+    return dados_jogo
+                                                           
