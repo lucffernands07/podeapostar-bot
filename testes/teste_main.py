@@ -290,11 +290,12 @@ def main():
                         # ----------------------------------------------------------
                         print(f"      🔍 [DEBUG FASE 3] Validando Liga: '{nome_comp}'")
                         print(f"      🔍 [DEBUG FASE 3] Está na lista Elite? {nome_comp in LIGAS_ELITE_JOGADORES}")
-                        
+
                         if nome_comp in LIGAS_ELITE_JOGADORES:
                             print(f"      🎯 [FASE 3] Buscando Scouts Avançados (Chutes/Faltas)...")
                             print(f"      🔗 [DEBUG URL MÃE] Enviando para a Fase 3: {dados_jogo.get('url_h2h_base')}")
                             
+                            # 1. Validação do Driver
                             try:
                                 _ = driver.current_window_handle
                             except Exception:
@@ -303,51 +304,54 @@ def main():
                                 except: pass
                                 driver = configurar_driver()
 
+                            # 2. Execução da Raspagem
                             try:
                                 driver.get(dados_jogo["url_h2h_base"])
                                 time.sleep(3) 
                                 driver.execute_script("window.scrollTo(0, 300);")
                                 
-                                dados_scouts = pegar_scouts_avancados(driver, dados_jogo, t1, t2)
-                                if dados_scouts and isinstance(dados_scouts, dict):
-                                    dados_jogo.update(dados_scouts)
+                                dados_jogo = pegar_scouts_avancados(driver, dados_jogo, t1, t2)
                             except Exception as e_f3:
                                 print(f"      ⚠️ Erro crítico na execução da Fase 3 no Main: {e_f3}")
                             
+                            # 3. Processamento de Resultados
                             elenco_casa_disponivel = dados_jogo.get("elenco_mandante") or dados_jogo.get("jogadores_mandante")
                             elenco_fora_disponivel = dados_jogo.get("elenco_visitante") or dados_jogo.get("jogadores_visitante")
                             
                             nome_time_casa = t1 if t1 else "MANDANTE"
                             nome_time_fora = t2 if t2 else "VISITANTE"
 
-                            # 1. Processamento de Chutes
-                            res_jogadores = jogadores.verificar_destaques_jogadores(
-                                dados_jogo.get("historico_chutes", {}), 5, nome_comp,
-                                elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
-                                nome_casa=nome_time_casa, nome_fora=nome_time_fora
-                            )
-                            
-                            # 2. Processamento de Faltas
-                            res_faltas = jogadores.verificar_destaques_faltas(
-                                dados_jogo.get("historico_faltas", {}), 5, nome_comp,
-                                elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
-                                nome_casa=nome_time_casa, nome_fora=nome_time_fora
-                            )
+                            if dados_jogo.get("historico_chutes") and dados_jogo.get("historico_faltas"):
+                                # A. Processamento de Chutes
+                                res_jogadores = jogadores.verificar_destaques_jogadores(
+                                    dados_jogo["historico_chutes"], 5, nome_comp,
+                                    elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
+                                    nome_casa=nome_time_casa, nome_fora=nome_time_fora
+                                )
+                                
+                                # B. Processamento de Faltas
+                                res_faltas = jogadores.verificar_destaques_faltas(
+                                    dados_jogo["historico_faltas"], 5, nome_comp,
+                                    elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
+                                    nome_casa=nome_time_casa, nome_fora=nome_time_fora
+                                )
 
-                            # 3. Salvamento de dados no Bingo (após processamento)
-                            for rj in res_jogadores:
-                                print(f"           ✅ [DEBUG] Salvando Chutes: {rj['texto']}")
-                                jogos_para_pendentes.append({
-                                    "time_casa": t1, "time_fora": t2, 
-                                    "mercado": rj['texto'], "odd": "1.30", "liga": nome_comp
-                                })
+                                # C. Salvamento no Bingo
+                                for rj in res_jogadores:
+                                    print(f"           ✅ [DEBUG] Salvando Chutes: {rj['texto']}")
+                                    jogos_para_pendentes.append({
+                                        "time_casa": t1, "time_fora": t2, 
+                                        "mercado": rj['texto'], "odd": "1.30", "liga": nome_comp
+                                    })
 
-                            for rf in res_faltas:
-                                print(f"           ✅ [DEBUG] Salvando Faltas: {rf['texto']}")
-                                jogos_para_pendentes.append({
-                                    "time_casa": t1, "time_fora": t2, 
-                                    "mercado": rf['texto'], "odd": "1.30", "liga": nome_comp
-                                })
+                                for rf in res_faltas:
+                                    print(f"           ✅ [DEBUG] Salvando Faltas: {rf['texto']}")
+                                    jogos_para_pendentes.append({
+                                        "time_casa": t1, "time_fora": t2, 
+                                        "mercado": rf['texto'], "odd": "1.30", "liga": nome_comp
+                                    })
+                            else:
+                                print(f"      ⚠️ [FASE 3] Nenhum dado de scout foi retornado para {t1} x {t2}.")
                         
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
