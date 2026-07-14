@@ -1,0 +1,23 @@
+{
+    "data_geracao": "2026-07-14",
+    "jogos": [
+        {
+            "time_casa": "França",
+            "time_fora": "Espanha",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/pU0PQ9nR/#/resumo-de-jogo",
+            "odd_casa": "2.38",
+            "odd_fora": "3.20"
+        },
+        {
+            "time_casa": "KuPS (Fin)",
+            "time_fora": "Vardar (Mkd)",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/MwGG56Ja/#/resumo-de-jogo",
+            "odd_casa": "1.55",
+            "odd_fora": "5.00"
+        }
+    ]
+}
