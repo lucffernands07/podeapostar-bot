@@ -1,4 +1,3 @@
-# testes/teste_raspagem_scouts.py
 import time
 from selenium.webdriver.common.by import By
 
@@ -8,14 +7,14 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
     e atualiza o acumulador por referência.
     """
     url_final = f"{url_base}/resumo/estatisticas-jogadores/{mercado}/?mid={mid_param}"
+    print(f"      🔍 [DEBUG SCOUT] Acessando aba {mercado}: {url_final}")
+    
     try:
         driver.get(url_final)
-        time.sleep(3.5) # Aguarda renderização da tabela
+        time.sleep(4.0)
         
-        # Definição dos termos de busca baseados no mercado
         termos_busca = ["ALVO", "TARGET", "NO GOL"] if mercado == "finalizacoes" else ["SOFRIDAS", "SUFFERED", "FALTAS SOF"]
         
-        # Identificação dinâmica da coluna
         cabecalhos = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .wcl-tableHeadCell_")
         indice_alvo = -1
         for idx, th in enumerate(cabecalhos):
@@ -28,6 +27,7 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
             indice_alvo = 5 if mercado == "finalizacoes" else 4
 
         linhas = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
+        print(f"      🔍 [DEBUG SCOUT] Linhas encontradas na tabela {mercado}: {len(linhas)}")
         
         for linha in linhas:
             try:
@@ -73,16 +73,19 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
         for p in participantes:
             img = p.find_element(By.CSS_SELECTOR, "img")
             src = img.get_attribute("src").split('/')[-1]
-            dicionario_escudos[src] = p.text.strip().upper()
+            nome = p.text.strip().upper()
+            dicionario_escudos[src] = nome
     except: pass
 
     links_historico = []
     try:
         blocos = driver.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")
-        for link in blocos[:5]: # Regra dos 5 jogos
+        print(f"      🔍 [DEBUG SCOUT] Blocos H2H encontrados: {len(blocos)}")
+        for link in blocos[:5]:
             href = link.get_attribute("href")
             if href: links_historico.append(href)
-    except: pass
+    except Exception as e:
+        print(f"      ⚠️ [ERRO SCOUT] Falha ao coletar links: {e}")
 
     acumulador = {}
     for url_jogo in links_historico:
@@ -90,7 +93,6 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
         mid = url_jogo.split("?mid=")[1] if "?mid=" in url_jogo else ""
         url_base = url_jogo.split("/#")[0].rstrip('/')
         
-        # Chama a função operária para cada mercado
         extrair_scouts_por_aba(driver, url_base, mid, "finalizacoes", dicionario_escudos, acumulador)
         extrair_scouts_por_aba(driver, url_base, mid, "ataque", dicionario_escudos, acumulador)
 
@@ -98,4 +100,4 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     dados_jogo["historico_faltas"] = acumulador
     
     return dados_jogo
-                                                           
+        
