@@ -6,6 +6,7 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
     Função Operária: Foca em uma aba específica, extrai a tabela de jogadores 
     e atualiza o acumulador por referência.
     """
+    # Montagem limpa: url_base pura + caminho + mid final
     url_final = f"{url_base}/resumo/estatisticas-jogadores/{mercado}/?mid={mid_param}"
     print(f"      🔍 [DEBUG SCOUT] Acessando aba {mercado}: {url_final}")
     
@@ -71,10 +72,12 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     try:
         participantes = driver.find_elements(By.CSS_SELECTOR, "[class*='wcl-matchRow-participant']")
         for p in participantes:
-            img = p.find_element(By.CSS_SELECTOR, "img")
-            src = img.get_attribute("src").split('/')[-1]
-            nome = p.text.strip().upper()
-            dicionario_escudos[src] = nome
+            try:
+                img = p.find_element(By.CSS_SELECTOR, "img")
+                src = img.get_attribute("src").split('/')[-1]
+                nome = p.text.strip().upper()
+                dicionario_escudos[src] = nome
+            except: continue
     except: pass
 
     links_historico = []
@@ -90,8 +93,11 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     acumulador = {}
     for url_jogo in links_historico:
         if not url_jogo: continue
+        
+        # AJUSTE: Limpa a base removendo tudo que vem após a URL principal do jogo
+        # Exemplo: .../time-a-id/time-b-id/?mid=ID -> vira .../time-a-id/time-b-id
         mid = url_jogo.split("?mid=")[1] if "?mid=" in url_jogo else ""
-        url_base = url_jogo.split("/#")[0].rstrip('/')
+        url_base = url_jogo.split("/?")[0].rstrip('/')
         
         extrair_scouts_por_aba(driver, url_base, mid, "finalizacoes", dicionario_escudos, acumulador)
         extrair_scouts_por_aba(driver, url_base, mid, "ataque", dicionario_escudos, acumulador)
@@ -100,4 +106,4 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     dados_jogo["historico_faltas"] = acumulador
     
     return dados_jogo
-        
+                
