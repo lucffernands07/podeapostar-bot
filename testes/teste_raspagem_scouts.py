@@ -12,6 +12,9 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
         indice_alvo = 5 if mercado == "finalizacoes" else 4
         linhas = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
         
+        # LOG INCONDICIONAL: Para você ver que ele está lendo o site
+        print(f"     📊 Linhas encontradas na tabela: {len(linhas)}")
+        
         for linha in linhas:
             try:
                 celula_jogador = linha.find_element(By.CSS_SELECTOR, "td[class*='isSticky'], [data-testid='wcl-playerCell']")
@@ -22,23 +25,27 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
                 time_real = dicionario_escudos.get(arquivo_linha, "DESCONHECIDO")
                 
                 celulas = linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell']")
-                if len(celulas) > indice_alvo:
-                    valor_txt = celulas[indice_alvo].text.strip()
-                    qtd = int(valor_txt) if valor_txt.isdigit() else 0
+                valor_txt = celulas[indice_alvo].text.strip() if len(celulas) > indice_alvo else "N/A"
+                qtd = int(valor_txt) if valor_txt.isdigit() else 0
+                
+                # LOG DE AUDITORIA COMPLETO (Vai aparecer mesmo se o time for desconhecido)
+                print(f"     👤 Jogador: {nome_jogador:20} | EscudoID: {arquivo_linha} | Time: {time_real} | Qtd: {qtd}")
+                
+                if time_real != "DESCONHECIDO" and qtd > 0:
+                    if nome_jogador not in acumulador_scouts:
+                        acumulador_scouts[nome_jogador] = {"time": time_real, "chutes_total": 0, "chutes_jogos": 0, "faltas_total": 0, "faltas_jogos": 0}
                     
-                    if time_real != "DESCONHECIDO" and qtd > 0:
-                        if nome_jogador not in acumulador_scouts:
-                            acumulador_scouts[nome_jogador] = {"time": time_real, "chutes_total": 0, "chutes_jogos": 0, "faltas_total": 0, "faltas_jogos": 0}
-                        
-                        if mercado == "finalizacoes":
-                            acumulador_scouts[nome_jogador]["chutes_total"] += qtd
-                            acumulador_scouts[nome_jogador]["chutes_jogos"] += 1
-                        else:
-                            acumulador_scouts[nome_jogador]["faltas_total"] += qtd
-                            acumulador_scouts[nome_jogador]["faltas_jogos"] += 1
-            except: continue
+                    if mercado == "finalizacoes":
+                        acumulador_scouts[nome_jogador]["chutes_total"] += qtd
+                        acumulador_scouts[nome_jogador]["chutes_jogos"] += 1
+                    else:
+                        acumulador_scouts[nome_jogador]["faltas_total"] += qtd
+                        acumulador_scouts[nome_jogador]["faltas_jogos"] += 1
+            except Exception as e:
+                # Opcional: logar erro individual se uma linha estiver mal formatada
+                continue
     except Exception as e:
-        print(f"  ⚠️ Erro na aba {mercado}: {e}")
+        print(f"  ⚠️ Erro crítico na aba {mercado}: {e}")
 
 def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     url_h2h_mae = dados_jogo.get("url_h2h_base")
