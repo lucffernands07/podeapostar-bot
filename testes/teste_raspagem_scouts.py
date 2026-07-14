@@ -54,21 +54,33 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     print(f"🔗 Acessando H2H do confronto: {url_h2h_mae}\n")
     
     driver.get(url_h2h_mae)
-    time.sleep(3.0)
+    time.sleep(4.0) # Aumentado para garantir carregamento total
     
     dicionario_escudos = {}
-    participantes = driver.find_elements(By.CSS_SELECTOR, "[class*='wcl-matchRow-participant']")
     print("📦 Dicionário de Escudos mapeado dinamicamente via H2H:")
-    for p in participantes:
+    
+    # AJUSTE: Buscando pelo contêiner pai estável
+    containers = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-matchRow-participant']")
+    
+    for container in containers:
         try:
-            img = p.find_element(By.CSS_SELECTOR, "img")
-            src = img.get_attribute("src").split('/')[-1]
-            nome_time = p.text.strip().upper()
-            dicionario_escudos[src] = nome_time
-            print(f"    • {src} ➔ {nome_time}")
-        except: continue
+            # AJUSTE: Buscando o item filho pelo prefixo da classe (ignora a ID dinâmica no final)
+            item = container.find_element(By.CSS_SELECTOR, "div[class^='wcl-item_']")
+            
+            img = item.find_element(By.CSS_SELECTOR, "img")
+            src = img.get_attribute("src")
+            arquivo_id = src.split('/')[-1]
+            
+            # AJUSTE: Buscando o nome pelo data-testid fixo do span
+            nome_time = item.find_element(By.CSS_SELECTOR, "span[data-testid='wcl-scores-simple-text-01']").text.strip().upper()
+            
+            dicionario_escudos[arquivo_id] = nome_time
+            print(f"    • {arquivo_id} ➔ {nome_time}")
+        except Exception as e:
+            continue
 
-    links_historico = [l.get_attribute("href") for l in driver.find_elements(By.CSS_SELECTOR, ".h2h__section:first-child a.h2h__row")][:5]
+    # AJUSTE: Removido o ':first-child' para capturar todos os jogos listados no H2H
+    links_historico = [l.get_attribute("href") for l in driver.find_elements(By.CSS_SELECTOR, "a.h2h__row")][:5]
     print(f"\n🔗 Total de jogos únicos para varrer: {len(links_historico)}")
     print("-" * 80)
 
@@ -85,9 +97,6 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     print("\n" + "="*80)
     print("📊 PROCESSAMENTO FINAL DAS MÉDIAS (REQUISITO: MÉDIA >= 1.0)")
     print("="*80)
-    
-    # Aqui você imprimiria o resumo do seu 'acumulador'
-    print(f"\n🏁 FIM DO TESTE COMPLETO DE SCOUTS COMBINADOS")
     
     dados_jogo["historico_chutes"] = acumulador
     dados_jogo["historico_faltas"] = acumulador
