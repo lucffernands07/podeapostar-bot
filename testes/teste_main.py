@@ -320,28 +320,35 @@ def main():
                             nome_time_casa = t1 if t1 else "MANDANTE"
                             nome_time_fora = t2 if t2 else "VISITANTE"
 
-                                                        # Processamento de Chutes
+                            # 1. Processamento de Chutes
+                            res_jogadores = jogadores.verificar_destaques_jogadores(
+                                dados_jogo.get("historico_chutes", {}), 5, nome_comp,
+                                elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
+                                nome_casa=nome_time_casa, nome_fora=nome_time_fora
+                            )
+                            
+                            # 2. Processamento de Faltas
+                            res_faltas = jogadores.verificar_destaques_faltas(
+                                dados_jogo.get("historico_faltas", {}), 5, nome_comp,
+                                elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
+                                nome_casa=nome_time_casa, nome_fora=nome_time_fora
+                            )
+
+                            # 3. Salvamento de dados no Bingo (após processamento)
                             for rj in res_jogadores:
                                 print(f"           ✅ [DEBUG] Salvando Chutes: {rj['texto']}")
                                 jogos_para_pendentes.append({
-                                    "time_casa": t1, 
-                                    "time_fora": t2, 
-                                    "mercado": rj['texto'], 
-                                    "odd": "1.30", 
-                                    "liga": nome_comp
+                                    "time_casa": t1, "time_fora": t2, 
+                                    "mercado": rj['texto'], "odd": "1.30", "liga": nome_comp
                                 })
 
-                            # Processamento de Faltas
                             for rf in res_faltas:
                                 print(f"           ✅ [DEBUG] Salvando Faltas: {rf['texto']}")
                                 jogos_para_pendentes.append({
-                                    "time_casa": t1, 
-                                    "time_fora": t2, 
-                                    "mercado": rf['texto'], 
-                                    "odd": "1.30", 
-                                    "liga": nome_comp
+                                    "time_casa": t1, "time_fora": t2, 
+                                    "mercado": rf['texto'], "odd": "1.30", "liga": nome_comp
                                 })
-
+                        
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
 
