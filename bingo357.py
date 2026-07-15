@@ -18,11 +18,22 @@ def extrair_odd(odd_str):
     try:
         if not odd_str or odd_str == "N/A" or odd_str == "":
             return 1.30
-        if isinstance(odd_str, str) and ("Análise" in odd_str or "chutes" in odd_str.lower() or "falta" in odd_str.lower() or "cartã" in odd_str.lower() or "cartao" in odd_str.lower()):
+        
+        # Garante que tratamos como string para a verificação de texto
+        odd_str_s = str(odd_str).strip()
+        
+        # Se for "Análise" (ou contiver termos relacionados), assume odd de 1.30 imediatamente
+        if "análise" in odd_str_s.lower() or "analise" in odd_str_s.lower():
             return 1.30
+            
+        # Fallback de segurança para palavras específicas que possam vir no campo da odd
+        if any(term in odd_str_s.lower() for term in ["chutes", "falta", "cartã", "cartao", "cantos"]):
+            return 1.30
+            
         if isinstance(odd_str, (int, float)):
             return float(odd_str)
-        return float(odd_str.replace(',', '.'))
+            
+        return float(odd_str_s.replace(',', '.'))
     except:
         return 1.30
 
