@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 
 def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escudos, acumulador_scouts):
     url_final = f"{url_base}/resumo/estatisticas-jogadores/{mercado}/?mid={mid_param}"
-    mercado_nome = "Chutes no gol" if mercado == "finalizacoes" else "Faltas sofridas"
+    mercado_nome = "Finalizações no alvo" if mercado == "finalizacoes" else "Faltas sofridas"
     
     print(f"  ➡️ Analisando {mercado.upper()}: {url_final}")
     
@@ -17,12 +17,12 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
         headers = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeaderCell']")
         if headers:
             textos_headers = [h.text.strip().lower() for h in headers]
-            # O primeiro Header costuma ser 'jogador', então mapeamos as colunas de estatísticas seguintes
+            # Mapeia as colunas procurando os termos exatos exibidos na tela do Flashscore
             for idx, texto in enumerate(textos_headers):
-                if mercado == "finalizacoes" and ("chutes no gol" in texto or "chutes ao gol" in texto or "finalizações no gol" in texto):
+                if mercado == "finalizacoes" and ("finalizações no alvo" in texto or "finalizações" in texto or "no alvo" in texto):
                     indice_alvo = idx - 1 # Remove 1 pois a lista wcl-tableBodyCell não inclui o nome do jogador
                     break
-                elif mercado == "ataque" and ("faltas sofridas" in texto or "sofridas" in texto):
+                elif mercado == "ataque" and ("faltas sofridas" in texto or "sofridas" in texto or "faltas recebidas" in texto):
                     indice_alvo = idx - 1
                     break
         
@@ -32,7 +32,7 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
         for linha in linhas:
             try:
                 # Extração jogador e escudo
-                celula_jogador = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
+                celula_jogador = inline = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
                 nome_jogador = celula_jogador.text.split('\n')[0].strip()
                 
                 img_logo = celula_jogador.find_element(By.CSS_SELECTOR, "img")
@@ -130,15 +130,16 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
             
             # Condição estrita: se a média for <= 1.0, desconsidera do resultado
             if media_chutes > 1.0:
-                linhas_chutes.append(f"Chutes no gol: {nome} média {media_chutes:.1f}")
+                linhas_chutes.append(f"Finalizações no alvo: {nome} média {media_chutes:.1f}")
             if media_faltas > 1.0:
                 linhas_faltas.append(f"Faltas sofridas: {nome} média {media_faltas:.1f}")
         
-        # Imprime primeiro todos os de chutes do time, depois todas as faltas do time
-        for l in lines_chutes:
+        # Imprime primeiro as Finalizações no alvo, depois as Faltas sofridas do time correspondente
+        for l in linhas_chutes:
             print(l)
-        for l in lines_faltas:
+        for l in linhas_faltas:
             print(l)
             
     print("="*50)
     return dados_jogo
+                        
