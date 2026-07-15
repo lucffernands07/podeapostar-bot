@@ -1,6 +1,4 @@
-#testes/teste_jogadores.py
-
-import re
+# testes/teste_jogadores.py
 
 # 🟢 LISTA BRANCA: Apenas ligas de elite que comprovadamente abrem mercados de jogadores na Betano
 LIGAS_ELITE_JOGADORES = [
@@ -13,178 +11,85 @@ LIGAS_ELITE_JOGADORES = [
     "Mundo - Amistoso Internacional"
 ]
 
-def gerar_sigla_time(nome_time, padrao="TIM"):
-    """Gera uma sigla de 3 letras em maiúsculo para o time (Ex: Jordânia -> JOR)"""
-    if not nome_time or not isinstance(nome_time, str):
-        return padrao
-    nome_limpo = nome_time.strip().replace(" ", "").replace(".", "")
-    if len(nome_limpo) >= 3:
-        return nome_limpo[:3].upper()
-    return nome_limpo.upper()
-
-def limpar_nome_jogador(nome_completo):
-    """Remove posições como 'Atacante', 'Ponta', 'Meio-campista' do final do nome."""
-    posicoes = ["Atacante", "Ponta", "Meio-campista", "Meia-atacante", "Lateral", "Zagueiro", "Ala", "Goleiro"]
-    nome_limpo = nome_completo
-    for posicao in posicoes:
-        if nome_limpo.endswith(posicao):
-            nome_limpo = nome_limpo[:-len(posicao)].strip()
-    return nome_limpo
-
-def verificar_destaques_jogadores(historico_chutes, quantidade_jogos=5, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
+def validar_liga_para_jogadores(nome_liga):
     """
-    Analisa os destaques de chutes baseando-se nos elencos capturados.
-    Filtra os últimos 5 jogos reais do jogador.
+    Verifica se a liga do confronto pertence à lista de ligas elite permitidas.
+    Retorna True se for permitido raspar estatísticas de jogadores, caso contrário False.
     """
-    if isinstance(quantidade_jogos, dict) or quantidade_jogos == 3:
-        quantidade_jogos = 5
-
-    nome_liga_limpo = nome_liga.strip() if nome_liga else ""
-    if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
-        return []
-
-    mercados_aprovados = []
-    dados_chutes = {}
+    if not nome_liga:
+        return False
+        
+    liga_limpa = nome_liga.strip()
     
-    if not isinstance(historico_chutes, dict) or not historico_chutes:
-        return mercados_aprovados
-
-    elenco_casa_set = set(elenco_casa) if elenco_casa else set()
-    elenco_fora_set = set(elenco_fora) if elenco_fora else set()
-
-    for jogador, lista_valores in historico_chutes.items():
-        if not isinstance(lista_valores, list) or not lista_valores:
-            continue
+    # Validação direta ou busca parcial (caso o nome da liga venha com acréscimos)
+    for liga_permitida in LIGAS_ELITE_JOGADORES:
+        if liga_permitida.lower() in liga_limpa.lower() or liga_limpa.lower() in liga_permitida.lower():
+            return True
             
-        # Define a qual time o jogador pertence usando os elencos reais
-        if jogador in elenco_fora_set:
-            time_pertence = "fora"
-        elif jogador in elenco_casa_set:
-            time_pertence = "casa"
-        else:
-            # Fallback seguro caso não ache em nenhum elenco explicitamente
-            continue
+    return False
 
-        # Como as listas estão alinhadas com o index global de 10 jogos,
-        # pegamos os valores válidos (diferentes de zero se ele não jogou, ou simplesmente os últimos do histórico)
-        valores_filtrados = [v for v in lista_valores if v is not None]
-        
-        # Pega os últimos N jogos que o robô processou para este jogador
-        valores_analise = valores_filtrados[-quantidade_jogos:] if len(valores_filtrados) >= quantidade_jogos else valores_filtrados
-        
-        while len(valores_analise) < quantidade_jogos:
-            valores_analise.append(0)
-            
-        media_real = sum(valores_analise) / quantidade_jogos
-        jogos_com_sucesso = sum(1 for qtd in valores_analise if qtd >= 1)
-        
-        dados_chutes[jogador] = {
-            "media": media_real,
-            "jogos_com_sucesso": jogos_com_sucesso, 
-            "time": time_pertence
-        }
 
-    if dados_chutes:
-        jogadores_casa = [j for j in dados_chutes.keys() if dados_chutes[j]["time"] == "casa"]
-        jogadores_fora = [j for j in dados_chutes.keys() if dados_chutes[j]["time"] == "fora"]
-        
-        top_casa = sorted(jogadores_casa, key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]), reverse=True)
-        top_fora = sorted(jogadores_fora, key=lambda k: (dados_chutes[k]["jogos_com_sucesso"], dados_chutes[k]["media"]), reverse=True)
-
-        selecionados = []
-        if top_casa: selecionados.append((top_casa[0], "casa"))
-        if top_fora: selecionados.append((top_fora[0], "fora"))
-        
-        for jogador, lado in selecionados:
-            res_c = dados_chutes[jogador]
-            
-            # 🛑 TRAVA DE SEGURANÇA: Média real >= 1.0 E sucesso em pelo menos 3 dos 5 jogos
-            if res_c["media"] < 1.0 or res_c["jogos_com_sucesso"] < 3:
-                continue
-
-            sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CAS")
-            nome_formatated = limpar_nome_jogador(jogador)
-
-            mercados_aprovados.append({
-                "texto": f"Chutes no gol: {sigla} {nome_formatated} | Méd: {res_c['media']:.1f}",
-                "chave": "CHUTES_ALVO"
-            })
-
-    return mercados_aprovados
-
-def verificar_destaques_faltas(historico_faltas, quantidade_jogos=5, nome_liga="", elenco_casa=None, elenco_fora=None, nome_casa="MANDANTE", nome_fora="VISITANTE"):
+def analisar_dados_jogadores(acumulador_scouts, t1, t2):
     """
-    Analisa os destaques de faltas sofridas baseando-se nos elencos capturados.
-    Ordenação e travas idênticas ao mercado de chutes.
+    Processa as estatísticas individuais de finalizações no alvo e faltas sofridas.
+    Filtra jogadores com médias estritamente maiores que 1.0.
+    Retorna dados estruturados e a string formatada para logs e envios.
     """
-    if isinstance(quantidade_jogos, dict) or quantidade_jogos == 3:
-        quantidade_jogos = 5
+    if not acumulador_scouts:
+        print("⏩ [HISTÓRICO INCOMPLETO] Sem dados de scouts de jogadores para calcular.")
+        return {"aprovado": False, "scouts_formatados": ""}
 
-    nome_liga_limpo = nome_liga.strip() if nome_liga else ""
-    if not nome_liga_limpo or nome_liga_limpo not in LIGAS_ELITE_JOGADORES:
-        return []
+    linhas_scouts_geral = []
+    lista_jogadores_qualificados = []
 
-    mercados_aprovados = []
-    dados_faltas = {}
+    # --- CÁLCULO E FORMATAÇÃO DE MÉDIAS ---
+    # Processa o mandante (T1) e depois o visitante (T2)
+    for time_alvo in [t1, t2]:
+        jogadores_do_time = {k: v for k, v in acumulador_scouts.items() if v['time'] == time_alvo.upper()}
+        
+        linhas_chutes = []
+        linhas_faltas = []
+        
+        for nome_jogador, d in jogadores_do_time.items():
+            media_chutes = d['chutes'] / d['c_jogos'] if d['c_jogos'] > 0 else 0
+            media_faltas = d['faltas'] / d['f_jogos'] if d['f_jogos'] > 0 else 0
+            
+            # Condição estrita: média obrigatoriamente > 1.0
+            if media_chutes > 1.0:
+                linhas_chutes.append(f"Finalizações no alvo: {nome_jogador} média {media_chutes:.1f}")
+                lista_jogadores_qualificados.append({
+                    "jogador": nome_jogador,
+                    "time": time_alvo,
+                    "mercado": "Finalizações no alvo",
+                    "media": round(media_chutes, 2)
+                })
+                
+            if media_faltas > 1.0:
+                linhas_faltas.append(f"Faltas sofridas: {nome_jogador} média {media_faltas:.1f}")
+                lista_jogadores_qualificados.append({
+                    "jogador": nome_jogador,
+                    "time": time_alvo,
+                    "mercado": "Faltas sofridas",
+                    "media": round(media_faltas, 2)
+                })
+
+        # Se houver dados do time, agrupa no formato exato solicitado
+        if linhas_chutes or linhas_faltas:
+            linhas_scouts_geral.append(f"{time_alvo.capitalize()}:")
+            for l in linhas_chutes:
+                linhas_scouts_geral.append(l)
+            for l in linhas_faltas:
+                linhas_scouts_geral.append(l)
+
+    # Montagem do bloco de texto final
+    separador = "="*50
+    texto_scouts_bloco = ""
+    if linhas_scouts_geral:
+        texto_scouts_bloco = f"\n{separador}\n" + "\n".join(linhas_scouts_geral) + f"\n{separador}"
     
-    if not isinstance(historico_faltas, dict) or not historico_faltas:
-        return mercados_aprovados
-
-    elenco_casa_set = set(elenco_casa) if elenco_casa else set()
-    elenco_fora_set = set(elenco_fora) if elenco_fora else set()
-
-    for jogador, lista_valores in historico_faltas.items():
-        if not isinstance(lista_valores, list) or not lista_valores:
-            continue
+    return {
+        "aprovado": len(lista_jogadores_qualificados) > 0,
+        "jogadores_qualificados": lista_jogadores_qualificados,
+        "scouts_formatados": texto_scouts_bloco
+}
             
-        if jogador in elenco_fora_set:
-            time_pertence = "fora"
-        elif jogador in elenco_casa_set:
-            time_pertence = "casa"
-        else:
-            continue
-
-        valores_filtrados = [v for v in lista_valores if v is not None]
-        valores_analise = valores_filtrados[-quantidade_jogos:] if len(valores_filtrados) >= quantidade_jogos else valores_filtrados
-
-        while len(valores_analise) < quantidade_jogos:
-            valores_analise.append(0)
-            
-        media_real = sum(valores_analise) / quantidade_jogos
-        jogos_com_sucesso = sum(1 for qtd in valores_analise if qtd >= 1)
-        
-        dados_faltas[jogador] = {
-            "media": media_real,
-            "jogos_com_sucesso": jogos_com_sucesso,
-            "time": time_pertence
-        }
-
-    if dados_faltas:
-        jogadores_casa = [j for j in dados_faltas.keys() if dados_faltas[j]["time"] == "casa"]
-        jogadores_fora = [j for j in dados_faltas.keys() if dados_faltas[j]["time"] == "fora"]
-        
-        # 🟢 Ajustado para ordenar por sucesso e depois por média, igual aos chutes
-        top_casa = sorted(jogadores_casa, key=lambda k: (dados_faltas[k]["jogos_com_sucesso"], dados_faltas[k]["media"]), reverse=True)
-        top_fora = sorted(jogadores_fora, key=lambda k: (dados_faltas[k]["jogos_com_sucesso"], dados_faltas[k]["media"]), reverse=True)
-
-        selecionados = []
-        if top_casa: selecionados.append((top_casa[0], "casa"))
-        if top_fora: selecionados.append((top_fora[0], "fora"))
-        
-        for jogador, lado in selecionados:
-            res_f = dados_faltas[jogador]
-            
-            # 🛑 TRAVA DE SEGURANÇA: Média real >= 1.0 E sucesso em pelo menos 3 dos 5 jogos
-            if res_f["media"] < 1.0 or res_f["jogos_com_sucesso"] < 3:
-                continue
-
-            sigla = gerar_sigla_time(nome_fora, "VIS") if lado == "fora" else gerar_sigla_time(nome_casa, "CAS")
-            nome_formatated = limpar_nome_jogador(jogador)
-
-            mercados_aprovados.append({
-                "texto": f"Faltas Sofridas: {sigla} {nome_formatated} | Méd: {res_f['media']:.1f}",
-                "chave": "FALTAS_SOFRIDAS"
-            })
-
-    return mercados_aprovados
-        
