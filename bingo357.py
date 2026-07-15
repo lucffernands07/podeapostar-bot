@@ -133,7 +133,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                 sufixo_odd = ""
             elif odd_valor:
                 sufixo_odd = f" ODD {odd_valor}"
-        
+                
             # --- TRATAMENTO DE SCOUTS DE JOGADORES ---
             if "falta" in mercado_limpo.lower():
                 is_scout = True
@@ -141,11 +141,9 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                 match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_limpo)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
                 
-                # Tenta buscar a média de todas as formas possíveis (objeto, texto 'média' ou 'Méd:')
-                med = j.get('media') or j.get('media_jogador')
-                if not med:
-                    match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_limpo, re.IGNORECASE)
-                    med = match_med.group(1) if match_med else None
+                # Busca a média que agora o main.py envia no texto (ex: "| Méd: 1.5")
+                match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_limpo, re.IGNORECASE)
+                med = match_med.group(1) if match_med else None
                 
                 if med:
                     texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {float(med):.1f}{sufixo_odd}"
@@ -158,17 +156,14 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                 match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_limpo)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
                 
-                # Tenta buscar a média de todas as formas possíveis (objeto, texto 'média' ou 'Méd:')
-                med = j.get('media') or j.get('media_jogador')
-                if not med:
-                    match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_limpo, re.IGNORECASE)
-                    med = match_med.group(1) if match_med else None
+                # Busca a média que agora o main.py envia no texto (ex: "| Méd: 2.0")
+                match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_limpo, re.IGNORECASE)
+                med = match_med.group(1) if match_med else None
                 
                 if med:
                     texto_final = f"🔶 Chutes no gol: {nome} | Méd: {float(med):.1f}{sufixo_odd}"
                 else:
                     texto_final = f"🔶 Chutes no gol: {nome}{sufixo_odd}"
-                
                 
             elif "cartã" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
                 # 🟢 Alinhado perfeitamente com os outros 'elif'
