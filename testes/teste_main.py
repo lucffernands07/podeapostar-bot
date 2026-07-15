@@ -322,9 +322,10 @@ def main():
                                 
                                 # Processa cada jogador que teve média estritamente maior que 1.0 para o listão e pendentes
                                 for jk in resultado_jogadores["jogadores_qualificados"]:
-                                    txt_mercado = f"{jk['mercado']}: {jk['jogador']} ({jk['time'].capitalize()})"
+                                    # 🔴 ALTERADO: Troca .capitalize() por [:3].upper()
+                                    txt_mercado = f"{jk['mercado']}: {jk['jogador']} ({jk['time'][:3].upper()})"
                                     print(f"           ✅ [DEBUG] Salvando Jogador: {txt_mercado}")
-                                    
+
                                     # Adiciona aos mercados para processamento individualizado (irá para o telegram e filtros)
                                     mercados_para_processar.append({
                                         "texto": txt_mercado,
