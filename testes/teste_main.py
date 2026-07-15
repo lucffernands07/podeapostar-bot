@@ -363,4 +363,111 @@ def main():
                                 # ------------------------------------------------------------------
                                 eh_scout = (
                                     m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA", "JOGADOR_SCOUT"] or
-                                    any(term in texto_lower for te
+                                    any(term in texto_lower for term in ["chute", "falta", "cartã", "cartao", "escanteio", "cantos"])
+                                )
+
+                                odd_para_lista = "Análise" if eh_scout else m_odd
+                                # ------------------------------------------------------------------
+
+                                lista_para_filtros.append({
+                                    "horario": h_br, "time_casa": t1, "time_fora": t2,
+                                    "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
+                                    "link_betano": dados_jogo.get("link_betano")
+                                })
+                                total_mercados += 1
+                                
+                        # 🌟 RETORNO SEGURO PARA A ABA PRINCIPAL DA LIGA
+                        if len(driver.window_handles) > 1:
+                            todas_abas = driver.window_handles[:]
+                            for aba in todas_abas:
+                                if aba != aba_principal:
+                                    driver.switch_to.window(aba)
+                                    driver.close()
+                            driver.switch_to.window(aba_principal)
+                            time.sleep(1)
+
+                except Exception as e:
+                    print(f"⚠️ Erro ao processar partida no loop interno (Index {idx+1}): {e}")
+                    
+                    if "invalid session id" in str(e).lower() or "session" in str(e).lower():
+                        print("⚠️ [CRÍTICO] Sessão inválida detectada no loop interno. Derrubando driver...")
+                        try: driver.quit()
+                        except: pass
+                        driver = configurar_driver()
+                        break 
+                    else:
+                        if len(driver.window_handles) > 1:
+                            try:
+                                todas_abas = driver.window_handles[:]
+                                for aba in todas_abas:
+                                    if aba != aba_principal:
+                                        driver.switch_to.window(aba)
+                                        driver.close()
+                                driver.switch_to.window(aba_principal)
+                            except:
+                                pass
+                    continue
+
+        # --- PROCESSAMENTO E ENVIO FINAL ---
+        if lista_para_filtros:
+            lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
+            
+            meu_chat_id = os.getenv('CHAT_ID')
+            if meu_chat_id:
+                cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
+                corpo = ""
+                for j in lista_para_filtros:
+                    bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
+                    
+                    if len(cabecalho + corpo + bloco) > 4000:
+                        enviar_telegram(cabecalho + corpo, meu_chat_id)
+                        cabecalho = "🎫 *LISTA (Continuação)*\n\n"
+                        corpo = bloco
+                    else:
+                        corpo += bloco
+                
+                enviar_telegram(cabecalho + corpo, meu_chat_id)
+                print("📨 Listão enviado.")
+    
+            cache_dados = {}
+            for j in lista_para_filtros:
+                chave = f"{j['time_casa']}x{j['time_fora']}"
+                cache_dados[chave] = {
+                    "link": j.get("link_betano"),
+                    "liga": j.get("liga"),
+                    "horario": j.get("horario"),
+                    "odd": j.get("odd")
+                }
+    
+            print("📢 Pulando envio do Elite conforme solicitado.")
+    
+            canal_id = os.getenv('CHANNEL_ID')
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
+            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
+    
+            if texto_bingos_final and canal_id:
+                try:
+                    msg_bingo_formatada = "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final
+                    menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
+                    print("📢 Menu interativo enviado para o Canal.")
+                except Exception as e:
+                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
+
+            os.makedirs("ranking", exist_ok=True)
+            with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
+                json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d"), "jogos": jogos_para_pendentes}, f, indent=4, ensure_ascii=False)
+            
+            os.makedirs("telegram", exist_ok=True)
+            with open(f"telegram/jogos_{hoje_ref.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
+                json.dump([{"horario": j.get("horario"), "liga": j.get("liga"), "time_casa": j.get("time_casa"), "time_fora": j.get("time_fora"), "mercado": j.get("mercado"), "odd": j.get("odd"), "link_betano": j.get("link_betano")} for j in lista_para_filtros], f, indent=4, ensure_ascii=False)
+        else:
+            print("⚠️ Nenhuma partida qualificada entrou na 'lista_para_filtros' após varrer os elementos.")
+
+    except Exception as e:
+        print(f"❌ Erro Crítico no Main: {e}")
+    finally:
+        try: driver.quit()
+        except: pass
+
+if __name__ == "__main__":
+    main()
