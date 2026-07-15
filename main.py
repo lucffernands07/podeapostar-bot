@@ -316,13 +316,13 @@ def main():
                                 # Exibe log formatado no console
                                 print(resultado_jogadores["scouts_formatados"])
                                 
-                                # Processa cada jogador que teve média estritamente maior que 1.0 para o listão e pendentes
+                                # Processa cada jogador selecionado como o melhor
                                 for jk in resultado_jogadores["jogadores_qualificados"]:
-                                    # 🔴 ALTERADO: Troca .capitalize() por [:3].upper()
-                                    txt_mercado = f"{jk['mercado']}: {jk['jogador']} ({jk['time'][:3].upper()})"
+                                    # 🟢 CORREÇÃO: Inclui a média na string utilizando o padrão '| Méd: X.X'
+                                    txt_mercado = f"{jk['mercado']}: {jk['jogador']} ({jk['time'][:3].upper()}) | Méd: {jk['media']:.1f}"
                                     print(f"           ✅ [DEBUG] Salvando Jogador: {txt_mercado}")
 
-                                    # Adiciona aos mercados para processamento individualizado (irá para o telegram e filtros)
+                                    # Adiciona aos mercados para processamento individualizado
                                     mercados_para_processar.append({
                                         "texto": txt_mercado,
                                         "chave": "JOGADOR_SCOUT",
