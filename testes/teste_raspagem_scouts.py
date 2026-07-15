@@ -1,3 +1,4 @@
+# testes/teste_raspagem_scouts.py
 import time
 from selenium.webdriver.common.by import By
 
@@ -14,33 +15,34 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
         # --- DESCOBERTA DINÂMICA DO ÍNDICE DA COLUNA ---
         indice_alvo = 5 if mercado == "ataque" else 6 # Fallback padrão seu
         
-        headers = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeaderCell']")
+        # Seletores compatíveis com a estrutura Desktop/Mobile do Flashscore
+        headers = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableHeaderCell'], .tableHeaderCell, th")
         if headers:
-            textos_headers = [h.text.strip().lower() for h in headers]
-            # Mapeia as colunas procurando os termos exatos exibidos na tela do Flashscore
+            textos_headers = [h.text.strip().lower() for h in headers if h.text.strip()]
             for idx, texto in enumerate(textos_headers):
                 if mercado == "finalizacoes" and ("finalizações no alvo" in texto or "finalizações" in texto or "no alvo" in texto):
-                    indice_alvo = idx - 1 # Remove 1 pois a lista wcl-tableBodyCell não inclui o nome do jogador
+                    indice_alvo = idx - 1  # Remove 1 pois a lista tableBodyCell não inclui o nome do jogador
                     break
                 elif mercado == "ataque" and ("faltas sofridas" in texto or "sofridas" in texto or "faltas recebidas" in texto):
                     indice_alvo = idx - 1
                     break
         
-        linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableRow']")
+        # Localiza as linhas da tabela
+        linhas = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableRow'], .tableRow")
         print(f"     📊 Linhas encontradas na tabela: {len(linhas)}")
         
         for linha in linhas:
             try:
-                # Extração jogador e escudo
-                celula_jogador = inline = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-playerCell']")
+                # Extração do jogador e escudo
+                celula_jogador = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .playerCell")
                 nome_jogador = celula_jogador.text.split('\n')[0].strip()
                 
                 img_logo = celula_jogador.find_element(By.CSS_SELECTOR, "img")
                 arquivo_linha = img_logo.get_attribute("src").split('/')[-1]
                 time_real = dicionario_escudos.get(arquivo_linha, "DESCONHECIDO")
                 
-                # Extração valor
-                celulas = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell']")
+                # Extração do valor com base no índice mapeado
+                celulas = linha.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-tableBodyCell'], .tableBodyCell")
                 valor_txt = celulas[indice_alvo].text.strip() if len(celulas) > indice_alvo else "0"
                 qtd = int(valor_txt) if valor_txt.isdigit() else 0
                 
@@ -96,50 +98,23 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
         links_t2 = todos_links[5:10] if len(todos_links) >= 10 else []
 
     print("\nlog: A url dos últimos 5 jogos do mandante como os jogos casa x visitante juntos e os scouts de cada jogador")
-    acumulador = {}
+    acumulador_scouts = {}
     
     # Processa histórico do Mandante (T1)
     for i, url_jogo in enumerate(links_t1, 1):
         print(f"\n{t1} {i}/{len(links_t1)}:")
         mid = url_jogo.split("?mid=")[1] if "?mid=" in url_jogo else ""
         url_base = url_jogo.split("/?")[0].rstrip('/')
-        extrair_scouts_por_aba(driver, url_base, mid, "finalizacoes", dicionario_escudos, acumulador)
-        extrair_scouts_por_aba(driver, url_base, mid, "ataque", dicionario_escudos, acumulador)
+        extrair_scouts_por_aba(driver, url_base, mid, "finalizacoes", dicionario_escudos, acumulador_scouts)
+        extrair_scouts_por_aba(driver, url_base, mid, "ataque", dicionario_escudos, acumulador_scouts)
 
     # Processa histórico do Visitante (T2)
     for i, url_jogo in enumerate(links_t2, 1):
         print(f"\n{t2} {i}/{len(links_t2)}:")
         mid = url_jogo.split("?mid=")[1] if "?mid=" in url_jogo else ""
         url_base = url_jogo.split("/?")[0].rstrip('/')
-        extrair_scouts_por_aba(driver, url_base, mid, "finalizacoes", dicionario_escudos, acumulador)
-        extrair_scouts_por_aba(driver, url_base, mid, "ataque", dicionario_escudos, acumulador)
+        extrair_scouts_por_aba(driver, url_base, mid, "finalizacoes", dicionario_escudos, acumulador_scouts)
+        extrair_scouts_por_aba(driver, url_base, mid, "ataque", dicionario_escudos, acumulador_scouts)
 
-    # --- IMPRESSÃO DO CÁLCULO DAS MÉDIAS NO FORMATO EXATO SOLICITADO ---
-    print("\n" + "="*50)
-    for time_alvo in [t1, t2]:
-        print(f"{time_alvo.capitalize()}:")
-        jogadores = {k: v for k, v in acumulador.items() if v['time'] == time_alvo.upper()}
-        
-        # Agrupadores por mercado para organizar a saída exatamente como no modelo
-        linhas_chutes = []
-        linhas_faltas = []
-        
-        for nome, d in jogadores.items():
-            media_chutes = d['chutes'] / d['c_jogos'] if d['c_jogos'] > 0 else 0
-            media_faltas = d['faltas'] / d['f_jogos'] if d['f_jogos'] > 0 else 0
-            
-            # Condição estrita: se a média for <= 1.0, desconsidera do resultado
-            if media_chutes > 1.0:
-                linhas_chutes.append(f"Finalizações no alvo: {nome} média {media_chutes:.1f}")
-            if media_faltas > 1.0:
-                linhas_faltas.append(f"Faltas sofridas: {nome} média {media_faltas:.1f}")
-        
-        # Imprime primeiro as Finalizações no alvo, depois as Faltas sofridas do time correspondente
-        for l in linhas_chutes:
-            print(l)
-        for l in linhas_faltas:
-            print(l)
-            
-    print("="*50)
-    return dados_jogo
-                        
+    return acumulador_scouts
+    
