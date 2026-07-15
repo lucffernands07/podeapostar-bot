@@ -81,7 +81,7 @@ def rodar_teste_completo_multi_mercado():
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
     driver = webdriver.Chrome(options=chrome_options)
-    url_h2h_mae = "https://www.flashscore.com.br/jogo/futebol/espanha-bLyo6mco/franca-QkGeVG1n/h2h/total/"
+    url_h2h_mae = "https://www.flashscore.com.br/jogo/futebol/argentina-f9OppQjp/inglaterra-j9N9ZNFA/h2h/total/?mid=pKVyGJbD"
     
     print("\n🚀 INICIANDO TESTE MULTI-MERCADO H2H: CHUTES NO GOL E FALTAS SOFRIDAS\n" + "="*80)
     print(f"🔗 Acessando H2H do confronto: {url_h2h_mae}")
@@ -145,8 +145,8 @@ def rodar_teste_completo_multi_mercado():
         print("📊 PROCESSAMENTO FINAL DAS MÉDIAS (REQUISITO: MÉDIA >= 1.0)")
         print("="*80)
         
-        NOME_MANDANTE_REF = "AMÉRICA-MG"
-        NOME_VISITANTE_REF = "LONDRINA"
+        NOME_MANDANTE_REF = "INGLATERRA"
+        NOME_VISITANTE_REF = "ARGENTINA"
 
         melhores = {
             NOME_MANDANTE_REF:  {"chutes": {"jogador": "Nenhum", "media": 0.0, "jogos": 0}, "faltas": {"jogador": "Nenhum", "media": 0.0, "jogos": 0}},
