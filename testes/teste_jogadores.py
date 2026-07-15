@@ -31,7 +31,7 @@ def validar_liga_para_jogadores(nome_liga):
 
 def analisar_dados_jogadores(acumulador_scouts, t1, t2):
     """
-    Processa as estatísticas individuais de finalizações no alvo e faltas sofridas.
+    Processa as estatísticas individuais de chutes no gol e faltas sofridas.
     Filtra jogadores com médias estritamente maiores que 1.0.
     Retorna dados estruturados e a string formatada para logs e envios.
     """
@@ -56,11 +56,11 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
             
             # Condição estrita: média obrigatoriamente > 1.0
             if media_chutes > 1.0:
-                linhas_chutes.append(f"Finalizações no alvo: {nome_jogador} média {media_chutes:.1f}")
+                linhas_chutes.append(f"Chutes no gol: {nome_jogador} média {media_chutes:.1f}")
                 lista_jogadores_qualificados.append({
                     "jogador": nome_jogador,
                     "time": time_alvo,
-                    "mercado": "Finalizações no alvo",
+                    "mercado": "Chutes no gol",
                     "media": round(media_chutes, 2)
                 })
                 
