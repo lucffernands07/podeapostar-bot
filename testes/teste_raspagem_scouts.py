@@ -34,7 +34,7 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
         for linha in linhas:
             try:
                 # Extração do jogador e escudo
-                celula_jogador = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .playerCell")
+                celula_jogador = inline = linha.find_element(By.CSS_SELECTOR, "[data-testid='wcl-playerCell'], .playerCell")
                 nome_jogador = celula_jogador.text.split('\n')[0].strip()
                 
                 img_logo = celula_jogador.find_element(By.CSS_SELECTOR, "img")
@@ -75,23 +75,38 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     
     print(f"\nlog: os ids dos pngs capturados dos times do histórico na pagina h2h")
     dicionario_escudos = {}
-    for c in driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-matchRow-participant']"):
+    
+    # 🔴 TRAVA DOS PNGS: Isola estritamente as duas primeiras seções (Mandante e Visitante)
+    # Ignora totalmente a terceira seção (Confronto Direto/Mutual) para não misturar os times
+    secoes_h2h = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+    participantes_validos = []
+    
+    if len(secoes_h2h) >= 2:
+        for sec in secoes_h2h[:2]:
+            participantes_validos.extend(sec.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-matchRow-participant']"))
+    else:
+        # Fallback de segurança se as seções não renderizarem (limita aos 20 primeiros elementos = 10 jogos)
+        participantes_validos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-matchRow-participant']")[:20]
+
+    for c in participantes_validos:
         try:
             img = c.find_element(By.CSS_SELECTOR, "img")
             src = img.get_attribute("src").split('/')[-1]
             nome = c.find_element(By.CSS_SELECTOR, "span[data-testid='wcl-scores-simple-text-01']").text.strip().upper()
-            dicionario_escudos[src] = nome
-            print(f"{src} ➔ {nome}")
+            
+            # Alimenta o dicionário limitando para evitar duplicados indesejados
+            if src not in dicionario_escudos:
+                dicionario_escudos[src] = nome
+                print(f"{src} ➔ {nome}")
         except: continue
 
     # Separação dos blocos H2H (5 do mandante e 5 do visitante)
-    secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
     links_t1 = []
     links_t2 = []
     
-    if len(secoes) >= 2:
-        links_t1 = [l.get_attribute("href") for l in secoes[0].find_elements(By.CSS_SELECTOR, "a.h2h__row")][:5]
-        links_t2 = [l.get_attribute("href") for l in secoes[1].find_elements(By.CSS_SELECTOR, "a.h2h__row")][:5]
+    if len(secoes_h2h) >= 2:
+        links_t1 = [l.get_attribute("href") for l in secoes_h2h[0].find_elements(By.CSS_SELECTOR, "a.h2h__row")][:5]
+        links_t2 = [l.get_attribute("href") for l in secoes_h2h[1].find_elements(By.CSS_SELECTOR, "a.h2h__row")][:5]
     else:
         todos_links = [l.get_attribute("href") for l in driver.find_elements(By.CSS_SELECTOR, "a.h2h__row")]
         links_t1 = todos_links[:5]
@@ -115,6 +130,32 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
         url_base = url_jogo.split("/?")[0].rstrip('/')
         extrair_scouts_por_aba(driver, url_base, mid, "finalizacoes", dicionario_escudos, acumulador_scouts)
         extrair_scouts_por_aba(driver, url_base, mid, "ataque", dicionario_escudos, acumulador_scouts)
+
+    # 🟢 NOVO LOG DE VALIDAÇÃO: Amostra detalhada do acumulador antes do retorno
+    print("\n" + "="*60)
+    print("📊 [VALIDAÇÃO DE DADOS DE JOGADORES COLETADOS] Amostra do Acumulador:")
+    
+    amostra_finalizacao = None
+    amostra_falta = None
+    
+    for jogador, info in acumulador_scouts.items():
+        if info["chutes"] > 0 and not amostra_finalizacao:
+            amostra_finalizacao = (jogador, info)
+        if info["faltas"] > 0 and not amostra_falta:
+            amostra_falta = (jogador, info)
+        if amostra_finalizacao and amostra_falta:
+            break
+
+    if amostra_finalizacao:
+        print(f"  🎯 FINALIZAÇÕES NO ALVO: {amostra_finalizacao[0]} | Time: {amostra_finalizacao[1]['time']} | Total Chutes: {amostra_finalizacao[1]['chutes']} em {amostra_finalizacao[1]['c_jogos']} jogo(s)")
+    else:
+        print("  🎯 FINALIZAÇÕES NO ALVO: Nenhum jogador com registros maiores que zero.")
+
+    if amostra_falta:
+        print(f"  🤕 FALTAS SOFRIDAS: {amostra_falta[0]} | Time: {amostra_falta[1]['time']} | Total Faltas: {amostra_falta[1]['faltas']} em {amostra_falta[1]['f_jogos']} jogo(s)")
+    else:
+        print("  🤕 FALTAS SOFRIDAS: Nenhum jogador com registros maiores que zero.")
+    print("="*60 + "\n")
 
     return acumulador_scouts
     
