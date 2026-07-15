@@ -14,7 +14,7 @@
         "time_casa": "Univ. Craiova (Rou)",
         "time_fora": "ML Vitebsk (Blr)",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "2.0",
+        "odd": "1.91",
         "link_betano": "https://www.betano.bet.br/match-odds/Universitatea-Craiova-FC-ML-Vitebsk/88752778/"
     },
     {
@@ -85,24 +85,6 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Inglaterra",
         "time_fora": "Argentina",
-        "mercado": "Chutes no gol: Kane H. (ING)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/England-Argentina/88933009/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Inglaterra",
-        "time_fora": "Argentina",
-        "mercado": "Faltas sofridas: Kane H. (ING)",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/England-Argentina/88933009/"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Mundo - Copa do Mundo",
-        "time_casa": "Inglaterra",
-        "time_fora": "Argentina",
         "mercado": "Chutes no gol: Bellingham J. (ING)",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/England-Argentina/88933009/"
@@ -121,7 +103,25 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Inglaterra",
         "time_fora": "Argentina",
-        "mercado": "Faltas sofridas: Anderson E. (ING)",
+        "mercado": "Faltas sofridas: Gordon A. (ING)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/England-Argentina/88933009/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Inglaterra",
+        "time_fora": "Argentina",
+        "mercado": "Chutes no gol: Kane H. (ING)",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/England-Argentina/88933009/"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Mundo - Copa do Mundo",
+        "time_casa": "Inglaterra",
+        "time_fora": "Argentina",
+        "mercado": "Faltas sofridas: Kane H. (ING)",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/England-Argentina/88933009/"
     },
@@ -166,7 +166,7 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Inglaterra",
         "time_fora": "Argentina",
-        "mercado": "Faltas sofridas: Spence D. (ING)",
+        "mercado": "Faltas sofridas: Anderson E. (ING)",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/England-Argentina/88933009/"
     },
@@ -175,7 +175,7 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Inglaterra",
         "time_fora": "Argentina",
-        "mercado": "Faltas sofridas: Gordon A. (ING)",
+        "mercado": "Faltas sofridas: Spence D. (ING)",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/England-Argentina/88933009/"
     },
@@ -274,7 +274,7 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Inglaterra",
         "time_fora": "Argentina",
-        "mercado": "Chutes no gol: Thiago Almada (ARG)",
+        "mercado": "Faltas sofridas: L. Martinez (ARG)",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/England-Argentina/88933009/"
     },
@@ -283,7 +283,7 @@
         "liga": "Mundo - Copa do Mundo",
         "time_casa": "Inglaterra",
         "time_fora": "Argentina",
-        "mercado": "Faltas sofridas: L. Martinez (ARG)",
+        "mercado": "Chutes no gol: Thiago Almada (ARG)",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/England-Argentina/88933009/"
     },
