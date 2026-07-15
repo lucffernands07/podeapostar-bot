@@ -13,7 +13,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
 from testes.teste_ligas import TESTE_COMPETICOES as COMPETICOES
-from testes.teste_jogadores import LIGAS_ELITE_JOGADORES
 from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa
 from testes import teste_cartoes as cartoes
 from testes import teste_jogadores as jogadores
@@ -21,7 +20,7 @@ from testes import teste_escanteios as escanteios
 import odds, bingo357
 from telegram import menus
 
-# Funções de raspagem e Novo Módulo de Escanteios
+# Funções de raspagem e Novo Módulo de Escanteios/Scouts
 from testes.teste_raspagem_h2h import pegar_estatisticas_h2h
 from testes.teste_raspagem_scouts import pegar_scouts_avancados
 from testes.teste_raspagem_estatisticas import pegar_estatisticas_coletivas
@@ -221,11 +220,10 @@ def main():
                         for item in mercados_fase1:
                             m_texto, m_chave = item["texto"], item["chave"]
                             
-                            # Modifique o bloco de atribuição de odd padrão para cobrir os scouts de jogadores vindos da Fase 3
                             if m_chave in ["CANTOS_OVER", "CANTOS_MEDIA", "CARTOES_CONFRONTO"]:
                                 valor_odd_str = "1.30"
                             elif m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"] or "JOGADOR" in m_chave or "SCOUT" in m_chave:
-                                valor_odd_str = "1.30"  # Garante 1.30 para casar com o que você injetou na Fase 3
+                                valor_odd_str = "1.30" 
                             else:
                                 valor_odd_str = v_odds.get(m_chave, "1.50")
                             
@@ -268,7 +266,6 @@ def main():
                         if res_escanteios and res_escanteios.get("aprovado"):
                             mercado_cantos_formatado = res_escanteios.get("mercado")
                             if mercado_cantos_formatado:
-                                # 🟢 AJUSTADO: Mudado de "Análise" para "1.30"
                                 mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA", "odd": "1.30"})
                                 print(f"           ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
 
@@ -281,17 +278,18 @@ def main():
                         if res_cartoes and res_cartoes.get("aprovado"):
                             mercado_cartoes_formatado = res_cartoes.get("mercado")
                             if mercado_cartoes_formatado:
-                                # 🟢 AJUSTADO: Mudado de "Análise" para "1.30"
                                 mercados_para_processar.append({"texto": mercado_cartoes_formatado, "chave": "CARTOES_CONFRONTO", "odd": "1.30"})
                                 print(f"           ✅ Mercado de Cartões Qualificado: {mercado_cartoes_formatado}")
 
                         # ----------------------------------------------------------
-                        # FASE 3: RASPAGEM DE SCOUTS (JOGADORES) - DEBBUG ATIVADO
+                        # FASE 3: RASPAGEM E PROCESSAMENTO DE SCOUTS (JOGADORES)
                         # ----------------------------------------------------------
+                        # 🟢 TRAVA DE SEGURANÇA: Validação da Liga Elite usando teste_jogadores
+                        permite_jogadores = jogadores.validar_liga_para_jogadores(nome_comp)
                         print(f"      🔍 [DEBUG FASE 3] Validando Liga: '{nome_comp}'")
-                        print(f"      🔍 [DEBUG FASE 3] Está na lista Elite? {nome_comp in LIGAS_ELITE_JOGADORES}")
+                        print(f"      🔍 [DEBUG FASE 3] Está na lista Elite? {permite_jogadores}")
 
-                        if nome_comp in LIGAS_ELITE_JOGADORES:
+                        if permite_jogadores:
                             print(f"      🎯 [FASE 3] Buscando Scouts Avançados (Chutes/Faltas)...")
                             print(f"      🔗 [DEBUG URL MÃE] Enviando para a Fase 3: {dados_jogo.get('url_h2h_base')}")
                             
@@ -304,55 +302,37 @@ def main():
                                 except: pass
                                 driver = configurar_driver()
 
-                            # 2. Execução da Raspagem
+                            # 2. Execução da Raspagem de Scouts Pura
+                            acumulador_scouts = {}
                             try:
                                 driver.get(dados_jogo["url_h2h_base"])
                                 time.sleep(3) 
                                 driver.execute_script("window.scrollTo(0, 300);")
                                 
-                                dados_jogo = pegar_scouts_avancados(driver, dados_jogo, t1, t2)
+                                acumulador_scouts = pegar_scouts_avancados(driver, dados_jogo, t1, t2)
                             except Exception as e_f3:
                                 print(f"      ⚠️ Erro crítico na execução da Fase 3 no Main: {e_f3}")
                             
-                            # 3. Processamento de Resultados
-                            elenco_casa_disponivel = dados_jogo.get("elenco_mandante") or dados_jogo.get("jogadores_mandante")
-                            elenco_fora_disponivel = dados_jogo.get("elenco_visitante") or dados_jogo.get("jogadores_visitante")
-                            
-                            nome_time_casa = t1 if t1 else "MANDANTE"
-                            nome_time_fora = t2 if t2 else "VISITANTE"
+                            # 3. Processamento de Resultados usando a nova teste_jogadores.py
+                            resultado_jogadores = jogadores.analisar_dados_jogadores(acumulador_scouts, t1, t2)
 
-                            if dados_jogo.get("historico_chutes") and dados_jogo.get("historico_faltas"):
-                                # A. Processamento de Chutes
-                                res_jogadores = jogadores.verificar_destaques_jogadores(
-                                    dados_jogo["historico_chutes"], 5, nome_comp,
-                                    elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
-                                    nome_casa=nome_time_casa, nome_fora=nome_time_fora
-                                )
+                            if resultado_jogadores["aprovado"]:
+                                # Exibe log formatado no console
+                                print(resultado_jogadores["scouts_formatados"])
                                 
-                                # B. Processamento de Faltas
-                                res_faltas = jogadores.verificar_destaques_faltas(
-                                    dados_jogo["historico_faltas"], 5, nome_comp,
-                                    elenco_casa=elenco_casa_disponivel, elenco_fora=elenco_fora_disponivel,
-                                    nome_casa=nome_time_casa, nome_fora=nome_time_fora
-                                )
-
-                                # C. Salvamento no Bingo
-                                for rj in res_jogadores:
-                                    print(f"           ✅ [DEBUG] Salvando Chutes: {rj['texto']}")
-                                    jogos_para_pendentes.append({
-                                        "time_casa": t1, "time_fora": t2, 
-                                        "mercado": rj['texto'], "odd": "1.30", "liga": nome_comp
-                                    })
-
-                                for rf in res_faltas:
-                                    print(f"           ✅ [DEBUG] Salvando Faltas: {rf['texto']}")
-                                    jogos_para_pendentes.append({
-                                        "time_casa": t1, "time_fora": t2, 
-                                        "mercado": rf['texto'], "odd": "1.30", "liga": nome_comp
+                                # Processa cada jogador que teve média estritamente maior que 1.0 para o listão e pendentes
+                                for jk in resultado_jogadores["jogadores_qualificados"]:
+                                    txt_mercado = f"{jk['mercado']}: {jk['jogador']} ({jk['time'].capitalize()})"
+                                    print(f"           ✅ [DEBUG] Salvando Jogador: {txt_mercado}")
+                                    
+                                    # Adiciona aos mercados para processamento individualizado (irá para o telegram e filtros)
+                                    mercados_para_processar.append({
+                                        "texto": txt_mercado,
+                                        "chave": "JOGADOR_SCOUT",
+                                        "odd": "1.30"
                                     })
                             else:
-                                print(f"      ⚠️ [FASE 3] Nenhum dado de scout foi retornado para {t1} x {t2}.")
-                        
+                                print(f"      ⚠️ [FASE 3] Nenhum jogador qualificado com média maior que 1.0 em {t1} x {t2}.")
                         else:
                             print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
 
@@ -381,116 +361,6 @@ def main():
                                 # ------------------------------------------------------------------
                                 # CONVERSÃO DINÂMICA: GERA "Análise" PARA OCULTAR EM BINGO357
                                 # ------------------------------------------------------------------
-                                # Verifica se pertence aos mercados de scouts/estatísticas coletivas ou de jogadores
                                 eh_scout = (
-                                    m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA"] or
-                                    any(term in texto_lower for term in ["chute", "falta", "cartã", "cartao", "escanteio", "cantos"])
-                                )
-
-                                # Se for scout, ele vai para a lista salvo como "Análise" (o bingo357 lerá e ocultará a odd na listagem)
-                                # Se não for scout (Gols, Ambas Marcam), mantém a odd numérica capturada originalmente.
-                                odd_para_lista = "Análise" if eh_scout else m_odd
-                                # ------------------------------------------------------------------
-
-                                lista_para_filtros.append({
-                                    "horario": h_br, "time_casa": t1, "time_fora": t2,
-                                    "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
-                                    "link_betano": dados_jogo.get("link_betano")
-                                })
-                                total_mercados += 1
-                                
-                        # 🌟 RETORNO SEGURO PARA A ABA PRINCIPAL DA LIGA
-                        if len(driver.window_handles) > 1:
-                            todas_abas = driver.window_handles[:]
-                            for aba in todas_abas:
-                                if aba != aba_principal:
-                                    driver.switch_to.window(aba)
-                                    driver.close()
-                            driver.switch_to.window(aba_principal)
-                            time.sleep(1)
-
-                except Exception as e:
-                    print(f"⚠️ Erro ao processar partida no loop interno (Index {idx+1}): {e}")
-                    
-                    if "invalid session id" in str(e).lower() or "session" in str(e).lower():
-                        print("⚠️ [CRÍTICO] Sessão inválida detectada no loop interno. Derrubando driver...")
-                        try: driver.quit()
-                        except: pass
-                        driver = configurar_driver()
-                        break 
-                    else:
-                        if len(driver.window_handles) > 1:
-                            try:
-                                todas_abas = driver.window_handles[:]
-                                for aba in todas_abas:
-                                    if aba != aba_principal:
-                                        driver.switch_to.window(aba)
-                                        driver.close()
-                                driver.switch_to.window(aba_principal)
-                            except:
-                                pass
-                    continue
-
-        # --- PROCESSAMENTO E ENVIO FINAL ---
-        if lista_para_filtros:
-            lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
-            
-            meu_chat_id = os.getenv('CHAT_ID')
-            if meu_chat_id:
-                cabecalho = "🎫 *LISTA DE MERCADOS DO DIA*\n\n"
-                corpo = ""
-                for j in lista_para_filtros:
-                    bloco = f"⏱️ {j['horario']} | {j['liga']}\n🏟️ {j['time_casa']} x {j['time_fora']}\n🔶 {j['mercado']} | Odd: {j['odd']}\n\n------------------------------------\n\n"
-                    
-                    if len(cabecalho + corpo + bloco) > 4000:
-                        enviar_telegram(cabecalho + corpo, meu_chat_id)
-                        cabecalho = "🎫 *LISTA (Continuação)*\n\n"
-                        corpo = bloco
-                    else:
-                        corpo += bloco
-                
-                enviar_telegram(cabecalho + corpo, meu_chat_id)
-                print("📨 Listão enviado.")
-    
-            cache_dados = {}
-            for j in lista_para_filtros:
-                chave = f"{j['time_casa']}x{j['time_fora']}"
-                cache_dados[chave] = {
-                    "link": j.get("link_betano"),
-                    "liga": j.get("liga"),
-                    "horario": j.get("horario"),
-                    "odd": j.get("odd")
-                }
-    
-            print("📢 Pulando envio do Elite conforme solicitado.")
-    
-            canal_id = os.getenv('CHANNEL_ID')
-            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
-            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
-    
-            if texto_bingos_final and canal_id:
-                try:
-                    msg_bingo_formatada = "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final
-                    menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
-                    print("📢 Menu interativo enviado para o Canal.")
-                except Exception as e:
-                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
-
-            os.makedirs("ranking", exist_ok=True)
-            with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
-                json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d"), "jogos": jogos_para_pendentes}, f, indent=4, ensure_ascii=False)
-            
-            os.makedirs("telegram", exist_ok=True)
-            with open(f"telegram/jogos_{hoje_ref.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
-                json.dump([{"horario": j.get("horario"), "liga": j.get("liga"), "time_casa": j.get("time_casa"), "time_fora": j.get("time_fora"), "mercado": j.get("mercado"), "odd": j.get("odd"), "link_betano": j.get("link_betano")} for j in lista_para_filtros], f, indent=4, ensure_ascii=False)
-        else:
-            print("⚠️ Nenhuma partida qualificada entrou na 'lista_para_filtros' após varrer os elementos.")
-
-    except Exception as e:
-        print(f"❌ Erro Crítico no Main: {e}")
-    finally:
-        try: driver.quit()
-        except: pass
-
-if __name__ == "__main__":
-    main()
+                                    m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA", "JOGADOR_SCOUT"] or
+                                    any(term in texto_lower for te
