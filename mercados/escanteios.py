@@ -28,6 +28,11 @@ def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_li
     total_cantos_acumulados = sum(jogos_mandante_total) + sum(jogos_visitante_total)
     media_geral_confronto = total_cantos_acumulados / (quantidade_jogos * 2)
 
+    # 🛑 REGRA DE SEGURANÇA: Descarta se a média combinada for menor que 1.0 (evita dados zerados ou inexpressivos)
+    if media_geral_confronto < 4.0:
+        print(f"⏩ [REJEITADO] Média de escanteios muito baixa ({media_geral_confronto:.2f}). Confronto descartado.")
+        return {"aprovado": False}
+
     # Média isolada para auditoria
     media_historico_mandante = sum(jogos_mandante_total) / quantidade_jogos
     media_historico_visitante = sum(jogos_visitante_total) / quantidade_jogos
