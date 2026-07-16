@@ -41,15 +41,16 @@ def prioridade_mercado(mercado_texto):
     m = str(mercado_texto).lower()
     
     if "gols" in m: return 1
-    if "1x" in m: return 2
-    if "chute" in m: return 3 
-    if "falta" in m: return 3.1
-    if "cartão" in m or "cartao" in m: return 4
-    if "vitória" in m or "vitoria" in m: return 5
-    if "ambas" in m: return 6
-    if "2x" in m or "x2" in m: return 7
+    if "ambas" in m: return 2
+    if "1x" in m: return 3
+    if "vitória" in m or "vitoria" in m: return 4   
+    if "2x" in m or "x2" in m: return 5
+    if "chute" in m: return 6
+    if "falta" in m: return 7
+    if "cartão" in m or "cartao" in m: return 8
+    if "escanteio" in m: return 9
     
-    return 8
+    return 10
 
 def carregar_ranking_pro():
     """Lê o ranking pré-montado pelo ranking.py"""
@@ -169,13 +170,11 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     texto_final = f"🔶 Chutes no gol: {nome}{sufixo_odd}"
                 
             elif "cartã" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
-                # 🟢 Alinhado perfeitamente com os outros 'elif'
                 match_med_cartao = re.search(r'[\d.]+', mercado_limpo)
                 num_media = match_med_cartao.group(0) if match_med_cartao else "0.0"
                 texto_final = f"🔶 Média de cartões: {num_media}{sufixo_odd}"
                 
             else:
-                # 🟢 Essencial para não quebrar mercados de Gols e Ambas Marcam
                 texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}{sufixo_odd}"
                 
             agrupados[chave_jogo]["mercados"].append({
@@ -200,46 +199,4 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
-
-                # Busca a média que agora o main.py envia no texto (ex: "| Méd: 2.0")
-                match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_limpo, re.IGNORECASE)
-                med = match_med.group(1) if match_med else None
-                
-                if med:
-                    texto_final = f"🔶 Chutes no gol: {nome} | Méd: {float(med):.1f}{sufixo_odd}"
-                else:
-                    texto_final = f"🔶 Chutes no gol: {nome}{sufixo_odd}"
-                
-            elif "cartã" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
-                # 🟢 Alinhado perfeitamente com os outros 'elif'
-                match_med_cartao = re.search(r'[\d.]+', mercado_limpo)
-                num_media = match_med_cartao.group(0) if match_med_cartao else "0.0"
-                texto_final = f"🔶 Média de cartões: {num_media}{sufixo_odd}"
-                
-            else:
-                # 🟢 Essencial para não quebrar mercados de Gols e Ambas Marcam
-                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}{sufixo_odd}"
-                
-            agrupados[chave_jogo]["mercados"].append({
-                "texto": texto_final, 
-                "prioridade": prioridade_mercado(j.get('mercado', ''))
-            })
-            odd_total *= extrair_odd(odd_valor)
-
-        lista_blocos = []
-        for chave in sorted(agrupados.keys()):
-            d = agrupados[chave]
-            d["mercados"].sort(key=lambda x: x['best_score'] if 'best_score' in x else x['prioridade'])
-            
-            linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
-            
-            bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n🌐 [Abrir na Betano]({d['link']})"
-            
-            if d.get("link_h2h"): 
-                bloco += f"\n📊 [Estatísticas]({d['link_h2h']})"
-            lista_blocos.append(bloco)
-
-        corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
-    
-    return corpo_total
-                    
+                                     
