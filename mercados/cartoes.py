@@ -13,6 +13,11 @@ def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_lig
     lista_mandante = cartoes_mandante_h2h if isinstance(cartoes_mandante_h2h, list) else []
     lista_visitante = cartoes_visitante_h2h if isinstance(cartoes_visitante_h2h, list) else []
 
+    # Se ambas as listas vierem completamente vazias da raspagem, já reprova de cara
+    if not lista_mandante and not lista_visitante:
+        print(f"⏩ [REJEITADO] Sem dados de cartões disponíveis para o confronto.")
+        return {"aprovado": False}
+
     # Recorta ou garante o tamanho exato de jogos coletados para a média (padrão: últimos 3 jogos)
     jogos_mandante = lista_mandante[:quantidade_jogos]
     jogos_visitante = lista_visitante[:quantidade_jogos]
@@ -27,6 +32,12 @@ def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_lig
     
     # Média combinada do confronto
     media_geral_confronto = media_mandante + media_visitante
+
+    # 🛑 REGRA DE SEGURANÇA: Descarta se a média combinada de cartões for menor que 1.0
+    # Evita dados zerados (0.0) ou insuficientes na geração do bilhete
+    if media_geral_confronto < 1.0:
+        print(f"⏩ [REJEITADO] Média de cartões muito baixa ({media_geral_confronto:.2f}). Confronto descartado.")
+        return {"aprovado": False}
 
     # Formatação limpa para o listão
     texto_mercado = f"Média Cartões: {media_geral_confronto:.1f}"
