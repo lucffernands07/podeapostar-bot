@@ -115,6 +115,9 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
             odd_valor = str(j.get('odd') or info_extra.get('odd', '1.50')).strip()
             
+            # 🟢 AJUSTE DE SEGURANÇA: Busca o link h2h no jogo atual ou no dicionário de cache extra
+            link_h2h_resolvido = j.get('link_h2h') or info_extra.get('link_h2h')
+            
             chave_jogo = f"{horario}_{t1}_{t2}"
             if chave_jogo not in agrupados:
                 agrupados[chave_jogo] = {
@@ -122,7 +125,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     "time_casa": j.get('time_casa'), "time_fora": j.get('time_fora'),
                     "mercados": [], 
                     "link": j.get('link_betano') or info_extra.get('link', "https://www.betano.bet.br/"),
-                    "link_h2h": j.get('link_h2h') 
+                    "link_h2h": link_h2h_resolvido # 🟢 Aplica o link resolvido de forma garantida
                 }
             
             mercado_limpo = j.get('mercado', '')
@@ -156,6 +159,48 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                 match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_limpo)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
                 
+                # Busca a média que agora o main.py envia no texto (ex: "| Méd: 2.0")
+                match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_limpo, re.IGNORECASE)
+                med = match_med.group(1) if match_med else None
+                
+                if med:
+                    texto_final = f"🔶 Chutes no gol: {nome} | Méd: {float(med):.1f}{sufixo_odd}"
+                else:
+                    texto_final = f"🔶 Chutes no gol: {nome}{sufixo_odd}"
+                
+            elif "cartã" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
+                # 🟢 Alinhado perfeitamente com os outros 'elif'
+                match_med_cartao = re.search(r'[\d.]+', mercado_limpo)
+                num_media = match_med_cartao.group(0) if match_med_cartao else "0.0"
+                texto_final = f"🔶 Média de cartões: {num_media}{sufixo_odd}"
+                
+            else:
+                # 🟢 Essencial para não quebrar mercados de Gols e Ambas Marcam
+                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}{sufixo_odd}"
+                
+            agrupados[chave_jogo]["mercados"].append({
+                "texto": texto_final, 
+                "prioridade": prioridade_mercado(j.get('mercado', ''))
+            })
+            odd_total *= extrair_odd(odd_valor)
+
+        lista_blocos = []
+        for chave in sorted(agrupados.keys()):
+            d = agrupados[chave]
+            d["mercados"].sort(key=lambda x: x['best_score'] if 'best_score' in x else x['prioridade'])
+            
+            linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
+            
+            bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n🌐 [Abrir na Betano]({d['link']})"
+            
+            if d.get("link_h2h"): 
+                bloco += f"\n📊 [Estatísticas]({d['link_h2h']})"
+            lista_blocos.append(bloco)
+
+        corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
+    
+    return corpo_total
+
                 # Busca a média que agora o main.py envia no texto (ex: "| Méd: 2.0")
                 match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_limpo, re.IGNORECASE)
                 med = match_med.group(1) if match_med else None
