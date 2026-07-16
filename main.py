@@ -426,10 +426,11 @@ def main():
                 enviar_telegram(cabecalho + corpo, meu_chat_id)
                 print("📨 Listão enviado.")
     
-            # 🟢 CORREÇÃO 1: Salvando o 'link_h2h' no cache_dados para a primeira execução
+            # 🟢 CORREÇÃO 1: Salvando o 'link_h2h' no cache_dados com chave normalizada em minúsculo
             cache_dados = {}
             for j in lista_para_filtros:
-                chave = f"{j['time_casa']}x{j['time_fora']}"
+                # Usamos .lower().strip() para garantir compatibilidade exata com o bingo357.py
+                chave = f"{j['time_casa']}x{j['time_fora']}".lower().strip()
                 cache_dados[chave] = {
                     "link": j.get("link_betano"),
                     "liga": j.get("liga"),
@@ -437,7 +438,7 @@ def main():
                     "odd": j.get("odd"),
                     "link_h2h": j.get("link_h2h") # <-- Mapeia o link do Flashscore
                 }
-    
+
             print("📢 Pulando envio do Elite conforme solicitado.")
     
             canal_id = os.getenv('CHANNEL_ID')
