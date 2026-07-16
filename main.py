@@ -426,6 +426,7 @@ def main():
                 enviar_telegram(cabecalho + corpo, meu_chat_id)
                 print("📨 Listão enviado.")
     
+            # 🟢 CORREÇÃO 1: Salvando o 'link_h2h' no cache_dados para a primeira execução
             cache_dados = {}
             for j in lista_para_filtros:
                 chave = f"{j['time_casa']}x{j['time_fora']}"
@@ -433,7 +434,8 @@ def main():
                     "link": j.get("link_betano"),
                     "liga": j.get("liga"),
                     "horario": j.get("horario"),
-                    "odd": j.get("odd")
+                    "odd": j.get("odd"),
+                    "link_h2h": j.get("link_h2h") # <-- Mapeia o link do Flashscore
                 }
     
             print("📢 Pulando envio do Elite conforme solicitado.")
@@ -454,9 +456,22 @@ def main():
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
                 json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d"), "jogos": jogos_para_pendentes}, f, indent=4, ensure_ascii=False)
             
+            # 🟢 CORREÇÃO 2: Salvando o 'link_h2h' no JSON que o Telegram lê
             os.makedirs("telegram", exist_ok=True)
             with open(f"telegram/jogos_{hoje_ref.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
-                json.dump([{"horario": j.get("horario"), "liga": j.get("liga"), "time_casa": j.get("time_casa"), "time_fora": j.get("time_fora"), "mercado": j.get("mercado"), "odd": j.get("odd"), "link_betano": j.get("link_betano")} for j in lista_para_filtros], f, indent=4, ensure_ascii=False)
+                json.dump([
+                    {
+                        "horario": j.get("horario"), 
+                        "liga": j.get("liga"), 
+                        "time_casa": j.get("time_casa"), 
+                        "time_fora": j.get("time_fora"), 
+                        "mercado": j.get("mercado"), 
+                        "odd": j.get("odd"), 
+                        "link_betano": j.get("link_betano"),
+                        "link_h2h": j.get("link_h2h") # <-- Garante que o processador do Telegram terá acesso ao link
+                    } 
+                    for j in lista_para_filtros
+                ], f, indent=4, ensure_ascii=False)
         else:
             print("⚠️ Nenhuma partida qualificada entrou na 'lista_para_filtros' após varrer os elementos.")
 
