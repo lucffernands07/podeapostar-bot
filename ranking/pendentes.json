@@ -1,40 +1,33 @@
 {
-    "data_geracao": "2026-07-16",
+    "data_geracao": "2026-07-17",
     "jogos": [
         {
-            "time_casa": "Botafogo",
-            "time_fora": "Santos",
+            "time_casa": "Bahia",
+            "time_fora": "Chapecoense",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/8KWmH9SI/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/8lKX5FW9/#/resumo-de-jogo"
         },
         {
-            "time_casa": "CRB",
-            "time_fora": "Náutico",
+            "time_casa": "América-MG",
+            "time_fora": "Ceará",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/QFSF8Fdd/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/WCN2EpTH/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Derry City (Nir)",
-            "time_fora": "CSKA Sofia (Bul)",
+            "time_casa": "Nashville SC",
+            "time_fora": "Atlanta Utd",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/zozl13I0/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/S0oPl1rT/#/resumo-de-jogo"
         },
         {
-            "time_casa": "CF Montreal",
-            "time_fora": "Toronto FC",
+            "time_casa": "San Lorenzo",
+            "time_fora": "Dep. Riestra",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/phGxAaqd/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Racing Club",
-            "time_fora": "Defensa y Justicia",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Iql4msg3/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/4MHiRjx1/#/resumo-de-jogo"
         }
     ]
 }
