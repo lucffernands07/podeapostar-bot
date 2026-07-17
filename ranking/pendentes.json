@@ -9,11 +9,53 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/8lKX5FW9/#/resumo-de-jogo"
         },
         {
+            "time_casa": "Fluminense",
+            "time_fora": "Red Bull Bragantino",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ELwuJVc6/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Mirassol",
+            "time_fora": "Grêmio",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SO3EXUCa/#/resumo-de-jogo"
+        },
+        {
             "time_casa": "América-MG",
             "time_fora": "Ceará",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/WCN2EpTH/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Juventude",
+            "time_fora": "Cuiabá",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/hMK1WIl3/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "São Bernardo",
+            "time_fora": "Avaí",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/OnKfG6b5/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Fortaleza",
+            "time_fora": "Novorizontino",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SxxMJu5c/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Londrina",
+            "time_fora": "Botafogo-SP",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zqkzdxDj/#/resumo-de-jogo"
         },
         {
             "time_casa": "Nashville SC",
@@ -23,11 +65,25 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/S0oPl1rT/#/resumo-de-jogo"
         },
         {
+            "time_casa": "Los Angeles Galaxy",
+            "time_fora": "Los Angeles FC",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ALllqu6j/#/resumo-de-jogo"
+        },
+        {
             "time_casa": "San Lorenzo",
             "time_fora": "Dep. Riestra",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/4MHiRjx1/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "River Plate",
+            "time_fora": "Aldosivi",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/E75QaBrQ/#/resumo-de-jogo"
         }
     ]
 }
