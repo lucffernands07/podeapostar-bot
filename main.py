@@ -369,9 +369,11 @@ def main():
                                 lista_para_filtros.append({
                                     "horario": h_br, "time_casa": t1, "time_fora": t2,
                                     "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
-                                    "link_betano": dados_jogo.get("link_betano")
+                                    "link_betano": dados_jogo.get("link_betano"),
+                                    "link_h2h": url_h2h_final # 🟢 CORREÇÃO: Garante o link direto do jogo para o cache do canal
                                 })
                                 total_mercados += 1
+
                                 
                         # 🌟 RETORNO SEGURO PARA A ABA PRINCIPAL DA LIGA
                         if len(driver.window_handles) > 1:
