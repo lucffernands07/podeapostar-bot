@@ -370,7 +370,7 @@ def main():
                                     "horario": h_br, "time_casa": t1, "time_fora": t2,
                                     "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
                                     "link_betano": dados_jogo.get("link_betano"),
-                                    "link_h2h": url_h2h_final # 🟢 CORREÇÃO: Garante o link direto do jogo para o cache do canal
+                                    "link_h2h": url_h2h_final
                                 })
                                 total_mercados += 1
 
@@ -384,6 +384,13 @@ def main():
                                     driver.close()
                             driver.switch_to.window(aba_principal)
                             time.sleep(1)
+
+                        # 🟢 CORREÇÃO CRÍTICA: Força o navegador a recarregar a lista de jogos da Liga atual
+                        try:
+                            driver.get(url)  # 'url' vem lá do loop principal: for nome_comp, url in COMPETICOES.items():
+                            time.sleep(4)    # Tempo essencial para renderizar a lista de jogos do campeonato novamente
+                        except Exception as e_volta:
+                            print(f"⚠️ Erro ao recarregar a página mãe da liga: {e_volta}")
 
                 except Exception as e:
                     print(f"⚠️ Erro ao processar partida no loop interno (Index {idx+1}): {e}")
