@@ -1,13 +1,18 @@
 import re
+import jogadores  # Importa o módulo onde fica a trava de validação de liga elite
 
 def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_liga="", quantidade_jogos=3):
     """
     Processa os históricos coletivos de cartões amarelos obtidos no H2H.
-    Calcula a média geral somando os cartões de ambos os times nos últimos jogos.
+    Calcula a média geral somando os cartões de ambos os times nos últimos jogos se for liga elite.
     """
     nome_liga_limpo = nome_liga.strip() if nome_liga else "Liga Não Informada"
     
-    # 🚫 TRAVA DE LIGA ELITE REMOVIDA DAQUI PARA DEIXAR RASPAGEM LIVRE
+    # 🟢 TRAVA DE SEGURANÇA: Validação da Liga Elite antes de processar
+    permite_coletivos = jogadores.validar_liga_para_jogadores(nome_liga_limpo)
+    if not permite_coletivos:
+        print(f"      ⏩ [OTIMIZAÇÃO CARTÕES] Pulando média de cartões para {nome_liga_limpo} (Não é liga Elite).")
+        return {"aprovado": False}
 
     # Garante que os parâmetros sejam listas válidas e não nulas
     lista_mandante = cartoes_mandante_h2h if isinstance(cartoes_mandante_h2h, list) else []
