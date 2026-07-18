@@ -1,0 +1,42 @@
+name: Executar Teste Surebet
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch: # Permite execução manual pelo painel do GitHub
+  schedule:
+    # 00:05 no Horário de Brasília (UTC-3) corresponde a 03:05 UTC
+    - cron: '5 3 * * *'
+
+jobs:
+  rodar-bot-surebet:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clonar o Repositório
+      uses: actions/checkout@v4
+
+    - name: Configurar o Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Instalar Dependências do Sistema (Chrome/WebDriver)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y chromium-browser chromium-chromedriver
+
+    - name: Instalar Dependências do Python
+      run: |
+        python -m pip install --upgrade pip
+        pip install selenium pyTelegramBotAPI requests
+
+    - name: Executar o Script de Teste Surebet
+      env:
+        # Injeta suas credenciais salvas nos Secrets do seu repositório do GitHub
+        TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+      run: python teste_surebet.py
+      
