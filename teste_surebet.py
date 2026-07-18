@@ -9,6 +9,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 import telebot
 
+# 🟢 NOVOS IMPORTS PARA O SEU DRIVER
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+
 try:
     import ligas
 except ModuleNotFoundError:
@@ -32,17 +37,33 @@ LIGAS_SUREBET_ELITE = [
 ]
 
 # =====================================================================
+# 🌐 CONFIGURAÇÃO DO SEU DRIVER PADRÃO
+# =====================================================================
+def configurar_driver():
+    options = Options()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--blink-settings=imagesEnabled=false")
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+    
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver.set_page_load_timeout(30) 
+    driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
+    return driver
+
+# =====================================================================
 # 📊 RASPAGEM APENAS DE CHUTES NO GOL (FASE 2)
 # =====================================================================
 
 def extrair_chutes_no_gol_por_aba(driver, url_base, mid_param, dicionario_escudos, acumulador_scouts):
-    """Acessa estritamente o mercado de finalizações e extrai os chutes no gol"""
     url_final = f"{url_base}/resumo/estatisticas-jogadores/finalizacoes/?mid={mid_param}"
     try:
         driver.get(url_final)
         time.sleep(3.5)
         
-        # Foco exclusivo em chutes no alvo / no gol
         termos_busca = ["ALVO", "TARGET", "NO GOL"]
         
         cabecalhos = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .wcl-tableHeadCell_")
@@ -54,7 +75,7 @@ def extrair_chutes_no_gol_por_aba(driver, url_base, mid_param, dicionario_escudo
                 break
         
         if indice_alvo == -1:
-            indice_alvo = 5  # Mapeamento padrão para finalizações no alvo
+            indice_alvo = 5
 
         linhas = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
         
@@ -91,7 +112,6 @@ def extrair_chutes_no_gol_por_aba(driver, url_base, mid_param, dicionario_escudo
         pass
 
 def pegar_scouts_chutes_somente(driver, url_h2h_mae):
-    """Varre o H2H coletando os jogos passados e chama a extração de finalizações"""
     driver.get(url_h2h_mae)
     time.sleep(4.0)
     
@@ -107,7 +127,7 @@ def pegar_scouts_chutes_somente(driver, url_h2h_mae):
             if href: 
                 links_jogos_historico.add(href)
             
-            participantes = linha_jogo.find_elements(By.CSS_SELECTOR, "[class*='wcl-matchRow-participant'], .h2h__participant")
+            participantes = inline_jogo = linha_jogo.find_elements(By.CSS_SELECTOR, "[class*='wcl-matchRow-participant'], .h2h__participant")
             for p in participantes:
                 try:
                     img_el = p.find_element(By.CSS_SELECTOR, "img")
@@ -130,7 +150,6 @@ def pegar_scouts_chutes_somente(driver, url_h2h_mae):
             url_base = url_jogo.split("/#")[0].rstrip('/')
             mid_param = ""
 
-        # Executa estritamente a raspagem de finalizações/chutes no alvo
         extrair_chutes_no_gol_por_aba(driver, url_base, mid_param, dicionario_escudos, acumulador_scouts)
 
     return acumulador_scouts
@@ -140,7 +159,6 @@ def pegar_scouts_chutes_somente(driver, url_h2h_mae):
 # =====================================================================
 
 def pegar_odds_vitoria_topo(driver):
-    """Fase 1: Coleta estritamente odds de vitória 1X2"""
     try:
         wait = WebDriverWait(driver, 8)
         odds_elements = wait.until(EC.presence_of_all_elements_with_grid_cells(
@@ -158,7 +176,7 @@ def enviar_telegram_surebet_nativo(mensagem, reply_markup_json=None):
     if not TELEGRAM_TOKEN or not CHANNEL_ID:
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": CHANNEL_ID, "text": message, "parse_mode": "Markdown", "disable_web_page_preview": True}
+    payload = {"chat_id": CHANNEL_ID, "text": mensagem, "parse_mode": "Markdown", "disable_web_page_preview": True}
     if reply_markup_json:
         payload["reply_markup"] = reply_markup_json
     try:
@@ -194,13 +212,10 @@ def estruturar_e_enviar_bilhete(t1, t2, odd_c, odd_f, jogador_c, jogador_f):
 # =====================================================================
 
 def executar_busca_surebet():
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    driver = webdriver.Chrome(options=options)
+    # 🟢 CHAMA A SUA FUNÇÃO CONFIGURADA
+    driver = configurar_driver()
     
-    print("🚀 Iniciando varredura limpa (F1: Vitória | F2: Chutes)...")
+    print("🚀 Iniciando varredura limpa (F1: Vitória | F2: Chutes) com Driver Otimizado...")
     
     for nome_comp, url in ligas.COMPETICOES.items():
         if nome_comp.strip() not in LIGAS_SUREBET_ELITE:
@@ -222,14 +237,12 @@ def executar_busca_surebet():
                 t1 = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__home").text.strip()
                 t2 = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__away").text.strip()
                 
-                # 1️⃣ FASE 1: VALIDAÇÃO APENAS DA ODD DE VITÓRIA (>= 1.70)
                 odd_casa, odd_fora = pegar_odds_vitoria_topo(driver)
                 if not odd_casa or not odd_fora or odd_casa < 1.70 or odd_fora < 1.70:
                     continue
                     
                 print(f"   🎯 [ODDS VITÓRIA OK] {t1} x {t2} -> Puxando scouts de finalizações...")
                 
-                # 2️⃣ FASE 2: ENTRA APENAS PARA VER CHUTES NO GOL
                 url_h2h_mae = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                 acumulador_scouts = pegar_scouts_chutes_somente(driver, url_h2h_mae)
                 
@@ -245,7 +258,6 @@ def executar_busca_surebet():
                         if dados["time"].upper() == t2.upper() and media_chutes >= 2.0 and not melhor_jogador_fora:
                             melhor_jogador_fora = f"{jogador} 1+"
                 
-                # 3️⃣ SINALIZAÇÃO
                 if melhor_jogador_casa and melhor_jogador_fora:
                     print(f"   ✅ Par Surebet qualificado e enviado pro canal!")
                     estruturar_e_enviar_bilhete(t1, t2, odd_casa, odd_fora, melhor_jogador_casa, melhor_jogador_fora)
@@ -301,4 +313,4 @@ if __name__ == "__main__":
     if bot and not os.getenv('GITHUB_ACTIONS'):
         print("🤖 Escutando interações locais do Telegram...")
         bot.infinity_polling()
-        
+                
