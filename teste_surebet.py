@@ -1,5 +1,6 @@
 import os
 import time
+import re
 import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -8,21 +9,19 @@ from selenium.webdriver.support import expected_conditions as EC
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 import telebot
 
-# --- SEUS IMPORTS EXISTENTES ---
-import ligas          # Onde está o dicionário COMPETICOES
-import scouts_avancado # Seu arquivo de scouts da Fase 2
+try:
+    import ligas
+except ModuleNotFoundError:
+    print("❌ Arquivo ligas.py não encontrado. Certifique-se de que ele está na raiz.")
+    raise
 
-# --- CONFIGURAÇÃO REAPROVEITADA DO SEU MAIN.PY ---
+# --- CONFIGURAÇÃO DO AMBIENTE ---
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHANNEL_ID = os.getenv('CHANNEL_ID')  # ID do Canal onde vão os bilhetes
+CHANNEL_ID = os.getenv('CHANNEL_ID')
 
-# Inicializa o telebot apenas para ficar escutando e respondendo os botões (Polling)
 bot = telebot.TeleBot(TELEGRAM_TOKEN) if TELEGRAM_TOKEN else None
-
-# Dicionário temporário na memória para guardar as odds do cálculo das stakes
 usuario_odds_teste = {}
 
-# --- LISTA DE LIGAS ELITE SELECIONADAS ---
 LIGAS_SUREBET_ELITE = [
     "Brasileirão Série A", "Copa do Brasil", "Libertadores", "Sul-Americana",
     "Argentina - Liga Profesional", "Mundo - Copa do Mundo", "Europa - Champions League",
@@ -32,31 +31,116 @@ LIGAS_SUREBET_ELITE = [
     "EUA - MLS", "Argentina - Copa"
 ]
 
-def enviar_telegram_surebet_nativo(mensagem, reply_markup_json=None):
-    """ Envia o bilhete usando o mesmo método do seu main.py (requests) """
-    if not TELEGRAM_TOKEN or not CHANNEL_ID:
-        print("⚠️ Erro: TELEGRAM_TOKEN ou CHANNEL_ID não configurados nas variáveis de ambiente.")
-        return
-    
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": CHANNEL_ID, 
-        "text": mensagem,                 
-        "parse_mode": "Markdown",
-        "disable_web_page_preview": True
-    }
-    
-    # Adiciona os botões se eles forem passados
-    if reply_markup_json:
-        payload["reply_markup"] = reply_markup_json
+# =====================================================================
+# 📊 RASPAGEM APENAS DE CHUTES NO GOL (FASE 2)
+# =====================================================================
 
+def extrair_chutes_no_gol_por_aba(driver, url_base, mid_param, dicionario_escudos, acumulador_scouts):
+    """Acessa estritamente o mercado de finalizações e extrai os chutes no gol"""
+    url_final = f"{url_base}/resumo/estatisticas-jogadores/finalizacoes/?mid={mid_param}"
     try:
-        requests.post(url, data=payload)
-    except Exception as e:
-        print(f"Erro Telegram Surebet: {e}")
+        driver.get(url_final)
+        time.sleep(3.5)
+        
+        # Foco exclusivo em chutes no alvo / no gol
+        termos_busca = ["ALVO", "TARGET", "NO GOL"]
+        
+        cabecalhos = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .wcl-tableHeadCell_")
+        indice_alvo = -1
+        for idx, th in enumerate(cabecalhos):
+            txt = th.text.strip().upper()
+            if any(x in txt for x in termos_busca) and not any(x in txt for x in ["XG", "XGOT", "COMETIDAS"]):
+                indice_alvo = idx
+                break
+        
+        if indice_alvo == -1:
+            indice_alvo = 5  # Mapeamento padrão para finalizações no alvo
+
+        linhas = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
+        
+        for linha in linhas:
+            try:
+                celula_jogador = linha.find_element(By.CSS_SELECTOR, "td[class*='isSticky'], td[class*='fitContent'], [data-testid='wcl-playerCell']")
+                nome_jogador = celula_jogador.find_element(By.CSS_SELECTOR, "[class*='fp-playerName'], [class*='playerName']").text.strip()
+                
+                if not nome_jogador or nome_jogador == "TODOS": 
+                    continue
+                
+                img_logo = celula_jogador.find_element(By.CSS_SELECTOR, "div[class*='wcl-teamLogo'] img, div.wcl-teamLogo_sFhMr img")
+                src_linha = img_logo.get_attribute("src") or ""
+                arquivo_linha = src_linha.split('/')[-1] if src_linha else ""
+                
+                time_real = dicionario_escudos.get(arquivo_linha, "DESCONHECIDO")
+                if time_real == "DESCONHECIDO": 
+                    continue
+                
+                celulas = linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")
+                if len(celulas) > indice_alvo:
+                    valor_txt = celulas[indice_alvo].text.strip()
+                    qtd = int(valor_txt) if valor_txt.isdigit() else 0
+                    
+                    if qtd > 0:
+                        if nome_jogador not in acumulador_scouts:
+                            acumulador_scouts[nome_jogador] = {"time": time_real, "chutes": 0, "c_jogos": 0}
+                        
+                        acumulador_scouts[nome_jogador]["chutes"] += qtd
+                        acumulador_scouts[nome_jogador]["c_jogos"] += 1
+            except:
+                continue
+    except:
+        pass
+
+def pegar_scouts_chutes_somente(driver, url_h2h_mae):
+    """Varre o H2H coletando os jogos passados e chama a extração de finalizações"""
+    driver.get(url_h2h_mae)
+    time.sleep(4.0)
+    
+    dicionario_escudos = {}
+    links_jogos_historico = set()
+    acumulador_scouts = {}
+    
+    secoes_h2h = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
+    for bloco in secoes_h2h[:2]:
+        linhas_jogos = bloco.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")
+        for linha_jogo in linhas_jogos[:5]:
+            href = linha_jogo.get_attribute("href")
+            if href: 
+                links_jogos_historico.add(href)
+            
+            participantes = linha_jogo.find_elements(By.CSS_SELECTOR, "[class*='wcl-matchRow-participant'], .h2h__participant")
+            for p in participantes:
+                try:
+                    img_el = p.find_element(By.CSS_SELECTOR, "img")
+                    src_img = img_el.get_attribute("src") or ""
+                    nome_arquivo = src_img.split('/')[-1]
+                    nome_time = p.text.strip().upper()
+                    if nome_arquivo and nome_time and nome_arquivo not in dicionario_escudos:
+                        dicionario_escudos[nome_arquivo] = nome_time
+                except:
+                    continue
+        
+    lista_final_links = list(links_jogos_historico)[:10]
+
+    for url_jogo in lista_final_links:
+        if "?mid=" in url_jogo:
+            parts = url_jogo.split("?mid=")
+            url_base = parts[0].rstrip('/')
+            mid_param = parts[1]
+        else:
+            url_base = url_jogo.split("/#")[0].rstrip('/')
+            mid_param = ""
+
+        # Executa estritamente a raspagem de finalizações/chutes no alvo
+        extrair_chutes_no_gol_por_aba(driver, url_base, mid_param, dicionario_escudos, acumulador_scouts)
+
+    return acumulador_scouts
+
+# =====================================================================
+# ⚙️ MÉTODOS AUXILIARES E ENVIO
+# =====================================================================
 
 def pegar_odds_vitoria_topo(driver):
-    """ Captura as odds de vitória (1x2) direto da tela de resumo do Flashscore """
+    """Fase 1: Coleta estritamente odds de vitória 1X2"""
     try:
         wait = WebDriverWait(driver, 8)
         odds_elements = wait.until(EC.presence_of_all_elements_with_grid_cells(
@@ -70,28 +154,32 @@ def pegar_odds_vitoria_topo(driver):
         pass
     return None, None
 
+def enviar_telegram_surebet_nativo(mensagem, reply_markup_json=None):
+    if not TELEGRAM_TOKEN or not CHANNEL_ID:
+        return
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = {"chat_id": CHANNEL_ID, "text": message, "parse_mode": "Markdown", "disable_web_page_preview": True}
+    if reply_markup_json:
+        payload["reply_markup"] = reply_markup_json
+    try:
+        requests.post(url, data=payload)
+    except Exception as e:
+        print(f"Erro Telegram: {e}")
+
 def estruturar_e_enviar_bilhete(t1, t2, odd_c, odd_f, jogador_c, jogador_f):
-    """ Monta o texto e os botões seguindo a API nativa do Telegram """
     texto_mensagem = (
         "✅ **BILHETE SUREBET** ⚽\n\n"
         "🎟️ **Aposta 1**\n"
-        f"🔶 Classificação/Vitória: {t1}\n"
-        f"🔶 Chutes no gol: {jogador_c}\n"
-        f"🔶 Chutes no gol: {jogador_f}\n"
-        "---\n"
+        f"🔶 Vitória: {t1}\n"
+        f"🔶 Chutes no alvo: {jogador_c}\n\n"
         "🎟️ **Aposta 2**\n"
-        f"🔶 Classificação/Vitória: {t2}\n"
-        f"🔶 Chutes no gol: {jogador_c}\n"
-        f"🔶 Chutes no gol: {jogador_f}\n"
+        f"🔶 Vitória: {t2}\n"
+        f"🔶 Chutes no alvo: {jogador_f}\n"
         "---\n"
-        "🌐 Betano\n"
-        "📊 Estatísticas \n"
-        "---\n"
-        f"💡 *Odds Base Capturadas: {t1} ({odd_c:.2f}) | {t2} ({odd_f:.2f})*\n"
+        "🌐 Betano\n\n"
+        f"💡 *Odds Vitória Capturadas: {t1} ({odd_c:.2f}) | {t2} ({odd_f:.2f})*\n"
         "⚙️ *Ajuste os valores finais combinados abaixo para calcular as stakes:*"
     )
-    
-    # Criamos o markup usando o telebot e exportamos para JSON string (o requests exige string/json no reply_markup)
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
     markup.add(
@@ -99,22 +187,26 @@ def estruturar_e_enviar_bilhete(t1, t2, odd_c, odd_f, jogador_c, jogador_f):
         InlineKeyboardButton("✏️ Odd Final Aposta 2", callback_data="def_odd2"),
         InlineKeyboardButton("🧮 CALCULAR ENTRADAS", callback_data="calcular_stakes")
     )
-    
     enviar_telegram_surebet_nativo(texto_mensagem, reply_markup_json=markup.to_json())
 
-# --- LOOP DE VARREDURA ---
+# =====================================================================
+# 🔄 LOOP PRINCIPAL
+# =====================================================================
+
 def executar_busca_surebet():
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=options)
     
-    print("🚀 Iniciando Varredura Avançada de Surebets (Módulo Isolado)...")
+    print("🚀 Iniciando varredura limpa (F1: Vitória | F2: Chutes)...")
     
     for nome_comp, url in ligas.COMPETICOES.items():
         if nome_comp.strip() not in LIGAS_SUREBET_ELITE:
             continue
             
-        print(f"\n🔥 [SUREBET ELITE] Verificando: {nome_comp}")
+        print(f"🔥 [SUREBET] Verificando liga: {nome_comp}")
         driver.get(url)
         time.sleep(4)
         
@@ -130,21 +222,16 @@ def executar_busca_surebet():
                 t1 = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__home").text.strip()
                 t2 = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__away").text.strip()
                 
-                # 1️⃣ FILTRO DE ODDS (>= 1.70)
+                # 1️⃣ FASE 1: VALIDAÇÃO APENAS DA ODD DE VITÓRIA (>= 1.70)
                 odd_casa, odd_fora = pegar_odds_vitoria_topo(driver)
-                
-                if not odd_casa or not odd_fora:
+                if not odd_casa or not odd_fora or odd_casa < 1.70 or odd_fora < 1.70:
                     continue
                     
-                if odd_casa < 1.70 or odd_fora < 1.70:
-                    print(f"   ⏩ [FILTRO ODD] {t1} ({odd_casa:.2f}) x {t2} ({odd_fora:.2f}) - Descartado.")
-                    continue
-                    
-                print(f"   🎯 [ODDS EM REGRA] {t1} x {t2} -> Puxando scouts de chutes...")
+                print(f"   🎯 [ODDS VITÓRIA OK] {t1} x {t2} -> Puxando scouts de finalizações...")
                 
-                # 2️⃣ RASPAGEM DE CHUTES (FASE 2)
-                dados_jogo_fake = {"url_h2h_base": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"}
-                acumulador_scouts = scouts_avancado.pegar_scouts_avancados(driver, dados_jogo_fake, t1, t2)
+                # 2️⃣ FASE 2: ENTRA APENAS PARA VER CHUTES NO GOL
+                url_h2h_mae = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
+                acumulador_scouts = pegar_scouts_chutes_somente(driver, url_h2h_mae)
                 
                 melhor_jogador_casa = None
                 melhor_jogador_fora = None
@@ -158,20 +245,20 @@ def executar_busca_surebet():
                         if dados["time"].upper() == t2.upper() and media_chutes >= 2.0 and not melhor_jogador_fora:
                             melhor_jogador_fora = f"{jogador} 1+"
                 
-                # 3️⃣ ENVIO SE QUALIFICADO
+                # 3️⃣ SINALIZAÇÃO
                 if melhor_jogador_casa and melhor_jogador_fora:
-                    print(f"   ✅ [SUREBET GERADA] Enviando via requisição nativa...")
+                    print(f"   ✅ Par Surebet qualificado e enviado pro canal!")
                     estruturar_e_enviar_bilhete(t1, t2, odd_casa, odd_fora, melhor_jogador_casa, melhor_jogador_fora)
-                else:
-                    print(f"   ⏩ [SEM SCOUTS] Média de chutes insuficiente para este confronto.")
                     
-            except Exception as e_jogo:
-                print(f"   ⚠️ Erro no processamento do ID {id_jogo}: {e_jogo}")
+            except Exception as e:
+                print(f"   ⚠️ Erro no processamento do jogo: {e}")
                 continue
                 
     driver.quit()
 
-# --- HANDLER DOS BOTÕES INTERATIVOS (TELEBOT) ---
+# =====================================================================
+# 🤖 BOTÕES DO TELEGRAM (TELEBOT POLLING)
+# =====================================================================
 if bot:
     @bot.callback_query_handler(func=lambda call: True)
     def escutar_botoes_surebet(call):
@@ -180,52 +267,38 @@ if bot:
             usuario_odds_teste[uid] = {"odd1": 3.05, "odd2": 4.20}
             
         if call.data == "def_odd1":
-            msg = bot.send_message(uid, "Digite a Odd Final Combinada da **Aposta 1** na Betano:")
-            bot.register_next_step_handler(msg, salvar_odd1)
+            msg = bot.send_message(uid, "Digite a Odd Final Combinada da **Aposta 1**:")
+            bot.register_next_step_handler(msg, lambda m: salvar_odd(m, "odd1"))
         elif call.data == "def_odd2":
-            msg = bot.send_message(uid, "Digite a Odd Final Combinada da **Aposta 2** na Betano:")
-            bot.register_next_step_handler(msg, salvar_odd2)
+            msg = bot.send_message(uid, "Digite a Odd Final Combinada da **Aposta 2**:")
+            bot.register_next_step_handler(msg, lambda m: salvar_odd(m, "odd2"))
         elif call.data == "calcular_stakes":
-            o1 = usuario_odds_teste[uid]["odd1"]
-            o2 = usuario_odds_teste[uid]["odd2"]
+            o1, o2 = usuario_odds_teste[uid]["odd1"], usuario_odds_teste[uid]["odd2"]
             banca_total = 90.00
-            
             margem = (1 / o1) + (1 / o2)
-            stake1 = banca_total / (margem * o1)
-            stake2 = banca_total / (margem * o2)
-            
-            retorno = stake1 * o1
-            lucro = retorno - banca_total
+            s1, s2 = banca_total / (margem * o1), banca_total / (margem * o2)
             
             texto_resultado = (
-                "📊 **DIVISÃO INTELIGENTE CALCULADA**\n\n"
-                f"💰 Investimento Total Fixo: R$ {banca_total:.2f}\n"
-                f"📈 Margem Calculada: {margem*100:.1f}%\n"
+                "📊 **CÁLCULO DE STAKES**\n\n"
+                f"💰 Investimento: R$ {banca_total:.2f}\n"
                 "----------------------------\n"
-                f"🔹 **Aposta 1 (Odd {o1:.2f}):** Investir **R$ {stake1:.2f}**\n"
-                f"🔹 **Aposta 2 (Odd {o2:.2f}):** Investir **R$ {stake2:.2f}**\n"
+                f"🔹 **Aposta 1 (Odd {o1:.2f}):** R$ {s1:.2f}\n"
+                f"🔹 **Aposta 2 (Odd {o2:.2f}):** R$ {s2:.2f}\n"
                 "----------------------------\n"
-                f"🟢 **Lucro Líquido Garantido: +R$ {lucro:.2f}**"
+                f"🟢 **Lucro Garantido: +R$ {(s1*o1)-banca_total:.2f}**"
             )
             bot.send_message(call.message.chat.id, texto_resultado, parse_mode="Markdown")
 
-    def salvar_odd1(message):
+    def salvar_odd(message, chave):
         try:
-            usuario_odds_teste[message.from_user.id]["odd1"] = float(message.text.replace(",", "."))
-            bot.send_message(message.from_user.id, "✅ Odd 1 salva!")
+            usuario_odds_teste[message.from_user.id][chave] = float(message.text.replace(",", "."))
+            bot.send_message(message.from_user.id, "✅ Odd salva!")
         except:
-            bot.send_message(message.from_user.id, "❌ Valor incorreto.")
-
-    def salvar_odd2(message):
-        try:
-            usuario_odds_teste[message.from_user.id]["odd2"] = float(message.text.replace(",", "."))
-            bot.send_message(message.from_user.id, "✅ Odd 2 salva!")
-        except:
-            bot.send_message(message.from_user.id, "❌ Valor incorreto.")
+            bot.send_message(message.from_user.id, "❌ Valor inválido.")
 
 if __name__ == "__main__":
     executar_busca_surebet()
-    if bot:
-        print("🤖 Escutando botões via Telebot Polling...")
+    if bot and not os.getenv('GITHUB_ACTIONS'):
+        print("🤖 Escutando interações locais do Telegram...")
         bot.infinity_polling()
         
