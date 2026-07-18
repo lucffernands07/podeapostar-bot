@@ -1,11 +1,18 @@
 import re
+import jogadores # Importa o módulo onde fica a trava de validação de liga elite
 
 def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_liga="", quantidade_jogos=3):
     """
     Processa os históricos de escanteios totais coletados na nova raspagem.
-    Retorna estritamente o valor médio final combinado dos últimos jogos.
+    Retorna estritamente o valor médio final combinado dos últimos jogos se for liga elite.
     """
     nome_liga_limpo = nome_liga.strip() if nome_liga else "Liga Não Informada"
+
+    # 🟢 TRAVA DE SEGURANÇA: Validação da Liga Elite antes de processar
+    permite_coletivos = jogadores.validar_liga_para_jogadores(nome_liga_limpo)
+    if not permite_coletivos:
+        print(f"      ⏩ [OTIMIZAÇÃO ESCANTEIOS] Pulando média de escanteios para {nome_liga_limpo} (Não é liga Elite).")
+        return {"aprovado": False}
 
     # Garante que possuímos a amostragem completa de jogos passados exigida
     if len(cantos_mandante_h2h) < quantidade_jogos or len(cantos_visitante_h2h) < quantidade_jogos:
@@ -28,7 +35,7 @@ def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_li
     total_cantos_acumulados = sum(jogos_mandante_total) + sum(jogos_visitante_total)
     media_geral_confronto = total_cantos_acumulados / (quantidade_jogos * 2)
 
-    # 🛑 REGRA DE SEGURANÇA: Descarta se a média combinada for menor que 1.0 (evita dados zerados ou inexpressivos)
+    # 🛑 REGRA DE SEGURANÇA: Descarta se a média combinada for menor que 4.0
     if media_geral_confronto < 4.0:
         print(f"⏩ [REJEITADO] Média de escanteios muito baixa ({media_geral_confronto:.2f}). Confronto descartado.")
         return {"aprovado": False}
