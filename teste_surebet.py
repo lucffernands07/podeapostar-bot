@@ -33,8 +33,7 @@ LIGAS_SUREBET_ELITE = [
     "Argentina - Liga Profesional", "Mundo - Copa do Mundo", "Europa - Champions League",
     "Inglaterra - Premier League", "Espanha - LaLiga", "Alemanha - Bundesliga",
     "Italia - Serie A", "França - Ligue 1", "Europa - League", "Inglaterra - FA Cup",
-    "Espanha - Copa del Rey", "Alemanha - DFB Pokal", "Arábia Saudita - King Cup",
-    "EUA - MLS", "Argentina - Copa"
+    "Espanha - Copa del Rey", "Alemanha - DFB Pokal", "Arábia Saudita - King Cup", "Argentina - Copa"
 ]
 
 # =====================================================================
