@@ -138,7 +138,7 @@ def pegar_scouts_chutes_somente(driver, url_h2h_mae):
             if href: 
                 links_jogos_historico.add(href)
             
-            participantes = inline_jogo = linha_jogo.find_elements(By.CSS_SELECTOR, "[class*='wcl-matchRow-participant'], .h2h__participant")
+            participantes = linha_jogo.find_elements(By.CSS_SELECTOR, "[class*='wcl-matchRow-participant'], .h2h__participant")
             for p in participantes:
                 try:
                     img_el = p.find_element(By.CSS_SELECTOR, "img")
@@ -225,7 +225,6 @@ def estruturar_e_enviar_bilhete(t1, t2, odd_c, odd_f, jogador_c, jogador_f):
 def executar_busca_surebet():
     driver = configurar_driver()
     
-    # Suas referências de data do main.py
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
     
@@ -239,16 +238,14 @@ def executar_busca_surebet():
         
         try:
             driver.get(url)
-            time.sleep(6) # Seus 6 segundos regulamentares do main.py
+            time.sleep(6)
             
-            # Captura idêntica ao seu main.py + classes de agendados do flashscore
             elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
             if not elementos_jogos:
                 elementos_jogos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
             
             print(f"📊 Total de elementos encontrados na página: {len(elementos_jogos)}")
             
-            # Extrai os IDs únicos dos jogos encontrados
             ids_jogos = []
             for el in elementos_jogos:
                 try:
@@ -258,11 +255,9 @@ def executar_busca_surebet():
                 except:
                     continue
             
-            # Remove IDs duplicados mantendo a ordem
             ids_jogos = list(dict.fromkeys(ids_jogos))
             
         except Exception as e:
-            # Sua proteção de queda de sessão idêntica ao main.py
             if "invalid session id" in str(e).lower() or "session" in str(e).lower():
                 print("⚠️ Sessão do Chrome caiu! Reiniciando o navegador...")
                 try: driver.quit()
@@ -280,11 +275,24 @@ def executar_busca_surebet():
         for id_jogo in ids_jogos:
             try:
                 url_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
+                
+                # 🟢 LOG DO LINK SOLICITADO
+                print(f"   🔗 Acessando: {url_jogo}")
+                
                 driver.get(url_jogo)
                 time.sleep(3)
                 
-                t1 = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__home").text.strip()
-                t2 = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__away").text.strip()
+                t1_bruto = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__home").text.strip()
+                t2_bruto = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__away").text.strip()
+                
+                t1 = t1_bruto.split('\n')[0].strip()
+                t2 = t2_bruto.split('\n')[0].strip()
+                
+                # 🛑 FILTRO DE SEGURANÇA: IGNORAR ESPORTS, LONG PRAZO OU RANKINGS
+                termos_esport = ["FIFA", "ELECTRONIC", "ESPORTS", "SIMULATED", "VENCEDOR", "AVANÇA", "AVANCA"]
+                if any(x in t1_bruto.upper() or x in t2_bruto.upper() for x in termos_esport):
+                    print(f"   🚫 [{t1} x {t2}]: Ignorado (Detetado eSports, mercado de Longo Prazo ou Simulados)")
+                    continue
                 
                 # 1️⃣ FASE 1: VALIDAÇÃO DAS ODDS DE VITÓRIA
                 odd_casa, odd_fora = pegar_odds_vitoria_topo(driver)
@@ -373,4 +381,4 @@ if __name__ == "__main__":
     if bot and not os.getenv('GITHUB_ACTIONS'):
         print("🤖 Escutando interações locais do Telegram...")
         bot.infinity_polling()
-                
+    
