@@ -2,6 +2,7 @@ import os
 import time
 import re
 import requests
+from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -212,22 +213,60 @@ def estruturar_e_enviar_bilhete(t1, t2, odd_c, odd_f, jogador_c, jogador_f):
 # =====================================================================
 
 def executar_busca_surebet():
-    # 🟢 CHAMA A SUA FUNÇÃO CONFIGURADA
     driver = configurar_driver()
     
-    print("🚀 Iniciando varredura limpa (F1: Vitória | F2: Chutes) com Driver Otimizado...")
+    # Suas referências de data do main.py
+    hoje_ref = datetime.now()
+    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
+    
+    print("🚀 Iniciando varredura clonada do main.py (F1: Vitória | F2: Chutes)...")
     
     for nome_comp, url in ligas.COMPETICOES.items():
         if nome_comp.strip() not in LIGAS_SUREBET_ELITE:
             continue
             
-        print(f"🔥 [SUREBET] Verificando liga: {nome_comp}")
-        driver.get(url)
-        time.sleep(4)
+        print(f"\n--- Analisando: {nome_comp} ---")
         
-        elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match, [id^='g_1_']")
-        ids_jogos = [el.get_attribute("id").split('_')[-1] for el in elementos_jogos if el.get_attribute("id")]
-                
+        try:
+            driver.get(url)
+            time.sleep(6) # Seus 6 segundos regulamentares do main.py
+            
+            # Captura idêntica ao seu main.py + classes de agendados do flashscore
+            elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+            if not elementos_jogos:
+                elementos_jogos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
+            
+            print(f"📊 Total de elementos encontrados na página: {len(elementos_jogos)}")
+            
+            # Extrai os IDs únicos dos jogos encontrados
+            ids_jogos = []
+            for el in elementos_jogos:
+                try:
+                    _id = el.get_attribute("id")
+                    if _id:
+                        ids_jogos.append(_id.split('_')[-1])
+                except:
+                    continue
+            
+            # Remove IDs duplicados mantendo a ordem
+            ids_jogos = list(dict.fromkeys(ids_jogos))
+            
+        except Exception as e:
+            # Sua proteção de queda de sessão idêntica ao main.py
+            if "invalid session id" in str(e).lower() or "session" in str(e).lower():
+                print("⚠️ Sessão do Chrome caiu! Reiniciando o navegador...")
+                try: driver.quit()
+                except: pass
+                driver = configurar_driver() 
+                driver.get(url)
+                time.sleep(6)
+                elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+                ids_jogos = [el.get_attribute("id").split('_')[-1] for el in elementos_jogos if el.get_attribute("id")]
+            else:
+                print(f"⚠️ Erro ao carregar liga {nome_comp}: {e}")
+                continue
+
+        # Processamento dos jogos encontrados na liga
         for id_jogo in ids_jogos:
             try:
                 url_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
@@ -237,12 +276,20 @@ def executar_busca_surebet():
                 t1 = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__home").text.strip()
                 t2 = driver.find_element(By.CSS_SELECTOR, ".duelParticipant__away").text.strip()
                 
+                # 1️⃣ FASE 1: VALIDAÇÃO DAS ODDS DE VITÓRIA
                 odd_casa, odd_fora = pegar_odds_vitoria_topo(driver)
-                if not odd_casa or not odd_fora or odd_casa < 1.70 or odd_fora < 1.70:
+                
+                if not odd_casa or not odd_fora:
+                    print(f"   🚫 [{t1} x {t2}]: Ignorado (Odds 1X2 não disponíveis no topo)")
                     continue
                     
-                print(f"   🎯 [ODDS VITÓRIA OK] {t1} x {t2} -> Puxando scouts de finalizações...")
+                if odd_casa < 1.70 or odd_fora < 1.70:
+                    print(f"   🚫 [{t1} x {t2}]: Ignorado (Odds fora do padrão -> H: {odd_casa} | A: {odd_fora})")
+                    continue
+                    
+                print(f"   🎯 [ODDS VITÓRIA OK] {t1} ({odd_casa:.2f}) x {t2} ({odd_fora:.2f}) -> Buscando H2H...")
                 
+                # 2️⃣ FASE 2: SCOUTS DE CHUTES NO ALVO
                 url_h2h_mae = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                 acumulador_scouts = pegar_scouts_chutes_somente(driver, url_h2h_mae)
                 
@@ -258,12 +305,15 @@ def executar_busca_surebet():
                         if dados["time"].upper() == t2.upper() and media_chutes >= 2.0 and not melhor_jogador_fora:
                             melhor_jogador_fora = f"{jogador} 1+"
                 
+                # 3️⃣ SINALIZAÇÃO
                 if melhor_jogador_casa and melhor_jogador_fora:
-                    print(f"   ✅ Par Surebet qualificado e enviado pro canal!")
+                    print(f"   ✅ Par Surebet qualificado!")
                     estruturar_e_enviar_bilhete(t1, t2, odd_casa, odd_fora, melhor_jogador_casa, melhor_jogador_fora)
+                else:
+                    print(f"   ❌ [{t1} x {t2}]: Sem jogadores com média de chutes >= 2.0")
                     
             except Exception as e:
-                print(f"   ⚠️ Erro no processamento do jogo: {e}")
+                print(f"   ⚠️ Erro no processamento do jogo {id_jogo}: {e}")
                 continue
                 
     driver.quit()
