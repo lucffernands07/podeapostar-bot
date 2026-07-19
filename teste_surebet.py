@@ -59,43 +59,26 @@ def capturar_todas_as_odds(driver, id_jogo):
         "BTTS": "N/A", "1X": "N/A", "X2": "N/A",
         "VITORIA_CASA": "N/A", "VITORIA_FORA": "N/A"
     }
-
-    original_window = driver.current_window_handle
-    driver.execute_script(f"window.open('https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo', '_blank');")
-    time.sleep(1)
-    driver.switch_to.window(driver.window_handles[-1])
-
-    try:
-        time.sleep(3)
-        try:
-            elemento_aba = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/odds/')]"))
-            )
-            link_odds_base = elemento_aba.get_attribute('href')
-        except:
-            driver.close()
-            driver.switch_to.window(original_window)
-            return res
-
-        # --- 1. VITÓRIA SECA (1X2) ---
-        url_1x2 = link_odds_base.replace("/odds/", "/odds/1x2-odds/tempo-regulamentar/")
-        driver.get(url_1x2)
-        try:
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
-            time.sleep(2)
-            linha_1x2 = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
-            odds_1x2 = linha_1x2.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
-            if len(odds_1x2) >= 3:
-                res["VITORIA_CASA"] = odds_1x2[0].text.replace('↑', '').replace('↓', '').strip()
-                res["VITORIA_FORA"] = odds_1x2[2].text.replace('↑', '').replace('↓', '').strip()
-        except: pass
-
-    except Exception as e:
-        print(f"    ❌ Erro na integração das odds: {e}")
-    finally:
-        driver.close()
-        driver.switch_to.window(original_window)
     
+    try:
+        # Aguarda a tabela de odds carregar na própria página de resumo
+        WebDriverWait(driver, 7).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row, [class*='ui-table__row']"))
+        )
+        
+        # Pega a primeira linha de odds disponível (geralmente Bet365 ou Betano que aparecem no topo)
+        linha_odds = driver.find_element(By.CSS_SELECTOR, ".ui-table__row, [class*='ui-table__row']")
+        odds_tags = linha_odds.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd, [class*='oddsCell__odd']")
+        
+        if len(odds_tags) >= 3:
+            # Limpa setas de subida/descida (↑ ou ↓) se houver variação ao vivo
+            res["VITORIA_CASA"] = odds_tags[0].text.replace('↑', '').replace('↓', '').strip()
+            res["VITORIA_FORA"] = odds_tags[2].text.replace('↑', '').replace('↓', '').strip()
+            print(f"   💰 Odds obtidas direto no sumário -> Casa: {res['VITORIA_CASA']} | Fora: {res['VITORIA_FORA']}")
+            
+    except Exception as e:
+        print(f"    ❌ Erro ao raspar odds da tabela do sumário: {e}")
+        
     return res
 
 # =====================================================================
