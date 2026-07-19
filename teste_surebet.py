@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 import telebot
 
-# 🟢 NOVOS IMPORTS PARA O SEU DRIVER
+# NOVOS IMPORTS PARA O SEU DRIVER
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
@@ -29,22 +29,7 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN) if TELEGRAM_TOKEN else None
 usuario_odds_teste = {}
 
 LIGAS_SUREBET_ELITE = [
-    #"Brasileirão Série A", 
-    #"Copa do Brasil", 
-    #"Libertadores", 
-    #"Sul-Americana",
-    #"Argentina - Liga Profesional", 
     "Mundo - Copa do Mundo"
-    #"Europa - Champions League",
-    #"Inglaterra - Premier League", 
-    #"Espanha - LaLiga", 
-    #"Alemanha - Bundesliga",
-    #"Italia - Serie A", 
-    #"França - Ligue 1", 
-    #"Inglaterra - FA Cup",
-    #"Espanha - Copa del Rey", 
-    #"Alemanha - DFB Pokal",
-    #"Argentina - Copa"
 ]
 
 # =====================================================================
@@ -62,13 +47,60 @@ def configurar_driver():
     
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     driver.set_page_load_timeout(30) 
-    driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
+    driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "America/Sao_Paulo"})
     return driver
+
+# =====================================================================
+# 🎰 INTEGRAÇÃO DO ODDS.PY (CAPTURAR ODDS DO SITE)
+# =====================================================================
+def capturar_todas_as_odds(driver, id_jogo):
+    res = {
+        "GOLS_15": "N/A", "GOLS_25": "N/A", "GOLS_M35": "N/A", "GOLS_M45": "N/A", 
+        "BTTS": "N/A", "1X": "N/A", "X2": "N/A",
+        "VITORIA_CASA": "N/A", "VITORIA_FORA": "N/A"
+    }
+
+    original_window = driver.current_window_handle
+    driver.execute_script(f"window.open('https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo', '_blank');")
+    time.sleep(1)
+    driver.switch_to.window(driver.window_handles[-1])
+
+    try:
+        time.sleep(3)
+        try:
+            elemento_aba = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/odds/')]"))
+            )
+            link_odds_base = elemento_aba.get_attribute('href')
+        except:
+            driver.close()
+            driver.switch_to.window(original_window)
+            return res
+
+        # --- 1. VITÓRIA SECA (1X2) ---
+        url_1x2 = link_odds_base.replace("/odds/", "/odds/1x2-odds/tempo-regulamentar/")
+        driver.get(url_1x2)
+        try:
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
+            time.sleep(2)
+            linha_1x2 = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
+            odds_1x2 = linha_1x2.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
+            if len(odds_1x2) >= 3:
+                res["VITORIA_CASA"] = odds_1x2[0].text.replace('↑', '').replace('↓', '').strip()
+                res["VITORIA_FORA"] = odds_1x2[2].text.replace('↑', '').replace('↓', '').strip()
+        except: pass
+
+    except Exception as e:
+        print(f"    ❌ Erro na integração das odds: {e}")
+    finally:
+        driver.close()
+        driver.switch_to.window(original_window)
+    
+    return res
 
 # =====================================================================
 # 📊 RASPAGEM APENAS DE CHUTES NO GOL (FASE 2)
 # =====================================================================
-
 def extrair_chutes_no_gol_por_aba(driver, url_base, mid_param, dicionario_escudos, acumulador_scouts):
     url_final = f"{url_base}/resumo/estatisticas-jogadores/finalizacoes/?mid={mid_param}"
     try:
@@ -76,7 +108,6 @@ def extrair_chutes_no_gol_por_aba(driver, url_base, mid_param, dicionario_escudo
         time.sleep(3.5)
         
         termos_busca = ["ALVO", "TARGET", "NO GOL"]
-        
         cabecalhos = driver.find_elements(By.CSS_SELECTOR, "th, [data-testid='wcl-tableHeadCell'], .wcl-tableHeadCell_")
         indice_alvo = -1
         for idx, th in enumerate(cabecalhos):
@@ -89,7 +120,6 @@ def extrair_chutes_no_gol_por_aba(driver, url_base, mid_param, dicionario_escudo
             indice_alvo = 5
 
         linhas = driver.find_elements(By.CSS_SELECTOR, "tr[class*='row'], tr, .wcl-table__row_, [data-testid='wcl-tableRow']")
-        
         for linha in linhas:
             try:
                 celula_jogador = linha.find_element(By.CSS_SELECTOR, "td[class*='isSticky'], td[class*='fitContent'], [data-testid='wcl-playerCell']")
@@ -151,7 +181,6 @@ def pegar_scouts_chutes_somente(driver, url_h2h_mae):
                     continue
         
     lista_final_links = list(links_jogos_historico)[:10]
-
     for url_jogo in lista_final_links:
         if "?mid=" in url_jogo:
             parts = url_jogo.split("?mid=")
@@ -160,7 +189,6 @@ def pegar_scouts_chutes_somente(driver, url_h2h_mae):
         else:
             url_base = url_jogo.split("/#")[0].rstrip('/')
             mid_param = ""
-
         extrair_chutes_no_gol_por_aba(driver, url_base, mid_param, dicionario_escudos, acumulador_scouts)
 
     return acumulador_scouts
@@ -168,26 +196,11 @@ def pegar_scouts_chutes_somente(driver, url_h2h_mae):
 # =====================================================================
 # ⚙️ MÉTODOS AUXILIARES E ENVIO
 # =====================================================================
-
-def pegar_odds_vitoria_topo(driver):
-    try:
-        wait = WebDriverWait(driver, 8)
-        odds_elements = wait.until(EC.presence_of_all_elements_with_grid_cells(
-            (By.CSS_SELECTOR, ".oddsValueInner, [class*='oddsValueInner']")
-        ))
-        if len(odds_elements) >= 3:
-            odd_casa = float(odds_elements[0].text.strip().replace(",", "."))
-            odd_fora = float(odds_elements[2].text.strip().replace(",", "."))
-            return odd_casa, odd_fora
-    except:
-        pass
-    return None, None
-
 def enviar_telegram_surebet_nativo(mensagem, reply_markup_json=None):
     if not TELEGRAM_TOKEN or not CHANNEL_ID:
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": CHANNEL_ID, "text": mensagem, "parse_mode": "Markdown", "disable_web_page_preview": True}
+    payload = {"chat_id": CHANNEL_ID, "text": message, "parse_mode": "Markdown", "disable_web_page_preview": True}
     if reply_markup_json:
         payload["reply_markup"] = reply_markup_json
     try:
@@ -219,16 +232,15 @@ def estruturar_e_enviar_bilhete(t1, t2, odd_c, odd_f, jogador_c, jogador_f):
     enviar_telegram_surebet_nativo(texto_mensagem, reply_markup_json=markup.to_json())
 
 # =====================================================================
-# 🔄 LOOP PRINCIPAL
+# 🔄 LOOP PRINCIPAL (LÓGICA DO MAIN)
 # =====================================================================
-
 def executar_busca_surebet():
     driver = configurar_driver()
     
     hoje_ref = datetime.now()
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
     
-    print("🚀 Iniciando varredura clonada do main.py (F1: Vitória | F2: Chutes)...")
+    print("🚀 Iniciando varredura sincronizada com main.py (F1: Odds dedicada | F2: Chutes)...")
     
     for nome_comp, url in ligas.COMPETICOES.items():
         if nome_comp.strip() not in LIGAS_SUREBET_ELITE:
@@ -240,7 +252,10 @@ def executar_busca_surebet():
             driver.get(url)
             time.sleep(6)
             
-            elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+            # FILTRAGEM DO MAIN: Captura apenas os elementos válidos programados
+            elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match--scheduled")
+            if not elementos_jogos:
+                elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
             if not elementos_jogos:
                 elementos_jogos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
             
@@ -249,6 +264,11 @@ def executar_busca_surebet():
             ids_jogos = []
             for el in elementos_jogos:
                 try:
+                    # Garante que ignora jogos encerrados pulando se contiver classes de resultados passados
+                    classe_elemento = el.get_attribute("class") or ""
+                    if "event__match--live" in classe_elemento or "event__match--done" in classe_elemento:
+                        continue
+                        
                     _id = el.get_attribute("id")
                     if _id:
                         ids_jogos.append(_id.split('_')[-1])
@@ -265,18 +285,16 @@ def executar_busca_surebet():
                 driver = configurar_driver() 
                 driver.get(url)
                 time.sleep(6)
-                elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+                elementos_jogos = driver.find_elements(By.CSS_SELECTOR, ".event__match--scheduled")
                 ids_jogos = [el.get_attribute("id").split('_')[-1] for el in elementos_jogos if el.get_attribute("id")]
             else:
                 print(f"⚠️ Erro ao carregar liga {nome_comp}: {e}")
                 continue
 
-        # Processamento dos jogos encontrados na liga
+        # Processamento dos jogos válidos da grade
         for id_jogo in ids_jogos:
             try:
                 url_jogo = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
-                
-                # 🟢 LOG DO LINK SOLICITADO
                 print(f"   🔗 Acessando: {url_jogo}")
                 
                 driver.get(url_jogo)
@@ -288,18 +306,21 @@ def executar_busca_surebet():
                 t1 = t1_bruto.split('\n')[0].strip()
                 t2 = t2_bruto.split('\n')[0].strip()
                 
-                # 🛑 FILTRO DE SEGURANÇA: IGNORAR ESPORTS, LONG PRAZO OU RANKINGS
+                # FILTRO ANTI-ESPORTS / JOGOS SIMULADOS
                 termos_esport = ["FIFA", "ELECTRONIC", "ESPORTS", "SIMULATED", "VENCEDOR", "AVANÇA", "AVANCA"]
                 if any(x in t1_bruto.upper() or x in t2_bruto.upper() for x in termos_esport):
-                    print(f"   🚫 [{t1} x {t2}]: Ignorado (Detetado eSports, mercado de Longo Prazo ou Simulados)")
+                    print(f"   🚫 [{t1} x {t2}]: Ignorado (Detetado eSports ou Simulados)")
                     continue
                 
-                # 1️⃣ FASE 1: VALIDAÇÃO DAS ODDS DE VITÓRIA
-                odd_casa, odd_fora = pegar_odds_vitoria_topo(driver)
+                # 1️⃣ FASE 1: VALIDAÇÃO DAS ODDS USANDO O SEU MÉTODO DO ODDS.PY
+                dict_odds = capturar_todas_as_odds(driver, id_jogo)
                 
-                if not odd_casa or not odd_fora:
-                    print(f"   🚫 [{t1} x {t2}]: Ignorado (Odds 1X2 não disponíveis no topo)")
+                if dict_odds["VITORIA_CASA"] == "N/A" or dict_odds["VITORIA_FORA"] == "N/A":
+                    print(f"   🚫 [{t1} x {t2}]: Ignorado (Odds 1X2 dedicadas indisponíveis)")
                     continue
+                    
+                odd_casa = float(dict_odds["VITORIA_CASA"])
+                odd_fora = float(dict_odds["VITORIA_FORA"])
                     
                 if odd_casa < 1.70 or odd_fora < 1.70:
                     print(f"   🚫 [{t1} x {t2}]: Ignorado (Odds fora do padrão -> H: {odd_casa} | A: {odd_fora})")
@@ -381,4 +402,4 @@ if __name__ == "__main__":
     if bot and not os.getenv('GITHUB_ACTIONS'):
         print("🤖 Escutando interações locais do Telegram...")
         bot.infinity_polling()
-    
+        
