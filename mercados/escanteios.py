@@ -1,5 +1,5 @@
 import re
-import jogadores # Importa o módulo onde fica a trava de validação de liga elite
+import . jogadores # Importa o módulo onde fica a trava de validação de liga elite
 
 def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_liga="", quantidade_jogos=3):
     """
