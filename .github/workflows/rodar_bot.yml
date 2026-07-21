@@ -55,7 +55,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: 1. Executar bot Selenium (Bilhetes de Hoje)
-        timeout-minutes: 50
+        timeout-minutes: 70
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
