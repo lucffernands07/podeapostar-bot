@@ -7,7 +7,7 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
     
     try:
         driver.get(url_final)
-        time.sleep(3.5)
+        time.sleep(1.5)
         
         termos_busca = ["ALVO", "TARGET", "NO GOL"] if mercado == "finalizacoes" else ["SOFRIDAS", "SUFFERED", "FALTAS SOF"]
         
@@ -62,7 +62,7 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
 def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     url_h2h_mae = dados_jogo.get("url_h2h_base")
     driver.get(url_h2h_mae)
-    time.sleep(4.0)
+    time.sleep(1.5)
     
     dicionario_escudos = {}
     links_jogos_historico = set()
