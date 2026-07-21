@@ -64,12 +64,12 @@ def pegar_estatisticas_coletivas(driver, stats):
                     try: WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
                     except: pass
                         
-                    time.sleep(2.5)
+                    time.sleep(1.5)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
 
                     url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas/total/"
                     driver.get(url_stats_geral)
-                    time.sleep(2.0)
+                    time.sleep(1.5)
 
                     cantos_jogo_total = 0
                     cartoes_jogo_total = 0
