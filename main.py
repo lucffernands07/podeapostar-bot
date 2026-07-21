@@ -49,7 +49,7 @@ def configurar_driver():
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    driver.set_page_load_timeout(30) 
+    driver.set_page_load_timeout(15) 
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": "UTC"})
     return driver
 
@@ -69,7 +69,7 @@ def main():
             
             try:
                 driver.get(url)
-                time.sleep(6)  
+                time.sleep(3)  
                 
                 elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
                 if not elementos:
@@ -84,7 +84,7 @@ def main():
                     except: pass
                     driver = configurar_driver() 
                     driver.get(url)
-                    time.sleep(6)
+                    time.sleep(3)
                     elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
                 else:
                     print(f"⚠️ Erro ao carregar liga {nome_comp}: {e}")
@@ -240,7 +240,7 @@ def main():
                         try:
                             # Garante que o driver vá para a URL mãe antes de iniciar a Fase 2
                             driver.get(dados_jogo["url_h2h_base"])
-                            time.sleep(2)
+                            time.sleep(1.5)
                             
                             dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
                             if dados_coletivos and isinstance(dados_coletivos, dict):
@@ -302,7 +302,7 @@ def main():
                             acumulador_scouts = {}
                             try:
                                 driver.get(dados_jogo["url_h2h_base"])
-                                time.sleep(3) 
+                                time.sleep(1.5) 
                                 driver.execute_script("window.scrollTo(0, 300);")
                                 
                                 acumulador_scouts = pegar_scouts_avancados(driver, dados_jogo, t1, t2)
@@ -388,7 +388,7 @@ def main():
                         # 🟢 CORREÇÃO CRÍTICA: Força o navegador a recarregar a lista de jogos da Liga atual
                         try:
                             driver.get(url)  # 'url' vem lá do loop principal: for nome_comp, url in COMPETICOES.items():
-                            time.sleep(4)    # Tempo essencial para renderizar a lista de jogos do campeonato novamente
+                            time.sleep(2.0)    # Tempo essencial para renderizar a lista de jogos do campeonato novamente
                         except Exception as e_volta:
                             print(f"⚠️ Erro ao recarregar a página mãe da liga: {e_volta}")
 
