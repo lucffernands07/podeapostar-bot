@@ -12,9 +12,9 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     """
     stats = {
         "link_betano": None,
-        "casa_15": 0, "casa_25": 0, "casa_45_under": 0, "casa_btts": 0, 
+        "casa_15": 0, "casa_25": 0, "casa_35_under": 0,"casa_45_under": 0, "casa_btts": 0, 
         "casa_vitorias_recente": 0, "ultimo_gols_casa": 0, "t1_resultado_1": "",
-        "fora_15": 0, "fora_25": 0, "fora_45_under": 0, "fora_btts": 0, 
+        "fora_15": 0, "fora_25": 0, "fora_35_under": 0,"fora_45_under": 0, "fora_btts": 0, 
         "fora_vitorias_recente": 0, "ultimo_gols_fora": 0, "t2_resultado_1": "",
         "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
         "h2h_res_1": "", "h2h_res_2": "", 
@@ -23,7 +23,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         "h2h_placar_1": None, "h2h_placar_2": None,   
         "pular_gols": False,
         "url_h2h_base": None,
-        # Inicializados vazios por segurança caso o jogo não passe nos filtros iniciais
         "historico_chutes": {}, 
         "historico_mandante_am": {}, "historico_mandante_vm": {},
         "historico_visitante_am": {}, "historico_visitante_vm": {}
@@ -101,6 +100,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                         if i == 0: stats[f"ultimo_gols_{prefixo}"] = total
                         if total > 1.5: stats[f"{prefixo}_15"] += 1
                         if total > 2.5: stats[f"{prefixo}_25"] += 1
+                        if total <= 3: stats[f"{prefixo}_35_under"] += 1
                         if total <= 4: stats[f"{prefixo}_45_under"] += 1 
                         if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
                         
