@@ -2,9 +2,7 @@ name: Executar Teste Surebet
 
 on:
   push:
-    branches:
-      - main
-      - master
+      surebet.py
   workflow_dispatch: # Permite execução manual pelo painel do GitHub
   schedule:
     # 00:05 no Horário de Brasília (UTC-3) corresponde a 03:05 UTC
