@@ -16,7 +16,7 @@ def capturar_todas_as_odds(driver, id_jogo):
     driver.switch_to.window(driver.window_handles[-1])
 
     try:
-        time.sleep(3)
+        time.sleep(1.5)
         try:
             elemento_aba = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/odds/')]"))
@@ -32,7 +32,7 @@ def capturar_todas_as_odds(driver, id_jogo):
         driver.get(url_1x2)
         try:
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
-            time.sleep(2)
+            time.sleep(1.5)
             linha_1x2 = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
             odds_1x2 = linha_1x2.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
             if odds_1x2:
@@ -44,7 +44,7 @@ def capturar_todas_as_odds(driver, id_jogo):
         driver.get(url_gols)
         try:
             WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
-            time.sleep(2)
+            time.sleep(1.5)
             
             # Mapeamento para o loop incluindo o alvo 3.5 apontando para a coluna 1 (Abaixo)
             mercados_alvo = {
@@ -70,7 +70,7 @@ def capturar_todas_as_odds(driver, id_jogo):
         # --- 3. AMBOS MARCAM (BTTS) ---
         try:
             driver.get(link_odds_base.replace("/odds/", "/odds/ambos-marcam/tempo-regulamentar/"))
-            time.sleep(2)
+            time.sleep(1.5)
             linha_b = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
             odds_b = linha_b.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
             if odds_b: res["BTTS"] = odds_b[0].text.replace('↑', '').replace('↓', '').strip()
@@ -79,7 +79,7 @@ def capturar_todas_as_odds(driver, id_jogo):
         # --- 4. DUPLA CHANCE ---
         try:
             driver.get(link_odds_base.replace("/odds/", "/odds/double-chance/tempo-regulamentar/"))
-            time.sleep(2)
+            time.sleep(1.5)
             linha_d = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
             odds_d = linha_d.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
             if len(odds_d) >= 3:
