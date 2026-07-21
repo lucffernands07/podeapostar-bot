@@ -1,7 +1,7 @@
 import re
 from . import jogadores  # Importa o módulo onde fica a trava de validação de liga elite
 
-def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_liga="", quantidade_jogos=3):
+def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_liga="", quantidade_jogos=3, dados_incompletos=False):
     """
     Processa os históricos coletivos de cartões amarelos obtidos no H2H.
     Calcula a média geral somando os cartões de ambos os times nos últimos jogos se for liga elite.
@@ -18,28 +18,37 @@ def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_lig
     lista_mandante = cartoes_mandante_h2h if isinstance(cartoes_mandante_h2h, list) else []
     lista_visitante = cartoes_visitante_h2h if isinstance(cartoes_visitante_h2h, list) else []
 
-    # Se ambas as listas vierem completamente vazias da raspagem, já reprova de cara
-    if not lista_mandante and not lista_visitante:
-        print(f"⏩ [REJEITADO] Sem dados de cartões disponíveis para o confronto.")
+    # Se ambas as listas vierem completamente vazias ou incompletas
+    if len(lista_mandante) < quantidade_jogos or len(lista_visitante) < quantidade_jogos:
+        print(f"⏩ [HISTÓRICO INCOMPLETO] Dados de cartões insuficientes para o confronto.")
         return {"aprovado": False}
 
-    # Recorta ou garante o tamanho exato de jogos coletados para a média (padrão: últimos 3 jogos)
-    jogos_mandante = lista_mandante[:quantidade_jogos]
-    jogos_visitante = lista_visitante[:quantidade_jogos]
+    # 🚨 BLINDAGEM: Converte todos os valores extraídos para INT limpando possíveis espaços ou strings
+    try:
+        jogos_mandante = [int(str(x).strip()) for x in lista_mandante[:quantidade_jogos]]
+        jogos_visitante = [int(str(x).strip()) for x in lista_visitante[:quantidade_jogos]]
+    except Exception as e_conv:
+        print(f"⚠️ [ERRO CONVERSÃO] Erro ao converter dados de cartões para números: {e_conv}")
+        return {"aprovado": False}
+
+    # 🛑 🚨 TRAVA DE DADOS ZERADOS/INCOMPLETOS:
+    # Descarta se a flag do scraper veio True OU se qualquer jogo das duas listas contiver 0
+    if dados_incompletos or (0 in jogos_mandante) or (0 in jogos_visitante):
+        print(f"⏩ [DESCARTADO] Jogo com estatísticas de cartões ausentes/zeradas: Mandante {jogos_mandante} | Visitante {jogos_visitante}")
+        return {"aprovado": False}
 
     # Soma todos os cartões amarelos do período de cada equipe
     total_mandante = sum(jogos_mandante)
     total_visitante = sum(jogos_visitante)
 
     # Calcula as médias por partida de cada equipe
-    media_mandante = total_mandante / len(jogos_mandante) if len(jogos_mandante) > 0 else 0
-    media_visitante = total_visitante / len(jogos_visitante) if len(jogos_visitante) > 0 else 0
+    media_mandante = total_mandante / quantidade_jogos
+    media_visitante = total_visitante / quantidade_jogos
     
     # Média combinada do confronto
     media_geral_confronto = media_mandante + media_visitante
 
     # 🛑 REGRA DE SEGURANÇA: Descarta se a média combinada de cartões for menor que 1.0
-    # Evita dados zerados (0.0) ou insuficientes na geração do bilhete
     if media_geral_confronto < 1.0:
         print(f"⏩ [REJEITADO] Média de cartões muito baixa ({media_geral_confronto:.2f}). Confronto descartado.")
         return {"aprovado": False}
