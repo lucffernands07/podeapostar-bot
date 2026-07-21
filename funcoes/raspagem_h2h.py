@@ -39,7 +39,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         # Clica na aba H2H do Flashscore
         h2h_tab = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
         h2h_tab.click()
-        time.sleep(2)
+        time.sleep(1.5)
         
         # Guarda a URL base do H2H para a Raspagem 2 usar se for necessário
         stats["url_h2h_base"] = driver.current_url
