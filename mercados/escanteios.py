@@ -1,7 +1,7 @@
 import re
 from . import jogadores # Importa o módulo onde fica a trava de validação de liga elite
 
-def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_liga="", quantidade_jogos=3):
+def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_liga="", quantidade_jogos=3, dados_incompletos=False):
     """
     Processa os históricos de escanteios totais coletados na nova raspagem.
     Retorna estritamente o valor médio final combinado dos últimos jogos se for liga elite.
@@ -27,9 +27,11 @@ def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_li
         print(f"⚠️ [ERRO CONVERSÃO] Erro ao converter dados de cantos para números: {e_conv}")
         return {"aprovado": False}
 
-    # Se mesmo após a conversão, as listas retornarem apenas zeros, criamos um log de aviso
-    if sum(jogos_mandante_total) == 0 and sum(jogos_visitante_total) == 0:
-        print(f"⚠️ [AVISO] Listas de escanteios vieram zeradas da raspagem! Mandante: {jogos_mandante_total} | Visitante: {jogos_visitante_total}")
+    # 🛑 🚨 TRAVA DE DADOS ZERADOS/INCOMPLETOS:
+    # Descarta se a flag do scraper veio True OU se qualquer jogo das duas listas contiver 0
+    if dados_incompletos or (0 in jogos_mandante_total) or (0 in jogos_visitante_total):
+        print(f"⏩ [DESCARTADO] Jogo com estatísticas de escanteio ausentes/zeradas: Mandante {jogos_mandante_total} | Visitante {jogos_visitante_total}")
+        return {"aprovado": False}
 
     # --- CÁLCULO DAS MÉDIAS REAIS ---
     total_cantos_acumulados = sum(jogos_mandante_total) + sum(jogos_visitante_total)
