@@ -18,7 +18,7 @@ def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_lig
     lista_mandante = cartoes_mandante_h2h if isinstance(cartoes_mandante_h2h, list) else []
     lista_visitante = cartoes_visitante_h2h if isinstance(cartoes_visitante_h2h, list) else []
 
-    # Se ambas as listas vierem completamente vazias ou incompletas
+    # Se ambas as listas vierem incompletas em número de jogos
     if len(lista_mandante) < quantidade_jogos or len(lista_visitante) < quantidade_jogos:
         print(f"⏩ [HISTÓRICO INCOMPLETO] Dados de cartões insuficientes para o confronto.")
         return {"aprovado": False}
@@ -32,10 +32,16 @@ def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_lig
         return {"aprovado": False}
 
     # 🛑 🚨 TRAVA DE DADOS ZERADOS/INCOMPLETOS:
-    # Descarta se a flag do scraper veio True OU se qualquer jogo das duas listas contiver 0
-    if dados_incompletos or (0 in jogos_mandante) or (0 in jogos_visitante):
-        print(f"⏩ [DESCARTADO] Jogo com estatísticas de cartões ausentes/zeradas: Mandante {jogos_mandante} | Visitante {jogos_visitante}")
+    # 1. Checa a flag do scraper
+    if dados_incompletos:
+        print(f"⏩ [DESCARTADO CARTÕES] Flag de dados incompletos ativada para {nome_liga_limpo}.")
         return {"aprovado": False}
+
+    # 2. Checa se o TOTAL COMBINADO da partida deu 0 (0 + 0 = 0 cartões na partida)
+    for m, v in zip(jogos_mandante, jogos_visitante):
+        if (m + v) == 0:
+            print(f"⏩ [DESCARTADO CARTÕES] Partida com total de cartões zerado ({m} + {v} = 0) para {nome_liga_limpo}.")
+            return {"aprovado": False}
 
     # Soma todos os cartões amarelos do período de cada equipe
     total_mandante = sum(jogos_mandante)
