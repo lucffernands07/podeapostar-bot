@@ -7,7 +7,7 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
     
     try:
         driver.get(url_final)
-        time.sleep(1.5)
+        time.sleep(1.2) # Otimizado para 1.2s
         
         termos_busca = ["ALVO", "TARGET", "NO GOL"] if mercado == "finalizacoes" else ["SOFRIDAS", "SUFFERED", "FALTAS SOF"]
         
@@ -46,6 +46,7 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
                     
                     if qtd > 0:
                         if nome_jogador not in acumulador_scouts:
+                            # 🟢 MANTIDO: 'faltas': 0 e 'f_jogos': 0 continuam aqui para não quebrar outros módulos que leem essa chave
                             acumulador_scouts[nome_jogador] = {"time": time_real, "chutes": 0, "c_jogos": 0, "faltas": 0, "f_jogos": 0}
                         
                         if mercado == "finalizacoes":
@@ -62,7 +63,7 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
 def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     url_h2h_mae = dados_jogo.get("url_h2h_base")
     driver.get(url_h2h_mae)
-    time.sleep(1.5)
+    time.sleep(1.2)
     
     dicionario_escudos = {}
     links_jogos_historico = set()
@@ -99,8 +100,11 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
             url_base = url_jogo.split("/#")[0].rstrip('/')
             mid_param = ""
 
+        # 🎯 MANTIDO APENAS CHUTES (FINALIZAÇÕES)
         extrair_scouts_por_aba(driver, url_base, mid_param, "finalizacoes", dicionario_escudos, acumulador_scouts)
-        extrair_scouts_por_aba(driver, url_base, mid_param, "ataque", dicionario_escudos, acumulador_scouts)
+        
+        # 🚫 FALTAS DESATIVADAS (Comentado para acelerar o bot em 50%)
+        # extrair_scouts_por_aba(driver, url_base, mid_param, "ataque", dicionario_escudos, acumulador_scouts)
 
     return acumulador_scouts
-    
+                            
