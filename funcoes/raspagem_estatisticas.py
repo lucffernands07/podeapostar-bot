@@ -6,8 +6,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def pegar_estatisticas_coletivas(driver, stats):
     """
-    Navega no histórico H2H e extrai as estatísticas coletivas de escanteios e cartões.
-    Valida se os dados realmente existem na página para evitar descartes incorretos.
+    Navega no histórico H2H e extrai as estatísticas coletivas APENAS de cartões.
+    Escanteios desativados sem quebrar a estrutura de dados esperada pelo robô.
     """
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
@@ -18,14 +18,14 @@ def pegar_estatisticas_coletivas(driver, stats):
             pass
         return stats
 
-    # Inicialização dos arrays de estatísticas
+    # Inicialização dos arrays de estatísticas (mantidos para não quebrar outros módulos)
     if "cantos_mandante_h2h" not in stats: stats["cantos_mandante_h2h"] = []
     if "cantos_visitante_h2h" not in stats: stats["cantos_visitante_h2h"] = []
     if "cartoes_mandante_h2h" not in stats: stats["cartoes_mandante_h2h"] = []
     if "cartoes_visitante_h2h" not in stats: stats["cartoes_visitante_h2h"] = []
     
-    # Flags de integridade dos dados
-    stats["dados_incompletos_cantos"] = False
+    # 🚫 Escanteios marcado como desativado/incompleto por padrão
+    stats["dados_incompletos_cantos"] = True
     stats["dados_incompletos_cartoes"] = False
 
     wait = WebDriverWait(driver, 10)
@@ -80,10 +80,9 @@ def pegar_estatisticas_coletivas(driver, stats):
                     driver.get(url_stats_geral)
                     time.sleep(1.2)
 
-                    cantos_jogo_total = 0
+                    cantos_jogo_total = 0  # 🚫 Escanteios desativados (permanece 0)
                     cartoes_jogo_total = 0
                     
-                    achou_escanteios = False
                     achou_cartoes = False
 
                     try:
@@ -94,26 +93,17 @@ def pegar_estatisticas_coletivas(driver, stats):
 
                         if not tem_tabela_stats:
                             # Tabela de estatísticas ausente no Flashscore
-                            stats["dados_incompletos_cantos"] = True
                             stats["dados_incompletos_cartoes"] = True
                             print(f"      ⚠️ Tabela de estatísticas ausente no Flashscore para este jogo.")
                         else:
                             for idx, span in enumerate(todos_spans):
                                 texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
                                 
-                                # 1. Captura de Escanteios
-                                if texto_elemento in ["ESCANTEIOS", "ESCANTEIO", "CORNER KICKS", "CORNERS"]:
-                                    achou_escanteios = True
-                                    if idx > 0 and (idx + 1) < len(todos_spans):
-                                        val_casa = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
-                                        val_fora = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                                        
-                                        cantos_casa = int(re.search(r'\d+', val_casa).group()) if re.search(r'\d+', val_casa) else 0
-                                        cantos_fora = int(re.search(r'\d+', val_fora).group()) if re.search(r'\d+', val_fora) else 0
-                                        cantos_jogo_total = cantos_casa + cantos_fora
+                                # 🚫 1. ESCANTEIOS DESATIVADOS
+                                # if texto_elemento in ["ESCANTEIOS", "ESCANTEIO", "CORNER KICKS", "CORNERS"]: ...
                                 
-                                # 2. Captura de Cartões Amarelos
-                                elif texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
+                                # 2. Captura de Cartões Amarelos (Mantido ativo)
+                                if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
                                     achou_cartoes = True
                                     if idx > 0 and (idx + 1) < len(todos_spans):
                                         val_casa_card = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
@@ -123,25 +113,22 @@ def pegar_estatisticas_coletivas(driver, stats):
                                         cartoes_fora = int(re.search(r'\d+', val_fora_card).group()) if re.search(r'\d+', val_fora_card) else 0
                                         cartoes_jogo_total = cartoes_casa + cartoes_fora
 
-                            # Se a tabela existe mas a linha do mercado específico não foi fornecida
-                            if not achou_escanteios:
-                                stats["dados_incompletos_cantos"] = True
+                            # Validação individual apenas para cartões
                             if not achou_cartoes:
                                 stats["dados_incompletos_cartoes"] = True
 
-                        print(f"      📊 [DADOS COLETADOS] Cantos: {cantos_jogo_total} | Cartões Amarelos: {cartoes_jogo_total}")
+                        print(f"      📊 [DADOS COLETADOS] Cartões Amarelos: {cartoes_jogo_total}")
                     
                     except Exception as e_passo_stats:
                         print(f"      ⚠️ Erro ao processar dados de estatísticas via JS: {e_passo_stats}")
-                        stats["dados_incompletos_cantos"] = True
                         stats["dados_incompletos_cartoes"] = True
 
-                    # Adiciona os totais das partidas aos arrays H2H
+                    # Adiciona aos arrays mantendo compatibilidade
                     if alvo["tipo"] == "MANDANTE":
-                        stats["cantos_mandante_h2h"].append(cantos_jogo_total)
+                        stats["cantos_mandante_h2h"].append(0)
                         stats["cartoes_mandante_h2h"].append(cartoes_jogo_total)
                     else:
-                        stats["cantos_visitante_h2h"].append(cantos_jogo_total)
+                        stats["cantos_visitante_h2h"].append(0)
                         stats["cartoes_visitante_h2h"].append(cartoes_jogo_total)
 
                 except Exception:
@@ -156,4 +143,4 @@ def pegar_estatisticas_coletivas(driver, stats):
         pass
 
     return stats
-    
+                            
