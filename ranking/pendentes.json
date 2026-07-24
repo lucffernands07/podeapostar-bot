@@ -1,54 +1,40 @@
 {
-    "data_geracao": "2026-07-23",
+    "data_geracao": "2026-07-24",
     "jogos": [
         {
-            "time_casa": "Botafogo",
-            "time_fora": "Vitória",
+            "time_casa": "Gimnasia Mendoza",
+            "time_fora": "Central Córdoba",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/QiFvlsBO/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/MosWPn7m/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Corinthians",
-            "time_fora": "Remo",
+            "time_casa": "Racing Club",
+            "time_fora": "Gimnasia L.P.",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Kb06Zjrm/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/QwvmM46C/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Bolivar (Bol)",
-            "time_fora": "Grêmio (Bra)",
+            "time_casa": "Vélez Sarsfield",
+            "time_fora": "Instituto",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/0CgKS1xn/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/4AA59RM6/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Santa Fe (Col)",
-            "time_fora": "Caracas (Ven)",
+            "time_casa": "Huracán",
+            "time_fora": "Banfield",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bPEnE2Nh/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/K4VNNHsH/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Athletic Club",
-            "time_fora": "São Bernardo",
+            "time_casa": "Platense",
+            "time_fora": "Union Santa Fe",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lpItqdY8/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Cuiabá",
-            "time_fora": "Atlético-GO",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/nsaUgDnR/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Botafogo-SP",
-            "time_fora": "Juventude",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lQRnNEBk/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/CzED75iJ/#/resumo-de-jogo"
         }
     ]
 }
