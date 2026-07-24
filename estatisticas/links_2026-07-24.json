@@ -1,0 +1,68 @@
+{
+    "data_geracao": "2026-07-23",
+    "jogos": [
+        {
+            "time_casa": "Botafogo",
+            "time_fora": "Vitória",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QiFvlsBO/#/resumo-de-jogo",
+            "odd_casa": "1.71",
+            "odd_fora": "4.75"
+        },
+        {
+            "time_casa": "Corinthians",
+            "time_fora": "Remo",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Kb06Zjrm/#/resumo-de-jogo",
+            "odd_casa": "1.49",
+            "odd_fora": "6.50"
+        },
+        {
+            "time_casa": "Bolivar (Bol)",
+            "time_fora": "Grêmio (Bra)",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0CgKS1xn/#/resumo-de-jogo",
+            "odd_casa": "1.57",
+            "odd_fora": "5.25"
+        },
+        {
+            "time_casa": "Santa Fe (Col)",
+            "time_fora": "Caracas (Ven)",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bPEnE2Nh/#/resumo-de-jogo",
+            "odd_casa": "1.40",
+            "odd_fora": "8.50"
+        },
+        {
+            "time_casa": "Athletic Club",
+            "time_fora": "São Bernardo",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lpItqdY8/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.80"
+        },
+        {
+            "time_casa": "Cuiabá",
+            "time_fora": "Atlético-GO",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/nsaUgDnR/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.75"
+        },
+        {
+            "time_casa": "Botafogo-SP",
+            "time_fora": "Juventude",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lQRnNEBk/#/resumo-de-jogo",
+            "odd_casa": "2.65",
+            "odd_fora": "2.85"
+        }
+    ]
+}
