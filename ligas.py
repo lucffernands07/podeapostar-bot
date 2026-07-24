@@ -25,7 +25,7 @@ COMPETICOES = {
     "Alemanha - DFB Pokal": "https://www.flashscore.com.br/futebol/alemanha/copa-da-alemanha/jogos/",
     "Arábia Saudita - King Cup": "https://www.flashscore.com.br/futebol/arabia-saudita/copa-do-rei/jogos/",
     "EUA - MLS": "https://www.flashscore.com.br/futebol/eua/mls/jogos",
-    "Argentina - Copa": "https://www.flashscore.com.br/futebol/argentina/copa-argentina/jogos"
+    "Argentina - Copa": "https://www.flashscore.com.br/futebol/argentina/copa-argentina/jogos",
 
     # --- BLOCO 4: LIGAS SECUNDÁRIAS EUROPEIAS ---
     "Arábia Saudita - Primeira Liga": "https://www.flashscore.com.br/futebol/arabia-saudita/primeira-liga/jogos/",
@@ -34,10 +34,10 @@ COMPETICOES = {
     "Países Baixos - Eredivisie": "https://www.flashscore.com.br/futebol/paises-baixos/eredivisie/jogos/",
     "Bélgica - Pro League": "https://www.flashscore.com.br/futebol/belgica/liga-jupiler/jogos/",
     "Turquia - Super Lig": "https://www.flashscore.com.br/futebol/turquia/super-lig/jogos/",
-    "Copa da Turquia": "https://www.flashscore.com.br/futebol/turquia/copa-da-turquia/jogos/"
-    "Áustria - Bundesliga": "https://www.flashscore.com.br/futebol/austria/bundesliga/jogos/",
-    "Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/jogos/"
-    "Cazaquistão - Primeira Liga": "https://www.flashscore.com.br/futebol/cazaquistao/primeira-liga/jogos"
+    "Copa da Turquia": "https://www.flashscore.com.br/futebol/turquia/copa-da-turquia/jogos/",
+    "Áustria - Bundesliga": "https://www.flashscore.com.br/futebol/austria/bundesliga/jogos/"
+    #"Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/jogos/",
+    #"Cazaquistão - Primeira Liga": "https://www.flashscore.com.br/futebol/cazaquistao/primeira-liga/jogos"
 }
 
       # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
