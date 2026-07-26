@@ -1,0 +1,194 @@
+{
+    "data_geracao": "2026-07-26",
+    "jogos": [
+        {
+            "time_casa": "Bahia",
+            "time_fora": "Corinthians",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jqSvpa2M/#/resumo-de-jogo",
+            "odd_casa": "2.10",
+            "odd_fora": "3.40"
+        },
+        {
+            "time_casa": "Cruzeiro",
+            "time_fora": "Botafogo",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fcrxQwBj/#/resumo-de-jogo",
+            "odd_casa": "1.71",
+            "odd_fora": "4.33"
+        },
+        {
+            "time_casa": "Flamengo",
+            "time_fora": "São Paulo",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tUYBxHfd/#/resumo-de-jogo",
+            "odd_casa": "1.42",
+            "odd_fora": "7.50"
+        },
+        {
+            "time_casa": "Grêmio",
+            "time_fora": "Fluminense",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/M3zOms3c/#/resumo-de-jogo",
+            "odd_casa": "2.70",
+            "odd_fora": "2.50"
+        },
+        {
+            "time_casa": "Red Bull Bragantino",
+            "time_fora": "Coritiba",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AP65VamT/#/resumo-de-jogo",
+            "odd_casa": "1.57",
+            "odd_fora": "5.50"
+        },
+        {
+            "time_casa": "Palmeiras",
+            "time_fora": "Atlético-MG",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AaNEdxnS/#/resumo-de-jogo",
+            "odd_casa": "1.57",
+            "odd_fora": "6.00"
+        },
+        {
+            "time_casa": "Remo",
+            "time_fora": "Vitória",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Y3V3vwQq/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.25"
+        },
+        {
+            "time_casa": "Criciúma",
+            "time_fora": "Náutico",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8YKdp0FU/#/resumo-de-jogo",
+            "odd_casa": "1.68",
+            "odd_fora": "5.25"
+        },
+        {
+            "time_casa": "São Bernardo",
+            "time_fora": "Ceará",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dziGp99D/#/resumo-de-jogo",
+            "odd_casa": "2.35",
+            "odd_fora": "3.50"
+        },
+        {
+            "time_casa": "América-MG",
+            "time_fora": "Goiás",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/MF7RiQGt/#/resumo-de-jogo",
+            "odd_casa": "3.00",
+            "odd_fora": "2.57"
+        },
+        {
+            "time_casa": "Londrina",
+            "time_fora": "Novorizontino",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fT5Zk4og/#/resumo-de-jogo",
+            "odd_casa": "3.80",
+            "odd_fora": "1.86"
+        },
+        {
+            "time_casa": "Ypiranga",
+            "time_fora": "Barra-SC",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/viCWtS94/#/resumo-de-jogo",
+            "odd_casa": "1.95",
+            "odd_fora": "3.90"
+        },
+        {
+            "time_casa": "Caxias",
+            "time_fora": "Botafogo-PB",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6wEOrluh/#/resumo-de-jogo",
+            "odd_casa": "1.90",
+            "odd_fora": "4.00"
+        },
+        {
+            "time_casa": "CSA",
+            "time_fora": "São Luiz",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jasGtC9s/#/resumo-de-jogo",
+            "odd_casa": "1.35",
+            "odd_fora": "8.50"
+        },
+        {
+            "time_casa": "Gama",
+            "time_fora": "América-RN",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rukaOUgD/#/resumo-de-jogo",
+            "odd_casa": "2.37",
+            "odd_fora": "3.35"
+        },
+        {
+            "time_casa": "ABC",
+            "time_fora": "Luverdense",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/pr8BDDue/#/resumo-de-jogo",
+            "odd_casa": "1.45",
+            "odd_fora": "7.30"
+        },
+        {
+            "time_casa": "ASA",
+            "time_fora": "Cianorte",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tnJXKemL/#/resumo-de-jogo",
+            "odd_casa": "1.62",
+            "odd_fora": "6.10"
+        },
+        {
+            "time_casa": "Treze",
+            "time_fora": "São José",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/p2b5Zf2E/#/resumo-de-jogo",
+            "odd_casa": "2.37",
+            "odd_fora": "3.20"
+        },
+        {
+            "time_casa": "Atl. Tucuman",
+            "time_fora": "Ind. Rivadavia",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/GWOWLeCT/#/resumo-de-jogo",
+            "odd_casa": "2.57",
+            "odd_fora": "2.82"
+        },
+        {
+            "time_casa": "Estudiantes",
+            "time_fora": "Independiente",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zVIlD9Ns/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.80"
+        },
+        {
+            "time_casa": "Dep. Riestra",
+            "time_fora": "Boca Juniors",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6a0QIVaK/#/resumo-de-jogo",
+            "odd_casa": "4.33",
+            "odd_fora": "1.96"
+        }
+    ]
+}
