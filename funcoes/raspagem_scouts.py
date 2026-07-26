@@ -5,6 +5,9 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
     """Navega na aba específica e extrai o scout sem poluir o log."""
     url_final = f"{url_base}/resumo/estatisticas-jogadores/{mercado}/?mid={mid_param}"
     
+    # 🛑 Lista de nomes inválidos para descarte (fallback de segurança)
+    NOMES_INVALIDOS = ["JOGADOR", "TODOS", "UNKNOWN", "NONE", "NULL", ""]
+
     try:
         driver.get(url_final)
         time.sleep(1.2) # Otimizado para 1.2s
@@ -30,14 +33,27 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
                 nome_element = celula_jogador.find_element(By.CSS_SELECTOR, "[class*='fp-playerName'], [class*='playerName']")
                 nome_jogador = nome_element.text.strip()
                 
-                if not nome_jogador or nome_jogador == "TODOS": continue
+                # 🛑 FALLBACK DE DESCARTE: Se o nome for genérico/vazio, pula a linha imediatamente
+                if not nome_jogador or nome_jogador.upper() in NOMES_INVALIDOS:
+                    continue
                 
-                img_logo = celula_jogador.find_element(By.CSS_SELECTOR, "div[class*='wcl-teamLogo'] img, div.wcl-teamLogo_sFhMr img")
-                src_linha = img_logo.get_attribute("src") or ""
+                # 🟢 CAPTURA DO ESCUDO MELHORADA: Procura qualquer img de escudo na célula para evitar quebra em atletas sem foto de rosto
+                src_linha = ""
+                imgs_celula = celula_jogador.find_elements(By.TAG_NAME, "img")
+                for img in imgs_celula:
+                    src = img.get_attribute("src") or ""
+                    if any(k in src for k in ["/entity-header/", "/team/", "logo"]):
+                        src_linha = src
+                        break
+                
+                if not src_linha and imgs_celula:
+                    src_linha = imgs_celula[-1].get_attribute("src") or ""
+
                 arquivo_linha = src_linha.split('/')[-1] if src_linha else ""
                 
                 time_real = dicionario_escudos.get(arquivo_linha, "DESCONHECIDO")
-                if time_real == "DESCONHECIDO": continue
+                if time_real == "DESCONHECIDO": 
+                    continue
                 
                 celulas = linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")
                 if len(celulas) > indice_alvo:
@@ -55,7 +71,7 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
                         else:
                             acumulador_scouts[nome_jogador]["faltas"] += qtd
                             acumulador_scouts[nome_jogador]["f_jogos"] += 1
-            except:
+            except Exception:
                 continue
     except Exception:
         pass # Silencia erros de raspagem para não poluir
@@ -74,7 +90,8 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
         linhas_jogos = bloco.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")
         for linha_jogo in linhas_jogos[:5]:
             href = linha_jogo.get_attribute("href")
-            if href: links_jogos_historico.add(href)
+            if href: 
+                links_jogos_historico.add(href)
             
             participantes = linha_jogo.find_elements(By.CSS_SELECTOR, "[class*='wcl-matchRow-participant'], .h2h__participant")
             for p in participantes:
@@ -85,7 +102,7 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
                     nome_time = p.text.strip().upper()
                     if nome_arquivo and nome_time and nome_arquivo not in dicionario_escudos:
                         dicionario_escudos[nome_arquivo] = nome_time
-                except:
+                except Exception:
                     continue
         
     lista_final_links = list(links_jogos_historico)[:10]
@@ -107,4 +124,4 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
         # extrair_scouts_por_aba(driver, url_base, mid_param, "ataque", dicionario_escudos, acumulador_scouts)
 
     return acumulador_scouts
-                            
+            
