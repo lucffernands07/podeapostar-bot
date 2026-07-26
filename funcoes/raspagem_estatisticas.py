@@ -6,27 +6,42 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def pegar_estatisticas_coletivas(driver, stats):
     """
-    Navega no histórico H2H e extrai as estatísticas coletivas APENAS de cartões.
-    Escanteios desativados sem quebrar a estrutura de dados esperada pelo robô.
+    Navega no histórico H2H e extrai estatísticas coletivas.
+    Com a flag EXECUTAR_SCRAPER = False, o scraper de estatísticas é pulado instantaneamente.
     """
-    url_h2h_base = stats.get("url_h2h_base")
-    if not url_h2h_base:
-        try:
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-        except Exception:
-            pass
-        return stats
+    # 🛑 CONTROLE MANUAL DE EXECUÇÃO: Altere para False para DESATIVAR completamente
+    EXECUTAR_SCRAPER = False
 
-    # Inicialização dos arrays de estatísticas (mantidos para não quebrar outros módulos)
+    # Inicialização dos arrays de estatísticas (mantidos para não dar KeyError em outros arquivos)
     if "cantos_mandante_h2h" not in stats: stats["cantos_mandante_h2h"] = []
     if "cantos_visitante_h2h" not in stats: stats["cantos_visitante_h2h"] = []
     if "cartoes_mandante_h2h" not in stats: stats["cartoes_mandante_h2h"] = []
     if "cartoes_visitante_h2h" not in stats: stats["cartoes_visitante_h2h"] = []
     
-    # 🚫 Escanteios marcado como desativado/incompleto por padrão
+    # Flags de integridade dos dados ativadas como incompletas para anular as análises
     stats["dados_incompletos_cantos"] = True
-    stats["dados_incompletos_cartoes"] = False
+    stats["dados_incompletos_cartoes"] = True
+
+    # 🛑 Se estiver desativado, fecha aba secundária (se houver) e encerra o processo na hora
+    if not EXECUTAR_SCRAPER:
+        print("      ⏩ [SCRAPER DESATIVADO] Pulo da raspagem de cartões e escanteios acionado.")
+        try:
+            if len(driver.window_handles) > 1:
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+        except Exception:
+            pass
+        return stats
+
+    url_h2h_base = stats.get("url_h2h_base")
+    if not url_h2h_base:
+        try:
+            if len(driver.window_handles) > 1:
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+        except Exception:
+            pass
+        return stats
 
     wait = WebDriverWait(driver, 10)
 
@@ -80,7 +95,7 @@ def pegar_estatisticas_coletivas(driver, stats):
                     driver.get(url_stats_geral)
                     time.sleep(1.2)
 
-                    cantos_jogo_total = 0  # 🚫 Escanteios desativados (permanece 0)
+                    cantos_jogo_total = 0
                     cartoes_jogo_total = 0
                     
                     achou_cartoes = False
@@ -88,21 +103,16 @@ def pegar_estatisticas_coletivas(driver, stats):
                     try:
                         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
                         
-                        # Verifica se a tabela de estatísticas existe na página
                         tem_tabela_stats = len(todos_spans) > 0
 
                         if not tem_tabela_stats:
-                            # Tabela de estatísticas ausente no Flashscore
                             stats["dados_incompletos_cartoes"] = True
                             print(f"      ⚠️ Tabela de estatísticas ausente no Flashscore para este jogo.")
                         else:
                             for idx, span in enumerate(todos_spans):
                                 texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
                                 
-                                # 🚫 1. ESCANTEIOS DESATIVADOS
-                                # if texto_elemento in ["ESCANTEIOS", "ESCANTEIO", "CORNER KICKS", "CORNERS"]: ...
-                                
-                                # 2. Captura de Cartões Amarelos (Mantido ativo)
+                                # 2. Captura de Cartões Amarelos
                                 if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
                                     achou_cartoes = True
                                     if idx > 0 and (idx + 1) < len(todos_spans):
@@ -113,7 +123,6 @@ def pegar_estatisticas_coletivas(driver, stats):
                                         cartoes_fora = int(re.search(r'\d+', val_fora_card).group()) if re.search(r'\d+', val_fora_card) else 0
                                         cartoes_jogo_total = cartoes_casa + cartoes_fora
 
-                            # Validação individual apenas para cartões
                             if not achou_cartoes:
                                 stats["dados_incompletos_cartoes"] = True
 
@@ -123,7 +132,6 @@ def pegar_estatisticas_coletivas(driver, stats):
                         print(f"      ⚠️ Erro ao processar dados de estatísticas via JS: {e_passo_stats}")
                         stats["dados_incompletos_cartoes"] = True
 
-                    # Adiciona aos arrays mantendo compatibilidade
                     if alvo["tipo"] == "MANDANTE":
                         stats["cantos_mandante_h2h"].append(0)
                         stats["cartoes_mandante_h2h"].append(cartoes_jogo_total)
@@ -137,10 +145,11 @@ def pegar_estatisticas_coletivas(driver, stats):
         print(f"      ⚠️ Erro Crítico na Raspagem Coletiva Geral: {e}")
 
     try:
-        driver.close()
-        driver.switch_to.window(driver.window_handles[0])
+        if len(driver.window_handles) > 1:
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
     except Exception:
         pass
 
     return stats
-                            
+                
