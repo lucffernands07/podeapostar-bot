@@ -32,7 +32,7 @@ def validar_liga_para_jogadores(nome_liga):
 def analisar_dados_jogadores(acumulador_scouts, t1, t2):
     """
     Processa as estatísticas individuais de chutes no gol e faltas sofridas.
-    Filtra e retorna APENAS o melhor jogador de cada mercado por time (com média > 1.0).
+    Filtra e retorna os até 2 MELHORES jogadores de cada mercado por time (com média > 1.0).
     """
     if not acumulador_scouts:
         print("⏩ [HISTÓRICO INCOMPLETO] Sem dados de scouts de jogadores para calcular.")
@@ -70,21 +70,27 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
                     "media": round(media_faltas, 2)
                 })
 
-        # --- FILTRO: Seleciona apenas o melhor de cada mercado para este time ---
+        # --- FILTRO: Seleciona os ATÉ 2 MELHORES de cada mercado para este time ---
         linhas_chutes = []
         linhas_faltas = []
 
         if candidatos_chutes:
-            # Ordena decrescente pela média e pega apenas o primeiro (o melhor)
-            melhor_chute = max(candidatos_chutes, key=lambda x: x['media'])
-            lista_jogadores_qualificados.append(melhor_chute)
-            linhas_chutes.append(f"Chutes no gol: {melhor_chute['jogador']} média {melhor_chute['media']:.1f}")
+            # Ordena decrescente pela média e pega os até 2 melhores
+            candidatos_chutes_ordenados = sorted(candidatos_chutes, key=lambda x: x['media'], reverse=True)
+            top2_chutes = candidatos_chutes_ordenados[:2]
+            
+            for j_chute in top2_chutes:
+                lista_jogadores_qualificados.append(j_chute)
+                linhas_chutes.append(f"Chutes no gol: {j_chute['jogador']} média {j_chute['media']:.1f}")
 
         if candidatos_faltas:
-            # Ordena decrescente pela média e pega apenas o primeiro (o melhor)
-            melhor_falta = max(candidatos_faltas, key=lambda x: x['media'])
-            lista_jogadores_qualificados.append(melhor_falta)
-            linhas_faltas.append(f"Faltas sofridas: {melhor_falta['jogador']} média {melhor_falta['media']:.1f}")
+            # Ordena decrescente pela média e pega os até 2 melhores
+            candidatos_faltas_ordenados = sorted(candidatos_faltas, key=lambda x: x['media'], reverse=True)
+            top2_faltas = candidatos_faltas_ordenados[:2]
+            
+            for j_falta in top2_faltas:
+                lista_jogadores_qualificados.append(j_falta)
+                linhas_faltas.append(f"Faltas sofridas: {j_falta['jogador']} média {j_falta['media']:.1f}")
 
         # Se houver dados qualificados para o time, adiciona nas linhas de log/bloco
         if linhas_chutes or linhas_faltas:
