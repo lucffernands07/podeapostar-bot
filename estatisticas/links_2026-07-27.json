@@ -1,0 +1,41 @@
+{
+    "data_geracao": "2026-07-27",
+    "jogos": [
+        {
+            "time_casa": "Atlético-GO",
+            "time_fora": "Operário",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zLMlnMpI/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.30"
+        },
+        {
+            "time_casa": "CRB",
+            "time_fora": "Vila Nova",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4f3E2sVb/#/resumo-de-jogo",
+            "odd_casa": "1.86",
+            "odd_fora": "3.75"
+        },
+        {
+            "time_casa": "Sport",
+            "time_fora": "Cuiabá",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bc06430n/#/resumo-de-jogo",
+            "odd_casa": "1.91",
+            "odd_fora": "4.33"
+        },
+        {
+            "time_casa": "Guarani",
+            "time_fora": "Internacional de Limeira",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dCGqWAen/#/resumo-de-jogo",
+            "odd_casa": "1.75",
+            "odd_fora": "4.60"
+        }
+    ]
+}
