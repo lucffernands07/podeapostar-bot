@@ -1,90 +1,10 @@
 [
     {
-        "horario": "12:00",
-        "liga": "Europa - Champions League",
-        "time_casa": "KuPS (Fin)",
-        "time_fora": "Sabah Baku (Aze)",
-        "mercado": "+1.5 Gols (80%)",
-        "odd": "1.29",
-        "link_betano": "https://www.betano.bet.br/match-odds/Kuopio-PS-FC-Sabah/89485661/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/4vVne52s/#/h2h/overall"
-    },
-    {
-        "horario": "13:00",
-        "liga": "Europa - Champions League",
-        "time_casa": "Lincoln (Gib)",
-        "time_fora": "Mjallby (Swe)",
-        "mercado": "+1.5 Gols (80%)",
-        "odd": "1.25",
-        "link_betano": "https://www.betano.bet.br/match-odds/Lincoln-Red-Imps-FC-Mjallby-AIF/89485815/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/4CbLusAN/#/h2h/overall"
-    },
-    {
-        "horario": "15:00",
-        "liga": "Europa - Champions League",
-        "time_casa": "Din. Zagreb (Cro)",
-        "time_fora": "Thun (Sui)",
-        "mercado": "+1.5 Gols (80%)",
-        "odd": "1.2",
-        "link_betano": "https://www.betano.bet.br/match-odds/GNK-Dinamo-Zagreb-FC-Thun/89486003/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/rqFko0Ea/#/h2h/overall"
-    },
-    {
-        "horario": "15:00",
-        "liga": "Europa - Champions League",
-        "time_casa": "Din. Zagreb (Cro)",
-        "time_fora": "Thun (Sui)",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.83",
-        "link_betano": "https://www.betano.bet.br/match-odds/GNK-Dinamo-Zagreb-FC-Thun/89486003/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/rqFko0Ea/#/h2h/overall"
-    },
-    {
-        "horario": "15:15",
-        "liga": "Europa - Champions League",
-        "time_casa": "Celje (Slo)",
-        "time_fora": "KF Egnatia (Alb)",
-        "mercado": "+1.5 Gols (100%)",
-        "odd": "1.22",
-        "link_betano": "https://www.betano.bet.br/match-odds/NK-Celje-KF-Egnatia/89486120/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/WxPrLDQE/#/h2h/overall"
-    },
-    {
-        "horario": "15:15",
-        "liga": "Europa - Champions League",
-        "time_casa": "Celje (Slo)",
-        "time_fora": "KF Egnatia (Alb)",
-        "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "1.83",
-        "link_betano": "https://www.betano.bet.br/match-odds/NK-Celje-KF-Egnatia/89486120/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/WxPrLDQE/#/h2h/overall"
-    },
-    {
-        "horario": "15:45",
-        "liga": "Europa - Champions League",
-        "time_casa": "Hearts (Sco)",
-        "time_fora": "Sturm Graz (Aut)",
-        "mercado": "+2.5 Gols (80%)",
-        "odd": "1.57",
-        "link_betano": "https://www.betano.bet.br/match-odds/Heart-of-Midlothian-FC-SK-Sturm-Graz/89486007/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/0M0wdHSH/#/h2h/overall"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Europa - Champions League",
-        "time_casa": "Shamrock Rovers (Irl)",
-        "time_fora": "Ararat-Armenia (Arm)",
-        "mercado": "+1.5 Gols (100%)",
-        "odd": "1.25",
-        "link_betano": "https://www.betano.bet.br/match-odds/Shamrock-Rovers-FC-FC-Ararat-Armenia/89485693/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/f9yUru7s/#/h2h/overall"
-    },
-    {
         "horario": "19:00",
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Banfield",
         "time_fora": "Sarmiento Junin",
-        "mercado": "Chutes no gol: Perrotta T. (BAN) | Méd: 2.0",
+        "mercado": "Chutes no gol: Perrotta T. (BAN) | Méd: 0.8",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Banfield-CA-Sarmiento/88417929/",
         "link_h2h": "https://www.flashscore.com.br/jogo/nkI9RKak/#/h2h/overall"
@@ -94,7 +14,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Banfield",
         "time_fora": "Sarmiento Junin",
-        "mercado": "Chutes no gol: Moreno N. (BAN) | Méd: 1.5",
+        "mercado": "Chutes no gol: Moreno N. (BAN) | Méd: 0.6",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Banfield-CA-Sarmiento/88417929/",
         "link_h2h": "https://www.flashscore.com.br/jogo/nkI9RKak/#/h2h/overall"
@@ -104,7 +24,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Banfield",
         "time_fora": "Sarmiento Junin",
-        "mercado": "Chutes no gol: Marabel J. (SAR) | Méd: 2.0",
+        "mercado": "Chutes no gol: Jonathan Gómez (SAR) | Méd: 0.7",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Banfield-CA-Sarmiento/88417929/",
         "link_h2h": "https://www.flashscore.com.br/jogo/nkI9RKak/#/h2h/overall"
@@ -114,7 +34,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Banfield",
         "time_fora": "Sarmiento Junin",
-        "mercado": "Chutes no gol: Diego Churin (SAR) | Méd: 2.0",
+        "mercado": "Chutes no gol: Orihuela R. (SAR) | Méd: 0.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Banfield-CA-Sarmiento/88417929/",
         "link_h2h": "https://www.flashscore.com.br/jogo/nkI9RKak/#/h2h/overall"
@@ -124,7 +44,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "San Lorenzo",
         "time_fora": "Gimnasia Mendoza",
-        "mercado": "Chutes no gol: Auzmendi R. (SAN) | Méd: 2.7",
+        "mercado": "Chutes no gol: Cardillo M. (SAN) | Méd: 2.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/San-Lorenzo-Gimnasia-Y-Esgrima-Mendoza/88418008/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ELgnOogc/#/h2h/overall"
@@ -134,7 +54,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "San Lorenzo",
         "time_fora": "Gimnasia Mendoza",
-        "mercado": "Chutes no gol: Cardillo M. (SAN) | Méd: 2.0",
+        "mercado": "Chutes no gol: Auzmendi R. (SAN) | Méd: 1.6",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/San-Lorenzo-Gimnasia-Y-Esgrima-Mendoza/88418008/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ELgnOogc/#/h2h/overall"
@@ -154,7 +74,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "San Lorenzo",
         "time_fora": "Gimnasia Mendoza",
-        "mercado": "Chutes no gol: Armoa B. (GIM) | Méd: 2.0",
+        "mercado": "Chutes no gol: Modica A. (GIM) | Méd: 0.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/San-Lorenzo-Gimnasia-Y-Esgrima-Mendoza/88418008/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ELgnOogc/#/h2h/overall"
@@ -165,7 +85,7 @@
         "time_casa": "Tigre (Arg)",
         "time_fora": "Nacional (Uru)",
         "mercado": "-3.5 Gols (100%)",
-        "odd": "1.28",
+        "odd": "1.23",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Tigre-Nacional-Montevideo/89472321/",
         "link_h2h": "https://www.flashscore.com.br/jogo/jaBvGOht/#/h2h/overall"
     },
@@ -175,7 +95,7 @@
         "time_casa": "Juventude",
         "time_fora": "Avaí",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.23",
+        "odd": "1.21",
         "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Avai-SC/89576516/",
         "link_h2h": "https://www.flashscore.com.br/jogo/x81M0LaB/#/h2h/overall"
     },
@@ -184,7 +104,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Juventude",
         "time_fora": "Avaí",
-        "mercado": "Chutes no gol: Messias (JUV) | Méd: 2.0",
+        "mercado": "Chutes no gol: Raí (JUV) | Méd: 1.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Avai-SC/89576516/",
         "link_h2h": "https://www.flashscore.com.br/jogo/x81M0LaB/#/h2h/overall"
@@ -194,7 +114,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Juventude",
         "time_fora": "Avaí",
-        "mercado": "Chutes no gol: Patryck (JUV) | Méd: 1.5",
+        "mercado": "Chutes no gol: Pablo Roberto (JUV) | Méd: 1.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Avai-SC/89576516/",
         "link_h2h": "https://www.flashscore.com.br/jogo/x81M0LaB/#/h2h/overall"
@@ -204,7 +124,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Juventude",
         "time_fora": "Avaí",
-        "mercado": "Chutes no gol: Daniel Penha (AVA) | Méd: 1.8",
+        "mercado": "Chutes no gol: Daniel Penha (AVA) | Méd: 1.4",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Avai-SC/89576516/",
         "link_h2h": "https://www.flashscore.com.br/jogo/x81M0LaB/#/h2h/overall"
@@ -215,7 +135,7 @@
         "time_casa": "Ponte Preta",
         "time_fora": "Athletic Club",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.22",
+        "odd": "1.21",
         "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Athletic-Club-MG/89576528/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lAm8nVv1/#/h2h/overall"
     },
@@ -234,7 +154,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Ponte Preta",
         "time_fora": "Athletic Club",
-        "mercado": "Chutes no gol: Elvis (PON) | Méd: 2.0",
+        "mercado": "Chutes no gol: Elvis (PON) | Méd: 1.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Athletic-Club-MG/89576528/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lAm8nVv1/#/h2h/overall"
@@ -244,7 +164,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Ponte Preta",
         "time_fora": "Athletic Club",
-        "mercado": "Chutes no gol: Kevyson (PON) | Méd: 2.0",
+        "mercado": "Chutes no gol: Brandão (PON) | Méd: 0.6",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Athletic-Club-MG/89576528/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lAm8nVv1/#/h2h/overall"
@@ -254,7 +174,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Ponte Preta",
         "time_fora": "Athletic Club",
-        "mercado": "Chutes no gol: Jota (ATH) | Méd: 2.0",
+        "mercado": "Chutes no gol: Yarlen (ATH) | Méd: 1.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Athletic-Club-MG/89576528/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lAm8nVv1/#/h2h/overall"
@@ -264,7 +184,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Ponte Preta",
         "time_fora": "Athletic Club",
-        "mercado": "Chutes no gol: Luiz Fernando (ATH) | Méd: 2.0",
+        "mercado": "Chutes no gol: Felipe Negrucci (ATH) | Méd: 1.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Ponte-Preta-SP-Athletic-Club-MG/89576528/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lAm8nVv1/#/h2h/overall"
@@ -274,7 +194,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Argentinos Juniors",
         "time_fora": "Estudiantes Rio Cuarto",
-        "mercado": "Chutes no gol: Morales I. (ARG) | Méd: 2.0",
+        "mercado": "Chutes no gol: Lescano A. (ARG) | Méd: 1.2",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Argentinos-Juniors-Estudiantes-Rio-Cuarto/88418020/",
         "link_h2h": "https://www.flashscore.com.br/jogo/K2GHPbU1/#/h2h/overall"
@@ -284,7 +204,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Argentinos Juniors",
         "time_fora": "Estudiantes Rio Cuarto",
-        "mercado": "Chutes no gol: Lescano A. (ARG) | Méd: 2.0",
+        "mercado": "Chutes no gol: Veron G. (ARG) | Méd: 1.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Argentinos-Juniors-Estudiantes-Rio-Cuarto/88418020/",
         "link_h2h": "https://www.flashscore.com.br/jogo/K2GHPbU1/#/h2h/overall"
@@ -302,10 +222,20 @@
     {
         "horario": "21:15",
         "liga": "Argentina - Liga Profesional",
+        "time_casa": "Argentinos Juniors",
+        "time_fora": "Estudiantes Rio Cuarto",
+        "mercado": "Chutes no gol: Quiroga A. (EST) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Argentinos-Juniors-Estudiantes-Rio-Cuarto/88418020/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/K2GHPbU1/#/h2h/overall"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
         "time_casa": "Rosario Central",
         "time_fora": "Racing Club",
         "mercado": "Ambas Marcam: Sim (100%)",
-        "odd": "2.1",
+        "odd": "2.2",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-Racing-Club/88417934/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ry2CotiL/#/h2h/overall"
     },
@@ -314,7 +244,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Rosario Central",
         "time_fora": "Racing Club",
-        "mercado": "Chutes no gol: Copetti E. (ROS) | Méd: 2.0",
+        "mercado": "Chutes no gol: Oviedo F. (ROS) | Méd: 1.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-Racing-Club/88417934/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ry2CotiL/#/h2h/overall"
@@ -324,7 +254,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Rosario Central",
         "time_fora": "Racing Club",
-        "mercado": "Chutes no gol: Campaz J. (ROS) | Méd: 1.5",
+        "mercado": "Chutes no gol: Copetti E. (ROS) | Méd: 0.8",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-Racing-Club/88417934/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ry2CotiL/#/h2h/overall"
@@ -334,7 +264,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Rosario Central",
         "time_fora": "Racing Club",
-        "mercado": "Chutes no gol: Miljevic M. (RAC) | Méd: 2.7",
+        "mercado": "Chutes no gol: Miljevic M. (RAC) | Méd: 1.6",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-Racing-Club/88417934/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ry2CotiL/#/h2h/overall"
@@ -344,7 +274,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Rosario Central",
         "time_fora": "Racing Club",
-        "mercado": "Chutes no gol: Vergara D. (RAC) | Méd: 2.0",
+        "mercado": "Chutes no gol: Solari S. (RAC) | Méd: 1.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-Racing-Club/88417934/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ry2CotiL/#/h2h/overall"
@@ -365,7 +295,7 @@
         "time_casa": "Santos (Bra)",
         "time_fora": "Universidad Central (Ven)",
         "mercado": "+2.5 Gols (80%)",
-        "odd": "1.62",
+        "odd": "1.65",
         "link_betano": "https://www.betano.bet.br/match-odds/Santos-SP-UCV-FC/89478671/",
         "link_h2h": "https://www.flashscore.com.br/jogo/Qex0uuMi/#/h2h/overall"
     },
@@ -375,7 +305,7 @@
         "time_casa": "Santos (Bra)",
         "time_fora": "Universidad Central (Ven)",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "2.1",
+        "odd": "2.25",
         "link_betano": "https://www.betano.bet.br/match-odds/Santos-SP-UCV-FC/89478671/",
         "link_h2h": "https://www.flashscore.com.br/jogo/Qex0uuMi/#/h2h/overall"
     },
@@ -385,7 +315,7 @@
         "time_casa": "Fortaleza",
         "time_fora": "Botafogo-SP",
         "mercado": "Ambas Marcam: Sim (80%)",
-        "odd": "2.0",
+        "odd": "2.1",
         "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Botafogo-SP/89576541/",
         "link_h2h": "https://www.flashscore.com.br/jogo/SfJtlrG5/#/h2h/overall"
     },
@@ -394,7 +324,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Fortaleza",
         "time_fora": "Botafogo-SP",
-        "mercado": "Chutes no gol: Miritello J. B. (FOR) | Méd: 3.0",
+        "mercado": "Chutes no gol: Miritello J. B. (FOR) | Méd: 1.2",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Botafogo-SP/89576541/",
         "link_h2h": "https://www.flashscore.com.br/jogo/SfJtlrG5/#/h2h/overall"
@@ -404,7 +334,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Fortaleza",
         "time_fora": "Botafogo-SP",
-        "mercado": "Chutes no gol: Pedro Henrique (FOR) | Méd: 1.5",
+        "mercado": "Chutes no gol: Vitinho (FOR) | Méd: 1.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Botafogo-SP/89576541/",
         "link_h2h": "https://www.flashscore.com.br/jogo/SfJtlrG5/#/h2h/overall"
@@ -414,7 +344,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Fortaleza",
         "time_fora": "Botafogo-SP",
-        "mercado": "Chutes no gol: Wesley Santos (BOT) | Méd: 2.0",
+        "mercado": "Chutes no gol: Kelvin (BOT) | Méd: 0.8",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Botafogo-SP/89576541/",
         "link_h2h": "https://www.flashscore.com.br/jogo/SfJtlrG5/#/h2h/overall"
@@ -424,7 +354,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Fortaleza",
         "time_fora": "Botafogo-SP",
-        "mercado": "Chutes no gol: Rafael Gava (BOT) | Méd: 1.5",
+        "mercado": "Chutes no gol: Wesley Santos (BOT) | Méd: 0.7",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Botafogo-SP/89576541/",
         "link_h2h": "https://www.flashscore.com.br/jogo/SfJtlrG5/#/h2h/overall"
