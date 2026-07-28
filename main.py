@@ -217,15 +217,15 @@ def main():
                             m_texto, m_chave = item["texto"], item["chave"]
                             
                             if m_chave in ["CANTOS_OVER", "CANTOS_MEDIA", "CARTOES_CONFRONTO"]:
-                                valor_odd_str = "1.30"
+                                valor_odd_str = "1.20"
                             elif m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"] or "JOGADOR" in m_chave or "SCOUT" in m_chave:
-                                valor_odd_str = "1.30" 
+                                valor_odd_str = "1.20" 
                             else:
-                                valor_odd_str = v_odds.get(m_chave, "1.50")
+                                valor_odd_str = v_odds.get(m_chave, "1.30")
                             
                             try:
                                 odd_float = float(str(valor_odd_str).replace(',', '.'))
-                                if odd_float >= 1.20:
+                                if odd_float >= 1.10:
                                     if "M45" in m_chave and odd_float >= 4.0: continue
                                     mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": str(odd_float)})
                                 else:
