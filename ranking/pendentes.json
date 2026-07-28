@@ -2,13 +2,6 @@
     "data_geracao": "2026-07-28",
     "jogos": [
         {
-            "time_casa": "Tigre (Arg)",
-            "time_fora": "Nacional (Uru)",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jaBvGOht/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Santos (Bra)",
             "time_fora": "Universidad Central (Ven)",
             "mercado": "MÚLTIPLOS",
@@ -23,32 +16,11 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/x81M0LaB/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Ponte Preta",
-            "time_fora": "Athletic Club",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lAm8nVv1/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Fortaleza",
             "time_fora": "Botafogo-SP",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/SfJtlrG5/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Banfield",
-            "time_fora": "Sarmiento Junin",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/nkI9RKak/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "San Lorenzo",
-            "time_fora": "Gimnasia Mendoza",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/ELgnOogc/#/resumo-de-jogo"
         },
         {
             "time_casa": "Argentinos Juniors",
