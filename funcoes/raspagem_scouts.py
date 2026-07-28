@@ -1,12 +1,13 @@
 import time
+import re
 from selenium.webdriver.common.by import By
 
 def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escudos, acumulador_scouts):
     """Navega na aba específica e extrai o scout sem poluir o log."""
     url_final = f"{url_base}/resumo/estatisticas-jogadores/{mercado}/?mid={mid_param}"
     
-    # 🛑 Lista de nomes inválidos para descarte (fallback de segurança)
-    NOMES_INVALIDOS = ["JOGADOR", "TODOS", "UNKNOWN", "NONE", "NULL", ""]
+    # 🛑 Lista ampliada para pegar variações genéricas
+    TERMOS_INVALIDOS = ["JOGADOR", "TODOS", "UNKNOWN", "NONE", "NULL", "PLAYER", "SUBSTITUTE"]
 
     try:
         driver.get(url_final)
@@ -31,13 +32,23 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
             try:
                 celula_jogador = linha.find_element(By.CSS_SELECTOR, "td[class*='isSticky'], td[class*='fitContent'], [data-testid='wcl-playerCell']")
                 nome_element = celula_jogador.find_element(By.CSS_SELECTOR, "[class*='fp-playerName'], [class*='playerName']")
-                nome_jogador = nome_element.text.strip()
+                nome_raw = nome_element.text.strip()
                 
-                # 🛑 FALLBACK DE DESCARTE: Se o nome for genérico/vazio, pula a linha imediatamente
-                if not nome_jogador or nome_jogador.upper() in NOMES_INVALIDOS:
+                # Normaliza o nome tirando quebras de linha/espaços duplos
+                nome_jogador = " ".join(nome_raw.split()).strip()
+                nome_upper = nome_jogador.upper()
+                
+                # 🛑 FALLBACK DE DESCARTE 1: Se for vazio, muito curto ou contiver termo genérico
+                if not nome_jogador or len(nome_jogador) < 2:
+                    continue
+                if any(termo in nome_upper for termo in TERMOS_INVALIDOS):
+                    continue
+
+                # 🛑 FALLBACK DE DESCARTE 2: Garante que tem letras do alfabeto no nome
+                if not re.search(r'[A-Za-zÀ-ÿ]', nome_jogador):
                     continue
                 
-                # 🟢 CAPTURA DO ESCUDO MELHORADA: Procura qualquer img de escudo na célula para evitar quebra em atletas sem foto de rosto
+                # 🟢 CAPTURA DO ESCUDO: Procura qualquer img de escudo na célula
                 src_linha = ""
                 imgs_celula = celula_jogador.find_elements(By.TAG_NAME, "img")
                 for img in imgs_celula:
@@ -60,17 +71,19 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
                     valor_txt = celulas[indice_alvo].text.strip()
                     qtd = int(valor_txt) if valor_txt.isdigit() else 0
                     
-                    if qtd > 0:
-                        if nome_jogador not in acumulador_scouts:
-                            # 🟢 MANTIDO: 'faltas': 0 e 'f_jogos': 0 continuam aqui para não quebrar outros módulos que leem essa chave
-                            acumulador_scouts[nome_jogador] = {"time": time_real, "chutes": 0, "c_jogos": 0, "faltas": 0, "f_jogos": 0}
-                        
-                        if mercado == "finalizacoes":
+                    # 🟢 INICIALIZA O ATLETA CASO NÃO EXISTA
+                    if nome_jogador not in acumulador_scouts:
+                        acumulador_scouts[nome_jogador] = {"time": time_real, "chutes": 0, "c_jogos": 0, "faltas": 0, "f_jogos": 0}
+                    
+                    # 🎯 CORREÇÃO DAS MÉDIAS: Incrementa a partida jogada INDEPENDENTE da quantidade de chutes
+                    if mercado == "finalizacoes":
+                        acumulador_scouts[nome_jogador]["c_jogos"] += 1
+                        if qtd > 0:
                             acumulador_scouts[nome_jogador]["chutes"] += qtd
-                            acumulador_scouts[nome_jogador]["c_jogos"] += 1
-                        else:
+                    else:
+                        acumulador_scouts[nome_jogador]["f_jogos"] += 1
+                        if qtd > 0:
                             acumulador_scouts[nome_jogador]["faltas"] += qtd
-                            acumulador_scouts[nome_jogador]["f_jogos"] += 1
             except Exception:
                 continue
     except Exception:
@@ -124,4 +137,3 @@ def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
         # extrair_scouts_por_aba(driver, url_base, mid_param, "ataque", dicionario_escudos, acumulador_scouts)
 
     return acumulador_scouts
-            
