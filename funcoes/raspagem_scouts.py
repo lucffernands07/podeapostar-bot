@@ -6,12 +6,11 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
     """Navega na aba específica e extrai o scout sem poluir o log."""
     url_final = f"{url_base}/resumo/estatisticas-jogadores/{mercado}/?mid={mid_param}"
     
-    # 🛑 Lista ampliada para pegar variações genéricas
     TERMOS_INVALIDOS = ["JOGADOR", "TODOS", "UNKNOWN", "NONE", "NULL", "PLAYER", "SUBSTITUTE"]
 
     try:
         driver.get(url_final)
-        time.sleep(1.2) # Otimizado para 1.2s
+        time.sleep(1.2)
         
         termos_busca = ["ALVO", "TARGET", "NO GOL"] if mercado == "finalizacoes" else ["SOFRIDAS", "SUFFERED", "FALTAS SOF"]
         
@@ -34,21 +33,19 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
                 nome_element = celula_jogador.find_element(By.CSS_SELECTOR, "[class*='fp-playerName'], [class*='playerName']")
                 nome_raw = nome_element.text.strip()
                 
-                # Normaliza o nome tirando quebras de linha/espaços duplos
+                # Normalização
                 nome_jogador = " ".join(nome_raw.split()).strip()
                 nome_upper = nome_jogador.upper()
                 
-                # 🛑 FALLBACK DE DESCARTE 1: Se for vazio, muito curto ou contiver termo genérico
+                # Descarte de nomes genéricos
                 if not nome_jogador or len(nome_jogador) < 2:
                     continue
                 if any(termo in nome_upper for termo in TERMOS_INVALIDOS):
                     continue
-
-                # 🛑 FALLBACK DE DESCARTE 2: Garante que tem letras do alfabeto no nome
                 if not re.search(r'[A-Za-zÀ-ÿ]', nome_jogador):
                     continue
                 
-                # 🟢 CAPTURA DO ESCUDO: Procura qualquer img de escudo na célula
+                # Escudo
                 src_linha = ""
                 imgs_celula = celula_jogador.find_elements(By.TAG_NAME, "img")
                 for img in imgs_celula:
@@ -69,25 +66,27 @@ def extrair_scouts_por_aba(driver, url_base, mid_param, mercado, dicionario_escu
                 celulas = linha.find_elements(By.CSS_SELECTOR, "td, [data-testid='wcl-tableBodyCell'], .wcl-tableBodyCell_")
                 if len(celulas) > indice_alvo:
                     valor_txt = celulas[indice_alvo].text.strip()
+                    
+                    # 🎯 TRATAMENTO DO HÍFEN E NÚMEROS:
+                    # Se for dígito, converte. Se for "-" ou outro texto, considera 0.
                     qtd = int(valor_txt) if valor_txt.isdigit() else 0
                     
-                    # 🟢 INICIALIZA O ATLETA CASO NÃO EXISTA
+                    # 🟢 INICIALIZA O ATLETA SE FOR A PRIMEIRA VEZ
                     if nome_jogador not in acumulador_scouts:
                         acumulador_scouts[nome_jogador] = {"time": time_real, "chutes": 0, "c_jogos": 0, "faltas": 0, "f_jogos": 0}
                     
-                    # 🎯 CORREÇÃO DAS MÉDIAS: Incrementa a partida jogada INDEPENDENTE da quantidade de chutes
+                    # 🎯 LÓGICA DE PRESENÇA NA LISTA:
+                    # Se o nome dele apareceu nesta partida, soma +1 em c_jogos e acumula os chutes (mesmo que qtd seja 0)
                     if mercado == "finalizacoes":
                         acumulador_scouts[nome_jogador]["c_jogos"] += 1
-                        if qtd > 0:
-                            acumulador_scouts[nome_jogador]["chutes"] += qtd
+                        acumulador_scouts[nome_jogador]["chutes"] += qtd
                     else:
                         acumulador_scouts[nome_jogador]["f_jogos"] += 1
-                        if qtd > 0:
-                            acumulador_scouts[nome_jogador]["faltas"] += qtd
+                        acumulador_scouts[nome_jogador]["faltas"] += qtd
             except Exception:
                 continue
     except Exception:
-        pass # Silencia erros de raspagem para não poluir
+        pass
 
 def pegar_scouts_avancados(driver, dados_jogo, t1, t2):
     url_h2h_mae = dados_jogo.get("url_h2h_base")
