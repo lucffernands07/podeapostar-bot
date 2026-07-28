@@ -54,7 +54,7 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
             media_faltas = d['faltas'] / d['f_jogos'] if d['f_jogos'] > 0 else 0
             
             # Adiciona aos candidatos se a média for estritamente maior que 1.0
-            if media_chutes > 1.0:
+            if media_chutes >= 0.5:
                 candidatos_chutes.append({
                     "jogador": nome_jogador,
                     "time": time_alvo,
@@ -62,7 +62,7 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
                     "media": round(media_chutes, 2)
                 })
                 
-            if media_faltas > 1.0:
+            if media_faltas >= 0.5:
                 candidatos_faltas.append({
                     "jogador": nome_jogador,
                     "time": time_alvo,
