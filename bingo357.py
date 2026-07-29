@@ -63,28 +63,23 @@ def carregar_ranking_pro():
 
 def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, **kwargs):
     """
-    Monta o bilhete diretamente filtrado pelas maiores porcentagens de acerto (Prováveis),
-    sem necessidade de passar estratégia ou modo.
+    Recebe os dados já filtrados pela janela e tipo de bingo, 
+    agrupa os jogos e gera o bilhete.
     """
     bilhetes = []
     if not dados_entrada: return bilhetes
 
-    dados_trabalho = list(dados_entrada)
-
-    # 🟢 REGRA ÚNICA: Ordena os mercados sempre pela maior porcentagem de probabilidade
-    dados_trabalho.sort(key=lambda x: extrair_porcentagem(x.get('mercado', '')), reverse=True)
-
-    # 1. Agrupa os mercados por confronto
+    # 1. Agrupa todos os mercados por confronto na ordem em que chegam
     jogos_agrupados = {}
     ordem_chaves = []
-    for jogo in dados_trabalho:
+    for jogo in dados_entrada:
         chave = f"{jogo['time_casa']}x{jogo['time_fora']}".lower().strip()
         if chave not in jogos_agrupados:
             jogos_agrupados[chave] = []
             ordem_chaves.append(chave)
         jogos_agrupados[chave].append(jogo)
 
-    # 2. Seleciona os N primeiros confrontos únicos
+    # 2. Seleciona a quantidade alvo de jogos (Bingo 3 ou Bingo 5)
     chaves_selecionadas = ordem_chaves[:qtd_alvo]
     
     jogos_selecionados = []
@@ -92,7 +87,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, **kwargs):
         jogos_selecionados.extend(jogos_agrupados[chave])
     
     total_reais = len(chaves_selecionadas)
-    nome_bilhete = f"✨ BINGO {total_reais} JOGOS - PROVÁVEIS"
+    nome_bilhete = f"✨ BINGO {total_reais} JOGOS"
 
     if jogos_selecionados:
         bilhetes.append({"id": "BINGO_CUSTOM", "nome": nome_bilhete, "jogos": jogos_selecionados})
