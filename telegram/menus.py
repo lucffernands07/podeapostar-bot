@@ -28,12 +28,11 @@ def extrair_markup_filtros(escolhas=None):
                 {"text": "Janela 5H", "callback_data": "cb_hora_5H"},
                 {"text": "Próximos", "callback_data": "cb_hora_PROXIMOS"}
             ],
-            # --- SEÇÃO 3: ESTRATÉGIA ---
+            # --- SEÇÃO 3: ESTRATÉGIA / AÇÕES ---
             [{"text": "✅ Escolha um modo:", "callback_data": "ignore"}],
             [
-                {"text": "Maiores Odds", "callback_data": "cb_tipo_ODDS"},
-                {"text": "Mais acertos", "callback_data": "cb_tipo_ACERTOS"},
-                {"text": "Equilibrado", "callback_data": "cb_tipo_AMBAS"}
+                {"text": "Provaveis", "callback_data": "cb_tipo_PROVAVEIS"},
+                {"text": "Atualizar", "callback_data": "cb_acao_ATUALIZAR"}
             ],
             # --- BOTÃO DE DISPARO DEFINITIVO ---
             [
@@ -45,13 +44,13 @@ def extrair_markup_filtros(escolhas=None):
 def enviar_menu_bingo(chat_id, texto):
     """
     Disparado pelo main.py de madrugada.
-    Envia a mensagem inicial acoplando o Painel com as escolhas padrão (5, PROXIMOS, ACERTOS).
+    Envia a mensagem inicial acoplando o Painel com as escolhas padrão (5, PROXIMOS, PROVAVEIS).
     """
     token = os.getenv('TELEGRAM_TOKEN')
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
-    # Configuração inicial do painel padrão
-    escolhas_padrao = {"bingo": "5", "horario": "PROXIMOS", "bilhete": "ACERTOS"}
+    # Configuração inicial do painel padrão atualizada (ACERTOS mudou para PROVAVEIS)
+    escolhas_padrao = {"bingo": "5", "horario": "PROXIMOS", "bilhete": "PROVAVEIS"}
     markup = extrair_markup_filtros(escolhas_padrao)
 
     payload = {
@@ -98,4 +97,3 @@ def atualizar_menu_inline(chat_id, message_id, texto, escolhas_atuais):
         requests.post(url, json=payload)
     except Exception as e:
         print(f"❌ Erro ao atualizar os botões dinâmicos: {e}")
-    
