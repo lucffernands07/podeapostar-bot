@@ -58,57 +58,58 @@ def extrair_url_base(jogo_json, cache_pendentes):
     return jogo_json.get("link_h2h") or info_extra.get("link_h2h")
 
 def raspar_titulares_flashscore(page, url_original):
-    """Acessa a URL inicial, obtém o link redirecionado, formata para /resumo/equipes/ e raspa os titulares."""
+    """Acessa a URL inicial, resolve o redirecionamento para /resumo/equipes/ e raspa os titulares."""
     titulares_casa = []
     titulares_fora = []
     url_final = url_original
     
     try:
-        # 1. Navega até o link original para que o Flashscore resolva os redirecionamentos
+        # 1. Abre a URL original para resolver o ID e redirecionamento
         page.goto(url_original, timeout=30000, wait_until="domcontentloaded")
         time.sleep(1.5)
 
-        # 2. Captura a URL real carregada pelo navegador
+        # 2. Captura a URL real e força o padrão /resumo/equipes/
         url_atual = page.url
-        
-        # 3. Trata a URL: deleta tudo a partir de '?' ou '#' e força /resumo/equipes/
         base_url = url_atual.split('?')[0].split('#')[0].rstrip('/')
         url_final = f"{base_url}/resumo/equipes/"
         
         print(f"🔗 URL Normalizada: {url_final}")
 
-        # 4. Vai para a aba final de escalações
+        # 3. Se ainda não estiver na URL final de equipes, navega até ela
         if page.url != url_final:
             page.goto(url_final, timeout=30000, wait_until="domcontentloaded")
+
+        # 4. Espera especificamente a presença do container principal de escalação no DOM
+        try:
+            page.wait_for_selector(".lf__sidesBox, .lf__sides", timeout=10000)
+        except Exception:
+            # Caso não tenha carregado de primeira, rola a página levemente
+            page.evaluate("window.scrollBy(0, 300)")
             time.sleep(2)
 
-        # 5. Espera pelo container das escalações
-        try:
-            page.wait_for_selector(".lf__sidesBox, .lf_sidesBox", timeout=6000)
-        except Exception:
-            # Botão de backup caso caia numa página intermediária
-            aba = page.query_selector("a[href*='equipes'], a[href*='escalacoes'], button:has-text('Escalações')")
-            if aba:
-                aba.click()
-                time.sleep(2)
-
-        # 6. Extração dos times no DOM
-        lados = page.query_selector_all(".lf__sidesBox > .lf__side, .lf_sidesBox > .lf_side")
+        # 5. Localiza as duas colunas do campo (Lado 1 = Casa, Lado 2 = Fora)
+        # Nota: Usamos busca descendente aberta (espaço) em vez de filhas diretas (>)
+        lados = page.query_selector_all(".lf__sidesBox .lf__side, .lf__sides .lf__side")
 
         if len(lados) >= 2:
-            # Casa
-            els_casa = lados[0].query_selector_all(".lf__participantNew, .lf_participantNew")
+            # --- TIME CASA (1º lado) ---
+            els_casa = lados[0].query_selector_all(".lf__participantNew")
             for el in els_casa:
                 nome = el.text_content().strip()
+                # Remove número da camisa do início, notas (ex: 6.5) ou quebras de linha
                 nome_limpo = re.sub(r'^\d+\s*', '', nome)
+                nome_limpo = re.sub(r'\s*\d+\.\d+$', '', nome_limpo).strip()
+                
                 if nome_limpo and nome_limpo not in titulares_casa and len(titulares_casa) < 11:
                     titulares_casa.append(nome_limpo)
 
-            # Fora
-            els_fora = lados[1].query_selector_all(".lf__participantNew, .lf_participantNew")
+            # --- TIME FORA (2º lado) ---
+            els_fora = lados[1].query_selector_all(".lf__participantNew")
             for el in els_fora:
                 nome = el.text_content().strip()
                 nome_limpo = re.sub(r'^\d+\s*', '', nome)
+                nome_limpo = re.sub(r'\s*\d+\.\d+$', '', nome_limpo).strip()
+                
                 if nome_limpo and nome_limpo not in titulares_fora and len(titulares_fora) < 11:
                     titulares_fora.append(nome_limpo)
 
