@@ -31,7 +31,7 @@ def validar_liga_para_jogadores(nome_liga):
 
 def garantir_diretorio():
     if not os.path.exists(DIRETORIO_ESCALACOES):
-        os.makedirs(DIRETORIO_ESCALACOES)
+        os.makedirs(DIRETORIO_ESCALACOES, exist_ok=True)
 
 def formatar_linha_jogadores(lista_jogadores, por_linha=4):
     if not lista_jogadores:
@@ -50,21 +50,19 @@ def extrair_url_base(jogo_json, cache_pendentes):
     return jogo_json.get("link_h2h") or info_extra.get("link_h2h")
 
 def raspar_titulares_flashscore(page, url_original):
-    """Acessa a URL inicial, resolve o redirecionamento para a URL SEO limpa /resumo/equipes/ e raspa os titulares."""
     titulares_casa = []
     titulares_fora = []
     url_final = url_original
 
     try:
-        # 1. Abre a URL original para que o Flashscore resolva o redirecionamento SEO
-        page.goto(url_original, timeout=30000, wait_until="domcontentloaded")
-        time.sleep(1.5)
+        # 1. Navega com timeout estendido e espera leve
+        page.goto(url_original, timeout=45000, wait_until="domcontentloaded")
+        time.sleep(2)
 
-        # 2. Captura a URL real após o redirecionamento e remove parâmetros ou hashes antigos
+        # 2. Captura a URL real e força o sufixo /resumo/equipes/
         url_atual = page.url
         base_url = url_atual.split('?')[0].split('#')[0].rstrip('/')
         
-        # Garante que a URL termine exatamente com /resumo/equipes/
         if not base_url.endswith("/resumo/equipes"):
             url_final = f"{base_url}/resumo/equipes/"
         else:
@@ -72,19 +70,19 @@ def raspar_titulares_flashscore(page, url_original):
         
         print(f"🔗 URL Normalizada: {url_final}")
 
-        # 3. Navega para a URL limpa de equipes
         if page.url != url_final:
             page.goto(url_final, timeout=30000, wait_until="domcontentloaded")
+            time.sleep(1.5)
 
-        # 4. Espera especificamente o container da escalação ou os jogadores
+        # 3. Espera pelo container da escalação
         seletor_container = ".lf__sidesBox, .lf__sides, .lf__participantNew"
         try:
-            page.wait_for_selector(seletor_container, timeout=10000)
+            page.wait_for_selector(seletor_container, timeout=8000)
         except Exception:
-            page.evaluate("window.scrollBy(0, 300)")
+            page.evaluate("window.scrollBy(0, 400)")
             time.sleep(2)
 
-        # 5. Captura as colunas de jogadores
+        # 4. Extrai os jogadores
         lados = page.query_selector_all(".lf__sidesBox .lf__side, .lf__sides .lf__side")
 
         if len(lados) >= 2:
@@ -97,7 +95,6 @@ def raspar_titulares_flashscore(page, url_original):
                     if not texto:
                         continue
                     
-                    # Trata quebras de linha (caso venha número e nome juntos)
                     linhas = [l.strip() for l in texto.split('\n') if l.strip()]
                     for linha in linhas:
                         nome_limpo = re.sub(r'^\d+\s*', '', linha)
@@ -112,7 +109,7 @@ def raspar_titulares_flashscore(page, url_original):
             titulares_fora = extrair_nomes(lados[1])
 
     except Exception as e:
-        print(f"⚠️ Aviso/Timeout ao raspar {url_original}: {e}")
+        print(f"⚠️ Erro ao raspar {url_original}: {e}")
         
     return titulares_casa, titulares_fora, url_final
 
@@ -150,7 +147,7 @@ def executar_raspagem_escalacoes():
                     f_time = item.get("time_fora", "").lower().strip()
                     cache_pendentes[f"{c}x{f_time}"] = item
         except Exception as e:
-            print(f"⚠️ Erro no pendentes: {e}")
+            print(f"⚠️ Erro ao ler pendentes: {e}")
 
     jogos_processados_nesta_run = set()
 
@@ -179,8 +176,9 @@ def executar_raspagem_escalacoes():
                 t_casa_existente = jogo_existente.get("titulares_casa", [])
                 t_fora_existente = jogo_existente.get("titulares_fora", [])
 
+                # Pula se já capturou os 11 de cada lado
                 if len(t_casa_existente) == 11 and len(t_fora_existente) == 11:
-                    print(f"⏩ [PULADO] {casa} x {fora} já possui escalação completa.")
+                    print(f"⏩ [PULADO] {casa} x {fora} já possui escalação completa (11x11).")
                     jogos_processados_nesta_run.add(chave)
                     continue
 
@@ -194,10 +192,16 @@ def executar_raspagem_escalacoes():
                     
                     t_casa, t_fora, url_final = raspar_titulares_flashscore(page, url_original)
                     
+                    # PROTEÇÃO: Se a busca atual falhou/veio vazia mas tínhamos algo antigo, preserva
+                    if len(t_casa) == 0 and len(t_casa_existente) > 0:
+                        t_casa = t_casa_existente
+                    if len(t_fora) == 0 and len(t_fora_existente) > 0:
+                        t_fora = t_fora_existente
+
                     if len(t_casa) > 0 or len(t_fora) > 0:
                         print(f"✅ Escalação capturada! Casa: {len(t_casa)} | Fora: {len(t_fora)}")
                     else:
-                        print("⏳ Escalação ainda não liberada no Flashscore. Guardando dados do jogo...")
+                        print("⏳ Escalação ainda não disponível no Flashscore.")
 
                     texto_formatado = (
                         f"**{casa}**:\n"
@@ -206,6 +210,7 @@ def executar_raspagem_escalacoes():
                         f"{formatar_linha_jogadores(t_fora)}"
                     )
 
+                    # Atualiza o dicionário de saída
                     dados_provaveis[chave] = {
                         "time_casa": casa,
                         "time_fora": fora,
@@ -219,11 +224,13 @@ def executar_raspagem_escalacoes():
 
         browser.close()
 
+    # Garantia de salvamento
+    garantir_diretorio()
     with open(CAMINHO_PROVAVEIS, "w", encoding="utf-8") as f:
         json.dump(dados_provaveis, f, ensure_ascii=False, indent=4)
         
     print(f"\n💾 [SALVANDO] Gravando dados em {CAMINHO_PROVAVEIS}...")
-    print(f"✅ Concluído! {len(dados_provaveis)} partidas atualizadas no arquivo.")
+    print(f"✅ Concluído! {len(dados_provaveis)} partidas registradas no JSON.")
 
 if __name__ == "__main__":
     executar_raspagem_escalacoes()
