@@ -18,8 +18,8 @@ def processar_comando_direto(tipo_bruto):
     print("\n--- [LOG PASSO 1] DESCODIFICANDO COMANDO ---")
     print(f"📥 Recebido tipo_bruto: '{tipo_bruto}'")
 
-    # Inicializa com valores padrão (sem referências a elite)
-    config = {"bingo": 3, "horario": "DIA", "bilhete": "ACERTOS", "aviso": ""}
+    # Inicializa com valores padrão (janela PROXIMOS por padrão)
+    config = {"bingo": 3, "horario": "PROXIMOS", "bilhete": "ACERTOS", "aviso": ""}
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
     # 1. PROCESSAMENTO DE CALLBACKS DO TELEGRAM (Maior Prioridade)
@@ -57,7 +57,7 @@ def processar_comando_direto(tipo_bruto):
                 digitos_brutos = "".join([c for c in tipo_limpo if c.isdigit()])
                 config["bingo"] = int(digitos_brutos) if digitos_brutos else 3
 
-            txt_janela = f"{config['horario']}" if config['horario'] != "DIA" else "Do Dia"
+            txt_janela = f"{config['horario']}" if config['horario'] not in ["DIA", "PROXIMOS"] else "Próximos"
             txt_modo = "Mais acertos"
             if config['bilhete'] == "ODDS": txt_modo = "Maiores Odds"
             elif config['bilhete'] == "AMBAS": txt_modo = "Equilibrado"
@@ -164,12 +164,11 @@ def executar():
                 hora_jogo += timedelta(days=1)
             
             # 🟢 TRAVA DOS 15 MINUTOS: Se o jogo começou há MAIS de 15 minutos atrás, descarta.
-            # Ex: Se agora é 16:16 e o jogo foi 16:00, (16:16 - 15 min = 16:01). 16:00 < 16:01 -> DESCARTA!
             if hora_jogo < (agora_br - timedelta(minutes=15)):
                 continue
 
-            # Filtros de janela futuros (Ex: Janela de 3H)
-            if filtro_hora != "DIA" and "H" in filtro_hora:
+            # Filtros de janela futuros (Ex: Janela de 3H ou 5H)
+            if filtro_hora not in ["DIA", "PROXIMOS"] and "H" in filtro_hora:
                 try:
                     horas_limite = int(filtro_hora.replace("H", ""))
                     if hora_jogo > agora_br + timedelta(hours=horas_limite):
@@ -180,7 +179,7 @@ def executar():
             j["datetime_real"] = hora_jogo
             jogos_validos_horario.append(j)
         except Exception as e:
-            if filtro_hora == "DIA": 
+            if filtro_hora in ["DIA", "PROXIMOS"]: 
                 jogos_validos_horario.append(j)
 
     jogos_validos_horario.sort(key=lambda x: x.get("datetime_real", agora_br))
@@ -218,3 +217,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
+            
