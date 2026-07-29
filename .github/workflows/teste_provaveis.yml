@@ -5,7 +5,6 @@ on:
     paths:
       - 'telegram/raspagem_provaveis.py'
   workflow_dispatch:
-  # 👈 Adicionado para ouvir a chamada da API do Cloudflare Worker
   repository_dispatch:
     types: [atualizar_provaveis, comando_telegram]
 
@@ -25,7 +24,7 @@ jobs:
       - name: Instalar Dependências e Playwright
         run: |
           pip install -r requirements.txt
-          pip install playwright bs4
+          pip install playwright bs4 requests
           playwright install chromium
 
       - name: 🚀 Executar Raspagem de Teste
@@ -41,7 +40,31 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Adiciona diretamente a pasta de escalações inteira ou o arquivo específico
           git add telegram/escalacoes/provaveis.json
           git commit -m "bot: atualiza escalações prováveis [skip ci]" || echo "Sem alterações para salvar"
           git push origin main
+
+      # 📢 PASSO ADICIONADO: Envia o resultado para o Telegram assim que salva
+      - name: 📢 Notificar Canal no Telegram
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ github.event.client_payload.chat_id || secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python -c "
+          import os, json, requests
+
+          token = os.environ.get('TELEGRAM_TOKEN')
+          chat_id = os.environ.get('CHAT_ID')
+          path = 'telegram/escalacoes/provaveis.json'
+
+          if os.path.exists(path) and token and chat_id:
+              with open(path, 'r', encoding='utf-8') as f:
+                  dados = json.load(f)
+              for chave, jogo in dados.items():
+                  msg = f\"⚽ *{jogo['time_casa']} x {jogo['time_fora']}*\n🏆 _{jogo['liga']}_\n\n{jogo['texto_telegram']}\n\n🕒 _Atualizado em: {jogo['atualizado_em']}_\"
+                  requests.post(f'https://api.telegram.org/bot{token}/sendMessage', json={
+                      'chat_id': chat_id,
+                      'text': msg,
+                      'parse_mode': 'Markdown'
+                  })
+          "
