@@ -26,7 +26,7 @@ def extrair_markup_filtros(escolhas=None):
             [
                 {"text": "Janela 3H", "callback_data": "cb_hora_3H"},
                 {"text": "Janela 5H", "callback_data": "cb_hora_5H"},
-                {"text": "Do Dia", "callback_data": "cb_hora_DIA"}
+                {"text": "Próximos", "callback_data": "cb_hora_PROXIMOS"}
             ],
             # --- SEÇÃO 3: ESTRATÉGIA ---
             [{"text": "✅ Escolha um modo:", "callback_data": "ignore"}],
@@ -45,13 +45,13 @@ def extrair_markup_filtros(escolhas=None):
 def enviar_menu_bingo(chat_id, texto):
     """
     Disparado pelo main.py de madrugada.
-    Envia a mensagem inicial acoplando o Painel com as escolhas padrão (5, DIA, ACERTOS).
+    Envia a mensagem inicial acoplando o Painel com as escolhas padrão (5, PROXIMOS, ACERTOS).
     """
     token = os.getenv('TELEGRAM_TOKEN')
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
     # Configuração inicial do painel padrão
-    escolhas_padrao = {"bingo": "5", "horario": "DIA", "bilhete": "ACERTOS"}
+    escolhas_padrao = {"bingo": "5", "horario": "PROXIMOS", "bilhete": "ACERTOS"}
     markup = extrair_markup_filtros(escolhas_padrao)
 
     payload = {
@@ -98,3 +98,4 @@ def atualizar_menu_inline(chat_id, message_id, texto, escolhas_atuais):
         requests.post(url, json=payload)
     except Exception as e:
         print(f"❌ Erro ao atualizar os botões dinâmicos: {e}")
+    
