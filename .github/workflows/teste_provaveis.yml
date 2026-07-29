@@ -21,13 +21,15 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Instalar Dependências e Playwright
+      - name: Instalar Dependências
         run: |
           pip install -r requirements.txt
           pip install playwright bs4 requests
           playwright install chromium
 
+      # 1. RODA A RASPAGEM SOMENTE SE FOR ATUALIZAÇÃO OU PUSH
       - name: 🚀 Executar Raspagem de Teste
+        if: github.event.action == 'atualizar_provaveis' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ github.event.client_payload.chat_id || secrets.TELEGRAM_CHAT_ID }}
@@ -35,17 +37,18 @@ jobs:
         run: |
           python telegram/raspagem_provaveis.py
 
+      # 2. SALVA NO REPOSITÓRIO SE HOUVE RASPAGEM
       - name: 💾 Salvar Resultado no Repositório
+        if: github.event.action == 'atualizar_provaveis' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
           git add telegram/escalacoes/provaveis.json
           git commit -m "bot: atualiza escalações prováveis [skip ci]" || echo "Sem alterações para salvar"
           git push origin main
 
-      # 📢 PASSO ADICIONADO: Envia o resultado para o Telegram assim que salva
-      - name: 📢 Notificar Canal no Telegram
+      # 3. ENVIA AS MENSAGENS PARA O TELEGRAM (Tanto se acabou de atualizar quanto se clicou em "Prováveis")
+      - name: 📢 Postar Escalações no Telegram
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ github.event.client_payload.chat_id || secrets.TELEGRAM_CHAT_ID }}
@@ -57,14 +60,23 @@ jobs:
           chat_id = os.environ.get('CHAT_ID')
           path = 'telegram/escalacoes/provaveis.json'
 
-          if os.path.exists(path) and token and chat_id:
-              with open(path, 'r', encoding='utf-8') as f:
-                  dados = json.load(f)
-              for chave, jogo in dados.items():
-                  msg = f\"⚽ *{jogo['time_casa']} x {jogo['time_fora']}*\n🏆 _{jogo['liga']}_\n\n{jogo['texto_telegram']}\n\n🕒 _Atualizado em: {jogo['atualizado_em']}_\"
-                  requests.post(f'https://api.telegram.org/bot{token}/sendMessage', json={
-                      'chat_id': chat_id,
-                      'text': msg,
-                      'parse_mode': 'Markdown'
-                  })
+          if not os.path.exists(path):
+              print(f'❌ Arquivo {path} não encontrado.')
+              exit(0)
+
+          with open(path, 'r', encoding='utf-8') as f:
+              dados = json.load(f)
+
+          if not dados:
+              print('⚠️ Nenhuma escalação cadastrada.')
+              exit(0)
+
+          for chave, jogo in dados.items():
+              msg = f\"⚽ *{jogo['time_casa']} x {jogo['time_fora']}*\n🏆 _{jogo['liga']}_\n\n{jogo['texto_telegram']}\n\n🕒 _Atualizado em: {jogo['atualizado_em']}_\"
+              res = requests.post(f'https://api.telegram.org/bot{token}/sendMessage', json={
+                  'chat_id': chat_id,
+                  'text': msg,
+                  'parse_mode': 'Markdown'
+              })
+              print(f'Enviado {chave}: {res.status_code}')
           "
