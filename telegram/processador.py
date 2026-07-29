@@ -12,7 +12,7 @@ from telegram import menus
 
 def processar_comando_direto(tipo_bruto):
     """
-    Lê a string unificada e separa os filtros para montar o bilhete.
+    Lê a string unificada e separa os filtros para montar o bilhete ou ações de prováveis.
     Garante que o callback do botão se sobreponha a qualquer padrão.
     """
     print("\n--- [LOG PASSO 1] DESCODIFICANDO COMANDO ---")
@@ -21,14 +21,20 @@ def processar_comando_direto(tipo_bruto):
     config = {"bingo": 3, "horario": "PROXIMOS", "aviso": "", "acao": "GERAR"}
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
-    # 0. VERIFICAÇÃO DO BOTÃO ATUALIZAR PROVÁVEIS
-    if "cb_atualizar" in tipo_limpo or "ATUALIZAR" in tipo_limpo or "provaveis" in tipo_limpo.lower():
+    # 0. AÇÕES RELACIONADAS AOS PROVÁVEIS
+    if "cb_atualizar" in tipo_limpo or "ATUALIZAR" in tipo_limpo:
         config["acao"] = "ATUALIZAR_PROVAVEIS"
         config["aviso"] = "🔄 *Solicitação de Atualização de Escalações Recebida!*"
-        print("✅ Ação detectada: Rodar raspagem_provaveis.py")
+        print("✅ Ação detectada: Rodar raspagem de prováveis")
         return config
 
-    # 1. PROCESSAMENTO DE CALLBACKS DIRETO DO TELEGRAM
+    if "cb_provaveis" in tipo_limpo or "VER_PROVAVEIS" in tipo_limpo:
+        config["acao"] = "VER_PROVAVEIS"
+        config["aviso"] = "📋 *Consulta de Prováveis Recebida!*"
+        print("✅ Ação detectada: Ler e exibir prováveis cadastrados")
+        return config
+
+    # 1. PROCESSAMENTO DE CALLBACKS DIRETO DO TELEGRAM (BINGOS)
     if "cb_bingo_" in tipo_limpo:
         partes = tipo_limpo.split("_")
         for p in partes:
@@ -76,6 +82,64 @@ def processar_comando_direto(tipo_bruto):
     print(f"✅ Configuração gerada por fallback geral: {config}")
     return config
 
+def obter_mensagem_provaveis_formatada():
+    """Lê o arquivo JSON de prováveis e retorna a string formatada filtrando vazios."""
+    caminhos_tentar = ["telegram/provaveis.json", "provaveis.json"]
+    caminho_provaveis = None
+
+    for path in caminhos_tentar:
+        if os.path.exists(path):
+            caminho_provaveis = path
+            break
+
+    if not caminho_provaveis:
+        return "⚠️ *Nenhum dado de prováveis encontrado localmente.*\nClique em *Atualizar* para realizar a raspagem."
+
+    try:
+        with open(caminho_provaveis, "r", encoding="utf-8") as f:
+            dados_provaveis = json.load(f)
+            
+        lista_jogos = dados_provaveis.get("jogos", []) if isinstance(dados_provaveis, dict) else dados_provaveis
+        
+        jogos_validos = []
+        for j in lista_jogos:
+            jogadores = j.get("jogadores") or j.get("provaveis") or j.get("scouts") or []
+            if jogadores and len(jogadores) > 0:
+                jogos_validos.append(j)
+
+        if not jogos_validos:
+            return "⚠️ *Não há escalações prováveis disponíveis na base no momento.*"
+
+        corpo_msg = "📋 *ESCALAÇÕES PROVÁVEIS CONFIRMADAS*\n\n"
+        for item in jogos_validos:
+            casa = item.get("time_casa", "Casa")
+            fora = item.get("time_fora", "Fora")
+            horario = item.get("horario", "")
+            jogadores = item.get("jogadores") or item.get("provaveis") or item.get("scouts") or []
+            
+            header = f"🏟️ *{casa} x {fora}*"
+            if horario:
+                header = f"⏱️ {horario} | " + header
+                
+            corpo_msg += f"{header}\n```\n"
+            for jog in jogadores:
+                if isinstance(jog, dict):
+                    nome = jog.get("nome", "Jogador")
+                    med = jog.get("media") or jog.get("med")
+                    txt_med = f" | Méd: {med}" if med else ""
+                    corpo_msg += f"• {nome}{txt_med}\n"
+                else:
+                    corpo_msg += f"• {str(jog)}\n"
+            corpo_msg += "```\n\n"
+
+        if len(corpo_msg) > 4000:
+            corpo_msg = corpo_msg[:3900] + "\n\n...(Lista resumida por limite de tamanho)"
+
+        return corpo_msg
+    except Exception as e:
+        print(f"❌ Erro ao ler/formatar prováveis: {e}")
+        return f"⚠️ Erro ao carregar escalações prováveis: {e}"
+
 def executar():
     token = os.getenv('TELEGRAM_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN')
     chat_id = os.getenv('CHAT_ID') or os.getenv('TELEGRAM_CHAT_ID')
@@ -83,14 +147,29 @@ def executar():
     
     url_msg = f"https://api.telegram.org/bot{token}/sendMessage"
     config = processar_comando_direto(tipo_bruto)
+    menu_botoes = menus.extrair_markup_filtros() if hasattr(menus, 'extrair_markup_filtros') else None
 
-    # --- FLUXO DE ATUALIZAÇÃO DOS PROVÁVEIS ---
+    # --- FLUXO 1: APENAS VER PROVÁVEIS (LEITURA RÁPIDA) ---
+    if config.get("acao") == "VER_PROVAVEIS":
+        texto_provaveis = obter_mensagem_provaveis_formatada()
+        payload = {
+            "chat_id": chat_id,
+            "text": texto_provaveis,
+            "parse_mode": "Markdown",
+            "disable_web_page_preview": True
+        }
+        if menu_botoes: payload["reply_markup"] = menu_botoes
+        requests.post(url_msg, json=payload)
+        return
+
+    # --- FLUXO 2: ATUALIZAR PROVÁVEIS (RASPAGEM + LEITURA) ---
     if config.get("acao") == "ATUALIZAR_PROVAVEIS":
         print("\n--- [LOG EXTRA] EXECUTANDO RASPAGEM DE PROVÁVEIS ---")
         try:
+            # Mensagem com o seu texto exato e sem nome de arquivo
             requests.post(url_msg, json={
                 "chat_id": chat_id,
-                "text": "🔄 *A atualizar escalações prováveis/confirmadas na base de dados... Por favor aguarde.*",
+                "text": "🔄 *Atualizando Escalações Prováveis...*\n\n⚠️ Aguarde alguns minutos, foi iniciado o servidor para atualizar a base de dados.",
                 "parse_mode": "Markdown"
             })
             
@@ -99,12 +178,19 @@ def executar():
             if hasattr(raspagem_provaveis, 'executar'):
                 raspagem_provaveis.executar()
             
-            requests.post(url_msg, json={
+            # Lê o JSON atualizado e envia só o que não estiver vazio
+            texto_provaveis = obter_mensagem_provaveis_formatada()
+            
+            payload = {
                 "chat_id": chat_id,
-                "text": "✅ *Escalações atualizadas com sucesso!* Agora pode gerar o seu bilhete.",
-                "parse_mode": "Markdown"
-            })
+                "text": f"✅ *Atualização Concluída!*\n\n{texto_provaveis}",
+                "parse_mode": "Markdown",
+                "disable_web_page_preview": True
+            }
+            if menu_botoes: payload["reply_markup"] = menu_botoes
+            requests.post(url_msg, json=payload)
             return
+            
         except Exception as e:
             print(f"❌ Erro ao executar raspagem_provaveis: {e}")
             requests.post(url_msg, json={
@@ -114,7 +200,7 @@ def executar():
             })
             return
 
-    # --- FLUXO PADRÃO DE GERAÇÃO DE BILHETES ---
+    # --- FLUXO 3: GERAR BILHETES (PADRÃO) ---
     qtd_alvo = config["bingo"]
     filtro_hora = config["horario"]
 
@@ -217,8 +303,6 @@ def executar():
     
     texto_final = bingo357.formatar_para_telegram(bilhetes_gerados, dict_cache_links)
 
-    menu_botoes = menus.extrair_markup_filtros() if hasattr(menus, 'extrair_markup_filtros') else None
-
     if texto_final:
         try:
             payload = {
@@ -241,3 +325,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
+            
