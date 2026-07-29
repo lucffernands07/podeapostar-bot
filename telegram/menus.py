@@ -13,13 +13,13 @@ def extrair_markup_filtros(escolhas=None):
         "inline_keyboard": [
             
             # --- SEÇÃO 1: BINGOS (Bingo 3 e 5) ---
-            [{"text": "✅ Escolha um bingo:", "callback_data": "ignore"}],
+            [{"text": "1️⃣ Escolha um bingo:", "callback_data": "ignore"}],
             [
                 {"text": "Bingo 3", "callback_data": "cb_bingo_3"},
                 {"text": "Bingo 5", "callback_data": "cb_bingo_5"}
             ],
             # --- SEÇÃO 2: HORÁRIOS ---
-            [{"text": "✅ Escolha uma janela:", "callback_data": "ignore"}],
+            [{"text": "2️⃣ Escolha uma janela:", "callback_data": "ignore"}],
             [
                 {"text": "Janela 3H", "callback_data": "cb_hora_3H"},
                 {"text": "Janela 5H", "callback_data": "cb_hora_5H"},
@@ -27,7 +27,7 @@ def extrair_markup_filtros(escolhas=None):
             ],
             # --- BOTÃO DE DISPARO DEFINITIVO ---
             [
-                {"text": "🚀 GERAR BILHETE", "callback_data": "cb_acao_GERAR"}
+                {"text": "3️⃣ GERAR BILHETE", "callback_data": "cb_acao_GERAR"}
             ],
             # --- LINHA RANKING SOLO ---
             [
