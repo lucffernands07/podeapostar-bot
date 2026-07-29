@@ -9,7 +9,7 @@ def extrair_porcentagem(texto_mercado):
     try:
         if not texto_mercado:
             return 0
-        match = re.search(r'\((\d+)%\)', texto_mercado)
+        match = re.search(r'\((\d+)%\)', str(texto_mercado))
         return int(match.group(1)) if match else 0
     except:
         return 0
@@ -19,14 +19,11 @@ def extrair_odd(odd_str):
         if not odd_str or odd_str == "N/A" or odd_str == "":
             return 1.30
         
-        # Garante que tratamos como string para a verificação de texto
         odd_str_s = str(odd_str).strip()
         
-        # Se for "Análise" (ou contiver termos relacionados), assume odd de 1.30 imediatamente
         if "análise" in odd_str_s.lower() or "analise" in odd_str_s.lower():
             return 1.30
             
-        # Fallback de segurança para palavras específicas que possam vir no campo da odd
         if any(term in odd_str_s.lower() for term in ["chutes", "falta", "cartã", "cartao", "cantos"]):
             return 1.30
             
@@ -64,21 +61,30 @@ def carregar_ranking_pro():
         except: return []
     return []
 
-def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"):
+def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, **kwargs):
+    """
+    Monta o bilhete diretamente filtrado pelas maiores porcentagens de acerto (Prováveis),
+    sem necessidade de passar estratégia ou modo.
+    """
     bilhetes = []
     if not dados_entrada: return bilhetes
 
-    # 1. Agrupa todos os mercados por confronto mantendo a ordem de aparição (cronológica)
+    dados_trabalho = list(dados_entrada)
+
+    # 🟢 REGRA ÚNICA: Ordena os mercados sempre pela maior porcentagem de probabilidade
+    dados_trabalho.sort(key=lambda x: extrair_porcentagem(x.get('mercado', '')), reverse=True)
+
+    # 1. Agrupa os mercados por confronto
     jogos_agrupados = {}
     ordem_chaves = []
-    for jogo in dados_entrada:
+    for jogo in dados_trabalho:
         chave = f"{jogo['time_casa']}x{jogo['time_fora']}".lower().strip()
         if chave not in jogos_agrupados:
             jogos_agrupados[chave] = []
             ordem_chaves.append(chave)
         jogos_agrupados[chave].append(jogo)
 
-    # 2. Seleciona estritamente os primeiros N confrontos cronológicos (Próximos N jogos)
+    # 2. Seleciona os N primeiros confrontos únicos
     chaves_selecionadas = ordem_chaves[:qtd_alvo]
     
     jogos_selecionados = []
@@ -86,7 +92,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
         jogos_selecionados.extend(jogos_agrupados[chave])
     
     total_reais = len(chaves_selecionadas)
-    nome_bilhete = f"✨ BINGO {total_reais} JOGOS - {estrategia.upper()}"
+    nome_bilhete = f"✨ BINGO {total_reais} JOGOS - PROVÁVEIS"
 
     if jogos_selecionados:
         bilhetes.append({"id": "BINGO_CUSTOM", "nome": nome_bilhete, "jogos": jogos_selecionados})
@@ -116,7 +122,6 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
             odd_valor = str(j.get('odd') or info_extra.get('odd', '1.50')).strip()
             
-            # 🟢 AJUSTE DE SEGURANÇA: Busca o link h2h no jogo atual ou no dicionário de cache extra
             link_h2h_resolvido = j.get('link_h2h') or info_extra.get('link_h2h')
             
             chave_jogo = f"{horario}_{t1}_{t2}"
@@ -126,12 +131,11 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     "time_casa": j.get('time_casa'), "time_fora": j.get('time_fora'),
                     "mercados": [], 
                     "link": j.get('link_betano') or info_extra.get('link', "https://www.betano.bet.br/"),
-                    "link_h2h": link_h2h_resolvido # 🟢 Aplica o link resolvido de forma garantida
+                    "link_h2h": link_h2h_resolvido
                 }
             
             mercado_limpo = j.get('mercado', '')
             
-            # Ajustado para trocar o @ pela sigla ODD
             sufixo_odd = ""
             if "Análise" in odd_valor:
                 sufixo_odd = ""
@@ -140,12 +144,9 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                 
             # --- TRATAMENTO DE SCOUTS DE JOGADORES ---
             if "falta" in mercado_limpo.lower():
-                is_scout = True
-                tipo_scout = "falta"
                 match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_limpo)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
                 
-                # Busca a média que agora o main.py envia no texto (ex: "| Méd: 1.5")
                 match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_limpo, re.IGNORECASE)
                 med = match_med.group(1) if match_med else None
                 
@@ -155,12 +156,9 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     texto_final = f"🔶 Faltas sofridas: {nome}{sufixo_odd}"
                 
             elif "chute" in mercado_limpo.lower():
-                is_scout = True
-                tipo_scout = "chute"
                 match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_limpo)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
                 
-                # Busca a média que agora o main.py envia no texto (ex: "| Méd: 2.0")
                 match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_limpo, re.IGNORECASE)
                 med = match_med.group(1) if match_med else None
                 
@@ -199,4 +197,3 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
-                                                                      
