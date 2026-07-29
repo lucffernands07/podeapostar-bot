@@ -1,6 +1,9 @@
 name: 🧪 Teste Raspagem Escalações Prováveis
 
 on:
+  push:
+    paths:
+      - 'telegram/raspagem_provaveis.py'
   workflow_dispatch:
 
 jobs:
