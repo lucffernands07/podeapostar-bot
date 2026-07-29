@@ -23,7 +23,7 @@ def extrair_markup_filtros(escolhas=None):
             [
                 {"text": "Janela 3H", "callback_data": "cb_hora_3H"},
                 {"text": "Janela 5H", "callback_data": "cb_hora_5H"},
-                {"text": "Próximos", "callback_data": "cb_hora_PROXIMOS"}
+                {"text": "Próximos", "callback_data": "cb_hora_DIA"}  # 👈 AJUSTADO (Sincronizado com o Worker)
             ],
             # --- BOTÃO DE DISPARO DEFINITIVO ---
             [
@@ -34,9 +34,9 @@ def extrair_markup_filtros(escolhas=None):
                 {"text": "📊 Ranking", "callback_data": "cb_ver_ranking"}
             ],
             # --- LINHA PROVÁVEIS E ATUALIZAR LADO A LADO ---
-            [{"text": "⚠️ Escalações Provaveis:", "callback_data": "ignore"}],
+            [{"text": "⚠️ Escalações Prováveis:", "callback_data": "ignore"}],
             [
-                {"text": "👕 Prováveis", "callback_data": "cb_provaveis"},
+                {"text": "👕 Prováveis", "callback_data": "cb_ver_provaveis"},  # 👈 AJUSTADO (Sincronizado com o Worker)
                 {"text": "🔄 Atualizar", "callback_data": "cb_atualizar_provaveis"}
             ]
         ]
@@ -45,13 +45,13 @@ def extrair_markup_filtros(escolhas=None):
 def enviar_menu_bingo(chat_id, texto):
     """
     Disparado pelo main.py de madrugada.
-    Envia a mensagem inicial acoplando o Painel com as escolhas padrão (5 e PROXIMOS).
+    Envia a mensagem inicial acoplando o Painel com as escolhas padrão (5 e DIA).
     """
     token = os.getenv('TELEGRAM_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN')
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
     # Configuração inicial do painel padrão
-    escolhas_padrao = {"bingo": "5", "horario": "PROXIMOS"}
+    escolhas_padrao = {"bingo": "5", "horario": "DIA"}
     markup = extrair_markup_filtros(escolhas_padrao)
 
     payload = {
@@ -96,4 +96,3 @@ def atualizar_menu_inline(chat_id, message_id, texto, escolhas_atuais):
         requests.post(url, json=payload)
     except Exception as e:
         print(f"❌ Erro ao atualizar os botões dinâmicos: {e}")
-    
