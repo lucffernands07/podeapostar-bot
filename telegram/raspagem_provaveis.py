@@ -55,11 +55,10 @@ def raspar_titulares_flashscore(page, url_original):
     url_final = url_original
 
     try:
-        # 1. Navega com timeout estendido e espera leve
         page.goto(url_original, timeout=45000, wait_until="domcontentloaded")
         time.sleep(2)
 
-        # 2. Captura a URL real e força o sufixo /resumo/equipes/
+        # 1. Normaliza a URL para a aba de formações/equipes
         url_atual = page.url
         base_url = url_atual.split('?')[0].split('#')[0].rstrip('/')
         
@@ -68,51 +67,64 @@ def raspar_titulares_flashscore(page, url_original):
         else:
             url_final = f"{base_url}/"
         
-        print(f"🔗 URL Normalizada: {url_final}")
-
         if page.url != url_final:
             page.goto(url_final, timeout=30000, wait_until="domcontentloaded")
-            time.sleep(1.5)
-
-        # 3. Espera pelo container da escalação
-        seletor_container = ".lf__sidesBox, .lf__sides, .lf__participantNew"
-        try:
-            page.wait_for_selector(seletor_container, timeout=8000)
-        except Exception:
-            page.evaluate("window.scrollBy(0, 400)")
             time.sleep(2)
 
-        # 4. Extrai os jogadores
-        lados = page.query_selector_all(".lf__sidesBox .lf__side, .lf__sides .lf__side")
+        # 2. Força o Scroll até o final da página para renderizar as tabelas inferiores (TITULARES e RESERVAS)
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        time.sleep(2)
 
-        if len(lados) >= 2:
-            def extrair_nomes(lado_element):
-                nomes = []
-                elementos = lado_element.query_selector_all(".lf__participantNew, .lf__participant")
-                
-                for el in elementos:
-                    texto = el.text_content().strip()
-                    if not texto:
-                        continue
-                    
-                    linhas = [l.strip() for l in texto.split('\n') if l.strip()]
-                    for linha in linhas:
-                        nome_limpo = re.sub(r'^\d+\s*', '', linha)
-                        nome_limpo = re.sub(r'\s*\d+(\.\d+)?$', '', nome_limpo).strip()
+        # 3. Busca a seção específica de "TITULARES" na página
+        # O Flashscore agrupa por blocos (substituídos, titulares, reservas)
+        secoes = page.query_selector_all(".lf__sides, .lf__sidesBox")
+
+        for secao in secoes:
+            # Verifica se esta seção pertence ao bloco de TITULARES
+            header_parent = secao.evaluate_handle("el => el.closest('.lf__section, .section') || el.parentElement")
+            texto_cabecalho = header_parent.as_element().text_content().upper() if header_parent.as_element() else ""
+
+            # Se for a seção de substitutos ou reservas, ignora
+            if "RESERVAS" in texto_cabecalho or "SUBSTITUÍDOS" in texto_cabecalho:
+                continue
+
+            lados = secao.query_selector_all(".lf__side")
+            if len(lados) >= 2:
+                def extrair_nomes(lado_element):
+                    nomes = []
+                    elementos = lado_element.query_selector_all(".lf__participantNew, .lf__participant")
+                    for el in elementos:
+                        texto = el.text_content().strip()
+                        if not texto:
+                            continue
                         
-                        if nome_limpo and not nome_limpo.replace('.', '').isdigit() and len(nome_limpo) > 2:
-                            if nome_limpo not in nomes and len(nomes) < 11:
-                                nomes.append(nome_limpo)
-                return nomes
+                        linhas = [l.strip() for l in texto.split('\n') if l.strip()]
+                        for linha in linhas:
+                            nome_limpo = re.sub(r'^\d+\s*', '', linha)
+                            nome_limpo = re.sub(r'\s*\d+(\.\d+)?$', '', nome_limpo).strip()
+                            
+                            # Remove tags de goleiro (G) se houver e limpa
+                            nome_limpo = re.sub(r'\s*\(G\)', '', nome_limpo, flags=re.IGNORECASE).strip()
+                            
+                            if nome_limpo and not nome_limpo.replace('.', '').isdigit() and len(nome_limpo) > 2:
+                                if nome_limpo not in nomes and len(nomes) < 11:
+                                    nomes.append(nome_limpo)
+                    return nomes
 
-            titulares_casa = extrair_nomes(lados[0])
-            titulares_fora = extrair_nomes(lados[1])
+                tc = extrair_nomes(lados[0])
+                tf = extrair_nomes(lados[1])
+
+                # Se achou uma lista com volume real de titulares, assume o resultado
+                if len(tc) >= 7 or len(tf) >= 7:
+                    titulares_casa = tc
+                    titulares_fora = tf
+                    break
 
     except Exception as e:
         print(f"⚠️ Erro ao raspar {url_original}: {e}")
         
     return titulares_casa, titulares_fora, url_final
-
+    
 def executar_raspagem_escalacoes():
     garantir_diretorio()
     agora_br = datetime.now() - timedelta(hours=3)
