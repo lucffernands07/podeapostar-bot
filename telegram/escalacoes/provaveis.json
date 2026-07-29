@@ -31,7 +31,8 @@
             "Fernandez T."
         ],
         "texto_telegram": "**Barracas Central**:\nMino M., Barrios R., Jappert K., Y. Rak\nDemartini N., Insua R., Porra T., Miloc D.\nTapia I.(C), Briasco N., Candia J.\n\n**Aldosivi**:\nChicco I., Breitenbruch N., Zalazar N., Pombo J.\nLopez E., Linares N., Castro L.(C), Laurelli F.\nDadin B., Cordero N., Fernandez T.",
-        "atualizado_em": "2026-07-29 19:09"
+        "atualizado_em": "2026-07-29 19:09",
+        "horario": "14:30"
     },
     "defensa y justiciaxdep. riestra": {
         "time_casa": "Defensa y Justicia",
@@ -65,7 +66,8 @@
             "Diaz A."
         ],
         "texto_telegram": "**Defensa y Justicia**:\nBorgogno M., Souto L., Fernandez D., Martinez D.\nM. Rodriguez, Sosa S., Perez C., Gutierrez J.\nBarbona D., Hausch A., Fernandez L.\n\n**Dep. Riestra**:\nArce I., Bracamonte M., Mino F., Paz C.\nQuintana C., Sansotre N., Alonso A., Monje P.\nCeliz M., Sanchez B., Diaz A.",
-        "atualizado_em": "2026-07-29 19:09"
+        "atualizado_em": "2026-07-29 19:09",
+        "horario": "17:00"
     },
     "gimnasia l.p.xriver plate": {
         "time_casa": "Gimnasia L.P.",
@@ -99,7 +101,8 @@
             "Borre R."
         ],
         "texto_telegram": "**Gimnasia L.P.**:\nInsfran N., Barros Schelotto B., Martinez E., Giampaoli R.\nSilva Torrejon P., Seoane M., Miramon I., Schelotto N.\nNacho Fernández, Auzmendi A., Panaro M.\n\n**River Plate**:\nBeltran S., Montiel G., Martinez Quarta L., Otamendi N.\nAcuna M., Fausto Vera, Silva L., Galvan T.\nCorrea A., Colidio F., Borre R.",
-        "atualizado_em": "2026-07-29 19:09"
+        "atualizado_em": "2026-07-29 19:09",
+        "horario": "19:15"
     },
     "internacionalxflamengo": {
         "time_casa": "Internacional",
@@ -133,7 +136,8 @@
             "Pedro"
         ],
         "texto_telegram": "**Internacional**:\nAnthoni, Bruno Gomes, Gabriel Mercado, Maripan G.\nMatheus Bahia, Vitor Naum, Bruno Henrique, Villagra R.\nBernabei A., Carbonero J., Alerrandro\n\n**Flamengo**:\nAgustín Rossi, Emerson Royal, Vitão, Léo Pereira\nAlex Sandro, Pulgar, Jorginho, Carrascal J.\nSamuel Lino, Bruno Henrique, Pedro",
-        "atualizado_em": "2026-07-29 19:10"
+        "atualizado_em": "2026-07-29 19:10",
+        "horario": "19:30"
     },
     "mirassolxremo": {
         "time_casa": "Mirassol",
@@ -167,7 +171,8 @@
             "Alef Manga"
         ],
         "texto_telegram": "**Mirassol**:\nThomazella, Igor Formiga, João Victor, Gabriel Knesowitsch\nReinaldo, Denílson, Carlos Eduardo, Japa\nEdson, Bruno Santos, Gustavo Mosquito\n\n**Remo**:\nMarcelo Rangel, Marcelinho, Marllon, Zé Ivaldo\nMayk, Ze Welison, Picco L., Yago Pikachu\nZé Ricardo, Jajá, Alef Manga",
-        "atualizado_em": "2026-07-29 19:10"
+        "atualizado_em": "2026-07-29 19:10",
+        "horario": "19:30"
     },
     "institutoxplatense": {
         "time_casa": "Instituto",
@@ -201,7 +206,8 @@
             "Heredia L."
         ],
         "texto_telegram": "**Instituto**:\nLedesma M., Galvan J., Mosevich L., Alarcon F. R.\nCerato G., Abregu G., Gallardo M., Sosa D.\nCordoba Mosquera J. E., Luna A., Tissera M.\n\n**Platense**:\nCozzani J., Lagos A., Vazquez I., Mendia M.\nThiago Silva, Gomez I., Barrios M., Mainero G.\nRetamar K., Merlini B., Heredia L.",
-        "atualizado_em": "2026-07-29 19:10"
+        "atualizado_em": "2026-07-29 19:10",
+        "horario": "21:30"
     },
     "fluminensexbahia": {
         "time_casa": "Fluminense",
@@ -235,7 +241,8 @@
             "Erick Pulga"
         ],
         "texto_telegram": "**Fluminense**:\nFábio, Guga, Thiago Silva, Freytes J.\nRené, Hércules, Martinelli, Agustín Canobbio\nAcosta L., Savarino, Hulk\n\n**Bahia**:\nRonaldo Strada, Gomez R., Marcos Victor, Santiago Ramos\nNicolás Acevedo, Ademir, Rodrigo Nestor, Jean Lucas\nLuciano Juba, Veliz A., Erick Pulga",
-        "atualizado_em": "2026-07-29 19:10"
+        "atualizado_em": "2026-07-29 19:10",
+        "horario": "21:30"
     },
     "vitóriaxpalmeiras": {
         "time_casa": "Vitória",
@@ -269,6 +276,7 @@
             "López J."
         ],
         "texto_telegram": "**Vitória**:\nLucas Arcanjo, Jamerson, Caca, Luan Cândido\nRamon, Emmanuel Martinez, Erick, Vitor\nBaralhas, Tarzia D., Rene\n\n**Palmeiras**:\nCarlos Miguel, Murilo, Gustavo Gómez, Alexander Barboza\nKhellven, Andreas Pereira, Marlon Freitas, Piquerez\nMaurício, Jhon Arias, López J.",
-        "atualizado_em": "2026-07-29 19:10"
+        "atualizado_em": "2026-07-29 19:10",
+        "horario": "21:30"
     }
 }
