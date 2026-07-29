@@ -58,7 +58,6 @@ def processar_comando_direto(tipo_bruto):
                 elif parte.startswith("HORA:"):
                     config["horario"] = parte.split(":")[1]
 
-            # Extração numérica do tamanho do bingo
             digitos = "".join([c for c in valor_b if c.isdigit()])
             if digitos:
                 config["bingo"] = int(digitos)
@@ -83,7 +82,7 @@ def processar_comando_direto(tipo_bruto):
     return config
 
 def obter_mensagem_provaveis_formatada():
-    """Lê o arquivo JSON de prováveis e retorna a string formatada, filtrando jogos futuros."""
+    """Lê o arquivo JSON de prováveis e retorna a string formatada, filtrando rigorosamente jogos futuros."""
     caminhos_tentar = ["telegram/provaveis.json", "provaveis.json"]
     caminho_provaveis = None
 
@@ -99,9 +98,11 @@ def obter_mensagem_provaveis_formatada():
         with open(caminho_provaveis, "r", encoding="utf-8") as f:
             dados_provaveis = json.load(f)
             
-        # Garante a leitura tanto se for Lista quanto Dicionário por chave
         if isinstance(dados_provaveis, dict):
-            lista_jogos = list(dados_provaveis.values()) if "jogos" not in dados_provaveis else dados_provaveis["jogos"]
+            if "jogos" in dados_provaveis:
+                lista_jogos = dados_provaveis["jogos"]
+            else:
+                lista_jogos = list(dados_provaveis.values())
         else:
             lista_jogos = dados_provaveis
         
@@ -110,7 +111,7 @@ def obter_mensagem_provaveis_formatada():
         data_hoje = agora_br.strftime("%Y-%m-%d")
         ano_j, mes_j, dia_j = map(int, data_hoje.split("-"))
 
-        # --- CARREGA TABELA DIÁRIA DE HORÁRIOS PARA CRUZAMENTO (FALLBACK) ---
+        # MAPA AUXILIAR DE HORÁRIOS (CASO O JSON DE PROVÁVEIS ESTEJA SEM HORA)
         mapa_horarios = {}
         caminho_jogos_hoje = f"telegram/jogos_{data_hoje}.json"
         if os.path.exists(caminho_jogos_hoje):
@@ -128,7 +129,6 @@ def obter_mensagem_provaveis_formatada():
 
         jogos_validos = []
         for j in lista_jogos:
-            # Verifica se há titulares/jogadores
             tem_jogadores = j.get("titulares_casa") or j.get("jogadores") or j.get("provaveis")
             if not tem_jogadores:
                 continue
@@ -137,29 +137,31 @@ def obter_mensagem_provaveis_formatada():
             fora_norm = str(j.get("time_fora", "")).strip().lower()
             chave_conf = f"{casa_norm}x{fora_norm}"
 
-            # 1. Tenta pegar o horário do próprio objeto
-            horario_str = j.get("horario", "")
+            horario_str = str(j.get("horario", "")).strip()
             
-            # 2. Se não existir, busca no mapa cruzado da base diária
             if not horario_str and chave_conf in mapa_horarios:
-                horario_str = mapa_horarios[chave_conf]
-                j["horario"] = horario_str # Salva para exibição textual
+                horario_str = str(mapa_horarios[chave_conf]).strip()
+                j["horario"] = horario_str
 
-            # --- FILTRO RIGOROSO DE HORÁRIO ---
-            if horario_str and ":" in str(horario_str):
+            # --- CORREÇÃO E FILTRO RÍGIDO DE HORÁRIO ---
+            if horario_str and ":" in horario_str:
                 try:
-                    h_partes = str(horario_str).strip().split(":")
-                    hora_jogo = datetime(ano_j, mes_j, dia_j, int(h_partes[0]), int(h_partes[1]), 0)
+                    h_partes = horario_str.split(":")
+                    hora_h = int(h_partes[0])
+                    min_m = int(h_partes[1])
+                    
+                    hora_jogo = datetime(ano_j, mes_j, dia_j, hora_h, min_m, 0)
                     
                     # Trata jogos de madrugada
-                    if int(h_partes[0]) < 4 and agora_br.hour > 20:
+                    if hora_h < 4 and agora_br.hour > 20:
                         hora_jogo += timedelta(days=1)
 
-                    # Descarta IMEDIATAMENTE se a hora do jogo for menor que a hora atual
+                    # SE A HORA DO JOGO JÁ PASSOUR DA HORA ATUAL (com margem de tolerância zero)
                     if hora_jogo < agora_br:
+                        print(f"🚫 [IGNORADO POR HORÁRIO PASSADO] {j.get('time_casa')} x {j.get('time_fora')} | Horário: {horario_str} | Agora: {agora_br.strftime('%H:%M')}")
                         continue
                 except Exception as e:
-                    print(f"⚠️ Erro ao validar horário ({horario_str}): {e}")
+                    print(f"⚠️ Erro ao validar horário ({horario_str}) para {chave_conf}: {e}")
 
             jogos_validos.append(j)
 
@@ -178,7 +180,6 @@ def obter_mensagem_provaveis_formatada():
                 
             linhas.append(header)
 
-            # Formata os titulares de Casa e Fora
             tit_casa = item.get("titulares_casa", [])
             tit_fora = item.get("titulares_fora", [])
 
@@ -188,12 +189,11 @@ def obter_mensagem_provaveis_formatada():
                 if tit_fora:
                     linhas.append(f"🚀 *{fora}*: " + ", ".join(tit_fora))
             else:
-                # Fallback para lista simples de jogadores
                 jogadores = item.get("jogadores") or item.get("provaveis") or []
                 for jog in jogadores:
                     linhas.append(f"• {str(jog)}")
                     
-            linhas.append("") # Linha em branco separadora
+            linhas.append("")
 
         corpo_msg = "\n".join(linhas)
 
@@ -204,14 +204,12 @@ def obter_mensagem_provaveis_formatada():
     except Exception as e:
         print(f"❌ Erro ao ler/formatar prováveis: {e}")
         return f"⚠️ Erro ao carregar escalações prováveis: {e}"
-                    
 
 def executar():
     token = os.getenv('TELEGRAM_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN')
     chat_id = os.getenv('CHAT_ID') or os.getenv('TELEGRAM_CHAT_ID')
     tipo_bruto = os.getenv('TIPO_BINGO', '') or os.getenv('TELEGRAM_TIPO', '')
     
-    # --- CORREÇÃO DA URL DO TELEGRAM ---
     if token:
         token = token.strip()
     url_msg = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -219,7 +217,7 @@ def executar():
     config = processar_comando_direto(tipo_bruto)
     menu_botoes = menus.extrair_markup_filtros() if hasattr(menus, 'extrair_markup_filtros') else None
 
-    # --- FLUXO 1: APENAS VER PROVÁVEIS (LEITURA RÁPIDA) ---
+    # --- FLUXO 1: APENAS VER PROVÁVEIS ---
     if config.get("acao") == "VER_PROVAVEIS":
         texto_provaveis = obter_mensagem_provaveis_formatada()
         payload = {
@@ -232,7 +230,7 @@ def executar():
         requests.post(url_msg, json=payload)
         return
 
-    # --- FLUXO 2: ATUALIZAR PROVÁVEIS (RASPAGEM + LEITURA) ---
+    # --- FLUXO 2: ATUALIZAR PROVÁVEIS ---
     if config.get("acao") == "ATUALIZAR_PROVAVEIS":
         print("\n--- [LOG EXTRA] EXECUTANDO RASPAGEM DE PROVÁVEIS ---")
         try:
@@ -243,7 +241,9 @@ def executar():
             })
             
             import raspagem_provaveis
-            if hasattr(raspagem_provaveis, 'executar'):
+            if hasattr(raspagem_provaveis, 'executar_raspagem_escalacoes'):
+                raspagem_provaveis.executar_raspagem_escalacoes()
+            elif hasattr(raspagem_provaveis, 'executar'):
                 raspagem_provaveis.executar()
             
             texto_provaveis = obter_mensagem_provaveis_formatada()
@@ -267,7 +267,7 @@ def executar():
             })
             return
 
-    # --- FLUXO 3: GERAR BILHETES (PADRÃO) ---
+    # --- FLUXO 3: GERAR BILHETES ---
     qtd_alvo = config["bingo"]
     filtro_hora = config["horario"]
 
@@ -298,8 +298,6 @@ def executar():
     with open(caminho_json, "r", encoding="utf-8") as f:
         jogos_banco = json.load(f)
 
-    print(f"📂 Base de dados diária carregada com sucesso. Total de mercados no JSON: {len(jogos_banco)}")
-
     dict_cache_links = {}
     for j in jogos_banco:
         casa = j.get("time_casa")
@@ -329,9 +327,7 @@ def executar():
         except Exception as e:
             print(f"⚠️ Erro ao processar links H2H do pendentes.json: {e}")
 
-    print("\n--- [LOG PASSO 3] FILTRANDO JOGOS POR HORÁRIO ---")
     jogos_validos_horario = []
-    
     for j in jogos_banco:
         try:
             h_partes = j['horario'].split(":")
@@ -341,11 +337,9 @@ def executar():
             if int(h_partes[0]) < 4 and agora_br.hour > 20:
                 hora_jogo += timedelta(days=1)
             
-            # TRAVA DOS 15 MINUTOS (Mantida apenas para montagem de bilhetes)
             if hora_jogo < (agora_br - timedelta(minutes=15)):
                 continue
 
-            # Filtros de janela futuros
             if filtro_hora not in ["DIA", "PROXIMOS"] and "H" in filtro_hora:
                 try:
                     horas_limite = int(filtro_hora.replace("H", ""))
@@ -362,7 +356,6 @@ def executar():
 
     jogos_validos_horario.sort(key=lambda x: x.get("datetime_real", agora_br))
 
-    print("\n--- [LOG PASSO 4] ENVIANDO PARA BINGO357 ---")
     bilhetes_gerados = bingo357.montar_bilhetes_estrategicos(
         jogos_validos_horario, 
         qtd_alvo=qtd_alvo
@@ -392,4 +385,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-            
+        
