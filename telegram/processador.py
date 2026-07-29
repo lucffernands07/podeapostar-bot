@@ -82,7 +82,7 @@ def processar_comando_direto(tipo_bruto):
     return config
 
 def obter_mensagem_provaveis_formatada():
-    """Lê o arquivo JSON de prováveis e retorna a string formatada, filtrando rigorosamente jogos futuros."""
+    """Lê o arquivo JSON de prováveis e retorna a string formatada em estilo monoespaçado (estilo bilhete)."""
     diretorio_script = os.path.dirname(os.path.abspath(__file__))
     diretorio_raiz = os.path.dirname(diretorio_script)
 
@@ -100,11 +100,9 @@ def obter_mensagem_provaveis_formatada():
     for path in caminhos_tentar:
         if os.path.exists(path):
             caminho_provaveis = path
-            print(f"📁 Arquivo provaveis.json localizado em: {path}")
             break
 
     if not caminho_provaveis:
-        print("❌ Nenhum arquivo provaveis.json foi encontrado nos caminhos mapeados.")
         return "⚠️ *Nenhum dado de prováveis encontrado localmente.*\nClique em *Atualizar* para realizar a raspagem."
 
     try:
@@ -112,18 +110,13 @@ def obter_mensagem_provaveis_formatada():
             dados_provaveis = json.load(f)
             
         if isinstance(dados_provaveis, dict):
-            if "jogos" in dados_provaveis:
-                lista_jogos = dados_provaveis["jogos"]
-            else:
-                lista_jogos = list(dados_provaveis.values())
+            lista_jogos = dados_provaveis.get("jogos", list(dados_provaveis.values()))
         else:
             lista_jogos = dados_provaveis
         
-        # --- HORA ATUAL REAL DO BRASIL (UTC-3) ---
         agora_br = datetime.utcnow() - timedelta(hours=3)
         data_hoje_br = agora_br.strftime("%Y-%m-%d")
 
-        # MAPA DIÁRIO AUXILIAR (CASO O PROVÁVEIS NÃO TENHA 'HORARIO')
         mapa_horarios = {}
         caminhos_jogos_hoje = [
             os.path.join(diretorio_script, f"jogos_{data_hoje_br}.json"),
@@ -141,8 +134,8 @@ def obter_mensagem_provaveis_formatada():
                             if c and f and h:
                                 mapa_horarios[f"{c}x{f}"] = h
                     break
-                except Exception as e_map:
-                    print(f"⚠️ Erro ao carregar mapa de horários auxiliar: {e_map}")
+                except Exception:
+                    pass
 
         jogos_validos = []
         for j in lista_jogos:
@@ -156,16 +149,13 @@ def obter_mensagem_provaveis_formatada():
 
             horario_str = str(j.get("horario", "")).strip()
             
-            # Se não tem horário no prováveis, tenta resgatar do banco diário
             if (not horario_str or horario_str == "None") and chave_conf in mapa_horarios:
                 horario_str = str(mapa_horarios[chave_conf]).strip()
                 j["horario"] = horario_str
 
-            # TRAVA 1: Se não tem horário válido, descarta sumariamente!
             if not horario_str or ":" not in horario_str:
                 continue
 
-            # Pega a data de referência (do 'atualizado_em' ou do dia atual)
             data_ref_str = data_hoje_br
             atualizado_em = str(j.get("atualizado_em", ""))
             if atualizado_em and " " in atualizado_em:
@@ -177,66 +167,62 @@ def obter_mensagem_provaveis_formatada():
                 hora_h, min_m = int(h_partes[0]), int(h_partes[1])
 
                 hora_jogo = datetime(ano_j, mes_j, dia_j, hora_h, min_m, 0)
-                
-                # Trata jogos pós meia-noite
                 if hora_h < 4 and agora_br.hour > 20:
                     hora_jogo += timedelta(days=1)
 
-                # TRAVA 2 (O CORTE): Se a hora do jogo for MENOR que a hora atual, ignora!
                 if hora_jogo < agora_br:
                     continue
 
                 j["datetime_real"] = hora_jogo
                 jogos_validos.append(j)
-
-            except Exception as e:
-                # Se falhou qualquer validação, NÃO ADICIONA À LISTA
-                print(f"⚠️ Erro ao processar horário do jogo {chave_conf}: {e}")
+            except Exception:
                 continue
 
         if not jogos_validos:
             return "⚠️ *Não há escalações prováveis de jogos futuros disponíveis no momento.*"
 
-        # Ordena os jogos pelo horário cronológico
         jogos_validos.sort(key=lambda x: x.get("datetime_real", agora_br))
 
         linhas = ["📋 *ESCALAÇÕES PROVÁVEIS CONFIRMADAS*\n"]
+        
         for item in jogos_validos:
             casa = item.get("time_casa", "Casa")
             fora = item.get("time_fora", "Fora")
             horario = item.get("horario", "")
             
-            header = f"🏟️ *{casa} x {fora}*"
-            if horario:
-                header = f"⏱️ {horario} | " + header
-                
-            linhas.append(header)
-
+            linhas.append(f"⏱️ {horario} | 🏟️ *{casa} x {fora}*")
+            
+            # --- INCÍCIO DO BLOCO DE CÓDIGO (FONTE PEQUENA/MONOESPAÇADA) ---
+            linhas.append("```")
+            
             tit_casa = item.get("titulares_casa", [])
             tit_fora = item.get("titulares_fora", [])
 
             if tit_casa or tit_fora:
                 if tit_casa:
-                    linhas.append(f"🏠 *{casa}*: " + ", ".join(tit_casa))
+                    linhas.append(f"🏠 {casa.upper()}:")
+                    linhas.append(", ".join(tit_casa))
+                if tit_casa and tit_fora:
+                    linhas.append("") # Linha em branco separando os times
                 if tit_fora:
-                    linhas.append(f"🚀 *{fora}*: " + ", ".join(tit_fora))
+                    linhas.append(f"🚀 {fora.upper()}:")
+                    linhas.append(", ".join(tit_fora))
             else:
                 jogadores = item.get("jogadores") or item.get("provaveis") or []
-                for jog in jogadores:
-                    linhas.append(f"• {str(jog)}")
-                    
-            linhas.append("")
+                linhas.append("\n".join([f"• {str(jog)}" for jog in jogadores]))
+            
+            linhas.append("```\n")
 
         corpo_msg = "\n".join(linhas)
 
         if len(corpo_msg) > 4000:
-            corpo_msg = corpo_msg[:3900] + "\n\n...(Lista resumida por limite de tamanho)"
+            corpo_msg = corpo_msg[:3900] + "\n```\n...(Lista resumida por limite)"
 
         return corpo_msg
     except Exception as e:
-        print(f"❌ Erro ao ler/formatar prováveis: {e}")
         return f"⚠️ Erro ao carregar escalações prováveis: {e}"
-
+            
+            
 def executar():
     token = os.getenv('TELEGRAM_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN')
     chat_id = os.getenv('CHAT_ID') or os.getenv('TELEGRAM_CHAT_ID')
