@@ -71,20 +71,17 @@ def raspar_titulares_flashscore(page, url_original):
             page.goto(url_final, timeout=30000, wait_until="domcontentloaded")
             time.sleep(2)
 
-        # 2. Força o Scroll até o final da página para renderizar as tabelas inferiores (TITULARES e RESERVAS)
+        # 2. Força o Scroll até o final da página para renderizar as tabelas inferiores
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         time.sleep(2)
 
         # 3. Busca a seção específica de "TITULARES" na página
-        # O Flashscore agrupa por blocos (substituídos, titulares, reservas)
         secoes = page.query_selector_all(".lf__sides, .lf__sidesBox")
 
         for secao in secoes:
-            # Verifica se esta seção pertence ao bloco de TITULARES
             header_parent = secao.evaluate_handle("el => el.closest('.lf__section, .section') || el.parentElement")
             texto_cabecalho = header_parent.as_element().text_content().upper() if header_parent.as_element() else ""
 
-            # Se for a seção de substitutos ou reservas, ignora
             if "RESERVAS" in texto_cabecalho or "SUBSTITUÍDOS" in texto_cabecalho:
                 continue
 
@@ -102,8 +99,6 @@ def raspar_titulares_flashscore(page, url_original):
                         for linha in linhas:
                             nome_limpo = re.sub(r'^\d+\s*', '', linha)
                             nome_limpo = re.sub(r'\s*\d+(\.\d+)?$', '', nome_limpo).strip()
-                            
-                            # Remove tags de goleiro (G) se houver e limpa
                             nome_limpo = re.sub(r'\s*\(G\)', '', nome_limpo, flags=re.IGNORECASE).strip()
                             
                             if nome_limpo and not nome_limpo.replace('.', '').isdigit() and len(nome_limpo) > 2:
@@ -114,7 +109,6 @@ def raspar_titulares_flashscore(page, url_original):
                 tc = extrair_nomes(lados[0])
                 tf = extrair_nomes(lados[1])
 
-                # Se achou uma lista com volume real de titulares, assume o resultado
                 if len(tc) >= 7 or len(tf) >= 7:
                     titulares_casa = tc
                     titulares_fora = tf
@@ -179,6 +173,8 @@ def executar_raspagem_escalacoes():
             if "chute" in mercado and validar_liga_para_jogadores(liga):
                 casa = j.get("time_casa")
                 fora = j.get("time_fora")
+                horario_jogo = j.get("horario", "")  # 👈 CAPTURA O HORÁRIO DIRETAMENTE DO ARQUIVO DE JOGOS DO DIA
+                
                 chave = f"{str(casa).strip().lower()}x{str(fora).strip().lower()}"
                 
                 if chave in jogos_processados_nesta_run:
@@ -188,9 +184,13 @@ def executar_raspagem_escalacoes():
                 t_casa_existente = jogo_existente.get("titulares_casa", [])
                 t_fora_existente = jogo_existente.get("titulares_fora", [])
 
-                # Pula se já capturou os 11 de cada lado
                 if len(t_casa_existente) == 11 and len(t_fora_existente) == 11:
                     print(f"⏩ [PULADO] {casa} x {fora} já possui escalação completa (11x11).")
+                    # Garante que atualiza o horário mesmo se já tiver as escalações
+                    if not jogo_existente.get("horario") and horario_jogo:
+                        jogo_existente["horario"] = horario_jogo
+                        dados_provaveis[chave] = jogo_existente
+                    
                     jogos_processados_nesta_run.add(chave)
                     continue
 
@@ -199,12 +199,11 @@ def executar_raspagem_escalacoes():
                 if url_original:
                     jogos_processados_nesta_run.add(chave)
                     
-                    print(f"\n⚽ Buscando: {casa} x {fora} | Liga: {liga}")
+                    print(f"\n⚽ Buscando: {casa} x {fora} | Horário: {horario_jogo} | Liga: {liga}")
                     print(f"🔗 URL Inicial: {url_original}")
                     
                     t_casa, t_fora, url_final = raspar_titulares_flashscore(page, url_original)
                     
-                    # PROTEÇÃO: Se a busca atual falhou/veio vazia mas tínhamos algo antigo, preserva
                     if len(t_casa) == 0 and len(t_casa_existente) > 0:
                         t_casa = t_casa_existente
                     if len(t_fora) == 0 and len(t_fora_existente) > 0:
@@ -222,10 +221,11 @@ def executar_raspagem_escalacoes():
                         f"{formatar_linha_jogadores(t_fora)}"
                     )
 
-                    # Atualiza o dicionário de saída
+                    # Salva no dicionário incluindo o campo "horario"
                     dados_provaveis[chave] = {
                         "time_casa": casa,
                         "time_fora": fora,
+                        "horario": horario_jogo,  # 👈 SALVA O HORÁRIO NO JSON DE PROVÁVEIS
                         "liga": liga,
                         "url_flashscore": url_final,
                         "titulares_casa": t_casa,
@@ -236,7 +236,6 @@ def executar_raspagem_escalacoes():
 
         browser.close()
 
-    # Garantia de salvamento
     garantir_diretorio()
     with open(CAMINHO_PROVAVEIS, "w", encoding="utf-8") as f:
         json.dump(dados_provaveis, f, ensure_ascii=False, indent=4)
@@ -246,3 +245,4 @@ def executar_raspagem_escalacoes():
 
 if __name__ == "__main__":
     executar_raspagem_escalacoes()
+                
