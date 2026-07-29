@@ -7,15 +7,16 @@ PASTA_TELEGRAM = "telegram"
 def extrair_markup_filtros(escolhas=None):
     """
     Gera o teclado de botões para o Telegram.
-    Totalmente simplificado e baseado em números diretos (3 e 5).
+    Layout limpo sem os botões de modo/estratégia.
     """
     return {
         "inline_keyboard": [
-            # --- NOVO BOTÃO NO TOPO ---
+            # --- LINHA 1: RANKING E ATUALIZAR PROVÁVEIS ---
             [
-                {"text": "📊 RANKING DE MERCADOS ✅⛔", "callback_data": "cb_ver_ranking"}
+                {"text": "📊 Ranking", "callback_data": "cb_ver_ranking"},
+                {"text": "🔄 Prováveis | Atualizar", "callback_data": "cb_atualizar_provaveis"}
             ],
-            # --- SEÇÃO 1: BINGOS (Bingo 3 e 5 puros) ---
+            # --- SEÇÃO 1: BINGOS (Bingo 3 e 5) ---
             [{"text": "✅ Escolha um bingo:", "callback_data": "ignore"}],
             [
                 {"text": "Bingo 3", "callback_data": "cb_bingo_3"},
@@ -28,12 +29,6 @@ def extrair_markup_filtros(escolhas=None):
                 {"text": "Janela 5H", "callback_data": "cb_hora_5H"},
                 {"text": "Próximos", "callback_data": "cb_hora_PROXIMOS"}
             ],
-            # --- SEÇÃO 3: ESTRATÉGIA / AÇÕES ---
-            [{"text": "✅ Escolha um modo:", "callback_data": "ignore"}],
-            [
-                {"text": "Provaveis", "callback_data": "cb_tipo_PROVAVEIS"},
-                {"text": "Atualizar", "callback_data": "cb_acao_ATUALIZAR"}
-            ],
             # --- BOTÃO DE DISPARO DEFINITIVO ---
             [
                 {"text": "🚀 GERAR BILHETE", "callback_data": "cb_acao_GERAR"}
@@ -44,13 +39,13 @@ def extrair_markup_filtros(escolhas=None):
 def enviar_menu_bingo(chat_id, texto):
     """
     Disparado pelo main.py de madrugada.
-    Envia a mensagem inicial acoplando o Painel com as escolhas padrão (5, PROXIMOS, PROVAVEIS).
+    Envia a mensagem inicial acoplando o Painel com as escolhas padrão (5 e PROXIMOS).
     """
-    token = os.getenv('TELEGRAM_TOKEN')
+    token = os.getenv('TELEGRAM_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN')
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
-    # Configuração inicial do painel padrão atualizada (ACERTOS mudou para PROVAVEIS)
-    escolhas_padrao = {"bingo": "5", "horario": "PROXIMOS", "bilhete": "PROVAVEIS"}
+    # Configuração inicial do painel padrão
+    escolhas_padrao = {"bingo": "5", "horario": "PROXIMOS"}
     markup = extrair_markup_filtros(escolhas_padrao)
 
     payload = {
@@ -80,11 +75,9 @@ def enviar_menu_bingo(chat_id, texto):
 
 def atualizar_menu_inline(chat_id, message_id, texto, escolhas_atuais):
     """
-    Função utilitária para o seu script que escuta cliques no Telegram.
-    Sempre que clicarem num botão, chame essa função passando as novas escolhas
-    para atualizar os botões na tela usando 'editMessageReplyMarkup'.
+    Função utilitária para atualizar os botões na tela usando 'editMessageReplyMarkup'.
     """
-    token = os.getenv('TELEGRAM_TOKEN')
+    token = os.getenv('TELEGRAM_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN')
     url = f"https://api.telegram.org/bot{token}/editMessageReplyMarkup"
     
     payload = {
