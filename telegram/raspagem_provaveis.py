@@ -48,49 +48,55 @@ def formatar_linha_jogadores(lista_jogadores, por_linha=4):
         linhas.append(", ".join(grupo))
     return "\n".join(linhas)
 
-def extrair_url_escalacao(jogo_json, cache_pendentes):
+def extrair_url_base(jogo_json, cache_pendentes):
+    """Apenas recupera o link original cadastrado (link_h2h)."""
     casa = jogo_json.get("time_casa", "").strip()
     fora = jogo_json.get("time_fora", "").strip()
     chave = f"{casa.lower()}x{fora.lower()}"
     
     info_extra = cache_pendentes.get(chave, {})
-    # Busca 'link_h2h' no json do jogo ou no cache de pendentes
-    link_h2h = jogo_json.get("link_h2h") or info_extra.get("link_h2h")
-    
-    if link_h2h and "flashscore" in link_h2h:
-        # Remova hashtags, querystrings e rotas legadas (/h2h, /resumo, etc)
-        base_limpa = link_h2h.split("/#/")[0].split("?")[0]
-        base_limpa = re.sub(r'/(h2h|resumo|estatisticas|escalacoes).*$', '', base_limpa)
-        
-        # Garante a rota no novo padrão exato do Flashscore
-        return f"{base_limpa.rstrip('/')}/resumo/equipes/"
-        
-    return None
+    return jogo_json.get("link_h2h") or info_extra.get("link_h2h")
 
-def raspar_titulares_flashscore(page, url):
-    """Acessa a URL do Flashscore e extrai os 11 titulares usando as classes do DOM extraído."""
+def raspar_titulares_flashscore(page, url_original):
+    """Acessa a URL inicial, obtém o link redirecionado, formata para /resumo/equipes/ e raspa os titulares."""
     titulares_casa = []
     titulares_fora = []
+    url_final = url_original
     
     try:
-        page.goto(url, timeout=30000, wait_until="domcontentloaded")
-        time.sleep(2)
+        # 1. Navega até o link original para que o Flashscore resolva os redirecionamentos
+        page.goto(url_original, timeout=30000, wait_until="domcontentloaded")
+        time.sleep(1.5)
 
-        # 🟢 Espera o container principal da escalação (.lf__sidesBox)
+        # 2. Captura a URL real carregada pelo navegador
+        url_atual = page.url
+        
+        # 3. Trata a URL: deleta tudo a partir de '?' ou '#' e força /resumo/equipes/
+        base_url = url_atual.split('?')[0].split('#')[0].rstrip('/')
+        url_final = f"{base_url}/resumo/equipes/"
+        
+        print(f"🔗 URL Normalizada: {url_final}")
+
+        # 4. Vai para a aba final de escalações
+        if page.url != url_final:
+            page.goto(url_final, timeout=30000, wait_until="domcontentloaded")
+            time.sleep(2)
+
+        # 5. Espera pelo container das escalações
         try:
             page.wait_for_selector(".lf__sidesBox, .lf_sidesBox", timeout=6000)
         except Exception:
-            # Caso não encontre de primeira, tenta clicar na aba de Escalações se houver
+            # Botão de backup caso caia numa página intermediária
             aba = page.query_selector("a[href*='equipes'], a[href*='escalacoes'], button:has-text('Escalações')")
             if aba:
                 aba.click()
                 time.sleep(2)
 
-        # 🟢 Extração com base nos seletores exatos
+        # 6. Extração dos times no DOM
         lados = page.query_selector_all(".lf__sidesBox > .lf__side, .lf_sidesBox > .lf_side")
 
         if len(lados) >= 2:
-            # Time Casa (Lado 1)
+            # Casa
             els_casa = lados[0].query_selector_all(".lf__participantNew, .lf_participantNew")
             for el in els_casa:
                 nome = el.text_content().strip()
@@ -98,7 +104,7 @@ def raspar_titulares_flashscore(page, url):
                 if nome_limpo and nome_limpo not in titulares_casa and len(titulares_casa) < 11:
                     titulares_casa.append(nome_limpo)
 
-            # Time Fora (Lado 2)
+            # Fora
             els_fora = lados[1].query_selector_all(".lf__participantNew, .lf_participantNew")
             for el in els_fora:
                 nome = el.text_content().strip()
@@ -107,9 +113,9 @@ def raspar_titulares_flashscore(page, url):
                     titulares_fora.append(nome_limpo)
 
     except Exception as e:
-        print(f"⚠️ Aviso/Timeout ao raspar {url}: {e}")
+        print(f"⚠️ Aviso/Timeout ao raspar {url_original}: {e}")
         
-    return titulares_casa, titulares_fora
+    return titulares_casa, titulares_fora, url_final
 
 def executar_raspagem_escalacoes():
     garantir_diretorio()
@@ -147,7 +153,6 @@ def executar_raspagem_escalacoes():
         except Exception as e:
             print(f"⚠️ Erro no pendentes: {e}")
 
-    # Set para evitar raspar o mesmo jogo mais de uma vez na mesma execução
     jogos_processados_nesta_run = set()
 
     with sync_playwright() as p:
@@ -168,11 +173,10 @@ def executar_raspagem_escalacoes():
                 fora = j.get("time_fora")
                 chave = f"{str(casa).strip().lower()}x{str(fora).strip().lower()}"
                 
-                # EVITA REPETIR O MESMO JOGO (Deduplicação de loop)
+                # Deduplicação de loop na mesma execução
                 if chave in jogos_processados_nesta_run:
                     continue
                 
-                # Checa se já possui escalação 11x11 salva anteriormente
                 jogo_existente = dados_provaveis.get(chave, {})
                 t_casa_existente = jogo_existente.get("titulares_casa", [])
                 t_fora_existente = jogo_existente.get("titulares_fora", [])
@@ -182,18 +186,18 @@ def executar_raspagem_escalacoes():
                     jogos_processados_nesta_run.add(chave)
                     continue
 
-                url_escalacao = extrair_url_escalacao(j, cache_pendentes) or jogo_existente.get("url_flashscore")
+                url_original = extrair_url_base(j, cache_pendentes) or jogo_existente.get("url_flashscore")
                 
-                if url_escalacao:
+                if url_original:
                     jogos_processados_nesta_run.add(chave)
                     
                     print(f"\n⚽ Buscando: {casa} x {fora} | Liga: {liga}")
-                    print(f"🔗 URL: {url_escalacao}")
+                    print(f"🔗 URL Inicial: {url_original}")
                     
-                    t_casa, t_fora = raspar_titulares_flashscore(page, url_escalacao)
+                    t_casa, t_fora, url_final = raspar_titulares_flashscore(page, url_original)
                     
                     if len(t_casa) > 0 or len(t_fora) > 0:
-                        print(f"✅ Escalação capturada! Casa: {len(t_casa)} jogadores | Fora: {len(t_fora)} jogadores")
+                        print(f"✅ Escalação capturada! Casa: {len(t_casa)} | Fora: {len(t_fora)}")
                     else:
                         print("⏳ Escalação ainda não liberada no Flashscore. Guardando dados do jogo...")
 
@@ -208,7 +212,7 @@ def executar_raspagem_escalacoes():
                         "time_casa": casa,
                         "time_fora": fora,
                         "liga": liga,
-                        "url_flashscore": url_escalacao,
+                        "url_flashscore": url_final,
                         "titulares_casa": t_casa,
                         "titulares_fora": t_fora,
                         "texto_telegram": texto_formatado,
