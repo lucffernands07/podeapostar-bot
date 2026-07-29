@@ -34,6 +34,7 @@ def extrair_markup_filtros(escolhas=None):
                 {"text": "📊 Ranking", "callback_data": "cb_ver_ranking"}
             ],
             # --- LINHA PROVÁVEIS E ATUALIZAR LADO A LADO ---
+            [{"text": "⚠️ Escalações Provaveis:", "callback_data": "ignore"}],
             [
                 {"text": "👕 Prováveis", "callback_data": "cb_provaveis"},
                 {"text": "🔄 Atualizar", "callback_data": "cb_atualizar_provaveis"}
