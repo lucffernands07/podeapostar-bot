@@ -6,7 +6,7 @@ on:
       - 'telegram/raspagem_provaveis.py'
   workflow_dispatch:
   repository_dispatch:
-    types: [atualizar_provaveis, comando_telegram]
+    types: [atualizar_provaveis, ver_provaveis]
 
 jobs:
   test-scraper:
@@ -27,7 +27,7 @@ jobs:
           pip install playwright bs4 requests
           playwright install chromium
 
-      # 1. RODA A RASPAGEM SOMENTE SE FOR ATUALIZAÇÃO OU PUSH
+      # 1. RODA A RASPAGEM SOMENTE EM ATUALIZAÇÕES, PUSH OU MANUAL
       - name: 🚀 Executar Raspagem de Teste
         if: github.event.action == 'atualizar_provaveis' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         env:
@@ -47,8 +47,9 @@ jobs:
           git commit -m "bot: atualiza escalações prováveis [skip ci]" || echo "Sem alterações para salvar"
           git push origin main
 
-      # 3. ENVIA AS MENSAGENS PARA O TELEGRAM (Tanto se acabou de atualizar quanto se clicou em "Prováveis")
+      # 3. ENVIA AS MENSAGENS PARA O TELEGRAM (Apenas se for atualizar_provaveis, ver_provaveis, push ou manual)
       - name: 📢 Postar Escalações no Telegram
+        if: github.event.action == 'atualizar_provaveis' || github.event.action == 'ver_provaveis' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ github.event.client_payload.chat_id || secrets.TELEGRAM_CHAT_ID }}
