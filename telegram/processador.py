@@ -18,8 +18,8 @@ def processar_comando_direto(tipo_bruto):
     print("\n--- [LOG PASSO 1] DESCODIFICANDO COMANDO ---")
     print(f"📥 Recebido tipo_bruto: '{tipo_bruto}'")
 
-    # Inicializa com valores padrão (janela PROXIMOS por padrão)
-    config = {"bingo": 3, "horario": "PROXIMOS", "bilhete": "ACERTOS", "aviso": ""}
+    # 🟢 AJUSTE 1: Inicializa com "PROVAVEIS" como padrão
+    config = {"bingo": 3, "horario": "PROXIMOS", "bilhete": "PROVAVEIS", "aviso": ""}
     tipo_limpo = tipo_bruto.strip() if tipo_bruto else ""
 
     # 1. PROCESSAMENTO DE CALLBACKS DO TELEGRAM (Maior Prioridade)
@@ -53,14 +53,20 @@ def processar_comando_direto(tipo_bruto):
             if digitos:
                 config["bingo"] = int(digitos)
             else:
-                # Se não achar número nenhum, tenta buscar na string bruta inteira
                 digitos_brutos = "".join([c for c in tipo_limpo if c.isdigit()])
                 config["bingo"] = int(digitos_brutos) if digitos_brutos else 3
 
             txt_janela = f"{config['horario']}" if config['horario'] not in ["DIA", "PROXIMOS"] else "Próximos"
-            txt_modo = "Mais acertos"
-            if config['bilhete'] == "ODDS": txt_modo = "Maiores Odds"
-            elif config['bilhete'] == "AMBAS": txt_modo = "Equilibrado"
+            
+            # 🟢 AJUSTE 2: Mapeamento do texto da estratégia atualizado
+            if config['bilhete'] == "PROVAVEIS":
+                txt_modo = "Prováveis 📋"
+            elif config['bilhete'] == "ODDS":
+                txt_modo = "Maiores Odds"
+            elif config['bilhete'] == "AMBAS":
+                txt_modo = "Equilibrado"
+            else:
+                txt_modo = config['bilhete']
 
             config["aviso"] = (f"🎲 Bingo: *{config['bingo']}*\n⏱️ Janela: *{txt_janela}*\n📊 Modo: *{txt_modo}*")
             print(f"✅ Configuração gerada do comando composto: {config}")
@@ -75,7 +81,10 @@ def processar_comando_direto(tipo_bruto):
     else:
         config["bingo"] = 3
         
-    if "ODDS" in tipo_limpo: config["bilhete"] = "ODDS"
+    if "ODDS" in tipo_limpo: 
+        config["bilhete"] = "ODDS"
+    elif "PROVAVEIS" in tipo_limpo:
+        config["bilhete"] = "PROVAVEIS"
     
     config["aviso"] = f"🚀 A processar comando recebido: *{config['bingo']}*"
     print(f"✅ Configuração gerada por fallback geral: {config}")
@@ -151,7 +160,7 @@ def executar():
         except Exception as e:
             print(f"⚠️ Erro ao processar links H2H do pendentes.json: {e}")
 
-        print("\n--- [LOG PASSO 3] FILTRANDO JOGOS POR HORÁRIO ---")
+    print("\n--- [LOG PASSO 3] FILTRANDO JOGOS POR HORÁRIO ---")
     jogos_validos_horario = []
     
     for j in jogos_banco:
@@ -211,10 +220,9 @@ def executar():
                 "chat_id": chat_id, "text": msg_erro, "parse_mode": "Markdown", "disable_web_page_preview": True
             }
             if menu_botoes: payload["reply_markup"] = menu_botoes
-            requests.post(url_msg, json=payload)
+            requests.post(url_msg, json={**payload})
             print("⚠️ [LOG PASSO 5] Mensagem de erro enviada.")
         except Exception as e: print(f"⚠️ Erro ao enviar erro Telegram: {e}")
 
 if __name__ == "__main__":
     executar()
-            
