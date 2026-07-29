@@ -82,7 +82,7 @@ def processar_comando_direto(tipo_bruto):
     return config
 
 def obter_mensagem_provaveis_formatada():
-    """Lê o arquivo JSON de prováveis e retorna a string formatada, filtrando jogos futuros (mesma lógica do Bingo)."""
+    """Lê o arquivo JSON de prováveis e retorna a string formatada, filtrando rigorosamente jogos futuros."""
     caminhos_tentar = ["telegram/provaveis.json", "provaveis.json"]
     caminho_provaveis = None
 
@@ -99,18 +99,20 @@ def obter_mensagem_provaveis_formatada():
             dados_provaveis = json.load(f)
             
         if isinstance(dados_provaveis, dict):
-            lista_jogos = list(dados_provaveis.values()) if "jogos" not in dados_provaveis else dados_provaveis["jogos"]
+            if "jogos" in dados_provaveis:
+                lista_jogos = dados_provaveis["jogos"]
+            else:
+                lista_jogos = list(dados_provaveis.values())
         else:
             lista_jogos = dados_provaveis
         
-        # --- PREPARA HORA ATUAL DO BRASIL (IGUAL AO BINGO) ---
-        agora_br = datetime.now() - timedelta(hours=3)
-        data_hoje = agora_br.strftime("%Y-%m-%d")
-        ano_j, mes_j, dia_j = map(int, data_hoje.split("-"))
+        # --- HORA ATUAL REAL DO BRASIL (UTC-3) ---
+        agora_br = datetime.utcnow() - timedelta(hours=3)
+        data_hoje_br = agora_br.strftime("%Y-%m-%d")
 
         # MAPA DIÁRIO AUXILIAR (CASO O PROVÁVEIS NÃO TENHA 'HORARIO')
         mapa_horarios = {}
-        caminho_jogos_hoje = f"telegram/jogos_{data_hoje}.json"
+        caminho_jogos_hoje = f"telegram/jogos_{data_hoje_br}.json"
         if os.path.exists(caminho_jogos_hoje):
             try:
                 with open(caminho_jogos_hoje, "r", encoding="utf-8") as f_jogos:
@@ -136,36 +138,48 @@ def obter_mensagem_provaveis_formatada():
 
             horario_str = str(j.get("horario", "")).strip()
             
-            # Se não tem horário no prováveis, busca no mapa do dia
-            if not horario_str and chave_conf in mapa_horarios:
+            # Se não tem horário no prováveis, tenta resgatar do banco diário
+            if (not horario_str or horario_str == "None") and chave_conf in mapa_horarios:
                 horario_str = str(mapa_horarios[chave_conf]).strip()
                 j["horario"] = horario_str
 
-            # --- FILTRO DE HORÁRIO IDÊNTICO AO DO BINGO ---
-            if horario_str and ":" in horario_str:
-                try:
-                    h_partes = horario_str.split(":")
-                    hora_jogo = datetime(ano_j, mes_j, dia_j, int(h_partes[0]), int(h_partes[1]), 0)
-                    
-                    if int(h_partes[0]) < 4 and agora_br.hour > 20:
-                        hora_jogo += timedelta(days=1)
+            # TRAVA 1: Se não tem horário válido, descarta sumariamente!
+            if not horario_str or ":" not in horario_str:
+                continue
 
-                    # MESMA REGRA DO BINGO: Se o jogo já passou do horário atual, descarta!
-                    if hora_jogo < agora_br:
-                        continue
+            # Pega a data de referência (do 'atualizado_em' ou do dia atual)
+            data_ref_str = data_hoje_br
+            atualizado_em = str(j.get("atualizado_em", ""))
+            if atualizado_em and " " in atualizado_em:
+                data_ref_str = atualizado_em.split(" ")[0]
 
-                    j["datetime_real"] = hora_jogo
-                    jogos_validos.append(j)
-                except Exception as e:
-                    print(f"⚠️ Erro ao converter horário ({horario_str}): {e}")
-            else:
-                # Se não tem horário para validar, descarta para não mandar jogo passado
+            try:
+                ano_j, mes_j, dia_j = map(int, data_ref_str.split("-"))
+                h_partes = horario_str.split(":")
+                hora_h, min_m = int(h_partes[0]), int(h_partes[1])
+
+                hora_jogo = datetime(ano_j, mes_j, dia_j, hora_h, min_m, 0)
+                
+                # Trata jogos pós meia-noite
+                if hora_h < 4 and agora_br.hour > 20:
+                    hora_jogo += timedelta(days=1)
+
+                # TRAVA 2 (O CORTE): Se a hora do jogo for MENOR que a hora atual, ignora!
+                if hora_jogo < agora_br:
+                    continue
+
+                j["datetime_real"] = hora_jogo
+                jogos_validos.append(j)
+
+            except Exception as e:
+                # Se falhou qualquer validação, NÃO ADICIONA À LISTA
+                print(f"⚠️ Erro ao processar horário do jogo {chave_conf}: {e}")
                 continue
 
         if not jogos_validos:
             return "⚠️ *Não há escalações prováveis de jogos futuros disponíveis no momento.*"
 
-        # Ordena os jogos pelo horário real (igual ao Bingo faz)
+        # Ordena os jogos pelo horário cronológico
         jogos_validos.sort(key=lambda x: x.get("datetime_real", agora_br))
 
         linhas = ["📋 *ESCALAÇÕES PROVÁVEIS CONFIRMADAS*\n"]
@@ -204,7 +218,7 @@ def obter_mensagem_provaveis_formatada():
     except Exception as e:
         print(f"❌ Erro ao ler/formatar prováveis: {e}")
         return f"⚠️ Erro ao carregar escalações prováveis: {e}"
-                            
+
 def executar():
     token = os.getenv('TELEGRAM_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN')
     chat_id = os.getenv('CHAT_ID') or os.getenv('TELEGRAM_CHAT_ID')
@@ -286,7 +300,7 @@ def executar():
     except Exception as e:
         print(f"⚠️ Erro ao enviar aviso de aguarde silencioso: {e}")
 
-    agora_br = datetime.now() - timedelta(hours=3)
+    agora_br = datetime.utcnow() - timedelta(hours=3)
     data_hoje = agora_br.strftime("%Y-%m-%d")
     caminho_json = f"telegram/jogos_{data_hoje}.json"
     caminho_pendentes = "ranking/pendentes.json"
@@ -385,4 +399,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-        
+    
