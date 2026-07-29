@@ -11,15 +11,7 @@ def extrair_markup_filtros(escolhas=None):
     """
     return {
         "inline_keyboard": [
-            # --- LINHA 1: RANKING SOLO ---
-            [
-                {"text": "📊 Ranking", "callback_data": "cb_ver_ranking"}
-            ],
-            # --- LINHA 2: PROVÁVEIS E ATUALIZAR LADO A LADO ---
-            [
-                {"text": "👕 Prováveis", "callback_data": "cb_provaveis"},
-                {"text": "🔄 Atualizar", "callback_data": "cb_atualizar_provaveis"}
-            ],
+            
             # --- SEÇÃO 1: BINGOS (Bingo 3 e 5) ---
             [{"text": "✅ Escolha um bingo:", "callback_data": "ignore"}],
             [
@@ -36,6 +28,15 @@ def extrair_markup_filtros(escolhas=None):
             # --- BOTÃO DE DISPARO DEFINITIVO ---
             [
                 {"text": "🚀 GERAR BILHETE", "callback_data": "cb_acao_GERAR"}
+            ],
+            # --- LINHA RANKING SOLO ---
+            [
+                {"text": "📊 Ranking", "callback_data": "cb_ver_ranking"}
+            ],
+            # --- LINHA PROVÁVEIS E ATUALIZAR LADO A LADO ---
+            [
+                {"text": "👕 Prováveis", "callback_data": "cb_provaveis"},
+                {"text": "🔄 Atualizar", "callback_data": "cb_atualizar_provaveis"}
             ]
         ]
     }
