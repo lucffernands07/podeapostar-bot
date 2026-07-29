@@ -83,7 +83,7 @@ def processar_comando_direto(tipo_bruto):
     return config
 
 def obter_mensagem_provaveis_formatada():
-    """Lê o arquivo JSON de prováveis e retorna a string formatada, filtrando jogos que já começaram (sem tolerância)."""
+    """Lê o arquivo JSON de prováveis e retorna a string formatada, filtrando jogos futuros."""
     caminhos_tentar = ["telegram/provaveis.json", "provaveis.json"]
     caminho_provaveis = None
 
@@ -99,28 +99,59 @@ def obter_mensagem_provaveis_formatada():
         with open(caminho_provaveis, "r", encoding="utf-8") as f:
             dados_provaveis = json.load(f)
             
-        lista_jogos = dados_provaveis.get("jogos", []) if isinstance(dados_provaveis, dict) else dados_provaveis
+        # Garante a leitura tanto se for Lista quanto Dicionário por chave
+        if isinstance(dados_provaveis, dict):
+            lista_jogos = list(dados_provaveis.values()) if "jogos" not in dados_provaveis else dados_provaveis["jogos"]
+        else:
+            lista_jogos = dados_provaveis
         
-        # --- FILTRO DE HORÁRIO RIGOROSO (SEM TOLERÂNCIA) ---
+        # --- PREPARA HORA ATUAL DO BRASIL ---
         agora_br = datetime.now() - timedelta(hours=3)
         data_hoje = agora_br.strftime("%Y-%m-%d")
         ano_j, mes_j, dia_j = map(int, data_hoje.split("-"))
 
+        # --- CARREGA TABELA DIÁRIA DE HORÁRIOS PARA CRUZAMENTO (FALLBACK) ---
+        mapa_horarios = {}
+        caminho_jogos_hoje = f"telegram/jogos_{data_hoje}.json"
+        if os.path.exists(caminho_jogos_hoje):
+            try:
+                with open(caminho_jogos_hoje, "r", encoding="utf-8") as f_jogos:
+                    banco_jogos = json.load(f_jogos)
+                    for item_j in banco_jogos:
+                        c = str(item_j.get("time_casa", "")).strip().lower()
+                        f = str(item_j.get("time_fora", "")).strip().lower()
+                        h = item_j.get("horario")
+                        if c and f and h:
+                            mapa_horarios[f"{c}x{f}"] = h
+            except Exception as e_map:
+                print(f"⚠️ Erro ao carregar mapa de horários auxiliar: {e_map}")
+
         jogos_validos = []
         for j in lista_jogos:
-            jogadores = j.get("jogadores") or j.get("provaveis") or j.get("scouts") or []
-            if not jogadores or len(jogadores) == 0:
+            # Verifica se há titulares/jogadores
+            tem_jogadores = j.get("titulares_casa") or j.get("jogadores") or j.get("provaveis")
+            if not tem_jogadores:
                 continue
 
+            casa_norm = str(j.get("time_casa", "")).strip().lower()
+            fora_norm = str(j.get("time_fora", "")).strip().lower()
+            chave_conf = f"{casa_norm}x{fora_norm}"
+
+            # 1. Tenta pegar o horário do próprio objeto
             horario_str = j.get("horario", "")
             
-            # Se houver horário informado no formato "HH:MM", valida se o jogo já começou
+            # 2. Se não existir, busca no mapa cruzado da base diária
+            if not horario_str and chave_conf in mapa_horarios:
+                horario_str = mapa_horarios[chave_conf]
+                j["horario"] = horario_str # Salva para exibição textual
+
+            # --- FILTRO RIGOROSO DE HORÁRIO ---
             if horario_str and ":" in str(horario_str):
                 try:
                     h_partes = str(horario_str).strip().split(":")
                     hora_jogo = datetime(ano_j, mes_j, dia_j, int(h_partes[0]), int(h_partes[1]), 0)
                     
-                    # Trata jogos de madrugada/virada do day
+                    # Trata jogos de madrugada
                     if int(h_partes[0]) < 4 and agora_br.hour > 20:
                         hora_jogo += timedelta(days=1)
 
@@ -128,7 +159,7 @@ def obter_mensagem_provaveis_formatada():
                     if hora_jogo < agora_br:
                         continue
                 except Exception as e:
-                    print(f"⚠️ Erro ao calcular horário do jogo de prováveis ({horario_str}): {e}")
+                    print(f"⚠️ Erro ao validar horário ({horario_str}): {e}")
 
             jogos_validos.append(j)
 
@@ -140,21 +171,28 @@ def obter_mensagem_provaveis_formatada():
             casa = item.get("time_casa", "Casa")
             fora = item.get("time_fora", "Fora")
             horario = item.get("horario", "")
-            jogadores = item.get("jogadores") or item.get("provaveis") or item.get("scouts") or []
             
             header = f"🏟️ *{casa} x {fora}*"
             if horario:
                 header = f"⏱️ {horario} | " + header
                 
             linhas.append(header)
-            for jog in jogadores:
-                if isinstance(jog, dict):
-                    nome = jog.get("nome", "Jogador")
-                    med = jog.get("media") or jog.get("med")
-                    txt_med = f" | Méd: {med}" if med else ""
-                    linhas.append(f"• {nome}{txt_med}")
-                else:
+
+            # Formata os titulares de Casa e Fora
+            tit_casa = item.get("titulares_casa", [])
+            tit_fora = item.get("titulares_fora", [])
+
+            if tit_casa or tit_fora:
+                if tit_casa:
+                    linhas.append(f"🏠 *{casa}*: " + ", ".join(tit_casa))
+                if tit_fora:
+                    linhas.append(f"🚀 *{fora}*: " + ", ".join(tit_fora))
+            else:
+                # Fallback para lista simples de jogadores
+                jogadores = item.get("jogadores") or item.get("provaveis") or []
+                for jog in jogadores:
                     linhas.append(f"• {str(jog)}")
+                    
             linhas.append("") # Linha em branco separadora
 
         corpo_msg = "\n".join(linhas)
@@ -166,6 +204,7 @@ def obter_mensagem_provaveis_formatada():
     except Exception as e:
         print(f"❌ Erro ao ler/formatar prováveis: {e}")
         return f"⚠️ Erro ao carregar escalações prováveis: {e}"
+                    
 
 def executar():
     token = os.getenv('TELEGRAM_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN')
