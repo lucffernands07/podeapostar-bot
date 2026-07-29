@@ -147,7 +147,11 @@ def executar():
     chat_id = os.getenv('CHAT_ID') or os.getenv('TELEGRAM_CHAT_ID')
     tipo_bruto = os.getenv('TIPO_BINGO', '') or os.getenv('TELEGRAM_TIPO', '')
     
-    url_msg = f"[https://api.telegram.org/bot](https://api.telegram.org/bot){token}/sendMessage"
+    # --- CORREÇÃO DA URL AQUI ---
+    if token:
+        token = token.strip()
+    url_msg = f"https://api.telegram.org/bot{token}/sendMessage"
+    
     config = processar_comando_direto(tipo_bruto)
     menu_botoes = menus.extrair_markup_filtros() if hasattr(menus, 'extrair_markup_filtros') else None
 
@@ -321,6 +325,6 @@ def executar():
             requests.post(url_msg, json=payload)
             print("⚠️ [LOG PASSO 5] Mensagem de erro enviada.")
         except Exception as e: print(f"⚠️ Erro ao enviar erro Telegram: {e}")
-
+            
 if __name__ == "__main__":
     executar()
