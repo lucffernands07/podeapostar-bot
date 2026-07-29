@@ -32,7 +32,8 @@ def validar_liga_para_jogadores(nome_liga):
 def analisar_dados_jogadores(acumulador_scouts, t1, t2):
     """
     Processa as estatísticas individuais de chutes no gol e faltas sofridas.
-    Filtra e retorna os até 2 MELHORES jogadores de cada mercado por time (com média > 1.0).
+    - Mandante (t1): Retorna os até 2 MELHORES jogadores de cada mercado.
+    - Visitante (t2): Retorna apenas o 1 MELHOR jogador de cada mercado.
     """
     if not acumulador_scouts:
         print("⏩ [HISTÓRICO INCOMPLETO] Sem dados de scouts de jogadores para calcular.")
@@ -44,6 +45,9 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
     # --- CÁLCULO E SELEÇÃO DOS MELHORES ---
     # Processa o mandante (T1) e depois o visitante (T2)
     for time_alvo in [t1, t2]:
+        # Define o limite baseado na condição: Mandante (T1) = 2, Visitante (T2) = 1
+        limite_jogadores = 2 if time_alvo == t1 else 1
+
         jogadores_do_time = {k: v for k, v in acumulador_scouts.items() if v['time'] == time_alvo.upper()}
         
         candidatos_chutes = []
@@ -53,7 +57,7 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
             media_chutes = d['chutes'] / d['c_jogos'] if d['c_jogos'] > 0 else 0
             media_faltas = d['faltas'] / d['f_jogos'] if d['f_jogos'] > 0 else 0
             
-            # Adiciona aos candidatos se a média for estritamente maior que 1.0
+            # Adiciona aos candidatos se a média for >= 0.5
             if media_chutes >= 0.5:
                 candidatos_chutes.append({
                     "jogador": nome_jogador,
@@ -70,25 +74,25 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
                     "media": round(media_faltas, 2)
                 })
 
-        # --- FILTRO: Seleciona os ATÉ 2 MELHORES de cada mercado para este time ---
+        # --- FILTRO: Seleciona top 2 para Mandante (T1) e top 1 para Visitante (T2) ---
         linhas_chutes = []
         linhas_faltas = []
 
         if candidatos_chutes:
-            # Ordena decrescente pela média e pega os até 2 melhores
+            # Ordena decrescente pela média e aplica o corte dinâmico
             candidatos_chutes_ordenados = sorted(candidatos_chutes, key=lambda x: x['media'], reverse=True)
-            top2_chutes = candidatos_chutes_ordenados[:2]
+            top_chutes = candidatos_chutes_ordenados[:limite_jogadores]
             
-            for j_chute in top2_chutes:
+            for j_chute in top_chutes:
                 lista_jogadores_qualificados.append(j_chute)
                 linhas_chutes.append(f"Chutes no gol: {j_chute['jogador']} média {j_chute['media']:.1f}")
 
         if candidatos_faltas:
-            # Ordena decrescente pela média e pega os até 2 melhores
+            # Ordena decrescente pela média e aplica o corte dinâmico
             candidatos_faltas_ordenados = sorted(candidatos_faltas, key=lambda x: x['media'], reverse=True)
-            top2_faltas = candidatos_faltas_ordenados[:2]
+            top_faltas = candidatos_faltas_ordenados[:limite_jogadores]
             
-            for j_falta in top2_faltas:
+            for j_falta in top_faltas:
                 lista_jogadores_qualificados.append(j_falta)
                 linhas_faltas.append(f"Faltas sofridas: {j_falta['jogador']} média {j_falta['media']:.1f}")
 
@@ -111,3 +115,4 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
         "jogadores_qualificados": lista_jogadores_qualificados,
         "scouts_formatados": texto_scouts_bloco
     }
+
