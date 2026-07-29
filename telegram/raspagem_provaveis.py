@@ -50,55 +50,59 @@ def extrair_url_base(jogo_json, cache_pendentes):
     return jogo_json.get("link_h2h") or info_extra.get("link_h2h")
 
 def raspar_titulares_flashscore(page, url_original):
-    """Acessa a URL inicial, resolve o redirecionamento e raspa os titulares garantindo o carregamento do DOM."""
+    """Acessa a URL inicial, resolve o redirecionamento para a URL SEO limpa /resumo/equipes/ e raspa os titulares."""
     titulares_casa = []
     titulares_fora = []
-    
-    # Monta a URL base para/resumo/equipes/
-    match = re.search(r'flashscore\.com\.br/jogo/([^/#]+)', url_original)
-    if match:
-        id_jogo = match.group(1)
-        url_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-do-jogo/escalacoes/equipes"
-    else:
-        url_final = url_original
+    url_final = url_original
 
     try:
-        page.goto(url_final, timeout=30000, wait_until="networkidle")
-        print(f"🔗 URL Normalizada: {page.url}")
+        # 1. Abre a URL original para que o Flashscore resolva o redirecionamento SEO
+        page.goto(url_original, timeout=30000, wait_until="domcontentloaded")
+        time.sleep(1.5)
 
-        # Seletor para o container da escalação ou os itens de participantes
-        seletor_jogador = ".lf__participantNew, .lf__sidesBox .lf__side, .wline_player, .lf__lineup"
+        # 2. Captura a URL real após o redirecionamento e remove parâmetros ou hashes antigos
+        url_atual = page.url
+        base_url = url_atual.split('?')[0].split('#')[0].rstrip('/')
         
+        # Garante que a URL termine exatamente com /resumo/equipes/
+        if not base_url.endswith("/resumo/equipes"):
+            url_final = f"{base_url}/resumo/equipes/"
+        else:
+            url_final = f"{base_url}/"
+        
+        print(f"🔗 URL Normalizada: {url_final}")
+
+        # 3. Navega para a URL limpa de equipes
+        if page.url != url_final:
+            page.goto(url_final, timeout=30000, wait_until="domcontentloaded")
+
+        # 4. Espera especificamente o container da escalação ou os jogadores
+        seletor_container = ".lf__sidesBox, .lf__sides, .lf__participantNew"
         try:
-            page.wait_for_selector(seletor_jogador, timeout=8000)
+            page.wait_for_selector(seletor_container, timeout=10000)
         except Exception:
-            # Rola a página para forçar lazy loading do Flashscore
-            page.evaluate("window.scrollBy(0, 400)")
+            page.evaluate("window.scrollBy(0, 300)")
             time.sleep(2)
 
-        # Captura os dois lados do campo (Casa = 0, Fora = 1)
-        lados = page.query_selector_all(".lf__sidesBox .lf__side, .lf__sides .lf__side, .lf__lineup")
+        # 5. Captura as colunas de jogadores
+        lados = page.query_selector_all(".lf__sidesBox .lf__side, .lf__sides .lf__side")
 
         if len(lados) >= 2:
-            # FUNÇÃO AUXILIAR DE LIMPEZA DE NOME
             def extrair_nomes(lado_element):
                 nomes = []
-                # Tenta capturar pelo nome do jogador ou do box do participante
-                elementos = lado_element.query_selector_all(".lf__participantNew, .lf__participant, .wline_player")
+                elementos = lado_element.query_selector_all(".lf__participantNew, .lf__participant")
                 
                 for el in elementos:
                     texto = el.text_content().strip()
                     if not texto:
                         continue
                     
-                    # Trata quebras de linha caso venha número e nome juntos
+                    # Trata quebras de linha (caso venha número e nome juntos)
                     linhas = [l.strip() for l in texto.split('\n') if l.strip()]
                     for linha in linhas:
-                        # Remove números de camisa, notas numéricas e símbolos
                         nome_limpo = re.sub(r'^\d+\s*', '', linha)
                         nome_limpo = re.sub(r'\s*\d+(\.\d+)?$', '', nome_limpo).strip()
                         
-                        # Filtra ruídos curtos ou numéricos
                         if nome_limpo and not nome_limpo.replace('.', '').isdigit() and len(nome_limpo) > 2:
                             if nome_limpo not in nomes and len(nomes) < 11:
                                 nomes.append(nome_limpo)
@@ -110,7 +114,7 @@ def raspar_titulares_flashscore(page, url_original):
     except Exception as e:
         print(f"⚠️ Aviso/Timeout ao raspar {url_original}: {e}")
         
-    return titulares_casa, titulares_fora, page.url
+    return titulares_casa, titulares_fora, url_final
 
 def executar_raspagem_escalacoes():
     garantir_diretorio()
