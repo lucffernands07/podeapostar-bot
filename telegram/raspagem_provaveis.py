@@ -10,7 +10,6 @@ from playwright.sync_api import sync_playwright
 DIRETORIO_ESCALACOES = "telegram/escalacoes"
 CAMINHO_PROVAVEIS = os.path.join(DIRETORIO_ESCALACOES, "provaveis.json")
 
-# 🟢 LISTA BRANCA DE LIGAS ELITE
 LIGAS_ELITE_JOGADORES = [
     "Brasileirão Série A", "Copa do Brasil", "Libertadores", "Sul-Americana",
     "Brasileirão Série B", "Argentina - Liga Profesional", "Mundo - Copa do Mundo",
@@ -22,16 +21,12 @@ LIGAS_ELITE_JOGADORES = [
 ]
 
 def validar_liga_para_jogadores(nome_liga):
-    """Verifica se a liga do confronto pertence à lista de ligas elite permitidas."""
     if not nome_liga:
         return False
-        
     liga_limpa = nome_liga.strip().lower()
-    
     for liga_permitida in LIGAS_ELITE_JOGADORES:
         if liga_permitida.lower() in liga_limpa or liga_limpa in liga_permitida.lower():
             return True
-            
     return False
 
 def garantir_diretorio():
@@ -41,7 +36,6 @@ def garantir_diretorio():
 def formatar_linha_jogadores(lista_jogadores, por_linha=4):
     if not lista_jogadores:
         return "Escalação provável não disponível"
-    
     linhas = []
     for i in range(0, len(lista_jogadores), por_linha):
         grupo = lista_jogadores[i:i + por_linha]
@@ -49,74 +43,74 @@ def formatar_linha_jogadores(lista_jogadores, por_linha=4):
     return "\n".join(linhas)
 
 def extrair_url_base(jogo_json, cache_pendentes):
-    """Apenas recupera o link original cadastrado (link_h2h)."""
     casa = jogo_json.get("time_casa", "").strip()
     fora = jogo_json.get("time_fora", "").strip()
     chave = f"{casa.lower()}x{fora.lower()}"
-    
     info_extra = cache_pendentes.get(chave, {})
     return jogo_json.get("link_h2h") or info_extra.get("link_h2h")
 
 def raspar_titulares_flashscore(page, url_original):
-    """Acessa a URL inicial, resolve o redirecionamento para /resumo/equipes/ e raspa os titulares."""
+    """Acessa a URL inicial, resolve o redirecionamento e raspa os titulares garantindo o carregamento do DOM."""
     titulares_casa = []
     titulares_fora = []
-    url_final = url_original
     
+    # Monta a URL base para/resumo/equipes/
+    match = re.search(r'flashscore\.com\.br/jogo/([^/#]+)', url_original)
+    if match:
+        id_jogo = match.group(1)
+        url_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-do-jogo/escalacoes/equipes"
+    else:
+        url_final = url_original
+
     try:
-        # 1. Abre a URL original para resolver o ID e redirecionamento
-        page.goto(url_original, timeout=30000, wait_until="domcontentloaded")
-        time.sleep(1.5)
+        page.goto(url_final, timeout=30000, wait_until="networkidle")
+        print(f"🔗 URL Normalizada: {page.url}")
 
-        # 2. Captura a URL real e força o padrão /resumo/equipes/
-        url_atual = page.url
-        base_url = url_atual.split('?')[0].split('#')[0].rstrip('/')
-        url_final = f"{base_url}/resumo/equipes/"
+        # Seletor para o container da escalação ou os itens de participantes
+        seletor_jogador = ".lf__participantNew, .lf__sidesBox .lf__side, .wline_player, .lf__lineup"
         
-        print(f"🔗 URL Normalizada: {url_final}")
-
-        # 3. Se ainda não estiver na URL final de equipes, navega até ela
-        if page.url != url_final:
-            page.goto(url_final, timeout=30000, wait_until="domcontentloaded")
-
-        # 4. Espera especificamente a presença do container principal de escalação no DOM
         try:
-            page.wait_for_selector(".lf__sidesBox, .lf__sides", timeout=10000)
+            page.wait_for_selector(seletor_jogador, timeout=8000)
         except Exception:
-            # Caso não tenha carregado de primeira, rola a página levemente
-            page.evaluate("window.scrollBy(0, 300)")
+            # Rola a página para forçar lazy loading do Flashscore
+            page.evaluate("window.scrollBy(0, 400)")
             time.sleep(2)
 
-        # 5. Localiza as duas colunas do campo (Lado 1 = Casa, Lado 2 = Fora)
-        # Nota: Usamos busca descendente aberta (espaço) em vez de filhas diretas (>)
-        lados = page.query_selector_all(".lf__sidesBox .lf__side, .lf__sides .lf__side")
+        # Captura os dois lados do campo (Casa = 0, Fora = 1)
+        lados = page.query_selector_all(".lf__sidesBox .lf__side, .lf__sides .lf__side, .lf__lineup")
 
         if len(lados) >= 2:
-            # --- TIME CASA (1º lado) ---
-            els_casa = lados[0].query_selector_all(".lf__participantNew")
-            for el in els_casa:
-                nome = el.text_content().strip()
-                # Remove número da camisa do início, notas (ex: 6.5) ou quebras de linha
-                nome_limpo = re.sub(r'^\d+\s*', '', nome)
-                nome_limpo = re.sub(r'\s*\d+\.\d+$', '', nome_limpo).strip()
+            # FUNÇÃO AUXILIAR DE LIMPEZA DE NOME
+            def extrair_nomes(lado_element):
+                nomes = []
+                # Tenta capturar pelo nome do jogador ou do box do participante
+                elementos = lado_element.query_selector_all(".lf__participantNew, .lf__participant, .wline_player")
                 
-                if nome_limpo and nome_limpo not in titulares_casa and len(titulares_casa) < 11:
-                    titulares_casa.append(nome_limpo)
+                for el in elementos:
+                    texto = el.text_content().strip()
+                    if not texto:
+                        continue
+                    
+                    # Trata quebras de linha caso venha número e nome juntos
+                    linhas = [l.strip() for l in texto.split('\n') if l.strip()]
+                    for linha in linhas:
+                        # Remove números de camisa, notas numéricas e símbolos
+                        nome_limpo = re.sub(r'^\d+\s*', '', linha)
+                        nome_limpo = re.sub(r'\s*\d+(\.\d+)?$', '', nome_limpo).strip()
+                        
+                        # Filtra ruídos curtos ou numéricos
+                        if nome_limpo and not nome_limpo.replace('.', '').isdigit() and len(nome_limpo) > 2:
+                            if nome_limpo not in nomes and len(nomes) < 11:
+                                nomes.append(nome_limpo)
+                return nomes
 
-            # --- TIME FORA (2º lado) ---
-            els_fora = lados[1].query_selector_all(".lf__participantNew")
-            for el in els_fora:
-                nome = el.text_content().strip()
-                nome_limpo = re.sub(r'^\d+\s*', '', nome)
-                nome_limpo = re.sub(r'\s*\d+\.\d+$', '', nome_limpo).strip()
-                
-                if nome_limpo and nome_limpo not in titulares_fora and len(titulares_fora) < 11:
-                    titulares_fora.append(nome_limpo)
+            titulares_casa = extrair_nomes(lados[0])
+            titulares_fora = extrair_nomes(lados[1])
 
     except Exception as e:
         print(f"⚠️ Aviso/Timeout ao raspar {url_original}: {e}")
         
-    return titulares_casa, titulares_fora, url_final
+    return titulares_casa, titulares_fora, page.url
 
 def executar_raspagem_escalacoes():
     garantir_diretorio()
@@ -174,7 +168,6 @@ def executar_raspagem_escalacoes():
                 fora = j.get("time_fora")
                 chave = f"{str(casa).strip().lower()}x{str(fora).strip().lower()}"
                 
-                # Deduplicação de loop na mesma execução
                 if chave in jogos_processados_nesta_run:
                     continue
                 
