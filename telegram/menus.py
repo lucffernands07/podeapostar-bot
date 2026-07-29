@@ -7,14 +7,18 @@ PASTA_TELEGRAM = "telegram"
 def extrair_markup_filtros(escolhas=None):
     """
     Gera o teclado de botões para o Telegram.
-    Layout limpo sem os botões de modo/estratégia.
+    Layout com botões de Prováveis e Atualizar separados na linha abaixo do Ranking.
     """
     return {
         "inline_keyboard": [
-            # --- LINHA 1: RANKING E ATUALIZAR PROVÁVEIS ---
+            # --- LINHA 1: RANKING SOLO ---
             [
-                {"text": "📊 Ranking", "callback_data": "cb_ver_ranking"},
-                {"text": "🔄 Prováveis | Atualizar", "callback_data": "cb_atualizar_provaveis"}
+                {"text": "📊 Ranking", "callback_data": "cb_ver_ranking"}
+            ],
+            # --- LINHA 2: PROVÁVEIS E ATUALIZAR LADO A LADO ---
+            [
+                {"text": "👕 Prováveis", "callback_data": "cb_provaveis"},
+                {"text": "🔄 Atualizar", "callback_data": "cb_atualizar_provaveis"}
             ],
             # --- SEÇÃO 1: BINGOS (Bingo 3 e 5) ---
             [{"text": "✅ Escolha um bingo:", "callback_data": "ignore"}],
@@ -90,3 +94,4 @@ def atualizar_menu_inline(chat_id, message_id, texto, escolhas_atuais):
         requests.post(url, json=payload)
     except Exception as e:
         print(f"❌ Erro ao atualizar os botões dinâmicos: {e}")
+    
