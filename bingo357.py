@@ -68,18 +68,18 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, estrategia="ACERTOS"
     bilhetes = []
     if not dados_entrada: return bilhetes
 
-    # 1. Agrupa todos os mercados por confronto
+    # 1. Agrupa todos os mercados por confronto mantendo a ordem de aparição (cronológica)
     jogos_agrupados = {}
+    ordem_chaves = []
     for jogo in dados_entrada:
         chave = f"{jogo['time_casa']}x{jogo['time_fora']}".lower().strip()
-        if chave not in jogos_agrupados: jogos_agrupados[chave] = []
+        if chave not in jogos_agrupados:
+            jogos_agrupados[chave] = []
+            ordem_chaves.append(chave)
         jogos_agrupados[chave].append(jogo)
 
-    # 2. Ordena os confrontos pelo número de mercados (mais densos primeiro)
-    lista_chaves = sorted(jogos_agrupados.keys(), key=lambda k: len(jogos_agrupados[k]), reverse=True)
-    
-    # Fatiamos a lista de chaves exatamente no tamanho do alvo
-    chaves_selecionadas = lista_chaves[:qtd_alvo]
+    # 2. Seleciona estritamente os primeiros N confrontos cronológicos (Próximos N jogos)
+    chaves_selecionadas = ordem_chaves[:qtd_alvo]
     
     jogos_selecionados = []
     for chave in chaves_selecionadas:
@@ -199,4 +199,4 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
-                                     
+                                                                      
