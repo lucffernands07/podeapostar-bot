@@ -83,15 +83,28 @@ def processar_comando_direto(tipo_bruto):
 
 def obter_mensagem_provaveis_formatada():
     """Lê o arquivo JSON de prováveis e retorna a string formatada, filtrando rigorosamente jogos futuros."""
-    caminhos_tentar = ["telegram/provaveis.json", "provaveis.json"]
-    caminho_provaveis = None
+    diretorio_script = os.path.dirname(os.path.abspath(__file__))
+    diretorio_raiz = os.path.dirname(diretorio_script)
 
+    caminhos_tentar = [
+        os.path.join(diretorio_script, "escalacoes", "provaveis.json"),
+        os.path.join(diretorio_raiz, "telegram", "escalacoes", "provaveis.json"),
+        os.path.join(diretorio_script, "provaveis.json"),
+        os.path.join(diretorio_raiz, "telegram", "provaveis.json"),
+        "telegram/escalacoes/provaveis.json",
+        "telegram/provaveis.json",
+        "provaveis.json"
+    ]
+    
+    caminho_provaveis = None
     for path in caminhos_tentar:
         if os.path.exists(path):
             caminho_provaveis = path
+            print(f"📁 Arquivo provaveis.json localizado em: {path}")
             break
 
     if not caminho_provaveis:
+        print("❌ Nenhum arquivo provaveis.json foi encontrado nos caminhos mapeados.")
         return "⚠️ *Nenhum dado de prováveis encontrado localmente.*\nClique em *Atualizar* para realizar a raspagem."
 
     try:
@@ -112,19 +125,24 @@ def obter_mensagem_provaveis_formatada():
 
         # MAPA DIÁRIO AUXILIAR (CASO O PROVÁVEIS NÃO TENHA 'HORARIO')
         mapa_horarios = {}
-        caminho_jogos_hoje = f"telegram/jogos_{data_hoje_br}.json"
-        if os.path.exists(caminho_jogos_hoje):
-            try:
-                with open(caminho_jogos_hoje, "r", encoding="utf-8") as f_jogos:
-                    banco_jogos = json.load(f_jogos)
-                    for item_j in banco_jogos:
-                        c = str(item_j.get("time_casa", "")).strip().lower()
-                        f = str(item_j.get("time_fora", "")).strip().lower()
-                        h = item_j.get("horario")
-                        if c and f and h:
-                            mapa_horarios[f"{c}x{f}"] = h
-            except Exception as e_map:
-                print(f"⚠️ Erro ao carregar mapa de horários auxiliar: {e_map}")
+        caminhos_jogos_hoje = [
+            os.path.join(diretorio_script, f"jogos_{data_hoje_br}.json"),
+            f"telegram/jogos_{data_hoje_br}.json"
+        ]
+        for c_hoje in caminhos_jogos_hoje:
+            if os.path.exists(c_hoje):
+                try:
+                    with open(c_hoje, "r", encoding="utf-8") as f_jogos:
+                        banco_jogos = json.load(f_jogos)
+                        for item_j in banco_jogos:
+                            c = str(item_j.get("time_casa", "")).strip().lower()
+                            f = str(item_j.get("time_fora", "")).strip().lower()
+                            h = item_j.get("horario")
+                            if c and f and h:
+                                mapa_horarios[f"{c}x{f}"] = h
+                    break
+                except Exception as e_map:
+                    print(f"⚠️ Erro ao carregar mapa de horários auxiliar: {e_map}")
 
         jogos_validos = []
         for j in lista_jogos:
@@ -302,11 +320,23 @@ def executar():
 
     agora_br = datetime.utcnow() - timedelta(hours=3)
     data_hoje = agora_br.strftime("%Y-%m-%d")
-    caminho_json = f"telegram/jogos_{data_hoje}.json"
-    caminho_pendentes = "ranking/pendentes.json"
+    
+    diretorio_script = os.path.dirname(os.path.abspath(__file__))
+    caminhos_banco = [
+        os.path.join(diretorio_script, f"jogos_{data_hoje}.json"),
+        f"telegram/jogos_{data_hoje}.json"
+    ]
+    
+    caminho_json = None
+    for c_banco in caminhos_banco:
+        if os.path.exists(c_banco):
+            caminho_json = c_banco
+            break
 
-    if not os.path.exists(caminho_json):
-        print(f"❌ ERRO CRÍTICO: Ficheiro {caminho_json} não encontrado.")
+    caminho_pendentes = os.path.join(os.path.dirname(diretorio_script), "ranking", "pendentes.json")
+
+    if not caminho_json:
+        print(f"❌ ERRO CRÍTICO: Ficheiro de jogos do dia não encontrado.")
         return
 
     with open(caminho_json, "r", encoding="utf-8") as f:
@@ -399,4 +429,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
-    
+                            
