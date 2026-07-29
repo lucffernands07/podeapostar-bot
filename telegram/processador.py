@@ -83,7 +83,7 @@ def processar_comando_direto(tipo_bruto):
     return config
 
 def obter_mensagem_provaveis_formatada():
-    """Lê o arquivo JSON de prováveis e retorna a string formatada filtrando vazios."""
+    """Lê o arquivo JSON de prováveis e retorna a string formatada, filtrando jogos que já começaram (sem tolerância)."""
     caminhos_tentar = ["telegram/provaveis.json", "provaveis.json"]
     caminho_provaveis = None
 
@@ -101,14 +101,39 @@ def obter_mensagem_provaveis_formatada():
             
         lista_jogos = dados_provaveis.get("jogos", []) if isinstance(dados_provaveis, dict) else dados_provaveis
         
+        # --- FILTRO DE HORÁRIO RIGOROSO (SEM TOLERÂNCIA) ---
+        agora_br = datetime.now() - timedelta(hours=3)
+        data_hoje = agora_br.strftime("%Y-%m-%d")
+        ano_j, mes_j, dia_j = map(int, data_hoje.split("-"))
+
         jogos_validos = []
         for j in lista_jogos:
             jogadores = j.get("jogadores") or j.get("provaveis") or j.get("scouts") or []
-            if jogadores and len(jogadores) > 0:
-                jogos_validos.append(j)
+            if not jogadores or len(jogadores) == 0:
+                continue
+
+            horario_str = j.get("horario", "")
+            
+            # Se houver horário informado no formato "HH:MM", valida se o jogo já começou
+            if horario_str and ":" in str(horario_str):
+                try:
+                    h_partes = str(horario_str).strip().split(":")
+                    hora_jogo = datetime(ano_j, mes_j, dia_j, int(h_partes[0]), int(h_partes[1]), 0)
+                    
+                    # Trata jogos de madrugada/virada do day
+                    if int(h_partes[0]) < 4 and agora_br.hour > 20:
+                        hora_jogo += timedelta(days=1)
+
+                    # Descarta IMEDIATAMENTE se a hora do jogo for menor que a hora atual
+                    if hora_jogo < agora_br:
+                        continue
+                except Exception as e:
+                    print(f"⚠️ Erro ao calcular horário do jogo de prováveis ({horario_str}): {e}")
+
+            jogos_validos.append(j)
 
         if not jogos_validos:
-            return "⚠️ *Não há escalações prováveis disponíveis na base no momento.*"
+            return "⚠️ *Não há escalações prováveis de jogos futuros disponíveis no momento.*"
 
         linhas = ["📋 *ESCALAÇÕES PROVÁVEIS CONFIRMADAS*\n"]
         for item in jogos_validos:
@@ -147,7 +172,7 @@ def executar():
     chat_id = os.getenv('CHAT_ID') or os.getenv('TELEGRAM_CHAT_ID')
     tipo_bruto = os.getenv('TIPO_BINGO', '') or os.getenv('TELEGRAM_TIPO', '')
     
-    # --- CORREÇÃO DA URL AQUI ---
+    # --- CORREÇÃO DA URL DO TELEGRAM ---
     if token:
         token = token.strip()
     url_msg = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -277,7 +302,7 @@ def executar():
             if int(h_partes[0]) < 4 and agora_br.hour > 20:
                 hora_jogo += timedelta(days=1)
             
-            # TRAVA DOS 15 MINUTOS
+            # TRAVA DOS 15 MINUTOS (Mantida apenas para montagem de bilhetes)
             if hora_jogo < (agora_br - timedelta(minutes=15)):
                 continue
 
@@ -325,6 +350,7 @@ def executar():
             requests.post(url_msg, json=payload)
             print("⚠️ [LOG PASSO 5] Mensagem de erro enviada.")
         except Exception as e: print(f"⚠️ Erro ao enviar erro Telegram: {e}")
-            
+
 if __name__ == "__main__":
     executar()
+            
