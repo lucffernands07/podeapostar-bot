@@ -53,13 +53,12 @@ def raspar_titulares_flashscore(page, url):
         time.sleep(3) # Aguarda renderização dos componentes
         
         # Seletores de escalação provável do Flashscore
-        # Procura os elementos dos times
         jogadores_elementos = page.query_selector_all(".lf__participantName, .lf__player")
         
-        # Se encontrou lista de escalação
         if jogadores_elementos:
-            nomes = [el.text_content().strip() for el el in jogadores_elementos if el.text_content().strip()]
-            # O Flashscore renderiza 11 do Mandante seguidos de 11 do Visitante
+            # Correção aplicada na linha abaixo: 'for el in'
+            nomes = [el.text_content().strip() for el in jogadores_elementos if el.text_content().strip()]
+            
             if len(nomes) >= 22:
                 titulares_casa = nomes[:11]
                 titulares_fora = nomes[11:22]
@@ -118,16 +117,23 @@ def executar_raspagem_escalacoes():
                     url_escalacao = extrair_url_escalacao(j, cache_pendentes)
                     
                     if url_escalacao:
-                        print(f"⚽ Raspando escalação de: {casa} x {fora}")
+                        print(f"\n⚽ Partida encontrada: {casa} x {fora}")
+                        print(f"🔗 URL: {url_escalacao}")
+                        print("⏳ Acessando página e extraindo titulares...")
+                        
                         t_casa, t_fora = raspar_titulares_flashscore(page, url_escalacao)
                         
-                        # Formata o texto final pronto para exibição no Telegram
                         texto_formatado = (
                             f"**{casa}**:\n"
                             f"{formatar_linha_jogadores(t_casa)}\n\n"
                             f"**{fora}**:\n"
                             f"{formatar_linha_jogadores(t_fora)}"
                         )
+
+                        print("📋 FORMATO TELEGRAM GERADO:")
+                        print("=" * 50)
+                        print(texto_formatado)
+                        print("=" * 50)
 
                         dados_provaveis[chave] = {
                             "time_casa": casa,
@@ -141,12 +147,12 @@ def executar_raspagem_escalacoes():
 
         browser.close()
 
-    # Salva no arquivo final
     with open(CAMINHO_PROVAVEIS, "w", encoding="utf-8") as f:
         json.dump(dados_provaveis, f, ensure_ascii=False, indent=4)
         
-    print(f"\n✅ Concluído! {len(dados_provaveis)} escalações salvas em {CAMINHO_PROVAVEIS}")
+    print(f"\n💾 [SALVANDO] Gravando dados em {CAMINHO_PROVAVEIS}...")
+    print(f"✅ Concluído! {len(dados_provaveis)} escalações salvas em {CAMINHO_PROVAVEIS}.")
 
 if __name__ == "__main__":
     executar_raspagem_escalacoes()
-                     
+    
