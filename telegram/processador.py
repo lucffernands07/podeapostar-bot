@@ -28,7 +28,6 @@ def processar_comando_direto(tipo_bruto):
         print("✅ Ação detectada: Rodar raspagem de prováveis")
         return config
 
-    # 👈 CORRIGIDO: Agora reconhece "cb_ver_provaveis" vindo do Worker e menus.py
     if "cb_ver_provaveis" in tipo_limpo or "cb_provaveis" in tipo_limpo or "VER_PROVAVEIS" in tipo_limpo:
         config["acao"] = "VER_PROVAVEIS"
         config["aviso"] = "📋 *Consulta de Prováveis Recebida!*"
