@@ -54,12 +54,17 @@ def extrair_url_escalacao(jogo_json, cache_pendentes):
     chave = f"{casa.lower()}x{fora.lower()}"
     
     info_extra = cache_pendentes.get(chave, {})
+    # Busca 'link_h2h' no json do jogo ou no cache de pendentes
     link_h2h = jogo_json.get("link_h2h") or info_extra.get("link_h2h")
     
     if link_h2h and "flashscore" in link_h2h:
-        base = link_h2h.split("/#/")[0].split("/resumo")[0].rstrip("/")
-        # Força o caminho direto de escalações
-        return f"{base}/#/resumo-do-jogo/escalacoes/equipes"
+        # Remova hashtags, querystrings e rotas legadas (/h2h, /resumo, etc)
+        base_limpa = link_h2h.split("/#/")[0].split("?")[0]
+        base_limpa = re.sub(r'/(h2h|resumo|estatisticas|escalacoes).*$', '', base_limpa)
+        
+        # Garante a rota no novo padrão exato do Flashscore
+        return f"{base_limpa.rstrip('/')}/resumo/equipes/"
+        
     return None
 
 def raspar_titulares_flashscore(page, url):
@@ -68,20 +73,20 @@ def raspar_titulares_flashscore(page, url):
     titulares_fora = []
     
     try:
-        page.goto(url, timeout=45000, wait_until="domcontentloaded")
+        page.goto(url, timeout=30000, wait_until="domcontentloaded")
         time.sleep(2)
 
         # 🟢 Espera o container principal da escalação (.lf__sidesBox)
         try:
-            page.wait_for_selector(".lf__sidesBox, .lf_sidesBox", timeout=8000)
+            page.wait_for_selector(".lf__sidesBox, .lf_sidesBox", timeout=6000)
         except Exception:
-            # Caso não encontre de primeira, tenta clicar na aba de Escalações
-            aba = page.query_selector("a[href*='escalacoes'], button:has-text('Escalações')")
+            # Caso não encontre de primeira, tenta clicar na aba de Escalações se houver
+            aba = page.query_selector("a[href*='equipes'], a[href*='escalacoes'], button:has-text('Escalações')")
             if aba:
                 aba.click()
                 time.sleep(2)
 
-        # 🟢 Extração com base nos seletores exatos da imagem
+        # 🟢 Extração com base nos seletores exatos
         lados = page.query_selector_all(".lf__sidesBox > .lf__side, .lf_sidesBox > .lf_side")
 
         if len(lados) >= 2:
@@ -89,7 +94,6 @@ def raspar_titulares_flashscore(page, url):
             els_casa = lados[0].query_selector_all(".lf__participantNew, .lf_participantNew")
             for el in els_casa:
                 nome = el.text_content().strip()
-                # Limpa números de camisa no início, se existirem
                 nome_limpo = re.sub(r'^\d+\s*', '', nome)
                 if nome_limpo and nome_limpo not in titulares_casa and len(titulares_casa) < 11:
                     titulares_casa.append(nome_limpo)
@@ -122,7 +126,6 @@ def executar_raspagem_escalacoes():
     with open(caminho_jogos_diario, "r", encoding="utf-8") as f:
         jogos = json.load(f)
 
-    # Carrega escalações existentes para não perder nem re-raspar o que já tem 11x11
     dados_provaveis = {}
     if os.path.exists(CAMINHO_PROVAVEIS):
         try:
@@ -144,6 +147,9 @@ def executar_raspagem_escalacoes():
         except Exception as e:
             print(f"⚠️ Erro no pendentes: {e}")
 
+    # Set para evitar raspar o mesmo jogo mais de uma vez na mesma execução
+    jogos_processados_nesta_run = set()
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
@@ -162,18 +168,25 @@ def executar_raspagem_escalacoes():
                 fora = j.get("time_fora")
                 chave = f"{str(casa).strip().lower()}x{str(fora).strip().lower()}"
                 
-                # Checa se já temos a escalação completa salva
+                # EVITA REPETIR O MESMO JOGO (Deduplicação de loop)
+                if chave in jogos_processados_nesta_run:
+                    continue
+                
+                # Checa se já possui escalação 11x11 salva anteriormente
                 jogo_existente = dados_provaveis.get(chave, {})
                 t_casa_existente = jogo_existente.get("titulares_casa", [])
                 t_fora_existente = jogo_existente.get("titulares_fora", [])
 
                 if len(t_casa_existente) == 11 and len(t_fora_existente) == 11:
                     print(f"⏩ [PULADO] {casa} x {fora} já possui escalação completa.")
+                    jogos_processados_nesta_run.add(chave)
                     continue
 
                 url_escalacao = extrair_url_escalacao(j, cache_pendentes) or jogo_existente.get("url_flashscore")
                 
                 if url_escalacao:
+                    jogos_processados_nesta_run.add(chave)
+                    
                     print(f"\n⚽ Buscando: {casa} x {fora} | Liga: {liga}")
                     print(f"🔗 URL: {url_escalacao}")
                     
