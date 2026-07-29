@@ -1,3 +1,5 @@
+# telegram/raspagem_provaveis.py
+
 import os
 import json
 import re
@@ -56,53 +58,52 @@ def extrair_url_escalacao(jogo_json, cache_pendentes):
     
     if link_h2h and "flashscore" in link_h2h:
         base = link_h2h.split("/#/")[0].split("/resumo")[0].rstrip("/")
+        # Força o caminho direto de escalações
         return f"{base}/#/resumo-do-jogo/escalacoes/equipes"
     return None
 
 def raspar_titulares_flashscore(page, url):
-    """Acessa a URL do Flashscore e extrai a escalação dos titulares."""
+    """Acessa a URL do Flashscore e extrai os 11 titulares usando as classes do DOM extraído."""
     titulares_casa = []
     titulares_fora = []
     
     try:
-        page.goto(url, timeout=40000, wait_until="networkidle")
-        
-        # Espera o contêiner de escalações carregar
-        page.wait_for_selector(".lf__lineUp, .lf__side, .lineupTable", timeout=10000)
+        page.goto(url, timeout=45000, wait_until="domcontentloaded")
         time.sleep(2)
 
-        # 🟢 ESTRATÉGIA 1: Pega pelos blocos de campo ou laterais de escalação (Casas vs Fora)
-        lados = page.query_selector_all(".lf__side, .lineup")
+        # 🟢 Espera o container principal da escalação (.lf__sidesBox)
+        try:
+            page.wait_for_selector(".lf__sidesBox, .lf_sidesBox", timeout=8000)
+        except Exception:
+            # Caso não encontre de primeira, tenta clicar na aba de Escalações
+            aba = page.query_selector("a[href*='escalacoes'], button:has-text('Escalações')")
+            if aba:
+                aba.click()
+                time.sleep(2)
+
+        # 🟢 Extração com base nos seletores exatos da imagem
+        lados = page.query_selector_all(".lf__sidesBox > .lf__side, .lf_sidesBox > .lf_side")
 
         if len(lados) >= 2:
-            # Pega apenas elementos de nomes no bloco da Casa
-            els_casa = lados[0].query_selector_all(".lf__participantName, .lineup__player .lineup__cell--name")
-            titulares_casa = [el.text_content().strip() for el in els_casa if el.text_content().strip()]
-
-            # Pega apenas elementos de nomes no bloco de Fora
-            els_fora = lados[1].query_selector_all(".lf__participantName, .lineup__player .lineup__cell--name")
-            titulares_fora = [el.text_content().strip() for el in els_fora if el.text_content().strip()]
-
-        # 🟢 ESTRATÉGIA 2 (FALLBACK): Seleção direta por links de jogadores caso os blocos não venham separados
-        if not titulares_casa or not titulares_fora:
-            jogadores_links = page.query_selector_all("a[href*='/jogador/'] .lf__participantName, .lf__participantName")
-            todos_nomes = []
-            
-            for el in jogadores_links:
+            # Time Casa (Lado 1)
+            els_casa = lados[0].query_selector_all(".lf__participantNew, .lf_participantNew")
+            for el in els_casa:
                 nome = el.text_content().strip()
-                if nome and nome not in todos_nomes:
-                    todos_nomes.append(nome)
+                # Limpa números de camisa no início, se existirem
+                nome_limpo = re.sub(r'^\d+\s*', '', nome)
+                if nome_limpo and nome_limpo not in titulares_casa and len(titulares_casa) < 11:
+                    titulares_casa.append(nome_limpo)
 
-            if len(todos_nomes) >= 22:
-                titulares_casa = todos_nomes[:11]
-                titulares_fora = todos_nomes[11:22]
-
-        # Limpeza rápida de duplicados mantendo a ordem
-        titulares_casa = list(dict.fromkeys(titulares_casa))[:11]
-        titulares_fora = list(dict.fromkeys(titulares_fora))[:11]
+            # Time Fora (Lado 2)
+            els_fora = lados[1].query_selector_all(".lf__participantNew, .lf_participantNew")
+            for el in els_fora:
+                nome = el.text_content().strip()
+                nome_limpo = re.sub(r'^\d+\s*', '', nome)
+                if nome_limpo and nome_limpo not in titulares_fora and len(titulares_fora) < 11:
+                    titulares_fora.append(nome_limpo)
 
     except Exception as e:
-        print(f"⚠️ Erro ao raspar URL {url}: {e}")
+        print(f"⚠️ Aviso/Timeout ao raspar {url}: {e}")
         
     return titulares_casa, titulares_fora
 
@@ -121,6 +122,15 @@ def executar_raspagem_escalacoes():
     with open(caminho_jogos_diario, "r", encoding="utf-8") as f:
         jogos = json.load(f)
 
+    # Carrega escalações existentes para não perder nem re-raspar o que já tem 11x11
+    dados_provaveis = {}
+    if os.path.exists(CAMINHO_PROVAVEIS):
+        try:
+            with open(CAMINHO_PROVAVEIS, "r", encoding="utf-8") as f:
+                dados_provaveis = json.load(f)
+        except Exception:
+            dados_provaveis = {}
+
     cache_pendentes = {}
     if os.path.exists(caminho_pendentes):
         try:
@@ -134,8 +144,6 @@ def executar_raspagem_escalacoes():
         except Exception as e:
             print(f"⚠️ Erro no pendentes: {e}")
 
-    dados_provaveis = {}
-
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
@@ -143,47 +151,56 @@ def executar_raspagem_escalacoes():
         )
         page = context.new_page()
 
-        print("🔍 [ESCALAÇÕES] Verificando jogos válidos (Mercado 'Chutes no gol' + Ligas Elite)...")
+        print("🔍 [ESCALAÇÕES] Processando partidas...")
         
         for j in jogos:
             mercado = str(j.get("mercado", "")).lower()
             liga = j.get("liga") or j.get("campeonato", "")
             
-            # 🟢 DUPLEX FILTRO: Apenas mercado de chute E liga autorizada
             if "chute" in mercado and validar_liga_para_jogadores(liga):
                 casa = j.get("time_casa")
                 fora = j.get("time_fora")
                 chave = f"{str(casa).strip().lower()}x{str(fora).strip().lower()}"
                 
-                if chave not in dados_provaveis:
-                    url_escalacao = extrair_url_escalacao(j, cache_pendentes)
-                    
-                    if url_escalacao:
-                        print(f"\n⚽ Partida Permitida: {casa} x {fora} | Liga: {liga}")
-                        print(f"🔗 URL: {url_escalacao}")
-                        print("⏳ Acessando página e extraindo titulares...")
-                        
-                        t_casa, t_fora = raspar_titulares_flashscore(page, url_escalacao)
-                        
-                        texto_formatado = (
-                            f"**{casa}**:\n"
-                            f"{formatar_linha_jogadores(t_casa)}\n\n"
-                            f"**{fora}**:\n"
-                            f"{formatar_linha_jogadores(t_fora)}"
-                        )
+                # Checa se já temos a escalação completa salva
+                jogo_existente = dados_provaveis.get(chave, {})
+                t_casa_existente = jogo_existente.get("titulares_casa", [])
+                t_fora_existente = jogo_existente.get("titulares_fora", [])
 
-                        dados_provaveis[chave] = {
-                            "time_casa": casa,
-                            "time_fora": fora,
-                            "liga": liga,
-                            "url_flashscore": url_escalacao,
-                            "titulares_casa": t_casa,
-                            "titulares_fora": t_fora,
-                            "texto_telegram": texto_formatado,
-                            "atualizado_em": datetime.now().strftime("%Y-%m-%d %H:%M")
-                        }
-            elif "chute" in mercado:
-                print(f"⏭️ [IGNORADO] {j.get('time_casa')} x {j.get('time_fora')} (Liga '{liga}' fora da lista elite)")
+                if len(t_casa_existente) == 11 and len(t_fora_existente) == 11:
+                    print(f"⏩ [PULADO] {casa} x {fora} já possui escalação completa.")
+                    continue
+
+                url_escalacao = extrair_url_escalacao(j, cache_pendentes) or jogo_existente.get("url_flashscore")
+                
+                if url_escalacao:
+                    print(f"\n⚽ Buscando: {casa} x {fora} | Liga: {liga}")
+                    print(f"🔗 URL: {url_escalacao}")
+                    
+                    t_casa, t_fora = raspar_titulares_flashscore(page, url_escalacao)
+                    
+                    if len(t_casa) > 0 or len(t_fora) > 0:
+                        print(f"✅ Escalação capturada! Casa: {len(t_casa)} jogadores | Fora: {len(t_fora)} jogadores")
+                    else:
+                        print("⏳ Escalação ainda não liberada no Flashscore. Guardando dados do jogo...")
+
+                    texto_formatado = (
+                        f"**{casa}**:\n"
+                        f"{formatar_linha_jogadores(t_casa)}\n\n"
+                        f"**{fora}**:\n"
+                        f"{formatar_linha_jogadores(t_fora)}"
+                    )
+
+                    dados_provaveis[chave] = {
+                        "time_casa": casa,
+                        "time_fora": fora,
+                        "liga": liga,
+                        "url_flashscore": url_escalacao,
+                        "titulares_casa": t_casa,
+                        "titulares_fora": t_fora,
+                        "texto_telegram": texto_formatado,
+                        "atualizado_em": datetime.now().strftime("%Y-%m-%d %H:%M")
+                    }
 
         browser.close()
 
@@ -191,8 +208,7 @@ def executar_raspagem_escalacoes():
         json.dump(dados_provaveis, f, ensure_ascii=False, indent=4)
         
     print(f"\n💾 [SALVANDO] Gravando dados em {CAMINHO_PROVAVEIS}...")
-    print(f"✅ Concluído! {len(dados_provaveis)} escalações salvas em {CAMINHO_PROVAVEIS}.")
+    print(f"✅ Concluído! {len(dados_provaveis)} partidas atualizadas no arquivo.")
 
 if __name__ == "__main__":
     executar_raspagem_escalacoes()
-                
