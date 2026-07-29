@@ -26,6 +26,7 @@ COMPETICOES = {
     "Arábia Saudita - King Cup": "https://www.flashscore.com.br/futebol/arabia-saudita/copa-do-rei/jogos/",
     "EUA - MLS": "https://www.flashscore.com.br/futebol/eua/mls/jogos",
     "Argentina - Copa": "https://www.flashscore.com.br/futebol/argentina/copa-argentina/jogos",
+    "Europa - Liga Europa": "https://www.flashscore.com.br/futebol/europa/liga-europa/jogos"
 
     # --- BLOCO 4: LIGAS SECUNDÁRIAS EUROPEIAS ---
     "Arábia Saudita - Primeira Liga": "https://www.flashscore.com.br/futebol/arabia-saudita/primeira-liga/jogos/",
