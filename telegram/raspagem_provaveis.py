@@ -121,7 +121,8 @@ def raspar_titulares_flashscore(page, url_original):
     
 def executar_raspagem_escalacoes():
     garantir_diretorio()
-    agora_br = datetime.now() - timedelta(hours=3)
+    # Pega o horário atual em Brasília (UTC-3)
+    agora_br = datetime.utcnow() - timedelta(hours=3)
     data_hoje = agora_br.strftime("%Y-%m-%d")
     
     caminho_jogos_diario = f"telegram/jogos_{data_hoje}.json"
@@ -173,7 +174,22 @@ def executar_raspagem_escalacoes():
             if "chute" in mercado and validar_liga_para_jogadores(liga):
                 casa = j.get("time_casa")
                 fora = j.get("time_fora")
-                horario_jogo = j.get("horario", "")
+                horario_jogo = str(j.get("horario", "")).strip()
+                
+                # --- 1. FILTRO: IGNORA JOGOS QUE JÁ PASSARAM ---
+                if horario_jogo and ":" in horario_jogo:
+                    try:
+                        h_partes = horario_jogo.split(":")
+                        hora_h, min_m = int(h_partes[0]), int(h_partes[1])
+                        hora_partida = datetime(agora_br.year, agora_br.month, agora_br.day, hora_h, min_m)
+                        
+                        # Se a partida começou há mais de 15 minutos, ignora a raspagem
+                        if hora_partida < (agora_br - timedelta(minutes=15)):
+                            print(f"⏭️ [JOGO PASSADO] {casa} x {fora} ({horario_jogo}) ignorado.")
+                            continue
+                    except Exception:
+                        pass
+                # -----------------------------------------------
                 
                 chave = f"{str(casa).strip().lower()}x{str(fora).strip().lower()}"
                 
@@ -212,7 +228,7 @@ def executar_raspagem_escalacoes():
                         f"{formatar_linha_jogadores(t_fora)}"
                     )
 
-                    # Salva e atualiza o dicionário com a data/hora da nova raspagem
+                    # --- 2. USA HORÁRIO DE BRASÍLIA NO ATUALIZADO_EM ---
                     dados_provaveis[chave] = {
                         "time_casa": casa,
                         "time_fora": fora,
@@ -222,18 +238,24 @@ def executar_raspagem_escalacoes():
                         "titulares_casa": t_casa,
                         "titulares_fora": t_fora,
                         "texto_telegram": texto_formatado,
-                        "atualizado_em": datetime.now().strftime("%Y-%m-%d %H:%M")
+                        "atualizado_em": agora_br.strftime("%Y-%m-%d %H:%M")
                     }
 
         browser.close()
 
+    # --- 3. SALVA SOMENTE OS JOGOS FUTUROS VALIDADOS NESTA EXECUÇÃO ---
+    dados_salvar = {
+        k: v for k, v in dados_provaveis.items() 
+        if k in jogos_processados_nesta_run
+    }
+
     garantir_diretorio()
     with open(CAMINHO_PROVAVEIS, "w", encoding="utf-8") as f:
-        json.dump(dados_provaveis, f, ensure_ascii=False, indent=4)
+        json.dump(dados_salvar, f, ensure_ascii=False, indent=4)
         
     print(f"\n💾 [SALVANDO] Gravando dados em {CAMINHO_PROVAVEIS}...")
-    print(f"✅ Concluído! {len(dados_provaveis)} partidas registradas no JSON.")
+    print(f"✅ Concluído! {len(dados_salvar)} partidas registradas no JSON.")
 
 if __name__ == "__main__":
     executar_raspagem_escalacoes()
-        
+            
