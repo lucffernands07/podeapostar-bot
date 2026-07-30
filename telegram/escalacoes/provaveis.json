@@ -32,7 +32,7 @@
             "Jordy Caicedo"
         ],
         "texto_telegram": "**Ind. Rivadavia**:\nBolcato N., Gomez L., Villalba I., Studer S.\nElordi J. M., L. Costa, Florentin Bobadilla J. I., Fernandez M.\nSartori F., Bucca L., Arce A.\n\n**Huracán**:\nGalindez H., Blondel L., Nervo H., Palazzo M.\nIbanez C., Kalinger F., Ojeda E., Gil L.\nCortes O., Bisanz J., Jordy Caicedo",
-        "atualizado_em": "2026-07-30 11:18"
+        "atualizado_em": "2026-07-30 18:13"
     },
     "talleres córdobaxvélez sarsfield": {
         "time_casa": "Talleres Córdoba",
@@ -67,7 +67,7 @@
             "Monzon F."
         ],
         "texto_telegram": "**Talleres Córdoba**:\nUnsain E., Schott A., Catalan M., Fernandez S.\nBaez Corradi G., Fattori F., Galarza M. A., Depietri V.\nFranco Cristaldo, Rick, Martinez R.\n\n**Vélez Sarsfield**:\nMarchiori T., Garcia J., Silvero T., Magallan L.\nGomez E., Aliendro R., Baeza C., Veron A.\nLanzini M., Pellegrini M., Monzon F.",
-        "atualizado_em": "2026-07-30 11:18"
+        "atualizado_em": "2026-07-30 18:13"
     },
     "corinthiansxathletico-pr": {
         "time_casa": "Corinthians",
@@ -102,7 +102,7 @@
             "Viveros K."
         ],
         "texto_telegram": "**Corinthians**:\nHugo Souza, Matheuzinho, Gabriel Paulista, Gustavo Henrique\nMilans P., André, Raniele, Kaio Cesar\nBreno Bidon, Labyad Z., Rodrigo Garro\n\n**Athletico-PR**:\nSantos, Teran C., Aguirre F., Arthur Dias\nGilberto, Jadson, Portilla J., Cláudio\nLeozinho, Mendoza S., Viveros K.",
-        "atualizado_em": "2026-07-30 11:18"
+        "atualizado_em": "2026-07-30 18:13"
     },
     "central córdobaxatl. tucuman": {
         "time_casa": "Central Córdoba",
@@ -110,10 +110,34 @@
         "horario": "21:15",
         "liga": "Argentina - Liga Profesional",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/atletico-tucuman-KpqpxWko/central-cordoba-santiago-del-estero-0dHZReql/resumo/equipes/",
-        "titulares_casa": [],
-        "titulares_fora": [],
-        "texto_telegram": "**Central Córdoba**:\nEscalação provável não disponível\n\n**Atl. Tucuman**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-07-30 11:18"
+        "titulares_casa": [
+            "Vallejos J.",
+            "Moyano S.",
+            "Maciel A. R.",
+            "Mansilla F.",
+            "Marchi L.",
+            "Martinez F.",
+            "Vera M.",
+            "Cravero T.",
+            "Barrera D.",
+            "Naya E.",
+            "Santos M."
+        ],
+        "titulares_fora": [
+            "Ingolotti L.",
+            "Villa M.",
+            "Ferreira Namandu C. D.",
+            "Vallejo L.",
+            "Galvan I.",
+            "Vega L.",
+            "N. Franco",
+            "Tesuri R.",
+            "Godoy L.",
+            "Ruiz R.",
+            "Diaz L."
+        ],
+        "texto_telegram": "**Central Córdoba**:\nVallejos J., Moyano S., Maciel A. R., Mansilla F.\nMarchi L., Martinez F., Vera M., Cravero T.\nBarrera D., Naya E., Santos M.\n\n**Atl. Tucuman**:\nIngolotti L., Villa M., Ferreira Namandu C. D., Vallejo L.\nGalvan I., Vega L., N. Franco, Tesuri R.\nGodoy L., Ruiz R., Diaz L.",
+        "atualizado_em": "2026-07-30 18:13"
     },
     "independientexnewell's old boys": {
         "time_casa": "Independiente",
@@ -121,10 +145,34 @@
         "horario": "21:15",
         "liga": "Argentina - Liga Profesional",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/independiente-UVatI5Y2/newells-old-boys-6gMiRHVj/resumo/equipes/",
-        "titulares_casa": [],
-        "titulares_fora": [],
-        "texto_telegram": "**Independiente**:\nEscalação provável não disponível\n\n**Newell's Old Boys**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-07-30 11:18"
+        "titulares_casa": [
+            "Rey R.",
+            "Godoy L.",
+            "Fedorco J.",
+            "Valdez S.",
+            "Zabala F.",
+            "Perez Curci M.",
+            "Marcone I.",
+            "Gutierrez M.",
+            "Montiel S.",
+            "Abaldo M.",
+            "Avalos G."
+        ],
+        "titulares_fora": [
+            "Reinatti J.",
+            "Escobar F.",
+            "Cabrera B.",
+            "Goitea N.",
+            "Russo J.",
+            "Sotelo D.",
+            "Regiardo L.",
+            "Mazzantti W.",
+            "Guch F.",
+            "Nunez W.",
+            "Coccaro M."
+        ],
+        "texto_telegram": "**Independiente**:\nRey R., Godoy L., Fedorco J., Valdez S.\nZabala F., Perez Curci M., Marcone I., Gutierrez M.\nMontiel S., Abaldo M., Avalos G.\n\n**Newell's Old Boys**:\nReinatti J., Escobar F., Cabrera B., Goitea N.\nRusso J., Sotelo D., Regiardo L., Mazzantti W.\nGuch F., Nunez W., Coccaro M.",
+        "atualizado_em": "2026-07-30 18:13"
     },
     "coritibaxcruzeiro": {
         "time_casa": "Coritiba",
@@ -139,8 +187,8 @@
             "Jacy",
             "Bruno",
             "Thiago Santos",
-            "Tissi",
-            "Lavega J.",
+            "Gomez S.",
+            "Lucas Ronier",
             "Josue",
             "Breno",
             "Pedro Rocha"
@@ -153,12 +201,12 @@
             "Rojas G.",
             "Matheus Henrique",
             "Gérson",
-            "Marquinhos",
+            "Arroyo K.",
             "Matheus Pereira",
             "Bruno Rodrigues",
             "Kaio Jorge"
         ],
-        "texto_telegram": "**Coritiba**:\nPedro Rangel, Tinga, Tiago Coser, Jacy\nBruno, Thiago Santos, Tissi, Lavega J.\nJosue, Breno, Pedro Rocha\n\n**Cruzeiro**:\nOtávio Costa, William, Fabrício Bruno, Jonathan Jesus\nRojas G., Matheus Henrique, Gérson, Marquinhos\nMatheus Pereira, Bruno Rodrigues, Kaio Jorge",
-        "atualizado_em": "2026-07-30 11:18"
+        "texto_telegram": "**Coritiba**:\nPedro Rangel, Tinga, Tiago Coser, Jacy\nBruno, Thiago Santos, Gomez S., Lucas Ronier\nJosue, Breno, Pedro Rocha\n\n**Cruzeiro**:\nOtávio Costa, William, Fabrício Bruno, Jonathan Jesus\nRojas G., Matheus Henrique, Gérson, Arroyo K.\nMatheus Pereira, Bruno Rodrigues, Kaio Jorge",
+        "atualizado_em": "2026-07-30 18:13"
     }
 }
