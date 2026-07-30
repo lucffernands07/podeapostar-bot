@@ -4,3 +4,4 @@ webdriver-manager
 undetected-chromedriver
 pytesseract
 Pillow
+playwright
