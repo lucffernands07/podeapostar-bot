@@ -1,39 +1,4 @@
 {
-    "corinthiansxathletico-pr": {
-        "time_casa": "Corinthians",
-        "time_fora": "Athletico-PR",
-        "horario": "19:30",
-        "liga": "Brasileirão Série A",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/athletico-pr-UoAxb1Tq/corinthians-QBGfQbSe/resumo/equipes/",
-        "titulares_casa": [
-            "Hugo Souza(C)",
-            "Matheuzinho",
-            "Andre Ramalho",
-            "Raniele",
-            "Milans P.",
-            "Allan",
-            "Matheus Pereira",
-            "André Carrillo",
-            "Lingard J.",
-            "Diego",
-            "Labyad Z."
-        ],
-        "titulares_fora": [
-            "Santos(C)",
-            "Teran C.",
-            "Arthur Dias",
-            "Benavidez G.",
-            "Gilberto",
-            "Jadson",
-            "Portilla J.",
-            "Cláudio",
-            "Leozinho",
-            "Mendoza S.",
-            "Viveros K."
-        ],
-        "texto_telegram": "**Corinthians**:\nHugo Souza(C), Matheuzinho, Andre Ramalho, Raniele\nMilans P., Allan, Matheus Pereira, André Carrillo\nLingard J., Diego, Labyad Z.\n\n**Athletico-PR**:\nSantos(C), Teran C., Arthur Dias, Benavidez G.\nGilberto, Jadson, Portilla J., Cláudio\nLeozinho, Mendoza S., Viveros K.",
-        "atualizado_em": "2026-07-30 19:16"
-    },
     "central córdobaxatl. tucuman": {
         "time_casa": "Central Córdoba",
         "time_fora": "Atl. Tucuman",
@@ -67,7 +32,7 @@
             "Diaz L."
         ],
         "texto_telegram": "**Central Córdoba**:\nVallejos J., Moyano S., Maciel A. R., Mansilla F.\nMarchi L., Martinez F., Vera M., Cravero T.\nBarrera D., Naya E., Santos M.\n\n**Atl. Tucuman**:\nIngolotti L., Villa M., Ferreira Namandu C. D., Vallejo L.\nGalvan I., Vega L., N. Franco, Tesuri R.\nGodoy L., Ruiz R., Diaz L.",
-        "atualizado_em": "2026-07-30 19:16"
+        "atualizado_em": "2026-07-30 20:50"
     },
     "independientexnewell's old boys": {
         "time_casa": "Independiente",
@@ -102,7 +67,7 @@
             "Coccaro M."
         ],
         "texto_telegram": "**Independiente**:\nRey R., Godoy L., Fedorco J., Valdez S.\nZabala F., Perez Curci M., Marcone I., Gutierrez M.\nMontiel S., Abaldo M., Avalos G.\n\n**Newell's Old Boys**:\nReinatti J., Escobar F., Cabrera B., Goitea N.\nRusso J., Sotelo D., Regiardo L., Mazzantti W.\nGuch F., Nunez W., Coccaro M.",
-        "atualizado_em": "2026-07-30 19:16"
+        "atualizado_em": "2026-07-30 20:50"
     },
     "coritibaxcruzeiro": {
         "time_casa": "Coritiba",
@@ -111,17 +76,17 @@
         "liga": "Brasileirão Série A",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/coritiba-KGO4pUqO/cruzeiro-0SwtclaU/resumo/equipes/",
         "titulares_casa": [
-            "Pedro Rangel",
+            "Pedro Morisco",
             "Tinga",
-            "Tiago Coser",
             "Jacy",
+            "Tiago Coser",
             "Bruno",
             "Thiago Santos",
-            "Gomez S.",
-            "Lucas Ronier",
+            "Gomez S.(C)",
+            "Pedro Rocha",
             "Josue",
             "Breno",
-            "Pedro Rocha"
+            "Lucas Ronier"
         ],
         "titulares_fora": [
             "Otávio Costa",
@@ -129,14 +94,14 @@
             "Fabrício Bruno",
             "Jonathan Jesus",
             "Rojas G.",
-            "Matheus Henrique",
+            "Lucas Romero(C)",
             "Gérson",
             "Arroyo K.",
             "Matheus Pereira",
-            "Bruno Rodrigues",
+            "Felipe Morais",
             "Kaio Jorge"
         ],
-        "texto_telegram": "**Coritiba**:\nPedro Rangel, Tinga, Tiago Coser, Jacy\nBruno, Thiago Santos, Gomez S., Lucas Ronier\nJosue, Breno, Pedro Rocha\n\n**Cruzeiro**:\nOtávio Costa, William, Fabrício Bruno, Jonathan Jesus\nRojas G., Matheus Henrique, Gérson, Arroyo K.\nMatheus Pereira, Bruno Rodrigues, Kaio Jorge",
-        "atualizado_em": "2026-07-30 19:16"
+        "texto_telegram": "**Coritiba**:\nPedro Morisco, Tinga, Jacy, Tiago Coser\nBruno, Thiago Santos, Gomez S.(C), Pedro Rocha\nJosue, Breno, Lucas Ronier\n\n**Cruzeiro**:\nOtávio Costa, William, Fabrício Bruno, Jonathan Jesus\nRojas G., Lucas Romero(C), Gérson, Arroyo K.\nMatheus Pereira, Felipe Morais, Kaio Jorge",
+        "atualizado_em": "2026-07-30 20:50"
     }
 }
