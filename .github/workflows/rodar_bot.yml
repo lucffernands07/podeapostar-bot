@@ -19,10 +19,9 @@ jobs:
       - name: Checkout do repositorio
         uses: actions/checkout@v4
 
-      # 🛠️ PASSO ADICIONADO ABAIXO PARA IMPLEMENTAR A SUA LÓGICA:
+      # 🔒 Trava para evitar dupla execução no modo automático (Cron)
       - name: 🔒 Verificar se o bot já rodou hoje (Apenas para Automático)
         id: check_run
-        # Só ativa a trava se o gatilho gerador for o Cron (schedule)
         if: ${{ github.event_name == 'schedule' }}
         run: |
           HOJE=$(date +'%Y-%m-%d')
@@ -54,6 +53,11 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      # 🎭 Instala o Chromium headless necessário para o Playwright raspar as escalações
+      - name: Instalar navegadores do Playwright
+        run: |
+          python -m playwright install chromium --with-deps
+
       - name: 1. Executar bot Selenium (Bilhetes de Hoje)
         timeout-minutes: 70
         env:
@@ -62,20 +66,25 @@ jobs:
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
         run: python main.py
 
-      - name: 2. Salvar Dados (Ranking e Telegram) no Repositório
+      # ⚽ Executa a raspagem de prováveis logo após a geração dos jogos do dia
+      - name: 2. Raspar Escalações Prováveis (Playwright)
+        run: python -m telegram.raspagem_provaveis
+
+      - name: 3. Salvar Dados (Ranking, Jogos e Prováveis) no Repositório
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Adiciona as pastas para garantir que os arquivos do dia subam
+          # Adiciona o JSON do ranking, os jogos do dia e a pasta com as escalações prováveis
           git add ranking/pendentes.json
           git add telegram/jogos_*.json
+          git add telegram/escalacoes/
           
-          # O commit com condicional evita travar o pipeline se o JSON não mudar
-          git commit -m "Auto: Atualizando banco de dados e ranking [skip ci]" || echo "Sem alterações para salvar"
+          # O commit com condicional evita travar o pipeline se nenhum JSON mudar
+          git commit -m "Auto: Atualizando banco de dados, jogos e escalações [skip ci]" || echo "Sem alterações para salvar"
           
-          # --- CORREÇÃO CIRÚRGICA DO ERRO DE LOCK REF ---
-          # Puxa o repositório atualizado (com os menus novos) e empilha o JSON no topo
+          # Pull com rebase para evitar conflito de lock ref
           git pull --rebase origin main
           
           git push origin main
+          
