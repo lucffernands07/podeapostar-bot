@@ -173,7 +173,7 @@ def executar_raspagem_escalacoes():
             if "chute" in mercado and validar_liga_para_jogadores(liga):
                 casa = j.get("time_casa")
                 fora = j.get("time_fora")
-                horario_jogo = j.get("horario", "")  # 👈 CAPTURA O HORÁRIO DIRETAMENTE DO ARQUIVO DE JOGOS DO DIA
+                horario_jogo = j.get("horario", "")
                 
                 chave = f"{str(casa).strip().lower()}x{str(fora).strip().lower()}"
                 
@@ -183,16 +183,6 @@ def executar_raspagem_escalacoes():
                 jogo_existente = dados_provaveis.get(chave, {})
                 t_casa_existente = jogo_existente.get("titulares_casa", [])
                 t_fora_existente = jogo_existente.get("titulares_fora", [])
-
-                if len(t_casa_existente) == 11 and len(t_fora_existente) == 11:
-                    print(f"⏩ [PULADO] {casa} x {fora} já possui escalação completa (11x11).")
-                    # Garante que atualiza o horário mesmo se já tiver as escalações
-                    if not jogo_existente.get("horario") and horario_jogo:
-                        jogo_existente["horario"] = horario_jogo
-                        dados_provaveis[chave] = jogo_existente
-                    
-                    jogos_processados_nesta_run.add(chave)
-                    continue
 
                 url_original = extrair_url_base(j, cache_pendentes) or jogo_existente.get("url_flashscore")
                 
@@ -204,13 +194,14 @@ def executar_raspagem_escalacoes():
                     
                     t_casa, t_fora, url_final = raspar_titulares_flashscore(page, url_original)
                     
+                    # Se não veio nada na raspagem nova, mantém os titulares salvos anteriormente
                     if len(t_casa) == 0 and len(t_casa_existente) > 0:
                         t_casa = t_casa_existente
                     if len(t_fora) == 0 and len(t_fora_existente) > 0:
                         t_fora = t_fora_existente
 
                     if len(t_casa) > 0 or len(t_fora) > 0:
-                        print(f"✅ Escalação capturada! Casa: {len(t_casa)} | Fora: {len(t_fora)}")
+                        print(f"✅ Escalação capturada/atualizada! Casa: {len(t_casa)} | Fora: {len(t_fora)}")
                     else:
                         print("⏳ Escalação ainda não disponível no Flashscore.")
 
@@ -221,11 +212,11 @@ def executar_raspagem_escalacoes():
                         f"{formatar_linha_jogadores(t_fora)}"
                     )
 
-                    # Salva no dicionário incluindo o campo "horario"
+                    # Salva e atualiza o dicionário com a data/hora da nova raspagem
                     dados_provaveis[chave] = {
                         "time_casa": casa,
                         "time_fora": fora,
-                        "horario": horario_jogo,  # 👈 SALVA O HORÁRIO NO JSON DE PROVÁVEIS
+                        "horario": horario_jogo,
                         "liga": liga,
                         "url_flashscore": url_final,
                         "titulares_casa": t_casa,
@@ -245,4 +236,4 @@ def executar_raspagem_escalacoes():
 
 if __name__ == "__main__":
     executar_raspagem_escalacoes()
-                
+        
