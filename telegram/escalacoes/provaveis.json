@@ -2,6 +2,7 @@
     "barracas centralxaldosivi": {
         "time_casa": "Barracas Central",
         "time_fora": "Aldosivi",
+        "horario": "14:30",
         "liga": "Argentina - Liga Profesional",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/aldosivi-Eu4qrEcB/barracas-centra-hW08cP6J/resumo/equipes/",
         "titulares_casa": [
@@ -31,26 +32,26 @@
             "Fernandez T."
         ],
         "texto_telegram": "**Barracas Central**:\nMino M., Barrios R., Jappert K., Y. Rak\nDemartini N., Insua R., Porra T., Miloc D.\nTapia I.(C), Briasco N., Candia J.\n\n**Aldosivi**:\nChicco I., Breitenbruch N., Zalazar N., Pombo J.\nLopez E., Linares N., Castro L.(C), Laurelli F.\nDadin B., Cordero N., Fernandez T.",
-        "atualizado_em": "2026-07-29 19:09",
-        "horario": "14:30"
+        "atualizado_em": "2026-07-30 00:10"
     },
     "defensa y justiciaxdep. riestra": {
         "time_casa": "Defensa y Justicia",
         "time_fora": "Dep. Riestra",
+        "horario": "17:00",
         "liga": "Argentina - Liga Profesional",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/defensa-y-justicia-Gdfv0Zsh/deportivo-riestra-2iZ4q0z6/resumo/equipes/",
         "titulares_casa": [
             "Borgogno M.",
             "Souto L.",
             "Fernandez D.",
-            "Martinez D.",
+            "S. Lucero",
             "M. Rodriguez",
             "Sosa S.",
             "Perez C.",
-            "Gutierrez J.",
-            "Barbona D.",
             "Hausch A.",
-            "Fernandez L."
+            "Barbona D.",
+            "Gutierrez J.",
+            "Fernandez L.(C)"
         ],
         "titulares_fora": [
             "Arce I.",
@@ -59,131 +60,131 @@
             "Paz C.",
             "Quintana C.",
             "Sansotre N.",
-            "Alonso A.",
-            "Monje P.",
-            "Celiz M.",
             "Sanchez B.",
+            "Celiz M.(C)",
+            "Monje P.",
+            "Alonso A.",
             "Diaz A."
         ],
-        "texto_telegram": "**Defensa y Justicia**:\nBorgogno M., Souto L., Fernandez D., Martinez D.\nM. Rodriguez, Sosa S., Perez C., Gutierrez J.\nBarbona D., Hausch A., Fernandez L.\n\n**Dep. Riestra**:\nArce I., Bracamonte M., Mino F., Paz C.\nQuintana C., Sansotre N., Alonso A., Monje P.\nCeliz M., Sanchez B., Diaz A.",
-        "atualizado_em": "2026-07-29 19:09",
-        "horario": "17:00"
+        "texto_telegram": "**Defensa y Justicia**:\nBorgogno M., Souto L., Fernandez D., S. Lucero\nM. Rodriguez, Sosa S., Perez C., Hausch A.\nBarbona D., Gutierrez J., Fernandez L.(C)\n\n**Dep. Riestra**:\nArce I., Bracamonte M., Mino F., Paz C.\nQuintana C., Sansotre N., Sanchez B., Celiz M.(C)\nMonje P., Alonso A., Diaz A.",
+        "atualizado_em": "2026-07-30 00:10"
     },
     "gimnasia l.p.xriver plate": {
         "time_casa": "Gimnasia L.P.",
         "time_fora": "River Plate",
+        "horario": "19:15",
         "liga": "Argentina - Liga Profesional",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/gimnasia-l-p-jiDN9Zaj/river-plate-EVqSBe2f/resumo/equipes/",
         "titulares_casa": [
             "Insfran N.",
             "Barros Schelotto B.",
-            "Martinez E.",
             "Giampaoli R.",
+            "Martinez E.",
             "Silva Torrejon P.",
-            "Seoane M.",
+            "Antônio Steimbach",
             "Miramon I.",
-            "Schelotto N.",
-            "Nacho Fernández",
-            "Auzmendi A.",
-            "Panaro M."
+            "Seoane M.",
+            "Nacho Fernández(C)",
+            "Merlo J.",
+            "Auzmendi A."
         ],
         "titulares_fora": [
             "Beltran S.",
             "Montiel G.",
             "Martinez Quarta L.",
-            "Otamendi N.",
+            "Otamendi N.(C)",
             "Acuna M.",
-            "Fausto Vera",
+            "Arambarri M.",
             "Silva L.",
-            "Galvan T.",
+            "Jaílson Freitas",
             "Correa A.",
-            "Colidio F.",
-            "Borre R."
+            "Galvan T.",
+            "Beltran L."
         ],
-        "texto_telegram": "**Gimnasia L.P.**:\nInsfran N., Barros Schelotto B., Martinez E., Giampaoli R.\nSilva Torrejon P., Seoane M., Miramon I., Schelotto N.\nNacho Fernández, Auzmendi A., Panaro M.\n\n**River Plate**:\nBeltran S., Montiel G., Martinez Quarta L., Otamendi N.\nAcuna M., Fausto Vera, Silva L., Galvan T.\nCorrea A., Colidio F., Borre R.",
-        "atualizado_em": "2026-07-29 19:09",
-        "horario": "19:15"
+        "texto_telegram": "**Gimnasia L.P.**:\nInsfran N., Barros Schelotto B., Giampaoli R., Martinez E.\nSilva Torrejon P., Antônio Steimbach, Miramon I., Seoane M.\nNacho Fernández(C), Merlo J., Auzmendi A.\n\n**River Plate**:\nBeltran S., Montiel G., Martinez Quarta L., Otamendi N.(C)\nAcuna M., Arambarri M., Silva L., Jaílson Freitas\nCorrea A., Galvan T., Beltran L.",
+        "atualizado_em": "2026-07-30 00:10"
     },
     "internacionalxflamengo": {
         "time_casa": "Internacional",
         "time_fora": "Flamengo",
+        "horario": "19:30",
         "liga": "Brasileirão Série A",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/flamengo-WjxY29qB/internacional-tSCiHj0I/resumo/equipes/",
         "titulares_casa": [
-            "Anthoni",
+            "Matheus Cunha",
             "Bruno Gomes",
             "Gabriel Mercado",
             "Maripan G.",
-            "Matheus Bahia",
             "Vitor Naum",
-            "Bruno Henrique",
             "Villagra R.",
-            "Bernabei A.",
+            "Bruno Henrique",
+            "Matheus Bahia",
             "Carbonero J.",
-            "Alerrandro"
+            "Bernabei A.",
+            "Alan Patrick(C)"
         ],
         "titulares_fora": [
             "Agustín Rossi",
-            "Emerson Royal",
+            "Varela",
             "Vitão",
             "Léo Pereira",
             "Alex Sandro",
-            "Pulgar",
+            "Evertton",
             "Jorginho",
             "Carrascal J.",
+            "De Arrascaeta(C)",
             "Samuel Lino",
-            "Bruno Henrique",
             "Pedro"
         ],
-        "texto_telegram": "**Internacional**:\nAnthoni, Bruno Gomes, Gabriel Mercado, Maripan G.\nMatheus Bahia, Vitor Naum, Bruno Henrique, Villagra R.\nBernabei A., Carbonero J., Alerrandro\n\n**Flamengo**:\nAgustín Rossi, Emerson Royal, Vitão, Léo Pereira\nAlex Sandro, Pulgar, Jorginho, Carrascal J.\nSamuel Lino, Bruno Henrique, Pedro",
-        "atualizado_em": "2026-07-29 19:10",
-        "horario": "19:30"
+        "texto_telegram": "**Internacional**:\nMatheus Cunha, Bruno Gomes, Gabriel Mercado, Maripan G.\nVitor Naum, Villagra R., Bruno Henrique, Matheus Bahia\nCarbonero J., Bernabei A., Alan Patrick(C)\n\n**Flamengo**:\nAgustín Rossi, Varela, Vitão, Léo Pereira\nAlex Sandro, Evertton, Jorginho, Carrascal J.\nDe Arrascaeta(C), Samuel Lino, Pedro",
+        "atualizado_em": "2026-07-30 00:10"
     },
     "mirassolxremo": {
         "time_casa": "Mirassol",
         "time_fora": "Remo",
+        "horario": "19:30",
         "liga": "Brasileirão Série A",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/mirassol-pQ8ryEe7/remo-2i0B6Zul/resumo/equipes/",
         "titulares_casa": [
             "Thomazella",
             "Igor Formiga",
-            "João Victor",
+            "João Victor(C)",
             "Gabriel Knesowitsch",
             "Reinaldo",
             "Denílson",
-            "Carlos Eduardo",
             "Japa",
+            "Gustavo Mosquito",
+            "Carlos Eduardo",
             "Edson",
-            "Bruno Santos",
-            "Gustavo Mosquito"
+            "Bruno Santos"
         ],
         "titulares_fora": [
             "Marcelo Rangel",
             "Marcelinho",
-            "Marllon",
+            "Marllon(C)",
             "Zé Ivaldo",
             "Mayk",
-            "Ze Welison",
+            "Patrick",
             "Picco L.",
             "Yago Pikachu",
             "Zé Ricardo",
-            "Jajá",
-            "Alef Manga"
+            "Alef Manga",
+            "Gabriel Taliari"
         ],
-        "texto_telegram": "**Mirassol**:\nThomazella, Igor Formiga, João Victor, Gabriel Knesowitsch\nReinaldo, Denílson, Carlos Eduardo, Japa\nEdson, Bruno Santos, Gustavo Mosquito\n\n**Remo**:\nMarcelo Rangel, Marcelinho, Marllon, Zé Ivaldo\nMayk, Ze Welison, Picco L., Yago Pikachu\nZé Ricardo, Jajá, Alef Manga",
-        "atualizado_em": "2026-07-29 19:10",
-        "horario": "19:30"
+        "texto_telegram": "**Mirassol**:\nThomazella, Igor Formiga, João Victor(C), Gabriel Knesowitsch\nReinaldo, Denílson, Japa, Gustavo Mosquito\nCarlos Eduardo, Edson, Bruno Santos\n\n**Remo**:\nMarcelo Rangel, Marcelinho, Marllon(C), Zé Ivaldo\nMayk, Patrick, Picco L., Yago Pikachu\nZé Ricardo, Alef Manga, Gabriel Taliari",
+        "atualizado_em": "2026-07-30 00:11"
     },
     "institutoxplatense": {
         "time_casa": "Instituto",
         "time_fora": "Platense",
+        "horario": "21:30",
         "liga": "Argentina - Liga Profesional",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/instituto-8G45bXRA/platense-80MMdBdN/resumo/equipes/",
         "titulares_casa": [
             "Ledesma M.",
             "Galvan J.",
             "Mosevich L.",
-            "Alarcon F. R.",
+            "Alarcon F. R.(C)",
             "Cerato G.",
             "Abregu G.",
             "Gallardo M.",
@@ -196,35 +197,35 @@
             "Cozzani J.",
             "Lagos A.",
             "Vazquez I.",
-            "Mendia M.",
+            "Victor Cuesta",
             "Thiago Silva",
             "Gomez I.",
             "Barrios M.",
             "Mainero G.",
-            "Retamar K.",
             "Merlini B.",
+            "Retamar K.",
             "Heredia L."
         ],
-        "texto_telegram": "**Instituto**:\nLedesma M., Galvan J., Mosevich L., Alarcon F. R.\nCerato G., Abregu G., Gallardo M., Sosa D.\nCordoba Mosquera J. E., Luna A., Tissera M.\n\n**Platense**:\nCozzani J., Lagos A., Vazquez I., Mendia M.\nThiago Silva, Gomez I., Barrios M., Mainero G.\nRetamar K., Merlini B., Heredia L.",
-        "atualizado_em": "2026-07-29 19:10",
-        "horario": "21:30"
+        "texto_telegram": "**Instituto**:\nLedesma M., Galvan J., Mosevich L., Alarcon F. R.(C)\nCerato G., Abregu G., Gallardo M., Sosa D.\nCordoba Mosquera J. E., Luna A., Tissera M.\n\n**Platense**:\nCozzani J., Lagos A., Vazquez I., Victor Cuesta\nThiago Silva, Gomez I., Barrios M., Mainero G.\nMerlini B., Retamar K., Heredia L.",
+        "atualizado_em": "2026-07-30 00:11"
     },
     "fluminensexbahia": {
         "time_casa": "Fluminense",
         "time_fora": "Bahia",
+        "horario": "21:30",
         "liga": "Brasileirão Série A",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/bahia-UeD7XtzM/fluminense-EV9L3kU4/resumo/equipes/",
         "titulares_casa": [
-            "Fábio",
-            "Guga",
-            "Thiago Silva",
+            "Fábio(C)",
+            "Samuel Xavier",
+            "Ignacio",
             "Freytes J.",
             "René",
-            "Hércules",
+            "Nonato",
             "Martinelli",
-            "Agustín Canobbio",
+            "Soteldo Y.",
             "Acosta L.",
-            "Savarino",
+            "Agustín Canobbio",
             "Hulk"
         ],
         "titulares_fora": [
@@ -232,7 +233,7 @@
             "Gomez R.",
             "Marcos Victor",
             "Santiago Ramos",
-            "Nicolás Acevedo",
+            "Nicolás Acevedo(C)",
             "Ademir",
             "Rodrigo Nestor",
             "Jean Lucas",
@@ -240,43 +241,42 @@
             "Veliz A.",
             "Erick Pulga"
         ],
-        "texto_telegram": "**Fluminense**:\nFábio, Guga, Thiago Silva, Freytes J.\nRené, Hércules, Martinelli, Agustín Canobbio\nAcosta L., Savarino, Hulk\n\n**Bahia**:\nRonaldo Strada, Gomez R., Marcos Victor, Santiago Ramos\nNicolás Acevedo, Ademir, Rodrigo Nestor, Jean Lucas\nLuciano Juba, Veliz A., Erick Pulga",
-        "atualizado_em": "2026-07-29 19:10",
-        "horario": "21:30"
+        "texto_telegram": "**Fluminense**:\nFábio(C), Samuel Xavier, Ignacio, Freytes J.\nRené, Nonato, Martinelli, Soteldo Y.\nAcosta L., Agustín Canobbio, Hulk\n\n**Bahia**:\nRonaldo Strada, Gomez R., Marcos Victor, Santiago Ramos\nNicolás Acevedo(C), Ademir, Rodrigo Nestor, Jean Lucas\nLuciano Juba, Veliz A., Erick Pulga",
+        "atualizado_em": "2026-07-30 00:11"
     },
     "vitóriaxpalmeiras": {
         "time_casa": "Vitória",
         "time_fora": "Palmeiras",
+        "horario": "21:30",
         "liga": "Brasileirão Série A",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/palmeiras-hMn9FTbH/vitoria-8bSbHipn/resumo/equipes/",
         "titulares_casa": [
             "Lucas Arcanjo",
-            "Jamerson",
+            "Fabiano",
+            "Britez E.",
             "Caca",
             "Luan Cândido",
             "Ramon",
+            "Matheusinho",
+            "Caíque Gonçalves",
+            "Baralhas(C)",
             "Emmanuel Martinez",
-            "Erick",
-            "Vitor",
-            "Baralhas",
-            "Tarzia D.",
             "Rene"
         ],
         "titulares_fora": [
             "Carlos Miguel",
             "Murilo",
-            "Gustavo Gómez",
+            "Gustavo Gómez(C)",
             "Alexander Barboza",
-            "Khellven",
+            "Allan",
             "Andreas Pereira",
             "Marlon Freitas",
             "Piquerez",
-            "Maurício",
             "Jhon Arias",
-            "López J."
+            "Maurício",
+            "Sosa R."
         ],
-        "texto_telegram": "**Vitória**:\nLucas Arcanjo, Jamerson, Caca, Luan Cândido\nRamon, Emmanuel Martinez, Erick, Vitor\nBaralhas, Tarzia D., Rene\n\n**Palmeiras**:\nCarlos Miguel, Murilo, Gustavo Gómez, Alexander Barboza\nKhellven, Andreas Pereira, Marlon Freitas, Piquerez\nMaurício, Jhon Arias, López J.",
-        "atualizado_em": "2026-07-29 19:10",
-        "horario": "21:30"
+        "texto_telegram": "**Vitória**:\nLucas Arcanjo, Fabiano, Britez E., Caca\nLuan Cândido, Ramon, Matheusinho, Caíque Gonçalves\nBaralhas(C), Emmanuel Martinez, Rene\n\n**Palmeiras**:\nCarlos Miguel, Murilo, Gustavo Gómez(C), Alexander Barboza\nAllan, Andreas Pereira, Marlon Freitas, Piquerez\nJhon Arias, Maurício, Sosa R.",
+        "atualizado_em": "2026-07-30 00:11"
     }
 }
