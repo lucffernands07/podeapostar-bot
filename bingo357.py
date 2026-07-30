@@ -72,7 +72,6 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=3, **kwargs):
     # 1. Agrupa todos os mercados por confronto preservando a ordem do fluxo
     jogos_agrupados = {}
     ordem_chaves = []
-    
     for jogo in dados_entrada:
         casa = str(jogo.get('time_casa', '')).strip()
         fora = str(jogo.get('time_fora', '')).strip()
@@ -81,10 +80,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=3, **kwargs):
         if chave not in jogos_agrupados:
             jogos_agrupados[chave] = []
             ordem_chaves.append(chave)
-            
-        # EVITA ADICIONAR O MESMO DICIONÁRIO DE JOGO/MERCADO SE FOR DUPLICADO NA ENTRADA
-        if jogo not in jogos_agrupados[chave]:
-            jogos_agrupados[chave].append(jogo)
+        jogos_agrupados[chave].append(jogo)
 
     # 2. Seleciona os N confrontos alvos (ex: Bingo 3, Bingo 5, etc)
     chaves_selecionadas = ordem_chaves[:qtd_alvo]
@@ -181,26 +177,20 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             else:
                 texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}{sufixo_odd}"
                 
-            # --- TRAVA DE SEGURANÇA: SÓ ADICIONA SE O TEXTO AINDA NÃO EXISTIR NO JOGO ---
-            item_mercado = {
+            agrupados[chave_jogo]["mercados"].append({
                 "texto": texto_final, 
                 "prioridade": prioridade_mercado(j.get('mercado', ''))
-            }
-            
-            textos_existentes = [m["texto"] for m in agrupados[chave_jogo]["mercados"]]
-            if texto_final not in textos_existentes:
-                agrupados[chave_jogo]["mercados"].append(item_mercado)
-                # Só acumula a ODD na total se o mercado não for repetido!
-                odd_total *= extrair_odd(odd_valor)
+            })
+            odd_total *= extrair_odd(odd_valor)
 
         lista_blocos = []
         for chave in sorted(agrupados.keys()):
             d = agrupados[chave]
             d["mercados"].sort(key=lambda x: x.get('best_score', x['prioridade']))
             
-            linhas = "\n".join([m['texto'] for m in d["mercados"]])
+            linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
             
-            bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n\n🌐 [Abrir na Betano]({d['link']})"
+            bloco = f"⏱️ {d['horario']} | {d['liga']}\n🏟️ {d['time_casa']} x {d['time_fora']}\n{linhas}\n🌐 [Abrir na Betano]({d['link']})"
             
             if d.get("link_h2h"): 
                 bloco += f"\n📊 [Estatísticas]({d['link_h2h']})"
@@ -209,4 +199,3 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
-                                 
