@@ -1,74 +1,4 @@
 {
-    "ind. rivadaviaxhuracán": {
-        "time_casa": "Ind. Rivadavia",
-        "time_fora": "Huracán",
-        "horario": "19:00",
-        "liga": "Argentina - Liga Profesional",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/huracan-xd3lGq3F/ind-rivadavia-Eg51aDC4/resumo/equipes/",
-        "titulares_casa": [
-            "Bolcato N.",
-            "Gomez L.",
-            "Villalba I.",
-            "Studer S.",
-            "Elordi J. M.",
-            "L. Costa",
-            "Florentin Bobadilla J. I.",
-            "Fernandez M.",
-            "Sartori F.",
-            "Bucca L.",
-            "Arce A."
-        ],
-        "titulares_fora": [
-            "Galindez H.",
-            "Blondel L.",
-            "Nervo H.",
-            "Palazzo M.",
-            "Ibanez C.",
-            "Kalinger F.",
-            "Ojeda E.",
-            "Gil L.",
-            "Cortes O.",
-            "Bisanz J.",
-            "Jordy Caicedo"
-        ],
-        "texto_telegram": "**Ind. Rivadavia**:\nBolcato N., Gomez L., Villalba I., Studer S.\nElordi J. M., L. Costa, Florentin Bobadilla J. I., Fernandez M.\nSartori F., Bucca L., Arce A.\n\n**Huracán**:\nGalindez H., Blondel L., Nervo H., Palazzo M.\nIbanez C., Kalinger F., Ojeda E., Gil L.\nCortes O., Bisanz J., Jordy Caicedo",
-        "atualizado_em": "2026-07-30 18:13"
-    },
-    "talleres córdobaxvélez sarsfield": {
-        "time_casa": "Talleres Córdoba",
-        "time_fora": "Vélez Sarsfield",
-        "horario": "19:00",
-        "liga": "Argentina - Liga Profesional",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/talleres-cordoba-bkDdeAvA/velez-sarsfield-UsCR8gFd/resumo/equipes/",
-        "titulares_casa": [
-            "Unsain E.",
-            "Schott A.",
-            "Catalan M.",
-            "Fernandez S.",
-            "Baez Corradi G.",
-            "Fattori F.",
-            "Galarza M. A.",
-            "Depietri V.",
-            "Franco Cristaldo",
-            "Rick",
-            "Martinez R."
-        ],
-        "titulares_fora": [
-            "Marchiori T.",
-            "Garcia J.",
-            "Silvero T.",
-            "Magallan L.",
-            "Gomez E.",
-            "Aliendro R.",
-            "Baeza C.",
-            "Veron A.",
-            "Lanzini M.",
-            "Pellegrini M.",
-            "Monzon F."
-        ],
-        "texto_telegram": "**Talleres Córdoba**:\nUnsain E., Schott A., Catalan M., Fernandez S.\nBaez Corradi G., Fattori F., Galarza M. A., Depietri V.\nFranco Cristaldo, Rick, Martinez R.\n\n**Vélez Sarsfield**:\nMarchiori T., Garcia J., Silvero T., Magallan L.\nGomez E., Aliendro R., Baeza C., Veron A.\nLanzini M., Pellegrini M., Monzon F.",
-        "atualizado_em": "2026-07-30 18:13"
-    },
     "corinthiansxathletico-pr": {
         "time_casa": "Corinthians",
         "time_fora": "Athletico-PR",
@@ -76,23 +6,23 @@
         "liga": "Brasileirão Série A",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/athletico-pr-UoAxb1Tq/corinthians-QBGfQbSe/resumo/equipes/",
         "titulares_casa": [
-            "Hugo Souza",
+            "Hugo Souza(C)",
             "Matheuzinho",
-            "Gabriel Paulista",
-            "Gustavo Henrique",
-            "Milans P.",
-            "André",
+            "Andre Ramalho",
             "Raniele",
-            "Kaio Cesar",
-            "Breno Bidon",
-            "Labyad Z.",
-            "Rodrigo Garro"
+            "Milans P.",
+            "Allan",
+            "Matheus Pereira",
+            "André Carrillo",
+            "Lingard J.",
+            "Diego",
+            "Labyad Z."
         ],
         "titulares_fora": [
-            "Santos",
+            "Santos(C)",
             "Teran C.",
-            "Aguirre F.",
             "Arthur Dias",
+            "Benavidez G.",
             "Gilberto",
             "Jadson",
             "Portilla J.",
@@ -101,8 +31,8 @@
             "Mendoza S.",
             "Viveros K."
         ],
-        "texto_telegram": "**Corinthians**:\nHugo Souza, Matheuzinho, Gabriel Paulista, Gustavo Henrique\nMilans P., André, Raniele, Kaio Cesar\nBreno Bidon, Labyad Z., Rodrigo Garro\n\n**Athletico-PR**:\nSantos, Teran C., Aguirre F., Arthur Dias\nGilberto, Jadson, Portilla J., Cláudio\nLeozinho, Mendoza S., Viveros K.",
-        "atualizado_em": "2026-07-30 18:13"
+        "texto_telegram": "**Corinthians**:\nHugo Souza(C), Matheuzinho, Andre Ramalho, Raniele\nMilans P., Allan, Matheus Pereira, André Carrillo\nLingard J., Diego, Labyad Z.\n\n**Athletico-PR**:\nSantos(C), Teran C., Arthur Dias, Benavidez G.\nGilberto, Jadson, Portilla J., Cláudio\nLeozinho, Mendoza S., Viveros K.",
+        "atualizado_em": "2026-07-30 19:16"
     },
     "central córdobaxatl. tucuman": {
         "time_casa": "Central Córdoba",
@@ -137,7 +67,7 @@
             "Diaz L."
         ],
         "texto_telegram": "**Central Córdoba**:\nVallejos J., Moyano S., Maciel A. R., Mansilla F.\nMarchi L., Martinez F., Vera M., Cravero T.\nBarrera D., Naya E., Santos M.\n\n**Atl. Tucuman**:\nIngolotti L., Villa M., Ferreira Namandu C. D., Vallejo L.\nGalvan I., Vega L., N. Franco, Tesuri R.\nGodoy L., Ruiz R., Diaz L.",
-        "atualizado_em": "2026-07-30 18:13"
+        "atualizado_em": "2026-07-30 19:16"
     },
     "independientexnewell's old boys": {
         "time_casa": "Independiente",
@@ -172,7 +102,7 @@
             "Coccaro M."
         ],
         "texto_telegram": "**Independiente**:\nRey R., Godoy L., Fedorco J., Valdez S.\nZabala F., Perez Curci M., Marcone I., Gutierrez M.\nMontiel S., Abaldo M., Avalos G.\n\n**Newell's Old Boys**:\nReinatti J., Escobar F., Cabrera B., Goitea N.\nRusso J., Sotelo D., Regiardo L., Mazzantti W.\nGuch F., Nunez W., Coccaro M.",
-        "atualizado_em": "2026-07-30 18:13"
+        "atualizado_em": "2026-07-30 19:16"
     },
     "coritibaxcruzeiro": {
         "time_casa": "Coritiba",
@@ -207,6 +137,6 @@
             "Kaio Jorge"
         ],
         "texto_telegram": "**Coritiba**:\nPedro Rangel, Tinga, Tiago Coser, Jacy\nBruno, Thiago Santos, Gomez S., Lucas Ronier\nJosue, Breno, Pedro Rocha\n\n**Cruzeiro**:\nOtávio Costa, William, Fabrício Bruno, Jonathan Jesus\nRojas G., Matheus Henrique, Gérson, Arroyo K.\nMatheus Pereira, Bruno Rodrigues, Kaio Jorge",
-        "atualizado_em": "2026-07-30 18:13"
+        "atualizado_em": "2026-07-30 19:16"
     }
 }
