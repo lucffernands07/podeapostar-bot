@@ -61,6 +61,14 @@ def carregar_ranking_pro():
         except: return []
     return []
 
+#Configura jogos das 00:00 para fim do dia
+def chave_ordenacao_horario(chave_jogo):
+    # chave_jogo é do tipo "00:00_time1_time2"
+    horario = chave_jogo.split('_')[0]
+    if horario == "00:00":
+        return f"24:00_{chave_jogo}"
+    return chave_jogo
+
 def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=3, **kwargs):
     """
     Recebe os jogos já filtrados pela janela de tempo,
@@ -184,8 +192,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             odd_total *= extrair_odd(odd_valor)
 
         lista_blocos = []
-        for chave in sorted(agrupados.keys()):
-            d = agrupados[chave]
+        for chave in sorted(agrupados.keys(), key=chave_ordenacao_horario):
             d["mercados"].sort(key=lambda x: x.get('best_score', x['prioridade']))
             
             linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
