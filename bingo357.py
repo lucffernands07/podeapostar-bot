@@ -193,6 +193,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
 
         lista_blocos = []
         for chave in sorted(agrupados.keys(), key=chave_ordenacao_horario):
+            d = agrupados[chave]  # Atribuição corrigida
             d["mercados"].sort(key=lambda x: x.get('best_score', x['prioridade']))
             
             linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
@@ -206,3 +207,4 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
+            
