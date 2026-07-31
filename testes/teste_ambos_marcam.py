@@ -1,78 +1,67 @@
 import re
 
-def verificar_btts_regra_final(s):
-    try:
-        def tem_btts(placar):
-            if not placar: return False
-            nums = re.findall(r'\d+', str(placar))
-            return len(nums) >= 2 and int(nums[0]) > 0 and int(nums[1]) > 0
+def tem_btts(placar):
+    """Verifica se ambas as equipes marcaram no placar fornecido (ex: '2:1', '1-1')"""
+    if not placar:
+        return False
+    nums = re.findall(r'\d+', str(placar))
+    return len(nums) >= 2 and int(nums[0]) > 0 and int(nums[1]) > 0
 
-        # --- COLETA DOS DADOS ---
-        p_casa = s.get("t1_placar_1")       # Último individual Casa
-        p_fora = s.get("t2_placar_1")       # Último individual Fora
-        p_h2h1 = s.get("h2h_placar_1")      # H2H mais recente
-        p_h2h2 = s.get("h2h_placar_2")      # H2H segundo mais recente
+def avaliar_ambos_marcam(jogos_casa_em_casa, jogos_fora_fora):
+    """
+    Avalia a sequência dos últimos 5 jogos:
+    - Min 4/5 para ambos os lados -> "Ambas Marcam: Sim" (80% ou 100%)
+    - Max 3/5 para ambos os lados -> "Ambas Marcam: Não"
+    """
+    if len(jogos_casa_em_casa) < 5 or len(jogos_fora_fora) < 5:
+        return None, "Dados insuficientes (menos de 5 jogos em algum dos lados)"
 
-        # --- VALIDAÇÃO DOS 3 PASSOS OBRIGATÓRIOS ---
-        casa_passou = tem_btts(p_casa)
-        fora_passou = tem_btts(p_fora)
-        
-        h2h1_btts = tem_btts(p_h2h1)
-        h2h2_btts = tem_btts(p_h2h2)
-        h2h_passou = h2h1_btts or h2h2_btts
+    # Conta quantas partidas deram BTTS Sim nos últimos 5 jogos
+    btts_casa = sum(1 for p in jogos_casa_em_casa[:5] if tem_btts(p))
+    btts_fora = sum(1 for p in jogos_fora_fora[:5] if tem_btts(p))
 
-        # --- LOG DETALHADO (CONFORME VOCÊ PEDIU) ---
-        print(f"   Casa (Último): {p_casa} -> {'✅ passou' if casa_passou else '❌ falhou'}")
-        print(f"   Fora (Último): {p_fora} -> {'✅ passou' if fora_passou else '❌ falhou'}")
-        print(f"   H2H (Últimos 2): {p_h2h1} e {p_h2h2} -> {'✅ passou' if h2h_passou else '❌ falhou'}")
+    # --- REGRA: AMBAS MARCAM SIM ---
+    # Requer pelo menos 4/5 em ambos os times
+    if btts_casa >= 4 and btts_fora >= 4:
+        porcentagem = "100%" if (btts_casa == 5 and btts_fora == 5) else "80%"
+        return f"Ambas Marcam: Sim ({porcentagem})", f"Casa: {btts_casa}/5 BTTS | Fora: {btts_fora}/5 BTTS"
 
-        # --- GATILHO FINAL E PORCENTAGEM ---
-        if casa_passou and fora_passou and h2h_passou:
-            # Se os dois H2H foram BTTS -> 100%
-            if h2h1_btts and h2h2_btts:
-                return "100%"
-            # Se apenas um do H2H foi BTTS -> 80%
-            return "80%"
-            
-        return None
-    except Exception as e:
-        return f"Erro: {e}"
+    # --- REGRA: AMBAS MARCAM NÃO ---
+    # Requer no máximo 3/5 em ambos os times (baixa ocorrência de BTTS nos dois lados)
+    if btts_casa <= 3 and btts_fora <= 3:
+        porcentagem = "100%" if (btts_casa <= 1 and btts_fora <= 1) else "80%"
+        return f"Ambas Marcam: Não ({porcentagem})", f"Casa: {btts_casa}/5 BTTS | Fora: {btts_fora}/5 BTTS"
 
-# --- CENÁRIO REAL: SPORTING CRISTAL vs PALMEIRAS ---
-dados_palmeiras = {
-    "t1_placar_1": "2:2",   # Sporting Cristal vs Cusco
-    "t2_placar_1": "1:1",   # Palmeiras vs Santos
-    "h2h_placar_1": "2:1",  # Palmeiras 2x1 Cristal (BTTS)
-    "h2h_placar_2": "6:0"   # Palmeiras 6x0 Cristal (Não BTTS)
-}
+    return None, f"Fora dos padrões (Casa: {btts_casa}/5 BTTS, Fora: {btts_fora}/5 BTTS)"
 
-# --- OUTROS CENÁRIOS PARA VALIDAÇÃO ---
+
+# --- CENÁRIOS DE TESTE ---
 testes = [
     {
-        "nome": "PALMEIRAS vs SPORTING CRISTAL (Dados do seu Print)",
-        "dados": dados_palmeiras
+        "nome": "Cenário Ambas Marcam SIM (80%)",
+        "casa_em_casa": ["2:1", "1:1", "3:1", "0:1", "2:2"], # 4/5 BTTS
+        "fora_fora":     ["1:2", "2:2", "1:1", "3:1", "0:2"]  # 4/5 BTTS
     },
     {
-        "nome": "EXEMPLO 100% (BTTS em tudo)",
-        "dados": {
-            "t1_placar_1": "3:1", "t2_placar_1": "1:2", 
-            "h2h_placar_1": "1:1", "h2h_placar_2": "2:2"
-        }
+        "nome": "Cenário Ambas Marcam NÃO (Poucos gols de ambos os lados)",
+        "casa_em_casa": ["2:0", "1:0", "0:0", "1:1", "3:0"], # 1/5 BTTS
+        "fora_fora":     ["0:1", "2:0", "1:1", "0:0", "1:0"]  # 1/5 BTTS
     },
     {
-        "nome": "EXEMPLO REPROVADO (Sem BTTS no H2H)",
-        "dados": {
-            "t1_placar_1": "1:1", "t2_placar_1": "1:1", 
-            "h2h_placar_1": "1:0", "h2h_placar_2": "2:0"
-        }
+        "nome": "Cenário Inconclusivo (Casa muito alto e Fora mediano)",
+        "casa_em_casa": ["2:1", "1:1", "3:1", "2:2", "2:1"], # 5/5 BTTS
+        "fora_fora":     ["0:0", "1:0", "2:1", "0:1", "1:0"]  # 1/5 BTTS
     }
 ]
 
-print("🧪 TESTANDO REGRA: ULTIMO INDIVIDUAL + 2 H2H\n" + "="*50)
+print("🧪 TESTANDO NOVA REGRA AMBAS MARCAM (CASA/FORA)\n" + "="*55)
 for t in testes:
-    print(f"\n🔹 Analisando: {t['nome']}")
-    res = verificar_btts_regra_final(t['dados'])
-    status = f"⭐ RESULTADO FINAL: {res}" if res else "🚫 RESULTADO FINAL: Ignorado (Não cumpre os 3 critérios)"
-    print(status)
-    print("-" * 50)
+    print(f"\n🔹 {t['nome']}")
+    resultado, detalhe = avaliar_ambos_marcam(t["casa_em_casa"], t["fora_fora"])
+    if resultado:
+        print(f"⭐ MERCADO GERADO: {resultado}")
+    else:
+        print(f"🚫 DESLOGADO/IGNORADO")
+    print(f"📊 Detalhes: {detalhe}")
+    print("-" * 55)
     
