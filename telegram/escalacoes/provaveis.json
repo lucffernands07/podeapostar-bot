@@ -1,107 +1,13 @@
 {
-    "central córdobaxatl. tucuman": {
-        "time_casa": "Central Córdoba",
-        "time_fora": "Atl. Tucuman",
-        "horario": "21:15",
-        "liga": "Argentina - Liga Profesional",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/atletico-tucuman-KpqpxWko/central-cordoba-santiago-del-estero-0dHZReql/resumo/equipes/",
-        "titulares_casa": [
-            "Vallejos J.",
-            "Moyano S.",
-            "Maciel A. R.(C)",
-            "Mansilla F.",
-            "Martinez F.",
-            "Iacobellis M.",
-            "Gonzalez L.",
-            "Vera M.",
-            "Tijanovich H.",
-            "Barrera D.",
-            "Varaldo L."
-        ],
-        "titulares_fora": [
-            "Ingolotti L.",
-            "Villa M.",
-            "Ferreira Namandu C. D.",
-            "Vallejo L.",
-            "Galvan I.",
-            "Godoy L.",
-            "Vega L.",
-            "N. Franco",
-            "Tesuri R.(C)",
-            "Diaz L.",
-            "Ruiz R."
-        ],
-        "texto_telegram": "**Central Córdoba**:\nVallejos J., Moyano S., Maciel A. R.(C), Mansilla F.\nMartinez F., Iacobellis M., Gonzalez L., Vera M.\nTijanovich H., Barrera D., Varaldo L.\n\n**Atl. Tucuman**:\nIngolotti L., Villa M., Ferreira Namandu C. D., Vallejo L.\nGalvan I., Godoy L., Vega L., N. Franco\nTesuri R.(C), Diaz L., Ruiz R.",
-        "atualizado_em": "2026-07-30 21:21"
-    },
-    "independientexnewell's old boys": {
-        "time_casa": "Independiente",
-        "time_fora": "Newell's Old Boys",
-        "horario": "21:15",
-        "liga": "Argentina - Liga Profesional",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/independiente-UVatI5Y2/newells-old-boys-6gMiRHVj/resumo/equipes/",
-        "titulares_casa": [
-            "Rey R.",
-            "Godoy L.",
-            "Fedorco J.",
-            "Valdez S.",
-            "Zabala F.",
-            "Perez Curci M.",
-            "Marcone I.(C)",
-            "Gutierrez M.",
-            "Montiel S.",
-            "Abaldo M.",
-            "Avalos G."
-        ],
-        "titulares_fora": [
-            "Reinatti J.",
-            "Escobar F.",
-            "Cabrera B.",
-            "Giannetti L.",
-            "Luciano M.",
-            "Sotelo D.",
-            "Regiardo L.(C)",
-            "Mazzantti W.",
-            "Guch F.",
-            "Nunez W.",
-            "Ramirez I."
-        ],
-        "texto_telegram": "**Independiente**:\nRey R., Godoy L., Fedorco J., Valdez S.\nZabala F., Perez Curci M., Marcone I.(C), Gutierrez M.\nMontiel S., Abaldo M., Avalos G.\n\n**Newell's Old Boys**:\nReinatti J., Escobar F., Cabrera B., Giannetti L.\nLuciano M., Sotelo D., Regiardo L.(C), Mazzantti W.\nGuch F., Nunez W., Ramirez I.",
-        "atualizado_em": "2026-07-30 21:21"
-    },
-    "coritibaxcruzeiro": {
-        "time_casa": "Coritiba",
-        "time_fora": "Cruzeiro",
-        "horario": "21:30",
-        "liga": "Brasileirão Série A",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/coritiba-KGO4pUqO/cruzeiro-0SwtclaU/resumo/equipes/",
-        "titulares_casa": [
-            "Pedro Morisco",
-            "Tinga",
-            "Jacy",
-            "Tiago Coser",
-            "Bruno",
-            "Thiago Santos",
-            "Gomez S.(C)",
-            "Pedro Rocha",
-            "Josue",
-            "Breno",
-            "Lucas Ronier"
-        ],
-        "titulares_fora": [
-            "Otávio Costa",
-            "William",
-            "Fabrício Bruno",
-            "Jonathan Jesus",
-            "Rojas G.",
-            "Lucas Romero(C)",
-            "Gérson",
-            "Arroyo K.",
-            "Matheus Pereira",
-            "Felipe Morais",
-            "Kaio Jorge"
-        ],
-        "texto_telegram": "**Coritiba**:\nPedro Morisco, Tinga, Jacy, Tiago Coser\nBruno, Thiago Santos, Gomez S.(C), Pedro Rocha\nJosue, Breno, Lucas Ronier\n\n**Cruzeiro**:\nOtávio Costa, William, Fabrício Bruno, Jonathan Jesus\nRojas G., Lucas Romero(C), Gérson, Arroyo K.\nMatheus Pereira, Felipe Morais, Kaio Jorge",
-        "atualizado_em": "2026-07-30 21:21"
+    "egito u20xjordânia u20": {
+        "time_casa": "Egito U20",
+        "time_fora": "Jordânia U20",
+        "horario": "14:00",
+        "liga": "Mundo - Amistoso Internacional",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/egipto-GOjODfW6/jordania-KU6NYfBl/resumo/equipes/",
+        "titulares_casa": [],
+        "titulares_fora": [],
+        "texto_telegram": "**Egito U20**:\nEscalação provável não disponível\n\n**Jordânia U20**:\nEscalação provável não disponível",
+        "atualizado_em": "2026-07-31 00:00"
     }
 }

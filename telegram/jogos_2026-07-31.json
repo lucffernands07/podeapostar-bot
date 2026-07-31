@@ -1,0 +1,232 @@
+[
+    {
+        "horario": "00:00",
+        "liga": "México - Liga MX",
+        "time_casa": "Atlético San Luis",
+        "time_fora": "Tijuana",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.18",
+        "link_betano": "https://www.betano.bet.br/match-odds/Atletico-San-Luis-Club-Tijuana/89399539/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/CjRd8P6s/#/h2h/overall"
+    },
+    {
+        "horario": "00:00",
+        "liga": "México - Liga MX",
+        "time_casa": "Juarez",
+        "time_fora": "U.N.A.M.",
+        "mercado": "-4.5 Gols (100%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Juarez-UNAM-Pumas/89399412/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/pIv463yf/#/h2h/overall"
+    },
+    {
+        "horario": "09:00",
+        "liga": "Armênia Premier League",
+        "time_casa": "Van",
+        "time_fora": "Sardarapat",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Van-Sardarapat-FC/89649069/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OrQuQfBM/#/h2h/overall"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Zorya",
+        "time_fora": "Kolos Kovalivka",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.39",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Zorya-Luhansk-Kolos-Kovalivka/88939579/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/MoWTl8SF/#/h2h/overall"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Zorya",
+        "time_fora": "Kolos Kovalivka",
+        "mercado": "+2.5 Gols (80%)",
+        "odd": "2.28",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Zorya-Luhansk-Kolos-Kovalivka/88939579/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/MoWTl8SF/#/h2h/overall"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Zorya",
+        "time_fora": "Kolos Kovalivka",
+        "mercado": "Ambas Marcam: Sim (100%)",
+        "odd": "1.83",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Zorya-Luhansk-Kolos-Kovalivka/88939579/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/MoWTl8SF/#/h2h/overall"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Polônia - Ekstraklasa",
+        "time_casa": "Plock",
+        "time_fora": "Widzew Lodz",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Wisla-Plock-Widzew-Lodz/88118838/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jPftWPiC/#/h2h/overall"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Polônia - Ekstraklasa",
+        "time_casa": "Plock",
+        "time_fora": "Widzew Lodz",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.95",
+        "link_betano": "https://www.betano.bet.br/match-odds/Wisla-Plock-Widzew-Lodz/88118838/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jPftWPiC/#/h2h/overall"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Mundo - Amistoso Internacional",
+        "time_casa": "Egito U20",
+        "time_fora": "Jordânia U20",
+        "mercado": "Chutes no gol: Haitham M. (EGI) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": null,
+        "link_h2h": "https://www.flashscore.com.br/jogo/W2nmSDce/#/h2h/overall"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Mundo - Amistoso Internacional",
+        "time_casa": "Egito U20",
+        "time_fora": "Jordânia U20",
+        "mercado": "Chutes no gol: Kabaka (EGI) | Méd: 0.5",
+        "odd": "Análise",
+        "link_betano": null,
+        "link_h2h": "https://www.flashscore.com.br/jogo/W2nmSDce/#/h2h/overall"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Polônia - Ekstraklasa",
+        "time_casa": "Motor Lublin",
+        "time_fora": "Jagiellonia",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.17",
+        "link_betano": "https://www.betano.bet.br/match-odds/Motor-Lublin-Jagiellonia-Bialystok/88118868/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jaPESjoK/#/h2h/overall"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Irlanda - Premier",
+        "time_casa": "Dundalk",
+        "time_fora": "Sligo Rovers",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Dundalk-FC-Sligo-Rovers-FC/87735691/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/MDFUmD0k/#/h2h/overall"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Irlanda - Premier",
+        "time_casa": "Dundalk",
+        "time_fora": "Sligo Rovers",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.16",
+        "link_betano": "https://www.betano.bet.br/match-odds/Dundalk-FC-Sligo-Rovers-FC/87735691/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/MDFUmD0k/#/h2h/overall"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Irlanda - Premier",
+        "time_casa": "Dundalk",
+        "time_fora": "Sligo Rovers",
+        "mercado": "+2.5 Gols (80%)",
+        "odd": "1.5",
+        "link_betano": "https://www.betano.bet.br/match-odds/Dundalk-FC-Sligo-Rovers-FC/87735691/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/MDFUmD0k/#/h2h/overall"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Irlanda - Premier",
+        "time_casa": "Drogheda",
+        "time_fora": "Shamrock Rovers",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/Drogheda-United-Shamrock-Rovers-FC/88119256/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SCcd6LGG/#/h2h/overall"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Irlanda - Premier",
+        "time_casa": "Drogheda",
+        "time_fora": "Shamrock Rovers",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/Drogheda-United-Shamrock-Rovers-FC/88119256/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SCcd6LGG/#/h2h/overall"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - MLS",
+        "time_casa": "New York City",
+        "time_fora": "Toronto FC",
+        "mercado": "-4.5 Gols (100%)",
+        "odd": "1.18",
+        "link_betano": "https://www.betano.bet.br/match-odds/New-York-City-FC-Toronto-FC/85508643/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OGEvQBZg/#/h2h/overall"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - MLS",
+        "time_casa": "New York City",
+        "time_fora": "Toronto FC",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.45",
+        "link_betano": "https://www.betano.bet.br/match-odds/New-York-City-FC-Toronto-FC/85508643/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OGEvQBZg/#/h2h/overall"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - MLS",
+        "time_casa": "New York City",
+        "time_fora": "Toronto FC",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.7",
+        "link_betano": "https://www.betano.bet.br/match-odds/New-York-City-FC-Toronto-FC/85508643/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OGEvQBZg/#/h2h/overall"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - MLS",
+        "time_casa": "New York City",
+        "time_fora": "Toronto FC",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/New-York-City-FC-Toronto-FC/85508643/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OGEvQBZg/#/h2h/overall"
+    },
+    {
+        "horario": "22:00",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Fortaleza",
+        "time_fora": "Pereira",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CEIF-Deportivo-Pereira/89064394/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UFyiZlyS/#/h2h/overall"
+    },
+    {
+        "horario": "22:00",
+        "liga": "México - Liga MX",
+        "time_casa": "Puebla",
+        "time_fora": "Guadalajara",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.17",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Puebla-Guadalajara-Chivas/89399551/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GKuRDoqK/#/h2h/overall"
+    },
+    {
+        "horario": "22:00",
+        "liga": "México - Liga MX",
+        "time_casa": "Puebla",
+        "time_fora": "Guadalajara",
+        "mercado": "2X (85%)",
+        "odd": "1.17",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Puebla-Guadalajara-Chivas/89399551/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GKuRDoqK/#/h2h/overall"
+    }
+]
