@@ -8,15 +8,15 @@
         "titulares_casa": [
             "Vallejos J.",
             "Moyano S.",
-            "Maciel A. R.",
+            "Maciel A. R.(C)",
             "Mansilla F.",
-            "Marchi L.",
             "Martinez F.",
+            "Iacobellis M.",
+            "Gonzalez L.",
             "Vera M.",
-            "Cravero T.",
+            "Tijanovich H.",
             "Barrera D.",
-            "Naya E.",
-            "Santos M."
+            "Varaldo L."
         ],
         "titulares_fora": [
             "Ingolotti L.",
@@ -24,15 +24,15 @@
             "Ferreira Namandu C. D.",
             "Vallejo L.",
             "Galvan I.",
+            "Godoy L.",
             "Vega L.",
             "N. Franco",
-            "Tesuri R.",
-            "Godoy L.",
-            "Ruiz R.",
-            "Diaz L."
+            "Tesuri R.(C)",
+            "Diaz L.",
+            "Ruiz R."
         ],
-        "texto_telegram": "**Central Córdoba**:\nVallejos J., Moyano S., Maciel A. R., Mansilla F.\nMarchi L., Martinez F., Vera M., Cravero T.\nBarrera D., Naya E., Santos M.\n\n**Atl. Tucuman**:\nIngolotti L., Villa M., Ferreira Namandu C. D., Vallejo L.\nGalvan I., Vega L., N. Franco, Tesuri R.\nGodoy L., Ruiz R., Diaz L.",
-        "atualizado_em": "2026-07-30 20:50"
+        "texto_telegram": "**Central Córdoba**:\nVallejos J., Moyano S., Maciel A. R.(C), Mansilla F.\nMartinez F., Iacobellis M., Gonzalez L., Vera M.\nTijanovich H., Barrera D., Varaldo L.\n\n**Atl. Tucuman**:\nIngolotti L., Villa M., Ferreira Namandu C. D., Vallejo L.\nGalvan I., Godoy L., Vega L., N. Franco\nTesuri R.(C), Diaz L., Ruiz R.",
+        "atualizado_em": "2026-07-30 21:21"
     },
     "independientexnewell's old boys": {
         "time_casa": "Independiente",
@@ -47,7 +47,7 @@
             "Valdez S.",
             "Zabala F.",
             "Perez Curci M.",
-            "Marcone I.",
+            "Marcone I.(C)",
             "Gutierrez M.",
             "Montiel S.",
             "Abaldo M.",
@@ -57,17 +57,17 @@
             "Reinatti J.",
             "Escobar F.",
             "Cabrera B.",
-            "Goitea N.",
-            "Russo J.",
+            "Giannetti L.",
+            "Luciano M.",
             "Sotelo D.",
-            "Regiardo L.",
+            "Regiardo L.(C)",
             "Mazzantti W.",
             "Guch F.",
             "Nunez W.",
-            "Coccaro M."
+            "Ramirez I."
         ],
-        "texto_telegram": "**Independiente**:\nRey R., Godoy L., Fedorco J., Valdez S.\nZabala F., Perez Curci M., Marcone I., Gutierrez M.\nMontiel S., Abaldo M., Avalos G.\n\n**Newell's Old Boys**:\nReinatti J., Escobar F., Cabrera B., Goitea N.\nRusso J., Sotelo D., Regiardo L., Mazzantti W.\nGuch F., Nunez W., Coccaro M.",
-        "atualizado_em": "2026-07-30 20:50"
+        "texto_telegram": "**Independiente**:\nRey R., Godoy L., Fedorco J., Valdez S.\nZabala F., Perez Curci M., Marcone I.(C), Gutierrez M.\nMontiel S., Abaldo M., Avalos G.\n\n**Newell's Old Boys**:\nReinatti J., Escobar F., Cabrera B., Giannetti L.\nLuciano M., Sotelo D., Regiardo L.(C), Mazzantti W.\nGuch F., Nunez W., Ramirez I.",
+        "atualizado_em": "2026-07-30 21:21"
     },
     "coritibaxcruzeiro": {
         "time_casa": "Coritiba",
@@ -102,6 +102,6 @@
             "Kaio Jorge"
         ],
         "texto_telegram": "**Coritiba**:\nPedro Morisco, Tinga, Jacy, Tiago Coser\nBruno, Thiago Santos, Gomez S.(C), Pedro Rocha\nJosue, Breno, Lucas Ronier\n\n**Cruzeiro**:\nOtávio Costa, William, Fabrício Bruno, Jonathan Jesus\nRojas G., Lucas Romero(C), Gérson, Arroyo K.\nMatheus Pereira, Felipe Morais, Kaio Jorge",
-        "atualizado_em": "2026-07-30 20:50"
+        "atualizado_em": "2026-07-30 21:21"
     }
 }
