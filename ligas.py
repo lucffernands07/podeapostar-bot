@@ -38,7 +38,6 @@ COMPETICOES = {
     "Áustria - Bundesliga": "https://www.flashscore.com.br/futebol/austria/bundesliga/jogos/",
     "Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/jogos/",
     "Cazaquistão - Primeira Liga": "https://www.flashscore.com.br/futebol/cazaquistao/primeira-liga/jogos",
-}
 
     # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
      "Irlanda - Premier": "https://www.flashscore.com.br/futebol/irlanda/divisao-premier/jogos/",
@@ -63,4 +62,5 @@ COMPETICOES = {
      "Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/jogos/",
      "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",  # <-- INCLUÍDO AQUI
      "Colômbia - Primera A": "https://www.flashscore.com.br/futebol/colombia/primeira-a/jogos/"
+}
 
