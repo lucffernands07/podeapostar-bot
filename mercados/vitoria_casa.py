@@ -1,34 +1,33 @@
-import re
+# mercados/vitorias.py
 
-def verificar_vitoria_casa(stats):
+def verificar_vitorias(stats):
     """
-    Regra de Vitória Casa Baseada no Cruzamento de Mando:
-    1. Mandante: Apenas VITÓRIA ('V') no seu último jogo geral.
-    2. Visitante: Apenas DERROTA ('D') no seu último jogo geral.
-    3. H2H: O último jogo com mando de campo correto (t1 em casa) precisa ser VITÓRIA ('V').
+    Regras de Vitória Casa e Vitória Fora (Recorte Casa/Fora - Mínimo 4/5):
     
-    Porcentagem fixa: 85%
+    - Vitória Casa: Mandante com >= 4 vitórias em 5 jogos em casa 
+                    AND Visitante com <= 1 vitória em 5 jogos fora.
+    - Vitória Fora: Visitante com >= 4 vitórias em 5 jogos fora 
+                    AND Mandante com <= 1 vitória em 5 jogos em casa.
     """
     retorno = []
     
-    # Captura os dados do dicionário preenchido pelo main.py
-    casa_ultimo = stats.get("t1_resultado_1", "")
-    fora_ultimo = stats.get("t2_resultado_1", "")
-    h2h_1 = stats.get("h2h_res_1", "")
+    # Vitórias filtradas do novo raspagem_h2h (Casa em Casa / Visitante Fora)
+    vitorias_casa = stats.get("casa_vitorias_recente", 0)
+    vitorias_fora = stats.get("fora_vitorias_recente", 0)
     
-    # 1. Validação do Momento Imediato (Passo 1 e 2 da sua regra)
-    # Mandante precisa ter vencido o último jogo geral E Visitante precisa ter perdido o último jogo geral
-    valida_momento = (casa_ultimo == "V") and (fora_ultimo == "D")
-    
-    # 2. Validação do H2H Histórico com Mando Correto (Passo 3 da sua regra)
-    # Como o main.py já filtrou e descartou os mandos invertidos, o h2h_1 é o último jogo real em casa.
-    valida_h2h = (h2h_1 == "V")
-    
-    # Executa o funil de segurança
-    if valida_momento and valida_h2h:
-        # Formata o texto exatamente como os seus outros módulos para o listão do Telegram
-        mercado_texto = "Vitória Casa (85%)"
-        retorno.append(mercado_texto)
+    # -----------------------------------------------------------------
+    # 🏠 VITÓRIA CASA (Mandante forte em casa vs Visitante fraco fora)
+    # -----------------------------------------------------------------
+    if vitorias_casa >= 4 and vitorias_fora <= 1:
+        pct = "100%" if (vitorias_casa == 5 and vitorias_fora == 0) else "85%"
+        retorno.append(f"Vitória Casa ({pct})")
+        
+    # -----------------------------------------------------------------
+    # ✈️ VITÓRIA FORA (Visitante forte fora vs Mandante fraco em casa)
+    # -----------------------------------------------------------------
+    if vitorias_fora >= 4 and vitorias_casa <= 1:
+        pct = "100%" if (vitorias_fora == 5 and vitorias_casa == 0) else "85%"
+        retorno.append(f"Vitória Fora ({pct})")
         
     return retorno
     
