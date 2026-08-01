@@ -11,7 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
 from ligas import COMPETICOES
-from mercados import gols, ambos_marcam, chance_dupla, vitorias, jogadores, cartoes, escanteios
+from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes, escanteios
 import odds, bingo357
 from telegram import menus
 
@@ -54,7 +54,9 @@ def configurar_driver():
 def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
+    hoje_no_site = hoje_ref.strftime("%d.%m.")
     amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
+    
     lista_para_filtros = []     
     jogos_para_pendentes = []  
     total_mercados = 0 
@@ -130,10 +132,10 @@ def main():
                     h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
                     aceitar = False
-                    if amanha_no_site in tempo_raw:
-                        if h_obj.hour <= 3: aceitar = True
-                    elif "." not in tempo_raw:
+                    if hoje_no_site in tempo_raw or "." not in tempo_raw:
                         if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
+                    elif amanha_no_site in tempo_raw:
+                        if h_obj.hour <= 3: aceitar = True
 
                     if aceitar:
                         print(f"      ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
@@ -179,13 +181,13 @@ def main():
 
                         mercados_fase1 = []
 
-                        # 1. Gols (+1.5, +2.5, -3.5, -4.5)
+                        # 1. Gols
                         res_gols = gols.verificar_gols(dados_jogo)
                         for rg in res_gols:
                             if isinstance(rg, dict):
                                 mercados_fase1.append({"texto": rg['mercado'], "chave": rg['tipo']})
 
-                        # 2. Ambos Marcam (Sim / Não) - Passa os gols aprovados para a Trava
+                        # 2. Ambos Marcam (Com Trava de Gols)
                         res_btts = ambos_marcam.verificar_btts(dados_jogo, mercados_gols_aprovados=res_gols)
                         for rb in res_btts:
                             if isinstance(rb, dict):
@@ -196,22 +198,50 @@ def main():
                                 chave_btts = "BTTS_NAO" if "Não" in rb or "Nao" in rb else "BTTS"
                                 mercados_fase1.append({"texto": rb, "chave": chave_btts})
 
-                        # 3. Dupla Chance
+                        # 3. Chance Dupla
                         res_cd = chance_dupla.verificar_chance_dupla(dados_jogo)
                         for rc in res_cd:
                             texto_cd = rc if isinstance(rc, str) else rc.get("mercado", "")
                             tipo_cd = "1X" if "1X" in texto_cd else "X2"
                             mercados_fase1.append({"texto": texto_cd, "chave": tipo_cd})
 
-                        # 4. Vitória Casa / Vitória Fora
-                        res_vitorias = vitorias.verificar_vitorias(dados_jogo)
-                        for rv in res_vitorias:
+                        # 4. Vitória Casa
+                        res_vc = vitoria_casa.verificar_vitoria_casa(dados_jogo)
+                        for rv in res_vc:
                             texto_vic = rv if isinstance(rv, str) else rv.get("mercado", "")
-                            chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
-                            mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
+                            mercados_fase1.append({"texto": texto_vic, "chave": "VITORIA_CASA"})
+
+                        # Extração de Odds
+                        v_odds = {}
+                        if mercados_fase1:
+                            try:
+                                v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
+                            except Exception as e_odds:
+                                print(f"      ⚠️ Erro ao capturar odds da Fase 1: {e_odds}")
+                                if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
+                                    try: driver.quit()
+                                    except: pass
+                                    driver = configurar_driver()
+
+                        # 🟢 CORREÇÃO CRÍTICA 1: Inicialização garantida da lista
+                        mercados_para_processar = []
+
+                        for item in mercados_fase1:
+                            m_texto, m_chave = item["texto"], item["chave"]
+                            valor_odd_str = v_odds.get(m_chave, "1.30")
+                            
+                            try:
+                                odd_float = float(str(valor_odd_str).replace(',', '.'))
+                                if odd_float >= 1.10:
+                                    if "M45" in m_chave and odd_float >= 4.0: continue
+                                    mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": str(odd_float)})
+                                else:
+                                    print(f"      ⚠️ Descartado (Odd baixa): {m_texto} | Valor: {valor_odd_str}")
+                            except Exception as e_conv:
+                                print(f"      ⚠️ Erro ao converter odd para float ({m_texto}): {e_conv}")
 
                         # ----------------------------------------------------------
-                        # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (APENAS UMA VEZ)
+                        # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS
                         # ----------------------------------------------------------
                         print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios/Cartões)...")
                         try:
@@ -239,7 +269,6 @@ def main():
                             mercado_cantos_formatado = res_escanteios.get("mercado")
                             if mercado_cantos_formatado:
                                 mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA", "odd": "1.30"})
-                                print(f"           ✅ Mercado de Cantos Qualificado: {mercado_cantos_formatado}")
 
                         res_cartoes = cartoes.analisar_dados_cartoes(
                             dados_jogo.get("cartoes_mandante_h2h", []),
@@ -251,23 +280,16 @@ def main():
                             mercado_cartoes_formatado = res_cartoes.get("mercado")
                             if mercado_cartoes_formatado:
                                 mercados_para_processar.append({"texto": mercado_cartoes_formatado, "chave": "CARTOES_CONFRONTO", "odd": "1.30"})
-                                print(f"           ✅ Mercado de Cartões Qualificado: {mercado_cartoes_formatado}")
 
                         # ----------------------------------------------------------
-                        # FASE 3: RASPAGEM E PROCESSAMENTO DE SCOUTS (JOGADORES)
+                        # FASE 3: RASPAGEM DE SCOUTS (JOGADORES)
                         # ----------------------------------------------------------
                         permite_jogadores = jogadores.validar_liga_para_jogadores(nome_comp)
-                        print(f"      🔍 [DEBUG FASE 3] Validando Liga: '{nome_comp}'")
-                        print(f"      🔍 [DEBUG FASE 3] Está na lista Elite? {permite_jogadores}")
 
                         if permite_jogadores:
-                            print(f"      🎯 [FASE 3] Buscando Scouts Avançados (Chutes/Faltas)...")
-                            print(f"      🔗 [DEBUG URL MÃE] Enviando para a Fase 3: {dados_jogo.get('url_h2h_base')}")
-                            
                             try:
                                 _ = driver.current_window_handle
                             except Exception:
-                                print("      ⚠️ [CORREÇÃO] Driver morto antes da Fase 3. Reiniciando...")
                                 try: driver.quit()
                                 except: pass
                                 driver = configurar_driver()
@@ -277,29 +299,20 @@ def main():
                                 driver.get(dados_jogo["url_h2h_base"])
                                 time.sleep(1.5) 
                                 driver.execute_script("window.scrollTo(0, 300);")
-                                
                                 acumulador_scouts = pegar_scouts_avancados(driver, dados_jogo, t1, t2)
                             except Exception as e_f3:
-                                print(f"      ⚠️ Erro crítico na execução da Fase 3 no Main: {e_f3}")
+                                print(f"      ⚠️ Erro na Fase 3: {e_f3}")
                             
                             resultado_jogadores = jogadores.analisar_dados_jogadores(acumulador_scouts, t1, t2)
 
-                            if resultado_jogadores["aprovado"]:
-                                print(resultado_jogadores["scouts_formatados"])
-                                
-                                for jk in resultado_jogadores["jogadores_qualificados"]:
+                            if resultado_jogadores.get("aprovado"):
+                                for jk in resultado_jogadores.get("jogadores_qualificados", []):
                                     txt_mercado = f"{jk['mercado']}: {jk['jogador']} ({jk['time'][:3].upper()}) | Méd: {jk['media']:.1f}"
-                                    print(f"           ✅ [DEBUG] Salvando Jogador: {txt_mercado}")
-
                                     mercados_para_processar.append({
                                         "texto": txt_mercado,
                                         "chave": "JOGADOR_SCOUT",
                                         "odd": "1.30"
                                     })
-                            else:
-                                print(f"      ⚠️ [FASE 3] Nenhum jogador qualificado com média maior que 1.0 em {t1} x {t2}.")
-                        else:
-                            print(f"      ⏩ [OTIMIZAÇÃO] Pulando scouts avançados para {nome_comp} (Não é liga Elite).")
 
                         # ALIMENTAÇÃO DA LISTA FINAL
                         if mercados_para_processar:
@@ -319,7 +332,6 @@ def main():
                                 texto_lower = texto_limpo.lower()
                                 
                                 if "0.0" in texto_limpo and any(t in texto_lower for t in ["chute", "falta"]):
-                                    print(f"⏩ Ignorando scout zerado: {texto_limpo}")
                                     continue
 
                                 eh_scout = (
@@ -329,12 +341,13 @@ def main():
 
                                 odd_para_lista = "Análise" if eh_scout else m_odd
 
+                                # 🟢 CORREÇÃO CRÍTICA 2: Recolocada a chave odds_todas
                                 lista_para_filtros.append({
                                     "horario": h_br, "time_casa": t1, "time_fora": t2,
                                     "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
                                     "link_betano": dados_jogo.get("link_betano"),
                                     "link_h2h": url_h2h_final,
-                                    "odds_todas": v_odds # 👈 Passa o dicionário completo das odds extraídas
+                                    "odds_todas": v_odds
                                 })
                                 total_mercados += 1
 
@@ -355,24 +368,11 @@ def main():
 
                 except Exception as e:
                     print(f"⚠️ Erro ao processar partida no loop interno (Index {idx+1}): {e}")
-                    
                     if "invalid session id" in str(e).lower() or "session" in str(e).lower():
-                        print("⚠️ [CRÍTICO] Sessão inválida detectada no loop interno. Derrubando driver...")
                         try: driver.quit()
                         except: pass
                         driver = configurar_driver()
                         break 
-                    else:
-                        if len(driver.window_handles) > 1:
-                            try:
-                                todas_abas = driver.window_handles[:]
-                                for aba in todas_abas:
-                                    if aba != aba_principal:
-                                        driver.switch_to.window(aba)
-                                        driver.close()
-                                driver.switch_to.window(aba_principal)
-                            except:
-                                pass
                     continue
 
         # --- PROCESSAMENTO E ENVIO FINAL ---
@@ -405,11 +405,9 @@ def main():
                     "horario": j.get("horario"),
                     "odd": j.get("odd"),
                     "link_h2h": j.get("link_h2h"),
-                    "odds_todas": j.get("odds_todas", {}) # 👈 Armazena o mapa completo de odds para o bingo357
+                    "odds_todas": j.get("odds_todas", {})
                 }
 
-            print("📢 Pulando envio do Elite conforme solicitado.")
-    
             canal_id = os.getenv('CHANNEL_ID')
             novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
             texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
