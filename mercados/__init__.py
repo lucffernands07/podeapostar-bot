@@ -3,6 +3,6 @@
 from . import gols
 from . import ambos_marcam
 from . import chance_dupla
-from . import vitoria_casa
+from . import vitorias
 from . import jogadores
 from . import cartoes
