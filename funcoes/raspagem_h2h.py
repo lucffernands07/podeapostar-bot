@@ -7,10 +7,9 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     """
-    RASPAGEM H2H OTIMIZADA:
-    1. Raspa o confronto direto histórico (3ª Tabela) navegando para /h2h/total/
-    2. Raspa os últimos 5 jogos isolados do Mandante em CASA via /h2h/casa/
-    3. Raspa os últimos 5 jogos isolados do Visitante FORA via /h2h/fora/
+    RASPAGEM H2H (TESTE ISOLADO):
+    - Raspa apenas os jogos em CASA do Mandante e FORA do Visitante.
+    - 3ª Tabela (H2H histórico na aba Total) desativada temporariamente para testes.
     """
     stats = {
         "link_betano": None,
@@ -39,7 +38,6 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
     else:
         url_base_h2h = url_limpa + "/h2h"
 
-    url_total = f"{url_base_h2h}/total/"
     url_casa = f"{url_base_h2h}/casa/"
     url_fora = f"{url_base_h2h}/fora/"
 
@@ -58,33 +56,10 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             print(f"      ⚠️ Erro ao capturar link Betano inicial: {e_link}")
 
         # -----------------------------------------------------------------
-        # 1. RASPAGEM: CONFRONTO DIRETO HISTÓRICO (3ª TABELA DA ABA TOTAL)
+        # 1. RASPAGEM: MANDANTE JOGANDO EM CASA (/h2h/casa/)
         # -----------------------------------------------------------------
         try:
-            driver.get(url_total)
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
-            secoes_total = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-            
-            if len(secoes_total) >= 3:
-                linhas_h2h = secoes_total[2].find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
-                for i, linha in enumerate(linhas_h2h):
-                    res_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result")
-                    if res_el:
-                        # Extrai os números do placar e formata com hífen (ex: "2-0")
-                        nums = re.findall(r'\d+', res_el[0].text)
-                        if len(nums) >= 2:
-                            placar_h2h = f"{nums[0]}-{nums[1]}"
-                            if i == 0: stats["h2h_placar_1"] = placar_h2h
-                            if i == 1: stats["h2h_placar_2"] = placar_h2h
-        except Exception as e_h2h:
-            print(f"      ⚠️ Erro/Aviso ao raspar 3ª tabela H2H (Total): {e_h2h}")
-
-        # -----------------------------------------------------------------
-        # 2. RASPAGEM: MANDANTE JOGANDO EM CASA (/h2h/casa/)
-        # -----------------------------------------------------------------
-        try:
-            driver.get(url_casa)
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
+            WebDriverWait(driver, 8).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
             secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
             if secoes:
                 linhas_casa = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
@@ -120,11 +95,11 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
             print(f"      ⚠️ Erro ao raspar jogos do Casa (em casa): {e_casa}")
 
         # -----------------------------------------------------------------
-        # 3. RASPAGEM: VISITANTE JOGANDO FORA (/h2h/fora/)
+        # 2. RASPAGEM: VISITANTE JOGANDO FORA (/h2h/fora/)
         # -----------------------------------------------------------------
         try:
             driver.get(url_fora)
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
+            WebDriverWait(driver, 8).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
             secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
             if secoes:
                 linhas_fora = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
@@ -149,7 +124,7 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                     if g1 > 0 and g2 > 0: stats["fora_btts"] += 1
                     
                     res_atual = "E"
-                    if (t2.lower() in n_casa.lower() and g1 > g2) or (t2.lower() in n_fora.lower() and g2 < g1):
+                    if (t2.lower() in n_casa.lower() and g1 > g2) or (t2.lower() in n_fora.lower() and g2 > g1):
                         res_atual = "V"
                         stats["fora_vitorias_recente"] += 1
                     elif (t2.lower() in n_casa.lower() and g1 < g2) or (t2.lower() in n_fora.lower() and g2 > g1):
@@ -159,8 +134,30 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
         except Exception as e_fora:
             print(f"      ⚠️ Erro ao raspar jogos do Fora (fora): {e_fora}")
 
+        # -----------------------------------------------------------------
+        # 3. RASPAGEM: CONFRONTO DIRETO HISTÓRICO (DESATIVADO PARA TESTE)
+        # -----------------------------------------------------------------
+        # try:
+        #     url_total = f"{url_base_h2h}/total/"
+        #     driver.get(url_total)
+        #     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
+        #     secoes_total = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        #     
+        #     if len(secoes_total) >= 3:
+        #         linhas_h2h = secoes_total[2].find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
+        #         for i, linha in enumerate(linhas_h2h):
+        #             res_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result")
+        #             if res_el:
+        #                 nums = re.findall(r'\d+', res_el[0].text)
+        #                 if len(nums) >= 2:
+        #                     placar_h2h = f"{nums[0]}-{nums[1]}"
+        #                     if i == 0: stats["h2h_placar_1"] = placar_h2h
+        #                     if i == 1: stats["h2h_placar_2"] = placar_h2h
+        # except Exception as e_h2h:
+        #     print(f"      ⚠️ Aviso H2H Total: {e_h2h}")
+
     except Exception as e:
-        print(f"      ⚠️ Erro Geral na Raspagem: {e}")
+        print(f"      ⚠️ Erro Geral na Raspagem H2H: {e}")
     
     finally:
         if len(driver.window_handles) > 1:
@@ -171,4 +168,4 @@ def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
                 pass
 
     return stats
-    
+        
