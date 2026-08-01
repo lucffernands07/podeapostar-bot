@@ -24,14 +24,14 @@ def verificar_btts(s, mercados_gols_aprovados=None):
         # 🟢 REGRA 1: AMBAS MARCAM SIM (Mínimo 4/5)
         if btts_casa >= 4 and btts_fora >= 4:
             if btts_casa == 5 and btts_fora == 5:
-                return ["Ambas Marcam: Sim (100%)"]
-            return ["Ambas Marcam: Sim (80%)"]
+                return [{"mercado": "Ambas Marcam: Sim (100%)", "tipo": "BTTS_SIM"}]
+            return [{"mercado": "Ambas Marcam: Sim (80%)", "tipo": "BTTS_SIM"}]
 
         # 🔴 REGRA 2: AMBAS MARCAM NÃO (Máximo 3/5)
         if btts_casa <= 3 and btts_fora <= 3:
             if btts_casa <= 1 and btts_fora <= 1:
-                return ["Ambas Marcam: Não (100%)"]
-            return ["Ambas Marcam: Não (80%)"]
+                return [{"mercado": "Ambas Marcam: Não (100%)", "tipo": "BTTS_NAO"}]
+            return [{"mercado": "Ambas Marcam: Não (80%)", "tipo": "BTTS_NAO"}]
 
         return []
 
