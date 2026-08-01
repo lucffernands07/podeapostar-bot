@@ -2,53 +2,11 @@
     "data_geracao": "2026-08-01",
     "jogos": [
         {
-            "time_casa": "Vasco",
-            "time_fora": "Fluminense",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/UZy4jFU7/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Atlético-MG",
-            "time_fora": "Juventude",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/6gCVQe6K/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Santos",
             "time_fora": "Remo",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/UgScCdiR/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Estudiantes Rio Cuarto",
-            "time_fora": "Banfield",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lU8z7mJb/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Gimnasia Mendoza",
-            "time_fora": "Union Santa Fe",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/d0FhdW4t/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Belgrano",
-            "time_fora": "Argentinos Juniors",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/8K0S89ln/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Estudiantes",
-            "time_fora": "Defensa y Justicia",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/ldXp0u6E/#/resumo-de-jogo"
         },
         {
             "time_casa": "Racing Club",
