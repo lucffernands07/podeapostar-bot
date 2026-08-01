@@ -4,11 +4,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 def capturar_todas_as_odds(driver, id_jogo):
-    # 1. Adicionado GOLS_M35 com valor padrão "N/A"
+    # Dicionário completo incluindo BTTS_NAO e VITORIA_FORA
     res = {
         "GOLS_15": "N/A", "GOLS_25": "N/A", "GOLS_M35": "N/A", "GOLS_M45": "N/A", 
-        "BTTS": "N/A", "1X": "N/A", "X2": "N/A",
-        "VITORIA_CASA": "N/A"
+        "BTTS": "N/A", "BTTS_NAO": "N/A",
+        "1X": "N/A", "X2": "N/A",
+        "VITORIA_CASA": "N/A", "VITORIA_FORA": "N/A"
     }
 
     # Abre a aba de resumo para pegar o link base
@@ -35,27 +36,27 @@ def capturar_todas_as_odds(driver, id_jogo):
             time.sleep(1.5)
             linha_1x2 = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
             odds_1x2 = linha_1x2.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
-            if odds_1x2:
+            if len(odds_1x2) >= 3:
+                # [0] = Casa | [1] = Empate | [2] = Fora
                 res["VITORIA_CASA"] = odds_1x2[0].text.replace('↑', '').replace('↓', '').strip()
+                res["VITORIA_FORA"] = odds_1x2[2].text.replace('↑', '').replace('↓', '').strip()
         except: pass
 
-        # --- 2. MERCADO DE GOLS (ACIMA/ABAIXO) COM O NOVO FILTRO ---
+        # --- 2. MERCADO DE GOLS (ACIMA/ABAIXO) ---
         url_gols = link_odds_base.replace("/odds/", "/odds/acima-abaixo/tempo-regulamentar/")
         driver.get(url_gols)
         try:
             WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
             time.sleep(1.5)
             
-            # Mapeamento para o loop incluindo o alvo 3.5 apontando para a coluna 1 (Abaixo)
             mercados_alvo = {
                 "1.5": {"chave": "GOLS_15", "col": 0},  # Acima
                 "2.5": {"chave": "GOLS_25", "col": 0},  # Acima
-                "3.5": {"chave": "GOLS_M35", "col": 1}, # 🚨 NOVO: Abaixo
+                "3.5": {"chave": "GOLS_M35", "col": 1}, # Abaixo
                 "4.5": {"chave": "GOLS_M45", "col": 1}  # Abaixo
             }
 
             for valor, config in mercados_alvo.items():
-                # XPath usando o data-testid validado no teste
                 xpath = f"//div[contains(@class, 'ui-table__row')][.//span[@data-testid='wcl-oddsValue' and text()='{valor}']]"
                 linhas = driver.find_elements(By.XPATH, xpath)
 
@@ -67,13 +68,16 @@ def capturar_todas_as_odds(driver, id_jogo):
                         res[config["chave"]] = odd_raw.replace('↑', '').replace('↓', '').strip()
         except: pass
 
-        # --- 3. AMBOS MARCAM (BTTS) ---
+        # --- 3. AMBOS MARCAM (BTTS SIM / BTTS NÃO) ---
         try:
             driver.get(link_odds_base.replace("/odds/", "/odds/ambos-marcam/tempo-regulamentar/"))
             time.sleep(1.5)
             linha_b = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
             odds_b = linha_b.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
-            if odds_b: res["BTTS"] = odds_b[0].text.replace('↑', '').replace('↓', '').strip()
+            if len(odds_b) >= 2:
+                # [0] = Sim | [1] = Não
+                res["BTTS"] = odds_b[0].text.replace('↑', '').replace('↓', '').strip()
+                res["BTTS_NAO"] = odds_b[1].text.replace('↑', '').replace('↓', '').strip()
         except: pass
 
         # --- 4. DUPLA CHANCE ---
