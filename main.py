@@ -171,13 +171,15 @@ def main():
                         print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
 
                         # ----------------------------------------------------------
-                        # FASE 1: ANÁLISE DE MERCADOS DE RECORRÊNCIA
+                        # FASE 1: ANÁLISE DE MERCADOS DE RECORRÊNCIA (CASA / FORA)
                         # ----------------------------------------------------------
-                        url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
-                        dados_jogo = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
+                        # Envia a URL limpa da partida sem sufixos
+                        url_jogo_base = f"https://www.flashscore.com.br/jogo/{id_jogo}"
+                        dados_jogo = pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2)
                         
+                        # Define a URL base H2H para ser usada pelas demais fases do bot
                         if isinstance(dados_jogo, dict) and "url_h2h_base" not in dados_jogo:
-                            dados_jogo["url_h2h_base"] = url_h2h_final
+                            dados_jogo["url_h2h_base"] = f"{url_jogo_base}/h2h"
 
                         mercados_fase1 = []
 
@@ -240,7 +242,7 @@ def main():
                                     print(f"      ⚠️ Descartado (Odd baixa): {m_texto} | Valor: {valor_odd_str}")
                             except Exception as e_conv:
                                 print(f"      ⚠️ Erro ao converter odd para float ({m_texto}): {e_conv}")
-
+    
                         # ----------------------------------------------------------
                         # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS
                         # ----------------------------------------------------------
