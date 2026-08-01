@@ -1,125 +1,5 @@
 [
     {
-        "horario": "00:05",
-        "liga": "México - Liga MX",
-        "time_casa": "Cruz Azul",
-        "time_fora": "Atlante",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "1.95",
-        "link_betano": "https://www.betano.bet.br/match-odds/Cruz-Azul-Atlante-FC/89400565/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/MHOyL2jm/#/h2h/overall"
-    },
-    {
-        "horario": "09:30",
-        "liga": "Ucrânia - Premier League",
-        "time_casa": "FC Kharkiv",
-        "time_fora": "Veres-Rivne",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "1.53",
-        "link_betano": "https://www.betano.bet.br/match-odds/Metalist-1925-Kharkiv-Veres-Rivne/88939584/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/lYXLjUc3/#/h2h/overall"
-    },
-    {
-        "horario": "09:45",
-        "liga": "Polônia - Ekstraklasa",
-        "time_casa": "Piast",
-        "time_fora": "Wisla",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.1",
-        "link_betano": "https://www.betano.bet.br/match-odds/Piast-Gliwice-Wisla-Krakow/88118863/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/IBdYXoNa/#/h2h/overall"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Armênia Premier League",
-        "time_casa": "BKMA",
-        "time_fora": "Shirak",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "1.8",
-        "link_betano": "https://www.betano.bet.br/match-odds/BKMA-Yerevan-FC-Shirak-Gyumri/89704796/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/zoW8BedT/#/h2h/overall"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Cazaquistão - Primeira Liga",
-        "time_casa": "Kyzylzhar",
-        "time_fora": "Aktobe",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "1.8",
-        "link_betano": "https://www.betano.bet.br/match-odds/Kyzylzhar-Petropavlosvk-FK-Aktobe/89704936/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/0UMhJPCk/#/h2h/overall"
-    },
-    {
-        "horario": "12:00",
-        "liga": "Cazaquistão - Primeira Liga",
-        "time_casa": "Atyrau",
-        "time_fora": "Zhetysu",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "1.8",
-        "link_betano": "https://www.betano.bet.br/match-odds/FK-Atyrau-Zhetysu-Taldykorgan/89704674/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/46PD6nTq/#/h2h/overall"
-    },
-    {
-        "horario": "12:00",
-        "liga": "Áustria - Bundesliga",
-        "time_casa": "Tirol",
-        "time_fora": "Sturm Graz",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "2.1",
-        "link_betano": "https://www.betano.bet.br/match-odds/WSG-Tirol-SK-Sturm-Graz/88064147/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/nZ2OYYNs/#/h2h/overall"
-    },
-    {
-        "horario": "12:30",
-        "liga": "Polônia - Ekstraklasa",
-        "time_casa": "Wieczysta Krakow",
-        "time_fora": "Lech",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "2.5",
-        "link_betano": "https://www.betano.bet.br/match-odds/Wieczysta-Krakow-Lech-Poznan/88118866/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/feEhL8wf/#/h2h/overall"
-    },
-    {
-        "horario": "13:00",
-        "liga": "Armênia Premier League",
-        "time_casa": "FC Gandzasar",
-        "time_fora": "Ararat-Armenia",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "1.61",
-        "link_betano": "https://www.betano.bet.br/match-odds/FC-Gandzasar-Kapan-FC-Ararat-Armenia/89704981/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/jVRXRGtA/#/h2h/overall"
-    },
-    {
-        "horario": "13:00",
-        "liga": "Dinamarca - Superliga",
-        "time_casa": "Lyngby",
-        "time_fora": "Aarhus",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "2.38",
-        "link_betano": "https://www.betano.bet.br/match-odds/Lyngby-BK-Aarhus-GF/88558391/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/Qi00fNLr/#/h2h/overall"
-    },
-    {
-        "horario": "14:30",
-        "liga": "Áustria - Bundesliga",
-        "time_casa": "Red Bull Salzburg",
-        "time_fora": "Hartberg",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "1.91",
-        "link_betano": "https://www.betano.bet.br/match-odds/FC-Red-Bull-Salzburg-TSV-Hartberg/88064149/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/Kn1WWChf/#/h2h/overall"
-    },
-    {
-        "horario": "15:30",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Estudiantes Rio Cuarto",
-        "time_fora": "Banfield",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "1.67",
-        "link_betano": "https://www.betano.bet.br/match-odds/Estudiantes-Rio-Cuarto-CA-Banfield/88418038/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/lU8z7mJb/#/h2h/overall"
-    },
-    {
         "horario": "15:30",
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Estudiantes Rio Cuarto",
@@ -150,56 +30,6 @@
         "link_h2h": "https://www.flashscore.com.br/jogo/lU8z7mJb/#/h2h/overall"
     },
     {
-        "horario": "15:30",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Gimnasia Mendoza",
-        "time_fora": "Union Santa Fe",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "1.8",
-        "link_betano": "https://www.betano.bet.br/match-odds/Gimnasia-Y-Esgrima-Mendoza-Union-de-Santa-Fe/88418035/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/d0FhdW4t/#/h2h/overall"
-    },
-    {
-        "horario": "15:30",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Gimnasia Mendoza",
-        "time_fora": "Union Santa Fe",
-        "mercado": "Chutes no gol: Simoni V. (GIM) | Méd: 1.0",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Gimnasia-Y-Esgrima-Mendoza-Union-de-Santa-Fe/88418035/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/d0FhdW4t/#/h2h/overall"
-    },
-    {
-        "horario": "15:30",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Gimnasia Mendoza",
-        "time_fora": "Union Santa Fe",
-        "mercado": "Chutes no gol: Estigarribia M. (UNI) | Méd: 2.0",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Gimnasia-Y-Esgrima-Mendoza-Union-de-Santa-Fe/88418035/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/d0FhdW4t/#/h2h/overall"
-    },
-    {
-        "horario": "16:00",
-        "liga": "Colombia - Primeira A",
-        "time_casa": "Deportivo Pasto",
-        "time_fora": "Aguilas",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "1.8",
-        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Pasto-Aguilas-Doradas/89064426/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/lOKywXy3/#/h2h/overall"
-    },
-    {
-        "horario": "17:30",
-        "liga": "Copa do Brasil",
-        "time_casa": "Vasco",
-        "time_fora": "Fluminense",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "1.8",
-        "link_betano": "https://www.betano.bet.br/match-odds/Vasco-da-Gama-RJ-Fluminense-RJ/86389476/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/UZy4jFU7/#/h2h/overall"
-    },
-    {
         "horario": "17:30",
         "liga": "Copa do Brasil",
         "time_casa": "Vasco",
@@ -214,7 +44,7 @@
         "liga": "Copa do Brasil",
         "time_casa": "Vasco",
         "time_fora": "Fluminense",
-        "mercado": "Chutes no gol: Cuiabano (VAS) | Méd: 0.5",
+        "mercado": "Chutes no gol: David (VAS) | Méd: 0.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Vasco-da-Gama-RJ-Fluminense-RJ/86389476/",
         "link_h2h": "https://www.flashscore.com.br/jogo/UZy4jFU7/#/h2h/overall"
@@ -228,16 +58,6 @@
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Vasco-da-Gama-RJ-Fluminense-RJ/86389476/",
         "link_h2h": "https://www.flashscore.com.br/jogo/UZy4jFU7/#/h2h/overall"
-    },
-    {
-        "horario": "18:00",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Belgrano",
-        "time_fora": "Argentinos Juniors",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "1.57",
-        "link_betano": "https://www.betano.bet.br/match-odds/CA-Belgrano-Argentinos-Juniors/88418046/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/8K0S89ln/#/h2h/overall"
     },
     {
         "horario": "18:00",
@@ -274,16 +94,6 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Estudiantes",
         "time_fora": "Defensa y Justicia",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "1.53",
-        "link_betano": "https://www.betano.bet.br/match-odds/Estudiantes-de-La-Plata-Defensa-y-Justicia/88418037/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/ldXp0u6E/#/h2h/overall"
-    },
-    {
-        "horario": "18:00",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Estudiantes",
-        "time_fora": "Defensa y Justicia",
         "mercado": "Chutes no gol: Lucas Alario (EST) | Méd: 1.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Estudiantes-de-La-Plata-Defensa-y-Justicia/88418037/",
@@ -310,26 +120,6 @@
         "link_h2h": "https://www.flashscore.com.br/jogo/ldXp0u6E/#/h2h/overall"
     },
     {
-        "horario": "18:05",
-        "liga": "Colombia - Primeira A",
-        "time_casa": "Alianza",
-        "time_fora": "Tolima",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "1.8",
-        "link_betano": "https://www.betano.bet.br/match-odds/Alianza-FC-Deportes-Tolima/89064349/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/ILwCMBiM/#/h2h/overall"
-    },
-    {
-        "horario": "19:30",
-        "liga": "Copa do Brasil",
-        "time_casa": "Atlético-MG",
-        "time_fora": "Juventude",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "1.53",
-        "link_betano": "https://www.betano.bet.br/match-odds/Clube-Atletico-MG-Juventude-RS/86389738/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/6gCVQe6K/#/h2h/overall"
-    },
-    {
         "horario": "19:30",
         "liga": "Copa do Brasil",
         "time_casa": "Atlético-MG",
@@ -350,32 +140,12 @@
         "link_h2h": "https://www.flashscore.com.br/jogo/6gCVQe6K/#/h2h/overall"
     },
     {
-        "horario": "20:00",
-        "liga": "México - Liga MX",
-        "time_casa": "Querétaro",
-        "time_fora": "Tigres",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "2.05",
-        "link_betano": "https://www.betano.bet.br/match-odds/Queretaro-FC-CF-Tigres-UANL/89399546/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/hrrC4s66/#/h2h/overall"
-    },
-    {
-        "horario": "20:10",
-        "liga": "Colombia - Primeira A",
-        "time_casa": "Ind. Medellín",
-        "time_fora": "Dep. Cali",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "1.8",
-        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-Medellin-Deportivo-Cali/89064427/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/MkYryB6F/#/h2h/overall"
-    },
-    {
         "horario": "20:30",
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Racing Club",
         "time_fora": "Tigre",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "1.57",
+        "mercado": "Chutes no gol: Braian Rodríguez (RAC) | Méd: 1.0",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Racing-Club-CA-Tigre/88418041/",
         "link_h2h": "https://www.flashscore.com.br/jogo/IeLIl63U/#/h2h/overall"
     },
@@ -394,100 +164,10 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Racing Club",
         "time_fora": "Tigre",
-        "mercado": "Chutes no gol: Braian Rodríguez (RAC) | Méd: 1.0",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Racing-Club-CA-Tigre/88418041/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/IeLIl63U/#/h2h/overall"
-    },
-    {
-        "horario": "20:30",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Racing Club",
-        "time_fora": "Tigre",
         "mercado": "Chutes no gol: Romero D. (TIG) | Méd: 1.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Racing-Club-CA-Tigre/88418041/",
         "link_h2h": "https://www.flashscore.com.br/jogo/IeLIl63U/#/h2h/overall"
-    },
-    {
-        "horario": "20:30",
-        "liga": "EUA - MLS",
-        "time_casa": "CF Montreal",
-        "time_fora": "New England Revolution",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.2",
-        "link_betano": "https://www.betano.bet.br/match-odds/CF-Montreal-New-England-Revolution/85561836/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/WtInOk46/#/h2h/overall"
-    },
-    {
-        "horario": "20:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Cincinnati",
-        "time_fora": "San Jose Earthquakes",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "3.4",
-        "link_betano": "https://www.betano.bet.br/match-odds/FC-Cincinnati-San-Jose-Earthquakes/85561842/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/290DX28U/#/h2h/overall"
-    },
-    {
-        "horario": "20:30",
-        "liga": "EUA - MLS",
-        "time_casa": "DC United",
-        "time_fora": "Nashville SC",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.05",
-        "link_betano": "https://www.betano.bet.br/match-odds/D-C-United-Nashville-SC/85561837/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/6NQNi6gn/#/h2h/overall"
-    },
-    {
-        "horario": "20:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Inter Miami",
-        "time_fora": "Columbus Crew",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.75",
-        "link_betano": "https://www.betano.bet.br/match-odds/Inter-Miami-CF-Columbus-Crew-SC/85561839/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/hvPVkpOb/#/h2h/overall"
-    },
-    {
-        "horario": "20:30",
-        "liga": "EUA - MLS",
-        "time_casa": "New York Red Bulls",
-        "time_fora": "Orlando City",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "3.4",
-        "link_betano": "https://www.betano.bet.br/match-odds/New-York-Red-Bulls-Orlando-City-SC/85561840/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/l6IvlOhB/#/h2h/overall"
-    },
-    {
-        "horario": "20:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Philadelphia Union",
-        "time_fora": "Atlanta Utd",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "2.25",
-        "link_betano": "https://www.betano.bet.br/match-odds/Philadelphia-Union-Atlanta-United-FC/85561834/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/MJGnn2NN/#/h2h/overall"
-    },
-    {
-        "horario": "20:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Vancouver Whitecaps",
-        "time_fora": "Los Angeles FC",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.5",
-        "link_betano": "https://www.betano.bet.br/match-odds/Vancouver-Whitecaps-FC-Los-Angeles-FC/85561841/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/hd6eMTYI/#/h2h/overall"
-    },
-    {
-        "horario": "21:00",
-        "liga": "Copa do Brasil",
-        "time_casa": "Santos",
-        "time_fora": "Remo",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "1.7",
-        "link_betano": "https://www.betano.bet.br/match-odds/Santos-SP-Remo-PA/86389759/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/UgScCdiR/#/h2h/overall"
     },
     {
         "horario": "21:00",
@@ -518,105 +198,5 @@
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Santos-SP-Remo-PA/86389759/",
         "link_h2h": "https://www.flashscore.com.br/jogo/UgScCdiR/#/h2h/overall"
-    },
-    {
-        "horario": "21:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Chicago Fire",
-        "time_fora": "Charlotte",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.38",
-        "link_betano": "https://www.betano.bet.br/match-odds/Chicago-Fire-FC-Charlotte-FC/85564131/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/t4cJttoo/#/h2h/overall"
-    },
-    {
-        "horario": "21:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Minnesota",
-        "time_fora": "San Diego FC",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.5",
-        "link_betano": "https://www.betano.bet.br/match-odds/Minnesota-United-FC-San-Diego-FC/85564134/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/SdwE2N74/#/h2h/overall"
-    },
-    {
-        "horario": "21:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Sporting Kansas City",
-        "time_fora": "Houston Dynamo",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.25",
-        "link_betano": "https://www.betano.bet.br/match-odds/Sporting-Kansas-City-Houston-Dynamo-FC/85564132/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/6sk54qwh/#/h2h/overall"
-    },
-    {
-        "horario": "21:30",
-        "liga": "EUA - MLS",
-        "time_casa": "St. Louis City",
-        "time_fora": "Real Salt Lake",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.5",
-        "link_betano": "https://www.betano.bet.br/match-odds/St-Louis-City-SC-Real-Salt-Lake/85564133/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/zNtM01xH/#/h2h/overall"
-    },
-    {
-        "horario": "22:00",
-        "liga": "México - Liga MX",
-        "time_casa": "Leon",
-        "time_fora": "Pachuca",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.2",
-        "link_betano": "https://www.betano.bet.br/match-odds/Club-Leon-CF-Pachuca/89400178/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/QetK2LzJ/#/h2h/overall"
-    },
-    {
-        "horario": "22:05",
-        "liga": "México - Liga MX",
-        "time_casa": "Atlas",
-        "time_fora": "Monterrey",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.05",
-        "link_betano": "https://www.betano.bet.br/match-odds/Atlas-FC-CF-Monterrey/89400115/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/h2Y5QOSP/#/h2h/overall"
-    },
-    {
-        "horario": "22:15",
-        "liga": "Colombia - Primeira A",
-        "time_casa": "Junior",
-        "time_fora": "Millonarios",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.0",
-        "link_betano": "https://www.betano.bet.br/match-odds/Club-Atletico-Junior-Millonarios-FC/89064428/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/YBQUR6T1/#/h2h/overall"
-    },
-    {
-        "horario": "22:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Colorado Rapids",
-        "time_fora": "Austin FC",
-        "mercado": "Ambas Marcam: Não (100%)",
-        "odd": "2.1",
-        "link_betano": "https://www.betano.bet.br/match-odds/Colorado-Rapids-Austin-FC/85566293/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/WlzVbu7T/#/h2h/overall"
-    },
-    {
-        "horario": "23:30",
-        "liga": "EUA - MLS",
-        "time_casa": "Los Angeles Galaxy",
-        "time_fora": "FC Dallas",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.63",
-        "link_betano": "https://www.betano.bet.br/match-odds/Los-Angeles-Galaxy-FC-Dallas/85568862/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/SKL0gJUj/#/h2h/overall"
-    },
-    {
-        "horario": "23:45",
-        "liga": "EUA - MLS",
-        "time_casa": "Portland Timbers",
-        "time_fora": "Seattle Sounders",
-        "mercado": "Ambas Marcam: Não (80%)",
-        "odd": "2.75",
-        "link_betano": "https://www.betano.bet.br/match-odds/Portland-Timbers-Seattle-Sounders-FC/85568865/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/hEuuHMMc/#/h2h/overall"
     }
 ]
