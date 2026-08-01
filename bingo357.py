@@ -40,8 +40,8 @@ def prioridade_mercado(mercado_texto):
     if "gols" in m: return 1
     if "ambas" in m: return 2
     if "1x" in m: return 3
-    if "vitória" in m or "vitoria" in m: return 4   
-    if "2x" in m or "x2" in m: return 5
+    if "2x" in m or "x2" in m: return 4
+    if "vitória" in m or "vitoria" in m: return 5   
     if "chute" in m: return 6
     if "falta" in m: return 7
     if "cartão" in m or "cartao" in m: return 8
@@ -61,9 +61,7 @@ def carregar_ranking_pro():
         except: return []
     return []
 
-#Configura jogos das 00:00 para fim do dia
 def chave_ordenacao_horario(chave_jogo):
-    # chave_jogo é do tipo "00:00_time1_time2"
     horario = chave_jogo.split('_')[0]
     if horario == "00:00":
         return f"24:00_{chave_jogo}"
@@ -128,8 +126,29 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             
             horario = j.get('horario') or info_extra.get('horario') or "00:00"
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
-            odd_valor = str(j.get('odd') or info_extra.get('odd', '1.30')).strip()
             
+            # --- SELEÇÃO INTELIGENTE DA ODD POR MERCADO ---
+            mercado_raw = j.get('mercado', '')
+            odd_valor = j.get('odd') or info_extra.get('odd', '1.30')
+            
+            # Mapeia a odd correta capturada no odds.py se presente no cache_dados
+            if isinstance(info_extra, dict) and "odds_todas" in info_extra:
+                odds_dic = info_extra["odds_todas"]
+                m_lower = mercado_raw.lower()
+                if "ambas marcam: não" in m_lower or "ambas marcam nao" in m_lower:
+                    odd_valor = odds_dic.get("BTTS_NAO", odd_valor)
+                elif "ambas marcam" in m_lower:
+                    odd_valor = odds_dic.get("BTTS", odd_valor)
+                elif "vitória fora" in m_lower or "vitoria fora" in m_lower:
+                    odd_valor = odds_dic.get("VITORIA_FORA", odd_valor)
+                elif "vitória casa" in m_lower or "vitoria casa" in m_lower:
+                    odd_valor = odds_dic.get("VITORIA_CASA", odd_valor)
+                elif "1x" in m_lower:
+                    odd_valor = odds_dic.get("1X", odd_valor)
+                elif "2x" in m_lower or "x2" in m_lower:
+                    odd_valor = odds_dic.get("X2", odd_valor)
+            
+            odd_valor = str(odd_valor).strip()
             link_h2h_resolvido = j.get('link_h2h') or info_extra.get('link_h2h')
             
             chave_jogo = f"{horario}_{t1}_{t2}"
@@ -144,57 +163,46 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                     "link_h2h": link_h2h_resolvido
                 }
             
-            mercado_limpo = j.get('mercado', '')
-            
             sufixo_odd = ""
-            if "Análise" in odd_valor or "analise" in odd_valor.lower():
+            if "Análise" in odd_valor or "analise" in odd_valor.lower() or odd_valor == "N/A":
                 sufixo_odd = ""
             elif odd_valor:
                 sufixo_odd = f" ODD {odd_valor}"
                 
-            # --- TRATAMENTO DE SCOUTS DE JOGADORES ---
-            if "falta" in mercado_limpo.lower():
-                match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_limpo)
+            # --- TRATAMENTO E FORMATAÇÃO DE TEXTO ---
+            if "falta" in mercado_raw.lower():
+                match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_raw)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
-                
-                match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_limpo, re.IGNORECASE)
+                match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_raw, re.IGNORECASE)
                 med = match_med.group(1) if match_med else None
+                texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {float(med):.1f}{sufixo_odd}" if med else f"🔶 Faltas sofridas: {nome}{sufixo_odd}"
                 
-                if med:
-                    texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {float(med):.1f}{sufixo_odd}"
-                else:
-                    texto_final = f"🔶 Faltas sofridas: {nome}{sufixo_odd}"
-                
-            elif "chute" in mercado_limpo.lower():
-                match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_limpo)
+            elif "chute" in mercado_raw.lower():
+                match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_raw)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
-                
-                match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_limpo, re.IGNORECASE)
+                match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_raw, re.IGNORECASE)
                 med = match_med.group(1) if match_med else None
+                texto_final = f"🔶 Chutes no gol: {nome} | Méd: {float(med):.1f}{sufixo_odd}" if med else f"🔶 Chutes no gol: {nome}{sufixo_odd}"
                 
-                if med:
-                    texto_final = f"🔶 Chutes no gol: {nome} | Méd: {float(med):.1f}{sufixo_odd}"
-                else:
-                    texto_final = f"🔶 Chutes no gol: {nome}{sufixo_odd}"
-                
-            elif "cartã" in mercado_limpo.lower() or "cartao" in mercado_limpo.lower():
-                match_med_cartao = re.search(r'[\d.]+', mercado_limpo)
+            elif "cartã" in mercado_raw.lower() or "cartao" in mercado_raw.lower():
+                match_med_cartao = re.search(r'[\d.]+', mercado_raw)
                 num_media = match_med_cartao.group(0) if match_med_cartao else "0.0"
                 texto_final = f"🔶 Média de cartões: {num_media}{sufixo_odd}"
                 
             else:
-                texto_final = f"🔶 {mercado_limpo.split('|')[0].strip()}{sufixo_odd}"
+                texto_final = f"🔶 {mercado_raw.split('|')[0].strip()}{sufixo_odd}"
                 
             agrupados[chave_jogo]["mercados"].append({
                 "texto": texto_final, 
-                "prioridade": prioridade_mercado(j.get('mercado', ''))
+                "prioridade": prioridade_mercado(mercado_raw)
             })
+            
             odd_total *= extrair_odd(odd_valor)
 
         lista_blocos = []
         for chave in sorted(agrupados.keys(), key=chave_ordenacao_horario):
-            d = agrupados[chave]  # Atribuição corrigida
-            d["mercados"].sort(key=lambda x: x.get('best_score', x['prioridade']))
+            d = agrupados[chave]
+            d["mercados"].sort(key=lambda x: x['prioridade'])
             
             linhas = "```\n" + "\n".join([m['texto'] for m in d["mercados"]]) + "\n```"
             
@@ -207,4 +215,3 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
-            
