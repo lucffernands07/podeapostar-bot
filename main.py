@@ -179,62 +179,37 @@ def main():
 
                         mercados_fase1 = []
 
-                        # Gols
+                        # 1. Gols (+1.5, +2.5, -3.5, -4.5)
                         res_gols = gols.verificar_gols(dados_jogo)
                         for rg in res_gols:
-                            mercados_fase1.append({"texto": rg['mercado'], "chave": rg['tipo']})
+                            if isinstance(rg, dict):
+                                mercados_fase1.append({"texto": rg['mercado'], "chave": rg['tipo']})
 
-                        # Ambos Marcam (Sim / Não)
-                        res_btts = ambos_marcam.verificar_btts(dados_jogo)
+                        # 2. Ambos Marcam (Sim / Não) - Passa os gols aprovados para a Trava
+                        res_btts = ambos_marcam.verificar_btts(dados_jogo, mercados_gols_aprovados=res_gols)
                         for rb in res_btts:
-                            chave_btts = "BTTS_NAO" if "Não" in rb else "BTTS"
-                            mercados_fase1.append({"texto": rb, "chave": chave_btts})
+                            if isinstance(rb, dict):
+                                m_texto = rb.get("mercado", "")
+                                m_tipo = rb.get("tipo", "BTTS")
+                                mercados_fase1.append({"texto": m_texto, "chave": m_tipo})
+                            elif isinstance(rb, str):
+                                chave_btts = "BTTS_NAO" if "Não" in rb or "Nao" in rb else "BTTS"
+                                mercados_fase1.append({"texto": rb, "chave": chave_btts})
 
-                        # Dupla Chance
+                        # 3. Dupla Chance
                         res_cd = chance_dupla.verificar_chance_dupla(dados_jogo)
                         for rc in res_cd:
-                            tipo_cd = "1X" if "1X" in rc else "X2"
-                            mercados_fase1.append({"texto": rc, "chave": tipo_cd})
+                            texto_cd = rc if isinstance(rc, str) else rc.get("mercado", "")
+                            tipo_cd = "1X" if "1X" in texto_cd else "X2"
+                            mercados_fase1.append({"texto": texto_cd, "chave": tipo_cd})
 
-                        # Vitória Casa / Vitória Fora
+                        # 4. Vitória Casa / Vitória Fora
                         res_vitorias = vitorias.verificar_vitorias(dados_jogo)
                         for rv in res_vitorias:
-                            chave_vic = "VITORIA_FORA" if "Fora" in rv else "VITORIA_CASA"
-                            mercados_fase1.append({"texto": rv, "chave": chave_vic})
+                            texto_vic = rv if isinstance(rv, str) else rv.get("mercado", "")
+                            chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
+                            mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
 
-                        v_odds = {}
-                        if mercados_fase1:
-                            try:
-                                v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-                            except Exception as e_odds:
-                                print(f"      ⚠️ Erro ao capturar odds da Fase 1: {e_odds}")
-                                if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
-                                    try: driver.quit()
-                                    except: pass
-                                    driver = configurar_driver()
-
-                        mercados_para_processar = []
-
-                        for item in mercados_fase1:
-                            m_texto, m_chave = item["texto"], item["chave"]
-                            
-                            if m_chave in ["CANTOS_OVER", "CANTOS_MEDIA", "CARTOES_CONFRONTO"]:
-                                valor_odd_str = "1.20"
-                            elif m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS"] or "JOGADOR" in m_chave or "SCOUT" in m_chave:
-                                valor_odd_str = "1.20" 
-                            else:
-                                valor_odd_str = v_odds.get(m_chave, "1.30")
-                            
-                            try:
-                                odd_float = float(str(valor_odd_str).replace(',', '.'))
-                                if odd_float >= 1.10:
-                                    if "M45" in m_chave and odd_float >= 4.0: continue
-                                    mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": str(odd_float)})
-                                else:
-                                    print(f"      ⚠️ Descartado (Odd baixa): {m_texto} | Valor: {valor_odd_str}")
-                            except Exception as e_conv:
-                                print(f"      ⚠️ Erro ao converter odd para float ({m_texto}): {e_conv}")
-                                
                         # ----------------------------------------------------------
                         # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (APENAS UMA VEZ)
                         # ----------------------------------------------------------
