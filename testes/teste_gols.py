@@ -1,176 +1,172 @@
-import os
-import sys
 import time
 import re
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+import links
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
-# Ajuste para importar módulos da pasta raiz
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from mercados import gols
-
-def configurar_driver():
-    options = Options()
-    options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
+    """
+    RASPAGEM H2H:
+    - Raspa a 3ª Tabela (Confronto Direto Histórico) via /h2h/total/
+    - Raspa 5 jogos isolados de Casa via /h2h/casa/
+    - Raspa 5 jogos isolados de Fora via /h2h/fora/
+    """
+    stats = {
+        "link_betano": None,
+        "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0, "casa_btts": 0, 
+        "casa_vitorias_recente": 0, "ultimo_gols_casa": 0, "t1_resultado_1": "",
+        "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0, "fora_btts": 0, 
+        "fora_vitorias_recente": 0, "ultimo_gols_fora": 0, "t2_resultado_1": "",
+        "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
+        "h2h_res_1": "", "h2h_res_2": "", 
+        "h2h_geral_res_1": "", "h2h_geral_res_2": "", "h2h_geral_res_3": "", "h2h_geral_res_4": "", "h2h_geral_res_5": "",
+        "t1_placar_1": None, "t2_placar_1": None,     
+        "h2h_placar_1": None, "h2h_placar_2": None,   
+        "pular_gols": False,
+        "url_h2h_base": None,
+        "historico_chutes": {}, 
+        "historico_mandante_am": {}, "historico_mandante_vm": {},
+        "historico_visitante_am": {}, "historico_visitante_vm": {}
+    }
     
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    driver.set_page_load_timeout(30)
-    return driver
-
-def testar_jogo_especifico():
-    # URL do jogo Remo x Santos
-    url_teste = "https://www.flashscore.com.br/jogo/futebol/remo-2i0B6Zul/santos-n3QdnjFB/h2h/total/"
-    t1_nome, t2_nome = "Remo", "Santos"
+    aba_principal = driver.window_handles[0]
     
-    # 🔗 Monta as URLs diretas de CASA e FORA
-    url_limpa = url_teste.rstrip("/")
+    # 🔗 Estruturação das URLs
+    url_limpa = url_jogo.rstrip("/")
     if "/h2h" in url_limpa:
-        url_base = url_limpa.split("/h2h")[0] + "/h2h"
+        url_base_h2h = url_limpa.split("/h2h")[0] + "/h2h"
     else:
-        url_base = url_limpa + "/h2h"
+        url_base_h2h = url_limpa + "/h2h"
 
-    url_casa = f"{url_base}/casa/"
-    url_fora = f"{url_base}/fora/"
+    url_total = f"{url_base_h2h}/total/"
+    url_casa = f"{url_base_h2h}/casa/"
+    url_fora = f"{url_base_h2h}/fora/"
 
-    driver = configurar_driver()
-    print(f"\n🚀 Iniciando teste real com URLs diretas: {t1_nome} x {t2_nome}")
-    print(f"🔗 URL Casa: {url_casa}")
-    print(f"🔗 URL Fora: {url_fora}")
+    stats["url_h2h_base"] = url_base_h2h
+
+    driver.execute_script(f"window.open('{url_casa}', '_blank');")
+    driver.switch_to.window(driver.window_handles[-1])
     
     try:
-        stats = {
-            "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0,
-            "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0,
-            "ultimo_gols_casa": 0, "ultimo_gols_fora": 0,
-            "h2h_placar_1": "" 
-        }
+        # --- LINK BETANO ---
+        try:
+            stats["link_betano"] = links.extrair_url_betano(driver)
+        except Exception:
+            pass
 
-        # --- PARTE 1: MANDANTE JOGANDO EM CASA (/h2h/casa/) ---
-        print(f"\n📊 Analisando jogos isolados de CASA ({t1_nome}):")
-        driver.get(url_casa)
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
-        
-        secoes_casa = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        if secoes_casa:
-            linhas_casa = secoes_casa[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
-            for i, linha in enumerate(linhas_casa):
-                res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
-                numeros = re.findall(r'\d+', res_texto)
-                
-                if len(numeros) >= 2:
-                    g1, g2 = int(numeros[0]), int(numeros[1])
+        # -----------------------------------------------------------------
+        # 1. RASPAGEM: CONFRONTO DIRETO HISTÓRICO (3ª TABELA DA ABA TOTAL)
+        # -----------------------------------------------------------------
+        try:
+            driver.get(url_total)
+            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
+            secoes_total = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+            
+            if len(secoes_total) >= 3:
+                linhas_h2h = secoes_total[2].find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
+                for i, linha in enumerate(linhas_h2h):
+                    res_el = linha.find_elements(By.CSS_SELECTOR, ".h2h__result")
+                    if res_el:
+                        nums = re.findall(r'\d+', res_el[0].text)
+                        if len(nums) >= 2:
+                            g1, g2 = int(nums[0]), int(nums[1])
+                            placar_h2h = f"{g1}-{g2}"
+                            if i == 0: stats["h2h_placar_1"] = placar_h2h
+                            if i == 1: stats["h2h_placar_2"] = placar_h2h
+        except Exception as e_h2h:
+            print(f"      ⚠️ Aviso: Erro ao raspar 3ª tabela H2H (Total): {e_h2h}")
+
+        # -----------------------------------------------------------------
+        # 2. RASPAGEM: MANDANTE JOGANDO EM CASA (/h2h/casa/)
+        # -----------------------------------------------------------------
+        try:
+            driver.get(url_casa)
+            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
+            secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+            if secoes:
+                linhas_casa = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
+                for i, linha in enumerate(linhas_casa):
+                    n_casa = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
+                    n_fora = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
+                    res_el = linha.find_element(By.CSS_SELECTOR, ".h2h__result")
+                    
+                    nums = re.findall(r'\d+', res_el.text)
+                    if len(nums) < 2: continue
+                    g1, g2 = int(nums[0]), int(nums[1])
+                    placar_str = f"{g1}-{g2}"
+
+                    if i == 0: stats["t1_placar_1"] = placar_str
+
                     total = g1 + g2
-                    print(f"   Jogo {i+1} (Em Casa): Placar {g1}-{g2} | Total: {total} gols")
-                    
-                    if i == 0:
-                        stats["ultimo_gols_casa"] = total
-                    
+                    if i == 0: stats["ultimo_gols_casa"] = total
                     if total > 1.5: stats["casa_15"] += 1
                     if total > 2.5: stats["casa_25"] += 1
                     if total <= 3: stats["casa_35_under"] += 1
-                    if total <= 4: stats["casa_45_under"] += 1
+                    if total <= 4: stats["casa_45_under"] += 1 
+                    if g1 > 0 and g2 > 0: stats["casa_btts"] += 1
+                    
+                    res_atual = "E"
+                    if (t1.lower() in n_casa.lower() and g1 > g2) or (t1.lower() in n_fora.lower() and g2 > g1):
+                        res_atual = "V"
+                        stats["casa_vitorias_recente"] += 1
+                    elif (t1.lower() in n_casa.lower() and g1 < g2) or (t1.lower() in n_fora.lower() and g2 < g1):
+                        res_atual = "D"
+                    
+                    if i == 0: stats["t1_resultado_1"] = res_atual
+        except Exception as e_casa:
+            print(f"      ⚠️ Erro ao raspar jogos do Casa (em casa): {e_casa}")
 
-        # --- PARTE 2: VISITANTE JOGANDO FORA (/h2h/fora/) ---
-        print(f"\n📊 Analisando jogos isolados de FORA ({t2_nome}):")
-        driver.get(url_fora)
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
-        
-        secoes_fora = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
-        if secoes_fora:
-            linhas_fora = secoes_fora[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
-            for i, linha in enumerate(linhas_fora):
-                res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
-                numeros = re.findall(r'\d+', res_texto)
-                
-                if len(numeros) >= 2:
-                    g1, g2 = int(numeros[0]), int(numeros[1])
+        # -----------------------------------------------------------------
+        # 3. RASPAGEM: VISITANTE JOGANDO FORA (/h2h/fora/)
+        # -----------------------------------------------------------------
+        try:
+            driver.get(url_fora)
+            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
+            secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+            if secoes:
+                linhas_fora = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
+                for i, linha in enumerate(linhas_fora):
+                    n_casa = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
+                    n_fora = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
+                    res_el = linha.find_element(By.CSS_SELECTOR, ".h2h__result")
+                    
+                    nums = re.findall(r'\d+', res_el.text)
+                    if len(nums) < 2: continue
+                    g1, g2 = int(nums[0]), int(nums[1])
+                    placar_str = f"{g1}-{g2}"
+
+                    if i == 0: stats["t2_placar_1"] = placar_str
+
                     total = g1 + g2
-                    print(f"   Jogo {i+1} (Fora): Placar {g1}-{g2} | Total: {total} gols")
-                    
-                    if i == 0:
-                        stats["ultimo_gols_fora"] = total
-                    
+                    if i == 0: stats["ultimo_gols_fora"] = total
                     if total > 1.5: stats["fora_15"] += 1
                     if total > 2.5: stats["fora_25"] += 1
                     if total <= 3: stats["fora_35_under"] += 1
-                    if total <= 4: stats["fora_45_under"] += 1
-
-        # --- PARTE 3: CONFRONTO DIRETO H2H (Pegando da tabela 3 se disponível) ---
-        if secoes_fora and len(secoes_fora) >= 3:
-            print("\n⚔️ Analisando o histórico de Confronto Direto (H2H):")
-            linhas_h2h = secoes_fora[2].find_elements(By.CSS_SELECTOR, ".h2h__row")
-            if linhas_h2h:
-                ultimo_confronto_placar = linhas_h2h[0].find_element(By.CSS_SELECTOR, ".h2h__result").text
-                stats["h2h_placar_1"] = ultimo_confronto_placar
-                print(f"   ➔ Último jogo do H2H capturado: '{ultimo_confronto_placar}'")
-            else:
-                print("   ⚠️ Nenhuma linha de H2H encontrada na Tabela 3.")
-        else:
-            print("\n⚠️ Tabela de confronto direto (H2H) não encontrada diretamente nesta visão.")
-
-        print("\n--- RESUMO DO DICIONÁRIO EXTRAÍDO ---")
-        print(stats)
-
-        # --- PARTE 4: SIMULAÇÃO E LOGS DE VALIDAÇÃO DOS MERCADOS ---
-        print("\n--- LOGS DETALHADOS DE VALIDAÇÃO DOS MERCADOS DE GOLS ---")
-        u_h2h = stats["h2h_placar_1"]
-        
-        mercados_para_validar = [
-            (4.5, "-4.5 Under"), 
-            (3.5, "-3.5 Under"), 
-            (1.5, "+1.5 Over"), 
-            (2.5, "+2.5 Over")
-        ]
-        
-        for alvo, nome_m in mercados_para_validar:
-            if alvo in [3.5, 4.5]:
-                pref_c = "casa_35_under" if alvo == 3.5 else "casa_45_under"
-                pref_f = "fora_35_under" if alvo == 3.5 else "fora_45_under"
-            else:
-                pref_c = f"casa_{str(alvo).replace('.','')}"
-                pref_f = f"fora_{str(alvo).replace('.','')}"
-            
-            c_val = stats.get(pref_c, 0)
-            f_val = stats.get(pref_f, 0)
-            
-            # Validação do passo 1 (Mínimo 4/5)
-            p1_passou = c_val >= 4 and f_val >= 4
-            
-            # Validação do passo 2 (H2H bate mercado)
-            p2_passou = gols.verificar_ultimo_jogo(u_h2h, alvo) if hasattr(gols, 'verificar_ultimo_jogo') else True
-            
-            status_p1 = "✅ PASSOU" if p1_passou else "❌ REPROVOU"
-            status_p2 = "✅ PASSOU" if p2_passou else "❌ REPROVOU"
-            
-            print(f"📌 Mercado {nome_m}:")
-            print(f"   -> Passo 1 (Min 4/5?): {status_p1} | Casa: {c_val}/5, Fora: {f_val}/5")
-            print(f"   -> Passo 2 (H2H válido?): {status_p2} | Placar H2H: '{u_h2h}'")
-
-        print("\n--- RESULTADO FINAL DO MÓDULO GOLS.PY ---")
-        res_gols = gols.verificar_gols(stats)
-        
-        if not res_gols:
-            print("❌ Módulo GOLS.PY não aprovou nenhuma entrada de gols para este jogo.")
-        else:
-            for r in res_gols:
-                print(f"💰 PALPITE EMITIDO: {r.get('texto', r)} [Tipo/Chave: {r.get('chave', 'N/A')}]")
+                    if total <= 4: stats["fora_45_under"] += 1 
+                    if g1 > 0 and g2 > 0: stats["fora_btts"] += 1
+                    
+                    res_atual = "E"
+                    if (t2.lower() in n_casa.lower() and g1 > g2) or (t2.lower() in n_fora.lower() and g2 > g1):
+                        res_atual = "V"
+                        stats["fora_vitorias_recente"] += 1
+                    elif (t2.lower() in n_casa.lower() and g1 < g2) or (t2.lower() in n_fora.lower() and g2 < g1):
+                        res_atual = "D"
+                    
+                    if i == 0: stats["t2_resultado_1"] = res_atual
+        except Exception as e_fora:
+            print(f"      ⚠️ Erro ao raspar jogos do Fora (fora): {e_fora}")
 
     except Exception as e:
-        print(f"❌ Erro durante o teste: {e}")
+        print(f"      ⚠️ Erro Geral na Raspagem: {e}")
+    
     finally:
-        driver.quit()
-        print("\n🏁 Teste finalizado.")
+        if len(driver.window_handles) > 1:
+            try:
+                driver.close()
+                driver.switch_to.window(aba_principal)
+            except Exception:
+                pass
 
-if __name__ == "__main__":
-    testar_jogo_especifico()
-                
+    return stats
+            
