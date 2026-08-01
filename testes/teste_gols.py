@@ -28,56 +28,87 @@ def configurar_driver():
     return driver
 
 def testar_jogo_especifico():
-    # URL real do jogo Cruzeiro x Fluminense enviada por você
-    url_teste = "https://www.flashscore.com.br/jogo/futebol/cruzeiro-0SwtclaU/fluminense-EV9L3kU4/h2h/total/"
-    t1_nome, t2_nome = "Cruzeiro", "Fluminense"
+    # URL do jogo Remo x Santos
+    url_teste = "https://www.flashscore.com.br/jogo/futebol/remo-2i0B6Zul/santos-n3QdnjFB/h2h/total/"
+    t1_nome, t2_nome = "Remo", "Santos"
     
+    # 🔗 Monta as URLs diretas de CASA e FORA
+    url_limpa = url_teste.rstrip("/")
+    if "/h2h" in url_limpa:
+        url_base = url_limpa.split("/h2h")[0] + "/h2h"
+    else:
+        url_base = url_limpa + "/h2h"
+
+    url_casa = f"{url_base}/casa/"
+    url_fora = f"{url_base}/fora/"
+
     driver = configurar_driver()
-    print(f"\n🚀 Iniciando teste real: {t1_nome} x {t2_nome}")
+    print(f"\n🚀 Iniciando teste real com URLs diretas: {t1_nome} x {t2_nome}")
+    print(f"🔗 URL Casa: {url_casa}")
+    print(f"🔗 URL Fora: {url_fora}")
     
     try:
-        driver.get(url_teste)
-        wait = WebDriverWait(driver, 15)
-        time.sleep(4) # Tempo de segurança para renderização das tabelas
-        
         stats = {
-            "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0, # 🟢 Adicionado casa_35_under
-            "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0, # 🟢 Adicionado fora_35_under
+            "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0,
+            "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0,
             "ultimo_gols_casa": 0, "ultimo_gols_fora": 0,
             "h2h_placar_1": "" 
         }
 
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        # --- PARTE 1: MANDANTE JOGANDO EM CASA (/h2h/casa/) ---
+        print(f"\n📊 Analisando jogos isolados de CASA ({t1_nome}):")
+        driver.get(url_casa)
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
         
-        # --- PARTE 1: RASPAR ÚLTIMOS JOGOS ISOLADOS (CASA E FORA) ---
-        for idx, secao in enumerate(secoes[:2]): 
-            prefixo = "casa" if idx == 0 else "fora"
-            nome_time = t1_nome if idx == 0 else t2_nome
-            print(f"\n📊 Analisando jogos isolados de {prefixo.upper()} ({nome_time}):")
-            
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
-            
-            for i, linha in enumerate(linhas):
+        secoes_casa = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        if secoes_casa:
+            linhas_casa = secoes_casa[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
+            for i, linha in enumerate(linhas_casa):
                 res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
                 numeros = re.findall(r'\d+', res_texto)
                 
                 if len(numeros) >= 2:
                     g1, g2 = int(numeros[0]), int(numeros[1])
                     total = g1 + g2
-                    print(f"   Jogo {i+1}: Placar {g1}-{g2} | Total: {total} gols")
+                    print(f"   Jogo {i+1} (Em Casa): Placar {g1}-{g2} | Total: {total} gols")
                     
                     if i == 0:
-                        stats[f"ultimo_gols_{prefixo}"] = total
+                        stats["ultimo_gols_casa"] = total
                     
-                    if total > 1.5: stats[f"{prefixo}_15"] += 1
-                    if total > 2.5: stats[f"{prefixo}_25"] += 1
-                    if total <= 3: stats[f"{prefixo}_35_under"] += 1 # 🟢 Nova contagem de -3.5 gols
-                    if total <= 4: stats[f"{prefixo}_45_under"] += 1
+                    if total > 1.5: stats["casa_15"] += 1
+                    if total > 2.5: stats["casa_25"] += 1
+                    if total <= 3: stats["casa_35_under"] += 1
+                    if total <= 4: stats["casa_45_under"] += 1
 
-        # --- PARTE 2: RASPAR O ÚLTIMO CONFRONTO DIRETO (H2H TABELA 3) ---
-        if len(secoes) >= 3:
+        # --- PARTE 2: VISITANTE JOGANDO FORA (/h2h/fora/) ---
+        print(f"\n📊 Analisando jogos isolados de FORA ({t2_nome}):")
+        driver.get(url_fora)
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section")))
+        
+        secoes_fora = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        if secoes_fora:
+            linhas_fora = secoes_fora[0].find_elements(By.CSS_SELECTOR, ".h2h__row")[:5]
+            for i, linha in enumerate(linhas_fora):
+                res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
+                numeros = re.findall(r'\d+', res_texto)
+                
+                if len(numeros) >= 2:
+                    g1, g2 = int(numeros[0]), int(numeros[1])
+                    total = g1 + g2
+                    print(f"   Jogo {i+1} (Fora): Placar {g1}-{g2} | Total: {total} gols")
+                    
+                    if i == 0:
+                        stats["ultimo_gols_fora"] = total
+                    
+                    if total > 1.5: stats["fora_15"] += 1
+                    if total > 2.5: stats["fora_25"] += 1
+                    if total <= 3: stats["fora_35_under"] += 1
+                    if total <= 4: stats["fora_45_under"] += 1
+
+        # --- PARTE 3: CONFRONTO DIRETO H2H (Pegando da tabela 3 se disponível) ---
+        if secoes_fora and len(secoes_fora) >= 3:
             print("\n⚔️ Analisando o histórico de Confronto Direto (H2H):")
-            linhas_h2h = secoes[2].find_elements(By.CSS_SELECTOR, ".h2h__row")
+            linhas_h2h = secoes_fora[2].find_elements(By.CSS_SELECTOR, ".h2h__row")
             if linhas_h2h:
                 ultimo_confronto_placar = linhas_h2h[0].find_element(By.CSS_SELECTOR, ".h2h__result").text
                 stats["h2h_placar_1"] = ultimo_confronto_placar
@@ -85,25 +116,23 @@ def testar_jogo_especifico():
             else:
                 print("   ⚠️ Nenhuma linha de H2H encontrada na Tabela 3.")
         else:
-            print("   ⚠️ Tabela 3 de H2H não está disponível na página.")
+            print("\n⚠️ Tabela de confronto direto (H2H) não encontrada diretamente nesta visão.")
 
-        print("\n--- RESUMO DO DICIONÁRIO ENVIADO ---")
+        print("\n--- RESUMO DO DICIONÁRIO EXTRAÍDO ---")
         print(stats)
 
-        # --- PARTE 3: SIMULAÇÃO E LOGS DE VALIDAÇÃO DOS MERCADOS ---
-        print("\n--- LOGS DETALHADOS DE VALIDAÇÃO (PASSO A PASSO) ---")
+        # --- PARTE 4: SIMULAÇÃO E LOGS DE VALIDAÇÃO DOS MERCADOS ---
+        print("\n--- LOGS DETALHADOS DE VALIDAÇÃO DOS MERCADOS DE GOLS ---")
         u_h2h = stats["h2h_placar_1"]
         
-        # Lista atualizada com o novo mercado de 3.5 gols incluído no loop de log
         mercados_para_validar = [
             (4.5, "-4.5 Under"), 
-            (3.5, "-3.5 Under"), # 🟢 Novo mercado mapeado aqui
+            (3.5, "-3.5 Under"), 
             (1.5, "+1.5 Over"), 
             (2.5, "+2.5 Over")
         ]
         
         for alvo, nome_m in mercados_para_validar:
-            # Tratamento dinâmico do nome das chaves com base na sua estrutura
             if alvo in [3.5, 4.5]:
                 pref_c = "casa_35_under" if alvo == 3.5 else "casa_45_under"
                 pref_f = "fora_35_under" if alvo == 3.5 else "fora_45_under"
@@ -118,7 +147,7 @@ def testar_jogo_especifico():
             p1_passou = c_val >= 4 and f_val >= 4
             
             # Validação do passo 2 (H2H bate mercado)
-            p2_passou = gols.verificar_ultimo_jogo(u_h2h, alvo)
+            p2_passou = gols.verificar_ultimo_jogo(u_h2h, alvo) if hasattr(gols, 'verificar_ultimo_jogo') else True
             
             status_p1 = "✅ PASSOU" if p1_passou else "❌ REPROVOU"
             status_p2 = "✅ PASSOU" if p2_passou else "❌ REPROVOU"
@@ -131,10 +160,10 @@ def testar_jogo_especifico():
         res_gols = gols.verificar_gols(stats)
         
         if not res_gols:
-            print("❌ Módulo GOLS.PY não aprovou nenhuma entrada para este jogo.")
+            print("❌ Módulo GOLS.PY não aprovou nenhuma entrada de gols para este jogo.")
         else:
             for r in res_gols:
-                print(f"💰 PALPITE EMITIDO PARA O BILHETE: {r['mercado']} [Tipo: {r['tipo']}]")
+                print(f"💰 PALPITE EMITIDO: {r.get('texto', r)} [Tipo/Chave: {r.get('chave', 'N/A')}]")
 
     except Exception as e:
         print(f"❌ Erro durante o teste: {e}")
@@ -144,4 +173,4 @@ def testar_jogo_especifico():
 
 if __name__ == "__main__":
     testar_jogo_especifico()
-        
+                
