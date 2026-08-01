@@ -1,5 +1,3 @@
-#main.py
-
 import os
 import time
 import json
@@ -13,7 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
 from ligas import COMPETICOES
-from mercados import gols, ambos_marcam, chance_dupla, vitoria_casa, jogadores, cartoes, escanteios
+from mercados import gols, ambos_marcam, chance_dupla, vitorias, jogadores, cartoes, escanteios
 import odds, bingo357
 from telegram import menus
 
@@ -93,7 +91,6 @@ def main():
             aba_principal = driver.current_window_handle
             total_elementos = len(elementos)
             
-            # Controle para não duplicar o mesmo jogo no JSON de pendentes
             ids_jogos_salvos_pendentes = set()
             
             for idx in range(total_elementos):
@@ -172,33 +169,38 @@ def main():
                         print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
 
                         # ----------------------------------------------------------
-                        # FASE 1 (FINAL): AJUSTE DE DIRECIONAMENTO SEGURO
+                        # FASE 1: ANÁLISE DE MERCADOS DE RECORRÊNCIA
                         # ----------------------------------------------------------
                         url_h2h_final = f"https://www.flashscore.com.br/jogo/{id_jogo}/#/h2h/overall"
                         dados_jogo = pegar_estatisticas_h2h(driver, url_h2h_final, t1, t2)
                         
-                        # Garante que o dicionário de dados do jogo tenha a URL mãe salva!
                         if isinstance(dados_jogo, dict) and "url_h2h_base" not in dados_jogo:
                             dados_jogo["url_h2h_base"] = url_h2h_final
 
                         mercados_fase1 = []
 
+                        # Gols
                         res_gols = gols.verificar_gols(dados_jogo)
                         for rg in res_gols:
                             mercados_fase1.append({"texto": rg['mercado'], "chave": rg['tipo']})
 
+                        # Ambos Marcam (Sim / Não)
                         res_btts = ambos_marcam.verificar_btts(dados_jogo)
-                        if res_btts:
-                            mercados_fase1.append({"texto": f"Ambas Marcam: Sim ({res_btts})", "chave": "BTTS"})
+                        for rb in res_btts:
+                            chave_btts = "BTTS_NAO" if "Não" in rb else "BTTS"
+                            mercados_fase1.append({"texto": rb, "chave": chave_btts})
 
+                        # Dupla Chance
                         res_cd = chance_dupla.verificar_chance_dupla(dados_jogo)
                         for rc in res_cd:
                             tipo_cd = "1X" if "1X" in rc else "X2"
                             mercados_fase1.append({"texto": rc, "chave": tipo_cd})
 
-                        res_vc = vitoria_casa.verificar_vitoria_casa(dados_jogo)
-                        for rv in res_vc:
-                            mercados_fase1.append({"texto": rv, "chave": "VITORIA_CASA"})
+                        # Vitória Casa / Vitória Fora
+                        res_vitorias = vitorias.verificar_vitorias(dados_jogo)
+                        for rv in res_vitorias:
+                            chave_vic = "VITORIA_FORA" if "Fora" in rv else "VITORIA_CASA"
+                            mercados_fase1.append({"texto": rv, "chave": chave_vic})
 
                         v_odds = {}
                         if mercados_fase1:
@@ -238,7 +240,6 @@ def main():
                         # ----------------------------------------------------------
                         print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios/Cartões)...")
                         try:
-                            # Garante que o driver vá para a URL mãe antes de iniciar a Fase 2
                             driver.get(dados_jogo["url_h2h_base"])
                             time.sleep(1.5)
                             
@@ -280,7 +281,6 @@ def main():
                         # ----------------------------------------------------------
                         # FASE 3: RASPAGEM E PROCESSAMENTO DE SCOUTS (JOGADORES)
                         # ----------------------------------------------------------
-                        # 🟢 TRAVA DE SEGURANÇA: Validação da Liga Elite usando teste_jogadores
                         permite_jogadores = jogadores.validar_liga_para_jogadores(nome_comp)
                         print(f"      🔍 [DEBUG FASE 3] Validando Liga: '{nome_comp}'")
                         print(f"      🔍 [DEBUG FASE 3] Está na lista Elite? {permite_jogadores}")
@@ -289,7 +289,6 @@ def main():
                             print(f"      🎯 [FASE 3] Buscando Scouts Avançados (Chutes/Faltas)...")
                             print(f"      🔗 [DEBUG URL MÃE] Enviando para a Fase 3: {dados_jogo.get('url_h2h_base')}")
                             
-                            # 1. Validação do Driver
                             try:
                                 _ = driver.current_window_handle
                             except Exception:
@@ -298,7 +297,6 @@ def main():
                                 except: pass
                                 driver = configurar_driver()
 
-                            # 2. Execução da Raspagem de Scouts Pura
                             acumulador_scouts = {}
                             try:
                                 driver.get(dados_jogo["url_h2h_base"])
@@ -309,20 +307,15 @@ def main():
                             except Exception as e_f3:
                                 print(f"      ⚠️ Erro crítico na execução da Fase 3 no Main: {e_f3}")
                             
-                            # 3. Processamento de Resultados usando a nova teste_jogadores.py
                             resultado_jogadores = jogadores.analisar_dados_jogadores(acumulador_scouts, t1, t2)
 
                             if resultado_jogadores["aprovado"]:
-                                # Exibe log formatado no console
                                 print(resultado_jogadores["scouts_formatados"])
                                 
-                                # Processa cada jogador selecionado como o melhor
                                 for jk in resultado_jogadores["jogadores_qualificados"]:
-                                    # 🟢 CORREÇÃO: Inclui a média na string utilizando o padrão '| Méd: X.X'
                                     txt_mercado = f"{jk['mercado']}: {jk['jogador']} ({jk['time'][:3].upper()}) | Méd: {jk['media']:.1f}"
                                     print(f"           ✅ [DEBUG] Salvando Jogador: {txt_mercado}")
 
-                                    # Adiciona aos mercados para processamento individualizado
                                     mercados_para_processar.append({
                                         "texto": txt_mercado,
                                         "chave": "JOGADOR_SCOUT",
@@ -335,7 +328,6 @@ def main():
 
                         # ALIMENTAÇÃO DA LISTA FINAL
                         if mercados_para_processar:
-                            # Adiciona uma única vez a partida no JSON de pendentes de resultados
                             if id_jogo not in ids_jogos_salvos_pendentes:
                                 jogos_para_pendentes.append({
                                     "time_casa": t1, 
@@ -355,27 +347,22 @@ def main():
                                     print(f"⏩ Ignorando scout zerado: {texto_limpo}")
                                     continue
 
-                                # ------------------------------------------------------------------
-                                # CONVERSÃO DINÂMICA: GERA "Análise" PARA OCULTAR EM BINGO357
-                                # ------------------------------------------------------------------
                                 eh_scout = (
                                     m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA", "JOGADOR_SCOUT"] or
                                     any(term in texto_lower for term in ["chute", "falta", "cartã", "cartao", "escanteio", "cantos"])
                                 )
 
                                 odd_para_lista = "Análise" if eh_scout else m_odd
-                                # ------------------------------------------------------------------
 
                                 lista_para_filtros.append({
                                     "horario": h_br, "time_casa": t1, "time_fora": t2,
                                     "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
                                     "link_betano": dados_jogo.get("link_betano"),
-                                    "link_h2h": url_h2h_final
+                                    "link_h2h": url_h2h_final,
+                                    "odds_todas": v_odds # 👈 Passa o dicionário completo das odds extraídas
                                 })
                                 total_mercados += 1
 
-                                
-                        # 🌟 RETORNO SEGURO PARA A ABA PRINCIPAL DA LIGA
                         if len(driver.window_handles) > 1:
                             todas_abas = driver.window_handles[:]
                             for aba in todas_abas:
@@ -385,10 +372,9 @@ def main():
                             driver.switch_to.window(aba_principal)
                             time.sleep(1)
 
-                        # 🟢 CORREÇÃO CRÍTICA: Força o navegador a recarregar a lista de jogos da Liga atual
                         try:
-                            driver.get(url)  # 'url' vem lá do loop principal: for nome_comp, url in COMPETICOES.items():
-                            time.sleep(2.0)    # Tempo essencial para renderizar a lista de jogos do campeonato novamente
+                            driver.get(url)
+                            time.sleep(2.0)
                         except Exception as e_volta:
                             print(f"⚠️ Erro ao recarregar a página mãe da liga: {e_volta}")
 
@@ -435,17 +421,16 @@ def main():
                 enviar_telegram(cabecalho + corpo, meu_chat_id)
                 print("📨 Listão enviado.")
     
-            # 🟢 CORREÇÃO 1: Salvando o 'link_h2h' no cache_dados com chave normalizada em minúsculo
             cache_dados = {}
             for j in lista_para_filtros:
-                # Usamos .lower().strip() para garantir compatibilidade exata com o bingo357.py
                 chave = f"{j['time_casa']}x{j['time_fora']}".lower().strip()
                 cache_dados[chave] = {
                     "link": j.get("link_betano"),
                     "liga": j.get("liga"),
                     "horario": j.get("horario"),
                     "odd": j.get("odd"),
-                    "link_h2h": j.get("link_h2h") # <-- Mapeia o link do Flashscore
+                    "link_h2h": j.get("link_h2h"),
+                    "odds_todas": j.get("odds_todas", {}) # 👈 Armazena o mapa completo de odds para o bingo357
                 }
 
             print("📢 Pulando envio do Elite conforme solicitado.")
@@ -466,7 +451,6 @@ def main():
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
                 json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d"), "jogos": jogos_para_pendentes}, f, indent=4, ensure_ascii=False)
             
-            # 🟢 CORREÇÃO 2: Salvando o 'link_h2h' no JSON que o Telegram lê
             os.makedirs("telegram", exist_ok=True)
             with open(f"telegram/jogos_{hoje_ref.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
                 json.dump([
@@ -478,7 +462,7 @@ def main():
                         "mercado": j.get("mercado"), 
                         "odd": j.get("odd"), 
                         "link_betano": j.get("link_betano"),
-                        "link_h2h": j.get("link_h2h") # <-- Garante que o processador do Telegram terá acesso ao link
+                        "link_h2h": j.get("link_h2h")
                     } 
                     for j in lista_para_filtros
                 ], f, indent=4, ensure_ascii=False)
