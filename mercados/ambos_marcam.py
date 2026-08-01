@@ -4,13 +4,13 @@ def verificar_btts(s):
     
     1. AMBAS MARCAM SIM:
        - Exige mínimo de 4/5 BTTS para ambos os times.
-       - Retorna "100%" se ambos tiverem 5/5 BTTS.
-       - Retorna "80%" se tiverem 4/5 BTTS.
+       - Retorna ["Ambas Marcam: Sim (100%)"] se ambos tiverem 5/5 BTTS.
+       - Retorna ["Ambas Marcam: Sim (80%)"] se tiverem 4/5 BTTS.
 
     2. AMBAS MARCAM NÃO:
        - Exige máximo de 3/5 BTTS para ambos os times.
-       - Retorna "Ambas Marcam: Não (100%)" se ambos tiverem <= 1/5 BTTS.
-       - Retorna "Ambas Marcam: Não (80%)" se ambos tiverem <= 3/5 BTTS.
+       - Retorna ["Ambas Marcam: Não (100%)"] se ambos tiverem <= 1/5 BTTS.
+       - Retorna ["Ambas Marcam: Não (80%)"] se ambos tiverem <= 3/5 BTTS.
     """
     try:
         # Pega os contadores calculados na nova raspagem H2H (Casa/Fora)
@@ -22,21 +22,21 @@ def verificar_btts(s):
         # -----------------------------------------------------------------
         if btts_casa >= 4 and btts_fora >= 4:
             if btts_casa == 5 and btts_fora == 5:
-                return "100%"
-            return "80%"
+                return ["Ambas Marcam: Sim (100%)"]
+            return ["Ambas Marcam: Sim (80%)"]
 
         # -----------------------------------------------------------------
         # 🔴 REGRA 2: AMBAS MARCAM NÃO (Máximo 3/5 para ambos)
         # -----------------------------------------------------------------
         if btts_casa <= 3 and btts_fora <= 3:
             if btts_casa <= 1 and btts_fora <= 1:
-                return "Ambas Marcam: Não (100%)"
-            return "Ambas Marcam: Não (80%)"
+                return ["Ambas Marcam: Não (100%)"]
+            return ["Ambas Marcam: Não (80%)"]
 
         # Fora dos padrões de segurança
-        return None
+        return []
 
     except Exception as e:
         print(f"      ⚠️ Erro ao processar mercado Ambas Marcam: {e}")
-        return None
+        return []
         
