@@ -205,11 +205,12 @@ def main():
                             tipo_cd = "1X" if "1X" in texto_cd else "X2"
                             mercados_fase1.append({"texto": texto_cd, "chave": tipo_cd})
 
-                        # 4. Vitória Casa
-                        res_vc = vitoria_casa.verificar_vitoria_casa(dados_jogo)
-                        for rv in res_vc:
+                        # 4. Vitória Casa / Vitória Fora
+                        res_vitorias = vitorias.verificar_vitorias(dados_jogo)
+                        for rv in res_vitorias:
                             texto_vic = rv if isinstance(rv, str) else rv.get("mercado", "")
-                            mercados_fase1.append({"texto": texto_vic, "chave": "VITORIA_CASA"})
+                            chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
+                            mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
 
                         # Extração de Odds
                         v_odds = {}
