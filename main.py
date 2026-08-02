@@ -317,6 +317,9 @@ def main():
                                         "odd": "1.30"
                                     })
 
+                        # 🟢 Puxa a URL guardada no dicionário do H2H e cria a variável no main.py
+                        url_h2h_final = stats_h2h.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
+
                         # ALIMENTAÇÃO DA LISTA FINAL
                         if mercados_para_processar:
                             if id_jogo not in ids_jogos_salvos_pendentes:
@@ -349,34 +352,11 @@ def main():
                                     "horario": h_br, "time_casa": t1, "time_fora": t2,
                                     "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
                                     "link_betano": dados_jogo.get("link_betano"),
-                                    "link_h2h": url_h2h_final,
+                                    "link_h2h": url_h2h_final,  # ✅ Agora a variável existe!
                                     "odds_todas": v_odds
                                 })
                                 total_mercados += 1
 
-                        if len(driver.window_handles) > 1:
-                            todas_abas = driver.window_handles[:]
-                            for aba in todas_abas:
-                                if aba != aba_principal:
-                                    driver.switch_to.window(aba)
-                                    driver.close()
-                            driver.switch_to.window(aba_principal)
-                            time.sleep(1)
-
-                        try:
-                            driver.get(url)
-                            time.sleep(2.0)
-                        except Exception as e_volta:
-                            print(f"⚠️ Erro ao recarregar a página mãe da liga: {e_volta}")
-
-                except Exception as e:
-                    print(f"⚠️ Erro ao processar partida no loop interno (Index {idx+1}): {e}")
-                    if "invalid session id" in str(e).lower() or "session" in str(e).lower():
-                        try: driver.quit()
-                        except: pass
-                        driver = configurar_driver()
-                        break 
-                    continue
 
         # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
