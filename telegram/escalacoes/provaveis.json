@@ -1,1 +1,72 @@
-{}
+{
+    "aldosivixgimnasia l.p.": {
+        "time_casa": "Aldosivi",
+        "time_fora": "Gimnasia L.P.",
+        "horario": "14:30",
+        "liga": "Argentina - Liga Profesional",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/aldosivi-Eu4qrEcB/gimnasia-l-p-jiDN9Zaj/resumo/equipes/",
+        "titulares_casa": [
+            "Chicco I.",
+            "Moya S.",
+            "Zalazar N.",
+            "Pombo J.",
+            "Gonzalez R.",
+            "Garcia M.",
+            "Linares N.",
+            "Castro L.",
+            "Laurelli F.",
+            "Cordero N.",
+            "Godoy M."
+        ],
+        "titulares_fora": [
+            "Insfran N.",
+            "Barros Schelotto B.",
+            "Cortazzo J.",
+            "Martinez E.",
+            "Silva Torrejon P.",
+            "Seoane M.",
+            "Nacho Fernández",
+            "Antônio Steimbach",
+            "Miramon I.",
+            "Auzmendi A.",
+            "Merlo J."
+        ],
+        "texto_telegram": "**Aldosivi**:\nChicco I., Moya S., Zalazar N., Pombo J.\nGonzalez R., Garcia M., Linares N., Castro L.\nLaurelli F., Cordero N., Godoy M.\n\n**Gimnasia L.P.**:\nInsfran N., Barros Schelotto B., Cortazzo J., Martinez E.\nSilva Torrejon P., Seoane M., Nacho Fernández, Antônio Steimbach\nMiramon I., Auzmendi A., Merlo J.",
+        "atualizado_em": "2026-08-02 01:20"
+    },
+    "palmeirasxfortaleza": {
+        "time_casa": "Palmeiras",
+        "time_fora": "Fortaleza",
+        "horario": "16:00",
+        "liga": "Copa do Brasil",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/fortaleza-42FbPIs2/palmeiras-hMn9FTbH/resumo/equipes/",
+        "titulares_casa": [
+            "Carlos Miguel",
+            "Murilo",
+            "Martinez E.",
+            "Alexander Barboza",
+            "Allan",
+            "Andreas Pereira",
+            "Marlon Freitas",
+            "Piquerez",
+            "Jhon Arias",
+            "Maurício",
+            "Sosa R."
+        ],
+        "titulares_fora": [
+            "Joao Ricardo",
+            "Mailton",
+            "Neris",
+            "Lucas Gazal",
+            "Mauricio Junior",
+            "Lucas Sasha",
+            "Rodrigo",
+            "Pedro Henrique",
+            "Vitinho",
+            "Luiz Fernando",
+            "Miritello J. B."
+        ],
+        "texto_telegram": "**Palmeiras**:\nCarlos Miguel, Murilo, Martinez E., Alexander Barboza\nAllan, Andreas Pereira, Marlon Freitas, Piquerez\nJhon Arias, Maurício, Sosa R.\n\n**Fortaleza**:\nJoao Ricardo, Mailton, Neris, Lucas Gazal\nMauricio Junior, Lucas Sasha, Rodrigo, Pedro Henrique\nVitinho, Luiz Fernando, Miritello J. B.",
+        "atualizado_em": "2026-08-02 01:20"
+    }
+}
