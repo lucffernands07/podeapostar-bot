@@ -71,12 +71,16 @@ def main():
                 driver.get(url)
                 time.sleep(3)  
                 
+                # 🟢 Rola a página até o fim para carregar jogos ocultos (Lazy Loading)
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(1.5)
+                
                 elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
                 if not elementos:
                     elementos = driver.find_elements(By.CSS_SELECTOR, "div[id^='g_1_']")
                 
                 print(f"📊 Total de elementos encontrados na página: {len(elementos)}")
-                
+
             except Exception as e:
                 if "invalid session id" in str(e).lower() or "session" in str(e).lower():
                     print("⚠️ Sessão do Chrome caiu! Reiniciando o navegador...")
@@ -359,9 +363,17 @@ def main():
                                 })
                                 total_mercados += 1
 
+                        # 🟢 Recarrega a página da liga para que o Selenium encontre os próximos jogos no loop (idx)
+                        try:
+                            driver.get(url)
+                            time.sleep(2.0)
+                        except Exception as e_volta:
+                            print(f"⚠️ Erro ao recarregar a liga: {e_volta}")
+
                 except Exception as e_jogo:
                     print(f"      ⚠️ Erro ao processar o jogo índice {idx}: {e_jogo}")
                     continue
+
 
         # --- PROCESSAMENTO E ENVIO FINAL (FORA DOS LOOPS) ---
         if lista_para_filtros:
