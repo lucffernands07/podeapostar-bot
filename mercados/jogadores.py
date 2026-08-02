@@ -34,6 +34,7 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
     Processa as estatísticas individuais de chutes no gol e faltas sofridas.
     - Mandante (t1): Retorna os até 2 MELHORES jogadores de cada mercado.
     - Visitante (t2): Retorna apenas o 1 MELHOR jogador de cada mercado.
+    - Trava de Amostra: Exige que o jogador tenha atuado em pelo menos 3 jogos.
     """
     if not acumulador_scouts:
         print("⏩ [HISTÓRICO INCOMPLETO] Sem dados de scouts de jogadores para calcular.")
@@ -54,11 +55,14 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
         candidatos_faltas = []
         
         for nome_jogador, d in jogadores_do_time.items():
+            # 🟢 TRAVA DE SEGURANÇA: Mínimo de 3 jogos disputados para considerar a média válida
+            MIN_JOGOS = 3
+
             media_chutes = d['chutes'] / d['c_jogos'] if d['c_jogos'] > 0 else 0
             media_faltas = d['faltas'] / d['f_jogos'] if d['f_jogos'] > 0 else 0
             
-            # Adiciona aos candidatos se a média for >= 0.5
-            if media_chutes >= 0.5:
+            # Adiciona aos candidatos se a média for >= 0.5 E tiver atuado em pelo menos 3 jogos
+            if media_chutes >= 0.5 and d['c_jogos'] >= MIN_JOGOS:
                 candidatos_chutes.append({
                     "jogador": nome_jogador,
                     "time": time_alvo,
@@ -66,7 +70,8 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
                     "media": round(media_chutes, 2)
                 })
                 
-            if media_faltas >= 0.5:
+            # Adiciona aos candidatos se a média for >= 0.5 E tiver atuado em pelo menos 3 jogos
+            if media_faltas >= 0.5 and d['f_jogos'] >= MIN_JOGOS:
                 candidatos_faltas.append({
                     "jogador": nome_jogador,
                     "time": time_alvo,
@@ -114,5 +119,5 @@ def analisar_dados_jogadores(acumulador_scouts, t1, t2):
         "aprovado": len(lista_jogadores_qualificados) > 0,
         "jogadores_qualificados": lista_jogadores_qualificados,
         "scouts_formatados": texto_scouts_bloco
-    }
-
+                                                 }
+    
