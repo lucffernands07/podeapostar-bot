@@ -1,5 +1,6 @@
 import time
 import re
+import links  # 🟢 Import do links.py restaurado
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -69,6 +70,25 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
     try:
         # Resolvendo a URL completa antes de navegar nas sub-rotas
         url_real = obter_url_real_h2h(driver, url_jogo_base)
+
+        # -----------------------------------------------------------------
+        # 🟢 CAPTURA RESTAURADA DO LINK DA BETANO (COM FALLBACK SEGURO)
+        # -----------------------------------------------------------------
+        try:
+            print(f"      🔗 Capturando link Betano para {t1} x {t2}...")
+            url_capturada = links.extrair_url_betano(driver)
+            
+            if url_capturada:
+                stats["link_betano"] = url_capturada
+            else:
+                t1_q = t1.replace(" ", "%20")
+                t2_q = t2.replace(" ", "%20")
+                stats["link_betano"] = f"https://www.betano.bet.br/busca/?q={t1_q}%20x%20{t2_q}"
+        except Exception as e_link:
+            print(f"      ⚠️ Erro ao capturar link Betano: {e_link}")
+            t1_q = t1.replace(" ", "%20")
+            t2_q = t2.replace(" ", "%20")
+            stats["link_betano"] = f"https://www.betano.bet.br/busca/?q={t1_q}%20x%20{t2_q}"
         
         rotas = [
             ("casa", formatar_rota_h2h(url_real, "casa")),
