@@ -1,39 +1,4 @@
 {
-    "palmeirasxfortaleza": {
-        "time_casa": "Palmeiras",
-        "time_fora": "Fortaleza",
-        "horario": "16:00",
-        "liga": "Copa do Brasil",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/fortaleza-42FbPIs2/palmeiras-hMn9FTbH/resumo/equipes/",
-        "titulares_casa": [
-            "Carlos Miguel",
-            "Martinez E.",
-            "Murilo",
-            "Alexander Barboza",
-            "Allan",
-            "Andreas Pereira",
-            "Marlon Freitas",
-            "Piquerez(C)",
-            "Maurício",
-            "Jhon Arias",
-            "Sosa R."
-        ],
-        "titulares_fora": [
-            "Joao Ricardo(C)",
-            "Mailton",
-            "Neris",
-            "Lucas Gazal",
-            "Gabriel Fuentes",
-            "Ronald",
-            "Lucas Sasha",
-            "Pierre",
-            "Vitinho",
-            "Luiz Fernando",
-            "Paulo Baya"
-        ],
-        "texto_telegram": "**Palmeiras**:\nCarlos Miguel, Martinez E., Murilo, Alexander Barboza\nAllan, Andreas Pereira, Marlon Freitas, Piquerez(C)\nMaurício, Jhon Arias, Sosa R.\n\n**Fortaleza**:\nJoao Ricardo(C), Mailton, Neris, Lucas Gazal\nGabriel Fuentes, Ronald, Lucas Sasha, Pierre\nVitinho, Luiz Fernando, Paulo Baya",
-        "atualizado_em": "2026-08-02 16:00"
-    },
     "newell's old boysxboca juniors": {
         "time_casa": "Newell's Old Boys",
         "time_fora": "Boca Juniors",
@@ -43,30 +8,65 @@
         "titulares_casa": [
             "Reinatti J.",
             "Escobar F.",
-            "Cabrera B.",
+            "Goitea N.",
             "Giannetti L.",
             "Russo J.",
             "Sotelo D.",
             "Regiardo L.",
             "Mazzantti W.",
-            "Sonora A.",
+            "Guch F.",
             "Rios T.",
             "Coccaro M."
         ],
         "titulares_fora": [
             "Montero A.",
-            "Lozano L.",
-            "Figal J.",
+            "Gorosito D.",
+            "Di Lollo L.",
             "Costa A.",
             "Blanco L.",
-            "Aranda T.",
-            "Paredes L.",
-            "Delgado M.",
+            "Paredes L.(C)",
             "Ascacibar S.",
-            "Miguel Merentiel",
-            "Villa S."
+            "Flores L.",
+            "Aranda T.",
+            "Villa S.",
+            "Miguel Merentiel"
         ],
-        "texto_telegram": "**Newell's Old Boys**:\nReinatti J., Escobar F., Cabrera B., Giannetti L.\nRusso J., Sotelo D., Regiardo L., Mazzantti W.\nSonora A., Rios T., Coccaro M.\n\n**Boca Juniors**:\nMontero A., Lozano L., Figal J., Costa A.\nBlanco L., Aranda T., Paredes L., Delgado M.\nAscacibar S., Miguel Merentiel, Villa S.",
-        "atualizado_em": "2026-08-02 16:00"
+        "texto_telegram": "**Newell's Old Boys**:\nReinatti J., Escobar F., Goitea N., Giannetti L.\nRusso J., Sotelo D., Regiardo L., Mazzantti W.\nGuch F., Rios T., Coccaro M.\n\n**Boca Juniors**:\nMontero A., Gorosito D., Di Lollo L., Costa A.\nBlanco L., Paredes L.(C), Ascacibar S., Flores L.\nAranda T., Villa S., Miguel Merentiel",
+        "atualizado_em": "2026-08-02 16:45"
+    },
+    "mirassolxgrêmio": {
+        "time_casa": "Mirassol",
+        "time_fora": "Grêmio",
+        "horario": "18:00",
+        "liga": "Copa do Brasil",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/gremio-E1EFmhVh/mirassol-pQ8ryEe7/resumo/equipes/",
+        "titulares_casa": [
+            "Walter",
+            "Igor Formiga",
+            "João Victor",
+            "Gabriel Knesowitsch",
+            "Reinaldo",
+            "Denílson",
+            "Japa",
+            "Gustavo Mosquito",
+            "Carlos Eduardo",
+            "Edson",
+            "Bruno Santos"
+        ],
+        "titulares_fora": [
+            "Weverton",
+            "Diego Caito",
+            "Gustavo Martins",
+            "Wagner Leonardo",
+            "Marlon",
+            "Perez L.",
+            "Tete",
+            "Mathias Vilasanti",
+            "Nardoni J.",
+            "Amuzu F.",
+            "Carlos"
+        ],
+        "texto_telegram": "**Mirassol**:\nWalter, Igor Formiga, João Victor, Gabriel Knesowitsch\nReinaldo, Denílson, Japa, Gustavo Mosquito\nCarlos Eduardo, Edson, Bruno Santos\n\n**Grêmio**:\nWeverton, Diego Caito, Gustavo Martins, Wagner Leonardo\nMarlon, Perez L., Tete, Mathias Vilasanti\nNardoni J., Amuzu F., Carlos",
+        "atualizado_em": "2026-08-02 16:45"
     }
 }
