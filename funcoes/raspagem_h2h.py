@@ -4,20 +4,37 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+def formatar_rota_h2h(url_base, sub_rota=""):
+    """
+    Limpa qualquer parâmetro de busca (como ?mid=...), barras duplicadas 
+    e sufixos antigos, deixando a URL limpa com /h2h/casa/ ou /h2h/fora/.
+    """
+    # 1. Remove qualquer parâmetro após o '?' (?mid=..., etc.) e o '#'
+    path = url_base.split('?')[0].split('#')[0].rstrip('/')
+
+    # 2. Limpa sufixos antigos de abas caso existam
+    for sufixo in ['/overall', '/casa', '/fora']:
+        if path.endswith(sufixo):
+            path = path[:-len(sufixo)]
+
+    # 3. Garante que a rota /h2h está no final da base
+    if not path.endswith('/h2h'):
+        path = f"{path}/h2h"
+
+    # 4. Adiciona a sub-rota (/casa ou /fora)
+    if sub_rota:
+        path = f"{path}/{sub_rota}"
+
+    return f"{path}/"
+
 def obter_url_real_h2h(driver, url_jogo_input):
     """
     Resolve IDs curtos (ex: .../jogo/Ak19JDbf/) abrindo a página raiz do jogo
     e pegando a URL completa com os slugs dos dois times gerada pelo Flashscore.
     """
-    # Se a URL já contiver o padrão longo com os nomes dos times, só limpa o final
+    # Se a URL já contiver o padrão longo com os nomes dos times
     if '/futebol/' in url_jogo_input:
-        url_base = url_jogo_input.split('#')[0].rstrip('/')
-        for sufixo in ['/overall', '/casa', '/fora']:
-            if url_base.endswith(sufixo):
-                url_base = url_base[:-len(sufixo)]
-        if not url_base.endswith('/h2h'):
-            url_base = f"{url_base}/h2h"
-        return url_base
+        return url_jogo_input.split('?')[0]
 
     # Caso seja a URL com ID curto (ex: .../jogo/Ak19JDbf/ ou só Ak19JDbf)
     match_id = re.search(r'/jogo/([A-Za-z0-9]+)', url_jogo_input)
@@ -27,13 +44,8 @@ def obter_url_real_h2h(driver, url_jogo_input):
     driver.get(url_raiz)
     time.sleep(1.5)  # Aguarda o redirecionamento do Flashscore para a URL longa
     
-    # Captura a URL expandida pelo navegador (ex: .../jogo/futebol/remo-2i0B6Zul/santos-n3QdnjFB/)
-    url_redirecionada = driver.current_url.split('#')[0].rstrip('/')
-    
-    if not url_redirecionada.endswith('/h2h'):
-        url_redirecionada = f"{url_redirecionada}/h2h"
-        
-    return url_redirecionada
+    # Captura a URL expandida pelo navegador sem parâmetros de query (?mid=...)
+    return driver.current_url.split('?')[0]
 
 def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
     stats = {
@@ -56,11 +68,11 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
 
     try:
         # Resolvendo a URL completa antes de navegar nas sub-rotas
-        url_h2h_completa = obter_url_real_h2h(driver, url_jogo_base)
+        url_real = obter_url_real_h2h(driver, url_jogo_base)
         
         rotas = [
-            ("casa", f"{url_h2h_completa}/casa/"),
-            ("fora", f"{url_h2h_completa}/fora/")
+            ("casa", formatar_rota_h2h(url_real, "casa")),
+            ("fora", formatar_rota_h2h(url_real, "fora"))
         ]
 
         for tipo, url in rotas:
