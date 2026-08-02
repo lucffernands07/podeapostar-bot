@@ -124,7 +124,8 @@ def main():
 
                     partes_tempo = tempo_raw.split()
                     if not partes_tempo: continue
-                        
+
+                    # Trata o horário UTC para jogos do dia
                     horario_str = partes_tempo[-1]
                     if ":" not in horario_str: continue
 
@@ -148,7 +149,7 @@ def main():
                             print(f"      ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
                             continue
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        
+                        #-----------------------------------
                         id_jogo = None
                         try:
                             link_el = el.find_element(By.CSS_SELECTOR, "a.icon--preview")
