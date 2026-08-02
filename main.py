@@ -173,11 +173,9 @@ def main():
                         # ----------------------------------------------------------
                         # FASE 1: ANÁLISE DE MERCADOS DE RECORRÊNCIA (CASA / FORA)
                         # ----------------------------------------------------------
-                        # Envia a URL limpa da partida sem sufixos
                         url_jogo_base = f"https://www.flashscore.com.br/jogo/{id_jogo}"
                         dados_jogo = pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2)
                         
-                        # Define a URL base H2H para ser usada pelas demais fases do bot
                         if isinstance(dados_jogo, dict) and "url_h2h_base" not in dados_jogo:
                             dados_jogo["url_h2h_base"] = f"{url_jogo_base}/h2h"
 
@@ -189,7 +187,7 @@ def main():
                             if isinstance(rg, dict):
                                 mercados_fase1.append({"texto": rg['mercado'], "chave": rg['tipo']})
 
-                        # 2. Ambos Marcam (Com Trava de Gols)
+                        # 2. Ambos Marcam
                         res_btts = ambos_marcam.verificar_btts(dados_jogo, mercados_gols_aprovados=res_gols)
                         for rb in res_btts:
                             if isinstance(rb, dict):
@@ -226,7 +224,6 @@ def main():
                                     except: pass
                                     driver = configurar_driver()
 
-                        # 🟢 CORREÇÃO CRÍTICA 1: Inicialização garantida da lista
                         mercados_para_processar = []
 
                         for item in mercados_fase1:
@@ -317,10 +314,11 @@ def main():
                                         "odd": "1.30"
                                     })
 
-                        # 🟢 Puxa a URL do dicionário dados_jogo (que já existe no main.py!)
                         url_h2h_final = dados_jogo.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
 
+                        # ----------------------------------------------------------
                         # ALIMENTAÇÃO DA LISTA FINAL
+                        # ----------------------------------------------------------
                         if mercados_para_processar:
                             if id_jogo not in ids_jogos_salvos_pendentes:
                                 jogos_para_pendentes.append({
@@ -347,7 +345,6 @@ def main():
 
                                 odd_para_lista = "Análise" if eh_scout else m_odd
 
-                                # 🟢 CORREÇÃO CRÍTICA 2: Recolocada a chave odds_todas
                                 lista_para_filtros.append({
                                     "horario": h_br, "time_casa": t1, "time_fora": t2,
                                     "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
@@ -357,7 +354,11 @@ def main():
                                 })
                                 total_mercados += 1
 
-        # --- PROCESSAMENTO E ENVIO FINAL ---
+                except Exception as e_jogo:
+                    print(f"      ⚠️ Erro ao processar o jogo índice {idx}: {e_jogo}")
+                    continue
+
+        # --- PROCESSAMENTO E ENVIO FINAL (FORA DOS LOOPS) ---
         if lista_para_filtros:
             lista_para_filtros.sort(key=lambda x: (x['horario'], x['liga']))
             
