@@ -1,45 +1,5 @@
 [
     {
-        "horario": "17:00",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Newell's Old Boys",
-        "time_fora": "Boca Juniors",
-        "mercado": "-3.5 Gols (80%)",
-        "odd": "1.18",
-        "link_betano": "https://www.betano.bet.br/match-odds/Newells-Old-Boys-Boca-Juniors/88418036/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/rckJsXkm"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Newell's Old Boys",
-        "time_fora": "Boca Juniors",
-        "mercado": "Chutes no gol: Luciano M. (NEW) | Méd: 1.0",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Newells-Old-Boys-Boca-Juniors/88418036/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/rckJsXkm"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Newell's Old Boys",
-        "time_fora": "Boca Juniors",
-        "mercado": "Chutes no gol: Banega E. (NEW) | Méd: 1.0",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Newells-Old-Boys-Boca-Juniors/88418036/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/rckJsXkm"
-    },
-    {
-        "horario": "17:00",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Newell's Old Boys",
-        "time_fora": "Boca Juniors",
-        "mercado": "Chutes no gol: Gimenez M. (BOC) | Méd: 3.0",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Newells-Old-Boys-Boca-Juniors/88418036/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/rckJsXkm"
-    },
-    {
         "horario": "17:45",
         "liga": "Colombia - Primeira A",
         "time_casa": "Jaguares de Cordoba",
@@ -55,7 +15,7 @@
         "time_casa": "Jaguares de Cordoba",
         "time_fora": "Atl. Nacional",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.36",
+        "odd": "1.37",
         "link_betano": "https://www.betano.bet.br/match-odds/Jaguares-de-Cordoba-Atletico-Nacional/89064430/",
         "link_h2h": "https://www.flashscore.com.br/jogo/l4UsHkFq"
     },
@@ -138,5 +98,305 @@
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Mirassol-SP-Gremio-RS/86389434/",
         "link_h2h": "https://www.flashscore.com.br/jogo/pnWA1uw9"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Chapecoense",
+        "time_fora": "Cruzeiro",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Chapecoense-SC-Cruzeiro-MG/86389869/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OfQlfcVr"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Chapecoense",
+        "time_fora": "Cruzeiro",
+        "mercado": "Chutes no gol: Bolasie (CHA) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Chapecoense-SC-Cruzeiro-MG/86389869/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OfQlfcVr"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Chapecoense",
+        "time_fora": "Cruzeiro",
+        "mercado": "Chutes no gol: João Paulo (CHA) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Chapecoense-SC-Cruzeiro-MG/86389869/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OfQlfcVr"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Chapecoense",
+        "time_fora": "Cruzeiro",
+        "mercado": "Chutes no gol: Kenji (CRU) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Chapecoense-SC-Cruzeiro-MG/86389869/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OfQlfcVr"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Platense",
+        "time_fora": "Talleres Córdoba",
+        "mercado": "Chutes no gol: Heredia L. (PLA) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Platense-CA-Talleres-de-Cordoba/88418048/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/A9tzvkkC"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Platense",
+        "time_fora": "Talleres Córdoba",
+        "mercado": "Chutes no gol: Vazquez I. (PLA) | Méd: 0.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Platense-CA-Talleres-de-Cordoba/88418048/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/A9tzvkkC"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Platense",
+        "time_fora": "Talleres Córdoba",
+        "mercado": "Chutes no gol: Baroni G. (TAL) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Platense-CA-Talleres-de-Cordoba/88418048/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/A9tzvkkC"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Vélez Sarsfield",
+        "time_fora": "Independiente",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velez-Sarsfield-CA-Independiente/88418051/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Vélez Sarsfield",
+        "time_fora": "Independiente",
+        "mercado": "Ambas Marcam: Não (80%)",
+        "odd": "1.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velez-Sarsfield-CA-Independiente/88418051/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Vélez Sarsfield",
+        "time_fora": "Independiente",
+        "mercado": "Chutes no gol: Valdes D. (VÉL) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velez-Sarsfield-CA-Independiente/88418051/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Vélez Sarsfield",
+        "time_fora": "Independiente",
+        "mercado": "Chutes no gol: Gordon J. (VÉL) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velez-Sarsfield-CA-Independiente/88418051/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Vélez Sarsfield",
+        "time_fora": "Independiente",
+        "mercado": "Chutes no gol: Montiel S. (IND) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velez-Sarsfield-CA-Independiente/88418051/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa"
+    },
+    {
+        "horario": "19:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "River Plate",
+        "time_fora": "Rosario Central",
+        "mercado": "Chutes no gol: Miguel Borja (RIV) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/River-Plate-CA-Rosario-Central/88418043/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/dtX9jSYH"
+    },
+    {
+        "horario": "19:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "River Plate",
+        "time_fora": "Rosario Central",
+        "mercado": "Chutes no gol: Colidio F. (RIV) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/River-Plate-CA-Rosario-Central/88418043/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/dtX9jSYH"
+    },
+    {
+        "horario": "19:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "River Plate",
+        "time_fora": "Rosario Central",
+        "mercado": "Chutes no gol: Malcorra I. (ROS) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/River-Plate-CA-Rosario-Central/88418043/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/dtX9jSYH"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Internacional",
+        "time_fora": "Corinthians",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.6",
+        "link_betano": "https://www.betano.bet.br/match-odds/Internacional-RS-Corinthians-SP/86389413/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/netHubGk"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Internacional",
+        "time_fora": "Corinthians",
+        "mercado": "Ambas Marcam: Sim (80%)",
+        "odd": "1.3",
+        "link_betano": "https://www.betano.bet.br/match-odds/Internacional-RS-Corinthians-SP/86389413/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/netHubGk"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Internacional",
+        "time_fora": "Corinthians",
+        "mercado": "Chutes no gol: Carbonero J. (INT) | Méd: 1.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Internacional-RS-Corinthians-SP/86389413/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/netHubGk"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Internacional",
+        "time_fora": "Corinthians",
+        "mercado": "Chutes no gol: Bernabei A. (INT) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Internacional-RS-Corinthians-SP/86389413/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/netHubGk"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Internacional",
+        "time_fora": "Corinthians",
+        "mercado": "Chutes no gol: Rodrigo Garro (COR) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Internacional-RS-Corinthians-SP/86389413/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/netHubGk"
+    },
+    {
+        "horario": "19:45",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "América de Cali",
+        "time_fora": "Boyacá Chicó",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.12",
+        "link_betano": "https://www.betano.bet.br/match-odds/America-de-Cali-Boyaca-Chico-FC/89746233/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bkIGkAL8"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Lanús",
+        "time_fora": "Instituto",
+        "mercado": "-3.5 Gols (100%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Lanus-Instituto-AC-Cordoba/88418044/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IZqrxTJO"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Lanús",
+        "time_fora": "Instituto",
+        "mercado": "Ambas Marcam: Não (100%)",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Lanus-Instituto-AC-Cordoba/88418044/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IZqrxTJO"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Lanús",
+        "time_fora": "Instituto",
+        "mercado": "1X (85%)",
+        "odd": "1.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Lanus-Instituto-AC-Cordoba/88418044/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IZqrxTJO"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Lanús",
+        "time_fora": "Instituto",
+        "mercado": "Chutes no gol: Marcelino Moreno (LAN) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Lanus-Instituto-AC-Cordoba/88418044/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IZqrxTJO"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Lanús",
+        "time_fora": "Instituto",
+        "mercado": "Chutes no gol: Besozzi L. (LAN) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Lanus-Instituto-AC-Cordoba/88418044/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IZqrxTJO"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Lanús",
+        "time_fora": "Instituto",
+        "mercado": "Chutes no gol: Klimowicz L. (INS) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Lanus-Instituto-AC-Cordoba/88418044/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IZqrxTJO"
+    },
+    {
+        "horario": "22:00",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Santa Fe",
+        "time_fora": "Once Caldas",
+        "mercado": "-4.5 Gols (100%)",
+        "odd": "1.11",
+        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-Santa-Fe-Once-Caldas/89064429/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QoNMTSbk"
+    },
+    {
+        "horario": "22:00",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Santa Fe",
+        "time_fora": "Once Caldas",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.35",
+        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-Santa-Fe-Once-Caldas/89064429/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QoNMTSbk"
+    },
+    {
+        "horario": "22:00",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Santa Fe",
+        "time_fora": "Once Caldas",
+        "mercado": "Ambas Marcam: Não (80%)",
+        "odd": "1.83",
+        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-Santa-Fe-Once-Caldas/89064429/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QoNMTSbk"
     }
 ]

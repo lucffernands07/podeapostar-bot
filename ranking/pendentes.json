@@ -9,11 +9,46 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/pnWA1uw9/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Newell's Old Boys",
-            "time_fora": "Boca Juniors",
+            "time_casa": "Chapecoense",
+            "time_fora": "Cruzeiro",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/rckJsXkm/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/OfQlfcVr/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Internacional",
+            "time_fora": "Corinthians",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/netHubGk/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "River Plate",
+            "time_fora": "Rosario Central",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/dtX9jSYH/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Lanús",
+            "time_fora": "Instituto",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/IZqrxTJO/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Platense",
+            "time_fora": "Talleres Córdoba",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/A9tzvkkC/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Vélez Sarsfield",
+            "time_fora": "Independiente",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa/#/resumo-de-jogo"
         },
         {
             "time_casa": "Jaguares de Cordoba",
@@ -21,6 +56,20 @@
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/l4UsHkFq/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "América de Cali",
+            "time_fora": "Boyacá Chicó",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bkIGkAL8/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Santa Fe",
+            "time_fora": "Once Caldas",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QoNMTSbk/#/resumo-de-jogo"
         }
     ]
 }
