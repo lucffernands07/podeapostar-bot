@@ -11,12 +11,12 @@
             "Martinez Quarta L.",
             "Otamendi N.",
             "Rivero L.",
+            "Moreno A.",
             "Fausto Vera",
-            "Silva L.",
-            "Correa A.",
-            "Beltran L.",
-            "Galvan T.",
-            "Jaílson Freitas"
+            "Pereyra L.",
+            "Jaílson Freitas",
+            "Colidio F.",
+            "Borre R."
         ],
         "titulares_fora": [
             "Ledesma C.",
@@ -26,13 +26,13 @@
             "Sandez A.",
             "Ibarra F.",
             "Pizarro V.",
-            "Campaz J.",
-            "Di Maria A.",
             "Cantizano G.",
-            "Badaloni T."
+            "Di Maria A.(C)",
+            "Campaz J.",
+            "Copetti E."
         ],
-        "texto_telegram": "**River Plate**:\nBeltran S., Montiel G., Martinez Quarta L., Otamendi N.\nRivero L., Fausto Vera, Silva L., Correa A.\nBeltran L., Galvan T., Jaílson Freitas\n\n**Rosario Central**:\nLedesma C., Coronel E., Ovando I., Avila G.\nSandez A., Ibarra F., Pizarro V., Campaz J.\nDi Maria A., Cantizano G., Badaloni T.",
-        "atualizado_em": "2026-08-02 17:54"
+        "texto_telegram": "**River Plate**:\nBeltran S., Montiel G., Martinez Quarta L., Otamendi N.\nRivero L., Moreno A., Fausto Vera, Pereyra L.\nJaílson Freitas, Colidio F., Borre R.\n\n**Rosario Central**:\nLedesma C., Coronel E., Ovando I., Avila G.\nSandez A., Ibarra F., Pizarro V., Cantizano G.\nDi Maria A.(C), Campaz J., Copetti E.",
+        "atualizado_em": "2026-08-02 18:57"
     },
     "lanúsxinstituto": {
         "time_casa": "Lanús",
@@ -67,6 +67,6 @@
             "Tissera M."
         ],
         "texto_telegram": "**Lanús**:\nLosada N., Perez G., Izquierdoz C., Canale J.\nMarcich S., Medina A., Cardozo A., Sepulveda M.\nCarrera R., Besozzi L., Valois Y.\n\n**Instituto**:\nLedesma M., Galvan J., Mosevich L., Alarcon F. R.\nCerato G., Abregu G., Gallardo M., Sosa D.\nCordoba Mosquera J. E., Luna A., Tissera M.",
-        "atualizado_em": "2026-08-02 17:54"
+        "atualizado_em": "2026-08-02 18:57"
     }
 }
