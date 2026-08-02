@@ -133,9 +133,13 @@ def main():
                     
                     aceitar = False
                     if amanha_no_site in tempo_raw:
-                        if h_obj.hour <= 3: aceitar = True
+                        # Aceita os jogos da virada da noite (0, 1, 2, 3 UTC = 21h, 22h, 23h, 00h BR)
+                        # E aceita os jogos do final do dia em UTC que vêm marcados como 'Amanhã' (21, 22, 23 UTC = 18h, 19h, 20h BR)
+                        if h_obj.hour <= 3 or h_obj.hour >= 21: 
+                            aceitar = True
                     elif "." not in tempo_raw:
-                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
+                        if (h_obj - timedelta(hours=3)).hour >= 7: 
+                            aceitar = True
 
                     if aceitar:
                         print(f"      ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
@@ -153,7 +157,7 @@ def main():
                                 id_jogo = url_jogo.split("mid=")[-1].split("&")[0]
                         except Exception:
                             pass
-
+    
                         if not id_jogo:
                             try:
                                 link_el = el.find_element(By.CSS_SELECTOR, "a.eventRowLink")
