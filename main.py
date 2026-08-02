@@ -129,19 +129,13 @@ def main():
                     if ":" not in horario_str: continue
 
                     h_obj = datetime.strptime(horario_str, "%H:%M")
-
-                    # Monta a data e hora UTC reais considerando se o Flashscore já virou a data
+                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
+                    
+                    aceitar = False
                     if amanha_no_site in tempo_raw:
-                        dt_utc = (hoje_ref + timedelta(days=1)).replace(hour=h_obj.hour, minute=h_obj.minute, second=0, microsecond=0)
-                    else:
-                        dt_utc = hoje_ref.replace(hour=h_obj.hour, minute=h_obj.minute, second=0, microsecond=0)
-
-                    # Converte o fuso completo UTC para Brasília (-3h)
-                    dt_br = dt_utc - timedelta(hours=3)
-                    h_br = dt_br.strftime("%H:%M")
-
-                    # Aceita se o jogo for HOJE no Brasil e a partir das 07:00 BR
-                    aceitar = (dt_br.date() == hoje_ref.date() and dt_br.hour >= 7)
+                        if h_obj.hour <= 3: aceitar = True
+                    elif "." not in tempo_raw:
+                        if (h_obj - timedelta(hours=3)).hour >= 7: aceitar = True
 
                     if aceitar:
                         print(f"      ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
@@ -159,7 +153,6 @@ def main():
                                 id_jogo = url_jogo.split("mid=")[-1].split("&")[0]
                         except Exception:
                             pass
-
 
                         if not id_jogo:
                             try:
