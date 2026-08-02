@@ -1,39 +1,4 @@
 {
-    "aldosivixgimnasia l.p.": {
-        "time_casa": "Aldosivi",
-        "time_fora": "Gimnasia L.P.",
-        "horario": "14:30",
-        "liga": "Argentina - Liga Profesional",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/aldosivi-Eu4qrEcB/gimnasia-l-p-jiDN9Zaj/resumo/equipes/",
-        "titulares_casa": [
-            "Chicco I.",
-            "Moya S.",
-            "Zalazar N.",
-            "Pombo J.",
-            "Gonzalez R.",
-            "Garcia M.",
-            "Linares N.",
-            "Castro L.",
-            "Laurelli F.",
-            "Cordero N.",
-            "Godoy M."
-        ],
-        "titulares_fora": [
-            "Insfran N.",
-            "Barros Schelotto B.",
-            "Cortazzo J.",
-            "Martinez E.",
-            "Silva Torrejon P.",
-            "Seoane M.",
-            "Nacho Fernández",
-            "Antônio Steimbach",
-            "Miramon I.",
-            "Auzmendi A.",
-            "Merlo J."
-        ],
-        "texto_telegram": "**Aldosivi**:\nChicco I., Moya S., Zalazar N., Pombo J.\nGonzalez R., Garcia M., Linares N., Castro L.\nLaurelli F., Cordero N., Godoy M.\n\n**Gimnasia L.P.**:\nInsfran N., Barros Schelotto B., Cortazzo J., Martinez E.\nSilva Torrejon P., Seoane M., Nacho Fernández, Antônio Steimbach\nMiramon I., Auzmendi A., Merlo J.",
-        "atualizado_em": "2026-08-02 13:15"
-    },
     "palmeirasxfortaleza": {
         "time_casa": "Palmeiras",
         "time_fora": "Fortaleza",
@@ -43,30 +8,120 @@
         "titulares_casa": [
             "Carlos Miguel",
             "Murilo",
-            "Martinez E.",
             "Alexander Barboza",
+            "Martinez E.",
             "Allan",
             "Andreas Pereira",
             "Marlon Freitas",
-            "Piquerez",
-            "Jhon Arias",
+            "Piquerez(C)",
             "Maurício",
+            "Jhon Arias",
             "Sosa R."
         ],
         "titulares_fora": [
-            "Joao Ricardo",
+            "Joao Ricardo(C)",
             "Mailton",
             "Neris",
             "Lucas Gazal",
-            "Mauricio Junior",
-            "Lucas Sasha",
-            "Rodrigo",
-            "Rodriguinho",
+            "Gabriel Fuentes",
+            "Pierre",
             "Vitinho",
-            "Luiz Fernando",
-            "Miritello J. B."
+            "Lucas Sasha",
+            "Ronald",
+            "Paulo Baya",
+            "Luiz Fernando"
         ],
-        "texto_telegram": "**Palmeiras**:\nCarlos Miguel, Murilo, Martinez E., Alexander Barboza\nAllan, Andreas Pereira, Marlon Freitas, Piquerez\nJhon Arias, Maurício, Sosa R.\n\n**Fortaleza**:\nJoao Ricardo, Mailton, Neris, Lucas Gazal\nMauricio Junior, Lucas Sasha, Rodrigo, Rodriguinho\nVitinho, Luiz Fernando, Miritello J. B.",
-        "atualizado_em": "2026-08-02 13:15"
+        "texto_telegram": "**Palmeiras**:\nCarlos Miguel, Murilo, Alexander Barboza, Martinez E.\nAllan, Andreas Pereira, Marlon Freitas, Piquerez(C)\nMaurício, Jhon Arias, Sosa R.\n\n**Fortaleza**:\nJoao Ricardo(C), Mailton, Neris, Lucas Gazal\nGabriel Fuentes, Pierre, Vitinho, Lucas Sasha\nRonald, Paulo Baya, Luiz Fernando",
+        "atualizado_em": "2026-08-02 15:39"
+    },
+    "bayernxstuttgart": {
+        "time_casa": "Bayern",
+        "time_fora": "Stuttgart",
+        "horario": "15:30",
+        "liga": "Alemanha - Bundesliga",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/bayern-nVp0wiqd/stuttgart-nJQmYp1B/resumo/equipes/",
+        "titulares_casa": [],
+        "titulares_fora": [],
+        "texto_telegram": "**Bayern**:\nEscalação provável não disponível\n\n**Stuttgart**:\nEscalação provável não disponível",
+        "atualizado_em": "2026-08-02 15:39"
+    },
+    "marseillexstrasbourg": {
+        "time_casa": "Marseille",
+        "time_fora": "Strasbourg",
+        "horario": "15:45",
+        "liga": "França - Ligue 1",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/marseille-SblU3Hee/strasbourg-nP6UzIU1/resumo/equipes/",
+        "titulares_casa": [],
+        "titulares_fora": [],
+        "texto_telegram": "**Marseille**:\nEscalação provável não disponível\n\n**Strasbourg**:\nEscalação provável não disponível",
+        "atualizado_em": "2026-08-02 15:39"
+    },
+    "grêmioxsão paulo": {
+        "time_casa": "Grêmio",
+        "time_fora": "São Paulo",
+        "horario": "16:00",
+        "liga": "Brasileirão Série A",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/gremio-E1EFmhVh/sao-paulo-QgP0oAUH/resumo/equipes/",
+        "titulares_casa": [],
+        "titulares_fora": [],
+        "texto_telegram": "**Grêmio**:\nEscalação provável não disponível\n\n**São Paulo**:\nEscalação provável não disponível",
+        "atualizado_em": "2026-08-02 15:39"
+    },
+    "estorilxfamalicão": {
+        "time_casa": "Estoril",
+        "time_fora": "Famalicão",
+        "horario": "16:15",
+        "liga": "Portugal - Primeira Liga",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/estoril-htoKuYZl/famalicao-ABBgitC3/resumo/equipes/",
+        "titulares_casa": [],
+        "titulares_fora": [],
+        "texto_telegram": "**Estoril**:\nEscalação provável não disponível\n\n**Famalicão**:\nEscalação provável não disponível",
+        "atualizado_em": "2026-08-02 15:39"
+    },
+    "newell's old boysxboca juniors": {
+        "time_casa": "Newell's Old Boys",
+        "time_fora": "Boca Juniors",
+        "horario": "17:00",
+        "liga": "Argentina - Liga Profesional",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/boca-juniors-hMrWAFH0/newells-old-boys-6gMiRHVj/resumo/equipes/",
+        "titulares_casa": [
+            "Reinatti J.",
+            "Escobar F.",
+            "Cabrera B.",
+            "Giannetti L.",
+            "Russo J.",
+            "Sotelo D.",
+            "Regiardo L.",
+            "Mazzantti W.",
+            "Sonora A.",
+            "Rios T.",
+            "Coccaro M."
+        ],
+        "titulares_fora": [
+            "Montero A.",
+            "Lozano L.",
+            "Figal J.",
+            "Costa A.",
+            "Blanco L.",
+            "Aranda T.",
+            "Paredes L.",
+            "Delgado M.",
+            "Ascacibar S.",
+            "Miguel Merentiel",
+            "Villa S."
+        ],
+        "texto_telegram": "**Newell's Old Boys**:\nReinatti J., Escobar F., Cabrera B., Giannetti L.\nRusso J., Sotelo D., Regiardo L., Mazzantti W.\nSonora A., Rios T., Coccaro M.\n\n**Boca Juniors**:\nMontero A., Lozano L., Figal J., Costa A.\nBlanco L., Aranda T., Paredes L., Delgado M.\nAscacibar S., Miguel Merentiel, Villa S.",
+        "atualizado_em": "2026-08-02 15:39"
+    },
+    "operárioxsão bernardo": {
+        "time_casa": "Operário",
+        "time_fora": "São Bernardo",
+        "horario": "19:30",
+        "liga": "Brasileirão Série B",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/operario-CW8Nm1GL/sao-bernardo-Wp4nyhLR/resumo/equipes/",
+        "titulares_casa": [],
+        "titulares_fora": [],
+        "texto_telegram": "**Operário**:\nEscalação provável não disponível\n\n**São Bernardo**:\nEscalação provável não disponível",
+        "atualizado_em": "2026-08-02 15:39"
     }
 }
