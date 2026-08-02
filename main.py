@@ -317,8 +317,8 @@ def main():
                                         "odd": "1.30"
                                     })
 
-                        # 🟢 Puxa a URL guardada no dicionário do H2H e cria a variável no main.py
-                        url_h2h_final = stats_h2h.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
+                        # 🟢 Puxa a URL do dicionário dados_jogo (que já existe no main.py!)
+                        url_h2h_final = dados_jogo.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
 
                         # ALIMENTAÇÃO DA LISTA FINAL
                         if mercados_para_processar:
@@ -352,11 +352,10 @@ def main():
                                     "horario": h_br, "time_casa": t1, "time_fora": t2,
                                     "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
                                     "link_betano": dados_jogo.get("link_betano"),
-                                    "link_h2h": url_h2h_final,  # ✅ Agora a variável existe!
+                                    "link_h2h": url_h2h_final,
                                     "odds_todas": v_odds
                                 })
                                 total_mercados += 1
-
 
         # --- PROCESSAMENTO E ENVIO FINAL ---
         if lista_para_filtros:
