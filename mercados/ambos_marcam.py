@@ -5,7 +5,7 @@ REGRAS DE MERCADO - AMBAS MARCAM (BTTS SIM / NÃO)
 3. NÃO: Visitante fora com Média de Gols <= 0.8 (últimos 5 jogos).
 """
 
-def verificar_btts(s, outros_mercados_aprovados=None):
+def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=None):
     """
     Avalia BTTS SIM / NÃO baseado na média de gols do visitante fora de casa,
     apenas se já houver pelo menos 1 outro mercado aprovado para o confronto.
@@ -14,8 +14,11 @@ def verificar_btts(s, outros_mercados_aprovados=None):
         if not isinstance(s, dict):
             return []
 
+        # Captura os mercados aprovados enviados pelo main.py (seja pelo nome novo ou pelo antigo)
+        mercados_previos = outros_mercados_aprovados or mercados_gols_aprovados
+
         # 🛑 TRAVA 1: Se não houver NENHUM outro mercado aprovado antes, cancela o BTTS
-        if not outros_mercados_aprovados: # lista vazia ou None
+        if not mercados_previos: # lista vazia ou None
             print("   ⚠️ BTTS BARRADO: Nenhum outro mercado foi aprovado para este jogo.")
             return []
 
