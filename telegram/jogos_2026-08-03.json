@@ -45,7 +45,7 @@
         "time_casa": "Cracovia",
         "time_fora": "Pogon Szczecin",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.29",
+        "odd": "1.31",
         "link_betano": "https://www.betano.bet.br/match-odds/Cracovia-Krakow-MKS-Pogon-Szczecin/88118840/",
         "link_h2h": "https://www.flashscore.com.br/jogo/tCC0Jn86"
     },
@@ -65,7 +65,7 @@
         "time_casa": "Cracovia",
         "time_fora": "Pogon Szczecin",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.95",
+        "odd": "2.05",
         "link_betano": "https://www.betano.bet.br/match-odds/Cracovia-Krakow-MKS-Pogon-Szczecin/88118840/",
         "link_h2h": "https://www.flashscore.com.br/jogo/tCC0Jn86"
     },
@@ -86,6 +86,36 @@
         "time_fora": "Ind. Rivadavia",
         "mercado": "Ambas Marcam: Não",
         "odd": "1.7",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Sarmiento-Independiente-Rivadavia-de-Mendoza/88418049/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Ms7r5RmB"
+    },
+    {
+        "horario": "16:45",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Sarmiento Junin",
+        "time_fora": "Ind. Rivadavia",
+        "mercado": "Chutes no gol: Villalba C. (SAR) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Sarmiento-Independiente-Rivadavia-de-Mendoza/88418049/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Ms7r5RmB"
+    },
+    {
+        "horario": "16:45",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Sarmiento Junin",
+        "time_fora": "Ind. Rivadavia",
+        "mercado": "Chutes no gol: J. Renteria (SAR) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Sarmiento-Independiente-Rivadavia-de-Mendoza/88418049/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Ms7r5RmB"
+    },
+    {
+        "horario": "16:45",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Sarmiento Junin",
+        "time_fora": "Ind. Rivadavia",
+        "mercado": "Chutes no gol: Osella A. (IND) | Méd: 3.0",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Sarmiento-Independiente-Rivadavia-de-Mendoza/88418049/",
         "link_h2h": "https://www.flashscore.com.br/jogo/Ms7r5RmB"
     },
@@ -132,6 +162,36 @@
     {
         "horario": "19:00",
         "liga": "Argentina - Liga Profesional",
+        "time_casa": "Platense",
+        "time_fora": "Talleres Córdoba",
+        "mercado": "Chutes no gol: Heredia L. (PLA) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Platense-CA-Talleres-de-Cordoba/88418048/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/A9tzvkkC"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Platense",
+        "time_fora": "Talleres Córdoba",
+        "mercado": "Chutes no gol: Vazquez I. (PLA) | Méd: 0.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Platense-CA-Talleres-de-Cordoba/88418048/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/A9tzvkkC"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Platense",
+        "time_fora": "Talleres Córdoba",
+        "mercado": "Chutes no gol: Baroni G. (TAL) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Platense-CA-Talleres-de-Cordoba/88418048/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/A9tzvkkC"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
         "time_casa": "Vélez Sarsfield",
         "time_fora": "Independiente",
         "mercado": "-3.5 Gols (80%)",
@@ -146,6 +206,36 @@
         "time_fora": "Independiente",
         "mercado": "Ambas Marcam: Não",
         "odd": "1.7",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velez-Sarsfield-CA-Independiente/88418051/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Vélez Sarsfield",
+        "time_fora": "Independiente",
+        "mercado": "Chutes no gol: Valdes D. (VÉL) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velez-Sarsfield-CA-Independiente/88418051/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Vélez Sarsfield",
+        "time_fora": "Independiente",
+        "mercado": "Chutes no gol: Machuca I. (VÉL) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velez-Sarsfield-CA-Independiente/88418051/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Vélez Sarsfield",
+        "time_fora": "Independiente",
+        "mercado": "Chutes no gol: Galdames P. (IND) | Méd: 1.0",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Velez-Sarsfield-CA-Independiente/88418051/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa"
     },
@@ -166,6 +256,36 @@
         "time_fora": "Atlético-MG",
         "mercado": "Ambas Marcam: Não",
         "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Clube-Atletico-MG/90078555/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xx31LZTs"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Juventude",
+        "time_fora": "Atlético-MG",
+        "mercado": "Chutes no gol: Igor Formiga (JUV) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Clube-Atletico-MG/90078555/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xx31LZTs"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Juventude",
+        "time_fora": "Atlético-MG",
+        "mercado": "Chutes no gol: Ênio (JUV) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Clube-Atletico-MG/90078555/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xx31LZTs"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Juventude",
+        "time_fora": "Atlético-MG",
+        "mercado": "Chutes no gol: Renan Lodi (ATL) | Méd: 2.0",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Clube-Atletico-MG/90078555/",
         "link_h2h": "https://www.flashscore.com.br/jogo/xx31LZTs"
     },
@@ -220,6 +340,36 @@
         "link_h2h": "https://www.flashscore.com.br/jogo/0xJT6zFl"
     },
     {
+        "horario": "21:00",
+        "liga": "Copa do Brasil",
+        "time_casa": "Athletico-PR",
+        "time_fora": "Vitória",
+        "mercado": "Chutes no gol: Luiz Gustavo (ATH) | Méd: 4.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Athletico-PR-Vitoria-BA/86389718/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0xJT6zFl"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Copa do Brasil",
+        "time_casa": "Athletico-PR",
+        "time_fora": "Vitória",
+        "mercado": "Chutes no gol: Viveros K. (ATH) | Méd: 4.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Athletico-PR-Vitoria-BA/86389718/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0xJT6zFl"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Copa do Brasil",
+        "time_casa": "Athletico-PR",
+        "time_fora": "Vitória",
+        "mercado": "Chutes no gol: Rene (VIT) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Athletico-PR-Vitoria-BA/86389718/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0xJT6zFl"
+    },
+    {
         "horario": "21:15",
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Central Córdoba",
@@ -242,6 +392,36 @@
     {
         "horario": "21:15",
         "liga": "Argentina - Liga Profesional",
+        "time_casa": "Central Córdoba",
+        "time_fora": "San Lorenzo",
+        "mercado": "Chutes no gol: Tijanovich H. (CEN) | Méd: 2.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Central-Cordoba-San-Lorenzo/88418052/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UDD0fAZh"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Central Córdoba",
+        "time_fora": "San Lorenzo",
+        "mercado": "Chutes no gol: Varaldo L. (CEN) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Central-Cordoba-San-Lorenzo/88418052/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UDD0fAZh"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Central Córdoba",
+        "time_fora": "San Lorenzo",
+        "mercado": "Chutes no gol: Rodriguez G. (SAN) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Central-Cordoba-San-Lorenzo/88418052/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UDD0fAZh"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
         "time_casa": "Huracán",
         "time_fora": "Atl. Tucuman",
         "mercado": "-3.5 Gols (80%)",
@@ -256,6 +436,26 @@
         "time_fora": "Atl. Tucuman",
         "mercado": "Ambas Marcam: Não",
         "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Huracan-Club-Atletico-Tucuman/88418050/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/I90i35IN"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Huracán",
+        "time_fora": "Atl. Tucuman",
+        "mercado": "Chutes no gol: Jordy Caicedo (HUR) | Méd: 1.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Huracan-Club-Atletico-Tucuman/88418050/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/I90i35IN"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Huracán",
+        "time_fora": "Atl. Tucuman",
+        "mercado": "Chutes no gol: Lamendola N. (ATL) | Méd: 1.0",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Huracan-Club-Atletico-Tucuman/88418050/",
         "link_h2h": "https://www.flashscore.com.br/jogo/I90i35IN"
     }
