@@ -2,32 +2,44 @@
 
 def verificar_vitorias(stats):
     """
-    Regras de Vitória Casa e Vitória Fora (Recorte Casa/Fora - Mínimo 4/5):
+    Regras de Vitória Casa e Vitória Fora baseadas nos 7 exemplos reais:
     
-    - Vitória Casa: Mandante com >= 4 vitórias em 5 jogos em casa 
-                    AND Visitante com <= 1 vitória em 5 jogos fora.
-    - Vitória Fora: Visitante com >= 4 vitórias em 5 jogos fora 
-                    AND Mandante com <= 1 vitória em 5 jogos em casa.
+    - Vitória Casa: Mandante competitivo (>= 3 vitórias) AND 
+                    (Visitante perdeu >= 3 jogos fora OU levou >= 8 gols fora).
+                    
+    - Vitória Fora: Visitante sólido na defesa (<= 6 gols sofridos fora AND >= 3 jogos sem perder) AND 
+                    (Mandante com 0 vitórias em casa OU Visitante com >= 3 vitórias fora).
     """
     retorno = []
     
-    # Vitórias filtradas do novo raspagem_h2h (Casa em Casa / Visitante Fora)
-    vitorias_casa = stats.get("casa_vitorias_recente", 0)
-    vitorias_fora = stats.get("fora_vitorias_recente", 0)
+    if not isinstance(stats, dict):
+        return retorno
+
+    # Captura das métricas do dicionário
+    vitorias_casa = int(stats.get("casa_vitorias_recente", 0) or 0)
+    vitorias_fora = int(stats.get("fora_vitorias_recente", 0) or 0)
     
+    derrotas_fora = int(stats.get("visitante_derrotas_fora", 0) or 0)
+    sem_derrota_fora = int(stats.get("visitante_sem_derrota_fora", 0) or 0)
+    gols_sofridos_fora = float(stats.get("visitante_gols_sofridos_fora", 0) or 0)
+
     # -----------------------------------------------------------------
-    # 🏠 VITÓRIA CASA (Mandante forte em casa vs Visitante fraco fora)
+    # 🏠 VITÓRIA CASA (Padrão América de Cali, Rapid Vienna, Palmeiras)
     # -----------------------------------------------------------------
-    if vitorias_casa >= 4 and vitorias_fora <= 1:
-        pct = "100%" if (vitorias_casa == 5 and vitorias_fora == 0) else "85%"
+    condicao_casa = (vitorias_casa >= 3) and (derrotas_fora >= 3 or gols_sofridos_fora >= 8)
+
+    if condicao_casa:
+        pct = "100%" if vitorias_casa == 5 else ("85%" if vitorias_casa == 4 else "70%")
         retorno.append(f"Vitória Casa ({pct})")
-        
+
     # -----------------------------------------------------------------
-    # ✈️ VITÓRIA FORA (Visitante forte fora vs Mandante fraco em casa)
+    # ✈️ VITÓRIA FORA (Padrão Barracas Central, Gimnasia L.P.)
     # -----------------------------------------------------------------
-    if vitorias_fora >= 4 and vitorias_casa <= 1:
-        pct = "100%" if (vitorias_fora == 5 and vitorias_casa == 0) else "85%"
+    condicao_fora = (gols_sofridos_fora <= 6 and sem_derrota_fora >= 3) and (vitorias_casa == 0 or vitorias_fora >= 3)
+
+    if condicao_fora:
+        pct = "100%" if vitorias_fora == 5 else ("85%" if vitorias_fora == 4 else "70%")
         retorno.append(f"Vitória Fora ({pct})")
-        
+
     return retorno
     
