@@ -1,0 +1,312 @@
+[
+    {
+        "horario": "09:30",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Bukovyna",
+        "time_fora": "LNZ Cherkasy",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.21",
+        "link_betano": "https://www.betano.bet.br/match-odds/Bukovina-Chernovtsy-LNZ-Cherkasy/89103295/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UVP3MaHb"
+    },
+    {
+        "horario": "09:30",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Bukovyna",
+        "time_fora": "LNZ Cherkasy",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.72",
+        "link_betano": "https://www.betano.bet.br/match-odds/Bukovina-Chernovtsy-LNZ-Cherkasy/89103295/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UVP3MaHb"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Shakhtar",
+        "time_fora": "Kudrivka",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.31",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Shakhtar-Donetsk-FK-Kudrivka/90046551/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OftzTQ5d"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Shakhtar",
+        "time_fora": "Kudrivka",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Shakhtar-Donetsk-FK-Kudrivka/90046551/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OftzTQ5d"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Armênia Premier League",
+        "time_casa": "Alashkert",
+        "time_fora": "Ararat",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/Alashkert-FC-FC-Ararat-Yerevan/89814029/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bN9QTxCc"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Dinamarca - Superliga",
+        "time_casa": "Odense",
+        "time_fora": "Sonderjyske",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.52",
+        "link_betano": "https://www.betano.bet.br/match-odds/Odense-BK-Sonderjyske/88668042/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GOwt705l"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Dinamarca - Superliga",
+        "time_casa": "Odense",
+        "time_fora": "Sonderjyske",
+        "mercado": "-4.5 Gols (60%)",
+        "odd": "1.21",
+        "link_betano": "https://www.betano.bet.br/match-odds/Odense-BK-Sonderjyske/88668042/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GOwt705l"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Dinamarca - Superliga",
+        "time_casa": "Odense",
+        "time_fora": "Sonderjyske",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "2.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Odense-BK-Sonderjyske/88668042/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GOwt705l"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Polônia - Ekstraklasa",
+        "time_casa": "Cracovia",
+        "time_fora": "Pogon Szczecin",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cracovia-Krakow-MKS-Pogon-Szczecin/88118840/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/tCC0Jn86"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Polônia - Ekstraklasa",
+        "time_casa": "Cracovia",
+        "time_fora": "Pogon Szczecin",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.8",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cracovia-Krakow-MKS-Pogon-Szczecin/88118840/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/tCC0Jn86"
+    },
+    {
+        "horario": "16:45",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Sarmiento Junin",
+        "time_fora": "Ind. Rivadavia",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.19",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Sarmiento-Independiente-Rivadavia-de-Mendoza/88418049/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Ms7r5RmB"
+    },
+    {
+        "horario": "16:45",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Sarmiento Junin",
+        "time_fora": "Ind. Rivadavia",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.7",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Sarmiento-Independiente-Rivadavia-de-Mendoza/88418049/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Ms7r5RmB"
+    },
+    {
+        "horario": "18:10",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Llaneros",
+        "time_fora": "Fortaleza",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/Llaneros-FC-Fortaleza-CEIF/89064431/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/zaPqtclC"
+    },
+    {
+        "horario": "18:10",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Llaneros",
+        "time_fora": "Fortaleza",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.73",
+        "link_betano": "https://www.betano.bet.br/match-odds/Llaneros-FC-Fortaleza-CEIF/89064431/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/zaPqtclC"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Platense",
+        "time_fora": "Talleres Córdoba",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.13",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Platense-CA-Talleres-de-Cordoba/88418048/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/A9tzvkkC"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Platense",
+        "time_fora": "Talleres Córdoba",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Platense-CA-Talleres-de-Cordoba/88418048/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/A9tzvkkC"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Vélez Sarsfield",
+        "time_fora": "Independiente",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velez-Sarsfield-CA-Independiente/88418051/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Vélez Sarsfield",
+        "time_fora": "Independiente",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/Velez-Sarsfield-CA-Independiente/88418051/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lfhRuBKa"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Juventude",
+        "time_fora": "Atlético-MG",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Clube-Atletico-MG/90078555/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xx31LZTs"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Juventude",
+        "time_fora": "Atlético-MG",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Clube-Atletico-MG/90078555/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xx31LZTs"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Juventude",
+        "time_fora": "Atlético-MG",
+        "mercado": "1X (85%)",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Clube-Atletico-MG/90078555/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xx31LZTs"
+    },
+    {
+        "horario": "20:15",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Tolima",
+        "time_fora": "Ind. Medellín",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Tolima-Independiente-Medellin/89064433/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/x2rdVuzf"
+    },
+    {
+        "horario": "20:15",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Tolima",
+        "time_fora": "Ind. Medellín",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.83",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Tolima-Independiente-Medellin/89064433/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/x2rdVuzf"
+    },
+    {
+        "horario": "20:15",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Tolima",
+        "time_fora": "Ind. Medellín",
+        "mercado": "1X (85%)",
+        "odd": "1.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Tolima-Independiente-Medellin/89064433/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/x2rdVuzf"
+    },
+    {
+        "horario": "20:15",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Tolima",
+        "time_fora": "Ind. Medellín",
+        "mercado": "Vitória Casa (85%)",
+        "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Tolima-Independiente-Medellin/89064433/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/x2rdVuzf"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Copa do Brasil",
+        "time_casa": "Athletico-PR",
+        "time_fora": "Vitória",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Athletico-PR-Vitoria-BA/86389718/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0xJT6zFl"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Copa do Brasil",
+        "time_casa": "Athletico-PR",
+        "time_fora": "Vitória",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/Athletico-PR-Vitoria-BA/86389718/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0xJT6zFl"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Central Córdoba",
+        "time_fora": "San Lorenzo",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.16",
+        "link_betano": "https://www.betano.bet.br/match-odds/Central-Cordoba-San-Lorenzo/88418052/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UDD0fAZh"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Central Córdoba",
+        "time_fora": "San Lorenzo",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/Central-Cordoba-San-Lorenzo/88418052/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UDD0fAZh"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Huracán",
+        "time_fora": "Atl. Tucuman",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.16",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Huracan-Club-Atletico-Tucuman/88418050/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/I90i35IN"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Huracán",
+        "time_fora": "Atl. Tucuman",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Huracan-Club-Atletico-Tucuman/88418050/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/I90i35IN"
+    }
+]
