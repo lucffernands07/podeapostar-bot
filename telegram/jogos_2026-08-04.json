@@ -74,6 +74,16 @@
         "liga": "Europa - Champions League",
         "time_casa": "Levski (Bul)",
         "time_fora": "Kairat Almaty (Kaz)",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.1",
+        "link_betano": "https://www.betano.bet.br/match-odds/PFC-Levski-Sofia-FC-Kairat/89903280/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/v1ZHdEUi"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Europa - Champions League",
+        "time_casa": "Levski (Bul)",
+        "time_fora": "Kairat Almaty (Kaz)",
         "mercado": "Ambas Marcam: Não",
         "odd": "1.62",
         "link_betano": "https://www.betano.bet.br/match-odds/PFC-Levski-Sofia-FC-Kairat/89903280/",
@@ -165,7 +175,7 @@
         "time_casa": "Sparta Praga (Cze)",
         "time_fora": "Lyon (Fra)",
         "mercado": "-4.5 Gols (80%)",
-        "odd": "1.16",
+        "odd": "1.17",
         "link_betano": "https://www.betano.bet.br/match-odds/AC-Sparta-Praha-Olympique-Lyonnais/89386992/",
         "link_h2h": "https://www.flashscore.com.br/jogo/bNBc695K"
     },
@@ -175,7 +185,7 @@
         "time_casa": "Sparta Praga (Cze)",
         "time_fora": "Lyon (Fra)",
         "mercado": "-3.5 Gols (60%)",
-        "odd": "1.42",
+        "odd": "1.44",
         "link_betano": "https://www.betano.bet.br/match-odds/AC-Sparta-Praha-Olympique-Lyonnais/89386992/",
         "link_h2h": "https://www.flashscore.com.br/jogo/bNBc695K"
     },
