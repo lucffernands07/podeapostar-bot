@@ -15,6 +15,11 @@ def extrair_porcentagem(texto_mercado):
         return 0
 
 def extrair_odd(odd_str):
+    """
+    Retorna a odd convertida para float.
+    Para mercados estáticos/scouts (incluindo Finalizações Totais do Time),
+    atribui a odd invisível padrão de 1.30 para não zerar nem cair em travas.
+    """
     try:
         if not odd_str or odd_str == "N/A" or odd_str == "":
             return 1.30
@@ -24,7 +29,8 @@ def extrair_odd(odd_str):
         if "análise" in odd_str_s.lower() or "analise" in odd_str_s.lower():
             return 1.30
             
-        if any(term in odd_str_s.lower() for term in ["chutes", "falta", "cartã", "cartao", "cantos"]):
+        # 🟢 Garante odd invisível de 1.30 para Finalizações Totais do Time (e legados de scouts/cartões/cantos)
+        if any(term in odd_str_s.lower() for term in ["chutes", "chute", "finaliza", "finalização", "finalizacao", "falta", "cartã", "cartao", "cantos", "escanteio"]):
             return 1.30
             
         if isinstance(odd_str, (int, float)):
@@ -35,6 +41,9 @@ def extrair_odd(odd_str):
         return 1.30
 
 def prioridade_mercado(mercado_texto):
+    """
+    Define a ordem em que os mercados aparecem no bloco de código do Telegram.
+    """
     m = str(mercado_texto).lower()
     
     if "gols" in m: return 1
@@ -42,7 +51,7 @@ def prioridade_mercado(mercado_texto):
     if "1x" in m: return 3
     if "2x" in m or "x2" in m: return 4
     if "vitória" in m or "vitoria" in m: return 5   
-    if "chute" in m: return 6
+    if "finalização" in m or "finalizacao" in m or "chute" in m: return 6  # 🎯 Finalizações do Time
     if "falta" in m: return 7
     if "cartão" in m or "cartao" in m: return 8
     if "escanteio" in m: return 9
@@ -88,7 +97,7 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=3, **kwargs):
             ordem_chaves.append(chave)
         jogos_agrupados[chave].append(jogo)
 
-    # 2. Seleciona os N confrontos alvos (ex: Bingo 3, Bingo 5, etc)
+    # 2. Seleciona os N confrontos alvos (ex: Bingo 3 jogos)
     chaves_selecionadas = ordem_chaves[:qtd_alvo]
     
     jogos_selecionados = []
@@ -108,6 +117,9 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=3, **kwargs):
     return bilhetes
 
 def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
+    """
+    Formata a mensagem interativa enviada para o Canal do Telegram.
+    """
     if not bilhetes: return ""
     
     titulo_principal = aviso_menu if aviso_menu else "🚀 *BILHETE GERADO COM SUCESSO*"
@@ -131,7 +143,7 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             mercado_raw = j.get('mercado', '')
             odd_valor = j.get('odd') or info_extra.get('odd', '1.30')
             
-            # Mapeia a odd correta capturada no odds.py se presente no cache_dados
+            # Mapeia a odd correta se presente no cache_dados
             if isinstance(info_extra, dict) and "odds_todas" in info_extra:
                 odds_dic = info_extra["odds_todas"]
                 m_lower = mercado_raw.lower()
@@ -170,20 +182,18 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
                 sufixo_odd = f" ODD {odd_valor}"
                 
             # --- TRATAMENTO E FORMATAÇÃO DE TEXTO ---
-            if "falta" in mercado_raw.lower():
+            # 🎯 1. Exclusivo para Finalizações Totais do Time
+            if any(term in mercado_raw.lower() for term in ["chutes totais", "finalizações", "finalizacoes", "chutes"]):
+                texto_final = f"🔶 {mercado_raw.split('|')[0].strip()}{sufixo_odd}"
+
+            # 2. Outros mercados (Gols, BTTS, Faltas, etc.)
+            elif "falta" in mercado_raw.lower():
                 match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_raw)
                 nome = match_nome.group(1).strip() if match_nome else "Jogador"
                 match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_raw, re.IGNORECASE)
                 med = match_med.group(1) if match_med else None
                 texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {float(med):.1f}{sufixo_odd}" if med else f"🔶 Faltas sofridas: {nome}{sufixo_odd}"
-                
-            elif "chute" in mercado_raw.lower():
-                match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_raw)
-                nome = match_nome.group(1).strip() if match_nome else "Jogador"
-                match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_raw, re.IGNORECASE)
-                med = match_med.group(1) if match_med else None
-                texto_final = f"🔶 Chutes no gol: {nome} | Méd: {float(med):.1f}{sufixo_odd}" if med else f"🔶 Chutes no gol: {nome}{sufixo_odd}"
-                
+
             elif "cartã" in mercado_raw.lower() or "cartao" in mercado_raw.lower():
                 match_med_cartao = re.search(r'[\d.]+', mercado_raw)
                 num_media = match_med_cartao.group(0) if match_med_cartao else "0.0"
@@ -215,3 +225,4 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         corpo_total += corpo + "\n\n".join(lista_blocos) + f"\n\n📈 *Odd Total: {odd_total:.2f}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     
     return corpo_total
+                      
