@@ -1,5 +1,3 @@
-
-            
 """
 REGRAS DE GOLS - VERSÃO OTIMIZADA COM +1.5 FLEXÍVEL E +2.5 SELETIVO
 Ordem de Prioridade:
