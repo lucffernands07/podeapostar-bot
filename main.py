@@ -232,17 +232,22 @@ def main():
 
                         for item in mercados_fase1:
                             m_texto, m_chave = item["texto"], item["chave"]
-                            valor_odd_str = v_odds.get(m_chave, "1.30")
+                            valor_odd_str = v_odds.get(m_chave, "N/A")
                             
+                            # Log para rastrear se a odd veio vazia ou N/A do odds.py
+                            if valor_odd_str == "N/A" or not valor_odd_str:
+                                print(f"      ⚠️ ALERTA ODD AUSENTE: O mercado '{m_texto}' (Chave: {m_chave}) retornou 'N/A' no odds.py e foi ignorado.")
+                                continue
+
                             try:
                                 odd_float = float(str(valor_odd_str).replace(',', '.'))
                                 if odd_float >= 1.10:
                                     if "M45" in m_chave and odd_float >= 4.0: continue
                                     mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": str(odd_float)})
                                 else:
-                                    print(f"      ⚠️ Descartado (Odd baixa): {m_texto} | Valor: {valor_odd_str}")
+                                    print(f"      ⚠️ Descartado (Odd baixa < 1.10): {m_texto} | Valor: {valor_odd_str}")
                             except Exception as e_conv:
-                                print(f"      ⚠️ Erro ao converter odd para float ({m_texto}): {e_conv}")
+                                print(f"      ⚠️ Erro ao converter odd para float ({m_texto}) [Valor lido: {valor_odd_str}]: {e_conv}")
     
                         # ----------------------------------------------------------
                         # FASE 2: RASPAGEM ESTATÍSTICA COLETIVA (CHUTES TOTAIS)
