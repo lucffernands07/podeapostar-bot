@@ -11,7 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos
 from ligas import COMPETICOES
-from mercados import gols, ambos_marcam, chance_dupla, vitorias, jogadores, cartoes, escanteios
+from mercados import gols, ambos_marcam, chance_dupla, vitorias, chutes_totais
 import odds, bingo357
 from telegram import menus
 
@@ -138,8 +138,6 @@ def main():
                     
                     aceitar = False
                     if amanha_no_site in tempo_raw:
-                        # Aceita os jogos da virada da noite (0, 1, 2, 3 UTC = 21h, 22h, 23h, 00h BR)
-                        # E aceita os jogos do final do dia em UTC que vêm marcados como 'Amanhã' (21, 22, 23 UTC = 18h, 19h, 20h BR)
                         if h_obj.hour <= 3 or h_obj.hour >= 21: 
                             aceitar = True
                     elif "." not in tempo_raw:
@@ -153,7 +151,7 @@ def main():
                             print(f"      ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
                             continue
                         t1, t2 = times[0].text.strip(), times[1].text.strip()
-                        #-----------------------------------
+
                         id_jogo = None
                         try:
                             link_el = el.find_element(By.CSS_SELECTOR, "a.icon--preview")
@@ -250,9 +248,9 @@ def main():
                                 print(f"      ⚠️ Erro ao converter odd para float ({m_texto}): {e_conv}")
     
                         # ----------------------------------------------------------
-                        # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS
+                        # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (APENAS CHUTES TOTAIS)
                         # ----------------------------------------------------------
-                        print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Escanteios/Cartões)...")
+                        print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Chutes Totais)...")
                         try:
                             driver.get(dados_jogo["url_h2h_base"])
                             time.sleep(1.5)
@@ -268,27 +266,18 @@ def main():
                                 except: pass
                                 driver = configurar_driver()
 
-                        res_escanteios = escanteios.analisar_dados_escanteios(
-                            dados_jogo.get("cantos_mandante_h2h", []), 
-                            dados_jogo.get("cantos_visitante_h2h", []), 
-                            nome_comp, 
-                            3
-                        )
-                        if res_escanteios and res_escanteios.get("aprovado"):
-                            mercado_cantos_formatado = res_escanteios.get("mercado")
-                            if mercado_cantos_formatado:
-                                mercados_para_processar.append({"texto": mercado_cantos_formatado, "chave": "CANTOS_MEDIA", "odd": "1.30"})
-
-                        res_cartoes = cartoes.analisar_dados_cartoes(
-                            dados_jogo.get("cartoes_mandante_h2h", []),
-                            dados_jogo.get("cartoes_visitante_h2h", []),
-                            nome_comp,
-                            3
-                        )
-                        if res_cartoes and res_cartoes.get("aprovado"):
-                            mercado_cartoes_formatado = res_cartoes.get("mercado")
-                            if mercado_cartoes_formatado:
-                                mercados_para_processar.append({"texto": mercado_cartoes_formatado, "chave": "CARTOES_CONFRONTO", "odd": "1.30"})
+                        # Análise Exclusiva de Chutes Totais / Finalizações do Time
+                        if hasattr(chutes, 'analisar_dados_chutes'):
+                            res_chutes = chutes.analisar_dados_chutes(
+                                dados_jogo.get("chutes_mandante_h2h", []),
+                                dados_jogo.get("chutes_visitante_h2h", []),
+                                nome_comp,
+                                3
+                            )
+                            if res_chutes and res_chutes.get("aprovado"):
+                                mercado_chutes_formatado = res_chutes.get("mercado")
+                                if mercado_chutes_formatado:
+                                    mercados_para_processar.append({"texto": mercado_chutes_formatado, "chave": "FINALIZACOES_TIME", "odd": "1.30"})
 
                         # ----------------------------------------------------------
                         # FASE 3: RASPAGEM DE SCOUTS (JOGADORES)
@@ -348,8 +337,8 @@ def main():
                                     continue
 
                                 eh_scout = (
-                                    m_chave in ["CHUTES_ALVO", "FALTAS_SOFRIDAS", "CARTOES_CONFRONTO", "CANTOS_MEDIA", "JOGADOR_SCOUT"] or
-                                    any(term in texto_lower for term in ["chute", "falta", "cartã", "cartao", "escanteio", "cantos"])
+                                    m_chave in ["FINALIZACOES_TIME", "CHUTES_ALVO", "FALTAS_SOFRIDAS", "JOGADOR_SCOUT"] or
+                                    any(term in texto_lower for term in ["chute", "finalizac", "falta"])
                                 )
 
                                 odd_para_lista = "Análise" if eh_scout else m_odd
@@ -363,7 +352,7 @@ def main():
                                 })
                                 total_mercados += 1
 
-                        # 🟢 Recarrega a página da liga para que o Selenium encontre os próximos jogos no loop (idx)
+                        # 🟢 Recarrega a página da liga para o Selenium continuar o loop
                         try:
                             driver.get(url)
                             time.sleep(2.0)
@@ -373,7 +362,6 @@ def main():
                 except Exception as e_jogo:
                     print(f"      ⚠️ Erro ao processar o jogo índice {idx}: {e_jogo}")
                     continue
-
 
         # --- PROCESSAMENTO E ENVIO FINAL (FORA DOS LOOPS) ---
         if lista_para_filtros:
