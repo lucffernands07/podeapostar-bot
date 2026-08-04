@@ -9,15 +9,14 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Módulos
+# Módulos de Mercados Ativos
 from ligas import COMPETICOES
 from mercados import gols, ambos_marcam, chance_dupla, vitorias, chutes_totais
 import odds, bingo357
 from telegram import menus
 
-# Funções de raspagem
+# Funções de Raspagem
 from funcoes.raspagem_h2h import pegar_estatisticas_h2h
-from funcoes.raspagem_scouts import pegar_scouts_avancados
 from funcoes.raspagem_estatisticas import pegar_estatisticas_coletivas
 
 def enviar_telegram(mensagem, chat_id_destino):
@@ -71,7 +70,7 @@ def main():
                 driver.get(url)
                 time.sleep(3)  
                 
-                # 🟢 Rola a página até o fim para carregar jogos ocultos (Lazy Loading)
+                # Rola a página para carregar jogos ocultos
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 time.sleep(1.5)
                 
@@ -94,9 +93,7 @@ def main():
                     print(f"⚠️ Erro ao carregar liga {nome_comp}: {e}")
                     continue
             
-            aba_principal = driver.current_window_handle
             total_elementos = len(elementos)
-            
             ids_jogos_salvos_pendentes = set()
             
             for idx in range(total_elementos):
@@ -129,7 +126,7 @@ def main():
                     partes_tempo = tempo_raw.split()
                     if not partes_tempo: continue
 
-                    # Trata o horário UTC para jogos do dia
+                    # Horário UTC para janela BR
                     horario_str = partes_tempo[-1]
                     if ":" not in horario_str: continue
 
@@ -219,7 +216,7 @@ def main():
                             chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
                             mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
 
-                        # Extração de Odds
+                        # Extração de Odds das principais
                         v_odds = {}
                         if mercados_fase1:
                             try:
@@ -248,7 +245,7 @@ def main():
                                 print(f"      ⚠️ Erro ao converter odd para float ({m_texto}): {e_conv}")
     
                         # ----------------------------------------------------------
-                        # FASE 2: RASPAGEM DE ESTATÍSTICAS COLETIVAS (APENAS CHUTES TOTAIS)
+                        # FASE 2: RASPAGEM ESTATÍSTICA COLETIVA (CHUTES TOTAIS)
                         # ----------------------------------------------------------
                         print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Chutes Totais)...")
                         try:
@@ -266,9 +263,9 @@ def main():
                                 except: pass
                                 driver = configurar_driver()
 
-                        # Análise Exclusiva de Chutes Totais / Finalizações do Time
-                        if hasattr(chutes, 'analisar_dados_chutes'):
-                            res_chutes = chutes.analisar_dados_chutes(
+                        # Análise de Chutes Totais / Finalizações do Time
+                        if hasattr(chutes_totais, 'analisar_dados_chutes'):
+                            res_chutes = chutes_totais.analisar_dados_chutes(
                                 dados_jogo.get("chutes_mandante_h2h", []),
                                 dados_jogo.get("chutes_visitante_h2h", []),
                                 nome_comp,
@@ -277,38 +274,9 @@ def main():
                             if res_chutes and res_chutes.get("aprovado"):
                                 mercado_chutes_formatado = res_chutes.get("mercado")
                                 if mercado_chutes_formatado:
-                                    mercados_para_processar.append({"texto": mercado_chutes_formatado, "chave": "FINALIZACOES_TIME", "odd": "1.30"})
-
-                        # ----------------------------------------------------------
-                        # FASE 3: RASPAGEM DE SCOUTS (JOGADORES)
-                        # ----------------------------------------------------------
-                        permite_jogadores = jogadores.validar_liga_para_jogadores(nome_comp)
-
-                        if permite_jogadores:
-                            try:
-                                _ = driver.current_window_handle
-                            except Exception:
-                                try: driver.quit()
-                                except: pass
-                                driver = configurar_driver()
-
-                            acumulador_scouts = {}
-                            try:
-                                driver.get(dados_jogo["url_h2h_base"])
-                                time.sleep(1.5) 
-                                driver.execute_script("window.scrollTo(0, 300);")
-                                acumulador_scouts = pegar_scouts_avancados(driver, dados_jogo, t1, t2)
-                            except Exception as e_f3:
-                                print(f"      ⚠️ Erro na Fase 3: {e_f3}")
-                            
-                            resultado_jogadores = jogadores.analisar_dados_jogadores(acumulador_scouts, t1, t2)
-
-                            if resultado_jogadores.get("aprovado"):
-                                for jk in resultado_jogadores.get("jogadores_qualificados", []):
-                                    txt_mercado = f"{jk['mercado']}: {jk['jogador']} ({jk['time'][:3].upper()}) | Méd: {jk['media']:.1f}"
                                     mercados_para_processar.append({
-                                        "texto": txt_mercado,
-                                        "chave": "JOGADOR_SCOUT",
+                                        "texto": mercado_chutes_formatado, 
+                                        "chave": "FINALIZACOES_TIME", 
                                         "odd": "1.30"
                                     })
 
@@ -333,12 +301,12 @@ def main():
                                 texto_limpo = m_texto.strip()
                                 texto_lower = texto_limpo.lower()
                                 
-                                if "0.0" in texto_limpo and any(t in texto_lower for t in ["chute", "falta"]):
+                                if "0.0" in texto_limpo and "chute" in texto_lower:
                                     continue
 
                                 eh_scout = (
-                                    m_chave in ["FINALIZACOES_TIME", "CHUTES_ALVO", "FALTAS_SOFRIDAS", "JOGADOR_SCOUT"] or
-                                    any(term in texto_lower for term in ["chute", "finalizac", "falta"])
+                                    m_chave == "FINALIZACOES_TIME" or
+                                    any(term in texto_lower for term in ["chute", "finalizac"])
                                 )
 
                                 odd_para_lista = "Análise" if eh_scout else m_odd
@@ -352,7 +320,7 @@ def main():
                                 })
                                 total_mercados += 1
 
-                        # 🟢 Recarrega a página da liga para o Selenium continuar o loop
+                        # Recarrega a liga para prosseguir a varredura dos elementos
                         try:
                             driver.get(url)
                             time.sleep(2.0)
