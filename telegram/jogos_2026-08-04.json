@@ -35,7 +35,7 @@
         "time_casa": "Mjallby (Swe)",
         "time_fora": "Slovan Bratislava (Svk)",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.37",
+        "odd": "1.36",
         "link_betano": "https://www.betano.bet.br/match-odds/Mjallby-AIF-SK-Slovan-Bratislava/89904719/",
         "link_h2h": "https://www.flashscore.com.br/jogo/rgl8UA3k"
     },
@@ -55,7 +55,7 @@
         "time_casa": "H. Beer Sheva (Isr)",
         "time_fora": "Crvena zvezda (Srb)",
         "mercado": "-4.5 Gols (60%)",
-        "odd": "1.17",
+        "odd": "1.19",
         "link_betano": "https://www.betano.bet.br/match-odds/Hapoel-Beer-Sheva-Red-Star-Belgrade/89903934/",
         "link_h2h": "https://www.flashscore.com.br/jogo/jaoGN2j5"
     },
@@ -64,8 +64,8 @@
         "liga": "Europa - Champions League",
         "time_casa": "H. Beer Sheva (Isr)",
         "time_fora": "Crvena zvezda (Srb)",
-        "mercado": "+2.5 Gols (80%)",
-        "odd": "1.75",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "2.0",
         "link_betano": "https://www.betano.bet.br/match-odds/Hapoel-Beer-Sheva-Red-Star-Belgrade/89903934/",
         "link_h2h": "https://www.flashscore.com.br/jogo/jaoGN2j5"
     },
@@ -74,18 +74,8 @@
         "liga": "Europa - Champions League",
         "time_casa": "Levski (Bul)",
         "time_fora": "Kairat Almaty (Kaz)",
-        "mercado": "-4.5 Gols (80%)",
-        "odd": "1.1",
-        "link_betano": "https://www.betano.bet.br/match-odds/PFC-Levski-Sofia-FC-Kairat/89903280/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/v1ZHdEUi"
-    },
-    {
-        "horario": "14:30",
-        "liga": "Europa - Champions League",
-        "time_casa": "Levski (Bul)",
-        "time_fora": "Kairat Almaty (Kaz)",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.62",
+        "odd": "1.57",
         "link_betano": "https://www.betano.bet.br/match-odds/PFC-Levski-Sofia-FC-Kairat/89903280/",
         "link_h2h": "https://www.flashscore.com.br/jogo/v1ZHdEUi"
     },
@@ -95,7 +85,7 @@
         "time_casa": "Din. Zagreb (Cro)",
         "time_fora": "Kauno Zalgiris (Ltu)",
         "mercado": "-4.5 Gols (60%)",
-        "odd": "1.25",
+        "odd": "1.23",
         "link_betano": "https://www.betano.bet.br/match-odds/GNK-Dinamo-Zagreb-FK-Kauno-Zalgiris/89900612/",
         "link_h2h": "https://www.flashscore.com.br/jogo/r9z6gEre"
     },
@@ -105,7 +95,7 @@
         "time_casa": "Din. Zagreb (Cro)",
         "time_fora": "Kauno Zalgiris (Ltu)",
         "mercado": "-3.5 Gols (60%)",
-        "odd": "1.6",
+        "odd": "1.55",
         "link_betano": "https://www.betano.bet.br/match-odds/GNK-Dinamo-Zagreb-FK-Kauno-Zalgiris/89900612/",
         "link_h2h": "https://www.flashscore.com.br/jogo/r9z6gEre"
     },
@@ -155,7 +145,7 @@
         "time_casa": "Royale Union SG (Bel)",
         "time_fora": "Bodo/Glimt (Nor)",
         "mercado": "-4.5 Gols (60%)",
-        "odd": "1.23",
+        "odd": "1.2",
         "link_betano": "https://www.betano.bet.br/match-odds/Union-Saint-Gilloise-FK-Bodo-Glimt/89386981/",
         "link_h2h": "https://www.flashscore.com.br/jogo/b3L3pSr1"
     },
@@ -164,8 +154,8 @@
         "liga": "Europa - Champions League",
         "time_casa": "Royale Union SG (Bel)",
         "time_fora": "Bodo/Glimt (Nor)",
-        "mercado": "+2.5 Gols (80%)",
-        "odd": "1.6",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "2.2",
         "link_betano": "https://www.betano.bet.br/match-odds/Union-Saint-Gilloise-FK-Bodo-Glimt/89386981/",
         "link_h2h": "https://www.flashscore.com.br/jogo/b3L3pSr1"
     },
@@ -175,7 +165,7 @@
         "time_casa": "Sparta Praga (Cze)",
         "time_fora": "Lyon (Fra)",
         "mercado": "-4.5 Gols (80%)",
-        "odd": "1.17",
+        "odd": "1.18",
         "link_betano": "https://www.betano.bet.br/match-odds/AC-Sparta-Praha-Olympique-Lyonnais/89386992/",
         "link_h2h": "https://www.flashscore.com.br/jogo/bNBc695K"
     },
@@ -185,7 +175,7 @@
         "time_casa": "Sparta Praga (Cze)",
         "time_fora": "Lyon (Fra)",
         "mercado": "-3.5 Gols (60%)",
-        "odd": "1.44",
+        "odd": "1.45",
         "link_betano": "https://www.betano.bet.br/match-odds/AC-Sparta-Praha-Olympique-Lyonnais/89386992/",
         "link_h2h": "https://www.flashscore.com.br/jogo/bNBc695K"
     },
@@ -205,7 +195,7 @@
         "time_casa": "Larne (Nir)",
         "time_fora": "Iberia 1999 (Geo)",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.83",
+        "odd": "1.8",
         "link_betano": "https://www.betano.bet.br/match-odds/Larne-FC-FC-Iberia-1999-Tbilisi/89960758/",
         "link_h2h": "https://www.flashscore.com.br/jogo/Eg6hAnHs"
     },
@@ -224,8 +214,8 @@
         "liga": "Europa - League",
         "time_casa": "Shamrock Rovers (Irl)",
         "time_fora": "KF Egnatia (Alb)",
-        "mercado": "+2.5 Gols (80%)",
-        "odd": "1.93",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "2.0",
         "link_betano": "https://www.betano.bet.br/match-odds/Shamrock-Rovers-FC-KF-Egnatia/89880166/",
         "link_h2h": "https://www.flashscore.com.br/jogo/0UKYViRF"
     },
@@ -235,7 +225,7 @@
         "time_casa": "Llaneros",
         "time_fora": "Fortaleza",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.2",
+        "odd": "1.19",
         "link_betano": "https://www.betano.bet.br/match-odds/Llaneros-FC-Fortaleza-CEIF/89064431/",
         "link_h2h": "https://www.flashscore.com.br/jogo/zaPqtclC"
     },
@@ -245,7 +235,7 @@
         "time_casa": "Llaneros",
         "time_fora": "Fortaleza",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.73",
+        "odd": "1.67",
         "link_betano": "https://www.betano.bet.br/match-odds/Llaneros-FC-Fortaleza-CEIF/89064431/",
         "link_h2h": "https://www.flashscore.com.br/jogo/zaPqtclC"
     },
@@ -295,7 +285,7 @@
         "time_casa": "Cruzeiro",
         "time_fora": "Chapecoense",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.67",
+        "odd": "1.7",
         "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Chapecoense-SC/90131451/",
         "link_h2h": "https://www.flashscore.com.br/jogo/d8Odhy0e"
     },
@@ -305,7 +295,7 @@
         "time_casa": "Juventude",
         "time_fora": "Atlético-MG",
         "mercado": "-3.5 Gols (60%)",
-        "odd": "1.24",
+        "odd": "1.19",
         "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Clube-Atletico-MG/90078555/",
         "link_h2h": "https://www.flashscore.com.br/jogo/xx31LZTs"
     },
@@ -315,7 +305,7 @@
         "time_casa": "Juventude",
         "time_fora": "Atlético-MG",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.8",
+        "odd": "1.7",
         "link_betano": "https://www.betano.bet.br/match-odds/Juventude-RS-Clube-Atletico-MG/90078555/",
         "link_h2h": "https://www.flashscore.com.br/jogo/xx31LZTs"
     },
@@ -325,7 +315,7 @@
         "time_casa": "Grêmio",
         "time_fora": "Mirassol",
         "mercado": "-3.5 Gols (60%)",
-        "odd": "1.23",
+        "odd": "1.22",
         "link_betano": "https://www.betano.bet.br/match-odds/Gremio-RS-Mirassol-SP/90131368/",
         "link_h2h": "https://www.flashscore.com.br/jogo/hCZIaJ7L"
     },
@@ -405,7 +395,7 @@
         "time_casa": "Remo",
         "time_fora": "Santos",
         "mercado": "-3.5 Gols (60%)",
-        "odd": "1.26",
+        "odd": "1.24",
         "link_betano": "https://www.betano.bet.br/match-odds/Remo-PA-Santos-SP/90081544/",
         "link_h2h": "https://www.flashscore.com.br/jogo/vmKq3hED"
     },
@@ -415,7 +405,7 @@
         "time_casa": "Remo",
         "time_fora": "Santos",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.91",
+        "odd": "1.8",
         "link_betano": "https://www.betano.bet.br/match-odds/Remo-PA-Santos-SP/90081544/",
         "link_h2h": "https://www.flashscore.com.br/jogo/vmKq3hED"
     }
