@@ -1,6 +1,6 @@
 """
 REGRAS DE MERCADO - AMBAS MARCAM (BTTS SIM / NÃO)
-Ajustado para acumular os mercados em lista sem encerrar a execução prematuramente.
+Ajustado para acumular os mercados em lista e equilibrar a aparição de Sim e Não.
 """
 
 def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=None):
@@ -28,30 +28,38 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
             print("   ⚠️ BTTS BARRADO: Nenhum outro mercado foi aprovado para este jogo.")
             return []
 
-        # Métricas detalhadas da raspagem
+        # Métricas detalhadas da raspagem (incluindo dados do mandante para equilibrar o Sim)
         media_gols_visitante = float(s.get("media_gols_fora", 0) or 0)
         v_jogos_marcou_fora = int(s.get("visitante_jogos_com_gol_fora", 0) or 0)
+        
+        media_gols_mandante = float(s.get("media_gols_casa", 0) or 0)
+        m_jogos_marcou_casa = int(s.get("mandante_jogos_com_gol_casa", 0) or 0)
+        
         mandante_sofreu_gol_ultimo = s.get("mandante_sofreu_gol_ultimo_casa", False)
 
-        # 🟢 REGRA 1: AMBAS MARCAM SIM
-        if media_gols_visitante >= 1.6 or v_jogos_marcou_fora >= 4:
+        # 🟢 REGRA 1: AMBAS MARCAM SIM (Agora avalia também o mandante para soltar alguns "Sim" equilibrados)
+        condicao_btts_sim = (
+            (media_gols_visitante >= 1.5 or v_jogos_marcou_fora >= 4) and 
+            (media_gols_mandante >= 1.2 or m_jogos_marcou_casa >= 3)
+        ) or (v_jogos_marcou_fora >= 4 and m_jogos_marcou_casa >= 4)
+
+        if condicao_btts_sim:
             mercados_aprovados.append({"mercado": "Ambas Marcam: Sim", "tipo": "BTTS_SIM"})
         else:
-            # 🔴 REGRA 2: AMBAS MARCAM NÃO (COM TRAVAS ANTI-RED)
+            # 🔴 REGRA 2: AMBAS MARCAM NÃO (Com travas dosadas para aparecer menos)
             if tem_over_aprovado:
                 print("   ⚠️ BTTS NÃO BARRADO: Jogo tem tendência de Over aprovada.")
-            elif v_jogos_marcou_fora >= 3:
-                print("   ⚠️ BTTS NÃO BARRADO: Visitante costuma marcar gols fora (>= 3/5 jogos).")
+            elif v_jogos_marcou_fora >= 4 or m_jogos_marcou_casa >= 4:
+                print("   ⚠️ BTTS NÃO BARRADO: Ambas as equipes marcam com muita frequência.")
             else:
-                if media_gols_visitante <= 0.6:
-                    if not mandante_sofreu_gol_ultimo:
-                        mercados_aprovados.append({"mercado": "Ambas Marcam: Não", "tipo": "BTTS_NAO"})
-                    else:
-                        print("   ⚠️ BTTS NÃO BARRADO: Mandante sofreu gol no último jogo em casa.")
+                if media_gols_visitante <= 0.9 or media_gols_mandante <= 0.9:
+                    mercados_aprovados.append({"mercado": "Ambas Marcam: Não", "tipo": "BTTS_NAO"})
+                else:
+                    print("   ⚠️ BTTS NÃO BARRADO: Médias intermediárias, fora do padrão estrito de Não.")
 
         return mercados_aprovados
 
     except Exception as e:
         print(f"      ⚠️ Erro ao processar mercado Ambas Marcam: {e}")
         return mercados_aprovados
-              
+                
