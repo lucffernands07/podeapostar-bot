@@ -55,12 +55,10 @@ def verificar_gols(s):
     pode_apostar_under = not (visitante_peneira or mandante_avassalador)
 
     # ==========================================================
-    # 🥇 1° PRIORIDADE: OVER +1.5 GOLS (Regra limpa, direta e sem barreiras ocultas)
+    # 🥇 1° PRIORIDADE: OVER +1.5 GOLS (100% Liberado se bater 60%)
     # ==========================================================
     if pct_15 >= 60:
-        # Se a porcentagem bateu e ambos os times demonstram histórico de gols nos últimos 5 jogos:
-        if m_jogos_marcou_casa >= 3 and v_jogos_marcou_fora >= 3:
-            mercados_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
+        mercados_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
 
     # ==========================================================
     # 🥈 2° PRIORIDADE: UNDER -4.5 GOLS
