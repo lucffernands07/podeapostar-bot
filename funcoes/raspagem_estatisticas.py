@@ -4,12 +4,30 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+# 🟢 LISTA BRANCA: Nomes-chave para busca flexível nas ligas de elite
+LIGAS_ELITE_JOGADORES = [
+    "brasileirão série a", "copa do brasil", "libertadores", "sul-americana",
+    "brasileirão série b", "liga profesional", "argentina", "copa do mundo",
+    "champions league", "premier league", "laliga", "bundesliga", "serie a", 
+    "ligue 1", "europa league", "fa cup", "copa del rey", "dfb pokal", 
+    "primeira liga", "eredivisie", "amistoso internacional"
+]
+
+def liga_eh_permitida(texto_liga):
+    """
+    Verifica se o nome da liga do confronto pertence à lista de ligas elite.
+    """
+    if not texto_liga:
+        return False
+    
+    texto_clean = texto_liga.lower()
+    return any(liga_elite in texto_clean for liga_elite in LIGAS_ELITE_JOGADORES)
+
 def pegar_estatisticas_coletivas(driver, stats):
     """
     Navega no histórico H2H dos times e extrai EXCLUSIVAMENTE
-    as estatísticas de FINALIZAÇÕES TOTAIS.
+    as estatísticas de FINALIZAÇÕES TOTAIS de jogos de LIGAS PERMITIDAS.
     """
-    # 🟢 Ativado para alimentar o mercados/chutes_totais.py
     EXECUTAR_SCRAPER = True
 
     # Arrays para Finalizações
@@ -75,6 +93,19 @@ def pegar_estatisticas_coletivas(driver, stats):
                         continue
                     
                     elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
+
+                    # 🔍 [NOVA VALIDAÇÃO DE LIGA] Leitura do nome da competição antes de clicar
+                    try:
+                        nome_liga_elemento = elemento_alvo.find_element(
+                            By.CSS_SELECTOR, ".h2h__event, .h2h__competition, [class*='event'], [class*='competition']"
+                        ).text.strip()
+                    except Exception:
+                        # Fallback: pega todo o texto da linha se não achar o seletor específico
+                        nome_liga_elemento = elemento_alvo.text.strip()
+
+                    if not liga_eh_permitida(nome_liga_elemento):
+                        print(f"      ⏩ [LIGA DESCAR TADA]: '{nome_liga_elemento}' não está na lista branca. Pulando jogo...")
+                        continue
 
                     url_anterior = driver.current_url
                     driver.execute_script("arguments[0].click();", elemento_alvo)
@@ -158,4 +189,4 @@ def pegar_estatisticas_coletivas(driver, stats):
         pass
 
     return stats
-                    
+                
