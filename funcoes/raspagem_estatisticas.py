@@ -6,25 +6,20 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def pegar_estatisticas_coletivas(driver, stats):
     """
-    Navega no histórico H2H e extrai estatísticas coletivas.
-    Com a flag EXECUTAR_SCRAPER = False, o scraper de estatísticas é pulado instantaneamente.
+    Navega no histórico H2H dos times e extrai EXCLUSIVAMENTE
+    as estatísticas de FINALIZAÇÕES TOTAIS.
     """
-    # 🛑 CONTROLE MANUAL DE EXECUÇÃO: Altere para False para DESATIVAR completamente
-    EXECUTAR_SCRAPER = False
+    # 🟢 Ativado para alimentar o mercados/chutes_totais.py
+    EXECUTAR_SCRAPER = True
 
-    # Inicialização dos arrays de estatísticas (mantidos para não dar KeyError em outros arquivos)
-    if "cantos_mandante_h2h" not in stats: stats["cantos_mandante_h2h"] = []
-    if "cantos_visitante_h2h" not in stats: stats["cantos_visitante_h2h"] = []
-    if "cartoes_mandante_h2h" not in stats: stats["cartoes_mandante_h2h"] = []
-    if "cartoes_visitante_h2h" not in stats: stats["cartoes_visitante_h2h"] = []
-    
-    # Flags de integridade dos dados ativadas como incompletas para anular as análises
-    stats["dados_incompletos_cantos"] = True
-    stats["dados_incompletos_cartoes"] = True
+    # Arrays para Finalizações
+    stats["chutes_mandante_h2h"] = []   
+    stats["chutes_visitante_h2h"] = []  
+    stats["chutes_jogo_total_h2h"] = [] 
+    stats["dados_incompletos_chutes"] = False
 
-    # 🛑 Se estiver desativado, fecha aba secundária (se houver) e encerra o processo na hora
     if not EXECUTAR_SCRAPER:
-        print("      ⏩ [SCRAPER DESATIVADO] Pulo da raspagem de cartões e escanteios acionado.")
+        print("      ⏩ [SCRAPER DESATIVADO] Pulo da raspagem de estatísticas acionado.")
         try:
             if len(driver.window_handles) > 1:
                 driver.close()
@@ -59,13 +54,14 @@ def pegar_estatisticas_coletivas(driver, stats):
                 selector_linhas = f".h2h__section:nth-child({alvo['idx_secao']}) .h2h__row"
                 linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
                 
-                for jogo_idx in range(min(3, len(linhas_confrontos))):
+                # Coleta até 5 jogos (padrão da esteira)
+                for jogo_idx in range(min(5, len(linhas_confrontos))):
                     try:
                         lista_urls_jogos.append({"idx": jogo_idx})
                     except Exception:
                         continue
             except Exception as e_coleta:
-                print(f"      ⚠️ Erro ao listar linhas para estatísticas: {e_coleta}")
+                print(f"      ⚠️ Erro ao listar linhas H2H para estatísticas: {e_coleta}")
                 continue
 
             for jogo_dados in lista_urls_jogos:
@@ -90,59 +86,69 @@ def pegar_estatisticas_coletivas(driver, stats):
                         
                     time.sleep(1.2)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
-
                     url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas/total/"
                     driver.get(url_stats_geral)
                     time.sleep(1.2)
 
-                    cantos_jogo_total = 0
-                    cartoes_jogo_total = 0
-                    
-                    achou_cartoes = False
+                    chutes_casa = 0
+                    chutes_fora = 0
+                    achou_chutes = False
 
                     try:
                         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
                         
-                        tem_tabela_stats = len(todos_spans) > 0
-
-                        if not tem_tabela_stats:
-                            stats["dados_incompletos_cartoes"] = True
-                            print(f"      ⚠️ Tabela de estatísticas ausente no Flashscore para este jogo.")
+                        if len(todos_spans) == 0:
+                            print(f"      ⚠️ Tabela de estatísticas ausente no Flashscore.")
                         else:
+                            achou_cartoes_ancora = False
+
                             for idx, span in enumerate(todos_spans):
                                 texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
                                 
-                                # 2. Captura de Cartões Amarelos
+                                # Trava de segurança: se bateu na linha de cartões amarelados, interrompe
                                 if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
-                                    achou_cartoes = True
+                                    achou_cartoes_ancora = True
+                                
+                                # Busca estrita do Total de Finalizações no topo (DESTAQUES)
+                                if not achou_cartoes_ancora and texto_elemento in ["TOTAL DE FINALIZAÇÕES", "TOTAL SHOTS"]:
                                     if idx > 0 and (idx + 1) < len(todos_spans):
-                                        val_casa_card = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
-                                        val_fora_card = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                                        
-                                        cartoes_casa = int(re.search(r'\d+', val_casa_card).group()) if re.search(r'\d+', val_casa_card) else 0
-                                        cartoes_fora = int(re.search(r'\d+', val_fora_card).group()) if re.search(r'\d+', val_fora_card) else 0
-                                        cartoes_jogo_total = cartoes_casa + cartoes_fora
+                                        val_casa_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                                        val_fora_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                                        chutes_casa = int(re.search(r'\d+', val_casa_str).group()) if re.search(r'\d+', val_casa_str) else 0
+                                        chutes_fora = int(re.search(r'\d+', val_fora_str).group()) if re.search(r'\d+', val_fora_str) else 0
+                                        achou_chutes = True
+                                        break # Pára a busca assim que pega a métrica do topo
 
-                            if not achou_cartoes:
-                                stats["dados_incompletos_cartoes"] = True
+                            if achou_chutes:
+                                total_jogo = chutes_casa + chutes_fora
+                                print(f"      📊 [{alvo['tipo']}] Finalizações Totais: Casa {chutes_casa} | Fora {chutes_fora} (Total: {total_jogo})")
+                                
+                                if alvo["tipo"] == "MANDANTE":
+                                    stats["chutes_mandante_h2h"].append(chutes_casa)
+                                else:
+                                    stats["chutes_visitante_h2h"].append(chutes_fora)
+                                    
+                                stats["chutes_jogo_total_h2h"].append(total_jogo)
+                            else:
+                                print(f"      ⚠️ Total de finalizações não localizado no topo.")
 
-                        print(f"      📊 [DADOS COLETADOS] Cartões Amarelos: {cartoes_jogo_total}")
-                    
                     except Exception as e_passo_stats:
-                        print(f"      ⚠️ Erro ao processar dados de estatísticas via JS: {e_passo_stats}")
-                        stats["dados_incompletos_cartoes"] = True
-
-                    if alvo["tipo"] == "MANDANTE":
-                        stats["cantos_mandante_h2h"].append(0)
-                        stats["cartoes_mandante_h2h"].append(cartoes_jogo_total)
-                    else:
-                        stats["cantos_visitante_h2h"].append(0)
-                        stats["cartoes_visitante_h2h"].append(cartoes_jogo_total)
+                        print(f"      ⚠️ Erro ao capturar finalizações via JS: {e_passo_stats}")
 
                 except Exception:
                     continue
+
     except Exception as e:
-        print(f"      ⚠️ Erro Crítico na Raspagem Coletiva Geral: {e}")
+        print(f"      ⚠️ Erro Crítico na Raspagem de Estatísticas: {e}")
+
+    # ----------------------------------------------------------
+    # 🧮 CALCULA AS MÉDIAS DE FINALIZAÇÕES PARA O MAIN
+    # ----------------------------------------------------------
+    c_h2h = stats.get("chutes_mandante_h2h", [])
+    v_h2h = stats.get("chutes_visitante_h2h", [])
+
+    stats["mandante_media_chutes_casa"] = round(sum(c_h2h) / len(c_h2h), 2) if len(c_h2h) > 0 else 0.0
+    stats["visitante_media_chutes_fora"] = round(sum(v_h2h) / len(v_h2h), 2) if len(v_h2h) > 0 else 0.0
 
     try:
         if len(driver.window_handles) > 1:
@@ -152,4 +158,4 @@ def pegar_estatisticas_coletivas(driver, stats):
         pass
 
     return stats
-                
+                    
