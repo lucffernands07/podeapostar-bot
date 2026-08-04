@@ -59,7 +59,7 @@ def verificar_gols(s):
     # ==========================================================
     if pct_15 >= 60:
         if m_jogos_marcou_casa >= 2 and (v_jogos_marcou_fora >= 2 or visitante_peneira):
-            if media_total_confronto >= 1.4 or mandante_avassalador or v_sofridos_fora >= 6 or media_total_confronto >= 2.2:
+            if media_total_confronto >= 1.4 or mandante_avassalador or v_sofridos_fora >= 6 or media_total_confronto >= 2.0:
                 mercados_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
 
     # ==========================================================
