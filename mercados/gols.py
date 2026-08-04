@@ -1,10 +1,12 @@
+
+            
 """
-REGRAS DE GOLS - VERSÃO OTIMIZADA COM PRIORIDADES (SEM LIMITES DE +2.5)
+REGRAS DE GOLS - VERSÃO OTIMIZADA COM +1.5 FLEXÍVEL E +2.5 SELETIVO
 Ordem de Prioridade:
-1° +1.5 Gols
+1° +1.5 Gols (Com a antiga flexibilidade do +2.5)
 2° -4.5 Gols
 3° -3.5 Gols
-4° +2.5 Gols (Liberado sem limite de quantidade)
+4° +2.5 Gols (Nova regra mais seletiva e sutil)
 """
 
 def calcular_porcentagem_gols(c, f):
@@ -13,7 +15,6 @@ def calcular_porcentagem_gols(c, f):
     except:
         return 0
 
-    # Permite calcular a partir de 2 acertos (ex: 2/5 ou 3/5)
     if c < 2 or f < 2:
         return 0
 
@@ -56,11 +57,11 @@ def verificar_gols(s):
     pode_apostar_under = not (visitante_peneira or mandante_avassalador)
 
     # ==========================================================
-    # 🥇 1° PRIORIDADE: OVER +1.5 GOLS
+    # 🥇 1° PRIORIDADE: OVER +1.5 GOLS (Recebeu a antiga flexibilidade do +2.5)
     # ==========================================================
     if pct_15 >= 60:
         if m_jogos_marcou_casa >= 2 and (v_jogos_marcou_fora >= 2 or visitante_peneira):
-            if media_total_confronto >= 1.4 or mandante_avassalador:
+            if media_total_confronto >= 1.4 or mandante_avassalador or v_sofridos_fora >= 6 or media_total_confronto >= 2.2:
                 mercados_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
 
     # ==========================================================
@@ -78,11 +79,11 @@ def verificar_gols(s):
             mercados_aprovados.append({"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"})
 
     # ==========================================================
-    # 🏅 4° PRIORIDADE: OVER +2.5 GOLS (Liberado e sem travamento)
+    # 🏅 4° PRIORIDADE: OVER +2.5 GOLS (Nova regra mais seletiva e sutil)
+    # Exige alta porcentagem (>=80%), média de confronto encorpada e constância de gols de ambos
     # ==========================================================
-    if pct_25 >= 60:
-        if v_sofridos_fora >= 6 or media_total_confronto >= 2.2 or mandante_avassalador or pct_25 >= 80:
+    if pct_25 >= 80:
+        if media_total_confronto >= 2.4 and m_jogos_marcou_casa >= 4 and v_jogos_marcou_fora >= 4:
             mercados_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
     return mercados_aprovados
-            
