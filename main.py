@@ -263,23 +263,23 @@ def main():
                                 except: pass
                                 driver = configurar_driver()
 
-                        # Análise de Chutes Totais / Finalizações do Time
-                        if hasattr(chutes_totais, 'analisar_dados_chutes'):
-                            res_chutes = chutes_totais.analisar_dados_chutes(
-                                dados_jogo.get("chutes_mandante_h2h", []),
-                                dados_jogo.get("chutes_visitante_h2h", []),
-                                nome_comp,
-                                3
-                            )
-                            if res_chutes and res_chutes.get("aprovado"):
-                                mercado_chutes_formatado = res_chutes.get("mercado")
-                                if mercado_chutes_formatado:
+                        # 🎯 Análise de Chutes Totais / Finalizações
+                        res_chutes = chutes_totais.verificar_chutes_totais(dados_jogo)
+                        
+                        if res_chutes:
+                            for rc in res_chutes:
+                                m_texto = rc.get("mercado")
+                                m_tipo = rc.get("tipo", "FINALIZACOES_TIME")
+                                if m_texto:
+                                    print(f"      ✅ [CHUTES APROVADO]: {m_texto}")
                                     mercados_para_processar.append({
-                                        "texto": mercado_chutes_formatado, 
-                                        "chave": "FINALIZACOES_TIME", 
-                                        "odd": "1.30"
+                                        "texto": m_texto, 
+                                        "chave": m_tipo, 
+                                        "odd": "Análise"
                                     })
-
+                        else:
+                            print(f"      ℹ️ Chutes Totais: Nenhum padrão atingido para {t1} x {t2}")
+        
                         url_h2h_final = dados_jogo.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
 
                         # ----------------------------------------------------------
