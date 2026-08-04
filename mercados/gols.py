@@ -1,10 +1,8 @@
 """
-REGRAS DE GOLS - VERSÃO OTIMIZADA COM +1.5 FLEXÍVEL E +2.5 SELETIVO
-Ordem de Prioridade:
-1° +1.5 Gols (Com a antiga flexibilidade do +2.5)
-2° -4.5 Gols
-3° -3.5 Gols
-4° +2.5 Gols (Nova regra mais seletiva e sutil)
+REGRAS DE GOLS - VERSÃO COM EXCLUSÃO MÚTUA (OVER x UNDER)
+Ordem de Prioridade e Exclusión:
+- Se houver Over (+1.5 ou +2.5), os Unders são vetados.
+- Se houver Under (-3.5 ou -4.5), os Overs são vetados.
 """
 
 def calcular_porcentagem_gols(c, f):
@@ -47,7 +45,8 @@ def verificar_gols(s):
 
     media_total_confronto = (m_feitos_casa + m_sofridos_casa + v_feitos_fora + v_sofridos_fora) / 5.0
 
-    mercados_aprovados = []
+    overs_aprovados = []
+    unders_aprovados = []
 
     # Trava de risco contra goleadas
     visitante_peneira = v_sofridos_fora >= 7
@@ -55,31 +54,33 @@ def verificar_gols(s):
     pode_apostar_under = not (visitante_peneira or mandante_avassalador)
 
     # ==========================================================
-    # 🥇 1° PRIORIDADE: OVER +1.5 GOLS (100% Liberado se bater 60%)
+    # AVALIAÇÃO DE OVERS (+1.5 e +2.5)
     # ==========================================================
     if pct_15 >= 60:
-        mercados_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
+        overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
+
+    if pct_25 >= 80:
+        if media_total_confronto >= 2.4 and m_jogos_marcou_casa >= 4 and v_jogos_marcou_fora >= 4:
+            overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
     # ==========================================================
-    # 🥈 2° PRIORIDADE: UNDER -4.5 GOLS
+    # AVALIAÇÃO DE UNDERS (-4.5 e -3.5)
     # ==========================================================
     if pode_apostar_under and pct_m45 >= 60:
         if media_total_confronto <= 3.2:
-            mercados_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
+            unders_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
 
-    # ==========================================================
-    # 🥉 3° PRIORIDADE: UNDER -3.5 GOLS
-    # ==========================================================
     if pode_apostar_under and pct_m35 >= 60:
         if media_total_confronto <= 2.6:
-            mercados_aprovados.append({"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"})
+            unders_aprovados.append({"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"})
 
     # ==========================================================
-    # 🏅 4° PRIORIDADE: OVER +2.5 GOLS (Nova regra mais seletiva e sutil)
-    # Exige alta porcentagem (>=80%), média de confronto encorpada e constância de gols de ambos
+    # TRAVA DE EXCLUSÃO MÚTUA (NUNCA MISTURA OVER COM UNDER)
     # ==========================================================
-    if pct_25 >= 80:
-        if media_total_confronto >= 2.4 and m_jogos_marcou_casa >= 4 and v_jogos_marcou_fora >= 4:
-            mercados_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
-
-    return mercados_aprovados
+    if overs_aprovados:
+        # Se encontrou qualquer Over, descartamos qualquer Under para este jogo
+        return overs_aprovados
+    else:
+        # Se não tem Over, liberamos os Unders aprovados (se houverem)
+        return unders_aprovados
+        
