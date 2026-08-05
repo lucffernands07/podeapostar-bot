@@ -1,41 +1,11 @@
 [
     {
-        "horario": "13:00",
-        "liga": "Dinamarca - Betano Pokalen",
-        "time_casa": "Hobro",
-        "time_fora": "Vendsyssel FF",
-        "mercado": "+1.5 Gols (80%)",
-        "odd": "1.27",
-        "link_betano": "https://www.betano.bet.br/match-odds/Hobro-IK-Vendsyssel-FF/90209724/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/0rpwVCyp"
-    },
-    {
-        "horario": "13:00",
-        "liga": "Dinamarca - Betano Pokalen",
-        "time_casa": "Odder",
-        "time_fora": "Skive",
-        "mercado": "+1.5 Gols (80%)",
-        "odd": "1.22",
-        "link_betano": "https://www.betano.bet.br/match-odds/Odder-IGF-Skive-IK/90209725/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/S2DEXsM8"
-    },
-    {
-        "horario": "13:30",
-        "liga": "Dinamarca - Betano Pokalen",
-        "time_casa": "Tarup-Paarup",
-        "time_fora": "Vejle",
-        "mercado": "+1.5 Gols (60%)",
-        "odd": "1.1",
-        "link_betano": "https://www.betano.bet.br/match-odds/Tarup-Paarup-Vejle-Boldklub/90209419/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/EwbuyHS0"
-    },
-    {
-        "horario": "13:30",
+        "horario": "14:10",
         "liga": "Europa - Champions League",
         "time_casa": "Aarhus (Den)",
         "time_fora": "Sabah Baku (Aze)",
         "mercado": "+1.5 Gols (100%)",
-        "odd": "1.25",
+        "odd": "1.28",
         "link_betano": "https://www.betano.bet.br/match-odds/Aarhus-GF-FC-Sabah/89904049/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ALq0Rpit"
     },
@@ -45,7 +15,7 @@
         "time_casa": "Fenerbahce (Tur)",
         "time_fora": "Sturm Graz (Aut)",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.19",
+        "odd": "1.17",
         "link_betano": "https://www.betano.bet.br/match-odds/Fenerbahce-SK-SK-Sturm-Graz/89904540/",
         "link_h2h": "https://www.flashscore.com.br/jogo/fTumx25b"
     },
@@ -65,7 +35,7 @@
         "time_casa": "Vinotinto",
         "time_fora": "Universidad Católica",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.19",
+        "odd": "1.2",
         "link_betano": "https://www.betano.bet.br/match-odds/Vinotinto-FC-Universidad-Catolica-Ecuador/90231235/",
         "link_h2h": "https://www.flashscore.com.br/jogo/4tbH9TqT"
     },
@@ -105,7 +75,7 @@
         "time_casa": "Cruzeiro",
         "time_fora": "Chapecoense",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.27",
+        "odd": "1.28",
         "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Chapecoense-SC/90131451/",
         "link_h2h": "https://www.flashscore.com.br/jogo/d8Odhy0e"
     },
@@ -115,7 +85,7 @@
         "time_casa": "Grêmio",
         "time_fora": "Mirassol",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.42",
+        "odd": "1.44",
         "link_betano": "https://www.betano.bet.br/match-odds/Gremio-RS-Mirassol-SP/90131368/",
         "link_h2h": "https://www.flashscore.com.br/jogo/hCZIaJ7L"
     },
@@ -128,16 +98,6 @@
         "odd": "1.34",
         "link_betano": "https://www.betano.bet.br/match-odds/Internacional-de-Bogota-Jaguares-de-Cordoba/89064436/",
         "link_h2h": "https://www.flashscore.com.br/jogo/fLNTqukm"
-    },
-    {
-        "horario": "20:30",
-        "liga": "América - Copa das Ligas",
-        "time_casa": "Inter Miami",
-        "time_fora": "Atlético San Luis",
-        "mercado": "+1.5 Gols (80%)",
-        "odd": "1.1",
-        "link_betano": "https://www.betano.bet.br/match-odds/Inter-Miami-CF-Atletico-San-Luis/90113214/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/40xI8x76"
     },
     {
         "horario": "20:30",
@@ -155,7 +115,7 @@
         "time_casa": "Santa Fe",
         "time_fora": "U. Magdalena",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.33",
+        "odd": "1.32",
         "link_betano": "https://www.betano.bet.br/match-odds/Independiente-Santa-Fe-Union-Magdalena/90233938/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lIuEp2D7"
     },
@@ -165,7 +125,7 @@
         "time_casa": "LDU Portoviejo",
         "time_fora": "Barcelona",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.15",
+        "odd": "1.17",
         "link_betano": "https://www.betano.bet.br/match-odds/LDU-Portoviejo-Barcelona-Guayaquil/90231467/",
         "link_h2h": "https://www.flashscore.com.br/jogo/WSa9BkFG"
     },
@@ -175,7 +135,7 @@
         "time_casa": "LDU Portoviejo",
         "time_fora": "Barcelona",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.62",
+        "odd": "1.65",
         "link_betano": "https://www.betano.bet.br/match-odds/LDU-Portoviejo-Barcelona-Guayaquil/90231467/",
         "link_h2h": "https://www.flashscore.com.br/jogo/WSa9BkFG"
     },
@@ -185,7 +145,7 @@
         "time_casa": "Tigre",
         "time_fora": "Belgrano",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.8",
+        "odd": "1.83",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Tigre-CA-Belgrano/88418045/",
         "link_h2h": "https://www.flashscore.com.br/jogo/zBb4m2M8"
     },
@@ -195,7 +155,7 @@
         "time_casa": "FC Dallas",
         "time_fora": "Querétaro",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.17",
+        "odd": "1.18",
         "link_betano": "https://www.betano.bet.br/match-odds/FC-Dallas-Queretaro-FC/90113190/",
         "link_h2h": "https://www.flashscore.com.br/jogo/OMz2CK7s"
     },
@@ -205,7 +165,7 @@
         "time_casa": "Nashville SC",
         "time_fora": "Leon",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.23",
+        "odd": "1.24",
         "link_betano": "https://www.betano.bet.br/match-odds/Nashville-SC-Club-Leon/90113267/",
         "link_h2h": "https://www.flashscore.com.br/jogo/IN8UUSN8"
     },
@@ -245,7 +205,7 @@
         "time_casa": "Toluca",
         "time_fora": "Seattle Sounders",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.17",
+        "odd": "1.16",
         "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Toluca-FC-Seattle-Sounders-FC/90113252/",
         "link_h2h": "https://www.flashscore.com.br/jogo/dzZ9Abxf"
     },
