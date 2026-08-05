@@ -1,15 +1,5 @@
 [
     {
-        "horario": "14:10",
-        "liga": "Europa - Champions League",
-        "time_casa": "Aarhus (Den)",
-        "time_fora": "Sabah Baku (Aze)",
-        "mercado": "+1.5 Gols (100%)",
-        "odd": "1.28",
-        "link_betano": "https://www.betano.bet.br/match-odds/Aarhus-GF-FC-Sabah/89904049/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/ALq0Rpit"
-    },
-    {
         "horario": "15:00",
         "liga": "Europa - Champions League",
         "time_casa": "Fenerbahce (Tur)",
@@ -205,7 +195,7 @@
         "time_casa": "Toluca",
         "time_fora": "Seattle Sounders",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.16",
+        "odd": "1.15",
         "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Toluca-FC-Seattle-Sounders-FC/90113252/",
         "link_h2h": "https://www.flashscore.com.br/jogo/dzZ9Abxf"
     },
