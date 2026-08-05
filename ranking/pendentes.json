@@ -44,25 +44,32 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/Gv4fiKIj/#/resumo-de-jogo"
         },
         {
+            "time_casa": "Universidad Católica",
+            "time_fora": "Vinotinto",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4tbH9TqT/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Hobro",
+            "time_fora": "Vendsyssel FF",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0rpwVCyp/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Odder",
+            "time_fora": "Skive",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/S2DEXsM8/#/resumo-de-jogo"
+        },
+        {
             "time_casa": "Inter Bogotá",
             "time_fora": "Jaguares de Cordoba",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/fLNTqukm/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Tigres",
-            "time_fora": "Real Salt Lake",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/SjVlIkv3/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Vancouver Whitecaps",
-            "time_fora": "Atlante",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/04TdGT8F/#/resumo-de-jogo"
         },
         {
             "time_casa": "Inter Miami",
