@@ -25,12 +25,13 @@ def liga_eh_permitida(texto_liga):
 
 def pegar_estatisticas_coletivas(driver, stats):
     """
-    Navega no histórico H2H dos times e extrai EXCLUSIVAMENTE
+    Navega nas abas específicas H2H de CASA (mandante) e FORA (visitante)
+    utilizando a estrutura estável de cliques e extraindo EXCLUSIVAMENTE
     as estatísticas de FINALIZAÇÕES TOTAIS de jogos de LIGAS PERMITIDAS.
     """
     EXECUTAR_SCRAPER = True
 
-    # Arrays para Finalizações
+    # Inicialização dos Arrays para Finalizações mantendo compatibilidade de chaves
     stats["chutes_mandante_h2h"] = []   
     stats["chutes_visitante_h2h"] = []  
     stats["chutes_jogo_total_h2h"] = [] 
@@ -58,53 +59,57 @@ def pegar_estatisticas_coletivas(driver, stats):
 
     wait = WebDriverWait(driver, 10)
 
-    secoes_alvo_stats = [
-        {"tipo": "MANDANTE", "idx_secao": 1},
-        {"tipo": "VISITANTE", "idx_secao": 2}
+    # Constrói as URLs segmentadas /h2h/casa/ e /h2h/fora/ a partir da url_h2h_base
+    url_base_limpa = url_h2h_base.replace("/h2h", "").rstrip("/")
+    url_casa = f"{url_base_limpa}/h2h/casa/"
+    url_fora = f"{url_base_limpa}/h2h/fora/"
+
+    configuracoes_alvo = [
+        {"tipo": "MANDANTE", "url": url_casa, "chave_array": "chutes_mandante_h2h"},
+        {"tipo": "VISITANTE", "url": url_fora, "chave_array": "chutes_visitante_h2h"}
     ]
 
     try:
-        for alvo in secoes_alvo_stats:
+        for alvo in configuracoes_alvo:
             lista_urls_jogos = []
             try:
-                driver.get(url_h2h_base)
+                driver.get(alvo["url"])
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-                selector_linhas = f".h2h__section:nth-child({alvo['idx_secao']}) .h2h__row"
-                linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
                 
-                # Coleta até 5 jogos (padrão da esteira)
+                # Na URL específica /h2h/casa/ ou /h2h/fora/, as linhas de interesse ficam na primeira seção
+                linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__section .h2h__row")
+                
+                # Coleta estritamente até 5 jogos do histórico
                 for jogo_idx in range(min(5, len(linhas_confrontos))):
                     try:
                         lista_urls_jogos.append({"idx": jogo_idx})
                     except Exception:
                         continue
             except Exception as e_coleta:
-                print(f"      ⚠️ Erro ao listar linhas H2H para estatísticas: {e_coleta}")
+                print(f"      ⚠️ Erro ao listar linhas H2H para chutes ({alvo['tipo']}): {e_coleta}")
                 continue
 
             for jogo_dados in lista_urls_jogos:
                 try:
-                    driver.get(url_h2h_base)
+                    driver.get(alvo["url"])
                     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
                     
-                    selector_linhas = f".h2h__section:nth-child({alvo['idx_secao']}) .h2h__row"
-                    linhas_atualizadas = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
+                    linhas_atualizadas = driver.find_elements(By.CSS_SELECTOR, ".h2h__section .h2h__row")
                     if len(linhas_atualizadas) <= jogo_dados["idx"]:
                         continue
                     
                     elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
 
-                    # 🔍 [NOVA VALIDAÇÃO DE LIGA] Leitura do nome da competição antes de clicar
+                    # 🔍 [VALIDAÇÃO DE LIGA] Leitura do nome da competição antes de clicar
                     try:
                         nome_liga_elemento = elemento_alvo.find_element(
                             By.CSS_SELECTOR, ".h2h__event, .h2h__competition, [class*='event'], [class*='competition']"
                         ).text.strip()
                     except Exception:
-                        # Fallback: pega todo o texto da linha se não achar o seletor específico
                         nome_liga_elemento = elemento_alvo.text.strip()
 
                     if not liga_eh_permitida(nome_liga_elemento):
-                        print(f"      ⏩ [LIGA DESCAR TADA]: '{nome_liga_elemento}' não está na lista branca. Pulando jogo...")
+                        print(f"      ⏩ [LIGA DESCARTADA]: '{nome_liga_elemento}' não está na lista branca. Pulando jogo...")
                         continue
 
                     url_anterior = driver.current_url
@@ -136,11 +141,9 @@ def pegar_estatisticas_coletivas(driver, stats):
                             for idx, span in enumerate(todos_spans):
                                 texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
                                 
-                                # Trava de segurança: se bateu na linha de cartões amarelados, interrompe
                                 if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
                                     achou_cartoes_ancora = True
                                 
-                                # Busca estrita do Total de Finalizações no topo (DESTAQUES)
                                 if not achou_cartoes_ancora and texto_elemento in ["TOTAL DE FINALIZAÇÕES", "TOTAL SHOTS"]:
                                     if idx > 0 and (idx + 1) < len(todos_spans):
                                         val_casa_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
@@ -148,18 +151,16 @@ def pegar_estatisticas_coletivas(driver, stats):
                                         chutes_casa = int(re.search(r'\d+', val_casa_str).group()) if re.search(r'\d+', val_casa_str) else 0
                                         chutes_fora = int(re.search(r'\d+', val_fora_str).group()) if re.search(r'\d+', val_fora_str) else 0
                                         achou_chutes = True
-                                        break # Pára a busca assim que pega a métrica do topo
+                                        break 
 
                             if achou_chutes:
+                                # Na aba de CASA do Mandante, o dado de interesse é o do mandante (casa).
+                                # Na aba de FORA do Visitante, o dado de interesse é o do visitante (fora).
+                                valor_alvo = chutes_casa if alvo["tipo"] == "MANDANTE" else chutes_fora
                                 total_jogo = chutes_casa + chutes_fora
-                                print(f"      📊 [{alvo['tipo']}] Finalizações Totais: Casa {chutes_casa} | Fora {chutes_fora} (Total: {total_jogo})")
                                 
-                                if alvo["tipo"] == "MANDANTE":
-                                    stats["chutes_mandante_h2h"].append(chutes_casa)
-                                else:
-                                    stats["chutes_visitante_h2h"].append(chutes_fora)
-                                    
-                                stats["chutes_jogo_total_h2h"].append(total_jogo)
+                                print(f"      📊 [{alvo['tipo']}] Finalizações Capturadas: {valor_alvo} (Jogo Total: {total_jogo})")
+                                stats[alvo["chave_array"]].append(valor_alvo)
                             else:
                                 print(f"      ⚠️ Total de finalizações não localizado no topo.")
 
