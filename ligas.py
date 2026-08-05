@@ -40,6 +40,8 @@ COMPETICOES = {
     "Cazaquistão - Primeira Liga": "https://www.flashscore.com.br/futebol/cazaquistao/primeira-liga/jogos",
 
     # --- BLOCO 5: LIGAS E COPAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
+     "Equador - Copa": "https://www.flashscore.com.br/futebol/equador/copa-do-equador/jogos/",
+     "Dinamarca - Betano Pokalen": "https://www.flashscore.com.br/futebol/dinamarca/betano-pokalen/jogos/",
      "Irlanda - Premier": "https://www.flashscore.com.br/futebol/irlanda/divisao-premier/jogos/",
      "Colombia - Copa": "https://www.flashscore.com.br/futebol/colombia/copa-da-colombia/jogos/",
      "Colombia - Primeira A": "https://www.flashscore.com.br/futebol/colombia/primera-a/jogos/",
