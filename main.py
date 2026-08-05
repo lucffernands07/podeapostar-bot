@@ -184,163 +184,163 @@ def main():
 
                     print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
 
-                        # ----------------------------------------------------------
-                        # FASE 1: ANÁLISE DE MERCADOS DE RECORRÊNCIA (CASA / FORA)
-                        # ----------------------------------------------------------
-                        url_jogo_base = f"https://www.flashscore.com.br/jogo/{id_jogo}"
-                        dados_jogo = pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2)
-                        
-                        if isinstance(dados_jogo, dict) and "url_h2h_base" not in dados_jogo:
-                            dados_jogo["url_h2h_base"] = f"{url_jogo_base}/h2h"
+                    # ----------------------------------------------------------
+                    # FASE 1: ANÁLISE DE MERCADOS DE RECORRÊNCIA (CASA / FORA)
+                    # ----------------------------------------------------------
+                    url_jogo_base = f"https://www.flashscore.com.br/jogo/{id_jogo}"
+                    dados_jogo = pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2)
+                    
+                    if isinstance(dados_jogo, dict) and "url_h2h_base" not in dados_jogo:
+                        dados_jogo["url_h2h_base"] = f"{url_jogo_base}/h2h"
 
-                        mercados_fase1 = []
+                    mercados_fase1 = []
 
-                        # 1. Gols
-                        res_gols = gols.verificar_gols(dados_jogo)
-                        for rg in res_gols:
-                            if isinstance(rg, dict):
-                                mercados_fase1.append({"texto": rg['mercado'], "chave": rg['tipo']})
+                    # 1. Gols
+                    res_gols = gols.verificar_gols(dados_jogo)
+                    for rg in res_gols:
+                        if isinstance(rg, dict):
+                            mercados_fase1.append({"texto": rg['mercado'], "chave": rg['tipo']})
 
-                        # 2. Ambos Marcam
-                        res_btts = ambos_marcam.verificar_btts(dados_jogo, mercados_gols_aprovados=res_gols)
-                        for rb in res_btts:
-                            if isinstance(rb, dict):
-                                m_texto = rb.get("mercado", "")
-                                m_tipo = rb.get("tipo", "BTTS")
-                                mercados_fase1.append({"texto": m_texto, "chave": m_tipo})
-                            elif isinstance(rb, str):
-                                chave_btts = "BTTS_NAO" if "Não" in rb or "Nao" in rb else "BTTS"
-                                mercados_fase1.append({"texto": rb, "chave": chave_btts})
+                    # 2. Ambos Marcam
+                    res_btts = ambos_marcam.verificar_btts(dados_jogo, mercados_gols_aprovados=res_gols)
+                    for rb in res_btts:
+                        if isinstance(rb, dict):
+                            m_texto = rb.get("mercado", "")
+                            m_tipo = rb.get("tipo", "BTTS")
+                            mercados_fase1.append({"texto": m_texto, "chave": m_tipo})
+                        elif isinstance(rb, str):
+                            chave_btts = "BTTS_NAO" if "Não" in rb or "Nao" in rb else "BTTS"
+                            mercados_fase1.append({"texto": rb, "chave": chave_btts})
 
-                        # 3. Chance Dupla
-                        res_cd = chance_dupla.verificar_chance_dupla(dados_jogo)
-                        for rc in res_cd:
-                            texto_cd = rc if isinstance(rc, str) else rc.get("mercado", "")
-                            tipo_cd = "1X" if "1X" in texto_cd else "X2"
-                            mercados_fase1.append({"texto": texto_cd, "chave": tipo_cd})
+                    # 3. Chance Dupla
+                    res_cd = chance_dupla.verificar_chance_dupla(dados_jogo)
+                    for rc in res_cd:
+                        texto_cd = rc if isinstance(rc, str) else rc.get("mercado", "")
+                        tipo_cd = "1X" if "1X" in texto_cd else "X2"
+                        mercados_fase1.append({"texto": texto_cd, "chave": tipo_cd})
 
-                        # 4. Vitória Casa / Vitória Fora
-                        res_vitorias = vitorias.verificar_vitorias(dados_jogo)
-                        for rv in res_vitorias:
-                            texto_vic = rv if isinstance(rv, str) else rv.get("mercado", "")
-                            chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
-                            mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
+                    # 4. Vitória Casa / Vitória Fora
+                    res_vitorias = vitorias.verificar_vitorias(dados_jogo)
+                    for rv in res_vitorias:
+                        texto_vic = rv if isinstance(rv, str) else rv.get("mercado", "")
+                        chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
+                        mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
 
-                        # Extração de Odds das principais
-                        v_odds = {}
-                        if mercados_fase1:
-                            try:
-                                v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-                            except Exception as e_odds:
-                                print(f"      ⚠️ Erro ao capturar odds da Fase 1: {e_odds}")
-                                if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
-                                    try: driver.quit()
-                                    except: pass
-                                    driver = configurar_driver()
-
-                        mercados_para_processar = []
-
-                        for item in mercados_fase1:
-                            m_texto, m_chave = item["texto"], item["chave"]
-                            valor_odd_str = v_odds.get(m_chave, "N/A")
-                            
-                            # Log para rastrear se a odd veio vazia ou N/A do odds.py
-                            if valor_odd_str == "N/A" or not valor_odd_str:
-                                print(f"      ⚠️ ALERTA ODD AUSENTE: O mercado '{m_texto}' (Chave: {m_chave}) retornou 'N/A' no odds.py e foi ignorado.")
-                                continue
-
-                            try:
-                                odd_float = float(str(valor_odd_str).replace(',', '.'))
-                                if odd_float >= 1.10:
-                                    if "M45" in m_chave and odd_float >= 4.0: continue
-                                    mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": str(odd_float)})
-                                else:
-                                    print(f"      ⚠️ Descartado (Odd baixa < 1.10): {m_texto} | Valor: {valor_odd_str}")
-                            except Exception as e_conv:
-                                print(f"      ⚠️ Erro ao converter odd para float ({m_texto}) [Valor lido: {valor_odd_str}]: {e_conv}")
-    
-                        # ----------------------------------------------------------
-                        # FASE 2: RASPAGEM ESTATÍSTICA COLETIVA (CHUTES TOTAIS)
-                        # ----------------------------------------------------------
-                        print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Chutes Totais)...")
+                    # Extração de Odds das principais
+                    v_odds = {}
+                    if mercados_fase1:
                         try:
-                            driver.get(dados_jogo["url_h2h_base"])
-                            time.sleep(1.5)
-                            
-                            dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
-                            if dados_coletivos and isinstance(dados_coletivos, dict):
-                                dados_jogo.update(dados_coletivos)
-                        except Exception as e_f2:
-                            print(f"      ⚠️ Erro na Fase 2: {e_f2}")
-                            if "invalid session id" in str(e_f2).lower() or "session" in str(e_f2).lower():
-                                print("      🔄 Recuperando driver após queda na Fase 2...")
+                            v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
+                        except Exception as e_odds:
+                            print(f"      ⚠️ Erro ao capturar odds da Fase 1: {e_odds}")
+                            if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
                                 try: driver.quit()
                                 except: pass
                                 driver = configurar_driver()
 
-                        # 🎯 Análise de Chutes Totais / Finalizações
-                        res_chutes = chutes_totais.verificar_chutes_totais(dados_jogo)
+                    mercados_para_processar = []
+
+                    for item in mercados_fase1:
+                        m_texto, m_chave = item["texto"], item["chave"]
+                        valor_odd_str = v_odds.get(m_chave, "N/A")
                         
-                        if res_chutes:
-                            for rc in res_chutes:
-                                m_texto = rc.get("mercado")
-                                m_tipo = rc.get("tipo", "FINALIZACOES_TIME")
-                                if m_texto:
-                                    print(f"      ✅ [CHUTES APROVADO]: {m_texto}")
-                                    mercados_para_processar.append({
-                                        "texto": m_texto, 
-                                        "chave": m_tipo, 
-                                        "odd": "Análise"
-                                    })
-                        else:
-                            print(f"      ℹ️ Chutes Totais: Nenhum padrão atingido para {t1} x {t2}")
-        
-                        url_h2h_final = dados_jogo.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
+                        # Log para rastrear se a odd veio vazia ou N/A do odds.py
+                        if valor_odd_str == "N/A" or not valor_odd_str:
+                            print(f"      ⚠️ ALERTA ODD AUSENTE: O mercado '{m_texto}' (Chave: {m_chave}) retornou 'N/A' no odds.py e foi ignorado.")
+                            continue
 
-                        # ----------------------------------------------------------
-                        # ALIMENTAÇÃO DA LISTA FINAL
-                        # ----------------------------------------------------------
-                        if mercados_para_processar:
-                            if id_jogo not in ids_jogos_salvos_pendentes:
-                                jogos_para_pendentes.append({
-                                    "time_casa": t1, 
-                                    "time_fora": t2, 
-                                    "mercado": "MÚLTIPLOS",
-                                    "mercado_ranking": "LISTÃO GERAL", 
-                                    "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
-                                })
-                                ids_jogos_salvos_pendentes.add(id_jogo)
-
-                            for item in mercados_para_processar:
-                                m_texto, m_chave, m_odd = item["texto"], item["chave"], item["odd"]
-                                texto_limpo = m_texto.strip()
-                                texto_lower = texto_limpo.lower()
-                                
-                                if "0.0" in texto_limpo and "chute" in texto_lower:
-                                    continue
-
-                                eh_scout = (
-                                    m_chave == "FINALIZACOES_TIME" or
-                                    any(term in texto_lower for term in ["chute", "finalizac"])
-                                )
-
-                                odd_para_lista = "Análise" if eh_scout else m_odd
-
-                                lista_para_filtros.append({
-                                    "horario": h_br, "time_casa": t1, "time_fora": t2,
-                                    "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
-                                    "link_betano": dados_jogo.get("link_betano"),
-                                    "link_h2h": url_h2h_final,
-                                    "odds_todas": v_odds
-                                })
-                                total_mercados += 1
-
-                        # Recarrega a página de calendário para prosseguir a varredura dos elementos
                         try:
-                            driver.get(url_calendario)
-                            time.sleep(2.0)
-                        except Exception as e_volta:
-                            print(f"⚠️ Erro ao recarregar a liga: {e_volta}")
+                            odd_float = float(str(valor_odd_str).replace(',', '.'))
+                            if odd_float >= 1.10:
+                                if "M45" in m_chave and odd_float >= 4.0: continue
+                                mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": str(odd_float)})
+                            else:
+                                print(f"      ⚠️ Descartado (Odd baixa < 1.10): {m_texto} | Valor: {valor_odd_str}")
+                        except Exception as e_conv:
+                            print(f"      ⚠️ Erro ao converter odd para float ({m_texto}) [Valor lido: {valor_odd_str}]: {e_conv}")
+
+                    # ----------------------------------------------------------
+                    # FASE 2: RASPAGEM ESTATÍSTICA COLETIVA (CHUTES TOTAIS)
+                    # ----------------------------------------------------------
+                    print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Chutes Totais)...")
+                    try:
+                        driver.get(dados_jogo["url_h2h_base"])
+                        time.sleep(1.5)
+                        
+                        dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
+                        if dados_coletivos and isinstance(dados_coletivos, dict):
+                            dados_jogo.update(dados_coletivos)
+                    except Exception as e_f2:
+                        print(f"      ⚠️ Erro na Fase 2: {e_f2}")
+                        if "invalid session id" in str(e_f2).lower() or "session" in str(e_f2).lower():
+                            print("      🔄 Recuperando driver após queda na Fase 2...")
+                            try: driver.quit()
+                            except: pass
+                            driver = configurar_driver()
+
+                    # 🎯 Análise de Chutes Totais / Finalizações
+                    res_chutes = chutes_totais.verificar_chutes_totais(dados_jogo)
+                    
+                    if res_chutes:
+                        for rc in res_chutes:
+                            m_texto = rc.get("mercado")
+                            m_tipo = rc.get("tipo", "FINALIZACOES_TIME")
+                            if m_texto:
+                                print(f"      ✅ [CHUTES APROVADO]: {m_texto}")
+                                mercados_para_processar.append({
+                                    "texto": m_texto, 
+                                    "chave": m_tipo, 
+                                    "odd": "Análise"
+                                })
+                    else:
+                        print(f"      ℹ️ Chutes Totais: Nenhum padrão atingido para {t1} x {t2}")
+    
+                    url_h2h_final = dados_jogo.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
+
+                    # ----------------------------------------------------------
+                    # ALIMENTAÇÃO DA LISTA FINAL
+                    # ----------------------------------------------------------
+                    if mercados_para_processar:
+                        if id_jogo not in ids_jogos_salvos_pendentes:
+                            jogos_para_pendentes.append({
+                                "time_casa": t1, 
+                                "time_fora": t2, 
+                                "mercado": "MÚLTIPLOS",
+                                "mercado_ranking": "LISTÃO GERAL", 
+                                "link_h2h": f"https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo-de-jogo"
+                            })
+                            ids_jogos_salvos_pendentes.add(id_jogo)
+
+                        for item in mercados_para_processar:
+                            m_texto, m_chave, m_odd = item["texto"], item["chave"], item["odd"]
+                            texto_limpo = m_texto.strip()
+                            texto_lower = texto_limpo.lower()
+                            
+                            if "0.0" in texto_limpo and "chute" in texto_lower:
+                                continue
+
+                            eh_scout = (
+                                m_chave == "FINALIZACOES_TIME" or
+                                any(term in texto_lower for term in ["chute", "finalizac"])
+                            )
+
+                            odd_para_lista = "Análise" if eh_scout else m_odd
+
+                            lista_para_filtros.append({
+                                "horario": h_br, "time_casa": t1, "time_fora": t2,
+                                "mercado": m_texto, "odd": odd_para_lista, "liga": nome_comp,
+                                "link_betano": dados_jogo.get("link_betano"),
+                                "link_h2h": url_h2h_final,
+                                "odds_todas": v_odds
+                            })
+                            total_mercados += 1
+
+                    # Recarrega a página de calendário para prosseguir a varredura dos elementos
+                    try:
+                        driver.get(url_calendario)
+                        time.sleep(2.0)
+                    except Exception as e_volta:
+                        print(f"⚠️ Erro ao recarregar a liga: {e_volta}")
 
                 except Exception as e_jogo:
                     print(f"      ⚠️ Erro ao processar o jogo índice {idx}: {e_jogo}")
