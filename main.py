@@ -126,22 +126,19 @@ def main():
                         continue
 
                     # ⏰📅 FILTRO RIGOROSO DE CALENDÁRIO: Apenas jogos que contêm a data exata de hoje
-                    # 1. Garante que o texto bruto do elemento realmente contém a data de hoje
                     if not tempo_raw or hoje_no_site not in tempo_raw:
-                        # Ignora silenciosamente jogos de outras datas (como os de outubro/novembro do log)
                         continue
 
                     partes_tempo = tempo_raw.split()
                     if not partes_tempo: 
                         continue
 
-                    # O horário é sempre o último elemento após o split da string de tempo
                     horario_str = partes_tempo[-1]
                     if ":" not in horario_str: 
                         continue
 
                     try:
-                        # 2. Conversão segura de horário UTC para o Brasil (UTC - 3)
+                        # Conversão segura de horário UTC para o Brasil (UTC - 3)
                         h_obj = datetime.strptime(horario_str, "%H:%M")
                         hora_dt = datetime.now().replace(hour=h_obj.hour, minute=h_obj.minute, second=0, microsecond=0)
                         hora_br_dt = hora_dt - timedelta(hours=3)
@@ -153,12 +150,14 @@ def main():
                         print(f"      ⚠️ Erro ao processar horário '{tempo_raw}': {e}")
                         continue
 
-
-                        times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
-                        if len(times) < 2:
-                            print(f"      ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
-                            continue
-                        t1, t2 = times[0].text.strip(), times[1].text.strip()
+                    # -------------------------------------------------------------
+                    # CONTINUAÇÃO DA LEITURA DOS TIMES (Alinhamento corrigido)
+                    # -------------------------------------------------------------
+                    times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                    if len(times) < 2:
+                        print(f"      ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
+                        continue
+                    t1, t2 = times[0].text.strip(), times[1].text.strip()
 
                         id_jogo = None
                         try:
