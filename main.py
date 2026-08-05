@@ -54,7 +54,6 @@ def main():
     driver = configurar_driver()
     hoje_ref = datetime.now()
     hoje_no_site = hoje_ref.strftime("%d.%m.")
-    amanha_no_site = (hoje_ref + timedelta(days=1)).strftime("%d.%m.")
     
     lista_para_filtros = []     
     jogos_para_pendentes = []  
@@ -66,8 +65,11 @@ def main():
                 break 
             print(f"\n--- Analisando: {nome_comp} ---")
             
+            # Ajusta a URL para o formato /calendario/ conforme planejado
+            url_calendario = url.rstrip("/").replace("/jogos", "").replace("/resultados", "") + "/calendario/"
+            
             try:
-                driver.get(url)
+                driver.get(url_calendario)
                 time.sleep(3)  
                 
                 # Rola a página para carregar jogos ocultos
@@ -86,7 +88,7 @@ def main():
                     try: driver.quit()
                     except: pass
                     driver = configurar_driver() 
-                    driver.get(url)
+                    driver.get(url_calendario)
                     time.sleep(3)
                     elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
                 else:
@@ -123,6 +125,11 @@ def main():
                         print(f"      ⏩ Pulado: Status ao vivo/encerrado detectado ({tempo_raw})")
                         continue
 
+                    # FILTRO RIGOROSO DE CALENDÁRIO: Apenas jogos que contêm a data exata de hoje
+                    if hoje_no_site not in tempo_raw:
+                        print(f"      ⏩ Pulado: Jogo fora da data de hoje ({tempo_raw})")
+                        continue
+
                     partes_tempo = tempo_raw.split()
                     if not partes_tempo: continue
 
@@ -130,36 +137,14 @@ def main():
                     horario_str = partes_tempo[-1]
                     if ":" not in horario_str: continue
 
-                    # Extrai a data do elemento se ela existir no texto bruto (ex: "05.08. 19:00")
-                    # Se o site traz o dia junto com a hora, podemos isolar
                     h_obj = datetime.strptime(horario_str, "%H:%M")
+                    h_br = (h_obj - timedelta(hours=3)).strftime("%H:%M")
                     
-                    # Simula o objeto datetime completo para hoje/amanhã baseado no texto do elemento
-                    # Se o elemento tem a tag de amanhã, consideramos a data de amanhã para validação
-                    data_jogo_ref = hoje_ref
-                    if amanha_no_site in tempo_raw:
-                        data_jogo_ref = hoje_ref + timedelta(days=1)
-                    
-                    # Cria o datetime real combinando a data do jogo e o horário UTC do site
-                    dt_utc = datetime(data_jogo_ref.year, data_jogo_ref.month, data_jogo_ref.day, h_obj.hour, h_obj.minute)
-                    
-                    # Converte para o Horário do Brasil (UTC-3)
-                    dt_br = dt_utc - timedelta(hours=3)
-                    h_br = dt_br.strftime("%H:%M")
-                    
-                    aceitar = False
-                    
-                    # Regra rigorosa: O jogo só é aceito se a data brasileira calculada for EXATAMENTE hoje!
-                    # Isso barra automaticamente qualquer jogo agendado para amanhã de tarde/noite, 
-                    # mas deixa passar os jogos de hoje à noite (mesmo que no site estivessem com a data de amanhã por causa do UTC).
-                    if dt_br.date() == hoje_ref.date():
-                        # Aplica a sua janela de horário permitida para hoje
-                        if dt_br.hour >= 7 or dt_br.hour <= 3:
-                            aceitar = True
+                    # Como já filtramos estritamente pela data do dia no calendário, validamos apenas a janela horária se necessário
+                    aceitar = True
 
                     if aceitar:
-                        print(f"      ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} ({dt_br.strftime('%d/%m')}) | Janela Aceita? {aceitar}")
-                        
+                        print(f"      ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Janela Aceita? {aceitar}")
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         if len(times) < 2:
                             print(f"      ⚠️ Falha: Não conseguiu ler os nomes dos dois times no elemento.")
@@ -342,9 +327,9 @@ def main():
                                 })
                                 total_mercados += 1
 
-                        # Recarrega a liga para prosseguir a varredura dos elementos
+                        # Recarrega a página de calendário para prosseguir a varredura dos elementos
                         try:
-                            driver.get(url)
+                            driver.get(url_calendario)
                             time.sleep(2.0)
                         except Exception as e_volta:
                             print(f"⚠️ Erro ao recarregar a liga: {e_volta}")
