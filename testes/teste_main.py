@@ -1,3 +1,5 @@
+#Testando apenas ligas como teste, os demais são import do principal 
+
 import os
 import time
 import json
@@ -10,7 +12,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos de Mercados Ativos
-from ligas import COMPETICOES
+from testes.ligas import COMPETICOES 
 from mercados import gols, ambos_marcam, chance_dupla, vitorias, chutes_totais
 import odds, bingo357
 from telegram import menus
@@ -398,4 +400,35 @@ def main():
                     menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
                     print("📢 Menu interativo enviado para o Canal.")
                 except Exception as e:
-                    print(f"⚠️ Erro ao
+                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
+
+            os.makedirs("ranking", exist_ok=True)
+            with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
+                json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d"), "jogos": jogos_para_pendentes}, f, indent=4, ensure_ascii=False)
+            
+            os.makedirs("telegram", exist_ok=True)
+            with open(f"telegram/jogos_{hoje_ref.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
+                json.dump([
+                    {
+                        "horario": j.get("horario"), 
+                        "liga": j.get("liga"), 
+                        "time_casa": j.get("time_casa"), 
+                        "time_fora": j.get("time_fora"), 
+                        "mercado": j.get("mercado"), 
+                        "odd": j.get("odd"), 
+                        "link_betano": j.get("link_betano"),
+                        "link_h2h": j.get("link_h2h")
+                    } 
+                    for j in lista_para_filtros
+                ], f, indent=4, ensure_ascii=False)
+        else:
+            print("⚠️ Nenhuma partida qualificada entrou na 'lista_para_filtros' após varrer os elementos.")
+
+    except Exception as e:
+        print(f"❌ Erro Crítico no Main: {e}")
+    finally:
+        try: driver.quit()
+        except: pass
+
+if __name__ == "__main__":
+    main()
