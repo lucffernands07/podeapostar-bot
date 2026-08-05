@@ -126,42 +126,33 @@ def main():
                         continue
 
                     # ⏰📅 FILTRO RIGOROSO DE CALENDÁRIO: Apenas jogos que contêm a data exata de hoje
-                    if hoje_no_site not in tempo_raw:
-                        #print(f"      ⏩ Pulado: Jogo fora da data de hoje ({tempo_raw})")
+                    # 1. Garante que o texto bruto do elemento realmente contém a data de hoje
+                    if not tempo_raw or hoje_no_site not in tempo_raw:
+                        # Ignora silenciosamente jogos de outras datas (como os de outubro/novembro do log)
                         continue
 
                     partes_tempo = tempo_raw.split()
-                    if not partes_tempo: continue
+                    if not partes_tempo: 
+                        continue
 
+                    # O horário é sempre o último elemento após o split da string de tempo
                     horario_str = partes_tempo[-1]
-                    if ":" not in horario_str: continue
+                    if ":" not in horario_str: 
+                        continue
 
                     try:
-                        # 1. Pega a hora UTC que veio do site
+                        # 2. Conversão segura de horário UTC para o Brasil (UTC - 3)
                         h_obj = datetime.strptime(horario_str, "%H:%M")
-                        
-                        # 2. Converte para o horário de Brasília (UTC - 3)
-                        # Usamos timedelta para lidar com a volta de dia caso seja madrugada UTC
                         hora_dt = datetime.now().replace(hour=h_obj.hour, minute=h_obj.minute, second=0, microsecond=0)
                         hora_br_dt = hora_dt - timedelta(hours=3)
                         h_br = hora_br_dt.strftime("%H:%M")
 
-                        # 3. Validação inteligente de data/horário para o Brasil:
-                        # Aceitamos se a data de hoje bater, OU se for um jogo noturno do BR 
-                        # que no UTC já caiu na madrugada do dia seguinte (00:00 até 02:59 UTC)
-                        eh_madrugada_utc_do_jogo_de_hoje = (h_obj.hour < 3) and ("ontem" in tempo_raw.lower() or "dia_seguinte" in tempo_raw.lower() or True)
-                        
-                        # Se a data de hoje está no texto OU se é o reflexo da madrugada UTC de um jogo de hoje
-                        data_valida = (hoje_no_site in tempo_raw) or (h_obj.hour < 3)
-
-                        if not data_valida:
-                            continue
-
-                        print(f"      ⏰ Horário UTC: {horario_str} | Horário BR: {h_br} | Jogo Aceito!")
+                        print(f"      ⏰ Data/Hora OK | UTC: {horario_str} | Horário BR: {h_br}")
 
                     except Exception as e:
                         print(f"      ⚠️ Erro ao processar horário '{tempo_raw}': {e}")
                         continue
+
 
                         times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                         if len(times) < 2:
