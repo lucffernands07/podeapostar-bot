@@ -275,9 +275,7 @@ def main():
                     # ----------------------------------------------------------
                     print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Chutes Totais)...")
                     try:
-                        driver.get(dados_jogo["url_h2h_base"])
-                        time.sleep(1.5)
-                        
+                        # Mantém a URL base H2H para a função construir as sub-abas internamente
                         dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
                         if dados_coletivos and isinstance(dados_coletivos, dict):
                             dados_jogo.update(dados_coletivos)
@@ -295,11 +293,11 @@ def main():
                     if res_chutes:
                         for rc in res_chutes:
                             m_texto = rc.get("mercado")
-                            m_tipo = rc.get("tipo", "FINALIZACOES_TIME")
+                            m_tipo = rc.get("tipo", "CHUTES_JOGO_TOTAL")
                             if m_texto:
                                 print(f"      ✅ [CHUTES APROVADO]: {m_texto}")
                                 mercados_para_processar.append({
-                                    "texto": m_texto, 
+                                    "texto": f"Chutes Totais no Jogo: {m_texto.split(':')[-1].strip()}" if ":" in m_texto else m_texto, 
                                     "chave": m_tipo, 
                                     "odd": "Análise"
                                 })
