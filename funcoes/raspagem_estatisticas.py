@@ -4,7 +4,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# 🟢 LISTA BRANCA: Nomes-chave para busca flexível nas ligas de elite
 LIGAS_ELITE_JOGADORES = [
     "brasileirão série a", "copa do brasil", "libertadores", "sul-americana",
     "brasileirão série b", "liga profesional", "argentina", "copa do mundo",
@@ -20,9 +19,6 @@ def liga_eh_permitida(texto_liga):
     return any(liga_elite in texto_clean for liga_elite in LIGAS_ELITE_JOGADORES)
 
 def formatar_rota_h2h(url_base, sub_rota=""):
-    """
-    Limpa qualquer parâmetro de busca e garante a rota correta /h2h/casa/ ou /h2h/fora/.
-    """
     path = url_base.split('?')[0].split('#')[0].rstrip('/')
     for sufixo in ['/overall', '/casa', '/fora']:
         if path.endswith(sufixo):
@@ -37,10 +33,6 @@ def formatar_rota_h2h(url_base, sub_rota=""):
     return f"{path}/"
 
 def pegar_estatisticas_coletivas(driver, stats):
-    """
-    Navega nas abas específicas /casa/ e /fora/ utilizando os seletores estruturais 
-    do Flashscore para extrair as Finalizações Totais dos últimos 5 jogos.
-    """
     EXECUTAR_SCRAPER = True
 
     stats["chutes_mandante_h2h"] = []   
@@ -53,10 +45,10 @@ def pegar_estatisticas_coletivas(driver, stats):
 
     url_h2h_base = stats.get("url_h2h_base")
     if not url_h2h_base:
+        print("      ⚠️ [LOG] url_h2h_base vazia nos stats.")
         return stats
 
     wait = WebDriverWait(driver, 10)
-
     url_real = url_h2h_base.replace("/h2h", "").rstrip("/")
     
     rotas_alvo = [
@@ -66,6 +58,7 @@ def pegar_estatisticas_coletivas(driver, stats):
 
     try:
         for alvo in rotas_alvo:
+            print(f"      🔍 [LOG] Acessando URL {alvo['tipo']}: {alvo['url']}")
             lista_urls_jogos = []
             try:
                 driver.get(alvo["url"])
@@ -73,12 +66,12 @@ def pegar_estatisticas_coletivas(driver, stats):
                 time.sleep(1.0)
                 
                 linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")
+                print(f"      📊 [LOG] Encontradas {len(linhas_confrontos)} linhas H2H para {alvo['tipo']}.")
                 
-                # Coleta até 5 jogos da aba correspondente
                 for jogo_idx in range(min(5, len(linhas_confrontos))):
                     lista_urls_jogos.append({"idx": jogo_idx})
             except Exception as e_coleta:
-                print(f"      ⚠️ Erro ao listar linhas H2H para chutes ({alvo['tipo']}): {e_coleta}")
+                print(f"      ⚠️ [LOG] Erro ao listar linhas H2H para chutes ({alvo['tipo']}): {e_coleta}")
                 continue
 
             for jogo_dados in lista_urls_jogos:
@@ -92,7 +85,6 @@ def pegar_estatisticas_coletivas(driver, stats):
                     
                     elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
 
-                    # Validação da Liga
                     try:
                         nome_liga_elemento = elemento_alvo.find_element(
                             By.CSS_SELECTOR, ".h2h__event, .h2h__competition, [class*='event'], [class*='competition']"
@@ -100,21 +92,26 @@ def pegar_estatisticas_coletivas(driver, stats):
                     except Exception:
                         nome_liga_elemento = elemento_alvo.text.strip()
 
+                    print(f"      ⚽ [LOG] Analisando jogo index {jogo_dados['idx']} | Competição/Texto: '{nome_liga_elemento}'")
+
                     if not liga_eh_permitida(nome_liga_elemento):
+                        print(f"      ⏩ [LOG] Liga ignorada: '{nome_liga_elemento}'")
                         continue
 
-                    # Clica na linha para entrar na partida específica usando o HTML validado
                     url_anterior = driver.current_url
                     driver.execute_script("arguments[0].click();", elemento_alvo)
+                    print(f"      🖱️ [LOG] Clique efetuado com sucesso no jogo index {jogo_dados['idx']}")
                     
                     try:
                         WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
                     except Exception:
+                        print(f"      ⚠️ [LOG] URL não mudou após o clique. Tentando prosseguir...")
                         pass
                         
                     time.sleep(1.2)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
                     url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas/total/"
+                    print(f"      🌐 [LOG] Navegando para estatísticas: {url_stats_geral}")
                     driver.get(url_stats_geral)
                     time.sleep(1.2)
 
@@ -124,6 +121,8 @@ def pegar_estatisticas_coletivas(driver, stats):
 
                     try:
                         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
+                        print(f"      🔎 [LOG] Spans de estatísticas encontrados: {len(todos_spans)}")
+                        
                         if len(todos_spans) > 0:
                             achou_cartoes_ancora = False
                             for idx, span in enumerate(todos_spans):
@@ -142,24 +141,28 @@ def pegar_estatisticas_coletivas(driver, stats):
                                         break 
 
                             if achou_chutes:
-                                # Na aba /casa/ o mandante foca no time da casa; na aba /fora/ o visitante foca no time de fora
                                 valor_alvo = chutes_casa if alvo["tipo"] == "MANDANTE" else chutes_fora
+                                print(f"      ✅ [LOG] Chutes capturados com sucesso ({alvo['tipo']}): {valor_alvo} (Casa: {chutes_casa} | Fora: {chutes_fora})")
                                 stats[alvo["chave_array"]].append(valor_alvo)
-                    except Exception:
-                        pass
+                            else:
+                                print(f"      ⚠️ [LOG] Métrica 'TOTAL DE FINALIZAÇÕES' não encontrada nos spans desta partida.")
+                    except Exception as e_esp:
+                        print(f"      ⚠️ [LOG] Erro ao ler spans estatísticos: {e_esp}")
 
-                except Exception:
+                except Exception as e_item:
+                    print(f"      ⚠️ [LOG] Erro interno ao iterar jogo de chutes: {e_item}")
                     continue
 
     except Exception as e:
-        print(f"      ⚠️ Erro Crítico na Raspagem Coletiva de Chutes: {e}")
+        print(f"      ⚠️ [LOG] Erro Crítico na Raspagem Coletiva de Chutes: {e}")
 
-    # 🧮 Cálculo das médias finais
     c_h2h = stats.get("chutes_mandante_h2h", [])
     v_h2h = stats.get("chutes_visitante_h2h", [])
 
     stats["mandante_media_chutes_casa"] = round(sum(c_h2h) / len(c_h2h), 2) if len(c_h2h) > 0 else 0.0
     stats["visitante_media_chutes_fora"] = round(sum(v_h2h) / len(v_h2h), 2) if len(v_h2h) > 0 else 0.0
+
+    print(f"      📊 [LOG FINAL] Médias calculadas -> Mandante Casa: {stats['mandante_media_chutes_casa']} | Visitante Fora: {stats['visitante_media_chutes_fora']}")
 
     try:
         if len(driver.window_handles) > 1:
@@ -169,4 +172,4 @@ def pegar_estatisticas_coletivas(driver, stats):
         pass
 
     return stats
-                        
+                    
