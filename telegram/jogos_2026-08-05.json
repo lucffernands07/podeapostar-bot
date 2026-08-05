@@ -5,7 +5,7 @@
         "time_casa": "Hobro",
         "time_fora": "Vendsyssel FF",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.26",
+        "odd": "1.27",
         "link_betano": "https://www.betano.bet.br/match-odds/Hobro-IK-Vendsyssel-FF/90209724/",
         "link_h2h": "https://www.flashscore.com.br/jogo/0rpwVCyp"
     },
@@ -15,9 +15,19 @@
         "time_casa": "Odder",
         "time_fora": "Skive",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.15",
+        "odd": "1.22",
         "link_betano": "https://www.betano.bet.br/match-odds/Odder-IGF-Skive-IK/90209725/",
         "link_h2h": "https://www.flashscore.com.br/jogo/S2DEXsM8"
+    },
+    {
+        "horario": "13:30",
+        "liga": "Dinamarca - Betano Pokalen",
+        "time_casa": "Tarup-Paarup",
+        "time_fora": "Vejle",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.1",
+        "link_betano": "https://www.betano.bet.br/match-odds/Tarup-Paarup-Vejle-Boldklub/90209419/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EwbuyHS0"
     },
     {
         "horario": "13:30",
@@ -35,7 +45,7 @@
         "time_casa": "Fenerbahce (Tur)",
         "time_fora": "Sturm Graz (Aut)",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.21",
+        "odd": "1.19",
         "link_betano": "https://www.betano.bet.br/match-odds/Fenerbahce-SK-SK-Sturm-Graz/89904540/",
         "link_h2h": "https://www.flashscore.com.br/jogo/fTumx25b"
     },
@@ -52,10 +62,20 @@
     {
         "horario": "17:00",
         "liga": "Equador - Copa",
-        "time_casa": "Universidad Católica",
-        "time_fora": "Vinotinto",
-        "mercado": "+1.5 Gols (60%)",
-        "odd": "1.36",
+        "time_casa": "Vinotinto",
+        "time_fora": "Universidad Católica",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.19",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vinotinto-FC-Universidad-Catolica-Ecuador/90231235/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/4tbH9TqT"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Equador - Copa",
+        "time_casa": "Vinotinto",
+        "time_fora": "Universidad Católica",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.65",
         "link_betano": "https://www.betano.bet.br/match-odds/Vinotinto-FC-Universidad-Catolica-Ecuador/90231235/",
         "link_h2h": "https://www.flashscore.com.br/jogo/4tbH9TqT"
     },
@@ -75,7 +95,7 @@
         "time_casa": "Boca Juniors",
         "time_fora": "Estudiantes",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.57",
+        "odd": "1.62",
         "link_betano": "https://www.betano.bet.br/match-odds/Boca-Juniors-Estudiantes-de-La-Plata/88418047/",
         "link_h2h": "https://www.flashscore.com.br/jogo/0hpMzPx3"
     },
@@ -85,7 +105,7 @@
         "time_casa": "Cruzeiro",
         "time_fora": "Chapecoense",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.26",
+        "odd": "1.27",
         "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Chapecoense-SC/90131451/",
         "link_h2h": "https://www.flashscore.com.br/jogo/d8Odhy0e"
     },
@@ -95,7 +115,7 @@
         "time_casa": "Grêmio",
         "time_fora": "Mirassol",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.47",
+        "odd": "1.42",
         "link_betano": "https://www.betano.bet.br/match-odds/Gremio-RS-Mirassol-SP/90131368/",
         "link_h2h": "https://www.flashscore.com.br/jogo/hCZIaJ7L"
     },
@@ -105,7 +125,7 @@
         "time_casa": "Inter Bogotá",
         "time_fora": "Jaguares de Cordoba",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.35",
+        "odd": "1.34",
         "link_betano": "https://www.betano.bet.br/match-odds/Internacional-de-Bogota-Jaguares-de-Cordoba/89064436/",
         "link_h2h": "https://www.flashscore.com.br/jogo/fLNTqukm"
     },
@@ -115,7 +135,7 @@
         "time_casa": "Inter Miami",
         "time_fora": "Atlético San Luis",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.11",
+        "odd": "1.1",
         "link_betano": "https://www.betano.bet.br/match-odds/Inter-Miami-CF-Atletico-San-Luis/90113214/",
         "link_h2h": "https://www.flashscore.com.br/jogo/40xI8x76"
     },
@@ -128,5 +148,115 @@
         "odd": "1.14",
         "link_betano": "https://www.betano.bet.br/match-odds/CF-Monterrey-Orlando-City-SC/90113247/",
         "link_h2h": "https://www.flashscore.com.br/jogo/AcuQ6GyJ"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Colombia - Copa",
+        "time_casa": "Santa Fe",
+        "time_fora": "U. Magdalena",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-Santa-Fe-Union-Magdalena/90233938/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lIuEp2D7"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Equador - Copa",
+        "time_casa": "LDU Portoviejo",
+        "time_fora": "Barcelona",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/LDU-Portoviejo-Barcelona-Guayaquil/90231467/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/WSa9BkFG"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Equador - Copa",
+        "time_casa": "LDU Portoviejo",
+        "time_fora": "Barcelona",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/LDU-Portoviejo-Barcelona-Guayaquil/90231467/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/WSa9BkFG"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Tigre",
+        "time_fora": "Belgrano",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.8",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Tigre-CA-Belgrano/88418045/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/zBb4m2M8"
+    },
+    {
+        "horario": "21:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "FC Dallas",
+        "time_fora": "Querétaro",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.17",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Dallas-Queretaro-FC/90113190/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OMz2CK7s"
+    },
+    {
+        "horario": "21:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Nashville SC",
+        "time_fora": "Leon",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.23",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nashville-SC-Club-Leon/90113267/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IN8UUSN8"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Fluminense",
+        "time_fora": "Vasco",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.52",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fluminense-RJ-Vasco-da-Gama-RJ/90075288/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/dtUkEIME"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Copa do Brasil",
+        "time_casa": "Fortaleza",
+        "time_fora": "Palmeiras",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fortaleza-CE-Palmeiras-SP/90125135/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/d6aHHiT6"
+    },
+    {
+        "horario": "22:30",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Once Caldas",
+        "time_fora": "América de Cali",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Once-Caldas-America-de-Cali/89064484/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IupCRcZI"
+    },
+    {
+        "horario": "23:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Toluca",
+        "time_fora": "Seattle Sounders",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.17",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Toluca-FC-Seattle-Sounders-FC/90113252/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/dzZ9Abxf"
+    },
+    {
+        "horario": "23:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Los Angeles FC",
+        "time_fora": "Guadalajara",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Los-Angeles-FC-Guadalajara-Chivas/90113272/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/CQLr7PV1"
     }
 ]
