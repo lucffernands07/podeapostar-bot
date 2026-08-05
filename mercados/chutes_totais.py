@@ -1,6 +1,6 @@
 """
-REGRAS DE MERCADO - CHUTES TOTAIS DO JOGO (ALINHADO À BETANO)
-Soma das médias dos últimos 5 jogos -> Linha de Segurança (+22.5 / +23.5 / +24.5)
+REGRAS DE MERCADO - CHUTES TOTAIS DO JOGO (FLEXÍVEL: OVER E UNDER)
+Soma das médias dos últimos 5 jogos -> Sugere linha Over ou Under proporcional.
 """
 
 def verificar_chutes_totais(s):
@@ -20,21 +20,30 @@ def verificar_chutes_totais(s):
 
     mercados_aprovados = []
 
-    # 2. Define a Linha de Aposta com base na Média Esperada
-    # Criamos margem de segurança para buscar odds interessantes (~1.40 - 1.60 na Betano)
+    # 2. Define dinamicamente a linha de Over ou Under com base na média somada
     if media_esperada >= 27.0:
         linha_sugerida = "+24.5 Chutes Totais no Jogo"
-    elif media_esperada >= 25.0:
-        linha_sugerida = "+22.5 Chutes Totais no Jogo"
-    elif media_esperada >= 23.0:
-        linha_sugerida = "+20.5 Chutes Totais no Jogo"
+        tipo_mercado = "CHUTES_JOGO_OVER"
+    elif media_esperada >= 24.0:
+        linha_sugerida = "+21.5 Chutes Totais no Jogo"
+        tipo_mercado = "CHUTES_JOGO_OVER"
+    elif media_esperada >= 21.0:
+        # Média intermediária/equilibrada
+        linha_sugerida = "+19.5 Chutes Totais no Jogo"
+        tipo_mercado = "CHUTES_JOGO_OVER"
+    elif media_esperada <= 16.0:
+        # Times que finalizam muito pouco: excelente para explorar o Under na Betano!
+        linha_sugerida = "-21.5 Chutes Totais no Jogo"
+        tipo_mercado = "CHUTES_JOGO_UNDER"
     else:
-        # Se a média somada for menor que 23 chutes, não vale o risco
-        return []
+        # Faixa neutra onde a média fica entre 16 e 21
+        linha_sugerida = "-23.5 Chutes Totais no Jogo"
+        tipo_mercado = "CHUTES_JOGO_UNDER"
 
     mercados_aprovados.append({
         "mercado": f"{linha_sugerida} (Média: {media_esperada:.1f})",
-        "tipo": "CHUTES_JOGO_TOTAL"
+        "tipo": tipo_mercado
     })
 
     return mercados_aprovados
+    
