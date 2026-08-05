@@ -1,123 +1,158 @@
-# testes/teste_raspagem_estatisticas.py
 import time
-import re
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
-def pegar_estatisticas_coletivas(driver, stats):
-    url_h2h_base = stats.get("url_h2h_base")
-    if not url_h2h_base:
-        # 🟢 REMOVIDO: driver.close() daqui, pois causava o fechamento prematuro
-        return stats
+def verificar_chutes_totais(s):
+    """
+    Regra de Chutes Totais do Jogo (Formato Decimal Livre)
+    Retorna a média esperada calculada dos últimos 5 jogos para livre escolha na Betano.
+    """
+    if not isinstance(s, dict):
+        return []
 
-    # Inicialização dos arrays para Escanteios (H2H)
-    if "cantos_mandante_h2h" not in stats: stats["cantos_mandante_h2h"] = []
-    if "cantos_visitante_h2h" not in stats: stats["cantos_visitante_h2h"] = []
+    media_m = float(s.get("mandante_media_chutes_casa", 0) or 0)
+    media_v = float(s.get("visitante_media_chutes_fora", 0) or 0)
+
+    if media_m == 0 or media_v == 0:
+        return []
+
+    media_esperada = media_m + media_v
+
+    mercados_aprovados = []
+    mercados_aprovados.append({
+        "mercado": f"Chutes Totais no Jogo: {media_esperada:.1f}",
+        "tipo": "CHUTES_JOGO_TOTAL"
+    })
+
+    return mercados_aprovados
+
+def extrair_estatisticas_partida(driver, url_jogo):
+    """
+    Navega para a aba de estatísticas do jogo individual e extrai o total de finalizações.
+    """
+    chutes_casa = 0
+    chutes_fora = 0
     
-    # Inicialização dos arrays para Cartões Amarelos (H2H)
-    if "cartoes_mandante_h2h" not in stats: stats["cartoes_mandante_h2h"] = []
-    if "cartoes_visitante_h2h" not in stats: stats["cartoes_visitante_h2h"] = []
+    try:
+        if "?mid=" in url_jogo:
+            url_stats = f"{url_jogo.split('?mid=')[0].rstrip('/')}/resumo/estatisticas/total/"
+        else:
+            url_stats = f"{url_jogo.split('/#')[0].rstrip('/')}/resumo/estatisticas/total/"
+            
+        driver.get(url_stats)
+        time.sleep(2.0)
+        
+        todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
+        achou_cartoes_ancora = False
+        
+        for idx, span in enumerate(todos_spans):
+            texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
+            
+            if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
+                achou_cartoes_ancora = True
+                
+            if not achou_cartoes_ancora and any(termo in texto_elemento for termo in ["FINALIZAÇÕES", "REMATES", "SHOTS"]):
+                if idx > 0 and (idx + 1) < len(todos_spans):
+                    import re
+                    val_casa_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                    val_fora_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                    chutes_casa = int(re.search(r'\d+', val_casa_str).group()) if re.search(r'\d+', val_casa_str) else 0
+                    chutes_fora = int(re.search(r'\d+', val_fora_str).group()) if re.search(r'\d+', val_fora_str) else 0
+                    break
+    except Exception as e:
+        print(f"  ⚠️ Erro ao raspar estatísticas do jogo: {e}")
+        
+    return chutes_casa, chutes_fora
 
-    wait = WebDriverWait(driver, 10)
-
-    secoes_alvo_stats = [
-        {"tipo": "MANDANTE", "idx_secao": 1},
-        {"tipo": "VISITANTE", "idx_secao": 2}
-    ]
+def rodar_teste_chutes_totais_com_urls():
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--window-size=2560,1440")
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    
+    driver = webdriver.Chrome(options=chrome_options)
+    
+    # URL Base informada
+    url_base_h2h = "https://www.flashscore.com.br/jogo/futebol/argentina-f9OppQjp/inglaterra-j9N9ZNFA/h2h/total/"
+    
+    # Constrói dinamicamente as URLs de casa e fora com base na URL base fornecida
+    url_casa = url_base_h2h.replace("/h2h/total/", "/h2h/casa/")
+    url_fora = url_base_h2h.replace("/h2h/total/", "/h2h/fora/")
+    
+    print("\n🚀 INICIANDO TESTE ISOLADO: URLs SEPARADAS E MÉDIA DE CHUTES TOTAIS\n" + "="*80)
+    print(f"1. URL CASA: {url_casa}")
+    print(f"2. URL FORA: {url_fora}")
+    print("-" * 80)
+    
+    chutes_mandante_h2h = []
+    chutes_visitante_h2h = []
 
     try:
-        for alvo in secoes_alvo_stats:
-            lista_urls_jogos = []
-            try:
-                driver.get(url_h2h_base)
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-                selector_linhas = f".h2h__section:nth-child({alvo['idx_secao']}) .h2h__row"
-                linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
-                
-                for jogo_idx in range(min(3, len(linhas_confrontos))):
-                    try:
-                        lista_urls_jogos.append({
-                            "idx": jogo_idx
-                        })
-                    except: continue
-            except Exception as e_coleta:
-                print(f"      ⚠️ Erro ao listar linhas para estatísticas: {e_coleta}")
-                continue
+        # Coleta jogos em CASA do mandante
+        print("\n🏠 Acessando aba de CASA do Mandante...")
+        driver.get(url_casa)
+        time.sleep(4.0)
+        
+        blocos_mandante = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
+        if blocos_mandante:
+            linhas_mandante = blocos_mandante[0].find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")[:5]
+            for linha in linhas_mandante:
+                href = linha.get_attribute("href")
+                if href:
+                    c_casa, _ = extrair_estatisticas_partida(driver, href)
+                    if c_casa > 0:
+                        chutes_mandante_h2h.append(c_casa)
+                        print(f"   • Jogo: {href} ➔ Chutes Mandante: {c_casa}")
 
-            for jogo_dados in lista_urls_jogos:
-                try:
-                    driver.get(url_h2h_base)
-                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row")))
-                    
-                    selector_linhas = f".h2h__section:nth-child({alvo['idx_secao']}) .h2h__row"
-                    linhas_atualizadas = driver.find_elements(By.CSS_SELECTOR, selector_linhas)
-                    if len(linhas_atualizadas) <= jogo_dados["idx"]: continue
-                    
-                    elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
+        # Coleta jogos FORA do visitante
+        print("\n✈️ Acessando aba de FORA do Visitante...")
+        driver.get(url_fora)
+        time.sleep(4.0)
+        
+        blocos_visitante = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
+        # Se a página estruturar com blocos separados para fora ou se pegar a segunda seção
+        if len(blocos_visitante) >= 1:
+            # Em /h2h/fora/, a seção alvo costuma ser a primeira ou segunda dependendo do layout do Flashscore
+            alvo_bloco = blocos_visitante[1] if len(blocos_visitante) > 1 else blocos_visitante[0]
+            linhas_visitante = alvo_bloco.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")[:5]
+            for linha in linhas_visitante:
+                href = linha.get_attribute("href")
+                if href:
+                    _, c_fora = extrair_estatisticas_partida(driver, href)
+                    if c_fora > 0:
+                        chutes_visitante_h2h.append(c_fora)
+                        print(f"   • Jogo: {href} ➔ Chutes Visitante: {c_fora}")
 
-                    url_anterior = driver.current_url
-                    driver.execute_script("arguments[0].click();", elemento_alvo)
-                    
-                    try: WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
-                    except: pass
-                        
-                    time.sleep(2.5)
-                    url_jogo_completa = driver.current_url.split("?")[0].strip("/")
+        # Cálculo das Médias
+        media_m = round(sum(chutes_mandante_h2h) / len(chutes_mandante_h2h), 2) if chutes_mandante_h2h else 0.0
+        media_v = round(sum(chutes_visitante_h2h) / len(chutes_visitante_h2h), 2) if chutes_visitante_h2h else 0.0
 
-                    url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas/total/"
-                    driver.get(url_stats_geral)
-                    time.sleep(2.0)
+        stats_teste = {
+            "mandante_media_chutes_casa": media_m,
+            "visitante_media_chutes_fora": media_v
+        }
 
-                    cantos_jogo_total = 0
-                    cartoes_jogo_total = 0
+        # Aplicação da regra de chutes totais
+        resultado_mercados = verificar_chutes_totais(stats_teste)
+        
+        print("\n" + "="*80)
+        print("3. RESULTADO DA MÉDIA DE CHUTES TOTAIS:")
+        if resultado_mercados:
+            for item in resultado_mercados:
+                print(f"   ✅ {item['mercado']}")
+        else:
+            print("   ⚠️ Média parcial zerada ou dados insuficientes recolhidos no momento.")
+            print(f"   • Média Calculada Mandante (Casa): {media_m}")
+            print(f"   • Média Calculada Visitante (Fora): {media_v}")
 
-                    try:
-                        todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
-                        
-                        for idx, span in enumerate(todos_spans):
-                            texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
-                            
-                            if texto_elemento in ["ESCANTEIOS", "ESCANTEIO", "CORNER KICKS", "CORNERS"]:
-                                if idx > 0 and (idx + 1) < len(todos_spans):
-                                    val_casa = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
-                                    val_fora = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                                    
-                                    cantos_casa = int(re.search(r'\d+', val_casa).group()) if re.search(r'\d+', val_casa) else 0
-                                    cantos_fora = int(re.search(r'\d+', val_fora).group()) if re.search(r'\d+', val_fora) else 0
-                                    cantos_jogo_total = cantos_casa + cantos_fora
-                            
-                            elif texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
-                                if idx > 0 and (idx + 1) < len(todos_spans):
-                                    val_casa_card = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
-                                    val_fora_card = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                                    
-                                    cartoes_casa = int(re.search(r'\d+', val_casa_card).group()) if re.search(r'\d+', val_casa_card) else 0
-                                    cartoes_fora = int(re.search(r'\d+', val_fora_card).group()) if re.search(r'\d+', val_fora_card) else 0
-                                    cartoes_jogo_total = cartoes_casa + cartoes_fora
-
-                        print(f"      📊 [DADOS COLETADOS] Cantos: {cantos_jogo_total} | Cartões Amarelos: {cartoes_jogo_total}")
-                    
-                    except Exception as e_passo_stats:
-                        print(f"      ⚠️ Erro ao processar dados de estatísticas via JS: {e_passo_stats}")
-
-                    if alvo["tipo"] == "MANDANTE":
-                        stats["cantos_mandante_h2h"].append(cantos_jogo_total)
-                        stats["cartoes_mandante_h2h"].append(cartoes_jogo_total)
-                    else:
-                        stats["cantos_visitante_h2h"].append(cantos_jogo_total)
-                        stats["cartoes_visitante_h2h"].append(cartoes_jogo_total)
-
-                except: continue
     except Exception as e:
-        print(f"      ⚠️ Erro Crítico na Raspagem Coletiva Geral: {e}")
+        print(f"\n❌ Erro crítico no fluxo de URLs: {e}")
+    finally:
+        driver.quit()
+        print("\n🏁 FIM DO TESTE")
 
-    while len(stats["cantos_mandante_h2h"]) < 3: stats["cantos_mandante_h2h"].append(0)
-    while len(stats["cantos_visitante_h2h"]) < 3: stats["cantos_visitante_h2h"].append(0)
-    while len(stats["cartoes_mandante_h2h"]) < 3: stats["cartoes_mandante_h2h"].append(0)
-    while len(stats["cartoes_visitante_h2h"]) < 3: stats["cartoes_visitante_h2h"].append(0)
-            
-    # 🟢 REMOVIDO: driver.close() e switch_to do final para manter a sessão viva para a Fase 3
-
-    return stats
-    
+if __name__ == "__main__":
+    rodar_teste_chutes_totais_com_urls()
