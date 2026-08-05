@@ -28,7 +28,7 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
             print("   ⚠️ BTTS BARRADO: Nenhum outro mercado foi aprovado para este jogo.")
             return []
 
-        # Métricas detalhadas da raspagem (incluindo dados do mandante para equilibrar o Sim)
+        # Métricas detalhadas da raspagem
         media_gols_visitante = float(s.get("media_gols_fora", 0) or 0)
         v_jogos_marcou_fora = int(s.get("visitante_jogos_com_gol_fora", 0) or 0)
         
@@ -37,16 +37,17 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
         
         mandante_sofreu_gol_ultimo = s.get("mandante_sofreu_gol_ultimo_casa", False)
 
-        # 🟢 REGRA 1: AMBAS MARCAM SIM (Agora avalia também o mandante para soltar alguns "Sim" equilibrados)
+        # 🟢 REGRA 1: AMBAS MARCAM SIM (Atualizada com as 3 novas regras em sequência)
         condicao_btts_sim = (
-            (media_gols_visitante >= 1.5 or v_jogos_marcou_fora >= 4) and 
-            (media_gols_mandante >= 1.2 or m_jogos_marcou_casa >= 3)
-        ) or (v_jogos_marcou_fora >= 4 and m_jogos_marcou_casa >= 4)
+            tem_over_aprovado and 
+            media_gols_visitante >= 1.5 and 
+            media_gols_mandante >= 1.0
+        )
 
         if condicao_btts_sim:
             mercados_aprovados.append({"mercado": "Ambas Marcam: Sim", "tipo": "BTTS_SIM"})
         else:
-            # 🔴 REGRA 2: AMBAS MARCAM NÃO (Com travas dosadas para aparecer menos)
+            # 🔴 REGRA 2: AMBAS MARCAM NÃO (Mantida exatamente como estava antes)
             if tem_over_aprovado:
                 print("   ⚠️ BTTS NÃO BARRADO: Jogo tem tendência de Over aprovada.")
             elif v_jogos_marcou_fora >= 4 or m_jogos_marcou_casa >= 4:
@@ -62,4 +63,4 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
     except Exception as e:
         print(f"      ⚠️ Erro ao processar mercado Ambas Marcam: {e}")
         return mercados_aprovados
-                
+            
