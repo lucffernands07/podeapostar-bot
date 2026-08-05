@@ -91,40 +91,48 @@ def rodar_teste_chutes_totais_com_urls():
     chutes_visitante_h2h = []
 
     try:
-        # Coleta jogos em CASA do mandante
+        # --- ETAPA 1: Coleta segura das URLs de CASA do Mandante ---
         print("\n🏠 Acessando aba de CASA do Mandante...")
         driver.get(url_casa)
         time.sleep(4.0)
         
+        urls_mandante_links = []
         blocos_mandante = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
         if blocos_mandante:
             linhas_mandante = blocos_mandante[0].find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")[:5]
             for linha in linhas_mandante:
                 href = linha.get_attribute("href")
                 if href:
-                    c_casa, _ = extrair_estatisticas_partida(driver, href)
-                    if c_casa > 0:
-                        chutes_mandante_h2h.append(c_casa)
-                        print(f"   • Jogo: {href} ➔ Chutes Mandante: {c_casa}")
+                    urls_mandante_links.append(href)
 
-        # Coleta jogos FORA do visitante
+        # Itera puramente sobre as strings de links salvos
+        for href in urls_mandante_links:
+            c_casa, _ = extrair_estatisticas_partida(driver, href)
+            if c_casa > 0:
+                chutes_mandante_h2h.append(c_casa)
+                print(f"   • Jogo: {href} ➔ Chutes Mandante: {c_casa}")
+
+        # --- ETAPA 2: Coleta segura das URLs de FORA do Visitante ---
         print("\n✈️ Acessando aba de FORA do Visitante...")
         driver.get(url_fora)
         time.sleep(4.0)
         
+        urls_visitante_links = []
         blocos_visitante = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
-        # Se a página estruturar com blocos separados para fora ou se pegar a segunda seção
         if len(blocos_visitante) >= 1:
-            # Em /h2h/fora/, a seção alvo costuma ser a primeira ou segunda dependendo do layout do Flashscore
             alvo_bloco = blocos_visitante[1] if len(blocos_visitante) > 1 else blocos_visitante[0]
             linhas_visitante = alvo_bloco.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")[:5]
             for linha in linhas_visitante:
                 href = linha.get_attribute("href")
                 if href:
-                    _, c_fora = extrair_estatisticas_partida(driver, href)
-                    if c_fora > 0:
-                        chutes_visitante_h2h.append(c_fora)
-                        print(f"   • Jogo: {href} ➔ Chutes Visitante: {c_fora}")
+                    urls_visitante_links.append(href)
+
+        # Itera puramente sobre as strings de links salvos
+        for href in urls_visitante_links:
+            _, c_fora = extrair_estatisticas_partida(driver, href)
+            if c_fora > 0:
+                chutes_visitante_h2h.append(c_fora)
+                print(f"   • Jogo: {href} ➔ Chutes Visitante: {c_fora}")
 
         # Cálculo das Médias
         media_m = round(sum(chutes_mandante_h2h) / len(chutes_mandante_h2h), 2) if chutes_mandante_h2h else 0.0
@@ -156,3 +164,4 @@ def rodar_teste_chutes_totais_com_urls():
 
 if __name__ == "__main__":
     rodar_teste_chutes_totais_com_urls()
+            
