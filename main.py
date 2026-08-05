@@ -151,7 +151,7 @@ def main():
                         continue
 
                     # -------------------------------------------------------------
-                    # CONTINUAÇÃO DA LEITURA DOS TIMES (Alinhamento corrigido)
+                    # CONTINUAÇÃO DA LEITURA DOS TIMES E ID (Alinhamento corrigido)
                     # -------------------------------------------------------------
                     times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                     if len(times) < 2:
@@ -159,30 +159,30 @@ def main():
                         continue
                     t1, t2 = times[0].text.strip(), times[1].text.strip()
 
-                        id_jogo = None
+                    id_jogo = None
+                    try:
+                        link_el = el.find_element(By.CSS_SELECTOR, "a.icon--preview")
+                        url_jogo = link_el.get_attribute('href')
+                        if "mid=" in url_jogo:
+                            id_jogo = url_jogo.split("mid=")[-1].split("&")[0]
+                    except Exception:
+                        pass
+
+                    if not id_jogo:
                         try:
-                            link_el = el.find_element(By.CSS_SELECTOR, "a.icon--preview")
-                            url_jogo = link_el.get_attribute('href')
-                            if "mid=" in url_jogo:
-                                id_jogo = url_jogo.split("mid=")[-1].split("&")[0]
+                            link_el = el.find_element(By.CSS_SELECTOR, "a.eventRowLink")
+                            id_jogo = link_el.get_attribute('id').split('_')[-1]
                         except Exception:
-                            pass
-    
-                        if not id_jogo:
                             try:
-                                link_el = el.find_element(By.CSS_SELECTOR, "a.eventRowLink")
-                                id_jogo = link_el.get_attribute('id').split('_')[-1]
+                                id_jogo = el.get_attribute('id').split('_')[-1]
                             except Exception:
-                                try:
-                                    id_jogo = el.get_attribute('id').split('_')[-1]
-                                except Exception:
-                                    continue
+                                continue
 
-                        if not id_jogo or len(id_jogo) < 3:
-                            print(f"      ⚠️ Falha: ID do jogo inválido ou não encontrado.")
-                            continue
+                    if not id_jogo or len(id_jogo) < 3:
+                        print(f"      ⚠️ Falha: ID do jogo inválido ou não encontrado.")
+                        continue
 
-                        print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
+                    print(f"      ✅ JOGO QUALIFICADO: {t1} x {t2} (ID: {id_jogo}) - Iniciando pipeline de análise...")
 
                         # ----------------------------------------------------------
                         # FASE 1: ANÁLISE DE MERCADOS DE RECORRÊNCIA (CASA / FORA)
