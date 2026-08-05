@@ -39,7 +39,7 @@ COMPETICOES = {
     "Dinamarca - Superliga": "https://www.flashscore.com.br/futebol/dinamarca/superliga/jogos/",
     "Cazaquistão - Primeira Liga": "https://www.flashscore.com.br/futebol/cazaquistao/primeira-liga/jogos",
 
-    # --- BLOCO 5: LIGAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
+    # --- BLOCO 5: LIGAS E COPAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
      "Irlanda - Premier": "https://www.flashscore.com.br/futebol/irlanda/divisao-premier/jogos/",
      "Colombia - Copa": "https://www.flashscore.com.br/futebol/colombia/copa-da-colombia/jogos/",
      "Colombia - Primeira A": "https://www.flashscore.com.br/futebol/colombia/primera-a/jogos/",
@@ -50,6 +50,7 @@ COMPETICOES = {
      "França - Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
      "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",
      "Copa dos Campeões - CONCACAF": "https://www.flashscore.com.br/futebol/america-do-norte-e-central/copa-dos-campeoes-da-concacaf/jogos",
+     "América - Copa das Ligas": "https://www.flashscore.com.br/futebol/america-do-norte-e-central/copa-das-ligas/jogos",
      "México - Liga MX": "https://www.flashscore.com.br/futebol/mexico/liga-mx/jogos/",
      "Andorra - Primeira Divisão": "https://www.flashscore.com.br/futebol/andorra/primeira-divisao/jogos/",
      "Argélia - Liga 1": "https://www.flashscore.com.br/futebol/argelia/1-divisao/jogos/",
