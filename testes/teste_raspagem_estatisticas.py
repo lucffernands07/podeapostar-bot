@@ -30,7 +30,7 @@ def verificar_chutes_totais(s):
 
 def extrair_estatisticas_partida(driver, url_jogo):
     """
-    Navega para a aba de estatísticas do jogo individual e extrai o total de finalizações.
+    Navega para a aba de estatísticas do jogo individual e extrai o total de finalizações de forma limpa.
     """
     chutes_casa = 0
     chutes_fora = 0
@@ -61,7 +61,7 @@ def extrair_estatisticas_partida(driver, url_jogo):
                     chutes_fora = int(match_f.group()) if match_f else 0
                     break
     except Exception as e:
-        print(f"  ⚠️ Erro ao raspar estatísticas do jogo: {e}")
+        print(f"  ⚠️ Erro ao raspar estatísticas do jogo {url_jogo}: {e}")
         
     return chutes_casa, chutes_fora
 
@@ -76,11 +76,10 @@ def rodar_teste_chutes_totais_com_urls():
     driver = webdriver.Chrome(options=chrome_options)
     
     url_base_h2h = "https://www.flashscore.com.br/jogo/futebol/fortaleza-42FbPIs2/palmeiras-hMn9FTbH/h2h/total/"
-    
     url_casa = url_base_h2h.replace("/h2h/total/", "/h2h/casa/")
     url_fora = url_base_h2h.replace("/h2h/total/", "/h2h/fora/")
     
-    print("\n🚀 INICIANDO TESTE ISOLADO: FORTALEZA X PALMEIRAS (5 JOGOS CADA)\n" + "="*80)
+    print("\n🚀 INICIANDO TESTE ISOLADO: FORTALEZA X PALMEIRAS (MAPEAMENTO SEGURO)\n" + "="*80)
     print(f"1. URL CASA: {url_casa}")
     print(f"2. URL FORA: {url_fora}")
     print("-" * 80)
@@ -89,9 +88,9 @@ def rodar_teste_chutes_totais_com_urls():
     chutes_visitante_h2h = []
 
     try:
-        # ==========================================
-        # PASSO 1: Coletar os links dos 5 jogos do Mandante (CASA)
-        # ==========================================
+        # =========================================================================
+        # PASSO 1: Mapear e extrair os 5 jogos do Mandante em CASA
+        # =========================================================================
         print("\n🏠 Acessando aba de CASA do Mandante (Fortaleza)...")
         driver.get(url_casa)
         time.sleep(4.0)
@@ -99,47 +98,52 @@ def rodar_teste_chutes_totais_com_urls():
         urls_mandante_links = []
         blocos_mandante = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
         if blocos_mandante:
-            # Pega estritamente até 5 linhas da seção de casa
             linhas_mandante = blocos_mandante[0].find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")[:5]
             for linha in linhas_mandante:
                 href = linha.get_attribute("href")
-                if href:
+                if href and href not in urls_mandante_links:
                     urls_mandante_links.append(href)
 
-        print(f"   📌 Encontrados {len(urls_mandante_links)} jogos do Mandante em casa. Raspando estatísticas...")
+        print(f"   📌 Total de links coletados do Mandante: {len(urls_mandante_links)}")
         for idx, href in enumerate(urls_mandante_links, start=1):
             c_casa, _ = extrair_estatisticas_partida(driver, href)
             if c_casa > 0:
                 chutes_mandante_h2h.append(c_casa)
-                print(f"   • [{idx}/5] Jogo: {href} ➔ Chutes Mandante: {c_casa}")
+                print(f"   • [{idx}/5] Jogo: {href} ➔ Chutes Mandante (Casa): {c_casa}")
 
-        # ==========================================
-        # PASSO 2: Coletar os links dos 5 jogos do Visitante (FORA)
-        # ==========================================
+        # =========================================================================
+        # PASSO 2: Mapear e extrair os 5 jogos do Visitante FORA
+        # =========================================================================
         print("\n✈️ Acessando aba de FORA do Visitante (Palmeiras)...")
         driver.get(url_fora)
         time.sleep(4.0)
         
         urls_visitante_links = []
         blocos_visitante = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
-        if len(blocos_visitante) >= 2:
-            # Na aba /h2h/fora/, o segundo bloco costuma focar nos jogos fora do visitante
-            linhas_visitante = blocos_visitante[1].find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")[:5]
+        
+        # Varre os blocos disponíveis para garantir que pegamos os jogos de fora do visitante
+        for bloco in blocos_visitante:
+            linhas_visitante = bloco.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")
             for linha in linhas_visitante:
                 href = linha.get_attribute("href")
-                if href:
+                if href and href not in urls_visitante_links:
                     urls_visitante_links.append(href)
+            if len(urls_visitante_links) >= 5:
+                break
 
-        print(f"   📌 Encontrados {len(urls_visitante_links)} jogos do Visitante fora. Raspando estatísticas...")
+        # Limita estritamente aos 5 primeiros coletados
+        urls_visitante_links = urls_visitante_links[:5]
+
+        print(f"   📌 Total de links coletados do Visitante: {len(urls_visitante_links)}")
         for idx, href in enumerate(urls_visitante_links, start=1):
             _, c_fora = extrair_estatisticas_partida(driver, href)
             if c_fora > 0:
                 chutes_visitante_h2h.append(c_fora)
-                print(f"   • [{idx}/5] Jogo: {href} ➔ Chutes Visitante: {c_fora}")
+                print(f"   • [{idx}/5] Jogo: {href} ➔ Chutes Visitante (Fora): {c_fora}")
 
-        # ==========================================
-        # PASSO 3: Cálculo das Médias Finais
-        # ==========================================
+        # =========================================================================
+        # PASSO 3: Cálculo e Validação Final das Médias
+        # =========================================================================
         media_m = round(sum(chutes_mandante_h2h) / len(chutes_mandante_h2h), 2) if chutes_mandante_h2h else 0.0
         media_v = round(sum(chutes_visitante_h2h) / len(chutes_visitante_h2h), 2) if chutes_visitante_h2h else 0.0
 
@@ -169,4 +173,3 @@ def rodar_teste_chutes_totais_com_urls():
 
 if __name__ == "__main__":
     rodar_teste_chutes_totais_com_urls()
-    
