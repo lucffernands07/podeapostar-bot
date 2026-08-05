@@ -1,5 +1,5 @@
 """
-REGRAS DE MERCADO - CHUTES TOTAIS DO JOGO (FORMATO DECIMAL LIVRE)
+REGRAS DE MERCADO - CHUTES TOTAIS DO Jogo (FORMATO DECIMAL LIVRE)
 Retorna a média esperada calculada dos últimos 5 jogos para livre escolha na Betano.
 """
 
@@ -7,7 +7,7 @@ def verificar_chutes_totais(s):
     if not isinstance(s, dict):
         return []
 
-    # Lê as médias já calculadas pelo scraper dos últimos 5 jogos
+    # Lê as médias já calculadas pelo scraper dos últimos 5 jogos (CASA para o mandante / FORA para o visitante)
     media_m = float(s.get("mandante_media_chutes_casa", 0) or 0)
     media_v = float(s.get("visitante_media_chutes_fora", 0) or 0)
 
