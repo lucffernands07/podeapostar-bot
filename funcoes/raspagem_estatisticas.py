@@ -38,8 +38,8 @@ def formatar_rota_h2h(url_base, sub_rota=""):
 
 def pegar_estatisticas_coletivas(driver, stats):
     """
-    Usa as mesmas rotas segmentadas (/casa/ e /fora/) da Fase 1 para abrir 
-    cada um dos últimos 5 jogos e extrair as Finalizações Totais.
+    Navega nas abas específicas /casa/ e /fora/ utilizando os seletores estruturais 
+    do Flashscore para extrair as Finalizações Totais dos últimos 5 jogos.
     """
     EXECUTAR_SCRAPER = True
 
@@ -57,7 +57,6 @@ def pegar_estatisticas_coletivas(driver, stats):
 
     wait = WebDriverWait(driver, 10)
 
-    # Usa a mesma lógica padrão de formatação de rota da Fase 1
     url_real = url_h2h_base.replace("/h2h", "").rstrip("/")
     
     rotas_alvo = [
@@ -70,14 +69,14 @@ def pegar_estatisticas_coletivas(driver, stats):
             lista_urls_jogos = []
             try:
                 driver.get(alvo["url"])
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")))
+                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")))
+                time.sleep(1.0)
                 
-                secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
-                if secoes:
-                    linhas_confrontos = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")[:5]
-                    
-                    for jogo_idx in range(len(linhas_confrontos)):
-                        lista_urls_jogos.append({"idx": jogo_idx})
+                linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")
+                
+                # Coleta até 5 jogos da aba correspondente
+                for jogo_idx in range(min(5, len(linhas_confrontos))):
+                    lista_urls_jogos.append({"idx": jogo_idx})
             except Exception as e_coleta:
                 print(f"      ⚠️ Erro ao listar linhas H2H para chutes ({alvo['tipo']}): {e_coleta}")
                 continue
@@ -85,13 +84,9 @@ def pegar_estatisticas_coletivas(driver, stats):
             for jogo_dados in lista_urls_jogos:
                 try:
                     driver.get(alvo["url"])
-                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")))
+                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")))
                     
-                    secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
-                    if not secoes:
-                        continue
-                        
-                    linhas_atualizadas = secoes[0].find_elements(By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")
+                    linhas_atualizadas = driver.find_elements(By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")
                     if len(linhas_atualizadas) <= jogo_dados["idx"]:
                         continue
                     
@@ -108,7 +103,7 @@ def pegar_estatisticas_coletivas(driver, stats):
                     if not liga_eh_permitida(nome_liga_elemento):
                         continue
 
-                    # Clica na linha para entrar na partida específica
+                    # Clica na linha para entrar na partida específica usando o HTML validado
                     url_anterior = driver.current_url
                     driver.execute_script("arguments[0].click();", elemento_alvo)
                     
@@ -147,6 +142,7 @@ def pegar_estatisticas_coletivas(driver, stats):
                                         break 
 
                             if achou_chutes:
+                                # Na aba /casa/ o mandante foca no time da casa; na aba /fora/ o visitante foca no time de fora
                                 valor_alvo = chutes_casa if alvo["tipo"] == "MANDANTE" else chutes_fora
                                 stats[alvo["chave_array"]].append(valor_alvo)
                     except Exception:
@@ -173,4 +169,4 @@ def pegar_estatisticas_coletivas(driver, stats):
         pass
 
     return stats
-    
+                        
