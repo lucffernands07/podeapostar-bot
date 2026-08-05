@@ -127,7 +127,7 @@ def main():
 
                     # FILTRO RIGOROSO DE CALENDÁRIO: Apenas jogos que contêm a data exata de hoje
                     if hoje_no_site not in tempo_raw:
-                        print(f"      ⏩ Pulado: Jogo fora da data de hoje ({tempo_raw})")
+                        #print(f"      ⏩ Pulado: Jogo fora da data de hoje ({tempo_raw})")
                         continue
 
                     partes_tempo = tempo_raw.split()
