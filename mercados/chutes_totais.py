@@ -1,6 +1,6 @@
 """
-REGRAS DE MERCADO - CHUTES TOTAIS DO JOGO (FLEXÍVEL: OVER E UNDER)
-Soma das médias dos últimos 5 jogos -> Sugere linha Over ou Under proporcional.
+REGRAS DE MERCADO - CHUTES TOTAIS DO JOGO (FORMATO DECIMAL LIVRE)
+Retorna a média esperada calculada dos últimos 5 jogos para livre escolha na Betano.
 """
 
 def verificar_chutes_totais(s):
@@ -20,29 +20,10 @@ def verificar_chutes_totais(s):
 
     mercados_aprovados = []
 
-    # 2. Define dinamicamente a linha de Over ou Under com base na média somada
-    if media_esperada >= 27.0:
-        linha_sugerida = "+24.5 Chutes Totais no Jogo"
-        tipo_mercado = "CHUTES_JOGO_OVER"
-    elif media_esperada >= 24.0:
-        linha_sugerida = "+21.5 Chutes Totais no Jogo"
-        tipo_mercado = "CHUTES_JOGO_OVER"
-    elif media_esperada >= 21.0:
-        # Média intermediária/equilibrada
-        linha_sugerida = "+19.5 Chutes Totais no Jogo"
-        tipo_mercado = "CHUTES_JOGO_OVER"
-    elif media_esperada <= 16.0:
-        # Times que finalizam muito pouco: excelente para explorar o Under na Betano!
-        linha_sugerida = "-21.5 Chutes Totais no Jogo"
-        tipo_mercado = "CHUTES_JOGO_UNDER"
-    else:
-        # Faixa neutra onde a média fica entre 16 e 21
-        linha_sugerida = "-23.5 Chutes Totais no Jogo"
-        tipo_mercado = "CHUTES_JOGO_UNDER"
-
+    # 2. Retorna a média exata e limpa, mantendo a chave padrão CHUTES_JOGO_TOTAL
     mercados_aprovados.append({
-        "mercado": f"{linha_sugerida} (Média: {media_esperada:.1f})",
-        "tipo": tipo_mercado
+        "mercado": f"Chutes Totais no Jogo: {media_esperada:.1f}",
+        "tipo": "CHUTES_JOGO_TOTAL"
     })
 
     return mercados_aprovados
