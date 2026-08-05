@@ -125,8 +125,19 @@ def main():
                         print(f"      ⏩ Pulado: Status ao vivo/encerrado detectado ({tempo_raw})")
                         continue
 
-                    # ⏰📅 FILTRO RIGOROSO DE CALENDÁRIO: Apenas jogos que contêm a data exata de hoje
-                    if not tempo_raw or hoje_no_site not in tempo_raw:
+                    # ⏰📅 FILTRO RIGOROSO DE CALENDÁRIO (Hoje + Madrugada UTC do dia seguinte)
+                    if not tempo_raw:
+                        continue
+
+                    amanha_ref = hoje_ref + timedelta(days=1)
+                    hoje_no_site = hoje_ref.strftime("%d.%m.")
+                    amanha_no_site = amanha_ref.strftime("%d.%m.")
+
+                    # Verifica se o jogo é de hoje OU se é da madrugada (00:00-02:59) que pertence à noite de hoje no BR
+                    eh_hoje = hoje_no_site in tempo_raw
+                    eh_madrugada_seguinte = amanha_no_site in tempo_raw and any(f"{h:02d}:" in tempo_raw for h in range(3))
+
+                    if not (eh_hoje or eh_madrugada_seguinte):
                         continue
 
                     partes_tempo = tempo_raw.split()
@@ -138,7 +149,7 @@ def main():
                         continue
 
                     try:
-                        # Conversão segura de horário UTC para o Brasil (UTC - 3)
+                        # Conversão de horário UTC para o Brasil (UTC - 3)
                         h_obj = datetime.strptime(horario_str, "%H:%M")
                         hora_dt = datetime.now().replace(hour=h_obj.hour, minute=h_obj.minute, second=0, microsecond=0)
                         hora_br_dt = hora_dt - timedelta(hours=3)
