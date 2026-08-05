@@ -2,6 +2,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+import re
 
 def verificar_chutes_totais(s):
     """
@@ -29,7 +30,8 @@ def verificar_chutes_totais(s):
 
 def extrair_estatisticas_partida(driver, url_jogo):
     """
-    Navega para a aba de estatísticas do jogo individual e extrai o total de finalizações.
+    Navega para a aba de estatísticas do jogo individual e extrai o total de finalizações
+    de forma limpa, focada estritamente nas estatísticas gerais do topo.
     """
     chutes_casa = 0
     chutes_fora = 0
@@ -41,24 +43,24 @@ def extrair_estatisticas_partida(driver, url_jogo):
             url_stats = f"{url_jogo.split('/#')[0].rstrip('/')}/resumo/estatisticas/total/"
             
         driver.get(url_stats)
-        time.sleep(2.0)
+        time.sleep(2.5)
         
         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
-        achou_cartoes_ancora = False
         
         for idx, span in enumerate(todos_spans):
             texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
             
-            if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
-                achou_cartoes_ancora = True
-                
-            if not achou_cartoes_ancora and any(termo in texto_elemento for termo in ["FINALIZAÇÕES", "REMATES", "SHOTS"]):
+            # Busca direta e estrita por Finalizações/Remates no topo da página
+            if any(termo in texto_elemento for termo in ["FINALIZAÇÕES", "REMATES", "SHOTS"]):
                 if idx > 0 and (idx + 1) < len(todos_spans):
-                    import re
                     val_casa_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
                     val_fora_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                    chutes_casa = int(re.search(r'\d+', val_casa_str).group()) if re.search(r'\d+', val_casa_str) else 0
-                    chutes_fora = int(re.search(r'\d+', val_fora_str).group()) if re.search(r'\d+', val_fora_str) else 0
+                    
+                    match_c = re.search(r'\d+', val_casa_str)
+                    match_f = re.search(r'\d+', val_fora_str)
+                    
+                    chutes_casa = int(match_c.group()) if match_c else 0
+                    chutes_fora = int(match_f.group()) if match_f else 0
                     break
     except Exception as e:
         print(f"  ⚠️ Erro ao raspar estatísticas do jogo: {e}")
@@ -75,14 +77,14 @@ def rodar_teste_chutes_totais_com_urls():
     
     driver = webdriver.Chrome(options=chrome_options)
     
-    # URL Base informada
-    url_base_h2h = "https://www.flashscore.com.br/jogo/futebol/argentina-f9OppQjp/inglaterra-j9N9ZNFA/h2h/total/"
+    # URL Base específica do confronto Fortaleza x Palmeiras informada
+    url_base_h2h = "https://www.flashscore.com.br/jogo/futebol/fortaleza-42FbPIs2/palmeiras-hMn9FTbH/h2h/total/"
     
-    # Constrói dinamicamente as URLs de casa e fora com base na URL base fornecida
+    # Constrói dinamicamente as URLs solicitadas
     url_casa = url_base_h2h.replace("/h2h/total/", "/h2h/casa/")
     url_fora = url_base_h2h.replace("/h2h/total/", "/h2h/fora/")
     
-    print("\n🚀 INICIANDO TESTE ISOLADO: URLs SEPARADAS E MÉDIA DE CHUTES TOTAIS\n" + "="*80)
+    print("\n🚀 INICIANDO TESTE ISOLADO: FORTALEZA X PALMEIRAS\n" + "="*80)
     print(f"1. URL CASA: {url_casa}")
     print(f"2. URL FORA: {url_fora}")
     print("-" * 80)
@@ -91,7 +93,7 @@ def rodar_teste_chutes_totais_com_urls():
     chutes_visitante_h2h = []
 
     try:
-        # --- ETAPA 1: Coleta segura das URLs de CASA do Mandante ---
+        # --- ETAPA 1: Coleta segura das URLs de CASA do Mandante (Fortaleza) ---
         print("\n🏠 Acessando aba de CASA do Mandante...")
         driver.get(url_casa)
         time.sleep(4.0)
@@ -105,14 +107,13 @@ def rodar_teste_chutes_totais_com_urls():
                 if href:
                     urls_mandante_links.append(href)
 
-        # Itera puramente sobre as strings de links salvos
         for href in urls_mandante_links:
             c_casa, _ = extrair_estatisticas_partida(driver, href)
             if c_casa > 0:
                 chutes_mandante_h2h.append(c_casa)
                 print(f"   • Jogo: {href} ➔ Chutes Mandante: {c_casa}")
 
-        # --- ETAPA 2: Coleta segura das URLs de FORA do Visitante ---
+        # --- ETAPA 2: Coleta segura das URLs de FORA do Visitante (Palmeiras) ---
         print("\n✈️ Acessando aba de FORA do Visitante...")
         driver.get(url_fora)
         time.sleep(4.0)
@@ -127,7 +128,6 @@ def rodar_teste_chutes_totais_com_urls():
                 if href:
                     urls_visitante_links.append(href)
 
-        # Itera puramente sobre as strings de links salvos
         for href in urls_visitante_links:
             _, c_fora = extrair_estatisticas_partida(driver, href)
             if c_fora > 0:
@@ -164,4 +164,4 @@ def rodar_teste_chutes_totais_com_urls():
 
 if __name__ == "__main__":
     rodar_teste_chutes_totais_com_urls()
-            
+    
