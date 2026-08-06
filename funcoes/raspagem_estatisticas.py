@@ -19,9 +19,6 @@ def liga_eh_permitida(texto_liga):
     return any(liga_elite in texto_clean for liga_elite in LIGAS_ELITE_JOGADORES)
 
 def formatar_rota_h2h(url_base, sub_rota=""):
-    """
-    Formata a rota base já carregada pelo navegador para a sub-rota /casa/ ou /fora/.
-    """
     path = url_base.split('?')[0].split('#')[0].rstrip('/')
     for sufixo in ['/overall', '/casa', '/fora']:
         if path.endswith(sufixo):
@@ -54,13 +51,10 @@ def pegar_estatisticas_coletivas(driver, stats):
     wait = WebDriverWait(driver, 10)
 
     try:
-        # 1. Garante que a página base H2H já foi aberta/carregada pelo menos uma vez 
-        # para o navegador resolver os slugs completos dos times a partir do ID
         if driver.current_url.rstrip("/") != url_h2h_base.rstrip("/"):
             driver.get(url_h2h_base)
             time.sleep(1.5)
 
-        # 2. Pega a URL já expandida e carregada pelo navegador (com os nomes dos times)
         url_atual_carregada = driver.current_url.split('?')[0]
         url_base_limpa = url_atual_carregada.replace("/h2h", "").rstrip("/")
 
@@ -70,7 +64,7 @@ def pegar_estatisticas_coletivas(driver, stats):
         ]
 
         for alvo in rotas_alvo:
-            print(f"      🔍 [LOG] Acessando URL {alvo['tipo']} (já carregada/expandida): {alvo['url']}")
+            print(f"      🔍 [LOG] Acessando URL {alvo['tipo']}: {alvo['url']}")
             lista_urls_jogos = []
             try:
                 driver.get(alvo["url"])
@@ -93,6 +87,7 @@ def pegar_estatisticas_coletivas(driver, stats):
                     
                     linhas_atualizadas = driver.find_elements(By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")
                     if len(linhas_atualizadas) <= jogo_dados["idx"]:
+                        print(f"      ⚠️ [LOG] Linha index {jogo_dados['idx']} não encontrada na atualização.")
                         continue
                     
                     elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
@@ -104,7 +99,10 @@ def pegar_estatisticas_coletivas(driver, stats):
                     except Exception:
                         nome_liga_elemento = elemento_alvo.text.strip()
 
+                    print(f"      ⚽ [LOG] Analisando jogo [{alvo['tipo']}] IDx {jogo_dados['idx']} | Competição: '{nome_liga_elemento}'")
+
                     if not liga_eh_permitida(nome_liga_elemento):
+                        print(f"      ⏩ [LOG] Liga ignorada: '{nome_liga_elemento}'")
                         continue
 
                     url_anterior = driver.current_url
@@ -127,6 +125,8 @@ def pegar_estatisticas_coletivas(driver, stats):
 
                     try:
                         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
+                        print(f"      🔎 [LOG] Spans de estatísticas encontrados na partida: {len(todos_spans)}")
+                        
                         if len(todos_spans) > 0:
                             achou_cartoes_ancora = False
                             for idx, span in enumerate(todos_spans):
@@ -146,11 +146,15 @@ def pegar_estatisticas_coletivas(driver, stats):
 
                             if achou_chutes:
                                 valor_alvo = chutes_casa if alvo["tipo"] == "MANDANTE" else chutes_fora
+                                print(f"      ✅ [LOG] Chutes capturados ({alvo['tipo']}): {valor_alvo} (Casa: {chutes_casa} | Fora: {chutes_fora})")
                                 stats[alvo["chave_array"]].append(valor_alvo)
-                    except Exception:
-                        pass
+                            else:
+                                print(f"      ⚠️ [LOG] 'TOTAL DE FINALIZAÇÕES' não localizado nos spans.")
+                    except Exception as e_sp:
+                        print(f"      ⚠️ [LOG] Erro ao ler spans estatísticos: {e_sp}")
 
-                except Exception:
+                except Exception as e_item:
+                    print(f"      ⚠️ [LOG] Erro interno ao iterar jogo de chutes: {e_item}")
                     continue
 
     except Exception as e:
@@ -172,4 +176,4 @@ def pegar_estatisticas_coletivas(driver, stats):
         pass
 
     return stats
-                                        
+                    
