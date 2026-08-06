@@ -5,17 +5,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 LIGAS_ELITE_JOGADORES = [
-    "brasileirão série a", "copa do brasil", "libertadores", "sul-americana",
-    "brasileirão série b", "liga profesional", "argentina", "copa do mundo",
-    "champions league", "premier league", "laliga", "bundesliga", "serie a", 
-    "ligue 1", "europa league", "fa cup", "copa del rey", "dfb pokal", 
-    "primeira liga", "eredivisie", "amistoso internacional"
+    "brasileirão", "serie a", "sra", "série a", "copa do brasil", "cop", 
+    "libertadores", "lib", "sul-americana", "sud", "brasileirão série b", "srb",
+    "liga profesional", "argentina", "copa do mundo", "wc", "champions league", 
+    "ucl", "premier league", "england", "laliga", "esp", "bundesliga", "ger", 
+    "ligue 1", "fra", "europa league", "uel", "fa cup", "copa del rey", 
+    "dfb pokal", "primeira liga", "por", "eredivisie", "ned", "amistoso"
 ]
 
 def liga_eh_permitida(texto_liga):
     if not texto_liga:
         return False
-    texto_clean = texto_liga.lower()
+    texto_clean = texto_liga.lower().strip()
     return any(liga_elite in texto_clean for liga_elite in LIGAS_ELITE_JOGADORES)
 
 def formatar_rota_h2h(url_base, sub_rota=""):
@@ -51,9 +52,10 @@ def pegar_estatisticas_coletivas(driver, stats):
     wait = WebDriverWait(driver, 10)
 
     try:
+        # 1. Garante que a página base H2H foi aberta para resolver a URL longa
         if driver.current_url.rstrip("/") != url_h2h_base.rstrip("/"):
             driver.get(url_h2h_base)
-            time.sleep(1.5)
+            time.sleep(1.2)
 
         url_atual_carregada = driver.current_url.split('?')[0]
         url_base_limpa = url_atual_carregada.replace("/h2h", "").rstrip("/")
@@ -65,59 +67,52 @@ def pegar_estatisticas_coletivas(driver, stats):
 
         for alvo in rotas_alvo:
             print(f"      🔍 [LOG] Acessando URL {alvo['tipo']}: {alvo['url']}")
-            lista_urls_jogos = []
             try:
                 driver.get(alvo["url"])
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")))
-                time.sleep(1.0)
+                time.sleep(0.8)
                 
-                linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")
+                # Extrai os links H2H diretamente sem precisar clicar em linha por linha
+                linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")
                 print(f"      📊 [LOG] Encontradas {len(linhas_confrontos)} linhas H2H para {alvo['tipo']}.")
                 
-                for jogo_idx in range(min(5, len(linhas_confrontos))):
-                    lista_urls_jogos.append({"idx": jogo_idx})
-            except Exception as e_coleta:
-                print(f"      ⚠️ [LOG] Erro ao listar linhas H2H para chutes ({alvo['tipo']}): {e_coleta}")
-                continue
-
-            for jogo_dados in lista_urls_jogos:
-                try:
-                    driver.get(alvo["url"])
-                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")))
+                links_jogos = []
+                for linha in linhas_confrontos[:5]:
+                    # Tenta pegar o href do elemento ou procurar tag <a> interna
+                    href = linha.get_attribute("href")
+                    if not href:
+                        try:
+                            a_tag = linha.find_element(By.TAG_NAME, "a")
+                            href = a_tag.get_attribute("href")
+                        except Exception:
+                            pass
                     
-                    linhas_atualizadas = driver.find_elements(By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")
-                    if len(linhas_atualizadas) <= jogo_dados["idx"]:
-                        print(f"      ⚠️ [LOG] Linha index {jogo_dados['idx']} não encontrada na atualização.")
-                        continue
-                    
-                    elemento_alvo = linhas_atualizadas[jogo_dados["idx"]]
-
+                    # Tenta capturar a sigla/nome da liga dentro da linha
+                    nome_liga = ""
                     try:
-                        nome_liga_elemento = elemento_alvo.find_element(
+                        nome_liga = linha.find_element(
                             By.CSS_SELECTOR, ".h2h__event, .h2h__competition, [class*='event'], [class*='competition']"
                         ).text.strip()
                     except Exception:
-                        nome_liga_elemento = elemento_alvo.text.strip()
+                        nome_liga = linha.text.strip()
 
-                    print(f"      ⚽ [LOG] Analisando jogo [{alvo['tipo']}] IDx {jogo_dados['idx']} | Competição: '{nome_liga_elemento}'")
+                    if href:
+                        links_jogos.append({"href": href, "liga": nome_liga})
 
-                    if not liga_eh_permitida(nome_liga_elemento):
-                        print(f"      ⏩ [LOG] Liga ignorada: '{nome_liga_elemento}'")
+                for item in links_jogos:
+                    nome_liga = item["liga"]
+                    print(f"      ⚽ [LOG] Analisando jogo [{alvo['tipo']}] | Competição/Texto: '{nome_liga}'")
+
+                    if not liga_eh_permitida(nome_liga):
+                        print(f"      ⏩ [LOG] Liga ignorada: '{nome_liga}'")
                         continue
 
-                    url_anterior = driver.current_url
-                    driver.execute_script("arguments[0].click();", elemento_alvo)
+                    # Vai direto para a URL do jogo encontrada no link
+                    url_jogo_base = item["href"].split("?")[0].split("#")[0].strip("/")
+                    url_stats_geral = f"{url_jogo_base}/resumo/estatisticas/total/"
                     
-                    try:
-                        WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
-                    except Exception:
-                        pass
-                        
-                    time.sleep(1.2)
-                    url_jogo_completa = driver.current_url.split("?")[0].strip("/")
-                    url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas/total/"
                     driver.get(url_stats_geral)
-                    time.sleep(1.2)
+                    time.sleep(1.0)
 
                     chutes_casa = 0
                     chutes_fora = 0
@@ -125,8 +120,6 @@ def pegar_estatisticas_coletivas(driver, stats):
 
                     try:
                         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
-                        print(f"      🔎 [LOG] Spans de estatísticas encontrados na partida: {len(todos_spans)}")
-                        
                         if len(todos_spans) > 0:
                             achou_cartoes_ancora = False
                             for idx, span in enumerate(todos_spans):
@@ -153,9 +146,9 @@ def pegar_estatisticas_coletivas(driver, stats):
                     except Exception as e_sp:
                         print(f"      ⚠️ [LOG] Erro ao ler spans estatísticos: {e_sp}")
 
-                except Exception as e_item:
-                    print(f"      ⚠️ [LOG] Erro interno ao iterar jogo de chutes: {e_item}")
-                    continue
+            except Exception as e_coleta:
+                print(f"      ⚠️ [LOG] Erro ao listar linhas H2H para chutes ({alvo['tipo']}): {e_coleta}")
+                continue
 
     except Exception as e:
         print(f"      ⚠️ [LOG] Erro Crítico na Raspagem Coletiva de Chutes: {e}")
@@ -176,4 +169,4 @@ def pegar_estatisticas_coletivas(driver, stats):
         pass
 
     return stats
-                    
+                
