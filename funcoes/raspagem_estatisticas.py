@@ -19,6 +19,9 @@ def liga_eh_permitida(texto_liga):
     return any(liga_elite in texto_clean for liga_elite in LIGAS_ELITE_JOGADORES)
 
 def formatar_rota_h2h(url_base, sub_rota=""):
+    """
+    Formata a rota base já carregada pelo navegador para a sub-rota /casa/ ou /fora/.
+    """
     path = url_base.split('?')[0].split('#')[0].rstrip('/')
     for sufixo in ['/overall', '/casa', '/fora']:
         if path.endswith(sufixo):
@@ -49,16 +52,25 @@ def pegar_estatisticas_coletivas(driver, stats):
         return stats
 
     wait = WebDriverWait(driver, 10)
-    url_real = url_h2h_base.replace("/h2h", "").rstrip("/")
-    
-    rotas_alvo = [
-        {"tipo": "MANDANTE", "url": formatar_rota_h2h(url_real, "casa"), "chave_array": "chutes_mandante_h2h"},
-        {"tipo": "VISITANTE", "url": formatar_rota_h2h(url_real, "fora"), "chave_array": "chutes_visitante_h2h"}
-    ]
 
     try:
+        # 1. Garante que a página base H2H já foi aberta/carregada pelo menos uma vez 
+        # para o navegador resolver os slugs completos dos times a partir do ID
+        if driver.current_url.rstrip("/") != url_h2h_base.rstrip("/"):
+            driver.get(url_h2h_base)
+            time.sleep(1.5)
+
+        # 2. Pega a URL já expandida e carregada pelo navegador (com os nomes dos times)
+        url_atual_carregada = driver.current_url.split('?')[0]
+        url_base_limpa = url_atual_carregada.replace("/h2h", "").rstrip("/")
+
+        rotas_alvo = [
+            {"tipo": "MANDANTE", "url": formatar_rota_h2h(url_base_limpa, "casa"), "chave_array": "chutes_mandante_h2h"},
+            {"tipo": "VISITANTE", "url": formatar_rota_h2h(url_base_limpa, "fora"), "chave_array": "chutes_visitante_h2h"}
+        ]
+
         for alvo in rotas_alvo:
-            print(f"      🔍 [LOG] Acessando URL {alvo['tipo']}: {alvo['url']}")
+            print(f"      🔍 [LOG] Acessando URL {alvo['tipo']} (já carregada/expandida): {alvo['url']}")
             lista_urls_jogos = []
             try:
                 driver.get(alvo["url"])
@@ -92,26 +104,20 @@ def pegar_estatisticas_coletivas(driver, stats):
                     except Exception:
                         nome_liga_elemento = elemento_alvo.text.strip()
 
-                    print(f"      ⚽ [LOG] Analisando jogo index {jogo_dados['idx']} | Competição/Texto: '{nome_liga_elemento}'")
-
                     if not liga_eh_permitida(nome_liga_elemento):
-                        print(f"      ⏩ [LOG] Liga ignorada: '{nome_liga_elemento}'")
                         continue
 
                     url_anterior = driver.current_url
                     driver.execute_script("arguments[0].click();", elemento_alvo)
-                    print(f"      🖱️ [LOG] Clique efetuado com sucesso no jogo index {jogo_dados['idx']}")
                     
                     try:
                         WebDriverWait(driver, 7).until(lambda d: d.current_url != url_anterior)
                     except Exception:
-                        print(f"      ⚠️ [LOG] URL não mudou após o clique. Tentando prosseguir...")
                         pass
                         
                     time.sleep(1.2)
                     url_jogo_completa = driver.current_url.split("?")[0].strip("/")
                     url_stats_geral = f"{url_jogo_completa}/resumo/estatisticas/total/"
-                    print(f"      🌐 [LOG] Navegando para estatísticas: {url_stats_geral}")
                     driver.get(url_stats_geral)
                     time.sleep(1.2)
 
@@ -121,8 +127,6 @@ def pegar_estatisticas_coletivas(driver, stats):
 
                     try:
                         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
-                        print(f"      🔎 [LOG] Spans de estatísticas encontrados: {len(todos_spans)}")
-                        
                         if len(todos_spans) > 0:
                             achou_cartoes_ancora = False
                             for idx, span in enumerate(todos_spans):
@@ -142,15 +146,11 @@ def pegar_estatisticas_coletivas(driver, stats):
 
                             if achou_chutes:
                                 valor_alvo = chutes_casa if alvo["tipo"] == "MANDANTE" else chutes_fora
-                                print(f"      ✅ [LOG] Chutes capturados com sucesso ({alvo['tipo']}): {valor_alvo} (Casa: {chutes_casa} | Fora: {chutes_fora})")
                                 stats[alvo["chave_array"]].append(valor_alvo)
-                            else:
-                                print(f"      ⚠️ [LOG] Métrica 'TOTAL DE FINALIZAÇÕES' não encontrada nos spans desta partida.")
-                    except Exception as e_esp:
-                        print(f"      ⚠️ [LOG] Erro ao ler spans estatísticos: {e_esp}")
+                    except Exception:
+                        pass
 
-                except Exception as e_item:
-                    print(f"      ⚠️ [LOG] Erro interno ao iterar jogo de chutes: {e_item}")
+                except Exception:
                     continue
 
     except Exception as e:
@@ -162,7 +162,7 @@ def pegar_estatisticas_coletivas(driver, stats):
     stats["mandante_media_chutes_casa"] = round(sum(c_h2h) / len(c_h2h), 2) if len(c_h2h) > 0 else 0.0
     stats["visitante_media_chutes_fora"] = round(sum(v_h2h) / len(v_h2h), 2) if len(v_h2h) > 0 else 0.0
 
-    print(f"      📊 [LOG FINAL] Médias calculadas -> Mandante Casa: {stats['mandante_media_chutes_casa']} | Visitante Fora: {stats['visitante_media_chutes_fora']}")
+    print(f"      📊 [LOG FINAL] Médias -> Mandante Casa: {stats['mandante_media_chutes_casa']} | Visitante Fora: {stats['visitante_media_chutes_fora']}")
 
     try:
         if len(driver.window_handles) > 1:
@@ -172,4 +172,4 @@ def pegar_estatisticas_coletivas(driver, stats):
         pass
 
     return stats
-                    
+                                        
