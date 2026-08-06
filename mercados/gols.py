@@ -1,6 +1,6 @@
 """
-REGRAS DE GOLS - VERSÃO COM EXCLUSÃO MÚTUA (OVER x UNDER)
-Ordem de Prioridade e Exclusión:
+REGRAS DE GOLS - VERSÃO COM EXCLUSÃO MÚTUA (OVER x UNDER) + FILTRO DE MÉDIA PARA +1.5 (60%)
+Ordem de Prioridade e Exclusão:
 - Se houver Over (+1.5 ou +2.5), os Unders são vetados.
 - Se houver Under (-3.5 ou -4.5), os Overs são vetados.
 """
@@ -56,8 +56,13 @@ def verificar_gols(s):
     # ==========================================================
     # AVALIAÇÃO DE OVERS (+1.5 e +2.5)
     # ==========================================================
-    if pct_15 >= 60:
+    if pct_15 >= 80:
+        # 80% ou 100% liberados diretamente pela consistência alta
         overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
+    elif pct_15 == 60:
+        # 60% agora exige a média combinada mínima de 2.4 para filtrar os jogos fracos
+        if media_total_confronto >= 2.4:
+            overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
 
     if pct_25 >= 80:
         if media_total_confronto >= 2.4 and m_jogos_marcou_casa >= 4 and v_jogos_marcou_fora >= 4:
@@ -78,9 +83,7 @@ def verificar_gols(s):
     # TRAVA DE EXCLUSÃO MÚTUA (NUNCA MISTURA OVER COM UNDER)
     # ==========================================================
     if overs_aprovados:
-        # Se encontrou qualquer Over, descartamos qualquer Under para este jogo
         return overs_aprovados
     else:
-        # Se não tem Over, liberamos os Unders aprovados (se houverem)
         return unders_aprovados
         
