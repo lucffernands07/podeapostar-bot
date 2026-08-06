@@ -1,1 +1,72 @@
-{}
+{
+    "corinthiansxinternacional": {
+        "time_casa": "Corinthians",
+        "time_fora": "Internacional",
+        "horario": "20:00",
+        "liga": "Copa do Brasil",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/corinthians-QBGfQbSe/internacional-tSCiHj0I/resumo/equipes/",
+        "titulares_casa": [
+            "Hugo Souza",
+            "Matheuzinho",
+            "Gabriel Paulista",
+            "Gustavo Henrique",
+            "Matheus Bidu",
+            "Allan",
+            "Raniele",
+            "Kaio Cesar",
+            "Breno Bidon",
+            "Rodrigo Garro",
+            "Lingard J."
+        ],
+        "titulares_fora": [
+            "Matheus Cunha",
+            "Bruno Gomes",
+            "Gabriel Mercado",
+            "Maripan G.",
+            "Vitor Naum",
+            "Bruno Henrique",
+            "Villagra R.",
+            "Matheus Bahia",
+            "Carbonero J.",
+            "Bernabei A.",
+            "Alan Patrick"
+        ],
+        "texto_telegram": "**Corinthians**:\nHugo Souza, Matheuzinho, Gabriel Paulista, Gustavo Henrique\nMatheus Bidu, Allan, Raniele, Kaio Cesar\nBreno Bidon, Rodrigo Garro, Lingard J.\n\n**Internacional**:\nMatheus Cunha, Bruno Gomes, Gabriel Mercado, Maripan G.\nVitor Naum, Bruno Henrique, Villagra R., Matheus Bahia\nCarbonero J., Bernabei A., Alan Patrick",
+        "atualizado_em": "2026-08-06 03:26"
+    },
+    "vitóriaxathletico-pr": {
+        "time_casa": "Vitória",
+        "time_fora": "Athletico-PR",
+        "horario": "20:00",
+        "liga": "Copa do Brasil",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/athletico-pr-UoAxb1Tq/vitoria-8bSbHipn/resumo/equipes/",
+        "titulares_casa": [
+            "Lucas Arcanjo",
+            "Fabiano",
+            "Caca",
+            "Luan Cândido",
+            "Ramon",
+            "Baralhas",
+            "Erick",
+            "Vitor",
+            "Caíque Gonçalves",
+            "Matheusinho",
+            "Rene"
+        ],
+        "titulares_fora": [
+            "Santos",
+            "Benavidez G.",
+            "Aguirre F.",
+            "Arthur Dias",
+            "Gilberto",
+            "Jadson",
+            "Luiz Gustavo",
+            "Mendoza S.",
+            "Leozinho",
+            "Joao Cruz",
+            "Viveros K."
+        ],
+        "texto_telegram": "**Vitória**:\nLucas Arcanjo, Fabiano, Caca, Luan Cândido\nRamon, Baralhas, Erick, Vitor\nCaíque Gonçalves, Matheusinho, Rene\n\n**Athletico-PR**:\nSantos, Benavidez G., Aguirre F., Arthur Dias\nGilberto, Jadson, Luiz Gustavo, Mendoza S.\nLeozinho, Joao Cruz, Viveros K.",
+        "atualizado_em": "2026-08-06 03:26"
+    }
+}
