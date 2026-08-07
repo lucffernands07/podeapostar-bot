@@ -11,7 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos de Mercados Ativos
 from ligas import COMPETICOES
-from mercados import gols, ambos_marcam, chance_dupla, vitorias, chutes_totais
+from mercados import gols, ambos_marcam, chance_dupla, vitorias, chutes_totais, faltas_totais
 import odds, bingo357
 from telegram import menus
 
@@ -271,9 +271,9 @@ def main():
                             print(f"      ⚠️ Erro ao converter odd para float ({m_texto}) [Valor lido: {valor_odd_str}]: {e_conv}")
 
                     # ----------------------------------------------------------
-                    # FASE 2: RASPAGEM ESTATÍSTICA COLETIVA (CHUTES TOTAIS)
+                    # FASE 2: RASPAGEM ESTATÍSTICA COLETIVA (CHUTES E FALTAS)
                     # ----------------------------------------------------------
-                    print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Chutes Totais)...")
+                    print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Chutes e Faltas)...")
                     try:
                         # Mantém a URL base H2H para a função construir as sub-abas internamente
                         dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
@@ -303,6 +303,23 @@ def main():
                                 })
                     else:
                         print(f"      ℹ️ Chutes Totais: Nenhum padrão atingido para {t1} x {t2}")
+
+                    # 🛑 Análise de Faltas Totais
+                    res_faltas = faltas_totais.verificar_faltas_totais(dados_jogo)
+                    
+                    if res_faltas:
+                        for rf in res_faltas:
+                            m_texto_f = rf.get("mercado")
+                            m_tipo_f = rf.get("tipo", "FALTAS_JOGO_TOTAL")
+                            if m_texto_f:
+                                print(f"      ✅ [FALTAS APROVADO]: {m_texto_f}")
+                                mercados_para_processar.append({
+                                    "texto": f"Faltas Totais no Jogo: {m_texto_f.split(':')[-1].strip()}" if ":" in m_texto_f else m_texto_f, 
+                                    "chave": m_tipo_f, 
+                                    "odd": "Análise"
+                                })
+                    else:
+                        print(f"      ℹ️ Faltas Totais: Nenhum padrão atingido para {t1} x {t2}")
     
                     url_h2h_final = dados_jogo.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
 
