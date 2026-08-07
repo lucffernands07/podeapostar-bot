@@ -40,7 +40,7 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
         # 🟢 REGRA 1: AMBAS MARCAM SIM (Atualizada com as 3 novas regras em sequência)
         condicao_btts_sim = (
             tem_over_aprovado and 
-            media_gols_visitante >= 1.5 and 
+            media_gols_visitante >= 1.2 and 
             media_gols_mandante >= 1.0
         )
 
