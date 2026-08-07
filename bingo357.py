@@ -76,7 +76,7 @@ def chave_ordenacao_horario(chave_jogo):
         return f"24:00_{chave_jogo}"
     return chave_jogo
 
-def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=3, **kwargs):
+def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=5, **kwargs):
     """
     Recebe os jogos já filtrados pela janela de tempo,
     agrupa por confronto e monta o bilhete único final.
