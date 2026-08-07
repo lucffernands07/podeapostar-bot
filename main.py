@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos de Mercados Ativos
-from ligas import COMPETICOES
+from ligas import COMPETICOES, liga_eh_permitida
 from mercados import gols, ambos_marcam, chance_dupla, vitorias, chutes_totais, faltas_totais
 import odds, bingo357
 from telegram import menus
@@ -273,55 +273,59 @@ def main():
                     # ----------------------------------------------------------
                     # FASE 2: RASPAGEM ESTATÍSTICA COLETIVA (CHUTES E FALTAS)
                     # ----------------------------------------------------------
-                    print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Chutes e Faltas)...")
-                    try:
-                        # Mantém a URL base H2H para a função construir as sub-abas internamente
-                        dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
-                        if dados_coletivos and isinstance(dados_coletivos, dict):
-                            dados_jogo.update(dados_coletivos)
-                    except Exception as e_f2:
-                        print(f"      ⚠️ Erro na Fase 2: {e_f2}")
-                        if "invalid session id" in str(e_f2).lower() or "session" in str(e_f2).lower():
-                            print("      🔄 Recuperando driver após queda na Fase 2...")
-                            try: driver.quit()
-                            except: pass
-                            driver = configurar_driver()
+                    if liga_eh_permitida(nome_comp):
+                        print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Chutes e Faltas) para {nome_comp}...")
+                        try:
+                            # Mantém a URL base H2H para a função construir as sub-abas internamente
+                            dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
+                            if dados_coletivos and isinstance(dados_coletivos, dict):
+                                dados_jogo.update(dados_coletivos)
+                        except Exception as e_f2:
+                            print(f"      ⚠️ Erro na Fase 2: {e_f2}")
+                            if "invalid session id" in str(e_f2).lower() or "session" in str(e_f2).lower():
+                                print("      🔄 Recuperando driver após queda na Fase 2...")
+                                try: driver.quit()
+                                except: pass
+                                driver = configurar_driver()
 
-                    # 🎯 Análise de Chutes Totais / Finalizações
-                    res_chutes = chutes_totais.verificar_chutes_totais(dados_jogo)
-                    
-                    if res_chutes:
-                        for rc in res_chutes:
-                            m_texto = rc.get("mercado")
-                            m_tipo = rc.get("tipo", "CHUTES_JOGO_TOTAL")
-                            if m_texto:
-                                print(f"      ✅ [CHUTES APROVADO]: {m_texto}")
-                                mercados_para_processar.append({
-                                    "texto": f"Chutes Totais no Jogo: {m_texto.split(':')[-1].strip()}" if ":" in m_texto else m_texto, 
-                                    "chave": m_tipo, 
-                                    "odd": "Análise"
-                                })
-                    else:
-                        print(f"      ℹ️ Chutes Totais: Nenhum padrão atingido para {t1} x {t2}")
+                        # 🎯 Análise de Chutes Totais / Finalizações
+                        res_chutes = chutes_totais.verificar_chutes_totais(dados_jogo)
+                        
+                        if res_chutes:
+                            for rc in res_chutes:
+                                m_texto = rc.get("mercado")
+                                m_tipo = rc.get("tipo", "CHUTES_JOGO_TOTAL")
+                                if m_texto:
+                                    print(f"      ✅ [CHUTES APROVADO]: {m_texto}")
+                                    mercados_para_processar.append({
+                                        "texto": f"Chutes Totais no Jogo: {m_texto.split(':')[-1].strip()}" if ":" in m_texto else m_texto, 
+                                        "chave": m_tipo, 
+                                        "odd": "Análise"
+                                    })
+                        else:
+                            print(f"      ℹ️ Chutes Totais: Nenhum padrão atingido para {t1} x {t2}")
 
-                    # 🛑 Análise de Faltas Totais
-                    res_faltas = faltas_totais.verificar_faltas_totais(dados_jogo)
-                    
-                    if res_faltas:
-                        for rf in res_faltas:
-                            m_texto_f = rf.get("mercado")
-                            m_tipo_f = rf.get("tipo", "FALTAS_JOGO_TOTAL")
-                            if m_texto_f:
-                                print(f"      ✅ [FALTAS APROVADO]: {m_texto_f}")
-                                mercados_para_processar.append({
-                                    "texto": f"Faltas Totais no Jogo: {m_texto_f.split(':')[-1].strip()}" if ":" in m_texto_f else m_texto_f, 
-                                    "chave": m_tipo_f, 
-                                    "odd": "Análise"
-                                })
+                        # 🛑 Análise de Faltas Totais
+                        res_faltas = faltas_totais.verificar_faltas_totais(dados_jogo)
+                        
+                        if res_faltas:
+                            for rf in res_faltas:
+                                m_texto_f = rf.get("mercado")
+                                m_tipo_f = rf.get("tipo", "FALTAS_JOGO_TOTAL")
+                                if m_texto_f:
+                                    print(f"      ✅ [FALTAS APROVADO]: {m_texto_f}")
+                                    mercados_para_processar.append({
+                                        "texto": f"Faltas Totais no Jogo: {m_texto_f.split(':')[-1].strip()}" if ":" in m_texto_f else m_texto_f, 
+                                        "chave": m_tipo_f, 
+                                        "odd": "Análise"
+                                    })
+                        else:
+                            print(f"      ℹ️ Faltas Totais: Nenhum padrão atingido para {t1} x {t2}")
                     else:
-                        print(f"      ℹ️ Faltas Totais: Nenhum padrão atingido para {t1} x {t2}")
-    
+                        print(f"      ⏩ [FASE 2] Ignorada: '{nome_comp}' não faz parte das Ligas de Elite.")
+
                     url_h2h_final = dados_jogo.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
+    .get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
 
                     # ----------------------------------------------------------
                     # ALIMENTAÇÃO DA LISTA FINAL
