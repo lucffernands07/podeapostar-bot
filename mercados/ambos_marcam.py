@@ -50,10 +50,10 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
             # 🔴 REGRA 2: AMBAS MARCAM NÃO (Mantida exatamente como estava antes)
             if tem_over_aprovado:
                 print("   ⚠️ BTTS NÃO BARRADO: Jogo tem tendência de Over aprovada.")
-            elif v_jogos_marcou_fora >= 4 or m_jogos_marcou_casa >= 4:
+            elif v_jogos_marcou_fora >= 3 or m_jogos_marcou_casa >= 3:
                 print("   ⚠️ BTTS NÃO BARRADO: Ambas as equipes marcam com muita frequência.")
             else:
-                if media_gols_visitante <= 0.9 or media_gols_mandante <= 0.9:
+                if media_gols_visitante <= 0.8 or media_gols_mandante <= 0.8:
                     mercados_aprovados.append({"mercado": "Ambas Marcam: Não", "tipo": "BTTS_NAO"})
                 else:
                     print("   ⚠️ BTTS NÃO BARRADO: Médias intermediárias, fora do padrão estrito de Não.")
