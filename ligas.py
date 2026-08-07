@@ -57,13 +57,27 @@ COMPETICOES = {
      "Andorra - Primeira Divisão": "https://www.flashscore.com.br/futebol/andorra/primeira-divisao/jogos/",
      "Argélia - Liga 1": "https://www.flashscore.com.br/futebol/argelia/1-divisao/jogos/",
      "Espanha - La Liga 2": "https://www.flashscore.com.br/futebol/espanha/laliga2/jogos/",
-     "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/jogos/",  # JÁ ESTAVA AQUI!
+     "Alemanha - 2. Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/2-bundesliga/jogos/",
      "Itália - Serie B": "https://www.flashscore.com.br/futebol/italia/serie-b/jogos/",
      "França - Ligue 2": "https://www.flashscore.com.br/futebol/franca/ligue-2/jogos/",
      "Países Baixos - Eerste Divisie": "https://www.flashscore.com.br/futebol/paises-baixos/eerste-divisie/jogos/",
      "Ucrânia - Premier League": "https://www.flashscore.com.br/futebol/ucrania/premier-league/jogos/",
      "Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/jogos/",
-     "Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",  # <-- INCLUÍDO AQUI
      "Colômbia - Primera A": "https://www.flashscore.com.br/futebol/colombia/primeira-a/jogos/"
 }
 
+# 🟢 LISTA BRANCA DE ELITE (Para validação de ligas e mercados específicos)
+LIGAS_ELITE_MERCADOS = [
+    "brasileirão", "serie a", "sra", "série a", "copa do brasil", "cop", 
+    "libertadores", "lib", "sul-americana", "sud", "brasileirão série b", "srb",
+    "liga profesional", "argentina", "copa do mundo", "champions league", 
+    "premier league", "laliga", "bundesliga", "ligue 1", "europa league", 
+    "fa cup", "copa del rey", "dfb pokal", "primeira liga", "eredivisie", 
+    "amistoso internacional"
+]
+
+def liga_eh_permitida(texto_liga):
+    if not texto_liga:
+        return False
+    texto_clean = texto_liga.lower().strip()
+    return any(liga_elite in texto_clean for liga_elite in LIGAS_ELITE_MERCADOS)
