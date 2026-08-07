@@ -325,7 +325,6 @@ def main():
                         print(f"      ⏩ [FASE 2] Ignorada: '{nome_comp}' não faz parte das Ligas de Elite.")
 
                     url_h2h_final = dados_jogo.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
-    .get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
 
                     # ----------------------------------------------------------
                     # ALIMENTAÇÃO DA LISTA FINAL
