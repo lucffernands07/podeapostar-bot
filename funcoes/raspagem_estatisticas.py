@@ -4,9 +4,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# Importa a função de validação centralizada do ligas.py
-from ligas import liga_eh_permitida
-
 def formatar_rota_h2h(url_base, sub_rota=""):
     path = url_base.split('?')[0].split('#')[0].rstrip('/')
     for sufixo in ['/overall', '/casa', '/fora']:
@@ -78,26 +75,11 @@ def pegar_estatisticas_coletivas(driver, stats):
                         except Exception:
                             pass
                     
-                    nome_liga = ""
-                    try:
-                        nome_liga = linha.find_element(
-                            By.CSS_SELECTOR, ".h2h__event, .h2h__competition, [class*='event'], [class*='competition']"
-                        ).text.strip()
-                    except Exception:
-                        nome_liga = linha.text.strip()
-
                     if href:
-                        links_jogos.append({"href": href, "liga": nome_liga})
+                        links_jogos.append(href)
 
-                for item in links_jogos:
-                    nome_liga = item["liga"]
-                    print(f"      ⚽ [LOG] Analisando jogo [{alvo['tipo']}] | Competição/Texto: '{nome_liga}'")
-
-                    if not liga_eh_permitida(nome_liga):
-                        print(f"      ⏩ [LOG] Liga ignorada: '{nome_liga}'")
-                        continue
-
-                    url_jogo_base = item["href"].split("?")[0].split("#")[0].strip("/")
+                for url_jogo in links_jogos:
+                    url_jogo_base = url_jogo.split("?")[0].split("#")[0].strip("/")
                     url_stats_geral = f"{url_jogo_base}/resumo/estatisticas/total/"
                     
                     driver.get(url_stats_geral)
@@ -130,7 +112,7 @@ def pegar_estatisticas_coletivas(driver, stats):
                                         chutes_fora = int(re.search(r'\d+', val_fora_str).group()) if re.search(r'\d+', val_fora_str) else 0
                                         achou_chutes = True
 
-                            # Extração de Faltas (Varre de trás para frente para garantir que pegamos a última tabela de Faltas, ignorando 'Faltas Cobradas')
+                            # Extração de Faltas (Varre de trás para frente para garantir que pegamos a última tabela de Faltas)
                             for idx in range(len(todos_spans) - 1, -1, -1):
                                 span = todos_spans[idx]
                                 texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
@@ -161,6 +143,8 @@ def pegar_estatisticas_coletivas(driver, stats):
                                 stats[alvo["chave_array_faltas"]].append(valor_alvo_faltas)
                             else:
                                 print(f"      ⚠️ [LOG] Estatística de 'Faltas' não localizada nos spans.")
+                        else:
+                            print(f"      ⏩ [LOG] Sem dados estatísticos para este jogo, pulando...")
 
                     except Exception as e_sp:
                         print(f"      ⚠️ [LOG] Erro ao ler spans estatísticos: {e_sp}")
@@ -185,7 +169,7 @@ def pegar_estatisticas_coletivas(driver, stats):
     stats["visitante_media_faltas_fora"] = round(sum(f_visitante) / len(f_visitante), 2) if len(f_visitante) > 0 else 0.0
 
     print(f"      📊 [LOG FINAL] Médias Chutes -> Mandante: {stats['mandante_media_chutes_casa']} | Visitante: {stats['visitante_media_chutes_fora']}")
-    print(f"      📊 [LOG FINAL] Médias Faltas -> Mandante: {stats['mandante_media_faltas_casa']} | Visitante: {stats['visitante_media_faltas_fora']}")
+    print(f"      📊 [LOG FINAL] Médias Faltas -> Mandante: {stats['mandante_media_faltas_casa']} | Visitante: {stats['mandante_media_faltas_fora']}")
 
     try:
         if len(driver.window_handles) > 1:
@@ -195,4 +179,4 @@ def pegar_estatisticas_coletivas(driver, stats):
         pass
 
     return stats
-                    
+            
