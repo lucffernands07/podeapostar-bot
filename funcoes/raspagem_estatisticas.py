@@ -4,20 +4,20 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-LIGAS_ELITE_JOGADORES = [
-    "brasileirão", "serie a", "sra", "série a", "copa do brasil", "cop", 
-    "libertadores", "lib", "sul-americana", "sud", "brasileirão série b", "srb",
-    "liga profesional", "argentina", "copa do mundo", "wc", "champions league", 
-    "ucl", "premier league", "england", "laliga", "esp", "bundesliga", "ger", 
-    "ligue 1", "fra", "europa league", "uel", "fa cup", "copa del rey", 
-    "dfb pokal", "primeira liga", "por", "eredivisie", "ned", "amistoso"
+# 🟢 LISTA BRANCA: Nomes-chave para busca flexível nas ligas de elite
+LIGAS_ELITE_MERCADOS = [
+    "brasileirão série a", "copa do brasil", "libertadores", "sul-americana",
+    "brasileirão série b", "liga profesional", "argentina", "copa do mundo",
+    "champions league", "premier league", "laliga", "bundesliga", "serie a", 
+    "ligue 1", "europa league", "fa cup", "copa del rey", "dfb pokal", 
+    "primeira liga", "eredivisie", "amistoso internacional"
 ]
 
 def liga_eh_permitida(texto_liga):
     if not texto_liga:
         return False
     texto_clean = texto_liga.lower().strip()
-    return any(liga_elite in texto_clean for liga_elite in LIGAS_ELITE_JOGADORES)
+    return any(liga_elite in texto_clean for liga_elite in LIGAS_ELITE_MERCADOS)
 
 def formatar_rota_h2h(url_base, sub_rota=""):
     path = url_base.split('?')[0].split('#')[0].rstrip('/')
