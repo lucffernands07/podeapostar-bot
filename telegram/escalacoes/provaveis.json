@@ -1,1 +1,37 @@
-{}
+{
+    "rosario centralxaldosivi": {
+        "time_casa": "Rosario Central",
+        "time_fora": "Aldosivi",
+        "horario": "19:30",
+        "liga": "Argentina - Liga Profesional",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/aldosivi-Eu4qrEcB/rosario-4QmJ2LNc/resumo/equipes/",
+        "titulares_casa": [
+            "Ledesma C.",
+            "Veron E.",
+            "Ovando I.",
+            "Avila G.",
+            "Soto A.",
+            "Ibarra F.",
+            "Pizarro V.",
+            "Cantizano G.",
+            "Di Maria A.(C)",
+            "Fernandez J.",
+            "Copetti E."
+        ],
+        "titulares_fora": [
+            "Acosta L.",
+            "Zalazar N.",
+            "Sigali L.",
+            "Breitenbruch N.",
+            "Garcia M.",
+            "Sosa A.",
+            "Castro L.(C)",
+            "Cufre B.",
+            "Fernandez T.",
+            "Godoy M.",
+            "Vombergar A."
+        ],
+        "texto_telegram": "**Rosario Central**:\nLedesma C., Veron E., Ovando I., Avila G.\nSoto A., Ibarra F., Pizarro V., Cantizano G.\nDi Maria A.(C), Fernandez J., Copetti E.\n\n**Aldosivi**:\nAcosta L., Zalazar N., Sigali L., Breitenbruch N.\nGarcia M., Sosa A., Castro L.(C), Cufre B.\nFernandez T., Godoy M., Vombergar A.",
+        "atualizado_em": "2026-08-07 19:25"
+    }
+}

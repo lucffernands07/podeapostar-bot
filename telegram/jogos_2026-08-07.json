@@ -15,7 +15,27 @@
         "time_casa": "Rosario Central",
         "time_fora": "Aldosivi",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.4",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-CA-Aldosivi/89890335/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bLNzWfhR"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Rosario Central",
+        "time_fora": "Aldosivi",
+        "mercado": "Chutes Totais no Jogo: 23.1",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-CA-Aldosivi/89890335/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bLNzWfhR"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Rosario Central",
+        "time_fora": "Aldosivi",
+        "mercado": "Faltas Totais no Jogo: 29.3",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-CA-Aldosivi/89890335/",
         "link_h2h": "https://www.flashscore.com.br/jogo/bLNzWfhR"
     },
@@ -25,7 +45,7 @@
         "time_casa": "Operário",
         "time_fora": "São Bernardo",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.25",
+        "odd": "1.23",
         "link_betano": "https://www.betano.bet.br/match-odds/Operario-PR-Sao-Bernardo-SP/89977884/",
         "link_h2h": "https://www.flashscore.com.br/jogo/fRtfFKE4"
     },
@@ -35,7 +55,7 @@
         "time_casa": "Operário",
         "time_fora": "São Bernardo",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.8",
+        "odd": "1.73",
         "link_betano": "https://www.betano.bet.br/match-odds/Operario-PR-Sao-Bernardo-SP/89977884/",
         "link_h2h": "https://www.flashscore.com.br/jogo/fRtfFKE4"
     },
@@ -65,7 +85,27 @@
         "time_casa": "Charlotte",
         "time_fora": "Atlas",
         "mercado": "Ambas Marcam: Não",
-        "odd": "2.1",
+        "odd": "2.0",
+        "link_betano": "https://www.betano.bet.br/match-odds/Charlotte-FC-Atlas-FC/90326224/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IsFUZE55"
+    },
+    {
+        "horario": "20:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Charlotte",
+        "time_fora": "Atlas",
+        "mercado": "Chutes Totais no Jogo: 22.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Charlotte-FC-Atlas-FC/90326224/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IsFUZE55"
+    },
+    {
+        "horario": "20:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Charlotte",
+        "time_fora": "Atlas",
+        "mercado": "Faltas Totais no Jogo: 21.3",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Charlotte-FC-Atlas-FC/90326224/",
         "link_h2h": "https://www.flashscore.com.br/jogo/IsFUZE55"
     },
@@ -95,7 +135,27 @@
         "time_casa": "Columbus Crew",
         "time_fora": "Pachuca",
         "mercado": "Ambas Marcam: Não",
-        "odd": "2.5",
+        "odd": "2.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Columbus-Crew-SC-CF-Pachuca/90326229/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/dhGpWW4U"
+    },
+    {
+        "horario": "20:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Columbus Crew",
+        "time_fora": "Pachuca",
+        "mercado": "Chutes Totais no Jogo: 24.7",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Columbus-Crew-SC-CF-Pachuca/90326229/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/dhGpWW4U"
+    },
+    {
+        "horario": "20:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Columbus Crew",
+        "time_fora": "Pachuca",
+        "mercado": "Faltas Totais no Jogo: 19.3",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Columbus-Crew-SC-CF-Pachuca/90326229/",
         "link_h2h": "https://www.flashscore.com.br/jogo/dhGpWW4U"
     },
@@ -105,7 +165,7 @@
         "time_casa": "Ceará",
         "time_fora": "Ponte Preta",
         "mercado": "-4.5 Gols (60%)",
-        "odd": "1.13",
+        "odd": "1.12",
         "link_betano": "https://www.betano.bet.br/match-odds/Ceara-SC-CE-Ponte-Preta-SP/89977885/",
         "link_h2h": "https://www.flashscore.com.br/jogo/2ip2DbqH"
     },
@@ -115,7 +175,7 @@
         "time_casa": "Ceará",
         "time_fora": "Ponte Preta",
         "mercado": "-3.5 Gols (60%)",
-        "odd": "1.33",
+        "odd": "1.32",
         "link_betano": "https://www.betano.bet.br/match-odds/Ceara-SC-CE-Ponte-Preta-SP/89977885/",
         "link_h2h": "https://www.flashscore.com.br/jogo/2ip2DbqH"
     },
@@ -125,7 +185,7 @@
         "time_casa": "Ceará",
         "time_fora": "Ponte Preta",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.62",
+        "odd": "1.67",
         "link_betano": "https://www.betano.bet.br/match-odds/Ceara-SC-CE-Ponte-Preta-SP/89977885/",
         "link_h2h": "https://www.flashscore.com.br/jogo/2ip2DbqH"
     },
@@ -140,12 +200,32 @@
         "link_h2h": "https://www.flashscore.com.br/jogo/x4DEwc6t"
     },
     {
+        "horario": "21:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Cincinnati",
+        "time_fora": "U.N.A.M.",
+        "mercado": "Chutes Totais no Jogo: 24.7",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Cincinnati-UNAM-Pumas/90326230/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/x4DEwc6t"
+    },
+    {
+        "horario": "21:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Cincinnati",
+        "time_fora": "U.N.A.M.",
+        "mercado": "Faltas Totais no Jogo: 23.7",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Cincinnati-UNAM-Pumas/90326230/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/x4DEwc6t"
+    },
+    {
         "horario": "21:45",
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Ind. Rivadavia",
         "time_fora": "Estudiantes Rio Cuarto",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.24",
+        "odd": "1.23",
         "link_betano": "https://www.betano.bet.br/match-odds/Independiente-Rivadavia-de-Mendoza-Estudiantes-Rio-Cuarto/89890078/",
         "link_h2h": "https://www.flashscore.com.br/jogo/WYLGs5Kj"
     },
@@ -160,12 +240,42 @@
         "link_h2h": "https://www.flashscore.com.br/jogo/WYLGs5Kj"
     },
     {
+        "horario": "21:45",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Ind. Rivadavia",
+        "time_fora": "Estudiantes Rio Cuarto",
+        "mercado": "Faltas Totais no Jogo: 14.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-Rivadavia-de-Mendoza-Estudiantes-Rio-Cuarto/89890078/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/WYLGs5Kj"
+    },
+    {
         "horario": "22:00",
         "liga": "América - Copa das Ligas",
         "time_casa": "Tigres",
         "time_fora": "Minnesota",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.26",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/CF-Tigres-UANL-Minnesota-United-FC/90326238/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/AHBMyyyg"
+    },
+    {
+        "horario": "22:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Tigres",
+        "time_fora": "Minnesota",
+        "mercado": "Chutes Totais no Jogo: 29.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CF-Tigres-UANL-Minnesota-United-FC/90326238/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/AHBMyyyg"
+    },
+    {
+        "horario": "22:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Tigres",
+        "time_fora": "Minnesota",
+        "mercado": "Faltas Totais no Jogo: 26.5",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CF-Tigres-UANL-Minnesota-United-FC/90326238/",
         "link_h2h": "https://www.flashscore.com.br/jogo/AHBMyyyg"
     },
@@ -176,6 +286,26 @@
         "time_fora": "Juarez",
         "mercado": "+1.5 Gols (80%)",
         "odd": "1.13",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vancouver-Whitecaps-FC-FC-Juarez/90326228/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OvIxYhzI"
+    },
+    {
+        "horario": "23:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Vancouver Whitecaps",
+        "time_fora": "Juarez",
+        "mercado": "Chutes Totais no Jogo: 27.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vancouver-Whitecaps-FC-FC-Juarez/90326228/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OvIxYhzI"
+    },
+    {
+        "horario": "23:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Vancouver Whitecaps",
+        "time_fora": "Juarez",
+        "mercado": "Faltas Totais no Jogo: 28.8",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Vancouver-Whitecaps-FC-FC-Juarez/90326228/",
         "link_h2h": "https://www.flashscore.com.br/jogo/OvIxYhzI"
     }
