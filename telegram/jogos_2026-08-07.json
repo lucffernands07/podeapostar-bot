@@ -5,7 +5,7 @@
         "time_casa": "Sonderjyske",
         "time_fora": "Viborg",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.18",
+        "odd": "1.17",
         "link_betano": "https://www.betano.bet.br/match-odds/Sonderjyske-Viborg-FF/88886833/",
         "link_h2h": "https://www.flashscore.com.br/jogo/Olsl5vz1"
     },
@@ -145,7 +145,7 @@
         "time_casa": "Rosario Central",
         "time_fora": "Aldosivi",
         "mercado": "Ambas Marcam: Não",
-        "odd": "1.44",
+        "odd": "1.4",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-CA-Aldosivi/89890335/",
         "link_h2h": "https://www.flashscore.com.br/jogo/bLNzWfhR"
     },
@@ -156,7 +156,17 @@
         "time_fora": "São Bernardo",
         "mercado": "-3.5 Gols (80%)",
         "odd": "1.26",
-        "link_betano": "https://www.betano.bet.br/busca/?q=Operário%20x%20São%20Bernardo",
+        "link_betano": "https://www.betano.bet.br/match-odds/Operario-PR-Sao-Bernardo-SP/89977884/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/fRtfFKE4"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Operário",
+        "time_fora": "São Bernardo",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.83",
+        "link_betano": "https://www.betano.bet.br/match-odds/Operario-PR-Sao-Bernardo-SP/89977884/",
         "link_h2h": "https://www.flashscore.com.br/jogo/fRtfFKE4"
     },
     {
@@ -235,7 +245,7 @@
         "time_casa": "Ceará",
         "time_fora": "Ponte Preta",
         "mercado": "-3.5 Gols (60%)",
-        "odd": "1.34",
+        "odd": "1.33",
         "link_betano": "https://www.betano.bet.br/match-odds/Ceara-SC-CE-Ponte-Preta-SP/89977885/",
         "link_h2h": "https://www.flashscore.com.br/jogo/2ip2DbqH"
     },
