@@ -2,55 +2,6 @@
     "data_geracao": "2026-08-08",
     "jogos": [
         {
-            "time_casa": "Inter Miami",
-            "time_fora": "Monterrey",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/pfnluAso/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Guadalajara",
-            "time_fora": "FC Dallas",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/SfcAnhkB/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Real Salt Lake",
-            "time_fora": "Atlante",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/xlZZ2DZi/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Grêmio",
-            "time_fora": "São Paulo",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/ClHgE1DU/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Remo",
-            "time_fora": "Atlético-MG",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/IRwLUMcB/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Coritiba",
-            "time_fora": "Chapecoense",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lnn4Y4bn/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Botafogo",
-            "time_fora": "Fluminense",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/EJGK1OTO/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Vila Nova",
             "time_fora": "Sport",
             "mercado": "MÚLTIPLOS",
