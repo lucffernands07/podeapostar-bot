@@ -75,7 +75,7 @@ def rodar_teste_chutes_totais_com_urls():
     
     driver = webdriver.Chrome(options=chrome_options)
     
-    url_base_h2h = "https://www.flashscore.com.br/jogo/futebol/fortaleza-42FbPIs2/palmeiras-hMn9FTbH/h2h/total/"
+    url_base_h2h = "https://www.flashscore.com.br/jogo/futebol/cuiaba-zVvjqDOo/fortaleza-42FbPIs2/h2h/total/"
     url_casa = url_base_h2h.replace("/h2h/total/", "/h2h/casa/")
     url_fora = url_base_h2h.replace("/h2h/total/", "/h2h/fora/")
     
