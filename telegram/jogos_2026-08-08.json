@@ -1,0 +1,842 @@
+[
+    {
+        "horario": "08:00",
+        "liga": "Alemanha - 2. Bundesliga",
+        "time_casa": "Darmstadt",
+        "time_fora": "Kiel",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/SV-Darmstadt-98-Holstein-Kiel/88763442/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/E9WO1yQh"
+    },
+    {
+        "horario": "08:00",
+        "liga": "Alemanha - 2. Bundesliga",
+        "time_casa": "Karlsruher",
+        "time_fora": "Bielefeld",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.19",
+        "link_betano": "https://www.betano.bet.br/match-odds/Karlsruher-SC-Arminia-Bielefeld/88763545/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/KlrvbgPH"
+    },
+    {
+        "horario": "08:00",
+        "liga": "Alemanha - 2. Bundesliga",
+        "time_casa": "Magdeburg",
+        "time_fora": "Braunschweig",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/1-FC-Magdeburg-Eintracht-Braunschweig/88763410/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SEondXgU"
+    },
+    {
+        "horario": "08:00",
+        "liga": "Alemanha - 2. Bundesliga",
+        "time_casa": "Magdeburg",
+        "time_fora": "Braunschweig",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.5",
+        "link_betano": "https://www.betano.bet.br/match-odds/1-FC-Magdeburg-Eintracht-Braunschweig/88763410/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SEondXgU"
+    },
+    {
+        "horario": "08:00",
+        "liga": "Alemanha - 2. Bundesliga",
+        "time_casa": "Magdeburg",
+        "time_fora": "Braunschweig",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "2.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/1-FC-Magdeburg-Eintracht-Braunschweig/88763410/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SEondXgU"
+    },
+    {
+        "horario": "09:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Altai",
+        "time_fora": "Kyzylzhar",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/Altay-Oskemen-Kyzylzhar-Petropavlosvk/89833528/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QXeSipJE"
+    },
+    {
+        "horario": "09:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Altai",
+        "time_fora": "Kyzylzhar",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.85",
+        "link_betano": "https://www.betano.bet.br/match-odds/Altay-Oskemen-Kyzylzhar-Petropavlosvk/89833528/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QXeSipJE"
+    },
+    {
+        "horario": "09:30",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Livyi Bereg",
+        "time_fora": "Kudrivka",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.29",
+        "link_betano": "https://www.betano.bet.br/match-odds/Livyi-Bereh-FK-Kudrivka/89323258/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/r10udPZr"
+    },
+    {
+        "horario": "10:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Zhetysu",
+        "time_fora": "Ordabasy",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.12",
+        "link_betano": "https://www.betano.bet.br/match-odds/Zhetysu-Taldykorgan-FC-Ordabasy/90089838/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/U3NaZy3m"
+    },
+    {
+        "horario": "10:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Zhetysu",
+        "time_fora": "Ordabasy",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/Zhetysu-Taldykorgan-FC-Ordabasy/90089838/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/U3NaZy3m"
+    },
+    {
+        "horario": "10:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Zhetysu",
+        "time_fora": "Ordabasy",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.72",
+        "link_betano": "https://www.betano.bet.br/match-odds/Zhetysu-Taldykorgan-FC-Ordabasy/90089838/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/U3NaZy3m"
+    },
+    {
+        "horario": "11:30",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Marítimo",
+        "time_fora": "Casa Pia",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.12",
+        "link_betano": "https://www.betano.bet.br/match-odds/CS-Maritimo-Casa-Pia-AC/88948991/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/tSpO6i5c"
+    },
+    {
+        "horario": "11:30",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Marítimo",
+        "time_fora": "Casa Pia",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.31",
+        "link_betano": "https://www.betano.bet.br/match-odds/CS-Maritimo-Casa-Pia-AC/88948991/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/tSpO6i5c"
+    },
+    {
+        "horario": "11:30",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Marítimo",
+        "time_fora": "Casa Pia",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.95",
+        "link_betano": "https://www.betano.bet.br/match-odds/CS-Maritimo-Casa-Pia-AC/88948991/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/tSpO6i5c"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Cazaquistão - Primeira Liga",
+        "time_casa": "Kaspij Aktau",
+        "time_fora": "Ulytau",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.9",
+        "link_betano": "https://www.betano.bet.br/match-odds/Kaspyi-Aktau-Ulytau-FC/89833911/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Im2QXORr"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Ucrânia - Premier League",
+        "time_casa": "Bukovyna",
+        "time_fora": "Obolon",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.36",
+        "link_betano": "https://www.betano.bet.br/match-odds/Bukovina-Chernovtsy-Obolon-Brovar/89323279/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/zT8tGpRE"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Áustria - Bundesliga",
+        "time_casa": "Grazer",
+        "time_fora": "A. Lustenau",
+        "mercado": "-4.5 Gols (60%)",
+        "odd": "1.11",
+        "link_betano": "https://www.betano.bet.br/match-odds/Grazer-AK-SC-Austria-Lustenau/88174847/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jN3Bqjx0"
+    },
+    {
+        "horario": "12:00",
+        "liga": "Áustria - Bundesliga",
+        "time_casa": "Grazer",
+        "time_fora": "A. Lustenau",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "2.0",
+        "link_betano": "https://www.betano.bet.br/match-odds/Grazer-AK-SC-Austria-Lustenau/88174847/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jN3Bqjx0"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Vitória de Guimarães",
+        "time_fora": "Arouca",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.13",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vitoria-Guimaraes-FC-Arouca/88949008/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QFjXncEO"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Vitória de Guimarães",
+        "time_fora": "Arouca",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.34",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vitoria-Guimaraes-FC-Arouca/88949008/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QFjXncEO"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Vitória de Guimarães",
+        "time_fora": "Arouca",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "2.0",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vitoria-Guimaraes-FC-Arouca/88949008/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QFjXncEO"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Áustria - Bundesliga",
+        "time_casa": "Hartberg",
+        "time_fora": "Sturm Graz",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/TSV-Hartberg-SK-Sturm-Graz/88174854/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Oz2JsU6C"
+    },
+    {
+        "horario": "14:45",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Atl. Tucuman",
+        "time_fora": "Sarmiento Junin",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.19",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Atletico-Tucuman-CA-Sarmiento/89890424/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/dM8XDeWr"
+    },
+    {
+        "horario": "14:45",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Atl. Tucuman",
+        "time_fora": "Sarmiento Junin",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Atletico-Tucuman-CA-Sarmiento/89890424/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/dM8XDeWr"
+    },
+    {
+        "horario": "14:45",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Dep. Riestra",
+        "time_fora": "Estudiantes",
+        "mercado": "-3.5 Gols (100%)",
+        "odd": "1.1",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Riestra-Estudiantes-de-La-Plata/89890001/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jNt0W3nA"
+    },
+    {
+        "horario": "14:45",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Dep. Riestra",
+        "time_fora": "Estudiantes",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Riestra-Estudiantes-de-La-Plata/89890001/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jNt0W3nA"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Alemanha - 2. Bundesliga",
+        "time_casa": "Wolfsburg",
+        "time_fora": "Kaiserslautern",
+        "mercado": "-4.5 Gols (60%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/VfL-Wolfsburg-1-FC-Kaiserslautern/88717393/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/8jEcb2J0"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Alemanha - 2. Bundesliga",
+        "time_casa": "Wolfsburg",
+        "time_fora": "Kaiserslautern",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "2.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/VfL-Wolfsburg-1-FC-Kaiserslautern/88717393/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/8jEcb2J0"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Bélgica - Pro League",
+        "time_casa": "St. Truiden",
+        "time_fora": "Lommel SK",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.28",
+        "link_betano": "https://www.betano.bet.br/match-odds/Sint-Truidense-VV-Lommel-SK/88174673/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/t8dK0WIk"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Bélgica - Pro League",
+        "time_casa": "Westerlo",
+        "time_fora": "Royale Union SG",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.28",
+        "link_betano": "https://www.betano.bet.br/match-odds/KVC-Westerlo-Union-Saint-Gilloise/88174593/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ELfSbAm2"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Boulogne",
+        "time_fora": "Nancy",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.1",
+        "link_betano": "https://www.betano.bet.br/match-odds/Boulogne-Sur-Mer-AS-Nancy-Lorraine/90054628/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/E3wL3jBj"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Boulogne",
+        "time_fora": "Nancy",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.83",
+        "link_betano": "https://www.betano.bet.br/match-odds/Boulogne-Sur-Mer-AS-Nancy-Lorraine/90054628/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/E3wL3jBj"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Clermont",
+        "time_fora": "Reims",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.1",
+        "link_betano": "https://www.betano.bet.br/match-odds/Clermont-Foot-Stade-Reims/90054332/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/vsV6Rg3c"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Clermont",
+        "time_fora": "Reims",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.28",
+        "link_betano": "https://www.betano.bet.br/match-odds/Clermont-Foot-Stade-Reims/90054332/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/vsV6Rg3c"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Clermont",
+        "time_fora": "Reims",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.8",
+        "link_betano": "https://www.betano.bet.br/match-odds/Clermont-Foot-Stade-Reims/90054332/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/vsV6Rg3c"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Dunkerque",
+        "time_fora": "Grenoble",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.13",
+        "link_betano": "https://www.betano.bet.br/match-odds/USL-Dunkerque-Grenoble-Foot-38/90054595/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/CfTEPXX9"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Dunkerque",
+        "time_fora": "Grenoble",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.34",
+        "link_betano": "https://www.betano.bet.br/match-odds/USL-Dunkerque-Grenoble-Foot-38/90054595/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/CfTEPXX9"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Dunkerque",
+        "time_fora": "Grenoble",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/USL-Dunkerque-Grenoble-Foot-38/90054595/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/CfTEPXX9"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Metz",
+        "time_fora": "Guingamp",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Metz-EA-Guingamp/90054398/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/KKWMNB2M"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Montpellier",
+        "time_fora": "Dijon",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.39",
+        "link_betano": "https://www.betano.bet.br/match-odds/Montpellier-HSC-Dijon-FCO/90054594/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/j3NhIkQq"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Nantes",
+        "time_fora": "Red Star",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.36",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Nantes-Red-Star-Paris/90054636/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OGL0GTfd"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Pau",
+        "time_fora": "Annecy",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.29",
+        "link_betano": "https://www.betano.bet.br/match-odds/Pau-FC-Annecy-FC/90054635/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UD8nvXn3"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Rodez",
+        "time_fora": "Laval",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.31",
+        "link_betano": "https://www.betano.bet.br/match-odds/Rodez-AF-Stade-Lavallois-MFC/90054637/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xvCfxBHF"
+    },
+    {
+        "horario": "15:45",
+        "liga": "França - Ligue 2",
+        "time_casa": "Sochaux",
+        "time_fora": "St. Etienne",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Sochaux-AS-Saint-Etienne/90054638/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/AiA2zknS"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Nacional-AM",
+        "time_fora": "ABC",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.1",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nacional-AM-ABC-FC-RN/89949547/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/h2Mt26Y8"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Nacional-AM",
+        "time_fora": "ABC",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.6",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nacional-AM-ABC-FC-RN/89949547/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/h2Mt26Y8"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Grêmio",
+        "time_fora": "São Paulo",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.12",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gremio-RS-Sao-Paulo-SP/89808689/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ClHgE1DU"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Grêmio",
+        "time_fora": "São Paulo",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.31",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gremio-RS-Sao-Paulo-SP/89808689/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ClHgE1DU"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Grêmio",
+        "time_fora": "São Paulo",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gremio-RS-Sao-Paulo-SP/89808689/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ClHgE1DU"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Vila Nova",
+        "time_fora": "Sport",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vila-Nova-GO-Sport-Recife-PE/89977886/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0rUvApfM"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Vila Nova",
+        "time_fora": "Sport",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.83",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vila-Nova-GO-Sport-Recife-PE/89977886/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0rUvApfM"
+    },
+    {
+        "horario": "16:30",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Estrela da Amadora",
+        "time_fora": "Sporting",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/CF-Estrela-Sporting-CP/88949112/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ELhxqlDj"
+    },
+    {
+        "horario": "16:30",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Estrela da Amadora",
+        "time_fora": "Sporting",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.6",
+        "link_betano": "https://www.betano.bet.br/match-odds/CF-Estrela-Sporting-CP/88949112/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ELhxqlDj"
+    },
+    {
+        "horario": "16:30",
+        "liga": "Portugal - Primeira Liga",
+        "time_casa": "Estrela da Amadora",
+        "time_fora": "Sporting",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.7",
+        "link_betano": "https://www.betano.bet.br/match-odds/CF-Estrela-Sporting-CP/88949112/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ELhxqlDj"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Tigre",
+        "time_fora": "River Plate",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.14",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Tigre-River-Plate/89890462/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jeKSXGNE"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Tigre",
+        "time_fora": "River Plate",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Tigre-River-Plate/89890462/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jeKSXGNE"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Botafogo-PB",
+        "time_fora": "Santa Cruz",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Botafogo-PB-Santa-Cruz-PE/89311818/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/fTkVVMI0"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Figueirense",
+        "time_fora": "Ferroviária",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/Figueirense-SC-Ferroviaria-SP/89311826/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/4zeCg5gA"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Figueirense",
+        "time_fora": "Ferroviária",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.7",
+        "link_betano": "https://www.betano.bet.br/match-odds/Figueirense-SC-Ferroviaria-SP/89311826/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/4zeCg5gA"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "São José",
+        "time_fora": "Gama",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.5",
+        "link_betano": "https://www.betano.bet.br/match-odds/Sao-Jose-RS-SE-do-Gama/89915598/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xxDzitQ7"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Uberlândia",
+        "time_fora": "CSA",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.17",
+        "link_betano": "https://www.betano.bet.br/match-odds/Uberlandia-MG-CSA-AL/90025032/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/KbRntPBk"
+    },
+    {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Uberlândia",
+        "time_fora": "CSA",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.67",
+        "link_betano": "https://www.betano.bet.br/match-odds/Uberlandia-MG-CSA-AL/90025032/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/KbRntPBk"
+    },
+    {
+        "horario": "17:30",
+        "liga": "EUA - MLS",
+        "time_casa": "New England Revolution",
+        "time_fora": "Houston Dynamo",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/New-England-Revolution-Houston-Dynamo-FC/85936280/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/vDOHN8Sh"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Goiatuba",
+        "time_fora": "ASA",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/Goiatuba-GO-AS-Arapiraquense-AL/89915599/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/dbBKfOQr"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Remo",
+        "time_fora": "Atlético-MG",
+        "mercado": "-4.5 Gols (100%)",
+        "odd": "1.1",
+        "link_betano": "https://www.betano.bet.br/match-odds/Remo-PA-Clube-Atletico-MG/89808690/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IRwLUMcB"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Remo",
+        "time_fora": "Atlético-MG",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.28",
+        "link_betano": "https://www.betano.bet.br/match-odds/Remo-PA-Clube-Atletico-MG/89808690/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IRwLUMcB"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Remo",
+        "time_fora": "Atlético-MG",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/Remo-PA-Clube-Atletico-MG/89808690/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IRwLUMcB"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Botafogo-SP",
+        "time_fora": "América-MG",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/Botafogo-SP-America-MG/89977887/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/pY4UbaUN"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Botafogo-SP",
+        "time_fora": "América-MG",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/Botafogo-SP-America-MG/89977887/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/pY4UbaUN"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Internacional de Limeira",
+        "time_fora": "Volta Redonda",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/Inter-Limeira-SP-Volta-Redonda-RJ/89311816/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jD4IXNWj"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileiro Serie C",
+        "time_casa": "Internacional de Limeira",
+        "time_fora": "Volta Redonda",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.72",
+        "link_betano": "https://www.betano.bet.br/match-odds/Inter-Limeira-SP-Volta-Redonda-RJ/89311816/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jD4IXNWj"
+    },
+    {
+        "horario": "20:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Coritiba",
+        "time_fora": "Chapecoense",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/Coritiba-PR-Chapecoense-SC/89808691/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lnn4Y4bn"
+    },
+    {
+        "horario": "21:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Inter Miami",
+        "time_fora": "Monterrey",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.11",
+        "link_betano": "https://www.betano.bet.br/match-odds/Inter-Miami-CF-CF-Monterrey/90333274/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/pfnluAso"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Botafogo",
+        "time_fora": "Fluminense",
+        "mercado": "-4.5 Gols (100%)",
+        "odd": "1.13",
+        "link_betano": "https://www.betano.bet.br/match-odds/Botafogo-RJ-Fluminense-RJ/89808692/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EJGK1OTO"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Botafogo",
+        "time_fora": "Fluminense",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/Botafogo-RJ-Fluminense-RJ/89808692/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EJGK1OTO"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Botafogo",
+        "time_fora": "Fluminense",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "2.0",
+        "link_betano": "https://www.betano.bet.br/match-odds/Botafogo-RJ-Fluminense-RJ/89808692/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EJGK1OTO"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Independiente",
+        "time_fora": "Platense",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.19",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Independiente-CA-Platense/89890367/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ppKYFr2T"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Independiente",
+        "time_fora": "Platense",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Independiente-CA-Platense/89890367/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ppKYFr2T"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Instituto",
+        "time_fora": "Gimnasia Mendoza",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.19",
+        "link_betano": "https://www.betano.bet.br/match-odds/Instituto-AC-Cordoba-Gimnasia-Y-Esgrima-Mendoza/89890203/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/G4SHJQ24"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Instituto",
+        "time_fora": "Gimnasia Mendoza",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/Instituto-AC-Cordoba-Gimnasia-Y-Esgrima-Mendoza/89890203/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/G4SHJQ24"
+    },
+    {
+        "horario": "22:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Guadalajara",
+        "time_fora": "FC Dallas",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Guadalajara-Chivas-FC-Dallas/90333276/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SfcAnhkB"
+    },
+    {
+        "horario": "22:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Guadalajara",
+        "time_fora": "FC Dallas",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.6",
+        "link_betano": "https://www.betano.bet.br/match-odds/Guadalajara-Chivas-FC-Dallas/90333276/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SfcAnhkB"
+    },
+    {
+        "horario": "22:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Guadalajara",
+        "time_fora": "FC Dallas",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "2.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Guadalajara-Chivas-FC-Dallas/90333276/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SfcAnhkB"
+    },
+    {
+        "horario": "23:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Real Salt Lake",
+        "time_fora": "Atlante",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.21",
+        "link_betano": "https://www.betano.bet.br/match-odds/Real-Salt-Lake-Atlante-FC/90333282/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xlZZ2DZi"
+    }
+]
