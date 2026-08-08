@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos de Mercados Ativos
-from ligas import COMPETICOES, liga_eh_permitida
+from ligas import COMPETICOES
 from mercados import gols, ambos_marcam, chance_dupla, vitorias, chutes_totais, faltas_totais
 import odds, bingo357
 from telegram import menus
