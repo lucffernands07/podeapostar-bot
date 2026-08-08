@@ -275,6 +275,10 @@ def main():
                     # ----------------------------------------------------------
                     print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Chutes e Faltas) para {nome_comp}...")
                     try:
+                        # 🟢 Injeta o nome da competição no dicionário para a trava de raiz funcionar
+                        if isinstance(dados_jogo, dict):
+                            dados_jogo["liga"] = nome_comp
+
                         # Mantém a URL base H2H para a função construir as sub-abas internamente
                         dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
                         if dados_coletivos and isinstance(dados_coletivos, dict):
@@ -322,6 +326,7 @@ def main():
                         print(f"      ℹ️ Faltas Totais: Nenhum padrão atingido para {t1} x {t2}")
 
                     url_h2h_final = dados_jogo.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
+
     
                     # ----------------------------------------------------------
                     # ALIMENTAÇÃO DA LISTA FINAL
