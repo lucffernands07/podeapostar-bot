@@ -2,6 +2,34 @@
     "data_geracao": "2026-08-08",
     "jogos": [
         {
+            "time_casa": "Orlando City",
+            "time_fora": "Leon",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/EBeIpWJN/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Inter Miami",
+            "time_fora": "Monterrey",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/pfnluAso/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Guadalajara",
+            "time_fora": "FC Dallas",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SfcAnhkB/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Real Salt Lake",
+            "time_fora": "Atlante",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xlZZ2DZi/#/resumo-de-jogo"
+        },
+        {
             "time_casa": "Grêmio",
             "time_fora": "São Paulo",
             "mercado": "MÚLTIPLOS",

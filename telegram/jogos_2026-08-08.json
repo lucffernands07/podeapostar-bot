@@ -5,7 +5,7 @@
         "time_casa": "Grêmio",
         "time_fora": "São Paulo",
         "mercado": "-3.5 Gols (60%)",
-        "odd": "1.26",
+        "odd": "1.25",
         "link_betano": "https://www.betano.bet.br/match-odds/Gremio-RS-Sao-Paulo-SP/89808689/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ClHgE1DU"
     },
@@ -55,7 +55,7 @@
         "time_casa": "Remo",
         "time_fora": "Atlético-MG",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.28",
+        "odd": "1.27",
         "link_betano": "https://www.betano.bet.br/match-odds/Remo-PA-Clube-Atletico-MG/89808690/",
         "link_h2h": "https://www.flashscore.com.br/jogo/IRwLUMcB"
     },
@@ -90,6 +90,26 @@
         "link_h2h": "https://www.flashscore.com.br/jogo/IRwLUMcB"
     },
     {
+        "horario": "19:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Orlando City",
+        "time_fora": "Leon",
+        "mercado": "Chutes Totais no Jogo: 21.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Orlando-City-SC-Club-Leon/90333275/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EBeIpWJN"
+    },
+    {
+        "horario": "19:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Orlando City",
+        "time_fora": "Leon",
+        "mercado": "Faltas Totais no Jogo: 22.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Orlando-City-SC-Club-Leon/90333275/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EBeIpWJN"
+    },
+    {
         "horario": "20:30",
         "liga": "Brasileirão Série A",
         "time_casa": "Coritiba",
@@ -118,6 +138,36 @@
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Coritiba-PR-Chapecoense-SC/89808691/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lnn4Y4bn"
+    },
+    {
+        "horario": "21:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Inter Miami",
+        "time_fora": "Monterrey",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.11",
+        "link_betano": "https://www.betano.bet.br/match-odds/Inter-Miami-CF-CF-Monterrey/90333274/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/pfnluAso"
+    },
+    {
+        "horario": "21:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Inter Miami",
+        "time_fora": "Monterrey",
+        "mercado": "Chutes Totais no Jogo: 24.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Inter-Miami-CF-CF-Monterrey/90333274/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/pfnluAso"
+    },
+    {
+        "horario": "21:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Inter Miami",
+        "time_fora": "Monterrey",
+        "mercado": "Faltas Totais no Jogo: 25.7",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Inter-Miami-CF-CF-Monterrey/90333274/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/pfnluAso"
     },
     {
         "horario": "21:00",
@@ -168,5 +218,65 @@
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Botafogo-RJ-Fluminense-RJ/89808692/",
         "link_h2h": "https://www.flashscore.com.br/jogo/EJGK1OTO"
+    },
+    {
+        "horario": "22:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Guadalajara",
+        "time_fora": "FC Dallas",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "2.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Guadalajara-Chivas-FC-Dallas/90333276/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SfcAnhkB"
+    },
+    {
+        "horario": "22:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Guadalajara",
+        "time_fora": "FC Dallas",
+        "mercado": "Chutes Totais no Jogo: 29.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Guadalajara-Chivas-FC-Dallas/90333276/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SfcAnhkB"
+    },
+    {
+        "horario": "22:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Guadalajara",
+        "time_fora": "FC Dallas",
+        "mercado": "Faltas Totais no Jogo: 24.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Guadalajara-Chivas-FC-Dallas/90333276/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SfcAnhkB"
+    },
+    {
+        "horario": "23:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Real Salt Lake",
+        "time_fora": "Atlante",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/Real-Salt-Lake-Atlante-FC/90333282/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xlZZ2DZi"
+    },
+    {
+        "horario": "23:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Real Salt Lake",
+        "time_fora": "Atlante",
+        "mercado": "Chutes Totais no Jogo: 27.2",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Real-Salt-Lake-Atlante-FC/90333282/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xlZZ2DZi"
+    },
+    {
+        "horario": "23:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Real Salt Lake",
+        "time_fora": "Atlante",
+        "mercado": "Faltas Totais no Jogo: 27.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Real-Salt-Lake-Atlante-FC/90333282/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xlZZ2DZi"
     }
 ]
