@@ -5,8 +5,8 @@ COMPETICOES = {
     #"Mundo - Copa do Mundo": "https://www.flashscore.com.br/futebol/mundo/campeonato-do-mundo/jogos/"
     #"Copa do Brasil": "https://www.flashscore.com.br/futebol/brasil/copa-betano-do-brasil/jogos/",
     "América - Copa das Ligas": "https://www.flashscore.com.br/futebol/america-do-norte-e-central/copa-das-ligas/jogos",
-    "Brasileirão Série A": "https://www.flashscore.com.br/futebol/brasil/brasileirao-betano/"
-    #"Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/brasileirao-serie-b/jogos/",
+    #"Brasileirão Série A": "https://www.flashscore.com.br/futebol/brasil/brasileirao-betano/",
+    "Brasileirão Série B": "https://www.flashscore.com.br/futebol/brasil/brasileirao-serie-b/jogos/"
     #"Brasileiro Serie C": "https://www.flashscore.com.br/futebol/brasil/serie-c/jogos/",
     #"Brasileiro Serie D": "https://www.flashscore.com.br/futebol/brasil/serie-d/jogos/"
 }
