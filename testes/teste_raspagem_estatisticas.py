@@ -79,7 +79,7 @@ def rodar_teste_chutes_totais_com_urls():
     url_casa = url_base_h2h.replace("/h2h/total/", "/h2h/casa/")
     url_fora = url_base_h2h.replace("/h2h/total/", "/h2h/fora/")
     
-    print("\n🚀 INICIANDO TESTE ISOLADO: FORTALEZA X PALMEIRAS (MAPEAMENTO SEGURO)\n" + "="*80)
+    print("\n🚀 INICIANDO TESTE ISOLADO: FORTALEZA X CUIABÁ (MAPEAMENTO SEGURO)\n" + "="*80)
     print(f"1. URL CASA: {url_casa}")
     print(f"2. URL FORA: {url_fora}")
     print("-" * 80)
