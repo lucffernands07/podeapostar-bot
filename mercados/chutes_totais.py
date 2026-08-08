@@ -15,8 +15,8 @@ def verificar_chutes_totais(s):
     if media_m == 0 or media_v == 0:
         return []
 
-    # 1. Soma das Médias (Mandante em casa + Visitante fora)
-    media_esperada = media_m + media_v
+    # 1. Soma das Médias (Mandante em casa + Visitante fora) com acréscimo de +7 de margem
+    media_esperada = (media_m + media_v) + 6.0
 
     mercados_aprovados = []
 
