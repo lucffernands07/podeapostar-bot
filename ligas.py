@@ -84,8 +84,7 @@ LIGAS_ELITE_MERCADOS = [
     "copa del rey", 
     "dfb pokal", 
     "primeira liga", 
-    "eredivisie", 
-    "copa das ligas"
+    "eredivisie"
 ]
 
 import unicodedata
