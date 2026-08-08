@@ -88,9 +88,25 @@ LIGAS_ELITE_MERCADOS = [
     "copa das ligas"
 ]
 
+import unicodedata
+
+def normalizar_texto(texto):
+    if not texto:
+        return ""
+    # Remove acentos e converte para minúsculas para padronizar qualquer comparação
+    nfkd = unicodedata.normalize('NFKD', texto)
+    return "".join([c for c in nfkd if not unicodedata.combining(c)]).lower().strip()
+
 def liga_eh_permitida(texto_liga):
     if not texto_liga:
         return False
-    texto_clean = texto_liga.lower().strip()
-    return any(liga_elite in texto_clean for liga_elite in LIGAS_ELITE_MERCADOS)
     
+    texto_clean = normalizar_texto(texto_liga)
+    
+    # Normaliza também a lista de elite para garantir 100% de compatibilidade sem acentos
+    for liga_elite in LIGAS_ELITE_MERCADOS:
+        if normalizar_texto(liga_elite) in texto_clean:
+            return True
+            
+    return False
+
