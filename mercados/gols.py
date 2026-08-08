@@ -1,5 +1,6 @@
 """
 REGRAS DE GOLS - VERSÃO COM EXCLUSÃO MÚTUA (OVER x UNDER) + FILTRO DE MÉDIA PARA +1.5 (60%)
+Com trava de integridade de dados para abortar caso a raspagem falhe.
 Ordem de Prioridade e Exclusão:
 - Se houver Over (+1.5 ou +2.5), os Unders são vetados.
 - Se houver Under (-3.5 ou -4.5), os Overs são vetados.
@@ -26,6 +27,18 @@ def calcular_porcentagem_gols(c, f):
 
 def verificar_gols(s):
     if not isinstance(s, dict):
+        return []
+
+    # 🛑 TRAVA DE SEGURANÇA: Validação de Integridade da Amostra
+    try:
+        c_15 = int(s.get("casa_15", 0) or 0)
+        f_15 = int(s.get("fora_15", 0) or 0)
+    except (ValueError, TypeError):
+        c_15, f_15 = 0, 0
+
+    # Se a raspagem não conseguiu coletar dados consistentes dos últimos jogos, aborta para evitar falsos unders
+    if c_15 < 2 or f_15 < 2:
+        print(f"      ⚠️ ALERTA DE LOG: Dados insuficientes ou falha na raspagem para {s.get('time_casa', 'Casa')} x {s.get('time_fora', 'Fora')}. Mercado de gols cancelado.")
         return []
 
     # Recorrência dos times nos últimos 5 jogos
@@ -86,4 +99,4 @@ def verificar_gols(s):
         return overs_aprovados
     else:
         return unders_aprovados
-        
+    
