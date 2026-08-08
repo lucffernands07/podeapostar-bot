@@ -2,18 +2,53 @@
     "data_geracao": "2026-08-08",
     "jogos": [
         {
-            "time_casa": "Vila Nova",
-            "time_fora": "Sport",
+            "time_casa": "Coritiba",
+            "time_fora": "Chapecoense",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/0rUvApfM/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/lnn4Y4bn/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Botafogo-SP",
-            "time_fora": "América-MG",
+            "time_casa": "Botafogo",
+            "time_fora": "Fluminense",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/pY4UbaUN/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/EJGK1OTO/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Independiente",
+            "time_fora": "Platense",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ppKYFr2T/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Instituto",
+            "time_fora": "Gimnasia Mendoza",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/G4SHJQ24/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Inter Miami",
+            "time_fora": "Monterrey",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/pfnluAso/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Guadalajara",
+            "time_fora": "FC Dallas",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/SfcAnhkB/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Real Salt Lake",
+            "time_fora": "Atlante",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xlZZ2DZi/#/resumo-de-jogo"
         }
     ]
 }

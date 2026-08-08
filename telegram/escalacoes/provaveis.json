@@ -1,1 +1,141 @@
-{}
+{
+    "coritibaxchapecoense": {
+        "time_casa": "Coritiba",
+        "time_fora": "Chapecoense",
+        "horario": "20:30",
+        "liga": "Brasileirão Série A",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/chapecoense-jcQV3XP6/coritiba-KGO4pUqO/resumo/equipes/",
+        "titulares_casa": [
+            "Pedro Morisco",
+            "Breno",
+            "Bruno",
+            "Gomez S.",
+            "Jacy(C)",
+            "Josue",
+            "Lavega J.",
+            "Pedro Rocha",
+            "Thiago Santos",
+            "Tiago Coser",
+            "Tinga"
+        ],
+        "titulares_fora": [
+            "Anderson",
+            "Camilo",
+            "Eduardo Doma",
+            "Everton",
+            "Fernando",
+            "Giovanni Augusto",
+            "Kauan",
+            "Marcinho",
+            "Matias Bruno",
+            "Max",
+            "Rubens"
+        ],
+        "texto_telegram": "**Coritiba**:\nPedro Morisco, Breno, Bruno, Gomez S.\nJacy(C), Josue, Lavega J., Pedro Rocha\nThiago Santos, Tiago Coser, Tinga\n\n**Chapecoense**:\nAnderson, Camilo, Eduardo Doma, Everton\nFernando, Giovanni Augusto, Kauan, Marcinho\nMatias Bruno, Max, Rubens",
+        "atualizado_em": "2026-08-08 19:48"
+    },
+    "botafogoxfluminense": {
+        "time_casa": "Botafogo",
+        "time_fora": "Fluminense",
+        "horario": "21:00",
+        "liga": "Brasileirão Série A",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/botafogo-jXzWoWa5/fluminense-EV9L3kU4/resumo/equipes/",
+        "titulares_casa": [
+            "Warleson",
+            "Vitinho",
+            "Monzon L.",
+            "Ferraresi",
+            "Alex Telles",
+            "Danilo",
+            "Medina C.",
+            "Villalba Jaume L. M.",
+            "Montoro A.",
+            "Arthur Cabral"
+        ],
+        "titulares_fora": [
+            "Fábio",
+            "Samuel Xavier",
+            "Ignacio",
+            "Jemmes",
+            "René",
+            "Hércules",
+            "Nonato",
+            "Serna K.",
+            "Martinelli",
+            "Soteldo Y.",
+            "Hulk"
+        ],
+        "texto_telegram": "**Botafogo**:\nWarleson, Vitinho, Monzon L., Ferraresi\nAlex Telles, Danilo, Medina C., Villalba Jaume L. M.\nMontoro A., Arthur Cabral\n\n**Fluminense**:\nFábio, Samuel Xavier, Ignacio, Jemmes\nRené, Hércules, Nonato, Serna K.\nMartinelli, Soteldo Y., Hulk",
+        "atualizado_em": "2026-08-08 19:48"
+    },
+    "independientexplatense": {
+        "time_casa": "Independiente",
+        "time_fora": "Platense",
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/independiente-UVatI5Y2/platense-80MMdBdN/resumo/equipes/",
+        "titulares_casa": [
+            "Rey R.",
+            "Santiago Arias",
+            "Fedorco J.",
+            "Lomonaco K.",
+            "Zabala F.",
+            "Perez Curci M.",
+            "Marcone I.",
+            "Gutierrez M.",
+            "Montiel S.",
+            "Abaldo M.",
+            "Avalos G."
+        ],
+        "titulares_fora": [
+            "Cozzani J.",
+            "Saborido J.",
+            "Vazquez I.",
+            "Victor Cuesta",
+            "Thiago Silva",
+            "Barrios M.",
+            "Ferreira P.",
+            "Zapiola F.",
+            "Mainero G.",
+            "Retamar K.",
+            "Nico López"
+        ],
+        "texto_telegram": "**Independiente**:\nRey R., Santiago Arias, Fedorco J., Lomonaco K.\nZabala F., Perez Curci M., Marcone I., Gutierrez M.\nMontiel S., Abaldo M., Avalos G.\n\n**Platense**:\nCozzani J., Saborido J., Vazquez I., Victor Cuesta\nThiago Silva, Barrios M., Ferreira P., Zapiola F.\nMainero G., Retamar K., Nico López",
+        "atualizado_em": "2026-08-08 19:48"
+    },
+    "institutoxgimnasia mendoza": {
+        "time_casa": "Instituto",
+        "time_fora": "Gimnasia Mendoza",
+        "horario": "21:30",
+        "liga": "Argentina - Liga Profesional",
+        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/gimnasia-mendoza-K2sDXbFE/instituto-8G45bXRA/resumo/equipes/",
+        "titulares_casa": [
+            "Ledesma M.",
+            "Galvan J.",
+            "Mosevich L.",
+            "Alarcon F. R.",
+            "Cerato G.",
+            "Abregu G.",
+            "Gallardo M.",
+            "Sosa D.",
+            "Cordoba Mosquera J. E.",
+            "Luna A.",
+            "Tissera M."
+        ],
+        "titulares_fora": [
+            "Rigamonti C.",
+            "Franco J.",
+            "Guiffrey G.",
+            "Munoz E.",
+            "M. Recalde",
+            "E. Fernández",
+            "Antonini F.",
+            "Lencioni F.",
+            "Rodriguez S.",
+            "Modica A.",
+            "Ceballos J."
+        ],
+        "texto_telegram": "**Instituto**:\nLedesma M., Galvan J., Mosevich L., Alarcon F. R.\nCerato G., Abregu G., Gallardo M., Sosa D.\nCordoba Mosquera J. E., Luna A., Tissera M.\n\n**Gimnasia Mendoza**:\nRigamonti C., Franco J., Guiffrey G., Munoz E.\nM. Recalde, E. Fernández, Antonini F., Lencioni F.\nRodriguez S., Modica A., Ceballos J.",
+        "atualizado_em": "2026-08-08 19:48"
+    }
+}
