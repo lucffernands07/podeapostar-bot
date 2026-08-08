@@ -188,16 +188,8 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
 
             # 2. Outros mercados (Gols, BTTS, Faltas, etc.)
             elif "falta" in mercado_raw.lower():
-                match_nome = re.search(r'([A-Za-zÀ-ÿ\s.\-]+(?:\s+[A-Za-zÀ-ÿ]\.)?\s*\([A-Z]{3}\))', mercado_raw)
-                nome = match_nome.group(1).strip() if match_nome else "Jogador"
-                match_med = re.search(r'(?:Méd:|média|Méd\.|med:)\s*([\d.]+)', mercado_raw, re.IGNORECASE)
-                med = match_med.group(1) if match_med else None
-                texto_final = f"🔶 Faltas sofridas: {nome} | Méd: {float(med):.1f}{sufixo_odd}" if med else f"🔶 Faltas sofridas: {nome}{sufixo_odd}"
-
-            elif "cartã" in mercado_raw.lower() or "cartao" in mercado_raw.lower():
-                match_med_cartao = re.search(r'[\d.]+', mercado_raw)
-                num_media = match_med_cartao.group(0) if match_med_cartao else "0.0"
-                texto_final = f"🔶 Média de cartões: {num_media}{sufixo_odd}"
+                # Formatação direta e limpa para Faltas Totais do Jogo (Coletivo)
+                texto_final = f"🔶 {mercado_raw.split('|')[0].strip()}{sufixo_odd}"
                 
             else:
                 texto_final = f"🔶 {mercado_raw.split('|')[0].strip()}{sufixo_odd}"
