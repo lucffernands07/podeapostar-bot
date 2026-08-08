@@ -20,6 +20,26 @@
         "link_h2h": "https://www.flashscore.com.br/jogo/ClHgE1DU"
     },
     {
+        "horario": "16:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Grêmio",
+        "time_fora": "São Paulo",
+        "mercado": "Chutes Totais no Jogo: 22.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gremio-RS-Sao-Paulo-SP/89808689/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ClHgE1DU"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Grêmio",
+        "time_fora": "São Paulo",
+        "mercado": "Faltas Totais no Jogo: 31.7",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gremio-RS-Sao-Paulo-SP/89808689/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ClHgE1DU"
+    },
+    {
         "horario": "18:30",
         "liga": "Brasileirão Série A",
         "time_casa": "Remo",
@@ -50,12 +70,52 @@
         "link_h2h": "https://www.flashscore.com.br/jogo/IRwLUMcB"
     },
     {
+        "horario": "18:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Remo",
+        "time_fora": "Atlético-MG",
+        "mercado": "Chutes Totais no Jogo: 22.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Remo-PA-Clube-Atletico-MG/89808690/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IRwLUMcB"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Remo",
+        "time_fora": "Atlético-MG",
+        "mercado": "Faltas Totais no Jogo: 25.2",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Remo-PA-Clube-Atletico-MG/89808690/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/IRwLUMcB"
+    },
+    {
         "horario": "20:30",
         "liga": "Brasileirão Série A",
         "time_casa": "Coritiba",
         "time_fora": "Chapecoense",
         "mercado": "+1.5 Gols (80%)",
         "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/Coritiba-PR-Chapecoense-SC/89808691/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lnn4Y4bn"
+    },
+    {
+        "horario": "20:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Coritiba",
+        "time_fora": "Chapecoense",
+        "mercado": "Chutes Totais no Jogo: 23.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Coritiba-PR-Chapecoense-SC/89808691/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lnn4Y4bn"
+    },
+    {
+        "horario": "20:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Coritiba",
+        "time_fora": "Chapecoense",
+        "mercado": "Faltas Totais no Jogo: 26.7",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Coritiba-PR-Chapecoense-SC/89808691/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lnn4Y4bn"
     },
@@ -86,6 +146,26 @@
         "time_fora": "Fluminense",
         "mercado": "Ambas Marcam: Não",
         "odd": "2.0",
+        "link_betano": "https://www.betano.bet.br/match-odds/Botafogo-RJ-Fluminense-RJ/89808692/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EJGK1OTO"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Botafogo",
+        "time_fora": "Fluminense",
+        "mercado": "Chutes Totais no Jogo: 22.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Botafogo-RJ-Fluminense-RJ/89808692/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EJGK1OTO"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Botafogo",
+        "time_fora": "Fluminense",
+        "mercado": "Faltas Totais no Jogo: 26.0",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Botafogo-RJ-Fluminense-RJ/89808692/",
         "link_h2h": "https://www.flashscore.com.br/jogo/EJGK1OTO"
     }
