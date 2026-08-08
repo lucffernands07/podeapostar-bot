@@ -1,8 +1,24 @@
 import time
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-import re
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+def formatar_rota_h2h(url_base, sub_rota=""):
+    path = url_base.split('?')[0].split('#')[0].rstrip('/')
+    for sufixo in ['/overall', '/casa', '/fora']:
+        if path.endswith(sufixo):
+            path = path[:-len(sufixo)]
+
+    if not path.endswith('/h2h'):
+        path = f"{path}/h2h"
+
+    if sub_rota:
+        path = f"{path}/{sub_rota}"
+
+    return f"{path}/"
 
 def verificar_chutes_totais(s):
     """
@@ -42,24 +58,29 @@ def extrair_estatisticas_partida(driver, url_jogo):
             url_stats = f"{url_jogo.split('/#')[0].rstrip('/')}/resumo/estatisticas/total/"
             
         driver.get(url_stats)
-        time.sleep(2.5)
+        time.sleep(2.0)
         
         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
         
-        for idx, span in enumerate(todos_spans):
-            texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
-            
-            if any(termo in texto_elemento for termo in ["FINALIZAÇÕES", "REMATES", "SHOTS"]):
-                if idx > 0 and (idx + 1) < len(todos_spans):
-                    val_casa_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
-                    val_fora_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                    
-                    match_c = re.search(r'\d+', val_casa_str)
-                    match_f = re.search(r'\d+', val_fora_str)
-                    
-                    chutes_casa = int(match_c.group()) if match_c else 0
-                    chutes_fora = int(match_f.group()) if match_f else 0
-                    break
+        if len(todos_spans) > 0:
+            achou_cartoes_ancora = False
+            for idx, span in enumerate(todos_spans):
+                texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
+                
+                if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
+                    achou_cartoes_ancora = True
+                
+                if not achou_cartoes_ancora and texto_elemento in ["TOTAL DE FINALIZAÇÕES", "TOTAL SHOTS"]:
+                    if idx > 0 and (idx + 1) < len(todos_spans):
+                        val_casa_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                        val_fora_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                        
+                        match_c = re.search(r'\d+', val_casa_str)
+                        match_f = re.search(r'\d+', val_fora_str)
+                        
+                        chutes_casa = int(match_c.group()) if match_c else 0
+                        chutes_fora = int(match_f.group()) if match_f else 0
+                        break
     except Exception as e:
         print(f"  ⚠️ Erro ao raspar estatísticas do jogo {url_jogo}: {e}")
         
@@ -74,78 +95,63 @@ def rodar_teste_chutes_totais_com_urls():
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
     driver = webdriver.Chrome(options=chrome_options)
+    wait = WebDriverWait(driver, 10)
     
+    # URL base H2H simulando o confronto
     url_base_h2h = "https://www.flashscore.com.br/jogo/futebol/cuiaba-zVvjqDOo/fortaleza-42FbPIs2/h2h/total/"
-    url_casa = url_base_h2h.replace("/h2h/total/", "/h2h/casa/")
-    url_fora = url_base_h2h.replace("/h2h/total/", "/h2h/fora/")
+    url_base_limpa = url_base_h2h.replace("/h2h/total", "").rstrip("/")
+
+    rotas_alvo = [
+        {"tipo": "MANDANTE", "url": formatar_rota_h2h(url_base_limpa, "casa"), "chave_array_chutes": "chutes_mandante_h2h"},
+        {"tipo": "VISITANTE", "url": formatar_rota_h2h(url_base_limpa, "fora"), "chave_array_chutes": "chutes_visitante_h2h"}
+    ]
     
-    print("\n🚀 INICIANDO TESTE ISOLADO: FORTALEZA X CUIABÁ (MAPEAMENTO SEGURO)\n" + "="*80)
-    print(f"1. URL CASA: {url_casa}")
-    print(f"2. URL FORA: {url_fora}")
-    print("-" * 80)
+    print("\n🚀 INICIANDO TESTE ISOLADO: FORTALEZA X CUIABÁ (LÓGICA PRINCIPAL)\n" + "="*80)
     
-    chutes_mandante_h2h = []
-    chutes_visitante_h2h = []
+    stats = {
+        "chutes_mandante_h2h": [],
+        "chutes_visitante_h2h": []
+    }
 
     try:
-        # =========================================================================
-        # PASSO 1: Mapear e extrair os 5 jogos do Mandante em CASA
-        # =========================================================================
-        print("\n🏠 Acessando aba de CASA do Mandante (Fortaleza)...")
-        driver.get(url_casa)
-        time.sleep(4.0)
-        
-        urls_mandante_links = []
-        blocos_mandante = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
-        if blocos_mandante:
-            linhas_mandante = blocos_mandante[0].find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")[:5]
-            for linha in linhas_mandante:
+        for alvo in rotas_alvo:
+            print(f"\n🔍 [LOG] Acessando URL {alvo['tipo']}: {alvo['url']}")
+            driver.get(alvo["url"])
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")))
+            time.sleep(1.0)
+            
+            linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")
+            print(f"      📊 [LOG] Encontradas {len(linhas_confrontos)} linhas H2H para {alvo['tipo']}.")
+            
+            links_jogos = []
+            for linha in linhas_confrontos[:5]:
                 href = linha.get_attribute("href")
-                if href and href not in urls_mandante_links:
-                    urls_mandante_links.append(href)
+                if not href:
+                    try:
+                        a_tag = linha.find_element(By.TAG_NAME, "a")
+                        href = a_tag.get_attribute("href")
+                    except Exception:
+                        pass
+                if href and href not in links_jogos:
+                    links_jogos.append(href)
 
-        print(f"   📌 Total de links coletados do Mandante: {len(urls_mandante_links)}")
-        for idx, href in enumerate(urls_mandante_links, start=1):
-            c_casa, _ = extrair_estatisticas_partida(driver, href)
-            if c_casa > 0:
-                chutes_mandante_h2h.append(c_casa)
-                print(f"   • [{idx}/5] Jogo: {href} ➔ Chutes Mandante (Casa): {c_casa}")
+            for idx, url_jogo in enumerate(links_jogos[:5], start=1):
+                url_jogo_base = url_jogo.split("?")[0].split("#")[0].strip("/")
+                c_casa, c_fora = extrair_estatisticas_partida(driver, url_jogo)
+                
+                if alvo["tipo"] == "MANDANTE" and c_casa > 0:
+                    stats["chutes_mandante_h2h"].append(c_casa)
+                    print(f"   • Mandante [{idx}/5] ➔ Chutes (Casa): {c_casa}")
+                elif alvo["tipo"] == "VISITANTE" and c_fora > 0:
+                    stats["chutes_visitante_h2h"].append(c_fora)
+                    print(f"   • Visitante [{idx}/5] ➔ Chutes (Fora): {c_fora}")
 
-        # =========================================================================
-        # PASSO 2: Mapear e extrair os 5 jogos do Visitante FORA
-        # =========================================================================
-        print("\n✈️ Acessando aba de FORA do Visitante (Palmeiras)...")
-        driver.get(url_fora)
-        time.sleep(4.0)
+        # Cálculo Final das Médias
+        c_h2h = stats.get("chutes_mandante_h2h", [])
+        v_h2h = stats.get("chutes_visitante_h2h", [])
         
-        urls_visitante_links = []
-        blocos_visitante = driver.find_elements(By.CSS_SELECTOR, ".h2h__section, [class*='h2h__section']")
-        
-        # Varre os blocos disponíveis para garantir que pegamos os jogos de fora do visitante
-        for bloco in blocos_visitante:
-            linhas_visitante = bloco.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")
-            for linha in linhas_visitante:
-                href = linha.get_attribute("href")
-                if href and href not in urls_visitante_links:
-                    urls_visitante_links.append(href)
-            if len(urls_visitante_links) >= 5:
-                break
-
-        # Limita estritamente aos 5 primeiros coletados
-        urls_visitante_links = urls_visitante_links[:5]
-
-        print(f"   📌 Total de links coletados do Visitante: {len(urls_visitante_links)}")
-        for idx, href in enumerate(urls_visitante_links, start=1):
-            _, c_fora = extrair_estatisticas_partida(driver, href)
-            if c_fora > 0:
-                chutes_visitante_h2h.append(c_fora)
-                print(f"   • [{idx}/5] Jogo: {href} ➔ Chutes Visitante (Fora): {c_fora}")
-
-        # =========================================================================
-        # PASSO 3: Cálculo e Validação Final das Médias
-        # =========================================================================
-        media_m = round(sum(chutes_mandante_h2h) / len(chutes_mandante_h2h), 2) if chutes_mandante_h2h else 0.0
-        media_v = round(sum(chutes_visitante_h2h) / len(chutes_visitante_h2h), 2) if chutes_visitante_h2h else 0.0
+        media_m = round(sum(c_h2h) / len(c_h2h), 2) if len(c_h2h) > 0 else 0.0
+        media_v = round(sum(v_h2h) / len(v_h2h), 2) if len(v_h2h) > 0 else 0.0
 
         stats_teste = {
             "mandante_media_chutes_casa": media_m,
@@ -156,8 +162,8 @@ def rodar_teste_chutes_totais_com_urls():
         
         print("\n" + "="*80)
         print("3. RESULTADO DA MÉDIA DE CHUTES TOTAIS:")
-        print(f"   • Média Calculada Mandante (Casa): {media_m} (Baseado em {len(chutes_mandante_h2h)} jogos)")
-        print(f"   • Média Calculada Visitante (Fora): {media_v} (Baseado em {len(chutes_visitante_h2h)} jogos)")
+        print(f"   • Média Calculada Mandante (Casa): {media_m} (Baseado em {len(c_h2h)} jogos)")
+        print(f"   • Média Calculada Visitante (Fora): {media_v} (Baseado em {len(v_h2h)} jogos)")
         
         if resultado_mercados:
             for item in resultado_mercados:
@@ -173,3 +179,4 @@ def rodar_teste_chutes_totais_com_urls():
 
 if __name__ == "__main__":
     rodar_teste_chutes_totais_com_urls()
+                        
