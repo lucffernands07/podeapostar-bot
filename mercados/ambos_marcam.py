@@ -1,6 +1,6 @@
 """
 REGRAS DE MERCADO - AMBAS MARCAM (BTTS SIM / NÃO)
-Ajustado para acumular os mercados em lista e equilibrar a aparição de Sim e Não.
+Ajustado para reconhecer qualquer mercado de gols prévio de forma ampla.
 """
 
 def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=None):
@@ -12,17 +12,18 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
         # Captura os mercados aprovados enviados pelo main.py
         mercados_previos = outros_mercados_aprovados or mercados_gols_aprovados
 
-        # 🛑 TRAVA 1: Validação de presença de mercados prévios
+        # 🛑 TRAVA 1: Validação de presença de mercados prévios e detecção ampla de gols
         tem_mercado_valido = False
-        tem_over_aprovado = False
+        tem_mercado_gols_ativo = False
 
         if isinstance(mercados_previos, list) and len(mercados_previos) > 0:
             tem_mercado_valido = True
-            tem_over_aprovado = any("GOLS_15" in item.get("tipo", "") or "GOLS_25" in item.get("tipo", "") for item in mercados_previos if isinstance(item, dict))
+            # Varre qualquer tipo que tenha relação com gols (ex: GOLS_15, GOLS_25, GOLS_35_MENOS, etc.)
+            tem_mercado_gols_ativo = any("GOL" in item.get("tipo", "").upper() for item in mercados_previos if isinstance(item, dict))
         elif isinstance(mercados_previos, dict):
             tem_mercado_valido = any(len(v) > 0 for v in mercados_previos.values() if isinstance(v, list))
             lista_gols = mercados_previos.get("gols", [])
-            tem_over_aprovado = any("GOLS_15" in item.get("tipo", "") or "GOLS_25" in item.get("tipo", "") for item in lista_gols if isinstance(item, dict))
+            tem_mercado_gols_ativo = any("GOL" in item.get("tipo", "").upper() for item in lista_gols if isinstance(item, dict))
 
         if not tem_mercado_valido:
             print("   ⚠️ BTTS BARRADO: Nenhum outro mercado foi aprovado para este jogo.")
@@ -34,12 +35,11 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
         
         media_gols_mandante = float(s.get("media_gols_casa", 0) or 0)
         m_jogos_marcou_casa = int(s.get("mandante_jogos_com_gol_casa", 0) or 0)
-        
-        mandante_sofreu_gol_ultimo = s.get("mandante_sofreu_gol_ultimo_casa", False)
 
-        # 🟢 REGRA 1: AMBAS MARCAM SIM (Atualizada com as 3 novas regras em sequência)
+        # 🟢 REGRA 1: AMBAS MARCAM SIM 
+        # Exige que haja um mercado de gols ativo e médias fortes de ambos os lados
         condicao_btts_sim = (
-            tem_over_aprovado and 
+            tem_mercado_gols_ativo and 
             media_gols_visitante >= 1.2 and 
             media_gols_mandante >= 1.0
         )
@@ -47,9 +47,10 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
         if condicao_btts_sim:
             mercados_aprovados.append({"mercado": "Ambas Marcam: Sim", "tipo": "BTTS_SIM"})
         else:
-            # 🔴 REGRA 2: AMBAS MARCAM NÃO (Mantida exatamente como estava antes)
-            if tem_over_aprovado:
-                print("   ⚠️ BTTS NÃO BARRADO: Jogo tem tendência de Over aprovada.")
+            # 🔴 REGRA 2: AMBAS MARCAM NÃO
+            # Se houver mercado de gols ativo com forte tendência, barra o "Não" para evitar conflito
+            if tem_mercado_gols_ativo:
+                print("   ⚠️ BTTS NÃO BARRADO: Jogo possui mercado de gols validado, conflitando com o padrão de Não.")
             elif v_jogos_marcou_fora >= 3 or m_jogos_marcou_casa >= 3:
                 print("   ⚠️ BTTS NÃO BARRADO: Ambas as equipes marcam com muita frequência.")
             else:
@@ -63,4 +64,3 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
     except Exception as e:
         print(f"      ⚠️ Erro ao processar mercado Ambas Marcam: {e}")
         return mercados_aprovados
-            
