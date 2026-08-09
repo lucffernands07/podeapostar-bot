@@ -2,20 +2,6 @@
     "data_geracao": "2026-08-09",
     "jogos": [
         {
-            "time_casa": "Bahia",
-            "time_fora": "Vasco",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/MapCWrTb/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Palmeiras",
-            "time_fora": "Internacional",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/zqMUJ5qg/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Red Bull Bragantino",
             "time_fora": "Corinthians",
             "mercado": "MÚLTIPLOS",
@@ -37,32 +23,11 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/IiNB3paC/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Novorizontino",
-            "time_fora": "Juventude",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/GGe0gwho/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Cuiabá",
             "time_fora": "Fortaleza",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/hIQWB6P9/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Maringá",
-            "time_fora": "Amazonas",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/r7cquReE/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Ypiranga",
-            "time_fora": "Floresta",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jX0iw5QQ/#/resumo-de-jogo"
         },
         {
             "time_casa": "Maranhão",

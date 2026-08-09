@@ -1,74 +1,4 @@
 {
-    "bahiaxvasco": {
-        "time_casa": "Bahia",
-        "time_fora": "Vasco",
-        "horario": "16:00",
-        "liga": "Brasileirão Série A",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/bahia-UeD7XtzM/vasco-2RABlYFn/resumo/equipes/",
-        "titulares_casa": [
-            "Ronaldo Strada",
-            "Gomez R.",
-            "David",
-            "Santiago Ramos",
-            "Luciano Juba",
-            "Ademir",
-            "Nicolás Acevedo(C)",
-            "Jean Lucas",
-            "Rodrigo Nestor",
-            "Willian José",
-            "Veliz A."
-        ],
-        "titulares_fora": [
-            "Leo Jardim",
-            "Paulo Henrique",
-            "Cuesta C.",
-            "Robert Renan",
-            "Cuiabano",
-            "Jair",
-            "Tchê Tchê",
-            "Adson",
-            "Thiago Mendes(C)",
-            "Gomez A.",
-            "Brenner"
-        ],
-        "texto_telegram": "**Bahia**:\nRonaldo Strada, Gomez R., David, Santiago Ramos\nLuciano Juba, Ademir, Nicolás Acevedo(C), Jean Lucas\nRodrigo Nestor, Willian José, Veliz A.\n\n**Vasco**:\nLeo Jardim, Paulo Henrique, Cuesta C., Robert Renan\nCuiabano, Jair, Tchê Tchê, Adson\nThiago Mendes(C), Gomez A., Brenner",
-        "atualizado_em": "2026-08-09 15:55"
-    },
-    "palmeirasxinternacional": {
-        "time_casa": "Palmeiras",
-        "time_fora": "Internacional",
-        "horario": "16:00",
-        "liga": "Brasileirão Série A",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/internacional-tSCiHj0I/palmeiras-hMn9FTbH/resumo/equipes/",
-        "titulares_casa": [
-            "Carlos Miguel",
-            "Martinez E.",
-            "Murilo",
-            "Alexander Barboza",
-            "Allan",
-            "Andreas Pereira",
-            "Marlon Freitas",
-            "Piquerez(C)",
-            "Maurício",
-            "Jhon Arias",
-            "Sosa R."
-        ],
-        "titulares_fora": [
-            "Matheus Cunha",
-            "Bruno Gomes",
-            "Maripan G.",
-            "Felix Torres",
-            "Vitor Naum",
-            "Paulinho",
-            "Bruno Henrique",
-            "Matheus Bahia",
-            "Carbonero J.",
-            "Bernabei A.",
-            "Alan Patrick(C)"
-        ],
-        "texto_telegram": "**Palmeiras**:\nCarlos Miguel, Martinez E., Murilo, Alexander Barboza\nAllan, Andreas Pereira, Marlon Freitas, Piquerez(C)\nMaurício, Jhon Arias, Sosa R.\n\n**Internacional**:\nMatheus Cunha, Bruno Gomes, Maripan G., Felix Torres\nVitor Naum, Paulinho, Bruno Henrique, Matheus Bahia\nCarbonero J., Bernabei A., Alan Patrick(C)",
-        "atualizado_em": "2026-08-09 15:55"
-    },
     "defensa y justiciaxnewell's old boys": {
         "time_casa": "Defensa y Justicia",
         "time_fora": "Newell's Old Boys",
@@ -102,7 +32,7 @@
             "Ramirez I."
         ],
         "texto_telegram": "**Defensa y Justicia**:\nBorgogno M., Portillo A., Fernandez D., S. Lucero\nM. Rodriguez, Sosa S., Perez C., Hausch A.\nBarbona D., Gutierrez J., Fernandez L.\n\n**Newell's Old Boys**:\nReinatti J., Escobar F., Cabrera B., Giannetti L.\nRusso J., Sotelo D., Regiardo L., Mazzantti W.\nGuch F., Rios T., Ramirez I.",
-        "atualizado_em": "2026-08-09 15:55"
+        "atualizado_em": "2026-08-09 16:38"
     },
     "gimnasia l.p.xbarracas central": {
         "time_casa": "Gimnasia L.P.",
@@ -137,7 +67,7 @@
             "Candia J."
         ],
         "texto_telegram": "**Gimnasia L.P.**:\nInsfran N., Antônio Steimbach, Cortazzo J., Martinez E.\nSilva Torrejon P., Seoane M., Schelotto N., Miramon I.\nNacho Fernández, Colazo A., Auzmendi A.\n\n**Barracas Central**:\nMino M., Barrios R., Jappert K., Y. Rak\nDemartini N., Insua R., Porra T., Miloc D.\nTapia I., Bruera F., Candia J.",
-        "atualizado_em": "2026-08-09 15:55"
+        "atualizado_em": "2026-08-09 16:38"
     },
     "red bull bragantinoxcorinthians": {
         "time_casa": "Red Bull Bragantino",
@@ -172,7 +102,7 @@
             "Kaio Cesar"
         ],
         "texto_telegram": "**Red Bull Bragantino**:\nTiago Volpi, Hurtado A., Alix, Pedro Henrique\nJuninho Capixaba, Rodriguinho, Ramires, Herrera J.\nLucas Barbosa, Fernando, Eduardo Sasha\n\n**Corinthians**:\nHugo Souza, Matheuzinho, Gabriel Paulista, Gustavo Henrique\nMatheus Bidu, André, Raniele, Rodrigo Garro\nMatheus Pereira, Pedro Raúl, Kaio Cesar",
-        "atualizado_em": "2026-08-09 15:55"
+        "atualizado_em": "2026-08-09 16:38"
     },
     "santosxathletico-pr": {
         "time_casa": "Santos",
@@ -207,7 +137,7 @@
             "Viveros K."
         ],
         "texto_telegram": "**Santos**:\nGabriel Brazão, Gabriel Menino, Frias A., Joao Ananias\nEscobar G., Oliva C., Joao Schmidt, Barreal A.\nGabriel Bontempo, Caballero G., Gabriel\n\n**Athletico-PR**:\nMycael, Benavidez G., Aguirre F., Arthur Dias\nGilberto, Jadson, Luiz Gustavo, Leo Derik\nLeozinho, Mendoza S., Viveros K.",
-        "atualizado_em": "2026-08-09 15:55"
+        "atualizado_em": "2026-08-09 16:38"
     },
     "flamengoxvitória": {
         "time_casa": "Flamengo",
@@ -242,7 +172,7 @@
             "Renato Kayzer"
         ],
         "texto_telegram": "**Flamengo**:\nAgustín Rossi, Varela, Vitão, Léo Pereira\nAlex Sandro, Pulgar, Jorginho, Gonzalo Plata\nDe Arrascaeta, Samuel Lino, Pedro\n\n**Vitória**:\nLucas Arcanjo, Fabiano, Britez E., Edenílson\nErick, Baralhas, Caíque Gonçalves, Matheusinho\nRamon, Rene, Renato Kayzer",
-        "atualizado_em": "2026-08-09 15:55"
+        "atualizado_em": "2026-08-09 16:38"
     },
     "argentinos juniorsxracing club": {
         "time_casa": "Argentinos Juniors",
@@ -277,7 +207,7 @@
             "Lautaro Diaz"
         ],
         "texto_telegram": "**Argentinos Juniors**:\nBruno Côrtes, Coronel K., Alvarez F., S. Prieto\nBravo C., Florentin G., Gutierrez K., Oroz N.\nLopez H., Molina T., Jainikoski F.\n\n**Racing Club**:\nCambeses F., Cannavo E., Colombo N., Rojo M.\nRodriguez I., Ortegoza U., Kranevitter M., Miljevic M.\nTello A., Adrian Martinez, Lautaro Diaz",
-        "atualizado_em": "2026-08-09 15:55"
+        "atualizado_em": "2026-08-09 16:38"
     },
     "benficaxacadémico viseu": {
         "time_casa": "Benfica",
@@ -287,31 +217,31 @@
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/academico-viseu-GrRgeTHo/benfica-zBkyuyRI/resumo/equipes/",
         "titulares_casa": [
             "S. Soares",
-            "Araujo T.(C)",
             "Bah A.",
+            "Araujo T.(C)",
+            "Lenglet C.",
+            "Dahl S.",
             "Barreiro L.",
             "Barrenechea E.",
-            "Dahl S.",
-            "Lenglet C.",
-            "Pavlidis V.",
-            "Prestianni G.",
             "Rafa Silva",
-            "Sudakov G."
+            "Sudakov G.",
+            "Prestianni G.",
+            "Pavlidis V."
         ],
         "titulares_fora": [
             "Ewerton",
+            "Robinho",
             "Adriano Correia",
-            "Andre Clovis",
+            "Pereira R.",
             "I. Milioransa",
-            "Joao Guilherme",
             "Kahraman C.",
             "Messeguem S.(C)",
+            "Joao Guilherme",
             "Mestanza A.",
-            "Pereira R.",
-            "Robinho",
-            "Zamora A."
+            "Zamora A.",
+            "Andre Clovis"
         ],
-        "texto_telegram": "**Benfica**:\nS. Soares, Araujo T.(C), Bah A., Barreiro L.\nBarrenechea E., Dahl S., Lenglet C., Pavlidis V.\nPrestianni G., Rafa Silva, Sudakov G.\n\n**Académico Viseu**:\nEwerton, Adriano Correia, Andre Clovis, I. Milioransa\nJoao Guilherme, Kahraman C., Messeguem S.(C), Mestanza A.\nPereira R., Robinho, Zamora A.",
-        "atualizado_em": "2026-08-09 15:55"
+        "texto_telegram": "**Benfica**:\nS. Soares, Bah A., Araujo T.(C), Lenglet C.\nDahl S., Barreiro L., Barrenechea E., Rafa Silva\nSudakov G., Prestianni G., Pavlidis V.\n\n**Académico Viseu**:\nEwerton, Robinho, Adriano Correia, Pereira R.\nI. Milioransa, Kahraman C., Messeguem S.(C), Joao Guilherme\nMestanza A., Zamora A., Andre Clovis",
+        "atualizado_em": "2026-08-09 16:38"
     }
 }
