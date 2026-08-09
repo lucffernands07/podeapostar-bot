@@ -1,19 +1,21 @@
 # mercados/vitorias.py
+from mercados.chance_dupla import verificar_chance_dupla  # Importa a regra de chance dupla
 
 def verificar_vitorias(stats):
     """
-    Regras de Vitória Casa e Vitória Fora baseadas nos 7 exemplos reais:
-    
-    - Vitória Casa: Mandante competitivo (>= 3 vitórias) AND 
-                    (Visitante perdeu >= 3 jogos fora OU levou >= 8 gols fora).
-                    
-    - Vitória Fora: Visitante sólido na defesa (<= 6 gols sofridos fora AND >= 3 jogos sem perder) AND 
-                    (Mandante com 0 vitórias em casa OU Visitante com >= 3 vitórias fora).
+    Regras de Vitória Casa e Vitória Fora.
+    Trava de Segurança: Se o jogo for aprovado em Chance Dupla (1X ou X2), 
+    os mercados de Vitória Simples são descartados.
     """
     retorno = []
     
     if not isinstance(stats, dict):
         return retorno
+
+    # 🛑 TRAVA DE SEGURANÇA: Se tem Chance Dupla, descarta Vitória Simples
+    chance_dupla_aprovada = verificar_chance_dupla(stats)
+    if chance_dupla_aprovada:
+        return []  # Retorna vazio, anulando a vitória simples para este jogo
 
     # Captura das métricas do dicionário
     vitorias_casa = int(stats.get("casa_vitorias_recente", 0) or 0)
