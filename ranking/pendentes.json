@@ -23,11 +23,11 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/IiNB3paC/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Cuiabá",
-            "time_fora": "Fortaleza",
+            "time_casa": "Itabaiana",
+            "time_fora": "Caxias",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/hIQWB6P9/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/zNHqycwq/#/resumo-de-jogo"
         },
         {
             "time_casa": "Maranhão",
@@ -37,53 +37,11 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/rmLiZz8e/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Defensa y Justicia",
-            "time_fora": "Newell's Old Boys",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/U7hiYPHc/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Gimnasia L.P.",
-            "time_fora": "Barracas Central",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/rga7QYFl/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Argentinos Juniors",
             "time_fora": "Racing Club",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/Q10lADV7/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Benfica",
-            "time_fora": "Académico Viseu",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/QsVHjuFa/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Gil Vicente",
-            "time_fora": "Rio Ave",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/dIXd3Ib5/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Moreirense",
-            "time_fora": "Braga",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lhUl5vUh/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Alianza",
-            "time_fora": "Bucaramanga",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/WMMOhzYH/#/resumo-de-jogo"
         },
         {
             "time_casa": "Jaguares de Cordoba",
@@ -98,13 +56,6 @@
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/IFrMNfXi/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Seattle Sounders",
-            "time_fora": "Querétaro",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/nHefjzjn/#/resumo-de-jogo"
         },
         {
             "time_casa": "Cruz Azul",
@@ -140,6 +91,13 @@
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/QRdfeMXr/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "San Diego FC",
+            "time_fora": "Tijuana",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/ruDG24u9/#/resumo-de-jogo"
         },
         {
             "time_casa": "Club America",

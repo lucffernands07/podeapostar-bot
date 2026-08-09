@@ -1,74 +1,4 @@
 {
-    "defensa y justiciaxnewell's old boys": {
-        "time_casa": "Defensa y Justicia",
-        "time_fora": "Newell's Old Boys",
-        "horario": "17:45",
-        "liga": "Argentina - Liga Profesional",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/defensa-y-justicia-Gdfv0Zsh/newells-old-boys-6gMiRHVj/resumo/equipes/",
-        "titulares_casa": [
-            "Borgogno M.",
-            "Portillo A.",
-            "Fernandez D.",
-            "S. Lucero",
-            "M. Rodriguez",
-            "Sosa S.",
-            "Perez C.",
-            "Hausch A.",
-            "Barbona D.",
-            "Gutierrez J.",
-            "Fernandez L."
-        ],
-        "titulares_fora": [
-            "Reinatti J.",
-            "Escobar F.",
-            "Cabrera B.",
-            "Giannetti L.",
-            "Russo J.",
-            "Sotelo D.",
-            "Regiardo L.",
-            "Mazzantti W.",
-            "Guch F.",
-            "Rios T.",
-            "Ramirez I."
-        ],
-        "texto_telegram": "**Defensa y Justicia**:\nBorgogno M., Portillo A., Fernandez D., S. Lucero\nM. Rodriguez, Sosa S., Perez C., Hausch A.\nBarbona D., Gutierrez J., Fernandez L.\n\n**Newell's Old Boys**:\nReinatti J., Escobar F., Cabrera B., Giannetti L.\nRusso J., Sotelo D., Regiardo L., Mazzantti W.\nGuch F., Rios T., Ramirez I.",
-        "atualizado_em": "2026-08-09 16:38"
-    },
-    "gimnasia l.p.xbarracas central": {
-        "time_casa": "Gimnasia L.P.",
-        "time_fora": "Barracas Central",
-        "horario": "17:45",
-        "liga": "Argentina - Liga Profesional",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/barracas-centra-hW08cP6J/gimnasia-l-p-jiDN9Zaj/resumo/equipes/",
-        "titulares_casa": [
-            "Insfran N.",
-            "Antônio Steimbach",
-            "Cortazzo J.",
-            "Martinez E.",
-            "Silva Torrejon P.",
-            "Seoane M.",
-            "Schelotto N.",
-            "Miramon I.",
-            "Nacho Fernández",
-            "Colazo A.",
-            "Auzmendi A."
-        ],
-        "titulares_fora": [
-            "Mino M.",
-            "Barrios R.",
-            "Jappert K.",
-            "Y. Rak",
-            "Demartini N.",
-            "Insua R.",
-            "Porra T.",
-            "Miloc D.",
-            "Tapia I.",
-            "Bruera F.",
-            "Candia J."
-        ],
-        "texto_telegram": "**Gimnasia L.P.**:\nInsfran N., Antônio Steimbach, Cortazzo J., Martinez E.\nSilva Torrejon P., Seoane M., Schelotto N., Miramon I.\nNacho Fernández, Colazo A., Auzmendi A.\n\n**Barracas Central**:\nMino M., Barrios R., Jappert K., Y. Rak\nDemartini N., Insua R., Porra T., Miloc D.\nTapia I., Bruera F., Candia J.",
-        "atualizado_em": "2026-08-09 16:38"
-    },
     "red bull bragantinoxcorinthians": {
         "time_casa": "Red Bull Bragantino",
         "time_fora": "Corinthians",
@@ -76,17 +6,17 @@
         "liga": "Brasileirão Série A",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/corinthians-QBGfQbSe/red-bull-bragantino-jwKvKhGa/resumo/equipes/",
         "titulares_casa": [
-            "Tiago Volpi",
+            "Tiago Volpi(C)",
             "Hurtado A.",
             "Alix",
             "Pedro Henrique",
             "Juninho Capixaba",
-            "Rodriguinho",
             "Ramires",
-            "Herrera J.",
+            "Rodriguinho",
             "Lucas Barbosa",
-            "Fernando",
-            "Eduardo Sasha"
+            "Eduardo Sasha",
+            "Mosquera H.",
+            "Isidro Pitta"
         ],
         "titulares_fora": [
             "Hugo Souza",
@@ -94,15 +24,15 @@
             "Gabriel Paulista",
             "Gustavo Henrique",
             "Matheus Bidu",
-            "André",
+            "Allan",
             "Raniele",
-            "Rodrigo Garro",
-            "Matheus Pereira",
-            "Pedro Raúl",
-            "Kaio Cesar"
+            "Kaio Cesar",
+            "Rodrigo Garro(C)",
+            "Breno Bidon",
+            "Pedro Raúl"
         ],
-        "texto_telegram": "**Red Bull Bragantino**:\nTiago Volpi, Hurtado A., Alix, Pedro Henrique\nJuninho Capixaba, Rodriguinho, Ramires, Herrera J.\nLucas Barbosa, Fernando, Eduardo Sasha\n\n**Corinthians**:\nHugo Souza, Matheuzinho, Gabriel Paulista, Gustavo Henrique\nMatheus Bidu, André, Raniele, Rodrigo Garro\nMatheus Pereira, Pedro Raúl, Kaio Cesar",
-        "atualizado_em": "2026-08-09 16:38"
+        "texto_telegram": "**Red Bull Bragantino**:\nTiago Volpi(C), Hurtado A., Alix, Pedro Henrique\nJuninho Capixaba, Ramires, Rodriguinho, Lucas Barbosa\nEduardo Sasha, Mosquera H., Isidro Pitta\n\n**Corinthians**:\nHugo Souza, Matheuzinho, Gabriel Paulista, Gustavo Henrique\nMatheus Bidu, Allan, Raniele, Kaio Cesar\nRodrigo Garro(C), Breno Bidon, Pedro Raúl",
+        "atualizado_em": "2026-08-09 18:25"
     },
     "santosxathletico-pr": {
         "time_casa": "Santos",
@@ -118,9 +48,9 @@
             "Escobar G.",
             "Oliva C.",
             "Joao Schmidt",
-            "Barreal A.",
             "Gabriel Bontempo",
             "Caballero G.",
+            "Barreal A.",
             "Gabriel"
         ],
         "titulares_fora": [
@@ -130,14 +60,14 @@
             "Arthur Dias",
             "Gilberto",
             "Jadson",
-            "Luiz Gustavo",
-            "Leo Derik",
+            "Luiz Gustavo(C)",
+            "Joao Cruz",
             "Leozinho",
             "Mendoza S.",
             "Viveros K."
         ],
-        "texto_telegram": "**Santos**:\nGabriel Brazão, Gabriel Menino, Frias A., Joao Ananias\nEscobar G., Oliva C., Joao Schmidt, Barreal A.\nGabriel Bontempo, Caballero G., Gabriel\n\n**Athletico-PR**:\nMycael, Benavidez G., Aguirre F., Arthur Dias\nGilberto, Jadson, Luiz Gustavo, Leo Derik\nLeozinho, Mendoza S., Viveros K.",
-        "atualizado_em": "2026-08-09 16:38"
+        "texto_telegram": "**Santos**:\nGabriel Brazão, Gabriel Menino, Frias A., Joao Ananias\nEscobar G., Oliva C., Joao Schmidt, Gabriel Bontempo\nCaballero G., Barreal A., Gabriel\n\n**Athletico-PR**:\nMycael, Benavidez G., Aguirre F., Arthur Dias\nGilberto, Jadson, Luiz Gustavo(C), Joao Cruz\nLeozinho, Mendoza S., Viveros K.",
+        "atualizado_em": "2026-08-09 18:25"
     },
     "flamengoxvitória": {
         "time_casa": "Flamengo",
@@ -172,7 +102,7 @@
             "Renato Kayzer"
         ],
         "texto_telegram": "**Flamengo**:\nAgustín Rossi, Varela, Vitão, Léo Pereira\nAlex Sandro, Pulgar, Jorginho, Gonzalo Plata\nDe Arrascaeta, Samuel Lino, Pedro\n\n**Vitória**:\nLucas Arcanjo, Fabiano, Britez E., Edenílson\nErick, Baralhas, Caíque Gonçalves, Matheusinho\nRamon, Rene, Renato Kayzer",
-        "atualizado_em": "2026-08-09 16:38"
+        "atualizado_em": "2026-08-09 18:25"
     },
     "argentinos juniorsxracing club": {
         "time_casa": "Argentinos Juniors",
@@ -207,41 +137,6 @@
             "Lautaro Diaz"
         ],
         "texto_telegram": "**Argentinos Juniors**:\nBruno Côrtes, Coronel K., Alvarez F., S. Prieto\nBravo C., Florentin G., Gutierrez K., Oroz N.\nLopez H., Molina T., Jainikoski F.\n\n**Racing Club**:\nCambeses F., Cannavo E., Colombo N., Rojo M.\nRodriguez I., Ortegoza U., Kranevitter M., Miljevic M.\nTello A., Adrian Martinez, Lautaro Diaz",
-        "atualizado_em": "2026-08-09 16:38"
-    },
-    "benficaxacadémico viseu": {
-        "time_casa": "Benfica",
-        "time_fora": "Académico Viseu",
-        "horario": "16:30",
-        "liga": "Portugal - Primeira Liga",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/academico-viseu-GrRgeTHo/benfica-zBkyuyRI/resumo/equipes/",
-        "titulares_casa": [
-            "S. Soares",
-            "Bah A.",
-            "Araujo T.(C)",
-            "Lenglet C.",
-            "Dahl S.",
-            "Barreiro L.",
-            "Barrenechea E.",
-            "Rafa Silva",
-            "Sudakov G.",
-            "Prestianni G.",
-            "Pavlidis V."
-        ],
-        "titulares_fora": [
-            "Ewerton",
-            "Robinho",
-            "Adriano Correia",
-            "Pereira R.",
-            "I. Milioransa",
-            "Kahraman C.",
-            "Messeguem S.(C)",
-            "Joao Guilherme",
-            "Mestanza A.",
-            "Zamora A.",
-            "Andre Clovis"
-        ],
-        "texto_telegram": "**Benfica**:\nS. Soares, Bah A., Araujo T.(C), Lenglet C.\nDahl S., Barreiro L., Barrenechea E., Rafa Silva\nSudakov G., Prestianni G., Pavlidis V.\n\n**Académico Viseu**:\nEwerton, Robinho, Adriano Correia, Pereira R.\nI. Milioransa, Kahraman C., Messeguem S.(C), Joao Guilherme\nMestanza A., Zamora A., Andre Clovis",
-        "atualizado_em": "2026-08-09 16:38"
+        "atualizado_em": "2026-08-09 18:25"
     }
 }
