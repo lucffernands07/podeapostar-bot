@@ -2,39 +2,11 @@
     "data_geracao": "2026-08-09",
     "jogos": [
         {
-            "time_casa": "Red Bull Bragantino",
-            "time_fora": "Corinthians",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/r9PxIqE5/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Santos",
-            "time_fora": "Athletico-PR",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/UVjULREt/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Flamengo",
             "time_fora": "Vitória",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/IiNB3paC/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Itabaiana",
-            "time_fora": "Caxias",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/zNHqycwq/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Maranhão",
-            "time_fora": "Brusque",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/rmLiZz8e/#/resumo-de-jogo"
         },
         {
             "time_casa": "Argentinos Juniors",
@@ -91,13 +63,6 @@
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/QRdfeMXr/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "San Diego FC",
-            "time_fora": "Tijuana",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/ruDG24u9/#/resumo-de-jogo"
         },
         {
             "time_casa": "Club America",

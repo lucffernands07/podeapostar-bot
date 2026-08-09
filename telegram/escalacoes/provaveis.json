@@ -1,74 +1,4 @@
 {
-    "red bull bragantinoxcorinthians": {
-        "time_casa": "Red Bull Bragantino",
-        "time_fora": "Corinthians",
-        "horario": "18:30",
-        "liga": "Brasileirão Série A",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/corinthians-QBGfQbSe/red-bull-bragantino-jwKvKhGa/resumo/equipes/",
-        "titulares_casa": [
-            "Tiago Volpi(C)",
-            "Hurtado A.",
-            "Alix",
-            "Pedro Henrique",
-            "Juninho Capixaba",
-            "Ramires",
-            "Rodriguinho",
-            "Lucas Barbosa",
-            "Eduardo Sasha",
-            "Mosquera H.",
-            "Isidro Pitta"
-        ],
-        "titulares_fora": [
-            "Hugo Souza",
-            "Matheuzinho",
-            "Gabriel Paulista",
-            "Gustavo Henrique",
-            "Matheus Bidu",
-            "Allan",
-            "Raniele",
-            "Kaio Cesar",
-            "Rodrigo Garro(C)",
-            "Breno Bidon",
-            "Pedro Raúl"
-        ],
-        "texto_telegram": "**Red Bull Bragantino**:\nTiago Volpi(C), Hurtado A., Alix, Pedro Henrique\nJuninho Capixaba, Ramires, Rodriguinho, Lucas Barbosa\nEduardo Sasha, Mosquera H., Isidro Pitta\n\n**Corinthians**:\nHugo Souza, Matheuzinho, Gabriel Paulista, Gustavo Henrique\nMatheus Bidu, Allan, Raniele, Kaio Cesar\nRodrigo Garro(C), Breno Bidon, Pedro Raúl",
-        "atualizado_em": "2026-08-09 18:25"
-    },
-    "santosxathletico-pr": {
-        "time_casa": "Santos",
-        "time_fora": "Athletico-PR",
-        "horario": "18:30",
-        "liga": "Brasileirão Série A",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/athletico-pr-UoAxb1Tq/santos-n3QdnjFB/resumo/equipes/",
-        "titulares_casa": [
-            "Gabriel Brazão",
-            "Gabriel Menino",
-            "Frias A.",
-            "Joao Ananias",
-            "Escobar G.",
-            "Oliva C.",
-            "Joao Schmidt",
-            "Gabriel Bontempo",
-            "Caballero G.",
-            "Barreal A.",
-            "Gabriel"
-        ],
-        "titulares_fora": [
-            "Mycael",
-            "Benavidez G.",
-            "Aguirre F.",
-            "Arthur Dias",
-            "Gilberto",
-            "Jadson",
-            "Luiz Gustavo(C)",
-            "Joao Cruz",
-            "Leozinho",
-            "Mendoza S.",
-            "Viveros K."
-        ],
-        "texto_telegram": "**Santos**:\nGabriel Brazão, Gabriel Menino, Frias A., Joao Ananias\nEscobar G., Oliva C., Joao Schmidt, Gabriel Bontempo\nCaballero G., Barreal A., Gabriel\n\n**Athletico-PR**:\nMycael, Benavidez G., Aguirre F., Arthur Dias\nGilberto, Jadson, Luiz Gustavo(C), Joao Cruz\nLeozinho, Mendoza S., Viveros K.",
-        "atualizado_em": "2026-08-09 18:25"
-    },
     "flamengoxvitória": {
         "time_casa": "Flamengo",
         "time_fora": "Vitória",
@@ -78,12 +8,12 @@
         "titulares_casa": [
             "Agustín Rossi",
             "Varela",
-            "Vitão",
+            "Léo Ortiz",
             "Léo Pereira",
-            "Alex Sandro",
+            "Ayrton Lucas",
             "Pulgar",
             "Jorginho",
-            "Gonzalo Plata",
+            "Carrascal J.",
             "De Arrascaeta",
             "Samuel Lino",
             "Pedro"
@@ -92,17 +22,17 @@
             "Lucas Arcanjo",
             "Fabiano",
             "Britez E.",
-            "Edenílson",
-            "Erick",
-            "Baralhas",
             "Caíque Gonçalves",
-            "Matheusinho",
-            "Ramon",
+            "Jamerson",
+            "Vitor",
+            "Walace",
+            "Emmanuel Martinez",
+            "Erick",
             "Rene",
-            "Renato Kayzer"
+            "Matheusinho"
         ],
-        "texto_telegram": "**Flamengo**:\nAgustín Rossi, Varela, Vitão, Léo Pereira\nAlex Sandro, Pulgar, Jorginho, Gonzalo Plata\nDe Arrascaeta, Samuel Lino, Pedro\n\n**Vitória**:\nLucas Arcanjo, Fabiano, Britez E., Edenílson\nErick, Baralhas, Caíque Gonçalves, Matheusinho\nRamon, Rene, Renato Kayzer",
-        "atualizado_em": "2026-08-09 18:25"
+        "texto_telegram": "**Flamengo**:\nAgustín Rossi, Varela, Léo Ortiz, Léo Pereira\nAyrton Lucas, Pulgar, Jorginho, Carrascal J.\nDe Arrascaeta, Samuel Lino, Pedro\n\n**Vitória**:\nLucas Arcanjo, Fabiano, Britez E., Caíque Gonçalves\nJamerson, Vitor, Walace, Emmanuel Martinez\nErick, Rene, Matheusinho",
+        "atualizado_em": "2026-08-09 19:14"
     },
     "argentinos juniorsxracing club": {
         "time_casa": "Argentinos Juniors",
@@ -137,6 +67,6 @@
             "Lautaro Diaz"
         ],
         "texto_telegram": "**Argentinos Juniors**:\nBruno Côrtes, Coronel K., Alvarez F., S. Prieto\nBravo C., Florentin G., Gutierrez K., Oroz N.\nLopez H., Molina T., Jainikoski F.\n\n**Racing Club**:\nCambeses F., Cannavo E., Colombo N., Rojo M.\nRodriguez I., Ortegoza U., Kranevitter M., Miljevic M.\nTello A., Adrian Martinez, Lautaro Diaz",
-        "atualizado_em": "2026-08-09 18:25"
+        "atualizado_em": "2026-08-09 19:14"
     }
 }
