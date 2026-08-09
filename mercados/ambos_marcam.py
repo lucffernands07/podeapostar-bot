@@ -49,4 +49,4 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
     except Exception as e:
         print(f"      ⚠️ Erro ao processar mercado Ambas Marcam: {e}")
         return mercados_aprovados
-        
+            
