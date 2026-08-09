@@ -14,17 +14,20 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
         tem_mercado_valido = False
         tem_over_ativo = False
         tem_under_35_ativo = False
+        tem_under_45_ativo = False
 
         if isinstance(mercados_previos, list) and len(mercados_previos) > 0:
             tem_mercado_valido = True
             tem_over_ativo = any("GOLS_15" in item.get("tipo", "").upper() or "GOLS_25" in item.get("tipo", "").upper() for item in mercados_previos if isinstance(item, dict))
             tem_under_35_ativo = any("M35" in item.get("tipo", "").upper() for item in mercados_previos if isinstance(item, dict))
+            tem_under_45_ativo = any("M45" in item.get("tipo", "").upper() for item in mercados_previos if isinstance(item, dict))
             
         elif isinstance(mercados_previos, dict):
             tem_mercado_valido = any(len(v) > 0 for v in mercados_previos.values() if isinstance(v, list))
             lista_gols = mercados_previos.get("gols", [])
             tem_over_ativo = any("GOLS_15" in item.get("tipo", "").upper() or "GOLS_25" in item.get("tipo", "").upper() for item in lista_gols if isinstance(item, dict))
             tem_under_35_ativo = any("M35" in item.get("tipo", "").upper() for item in lista_gols if isinstance(item, dict))
+            tem_under_45_ativo = any("M45" in item.get("tipo", "").upper() for item in lista_gols if isinstance(item, dict))
 
         if not tem_mercado_valido:
             print("   ⚠️ BTTS BARRADO: Nenhum outro mercado foi aprovado para este jogo.")
@@ -36,9 +39,11 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
         else:
             print("   ⚠️ BTTS SIM, BARRADO: Jogo não possui Over ativo.")
 
-        # 🔴 REGRA 2: BTTS NÃO (Se tem UNDER com gols -3.5)
+        # 🔴 REGRA 2: BTTS NÃO (Se tem UNDER com gols -3.5 e NÃO tem -4.5)
         if tem_over_ativo:
             print("   ⚠️ BTTS NÃO, BARRADO: Jogo tem Over ativo (Exclusão Mútua).")
+        elif tem_under_45_ativo:
+            print("   ⚠️ BTTS NÃO, BARRADO: Jogo possui linha de -4.5 Gols ativa (exige estritamente apenas -3.5).")
         elif tem_under_35_ativo:
             mercados_aprovados.append({"mercado": "Ambas Marcam: Não", "tipo": "BTTS_NAO"})
         else:
@@ -49,4 +54,4 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
     except Exception as e:
         print(f"      ⚠️ Erro ao processar mercado Ambas Marcam: {e}")
         return mercados_aprovados
-            
+        
