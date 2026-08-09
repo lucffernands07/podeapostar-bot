@@ -55,22 +55,22 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
             # 🔴 REGRA 2: AMBAS MARCAM NÃO
             # Se tem Over ativo, respeita a exclusão mútua
             if tem_over_ativo:
-                print("   ⚠️ BTTS NÃO BARRADO: Jogo tem tendência de Over ativa (Exclusão Mútua respeitada).")
+                print("   ⚠️ BTTS NÃO, BARRADO: Jogo tem tendência de Over ativa (Exclusão Mútua respeitada).")
                 return mercados_aprovados
 
             # 🛑 NOVA TRAVA: Se não foi aprovado estritamente o Under -3.5, barra o BTTS Não
             if not tem_under_35_ativo:
-                print("   ⚠️ BTTS NÃO BARRADO: O mercado de gols aprovado não é o -3.5.")
+                print("   ⚠️ BTTS NÃO, BARRADO: O mercado de gols aprovado não é o -3.5.")
                 return mercados_aprovados
 
             # Se passou com Under -3.5 confirmado, avalia as frequências
             if v_jogos_marcou_fora >= 3 or m_jogos_marcou_casa >= 3:
-                print("   ⚠️ BTTS NÃO BARRADO: Ambas as equipes marcam com muita frequência, mesmo com linha de Under -3.5.")
+                print("   ⚠️ BTTS NÃO, BARRADO: Ambas as equipes marcam com muita frequência, mesmo com linha de Under -3.5.")
             else:
                 if media_gols_visitante <= 0.8 or media_gols_mandante <= 0.8:
                     mercados_aprovados.append({"mercado": "Ambas Marcam: Não", "tipo": "BTTS_NAO"})
                 else:
-                    print("   ⚠️ BTTS NÃO BARRADO: Médias intermediárias, fora do padrão estrito de Não.")
+                    print("   ⚠️ BTTS NÃO, BARRADO: Médias intermediárias, fora do padrão estrito de Não.")
 
         return mercados_aprovados
 
