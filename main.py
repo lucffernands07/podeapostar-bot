@@ -262,6 +262,12 @@ def main():
 
                         try:
                             odd_float = float(str(valor_odd_str).replace(',', '.'))
+                            
+                            # 🛑 TRAVA: BTTS Sim exige estritamente Odd <= 1.20
+                            if m_chave == "BTTS_SIM" and odd_float > 1.20:
+                                print(f"      ⚠️ Descartado (BTTS Sim com Odd > 1.20): {m_texto} | Valor: {odd_float}")
+                                continue
+
                             if odd_float >= 1.10:
                                 if "M45" in m_chave and odd_float >= 4.0: continue
                                 mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": str(odd_float)})
