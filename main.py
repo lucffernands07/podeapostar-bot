@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos de Mercados Ativos
-from ligas import COMPETICOES #testando estatísticas apenas na liga Brasileirão Betano 
+from ligas import COMPETICOES, liga_eh_permitida #testando estatísticas apenas na liga Brasileirão Betano 
 from mercados import gols, ambos_marcam, chance_dupla, vitorias, chutes_totais, faltas_totais
 import odds, bingo357
 from telegram import menus
@@ -64,6 +64,12 @@ def main():
             if total_mercados >= 200: 
                 break 
             print(f"\n--- Analisando: {nome_comp} ---")
+            
+            # 🛑 TRAVA DE ELITE: Pula imediatamente se não for uma liga permitida
+            if not liga_eh_permitida(nome_comp):
+                print(f"⏩ Pulando liga secundária/não permitida: {nome_comp}")
+                continue
+
             
             # Ajusta a URL para o formato /calendario/ conforme planejado
             url_calendario = url.rstrip("/").replace("/jogos", "").replace("/resultados", "") + "/calendario/"
