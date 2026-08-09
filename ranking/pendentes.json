@@ -72,13 +72,6 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/rmLiZz8e/#/resumo-de-jogo"
         },
         {
-            "time_casa": "San Lorenzo",
-            "time_fora": "Huracán",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/lhiNcqto/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Defensa y Justicia",
             "time_fora": "Newell's Old Boys",
             "mercado": "MÚLTIPLOS",
@@ -100,6 +93,13 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/Q10lADV7/#/resumo-de-jogo"
         },
         {
+            "time_casa": "Benfica",
+            "time_fora": "Académico Viseu",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/QsVHjuFa/#/resumo-de-jogo"
+        },
+        {
             "time_casa": "Gil Vicente",
             "time_fora": "Rio Ave",
             "mercado": "MÚLTIPLOS",
@@ -112,34 +112,6 @@
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/lhUl5vUh/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Anderlecht",
-            "time_fora": "RAAL La Louviere",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/APoiFVXr/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Antwerp",
-            "time_fora": "Beveren",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/IkkaD92e/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Austria Vienna",
-            "time_fora": "LASK",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/YTwqbkig/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Horsens",
-            "time_fora": "Brondby",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/MuXsRLdK/#/resumo-de-jogo"
         },
         {
             "time_casa": "Alianza",
