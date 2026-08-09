@@ -55,6 +55,12 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
         "casa_vitorias_recente": 0, "ultimo_gols_casa": 0, "t1_resultado_1": "",
         "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0, "fora_btts": 0, 
         "fora_vitorias_recente": 0, "ultimo_gols_fora": 0, "t2_resultado_1": "",
+        # 🟢 NOVAS CHAVES ADICIONADAS PARA CHANCE DUPLA
+        "mandante_sem_derrota_casa": 0,
+        "mandante_vitorias_casa": 0,
+        "visitante_derrotas_fora": 0,
+        "visitante_gols_sofridos_fora": 0.0,
+        "visitante_sem_derrota_fora": 0,
         "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
         "h2h_res_1": "", "h2h_res_2": "", 
         "h2h_geral_res_1": "", "h2h_geral_res_2": "", "h2h_geral_res_3": "", "h2h_geral_res_4": "", "h2h_geral_res_5": "",
@@ -133,10 +139,13 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
                                 if g1 > g2:
                                     res_atual = "V"
                                     stats["casa_vitorias_recente"] += 1
+                                    stats["mandante_vitorias_casa"] += 1
+                                    stats["mandante_sem_derrota_casa"] += 1
                                 elif g1 < g2:
                                     res_atual = "D"
                                 else:
                                     res_atual = "E"
+                                    stats["mandante_sem_derrota_casa"] += 1 # Empate conta como sem derrota
                                 
                                 if i == 0: stats["t1_resultado_1"] = res_atual
 
@@ -152,13 +161,19 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
                                 if total <= 4: stats["fora_45_under"] += 1 
                                 if g1 > 0 and g2 > 0: stats["fora_btts"] += 1
                                 
+                                # O visitante sofreu g1 gols jogando fora
+                                stats["visitante_gols_sofridos_fora"] += float(g1)
+                                
                                 if g2 > g1:
                                     res_atual = "V"
                                     stats["fora_vitorias_recente"] += 1
+                                    stats["visitante_sem_derrota_fora"] += 1
                                 elif g2 < g1:
                                     res_atual = "D"
+                                    stats["visitante_derrotas_fora"] += 1
                                 else:
                                     res_atual = "E"
+                                    stats["visitante_sem_derrota_fora"] += 1
                                 
                                 if i == 0: stats["t2_resultado_1"] = res_atual
 
