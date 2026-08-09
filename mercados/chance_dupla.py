@@ -26,7 +26,7 @@ def verificar_chance_dupla(s):
     # Exige (Mandante sem derrota >= 4/5 OU Visitante derrotas >= 3/5)
     # E OBRIGATORIAMENTE: Visitante levou >= 8 gols fora.
     # ----------------------------------------------------------
-    condicao_1x = (m_sem_derrota_casa >= 4 or v_derrotas_fora >= 2) and (v_sofridos_fora >= 6)
+    condicao_1x = (m_sem_derrota_casa >= 4 or v_derrotas_fora >= 3) and (m_sofridos_fora >= 6)
 
     if condicao_1x:
         pct = 100 if m_sem_derrota_casa == 5 else 80
@@ -37,7 +37,7 @@ def verificar_chance_dupla(s):
     # Exige (Visitante sem derrota >= 4/5 OU Mandante vitorias <= 1)
     # E OBRIGATORIAMENTE: Visitante pontuou >= 3/5 AND Gols sofridos <= 7.
     # ----------------------------------------------------------
-    condicao_x2 = (v_sem_derrota_fora >= 4 or m_vitorias_casa <= 1) and (v_sem_derrota_fora >= 3 and v_sofridos_fora <= 7)
+    condicao_x2 = (v_sem_derrota_fora >= 5 and m_vitorias_casa <= 1) and v_sofridos_fora <= 6)
 
     if condicao_x2:
         pct = 100 if v_sem_derrota_fora == 5 else 80
