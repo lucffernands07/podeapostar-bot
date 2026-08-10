@@ -5,7 +5,7 @@
         "time_casa": "Polissya Zhytomyr",
         "time_fora": "FC Kharkiv",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.42",
+        "odd": "1.41",
         "link_betano": "https://www.betano.bet.br/match-odds/Polissya-Zhytomyr-Metalist-1925-Kharkiv/89323268/",
         "link_h2h": "https://www.flashscore.com.br/jogo/nVE91oCL"
     },
@@ -15,7 +15,7 @@
         "time_casa": "Polissya Zhytomyr",
         "time_fora": "FC Kharkiv",
         "mercado": "Dupla Chance: 1X (80%)",
-        "odd": "1.21",
+        "odd": "1.19",
         "link_betano": "https://www.betano.bet.br/match-odds/Polissya-Zhytomyr-Metalist-1925-Kharkiv/89323268/",
         "link_h2h": "https://www.flashscore.com.br/jogo/nVE91oCL"
     },
@@ -45,7 +45,17 @@
         "time_casa": "Silkeborg",
         "time_fora": "Odense",
         "mercado": "Dupla Chance: 1X (80%)",
-        "odd": "1.53",
+        "odd": "1.5",
+        "link_betano": "https://www.betano.bet.br/match-odds/Silkeborg-IF-Odense-BK/89050651/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/hONDLaKs"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Dinamarca - Superliga",
+        "time_casa": "Silkeborg",
+        "time_fora": "Odense",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.44",
         "link_betano": "https://www.betano.bet.br/match-odds/Silkeborg-IF-Odense-BK/89050651/",
         "link_h2h": "https://www.flashscore.com.br/jogo/hONDLaKs"
     },
@@ -55,7 +65,7 @@
         "time_casa": "Santa Clara",
         "time_fora": "Nacional",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.42",
+        "odd": "1.44",
         "link_betano": "https://www.betano.bet.br/match-odds/CD-Santa-Clara-CD-Nacional-Madeira/88949054/",
         "link_h2h": "https://www.flashscore.com.br/jogo/Y7YPlJqC"
     },
@@ -75,7 +85,7 @@
         "time_casa": "Banfield",
         "time_fora": "Belgrano",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.6",
+        "odd": "1.57",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Banfield-CA-Belgrano/89890111/",
         "link_h2h": "https://www.flashscore.com.br/jogo/hl2tCZ0e"
     },
@@ -135,7 +145,7 @@
         "time_casa": "Anápolis",
         "time_fora": "Guarani",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.25",
+        "odd": "1.3",
         "link_betano": "https://www.betano.bet.br/match-odds/Anapolis-GO-Guarani-SP/89421904/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lpOaXEx8"
     },
@@ -145,7 +155,7 @@
         "time_casa": "Ind. Medellín",
         "time_fora": "Millonarios",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.34",
+        "odd": "1.35",
         "link_betano": "https://www.betano.bet.br/match-odds/Independiente-Medellin-Millonarios-FC/89119486/",
         "link_h2h": "https://www.flashscore.com.br/jogo/tGbl9eIb"
     },
@@ -156,6 +166,26 @@
         "time_fora": "Central Córdoba",
         "mercado": "Dupla Chance: 1X (80%)",
         "odd": "1.1",
+        "link_betano": "https://www.betano.bet.br/match-odds/Union-de-Santa-Fe-Central-Cordoba/89889993/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UmU9LnYi"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Union Santa Fe",
+        "time_fora": "Central Córdoba",
+        "mercado": "Chutes Totais no Jogo: 25.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Union-de-Santa-Fe-Central-Cordoba/89889993/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UmU9LnYi"
+    },
+    {
+        "horario": "21:15",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Union Santa Fe",
+        "time_fora": "Central Córdoba",
+        "mercado": "Faltas Totais no Jogo: 19.0",
+        "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Union-de-Santa-Fe-Central-Cordoba/89889993/",
         "link_h2h": "https://www.flashscore.com.br/jogo/UmU9LnYi"
     }
