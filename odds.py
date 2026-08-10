@@ -4,10 +4,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 def capturar_todas_as_odds(driver, id_jogo):
-    # Dicionário completo incluindo BTTS_NAO e VITORIA_FORA
+    # Dicionário completo atualizado com a chave correta 'BTTS_SIM'
     res = {
         "GOLS_15": "N/A", "GOLS_25": "N/A", "GOLS_M35": "N/A", "GOLS_M45": "N/A", 
-        "BTTS": "N/A", "BTTS_NAO": "N/A",
+        "BTTS_SIM": "N/A", "BTTS_NAO": "N/A",
         "1X": "N/A", "X2": "N/A",
         "VITORIA_CASA": "N/A", "VITORIA_FORA": "N/A"
     }
@@ -72,12 +72,19 @@ def capturar_todas_as_odds(driver, id_jogo):
         try:
             driver.get(link_odds_base.replace("/odds/", "/odds/ambos-marcam/tempo-regulamentar/"))
             time.sleep(1.5)
-            linha_b = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
-            odds_b = linha_b.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
-            if len(odds_b) >= 2:
-                # [0] = Sim | [1] = Não
-                res["BTTS"] = odds_b[0].text.replace('↑', '').replace('↓', '').strip()
-                res["BTTS_NAO"] = odds_b[1].text.replace('↑', '').replace('↓', '').strip()
+            
+            # Varre as linhas da tabela para ignorar traços (-) e pegar a primeira odd válida disponível
+            linhas_b = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
+            for linha_b in linhas_b:
+                odds_b = linha_b.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
+                if len(odds_b) >= 2:
+                    val_sim = odds_b[0].text.replace('↑', '').replace('↓', '').strip()
+                    val_nao = odds_b[1].text.replace('↑', '').replace('↓', '').strip()
+                    
+                    if val_sim and val_sim != "-":
+                        res["BTTS_SIM"] = val_sim
+                        res["BTTS_NAO"] = val_nao
+                        break
         except: pass
 
         # --- 4. DUPLA CHANCE ---
@@ -98,4 +105,4 @@ def capturar_todas_as_odds(driver, id_jogo):
         driver.switch_to.window(driver.window_handles[0])
     
     return res
-            
+                
