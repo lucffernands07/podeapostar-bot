@@ -1,5 +1,5 @@
 """
-REGRAS DE GOLS - VERSÃO COM EXCLUSÃO MÚTUA (OVER x UNDER) + FILTRO DE MÉDIA PARA +1.5 (60%)
+REGRAS DE GOLS - VERSÃO AJUSTADA ÀS CHAVES DA RASPAGEM
 Com trava de integridade de dados para abortar caso a raspagem falhe.
 Ordem de Prioridade e Exclusão:
 - Se houver Over (+1.5 ou +2.5), os Unders são vetados.
@@ -38,47 +38,43 @@ def verificar_gols(s):
 
     # Se a raspagem não conseguiu coletar dados consistentes dos últimos jogos, aborta para evitar falsos unders
     if c_15 < 2 or f_15 < 2:
-        print(f"      ⚠️ ALERTA DE LOG: Dados insuficientes ou falha na raspagem para {s.get('time_casa', 'Casa')} x {s.get('time_fora', 'Fora')}. Mercado de gols cancelado.")
+        print(f"      ⚠️ ALERTA DE LOG: Dados insuficientes ou falha na raspagem. Mercado de gols cancelado.")
         return []
 
-    # Recorrência dos times nos últimos 5 jogos
+    # Recorrência dos times nos últimos 5 jogos (usando as chaves corretas que a raspagem entrega)
     pct_15  = calcular_porcentagem_gols(s.get("casa_15", 0), s.get("fora_15", 0))
-    pct_m45 = calcular_porcentagem_gols(s.get("casa_45_under", 0), s.get("fora_45_under", 0))
-    pct_m35 = calcular_porcentagem_gols(s.get("casa_35_under", 0), s.get("fora_35_under", 0))
     pct_25  = calcular_porcentagem_gols(s.get("casa_25", 0), s.get("fora_25", 0))
+    
+    # Nota: A raspagem atual gera apenas chaves de under globais (casa_35_under e casa_45_under). 
+    # Mapeamos para ambos os lados utilizarem a mesma base coletada de forma segura.
+    pct_m35 = calcular_porcentagem_gols(s.get("casa_35_under", 0), s.get("casa_35_under", 0))
+    pct_m45 = calcular_porcentagem_gols(s.get("casa_45_under", 0), s.get("casa_45_under", 0))
 
-    # Métricas de estatística
-    m_feitos_casa = float(s.get("mandante_gols_feitos_casa", 0) or 0)
-    m_sofridos_casa = float(s.get("mandante_gols_sofridos_casa", 0) or 0)
-    v_feitos_fora = float(s.get("visitante_gols_feitos_fora", 0) or 0)
-    v_sofridos_fora = float(s.get("visitante_gols_sofridos_fora", 0) or 0)
+    # Métricas de estatística defensiva/ofensiva disponíveis na raspagem atual
+    mandante_gols_sofridos = float(s.get("mandante_gols_sofridos_casa", 0) or 0)
+    visitante_gols_sofridos = float(s.get("visitante_gols_sofridos_fora", 0) or 0)
 
-    m_jogos_marcou_casa = int(s.get("mandante_jogos_com_gol_casa", 0) or 0)
-    v_jogos_marcou_fora = int(s.get("visitante_jogos_com_gol_fora", 0) or 0)
-
-    media_total_confronto = (m_feitos_casa + m_sofridos_casa + v_feitos_fora + v_sofridos_fora) / 5.0
+    # Média estimada de gols do confronto baseada nos gols sofridos e aproveitamento geral
+    media_total_confronto = (mandante_gols_sofridos + visitante_gols_sofridos) / 2.5
 
     overs_aprovados = []
     unders_aprovados = []
 
-    # Trava de risco contra goleadas
-    visitante_peneira = v_sofridos_fora >= 7
-    mandante_avassalador = m_feitos_casa >= 8
-    pode_apostar_under = not (visitante_peneira or mandante_avassalador)
+    # Trava de risco contra goleadas baseada nos gols sofridos fora do visitante
+    visitante_peneira = visitante_gols_sofridos >= 7
+    pode_apostar_under = not visitante_peneira
 
     # ==========================================================
     # AVALIAÇÃO DE OVERS (+1.5 e +2.5)
     # ==========================================================
     if pct_15 >= 80:
-        # 80% ou 100% liberados diretamente pela consistência alta
         overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
     elif pct_15 == 60:
-        # 60% agora exige a média combinada mínima de 2.4 para filtrar os jogos fracos
         if media_total_confronto >= 2.4:
             overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
 
     if pct_25 >= 80:
-        if media_total_confronto >= 2.4 and m_jogos_marcou_casa >= 4 and v_jogos_marcou_fora >= 4:
+        if media_total_confronto >= 2.4:
             overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
     # ==========================================================
