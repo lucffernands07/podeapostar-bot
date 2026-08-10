@@ -63,6 +63,12 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
         "visitante_gols_sofridos_fora": 0.0,
         "mandante_gols_sofridos_casa": 0.0,
 
+        # 🟢 CHAVES DE GOLS EXIGIDAS PELO GOLS.PY ADICIONADAS
+        "mandante_gols_feitos_casa": 0.0,
+        "visitante_gols_feitos_fora": 0.0,
+        "mandante_jogos_com_gol_casa": 0,
+        "visitante_jogos_com_gol_fora": 0,
+
         "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
         "h2h_res_1": "", "h2h_res_2": "", 
         "h2h_geral_res_1": "", "h2h_geral_res_2": "", "h2h_geral_res_3": "", "h2h_geral_res_4": "", "h2h_geral_res_5": "",
@@ -137,8 +143,11 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
                                 if total <= 4: stats["casa_45_under"] += 1 
                                 if g1 > 0 and g2 > 0: stats["casa_btts"] += 1
                                 
-                                # Contabiliza gols sofridos pelo mandante em casa (g2)
+                                # Contabiliza gols feitos e sofridos do mandante em casa
+                                stats["mandante_gols_feitos_casa"] += float(g1)
                                 stats["mandante_gols_sofridos_casa"] += float(g2)
+                                if g1 > 0:
+                                    stats["mandante_jogos_com_gol_casa"] += 1
                                 
                                 if g1 > g2:
                                     res_atual = "V"
@@ -163,8 +172,11 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
                                 if total <= 4: stats["fora_45_under"] += 1 
                                 if g1 > 0 and g2 > 0: stats["fora_btts"] += 1
                                 
-                                # O visitante sofreu g1 gols jogando fora
+                                # Contabiliza gols feitos e sofridos do visitante fora
+                                stats["visitante_gols_feitos_fora"] += float(g2)
                                 stats["visitante_gols_sofridos_fora"] += float(g1)
+                                if g2 > 0:
+                                    stats["visitante_jogos_com_gol_fora"] += 1
                                 
                                 if g2 > g1:
                                     res_atual = "V"
@@ -189,4 +201,4 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
         print(f"      ⚠️ Erro ao resolver URL do jogo: {e_geral}")
 
     return stats
-    
+        
