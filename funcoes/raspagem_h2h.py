@@ -52,15 +52,17 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
     stats = {
         "link_betano": None,
         "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0, "casa_btts": 0, 
-        "casa_vitorias_recente": 0, "ultimo_gols_casa": 0, "t1_resultado_1": "",
         "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0, "fora_btts": 0, 
-        "fora_vitorias_recente": 0, "ultimo_gols_fora": 0, "t2_resultado_1": "",
-        # 🟢 NOVAS CHAVES ADICIONADAS PARA CHANCE DUPLA
-        "mandante_sem_derrota_casa": 0,
+        
+        # 🟢 CHAVES PADRÃO UNIFICADAS (Chance Dupla e Vitórias)
         "mandante_vitorias_casa": 0,
+        "visitante_vitorias_fora": 0,
+        "mandante_sem_derrota_casa": 0,
+        "visitante_sem_derrota_fora": 0,
         "visitante_derrotas_fora": 0,
         "visitante_gols_sofridos_fora": 0.0,
-        "visitante_sem_derrota_fora": 0,
+        "mandante_gols_sofridos_casa": 0.0,
+
         "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
         "h2h_res_1": "", "h2h_res_2": "", 
         "h2h_geral_res_1": "", "h2h_geral_res_2": "", "h2h_geral_res_3": "", "h2h_geral_res_4": "", "h2h_geral_res_5": "",
@@ -128,7 +130,6 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
                             if tipo == "casa":
                                 if i == 0: 
                                     stats["t1_placar_1"] = placar_str
-                                    stats["ultimo_gols_casa"] = total
                                 
                                 if total > 1.5: stats["casa_15"] += 1
                                 if total > 2.5: stats["casa_25"] += 1
@@ -136,10 +137,12 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
                                 if total <= 4: stats["casa_45_under"] += 1 
                                 if g1 > 0 and g2 > 0: stats["casa_btts"] += 1
                                 
+                                # Contabiliza gols sofridos pelo mandante em casa (g2)
+                                stats["mandante_gols_sofridos_casa"] += float(g2)
+                                
                                 if g1 > g2:
                                     res_atual = "V"
-                                    stats["casa_vitorias_recente"] += 1
-                                    stats["mandante_vitorias_casa"] += 1
+                                    stats["mandante_vitorias_casa"] += 1  # Chave padrão unificada
                                     stats["mandante_sem_derrota_casa"] += 1
                                 elif g1 < g2:
                                     res_atual = "D"
@@ -153,7 +156,6 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
                             elif tipo == "fora":
                                 if i == 0: 
                                     stats["t2_placar_1"] = placar_str
-                                    stats["ultimo_gols_fora"] = total
                                 
                                 if total > 1.5: stats["fora_15"] += 1
                                 if total > 2.5: stats["fora_25"] += 1
@@ -166,7 +168,7 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
                                 
                                 if g2 > g1:
                                     res_atual = "V"
-                                    stats["fora_vitorias_recente"] += 1
+                                    stats["visitante_vitorias_fora"] += 1  # Chave padrão unificada
                                     stats["visitante_sem_derrota_fora"] += 1
                                 elif g2 < g1:
                                     res_atual = "D"
@@ -187,4 +189,4 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
         print(f"      ⚠️ Erro ao resolver URL do jogo: {e_geral}")
 
     return stats
-        
+    
