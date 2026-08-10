@@ -206,7 +206,7 @@ def main():
 
                     mercados_fase1 = []
 
-                    # 1° GOLS (Deve rodar primeiro para gerar a base de tipos para o ambos marcam)
+                    # 1° GOLS 
                     res_gols = gols.verificar_gols(dados_jogo)
                     for rg in res_gols:
                         if isinstance(rg, dict):
@@ -219,16 +219,27 @@ def main():
                         tipo_cd = "1X" if "1X" in texto_cd else "X2"
                         mercados_fase1.append({"texto": texto_cd, "chave": tipo_cd})
 
-                    # 3° VITÓRIAS (Possui a trava de segurança interna que já valida a chance dupla)
+                    # 3° VITÓRIAS 
                     res_vitorias = vitorias.verificar_vitorias(dados_jogo)
                     for rv in res_vitorias:
                         texto_vic = rv if isinstance(rv, str) else rv.get("mercado", "")
                         chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
                         mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
 
-                    # 4° AMBOS MARCAM (Executado por último, consumindo os gols aprovados no passo 1)
+                    # 🟢 CAPTURA ANTECIPADA DAS ODDS (Necessária para o Ambas Marcam validar a regra de <= 1.20 nos gols)
+                    v_odds = {}
+                    try:
+                        v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
+                    except Exception as e_odds:
+                        print(f"      ⚠️ Erro ao capturar odds prévias: {e_odds}")
+                        if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
+                            try: driver.quit()
+                            except: pass
+                            driver = configurar_driver()
+
+                    # 4° AMBOS MARCAM (Agora recebe as odds do jogo para validar se os gols estão <= 1.20)
                     lista_gols_segura = res_gols if isinstance(res_gols, list) else []
-                    res_btts = ambos_marcam.verificar_btts(dados_jogo, mercados_gols_aprovados=lista_gols_segura)
+                    res_btts = ambos_marcam.verificar_btts(dados_jogo, mercados_gols_aprovados=lista_gols_segura, odds_jogo=v_odds)
                     for rb in res_btts:
                         if isinstance(rb, dict):
                             m_texto = rb.get("mercado", "")
@@ -238,25 +249,12 @@ def main():
                             chave_btts = "BTTS_NAO" if "Não" in rb or "Nao" in rb else "BTTS"
                             mercados_fase1.append({"texto": rb, "chave": chave_btts})
 
-                    # Extração de Odds das principais
-                    v_odds = {}
-                    if mercados_fase1:
-                        try:
-                            v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-                        except Exception as e_odds:
-                            print(f"      ⚠️ Erro ao capturar odds da Fase 1: {e_odds}")
-                            if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
-                                try: driver.quit()
-                                except: pass
-                                driver = configurar_driver()
-
                     mercados_para_processar = []
 
                     for item in mercados_fase1:
                         m_texto, m_chave = item["texto"], item["chave"]
                         valor_odd_str = v_odds.get(m_chave, "N/A")
                         
-                        # Log para rastrear se a odd veio vazia ou N/A do odds.py
                         if valor_odd_str == "N/A" or not valor_odd_str:
                             print(f"      ⚠️ ALERTA ODD AUSENTE: O mercado '{m_texto}' (Chave: {m_chave}) retornou 'N/A' no odds.py e foi ignorado.")
                             continue
@@ -264,10 +262,8 @@ def main():
                         try:
                             odd_float = float(str(valor_odd_str).replace(',', '.'))
                             
-                            # 🛑 TRAVA: BTTS Sim exige estritamente Odd <= 1.20
-                            if m_chave == "BTTS_SIM" and odd_float > 1.20:
-                                print(f"      ⚠️ Descartado (BTTS Sim com Odd > 1.20): {m_texto} | Valor: {odd_float}")
-                                continue
+                            # 🛑 (A trava antiga de BTTS Sim > 1.20 foi removida daqui, 
+                            # pois agora a regra de corte por odd é validada diretamente dentro do ambos_marcam.py)
 
                             if odd_float >= 1.10:
                                 if "M45" in m_chave and odd_float >= 4.0: continue
