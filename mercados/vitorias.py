@@ -28,7 +28,7 @@ def verificar_vitorias(stats):
     # -----------------------------------------------------------------
     # 🏠 VITÓRIA CASA (Padrão América de Cali, Rapid Vienna, Palmeiras)
     # -----------------------------------------------------------------
-    condicao_casa = (vitorias_casa >= 3) and (derrotas_fora >= 3 or gols_sofridos_fora >= 8)
+    condicao_casa = (vitorias_casa >= 4) and (derrotas_fora >= 3 and gols_sofridos_fora >= 8)
 
     if condicao_casa:
         pct = "100%" if vitorias_casa == 5 else ("85%" if vitorias_casa == 4 else "70%")
@@ -37,7 +37,7 @@ def verificar_vitorias(stats):
     # -----------------------------------------------------------------
     # ✈️ VITÓRIA FORA (Padrão Barracas Central, Gimnasia L.P.)
     # -----------------------------------------------------------------
-    condicao_fora = (gols_sofridos_fora <= 6 and sem_derrota_fora >= 3) and (vitorias_casa == 0 or vitorias_fora >= 3)
+    condicao_fora = (gols_sofridos_fora <= 5 and sem_derrota_fora >= 4) and (vitorias_casa == 0)
 
     if condicao_fora:
         pct = "100%" if vitorias_fora == 5 else ("85%" if vitorias_fora == 4 else "70%")
