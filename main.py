@@ -1,4 +1,4 @@
-import os
+limport os
 import time
 import json
 import requests
@@ -206,14 +206,29 @@ def main():
 
                     mercados_fase1 = []
 
-                    # 1. Gols
+                    # 1° GOLS (Deve rodar primeiro para gerar a base de tipos para o ambos marcam)
                     res_gols = gols.verificar_gols(dados_jogo)
                     for rg in res_gols:
                         if isinstance(rg, dict):
                             mercados_fase1.append({"texto": rg['mercado'], "chave": rg['tipo']})
 
-                    # 2. Ambos Marcam
-                    res_btts = ambos_marcam.verificar_btts(dados_jogo, mercados_gols_aprovados=res_gols)
+                    # 2° CHANCE DUPLA
+                    res_cd = chance_dupla.verificar_chance_dupla(dados_jogo)
+                    for rc in res_cd:
+                        texto_cd = rc if isinstance(rc, str) else rc.get("mercado", "")
+                        tipo_cd = "1X" if "1X" in texto_cd else "X2"
+                        mercados_fase1.append({"texto": texto_cd, "chave": tipo_cd})
+
+                    # 3° VITÓRIAS (Possui a trava de segurança interna que já valida a chance dupla)
+                    res_vitorias = vitorias.verificar_vitorias(dados_jogo)
+                    for rv in res_vitorias:
+                        texto_vic = rv if isinstance(rv, str) else rv.get("mercado", "")
+                        chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
+                        mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
+
+                    # 4° AMBOS MARCAM (Executado por último, consumindo os gols aprovados no passo 1)
+                    lista_gols_segura = res_gols if isinstance(res_gols, list) else []
+                    res_btts = ambos_marcam.verificar_btts(dados_jogo, mercados_gols_aprovados=lista_gols_segura)
                     for rb in res_btts:
                         if isinstance(rb, dict):
                             m_texto = rb.get("mercado", "")
@@ -222,20 +237,6 @@ def main():
                         elif isinstance(rb, str):
                             chave_btts = "BTTS_NAO" if "Não" in rb or "Nao" in rb else "BTTS"
                             mercados_fase1.append({"texto": rb, "chave": chave_btts})
-
-                    # 3. Chance Dupla
-                    res_cd = chance_dupla.verificar_chance_dupla(dados_jogo)
-                    for rc in res_cd:
-                        texto_cd = rc if isinstance(rc, str) else rc.get("mercado", "")
-                        tipo_cd = "1X" if "1X" in texto_cd else "X2"
-                        mercados_fase1.append({"texto": texto_cd, "chave": tipo_cd})
-
-                    # 4. Vitória Casa / Vitória Fora
-                    res_vitorias = vitorias.verificar_vitorias(dados_jogo)
-                    for rv in res_vitorias:
-                        texto_vic = rv if isinstance(rv, str) else rv.get("mercado", "")
-                        chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
-                        mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
 
                     # Extração de Odds das principais
                     v_odds = {}
