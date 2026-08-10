@@ -31,7 +31,7 @@ def verificar_chance_dupla(s):
     # ----------------------------------------------------------
     # 🟢 REGRA 1X (Casa ou Empate)
     # ----------------------------------------------------------
-    condicao_1x = (m_sem_derrota_casa >= 4 or v_derrotas_fora >= 3) and (m_sofridos_casa >= 6)
+    condicao_1x = (m_sem_derrota_casa >= 4 or v_derrotas_fora >= 3) and (v_sofridos_fora >= 7)
 
     if condicao_1x:
         tem_1x = True
@@ -40,7 +40,7 @@ def verificar_chance_dupla(s):
     # ----------------------------------------------------------
     # 🟢 REGRA X2 (Empate ou Visitante)
     # ----------------------------------------------------------
-    condicao_x2 = (v_sem_derrota_fora >= 5 and m_vitorias_casa <= 1) and (v_sofridos_fora <= 6)
+    condicao_x2 = (v_sem_derrota_fora >= 4 or m_vitorias_casa <= 1) and (m_sofridos_casa >= 7)
 
     if condicao_x2:
         tem_x2 = True
