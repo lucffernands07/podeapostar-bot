@@ -16,11 +16,10 @@ def verificar_chance_dupla(s):
     m_sem_derrota_casa = int(s.get("mandante_sem_derrota_casa", 0) or 0)
     v_sem_derrota_fora = int(s.get("visitante_sem_derrota_fora", 0) or 0)
 
-    m_vitorias_casa = int(s.get("mandante_vitorias_casa", 0) or 0)
     v_derrotas_fora = int(s.get("visitante_derrotas_fora", 0) or 0)
-
     v_sofridos_fora = float(s.get("visitante_gols_sofridos_fora", 0) or 0)
-    m_sofridos_casa = float(s.get("mandante_gols_sofridos_casa", 0) or 0) # Mantido conforme o seu código ajustado
+    
+    m_sofridos_casa = float(s.get("mandante_gols_sofridos_casa", 0) or 0)
 
     # Variáveis de controle para testar cada lado de forma independente
     tem_1x = False
@@ -38,19 +37,10 @@ def verificar_chance_dupla(s):
         pct_1x = 100 if m_sem_derrota_casa == 5 else 80
 
     # ----------------------------------------------------------
-    # 🟢 REGRA X2 (Utilizando as chaves reais da raspagem)
+    # 🟢 REGRA X2 (Invertida espelhando exatamente a lógica do 1X)
     # ----------------------------------------------------------
-    # Visitante sem derrotas fora (derrotas == 0) E com vitórias fora >= 3,
-    # combinado com o mandante tendo 3 ou mais derrotas em casa (calculado via 5 jogos menos os sem derrota).
-    
-    v_derrotas_fora_atual = int(s.get("visitante_derrotas_fora", 0) or 0)
-    v_vitorias_fora_atual = int(s.get("visitante_vitorias_fora", 0) or 0)
-    
-    # Como a raspagem gera o acumulado de "sem derrota", calculamos as derrotas do mandante em casa (5 jogos totais - sem derrota)
-    m_sem_derrota_casa_atual = int(s.get("mandante_sem_derrota_casa", 0) or 0)
-    m_derrotas_casa_atual = 5 - m_sem_derrota_casa_atual
-
-    condicao_x2 = (v_derrotas_fora_atual == 0 and v_vitorias_fora_atual >= 3) and (m_derrotas_casa_atual >= 3)
+    m_derrotas_casa = 5 - m_sem_derrota_casa
+    condicao_x2 = (v_sem_derrota_fora >= 4 or m_derrotas_casa >= 3) and (m_sofridos_casa >= 7)
 
     if condicao_x2:
         tem_x2 = True
