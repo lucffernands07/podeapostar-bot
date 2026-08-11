@@ -1,25 +1,38 @@
 {
-    "kairat almaty (kaz)xlevski (bul)": {
-        "time_casa": "Kairat Almaty (Kaz)",
-        "time_fora": "Levski (Bul)",
-        "horario": "12:00",
-        "liga": "Europa - Champions League",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/kairat-almaty-CrO7xXpJ/levski-E5OOzgs4/resumo/equipes/",
-        "titulares_casa": [],
-        "titulares_fora": [],
-        "texto_telegram": "**Kairat Almaty (Kaz)**:\nEscalação provável não disponível\n\n**Levski (Bul)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-11 00:38"
-    },
     "bodo/glimt (nor)xroyale union sg (bel)": {
         "time_casa": "Bodo/Glimt (Nor)",
         "time_fora": "Royale Union SG (Bel)",
         "horario": "13:00",
         "liga": "Europa - Champions League",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/bodo-glimt-S0WZMUNG/royale-union-sg-407h8Ird/resumo/equipes/",
-        "titulares_casa": [],
-        "titulares_fora": [],
-        "texto_telegram": "**Bodo/Glimt (Nor)**:\nEscalação provável não disponível\n\n**Royale Union SG (Bel)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-11 00:38"
+        "titulares_casa": [
+            "Haikin N.",
+            "Sjovold F.",
+            "Bjortuft O. L.",
+            "Gundersen J.",
+            "Bjorkan F.",
+            "Auklend S.",
+            "Berg P.(C)",
+            "Fet S.",
+            "Blomberg O.",
+            "Brynhildsen O.",
+            "Hauge J."
+        ],
+        "titulares_fora": [
+            "Chambaere V.",
+            "Patris L.",
+            "Mac Allister K.(C)",
+            "Havenaar N.",
+            "Sylla M.",
+            "Zorgane A.",
+            "Olaru D.",
+            "Van De Perre K.",
+            "Zeneli B.",
+            "David P.",
+            "Guilherme Smith"
+        ],
+        "texto_telegram": "**Bodo/Glimt (Nor)**:\nHaikin N., Sjovold F., Bjortuft O. L., Gundersen J.\nBjorkan F., Auklend S., Berg P.(C), Fet S.\nBlomberg O., Brynhildsen O., Hauge J.\n\n**Royale Union SG (Bel)**:\nChambaere V., Patris L., Mac Allister K.(C), Havenaar N.\nSylla M., Zorgane A., Olaru D., Van De Perre K.\nZeneli B., David P., Guilherme Smith",
+        "atualizado_em": "2026-08-11 12:47"
     },
     "sabah baku (aze)xaarhus (den)": {
         "time_casa": "Sabah Baku (Aze)",
@@ -27,10 +40,34 @@
         "horario": "13:00",
         "liga": "Europa - Champions League",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/aarhus-OOXnKGbO/sabah-baku-fNGcxbyr/resumo/equipes/",
-        "titulares_casa": [],
-        "titulares_fora": [],
-        "texto_telegram": "**Sabah Baku (Aze)**:\nEscalação provável não disponível\n\n**Aarhus (Den)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-11 00:38"
+        "titulares_casa": [
+            "Pokatilov S.(C)",
+            "Zedadka A.",
+            "Solvet S.",
+            "Dashdamirov R.",
+            "Puchacz T.",
+            "Rakhmonaliyev U.",
+            "Lepinjica I.",
+            "Simic V.",
+            "Isayev A.",
+            "Mickels J.",
+            "Mbina O."
+        ],
+        "titulares_fora": [
+            "Hedenstad M.",
+            "Andersen J.",
+            "Rosler C.",
+            "Kahl E.",
+            "Carstensen R.",
+            "Jonsson J.",
+            "Knudsen M.",
+            "Arnstad K.(C)",
+            "Links G.",
+            "Bech T.",
+            "Bogere J."
+        ],
+        "texto_telegram": "**Sabah Baku (Aze)**:\nPokatilov S.(C), Zedadka A., Solvet S., Dashdamirov R.\nPuchacz T., Rakhmonaliyev U., Lepinjica I., Simic V.\nIsayev A., Mickels J., Mbina O.\n\n**Aarhus (Den)**:\nHedenstad M., Andersen J., Rosler C., Kahl E.\nCarstensen R., Jonsson J., Knudsen M., Arnstad K.(C)\nLinks G., Bech T., Bogere J.",
+        "atualizado_em": "2026-08-11 12:47"
     },
     "kauno zalgiris (ltu)xdin. zagreb (cro)": {
         "time_casa": "Kauno Zalgiris (Ltu)",
@@ -38,10 +75,34 @@
         "horario": "14:00",
         "liga": "Europa - Champions League",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/din-zagreb-8G5ufQTg/fk-kauno-zalgiris-0p17kQla/resumo/equipes/",
-        "titulares_casa": [],
-        "titulares_fora": [],
-        "texto_telegram": "**Kauno Zalgiris (Ltu)**:\nEscalação provável não disponível\n\n**Din. Zagreb (Cro)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-11 00:38"
+        "titulares_casa": [
+            "Mikelionis D.(C)",
+            "Baldassarra F.",
+            "Benchaib A.",
+            "Burba M.",
+            "Konatar M.",
+            "Krekovic L.",
+            "Lekiatas R.",
+            "Moutachy J.",
+            "Renan Oliveira",
+            "Slivka V.",
+            "Tolordava A."
+        ],
+        "titulares_fora": [
+            "Filipovic I.",
+            "Beljo D.",
+            "Dominguez S.",
+            "Kacavenda L.",
+            "Lisica M.",
+            "McKenna S.",
+            "Misic J.(C)",
+            "Orsic M.",
+            "Perez Vinlof M.",
+            "Stojkovic L.",
+            "Valincic M."
+        ],
+        "texto_telegram": "**Kauno Zalgiris (Ltu)**:\nMikelionis D.(C), Baldassarra F., Benchaib A., Burba M.\nKonatar M., Krekovic L., Lekiatas R., Moutachy J.\nRenan Oliveira, Slivka V., Tolordava A.\n\n**Din. Zagreb (Cro)**:\nFilipovic I., Beljo D., Dominguez S., Kacavenda L.\nLisica M., McKenna S., Misic J.(C), Orsic M.\nPerez Vinlof M., Stojkovic L., Valincic M.",
+        "atualizado_em": "2026-08-11 12:47"
     },
     "nijmegen (ned)xolympiacos (gre)": {
         "time_casa": "Nijmegen (Ned)",
@@ -52,7 +113,7 @@
         "titulares_casa": [],
         "titulares_fora": [],
         "texto_telegram": "**Nijmegen (Ned)**:\nEscalação provável não disponível\n\n**Olympiacos (Gre)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-11 00:38"
+        "atualizado_em": "2026-08-11 12:47"
     },
     "crvena zvezda (srb)xh. beer sheva (isr)": {
         "time_casa": "Crvena zvezda (Srb)",
@@ -63,7 +124,7 @@
         "titulares_casa": [],
         "titulares_fora": [],
         "texto_telegram": "**Crvena zvezda (Srb)**:\nEscalação provável não disponível\n\n**H. Beer Sheva (Isr)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-11 00:38"
+        "atualizado_em": "2026-08-11 12:47"
     },
     "celje (slo)xararat-armenia (arm)": {
         "time_casa": "Celje (Slo)",
@@ -74,7 +135,7 @@
         "titulares_casa": [],
         "titulares_fora": [],
         "texto_telegram": "**Celje (Slo)**:\nEscalação provável não disponível\n\n**Ararat-Armenia (Arm)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-11 00:38"
+        "atualizado_em": "2026-08-11 12:47"
     },
     "slovan bratislava (svk)xmjallby (swe)": {
         "time_casa": "Slovan Bratislava (Svk)",
@@ -85,7 +146,7 @@
         "titulares_casa": [],
         "titulares_fora": [],
         "texto_telegram": "**Slovan Bratislava (Svk)**:\nEscalação provável não disponível\n\n**Mjallby (Swe)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-11 00:38"
+        "atualizado_em": "2026-08-11 12:47"
     },
     "sturm graz (aut)xfenerbahce (tur)": {
         "time_casa": "Sturm Graz (Aut)",
@@ -96,7 +157,7 @@
         "titulares_casa": [],
         "titulares_fora": [],
         "texto_telegram": "**Sturm Graz (Aut)**:\nEscalação provável não disponível\n\n**Fenerbahce (Tur)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-11 00:38"
+        "atualizado_em": "2026-08-11 12:47"
     },
     "fluminense (bra)xind. rivadavia (arg)": {
         "time_casa": "Fluminense (Bra)",
@@ -109,7 +170,7 @@
             "Guga",
             "Ignacio",
             "Igor Rabello",
-            "Guilherme Arana",
+            "René",
             "Hércules",
             "Martinelli",
             "Agustín Canobbio",
@@ -124,14 +185,14 @@
             "Studer S.",
             "Elordi J. M.",
             "Bottari T.",
-            "Rios G.",
+            "Bucca L.",
             "Fernandez M.",
             "Atencio R.",
             "Sartori F.",
             "Arce A."
         ],
-        "texto_telegram": "**Fluminense (Bra)**:\nFábio, Guga, Ignacio, Igor Rabello\nGuilherme Arana, Hércules, Martinelli, Agustín Canobbio\nAcosta L., Serna K., Hulk\n\n**Ind. Rivadavia (Arg)**:\nBolcato N., Osella A., L. Costa, Studer S.\nElordi J. M., Bottari T., Rios G., Fernandez M.\nAtencio R., Sartori F., Arce A.",
-        "atualizado_em": "2026-08-11 00:38"
+        "texto_telegram": "**Fluminense (Bra)**:\nFábio, Guga, Ignacio, Igor Rabello\nRené, Hércules, Martinelli, Agustín Canobbio\nAcosta L., Serna K., Hulk\n\n**Ind. Rivadavia (Arg)**:\nBolcato N., Osella A., L. Costa, Studer S.\nElordi J. M., Bottari T., Bucca L., Fernandez M.\nAtencio R., Sartori F., Arce A.",
+        "atualizado_em": "2026-08-11 12:47"
     },
     "boca juniors (arg)xrecoleta (par)": {
         "time_casa": "Boca Juniors (Arg)",
@@ -142,7 +203,7 @@
         "titulares_casa": [],
         "titulares_fora": [],
         "texto_telegram": "**Boca Juniors (Arg)**:\nEscalação provável não disponível\n\n**Recoleta (Par)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-11 00:38"
+        "atualizado_em": "2026-08-11 12:47"
     },
     "talleres córdobaxlanús": {
         "time_casa": "Talleres Córdoba",
@@ -152,9 +213,9 @@
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/lanus-Y9yh1J7G/talleres-cordoba-bkDdeAvA/resumo/equipes/",
         "titulares_casa": [
             "Unsain E.",
+            "Schott A.",
             "Riquelme R. D.",
             "Fernandez S.",
-            "Fascendini V.",
             "Chamorro T.",
             "Fattori F.",
             "Galarza M. A.",
@@ -165,19 +226,19 @@
         ],
         "titulares_fora": [
             "Losada N.",
-            "Guidara T.",
+            "Perez G.",
             "Izquierdoz C.",
             "De Jesus R.",
             "Marcich S.",
-            "Medina A.",
+            "Pena Biafore F.",
             "Cardozo A.",
+            "Salvio E.",
             "Sepulveda M.",
-            "Carrera R.",
             "Besozzi L.",
             "Valois Y."
         ],
-        "texto_telegram": "**Talleres Córdoba**:\nUnsain E., Riquelme R. D., Fernandez S., Fascendini V.\nChamorro T., Fattori F., Galarza M. A., Maidana A.\nFranco Cristaldo, Rick, Martinez R.\n\n**Lanús**:\nLosada N., Guidara T., Izquierdoz C., De Jesus R.\nMarcich S., Medina A., Cardozo A., Sepulveda M.\nCarrera R., Besozzi L., Valois Y.",
-        "atualizado_em": "2026-08-11 00:38"
+        "texto_telegram": "**Talleres Córdoba**:\nUnsain E., Schott A., Riquelme R. D., Fernandez S.\nChamorro T., Fattori F., Galarza M. A., Maidana A.\nFranco Cristaldo, Rick, Martinez R.\n\n**Lanús**:\nLosada N., Perez G., Izquierdoz C., De Jesus R.\nMarcich S., Pena Biafore F., Cardozo A., Salvio E.\nSepulveda M., Besozzi L., Valois Y.",
+        "atualizado_em": "2026-08-11 12:47"
     },
     "estudiantes (arg)xuniversidad católica (chi)": {
         "time_casa": "Estudiantes (Arg)",
@@ -186,7 +247,7 @@
         "liga": "Libertadores",
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/estudiantes-p2SkCHXs/u-catolica-Qe432hiO/resumo/equipes/",
         "titulares_casa": [
-            "Iacovich F.",
+            "Muslera F.",
             "Meza E.",
             "Nunez S.",
             "Palacios T.",
@@ -199,54 +260,19 @@
         ],
         "titulares_fora": [
             "Bernedo V.",
-            "Arancibia S.",
+            "Cerezo B.",
             "Ampuero B.",
-            "Diaz J.",
+            "Martinez J. A.",
             "Mena",
             "Zuqui F.",
             "Valencia J.",
-            "Montes C.",
+            "Corral D.",
             "Cuevas C.",
             "Giani J.",
             "Zampedri F."
         ],
-        "texto_telegram": "**Estudiantes (Arg)**:\nIacovich F., Meza E., Nunez S., Palacios T.\nBenedetti G., Piovi L., Castro A., Perez Fabricio\nBurgos J., Gaich A.\n\n**Universidad Católica (Chi)**:\nBernedo V., Arancibia S., Ampuero B., Diaz J.\nMena, Zuqui F., Valencia J., Montes C.\nCuevas C., Giani J., Zampedri F.",
-        "atualizado_em": "2026-08-11 00:38"
-    },
-    "tolima (col)xind. del valle (ecu)": {
-        "time_casa": "Tolima (Col)",
-        "time_fora": "Ind. del Valle (Ecu)",
-        "horario": "21:30",
-        "liga": "Libertadores",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/independiente-del-valle-YFwXD2sh/tolima-bLphhbYf/resumo/equipes/",
-        "titulares_casa": [
-            "Michael Ortega",
-            "Mosquera J.",
-            "Angulo J.",
-            "Osorio Y.",
-            "Hernandez J.",
-            "Martinez Yepez H. E.",
-            "Guzman S.",
-            "Hurtado J.",
-            "Sanchez L.",
-            "Florez K.",
-            "Parra Osorio A."
-        ],
-        "titulares_fora": [
-            "Quintana A.",
-            "Romero Padilla D. A.",
-            "Carabajal M.",
-            "Schunke R.",
-            "Loor L.",
-            "Alcivar J.",
-            "Rodriguez A.",
-            "Guagua D.",
-            "J. Sornoza",
-            "Pata E.",
-            "Angulo J."
-        ],
-        "texto_telegram": "**Tolima (Col)**:\nMichael Ortega, Mosquera J., Angulo J., Osorio Y.\nHernandez J., Martinez Yepez H. E., Guzman S., Hurtado J.\nSanchez L., Florez K., Parra Osorio A.\n\n**Ind. del Valle (Ecu)**:\nQuintana A., Romero Padilla D. A., Carabajal M., Schunke R.\nLoor L., Alcivar J., Rodriguez A., Guagua D.\nJ. Sornoza, Pata E., Angulo J.",
-        "atualizado_em": "2026-08-11 00:38"
+        "texto_telegram": "**Estudiantes (Arg)**:\nMuslera F., Meza E., Nunez S., Palacios T.\nBenedetti G., Piovi L., Castro A., Perez Fabricio\nBurgos J., Gaich A.\n\n**Universidad Católica (Chi)**:\nBernedo V., Cerezo B., Ampuero B., Martinez J. A.\nMena, Zuqui F., Valencia J., Corral D.\nCuevas C., Giani J., Zampedri F.",
+        "atualizado_em": "2026-08-11 12:47"
     },
     "bolivar (bol)xsão paulo (bra)": {
         "time_casa": "Bolivar (Bol)",
@@ -257,6 +283,6 @@
         "titulares_casa": [],
         "titulares_fora": [],
         "texto_telegram": "**Bolivar (Bol)**:\nEscalação provável não disponível\n\n**São Paulo (Bra)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-11 00:38"
+        "atualizado_em": "2026-08-11 12:47"
     }
 }
