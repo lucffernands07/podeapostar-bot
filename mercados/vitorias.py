@@ -1,47 +1,70 @@
-# mercados/vitorias.py
-from mercados.chance_dupla import verificar_chance_dupla  # Importa a regra de chance dupla
+"""
+REGRAS DE MERCADO - VITÓRIAS (CASA / FORA)
+Mercado de maior risco: exige rigor estatístico superior à Chance Dupla.
+"""
 
-def verificar_vitorias(stats):
+def verificar_vitorias(s):
     """
-    Regras de Vitória Casa e Vitória Fora padronizadas com as chaves do chance_dupla.py.
-    Trava de Segurança: Se o jogo for aprovado em Chance Dupla (1X ou X2), 
-    os mercados de Vitória Simples são descartados.
+    Recebe o dicionário 's' e retorna mercados de Vitórias aprovados (Vitória Casa ou Vitória Fora).
+    Se ambos baterem ou se as condições não forem estritamente fortes, descarta.
     """
-    retorno = []
+    mercados_aprovados = []
+    if not isinstance(s, dict):
+        return mercados_aprovados
+
+    # --- CAPTURA DE DADOS COMPLEMENTARES ---
+    m_vitorias_casa = int(s.get("mandante_vitorias_casa", 0) or 0)
+    v_vitorias_fora = int(s.get("visitante_vitorias_fora", 0) or 0)
+
+    v_derrotas_fora = int(s.get("visitante_derrotas_fora", 0) or 0)
+    m_sem_derrota_casa = int(s.get("mandante_sem_derrota_casa", 0) or 0)
+    m_derrotas_casa = 5 - m_sem_derrota_casa
+
+    v_sofridos_fora = float(s.get("visitante_gols_sofridos_fora", 0) or 0)
+    m_sofridos_casa = float(s.get("mandante_gols_sofridos_casa", 0) or 0)
+
+    tem_vitoria_casa = False
+    tem_vitoria_fora = False
+
+    # ----------------------------------------------------------
+    # 🟢 REGRA VITÓRIA CADA (Nível Acima da Dupla Chance 1X)
+    # Exige: Mandante com pelo menos 4 vitórias em casa (ou 100% de vitórias) 
+    # E o visitante com muitas derrotas fora OU defesa extremamente vazada (>= 8 gols sofridos).
+    # ----------------------------------------------------------
+    condicao_vitoria_casa = (m_vitorias_casa >= 4) and (v_derrotas_fora >= 3 or v_sofridos_fora >= 8)
+
+    if condicao_vitoria_casa:
+        tem_vitoria_casa = True
+
+    # ----------------------------------------------------------
+    # 🟢 REGRA VITÓRIA FORA (Nível Acima da Dupla Chance X2)
+    # Exige: Visitante com pelo menos 4 vitórias fora 
+    # E o mandante com muitas derrotas em casa (>= 3) OU defesa extremamente vazada (>= 8 gols sofridos).
+    # ----------------------------------------------------------
+    condicao_vitoria_fora = (v_vitorias_fora >= 4) and (m_derrotas_casa >= 3 or m_sofridos_casa >= 8)
+
+    if condicao_vitoria_fora:
+        tem_vitoria_fora = True
+
+    # ----------------------------------------------------------
+    # 🛑 TRAVA DE DESCARTE MÚTUO
+    # Se os dois lados apontarem vitória seca, o jogo é inconclusivo e anula.
+    # ----------------------------------------------------------
+    if tem_vitoria_casa and tem_vitoria_fora:
+        print(f"      ⚠️ CONFLITO DE VITÓRIAS: Vitória Casa e Vitória Fora passaram juntas. Jogo descartado.")
+        return []
+
+    if tem_vitoria_casa:
+        mercados_aprovados.append({
+            "mercado": "Resultado Final: Vitória Casa", 
+            "tipo": "VITORIA_CASA"
+        })
     
-    if not isinstance(stats, dict):
-        return retorno
+    if tem_vitoria_fora:
+        mercados_aprovados.append({
+            "mercado": "Resultado Final: Vitória Fora", 
+            "tipo": "VITORIA_FORA"
+        })
 
-    # 🛑 TRAVA DE SEGURANÇA: Se tem Chance Dupla, descarta Vitória Simples
-    chance_dupla_aprovada = verificar_chance_dupla(stats)
-    if chance_dupla_aprovada:
-        return []  # Retorna vazio, anulando a vitória simples para este jogo
-
-    # Captura das métricas unificadas no padrão de chance_dupla.py
-    mandante_vitorias_casa = int(stats.get("mandante_vitorias_casa", 0) or 0)
-    visitante_vitorias_fora = int(stats.get("visitante_vitorias_fora", 0) or 0) # Padronizado
-    
-    visitante_derrotas_fora = int(stats.get("visitante_derrotas_fora", 0) or 0)
-    visitante_sem_derrota_fora = int(stats.get("visitante_sem_derrota_fora", 0) or 0)
-    visitante_gols_sofridos_fora = float(stats.get("visitante_gols_sofridos_fora", 0) or 0)
-
-    # -----------------------------------------------------------------
-    # 🏠 VITÓRIA CASA 
-    # -----------------------------------------------------------------
-    condicao_casa = (mandante_vitorias_casa >= 4) and (visitante_derrotas_fora >= 3 and visitante_gols_sofridos_fora >= 8)
-
-    if condicao_casa:
-        pct = "100%" if mandante_vitorias_casa == 5 else ("85%" if mandante_vitorias_casa == 4 else "70%")
-        retorno.append(f"Vitória Casa ({pct})")
-
-    # -----------------------------------------------------------------
-    # ✈️ VITÓRIA FORA 
-    # -----------------------------------------------------------------
-    condicao_fora = (visitante_gols_sofridos_fora <= 5 and visitante_sem_derrota_fora >= 4) and (mandante_vitorias_casa == 0)
-
-    if condicao_fora:
-        pct = "100%" if visitante_vitorias_fora == 5 else ("85%" if visitante_vitorias_fora == 4 else "70%")
-        retorno.append(f"Vitória Fora ({pct})")
-
-    return retorno
+    return mercados_aprovados
     
