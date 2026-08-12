@@ -37,6 +37,13 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/thrJgPg3/#/resumo-de-jogo"
         },
         {
+            "time_casa": "PSG",
+            "time_fora": "Aston Villa",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/GnSGwOrJ/#/resumo-de-jogo"
+        },
+        {
             "time_casa": "Atl. Tucuman",
             "time_fora": "Independiente",
             "mercado": "MÚLTIPLOS",
@@ -91,6 +98,34 @@
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/rPYySK8K/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Magallanes",
+            "time_fora": "Cobreloa",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8noYpoZp/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Recoleta",
+            "time_fora": "Rangers",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fD4e8uX8/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Antofagasta",
+            "time_fora": "Santiago Wanderers",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/t68K6Se4/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Arica",
+            "time_fora": "Unión San Felipe",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/2LdT46QG/#/resumo-de-jogo"
         }
     ]
 }

@@ -14,25 +14,25 @@
             "Andreas Pereira",
             "Marlon Freitas",
             "Piquerez",
-            "Maurício",
+            "López J.",
             "Jhon Arias",
-            "Sosa R."
+            "Vitor Roque"
         ],
         "titulares_fora": [
             "Roffo M.",
-            "Ramirez I.",
+            "Canete Torres A. D.",
             "Gustavo Velazquez",
             "Perez M.",
             "Benitez A. G.",
             "Piris da Motta",
             "Dominguez C.",
-            "Gamarra A.",
+            "Morel J.",
             "Bobadilla C.",
             "Torres J.",
             "Pablo Vegetti"
         ],
-        "texto_telegram": "**Palmeiras (Bra)**:\nCarlos Miguel, Martinez E., Murilo, Alexander Barboza\nAllan, Andreas Pereira, Marlon Freitas, Piquerez\nMaurício, Jhon Arias, Sosa R.\n\n**Cerro Porteno (Par)**:\nRoffo M., Ramirez I., Gustavo Velazquez, Perez M.\nBenitez A. G., Piris da Motta, Dominguez C., Gamarra A.\nBobadilla C., Torres J., Pablo Vegetti",
-        "atualizado_em": "2026-08-12 00:53"
+        "texto_telegram": "**Palmeiras (Bra)**:\nCarlos Miguel, Martinez E., Murilo, Alexander Barboza\nAllan, Andreas Pereira, Marlon Freitas, Piquerez\nLópez J., Jhon Arias, Vitor Roque\n\n**Cerro Porteno (Par)**:\nRoffo M., Canete Torres A. D., Gustavo Velazquez, Perez M.\nBenitez A. G., Piris da Motta, Dominguez C., Morel J.\nBobadilla C., Torres J., Pablo Vegetti",
+        "atualizado_em": "2026-08-12 12:02"
     },
     "platense (arg)xcoquimbo unido (chi)": {
         "time_casa": "Platense (Arg)",
@@ -57,17 +57,17 @@
             "Sanchez D.",
             "Salinas F.",
             "Gazzolo B.",
-            "Fernandez M.",
+            "Hernandez E.",
             "Cornejo J.",
             "Camargo A.",
             "Galani S.",
             "Zavala C.",
-            "Rodriguez P.",
+            "Vadala G.",
             "Azocar Machuca A. E.",
-            "Johansen N."
+            "Pons F."
         ],
-        "texto_telegram": "**Platense (Arg)**:\nCozzani J., Saborido J., Vazquez I., Victor Cuesta\nThiago Silva, Ferreira P., Barrios M., Mainero G.\nRetamar K., Zapiola F., Gimenez L.\n\n**Coquimbo Unido (Chi)**:\nSanchez D., Salinas F., Gazzolo B., Fernandez M.\nCornejo J., Camargo A., Galani S., Zavala C.\nRodriguez P., Azocar Machuca A. E., Johansen N.",
-        "atualizado_em": "2026-08-12 00:53"
+        "texto_telegram": "**Platense (Arg)**:\nCozzani J., Saborido J., Vazquez I., Victor Cuesta\nThiago Silva, Ferreira P., Barrios M., Mainero G.\nRetamar K., Zapiola F., Gimenez L.\n\n**Coquimbo Unido (Chi)**:\nSanchez D., Salinas F., Gazzolo B., Hernandez E.\nCornejo J., Camargo A., Galani S., Zavala C.\nVadala G., Azocar Machuca A. E., Pons F.",
+        "atualizado_em": "2026-08-12 12:02"
     },
     "red bull bragantino (bra)xatlético-mg (bra)": {
         "time_casa": "Red Bull Bragantino (Bra)",
@@ -78,7 +78,7 @@
         "titulares_casa": [],
         "titulares_fora": [],
         "texto_telegram": "**Red Bull Bragantino (Bra)**:\nEscalação provável não disponível\n\n**Atlético-MG (Bra)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-12 00:53"
+        "atualizado_em": "2026-08-12 12:02"
     },
     "tigre (arg)xmontevideo city (uru)": {
         "time_casa": "Tigre (Arg)",
@@ -89,7 +89,7 @@
         "titulares_casa": [],
         "titulares_fora": [],
         "texto_telegram": "**Tigre (Arg)**:\nEscalação provável não disponível\n\n**Montevideo City (Uru)**:\nEscalação provável não disponível",
-        "atualizado_em": "2026-08-12 00:53"
+        "atualizado_em": "2026-08-12 12:02"
     },
     "cruzeiro (bra)xflamengo (bra)": {
         "time_casa": "Cruzeiro (Bra)",
@@ -99,11 +99,11 @@
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/cruzeiro-0SwtclaU/flamengo-WjxY29qB/resumo/equipes/",
         "titulares_casa": [
             "Otávio Costa",
-            "Fagner",
+            "William",
             "Fabrício Bruno",
             "Jonathan Jesus",
-            "Villalba",
-            "Lucas Romero",
+            "Rojas G.",
+            "Matheus Henrique",
             "Gérson",
             "Arroyo K.",
             "Matheus Pereira",
@@ -113,17 +113,17 @@
         "titulares_fora": [
             "Agustín Rossi",
             "Varela",
-            "Vitão",
+            "Léo Ortiz",
             "Léo Pereira",
             "Ayrton Lucas",
             "Pulgar",
             "Jorginho",
             "Carrascal J.",
             "De Arrascaeta",
-            "Bruno Henrique",
+            "Samuel Lino",
             "Pedro"
         ],
-        "texto_telegram": "**Cruzeiro (Bra)**:\nOtávio Costa, Fagner, Fabrício Bruno, Jonathan Jesus\nVillalba, Lucas Romero, Gérson, Arroyo K.\nMatheus Pereira, Kenji, Kaio Jorge\n\n**Flamengo (Bra)**:\nAgustín Rossi, Varela, Vitão, Léo Pereira\nAyrton Lucas, Pulgar, Jorginho, Carrascal J.\nDe Arrascaeta, Bruno Henrique, Pedro",
-        "atualizado_em": "2026-08-12 00:53"
+        "texto_telegram": "**Cruzeiro (Bra)**:\nOtávio Costa, William, Fabrício Bruno, Jonathan Jesus\nRojas G., Matheus Henrique, Gérson, Arroyo K.\nMatheus Pereira, Kenji, Kaio Jorge\n\n**Flamengo (Bra)**:\nAgustín Rossi, Varela, Léo Ortiz, Léo Pereira\nAyrton Lucas, Pulgar, Jorginho, Carrascal J.\nDe Arrascaeta, Samuel Lino, Pedro",
+        "atualizado_em": "2026-08-12 12:02"
     }
 }

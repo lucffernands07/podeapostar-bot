@@ -1,20 +1,80 @@
 [
     {
+        "horario": "16:00",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "Magallanes",
+        "time_fora": "Cobreloa",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/Magallanes-CD-Cobreloa-Calama/89773428/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/8noYpoZp"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "Magallanes",
+        "time_fora": "Cobreloa",
+        "mercado": "Dupla Chance: X2 (80%)",
+        "odd": "1.88",
+        "link_betano": "https://www.betano.bet.br/match-odds/Magallanes-CD-Cobreloa-Calama/89773428/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/8noYpoZp"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Europa - UEFA",
+        "time_casa": "PSG",
+        "time_fora": "Aston Villa",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Paris-Saint-Germain-Aston-Villa/86971673/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GnSGwOrJ"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Europa - UEFA",
+        "time_casa": "PSG",
+        "time_fora": "Aston Villa",
+        "mercado": "Chutes Totais no Jogo: 26.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Paris-Saint-Germain-Aston-Villa/86971673/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GnSGwOrJ"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Europa - UEFA",
+        "time_casa": "PSG",
+        "time_fora": "Aston Villa",
+        "mercado": "Faltas Totais no Jogo: 18.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Paris-Saint-Germain-Aston-Villa/86971673/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GnSGwOrJ"
+    },
+    {
         "horario": "17:00",
         "liga": "Equador - Copa",
         "time_casa": "La Union",
         "time_fora": "Aucas",
         "mercado": "Dupla Chance: X2 (80%)",
-        "odd": "1.16",
+        "odd": "1.15",
         "link_betano": "https://www.betano.bet.br/match-odds/Club-La-Union-Aucas/90589838/",
         "link_h2h": "https://www.flashscore.com.br/jogo/65CwXNQP"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "Recoleta",
+        "time_fora": "Rangers",
+        "mercado": "Dupla Chance: 1X (80%)",
+        "odd": "1.45",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Recoleta-Rangers-de-Talca/90146512/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/fD4e8uX8"
     },
     {
         "horario": "19:00",
         "liga": "Libertadores",
         "time_casa": "Palmeiras (Bra)",
         "time_fora": "Cerro Porteno (Par)",
-        "mercado": "Chutes Totais no Jogo: 36.2",
+        "mercado": "Chutes Totais no Jogo: 39.8",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Palmeiras-SP-Cerro-Porteno/86553917/",
         "link_h2h": "https://www.flashscore.com.br/jogo/CCzXyxrJ"
@@ -24,7 +84,7 @@
         "liga": "Libertadores",
         "time_casa": "Palmeiras (Bra)",
         "time_fora": "Cerro Porteno (Par)",
-        "mercado": "Faltas Totais no Jogo: 20.8",
+        "mercado": "Faltas Totais no Jogo: 17.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Palmeiras-SP-Cerro-Porteno/86553917/",
         "link_h2h": "https://www.flashscore.com.br/jogo/CCzXyxrJ"
@@ -35,7 +95,7 @@
         "time_casa": "Platense (Arg)",
         "time_fora": "Coquimbo Unido (Chi)",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.57",
+        "odd": "1.62",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Platense-Coquimbo-Unido/86553648/",
         "link_h2h": "https://www.flashscore.com.br/jogo/QeUNeWYi"
     },
@@ -45,7 +105,7 @@
         "time_casa": "Platense (Arg)",
         "time_fora": "Coquimbo Unido (Chi)",
         "mercado": "Dupla Chance: X2 (80%)",
-        "odd": "1.91",
+        "odd": "1.8",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Platense-Coquimbo-Unido/86553648/",
         "link_h2h": "https://www.flashscore.com.br/jogo/QeUNeWYi"
     },
@@ -74,16 +134,6 @@
         "liga": "Sul-Americana",
         "time_casa": "Red Bull Bragantino (Bra)",
         "time_fora": "Atlético-MG (Bra)",
-        "mercado": "-4.5 Gols (100%)",
-        "odd": "1.1",
-        "link_betano": "https://www.betano.bet.br/match-odds/Bragantino-SP-Clube-Atletico-MG/89917579/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/KUNlC0e5"
-    },
-    {
-        "horario": "19:00",
-        "liga": "Sul-Americana",
-        "time_casa": "Red Bull Bragantino (Bra)",
-        "time_fora": "Atlético-MG (Bra)",
         "mercado": "Chutes Totais no Jogo: 35.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Bragantino-SP-Clube-Atletico-MG/89917579/",
@@ -105,7 +155,7 @@
         "time_casa": "Tigre (Arg)",
         "time_fora": "Montevideo City (Uru)",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.47",
+        "odd": "1.52",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Tigre-Montevideo-City-Torque/89859060/",
         "link_h2h": "https://www.flashscore.com.br/jogo/thrJgPg3"
     },
@@ -145,7 +195,7 @@
         "time_casa": "Atl. Tucuman",
         "time_fora": "Independiente",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.41",
+        "odd": "1.48",
         "link_betano": "https://www.betano.bet.br/match-odds/Club-Atletico-Tucuman-CA-Independiente/90355195/",
         "link_h2h": "https://www.flashscore.com.br/jogo/0tRjk6hR"
     },
@@ -155,7 +205,7 @@
         "time_casa": "Orlando City",
         "time_fora": "Atlético San Luis",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.16",
+        "odd": "1.15",
         "link_betano": "https://www.betano.bet.br/match-odds/Orlando-City-SC-Atletico-San-Luis/90578266/",
         "link_h2h": "https://www.flashscore.com.br/jogo/nZxFKx1f"
     },
@@ -185,9 +235,49 @@
         "time_casa": "Monterrey",
         "time_fora": "Nashville SC",
         "mercado": "Dupla Chance: X2 (80%)",
-        "odd": "1.33",
+        "odd": "1.36",
         "link_betano": "https://www.betano.bet.br/match-odds/CF-Monterrey-Nashville-SC/90578279/",
         "link_h2h": "https://www.flashscore.com.br/jogo/KnyNIGV6"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "Antofagasta",
+        "time_fora": "Santiago Wanderers",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/CD-Antofagasta-Santiago-Wanderers/89773271/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/t68K6Se4"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "Antofagasta",
+        "time_fora": "Santiago Wanderers",
+        "mercado": "Dupla Chance: 1X (100%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/CD-Antofagasta-Santiago-Wanderers/89773271/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/t68K6Se4"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "Arica",
+        "time_fora": "Unión San Felipe",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/CD-San-Marcos-de-Arica-Union-San-Felipe/89773435/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/2LdT46QG"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "Arica",
+        "time_fora": "Unión San Felipe",
+        "mercado": "Dupla Chance: 1X (80%)",
+        "odd": "1.13",
+        "link_betano": "https://www.betano.bet.br/match-odds/CD-San-Marcos-de-Arica-Union-San-Felipe/89773435/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/2LdT46QG"
     },
     {
         "horario": "21:30",
@@ -195,7 +285,7 @@
         "time_casa": "Cruzeiro (Bra)",
         "time_fora": "Flamengo (Bra)",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.4",
+        "odd": "1.45",
         "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Flamengo-RJ/86553592/",
         "link_h2h": "https://www.flashscore.com.br/jogo/WYYGuKrf"
     },
@@ -204,7 +294,7 @@
         "liga": "Libertadores",
         "time_casa": "Cruzeiro (Bra)",
         "time_fora": "Flamengo (Bra)",
-        "mercado": "Chutes Totais no Jogo: 39.5",
+        "mercado": "Chutes Totais no Jogo: 37.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Flamengo-RJ/86553592/",
         "link_h2h": "https://www.flashscore.com.br/jogo/WYYGuKrf"
@@ -235,7 +325,7 @@
         "time_casa": "San Diego FC",
         "time_fora": "Puebla",
         "mercado": "+1.5 Gols (60%)",
-        "odd": "1.15",
+        "odd": "1.16",
         "link_betano": "https://www.betano.bet.br/match-odds/San-Diego-FC-Club-Puebla/90578291/",
         "link_h2h": "https://www.flashscore.com.br/jogo/fJIEO6JP"
     },
@@ -255,7 +345,7 @@
         "time_casa": "San Diego FC",
         "time_fora": "Puebla",
         "mercado": "Ambas Marcam: Sim",
-        "odd": "1.53",
+        "odd": "1.5",
         "link_betano": "https://www.betano.bet.br/match-odds/San-Diego-FC-Club-Puebla/90578291/",
         "link_h2h": "https://www.flashscore.com.br/jogo/fJIEO6JP"
     },
@@ -275,7 +365,7 @@
         "time_casa": "Los Angeles FC",
         "time_fora": "Querétaro",
         "mercado": "Ambas Marcam: Sim",
-        "odd": "1.67",
+        "odd": "1.8",
         "link_betano": "https://www.betano.bet.br/match-odds/Los-Angeles-FC-Queretaro-FC/90578290/",
         "link_h2h": "https://www.flashscore.com.br/jogo/SCvVGf0J"
     },
@@ -285,7 +375,7 @@
         "time_casa": "Seattle Sounders",
         "time_fora": "Guadalajara",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.18",
+        "odd": "1.19",
         "link_betano": "https://www.betano.bet.br/match-odds/Seattle-Sounders-FC-Guadalajara-Chivas/90578289/",
         "link_h2h": "https://www.flashscore.com.br/jogo/rPYySK8K"
     },
@@ -295,7 +385,7 @@
         "time_casa": "Seattle Sounders",
         "time_fora": "Guadalajara",
         "mercado": "Dupla Chance: X2 (80%)",
-        "odd": "1.36",
+        "odd": "1.33",
         "link_betano": "https://www.betano.bet.br/match-odds/Seattle-Sounders-FC-Guadalajara-Chivas/90578289/",
         "link_h2h": "https://www.flashscore.com.br/jogo/rPYySK8K"
     },
