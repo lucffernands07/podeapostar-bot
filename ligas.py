@@ -24,7 +24,7 @@ COMPETICOES = {
     "Espanha - Copa del Rey": "https://www.flashscore.com.br/futebol/espanha/copa-do-rei/jogos/",
     "Alemanha - DFB Pokal": "https://www.flashscore.com.br/futebol/alemanha/copa-da-alemanha/jogos/",
     "Arábia Saudita - King Cup": "https://www.flashscore.com.br/futebol/arabia-saudita/copa-do-rei/jogos/",
-    "EUA - MLS": "https://www.flashscore.com.br/futebol/eua/mls/jogos",
+    "EUA - Copa MLS": "https://www.flashscore.com.br/futebol/eua/mls/jogos",
     "Argentina - Copa": "https://www.flashscore.com.br/futebol/argentina/copa-argentina/jogos",
 
     # --- BLOCO 4: LIGAS SECUNDÁRIAS EUROPEIAS ---
@@ -41,15 +41,15 @@ COMPETICOES = {
 
     # --- BLOCO 5: LIGAS E COPAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
     "Equador - Copa": "https://www.flashscore.com.br/futebol/equador/copa-do-equador/jogos/",
-    #"Dinamarca - Betano Pokalen": "https://www.flashscore.com.br/futebol/dinamarca/betano-pokalen/jogos/",
-    #"Irlanda - Premier": "https://www.flashscore.com.br/futebol/irlanda/divisao-premier/jogos/",
+    "Dinamarca - Betano Pokalen": "https://www.flashscore.com.br/futebol/dinamarca/betano-pokalen/jogos/",
+    "Irlanda - Premier": "https://www.flashscore.com.br/futebol/irlanda/divisao-premier/jogos/",
     "Colombia - Copa": "https://www.flashscore.com.br/futebol/colombia/copa-da-colombia/jogos/",
     "Colombia - Primeira A": "https://www.flashscore.com.br/futebol/colombia/primera-a/jogos/",
     #"Mundo - Amistoso Internacional": "https://www.flashscore.com.br/futebol/mundo/amistoso-internacional/jogos/",
     "Alemanha - Liga Playoffs": "https://www.flashscore.com.br/futebol/alemanha/playoffs-da-liga-regional/jogos/",
     #"Albânia - Superliga": "https://www.flashscore.com.br/futebol/albania/super-liga/jogos/",
     "Noruega - Serie de Elite": "https://www.flashscore.com.br/futebol/noruega/serie-de-el:ite/jogos/",
-    #"França - Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
+    "França - Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
     #"Armênia Premier League": "https://www.flashscore.com.br/futebol/armenia/premier-league/jogos/",
     "Copa dos Campeões - CONCACAF": "https://www.flashscore.com.br/futebol/america-do-norte-e-central/copa-dos-campeoes-da-concacaf/jogos",
     "América - Copa das Ligas": "https://www.flashscore.com.br/futebol/america-do-norte-e-central/copa-das-ligas/jogos",
@@ -62,7 +62,8 @@ COMPETICOES = {
     "França - Ligue 2": "https://www.flashscore.com.br/futebol/franca/ligue-2/jogos/",
     "Países Baixos - Eerste Divisie": "https://www.flashscore.com.br/futebol/paises-baixos/eerste-divisie/jogos/",
     "Ucrânia - Premier League": "https://www.flashscore.com.br/futebol/ucrania/premier-league/jogos/",
-    #"Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/jogos/"
+    #"Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/jogos/",
+    "Chile - Liga Ascenso": "https://www.flashscore.com.br/futebol/chile/liga-de-ascenso/jogos",
 }
 
 # 🟢 LISTA BRANCA DE ELITE (Baseada puramente nos nomes fantasia/chaves do dicionário acima)
