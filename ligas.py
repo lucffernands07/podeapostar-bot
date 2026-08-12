@@ -10,13 +10,14 @@ COMPETICOES = {
     "Argentina - Liga Profesional": "https://www.flashscore.com.br/futebol/argentina/liga-profesional/jogos/",
     
     # --- BLOCO 2: ELITE EUROPEIA (BIG 5 + CHAMPIONS) ---
-    "Europa - Champions League": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/jogos/",
+    "Europa - Liga dos Campeões": "https://www.flashscore.com.br/futebol/europa/liga-dos-campeoes/jogos/",
     "Inglaterra - Premier League": "https://www.flashscore.com.br/futebol/inglaterra/premier-league/jogos/",
     "Espanha - LaLiga": "https://www.flashscore.com.br/futebol/espanha/laliga/jogos/",
     "Alemanha - Bundesliga": "https://www.flashscore.com.br/futebol/alemanha/bundesliga/jogos/",
     "Italia - Serie A": "https://www.flashscore.com.br/futebol/italia/serie-a/jogos/",
     "França - Ligue 1": "https://www.flashscore.com.br/futebol/franca/ligue-1/jogos/",
     "Europa - League": "https://www.flashscore.com.br/futebol/europa/liga-europa/jogos/",
+    "Europa - UEFA": "https://www.flashscore.com.br/futebol/europa/supercopa-da-uefa/jogos/",
 
     # --- BLOCO 3: COPAS NACIONAIS ---
     "Inglaterra - FA Cup": "https://www.flashscore.com.br/futebol/inglaterra/copa-da-fpc/jogos/",
@@ -72,13 +73,14 @@ LIGAS_ELITE_MERCADOS = [
     "sul-americana",
     "brasileirão série b", 
     "argentina - liga profesional", 
-    "champions league", 
+    "europa - liga dos campeões", 
     "inglaterra - premier league", 
-    "laliga", 
+    "espanha - laliga", 
     "alemanha - bundesliga", 
     "italia - serie a", 
     "frança - ligue 1", 
-    "europa league", 
+    "europa - league", 
+    "europa - uefa",
     "fa cup", 
     "copa del rey", 
     "dfb pokal", 
