@@ -1,0 +1,902 @@
+[
+    {
+        "horario": "13:15",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Abha",
+        "time_fora": "Al Hazem",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.34",
+        "link_betano": "https://www.betano.bet.br/match-odds/Abha-Club-Al-Hazem-SC/89664896/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Wz6dv8uH"
+    },
+    {
+        "horario": "13:15",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Abha",
+        "time_fora": "Al Hazem",
+        "mercado": "Dupla Chance: 1X (80%)",
+        "odd": "1.5",
+        "link_betano": "https://www.betano.bet.br/match-odds/Abha-Club-Al-Hazem-SC/89664896/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Wz6dv8uH"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Besiktas (Tur)",
+        "time_fora": "Hradec Kralove (Cze)",
+        "mercado": "-4.5 Gols (100%)",
+        "odd": "1.21",
+        "link_betano": "https://www.betano.bet.br/match-odds/Besiktas-JK-FC-Hradec-Kralove/90341877/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/neOLCi6t"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Besiktas (Tur)",
+        "time_fora": "Hradec Kralove (Cze)",
+        "mercado": "Chutes Totais no Jogo: 36.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Besiktas-JK-FC-Hradec-Kralove/90341877/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/neOLCi6t"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Besiktas (Tur)",
+        "time_fora": "Hradec Kralove (Cze)",
+        "mercado": "Faltas Totais no Jogo: 24.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Besiktas-JK-FC-Hradec-Kralove/90341877/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/neOLCi6t"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Gornik Zabrze (Pol)",
+        "time_fora": "Ferencvaros (Hun)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.3",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gornik-Zabrze-Ferencvarosi-TC/90332530/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/rodtFNAc"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Gornik Zabrze (Pol)",
+        "time_fora": "Ferencvaros (Hun)",
+        "mercado": "Dupla Chance: 1X (80%)",
+        "odd": "1.36",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gornik-Zabrze-Ferencvarosi-TC/90332530/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/rodtFNAc"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Gornik Zabrze (Pol)",
+        "time_fora": "Ferencvaros (Hun)",
+        "mercado": "Chutes Totais no Jogo: 35.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gornik-Zabrze-Ferencvarosi-TC/90332530/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/rodtFNAc"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Gornik Zabrze (Pol)",
+        "time_fora": "Ferencvaros (Hun)",
+        "mercado": "Faltas Totais no Jogo: 24.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Gornik-Zabrze-Ferencvarosi-TC/90332530/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/rodtFNAc"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Omonia (Cyp)",
+        "time_fora": "Lincoln (Gib)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/AC-Omonia-Nicosia-Lincoln-Red-Imps-FC/90342568/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bBXnVb1T"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Omonia (Cyp)",
+        "time_fora": "Lincoln (Gib)",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "2.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/AC-Omonia-Nicosia-Lincoln-Red-Imps-FC/90342568/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bBXnVb1T"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Omonia (Cyp)",
+        "time_fora": "Lincoln (Gib)",
+        "mercado": "Chutes Totais no Jogo: 55.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/AC-Omonia-Nicosia-Lincoln-Red-Imps-FC/90342568/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bBXnVb1T"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Omonia (Cyp)",
+        "time_fora": "Lincoln (Gib)",
+        "mercado": "Faltas Totais no Jogo: 43.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/AC-Omonia-Nicosia-Lincoln-Red-Imps-FC/90342568/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bBXnVb1T"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Pafos (Cyp)",
+        "time_fora": "Red Bull Salzburg (Aut)",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.24",
+        "link_betano": "https://www.betano.bet.br/match-odds/Pafos-FC-FC-Red-Bull-Salzburg/90345334/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6Ltipv8U"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Pafos (Cyp)",
+        "time_fora": "Red Bull Salzburg (Aut)",
+        "mercado": "Chutes Totais no Jogo: 42.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Pafos-FC-FC-Red-Bull-Salzburg/90345334/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6Ltipv8U"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Pafos (Cyp)",
+        "time_fora": "Red Bull Salzburg (Aut)",
+        "mercado": "Faltas Totais no Jogo: 22.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Pafos-FC-FC-Red-Bull-Salzburg/90345334/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6Ltipv8U"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Univ. Craiova (Rou)",
+        "time_fora": "KuPS (Fin)",
+        "mercado": "-4.5 Gols (100%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/Universitatea-Craiova-Kuopio-PS/90336592/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/h6luiAbT"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Univ. Craiova (Rou)",
+        "time_fora": "KuPS (Fin)",
+        "mercado": "Chutes Totais no Jogo: 44.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Universitatea-Craiova-Kuopio-PS/90336592/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/h6luiAbT"
+    },
+    {
+        "horario": "14:00",
+        "liga": "Europa - League",
+        "time_casa": "Univ. Craiova (Rou)",
+        "time_fora": "KuPS (Fin)",
+        "mercado": "Faltas Totais no Jogo: 30.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Universitatea-Craiova-Kuopio-PS/90336592/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/h6luiAbT"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Europa - League",
+        "time_casa": "Klaksvik (Fai)",
+        "time_fora": "Lech (Pol)",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.19",
+        "link_betano": "https://www.betano.bet.br/match-odds/KI-Klaksvik-Lech-Poznan/90363772/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UTxAlWfL"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Europa - League",
+        "time_casa": "Klaksvik (Fai)",
+        "time_fora": "Lech (Pol)",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.67",
+        "link_betano": "https://www.betano.bet.br/match-odds/KI-Klaksvik-Lech-Poznan/90363772/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UTxAlWfL"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Europa - League",
+        "time_casa": "Klaksvik (Fai)",
+        "time_fora": "Lech (Pol)",
+        "mercado": "Faltas Totais no Jogo: 27.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/KI-Klaksvik-Lech-Poznan/90363772/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UTxAlWfL"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Europa - League",
+        "time_casa": "Vikingur Reykjavik (Ice)",
+        "time_fora": "Thun (Sui)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vikingur-Reykjavik-FC-Thun/90363773/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QeUJLL3K"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Europa - League",
+        "time_casa": "Vikingur Reykjavik (Ice)",
+        "time_fora": "Thun (Sui)",
+        "mercado": "Dupla Chance: 1X (100%)",
+        "odd": "1.4",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vikingur-Reykjavik-FC-Thun/90363773/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QeUJLL3K"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Europa - League",
+        "time_casa": "Vikingur Reykjavik (Ice)",
+        "time_fora": "Thun (Sui)",
+        "mercado": "Resultado Final: Vitória Casa",
+        "odd": "2.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vikingur-Reykjavik-FC-Thun/90363773/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QeUJLL3K"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Europa - League",
+        "time_casa": "Vikingur Reykjavik (Ice)",
+        "time_fora": "Thun (Sui)",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vikingur-Reykjavik-FC-Thun/90363773/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QeUJLL3K"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Europa - League",
+        "time_casa": "Vikingur Reykjavik (Ice)",
+        "time_fora": "Thun (Sui)",
+        "mercado": "Chutes Totais no Jogo: 33.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vikingur-Reykjavik-FC-Thun/90363773/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QeUJLL3K"
+    },
+    {
+        "horario": "14:30",
+        "liga": "Europa - League",
+        "time_casa": "Vikingur Reykjavik (Ice)",
+        "time_fora": "Thun (Sui)",
+        "mercado": "Faltas Totais no Jogo: 27.2",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vikingur-Reykjavik-FC-Thun/90363773/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QeUJLL3K"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al Diriyah",
+        "time_fora": "Al-Ahli",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.16",
+        "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Ahli-SFC/89664911/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/v194xnAT"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al Diriyah",
+        "time_fora": "Al-Ahli",
+        "mercado": "Dupla Chance: 1X (100%)",
+        "odd": "2.63",
+        "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Ahli-SFC/89664911/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/v194xnAT"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al Diriyah",
+        "time_fora": "Al-Ahli",
+        "mercado": "Resultado Final: Vitória Casa",
+        "odd": "6.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Ahli-SFC/89664911/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/v194xnAT"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al Diriyah",
+        "time_fora": "Al-Ahli",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.67",
+        "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Ahli-SFC/89664911/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/v194xnAT"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Shabab",
+        "time_fora": "Al-Qadsiah",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Shabab-FC-Al-Qadsiah-FC/89664966/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Aq0zXPXj"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Shabab",
+        "time_fora": "Al-Qadsiah",
+        "mercado": "Dupla Chance: X2 (80%)",
+        "odd": "1.17",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Shabab-FC-Al-Qadsiah-FC/89664966/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Aq0zXPXj"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Shabab",
+        "time_fora": "Al-Qadsiah",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Shabab-FC-Al-Qadsiah-FC/89664966/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Aq0zXPXj"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Europa - League",
+        "time_casa": "CSKA Sofia (Bul)",
+        "time_fora": "M. Tel Aviv (Isr)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.35",
+        "link_betano": "https://www.betano.bet.br/match-odds/PFC-CSKA-Sofia-Maccabi-Tel-Aviv/90341728/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/AqWiUvbB"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Europa - League",
+        "time_casa": "CSKA Sofia (Bul)",
+        "time_fora": "M. Tel Aviv (Isr)",
+        "mercado": "+2.5 Gols (80%)",
+        "odd": "2.05",
+        "link_betano": "https://www.betano.bet.br/match-odds/PFC-CSKA-Sofia-Maccabi-Tel-Aviv/90341728/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/AqWiUvbB"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Europa - League",
+        "time_casa": "CSKA Sofia (Bul)",
+        "time_fora": "M. Tel Aviv (Isr)",
+        "mercado": "Dupla Chance: X2 (80%)",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/PFC-CSKA-Sofia-Maccabi-Tel-Aviv/90341728/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/AqWiUvbB"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Europa - League",
+        "time_casa": "CSKA Sofia (Bul)",
+        "time_fora": "M. Tel Aviv (Isr)",
+        "mercado": "Chutes Totais no Jogo: 21.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/PFC-CSKA-Sofia-Maccabi-Tel-Aviv/90341728/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/AqWiUvbB"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Europa - League",
+        "time_casa": "CSKA Sofia (Bul)",
+        "time_fora": "M. Tel Aviv (Isr)",
+        "mercado": "Faltas Totais no Jogo: 31.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/PFC-CSKA-Sofia-Maccabi-Tel-Aviv/90341728/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/AqWiUvbB"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Europa - League",
+        "time_casa": "Anderlecht (Bel)",
+        "time_fora": "PAOK (Gre)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.3",
+        "link_betano": "https://www.betano.bet.br/match-odds/RSC-Anderlecht-PAOK/90342683/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jLURWwJG"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Europa - League",
+        "time_casa": "Anderlecht (Bel)",
+        "time_fora": "PAOK (Gre)",
+        "mercado": "+2.5 Gols (80%)",
+        "odd": "1.88",
+        "link_betano": "https://www.betano.bet.br/match-odds/RSC-Anderlecht-PAOK/90342683/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jLURWwJG"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Europa - League",
+        "time_casa": "Anderlecht (Bel)",
+        "time_fora": "PAOK (Gre)",
+        "mercado": "Dupla Chance: 1X (100%)",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/RSC-Anderlecht-PAOK/90342683/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jLURWwJG"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Europa - League",
+        "time_casa": "Anderlecht (Bel)",
+        "time_fora": "PAOK (Gre)",
+        "mercado": "Resultado Final: Vitória Casa",
+        "odd": "3.0",
+        "link_betano": "https://www.betano.bet.br/match-odds/RSC-Anderlecht-PAOK/90342683/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jLURWwJG"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Europa - League",
+        "time_casa": "Anderlecht (Bel)",
+        "time_fora": "PAOK (Gre)",
+        "mercado": "Chutes Totais no Jogo: 45.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/RSC-Anderlecht-PAOK/90342683/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jLURWwJG"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Europa - League",
+        "time_casa": "Anderlecht (Bel)",
+        "time_fora": "PAOK (Gre)",
+        "mercado": "Faltas Totais no Jogo: 29.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/RSC-Anderlecht-PAOK/90342683/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jLURWwJG"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Europa - League",
+        "time_casa": "Rangers (Sco)",
+        "time_fora": "Jagiellonia (Pol)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.24",
+        "link_betano": "https://www.betano.bet.br/match-odds/Rangers-FC-Jagiellonia-Bialystok/90363795/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/hb0w8iCc"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Europa - League",
+        "time_casa": "Rangers (Sco)",
+        "time_fora": "Jagiellonia (Pol)",
+        "mercado": "Dupla Chance: X2 (100%)",
+        "odd": "2.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/Rangers-FC-Jagiellonia-Bialystok/90363795/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/hb0w8iCc"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Europa - League",
+        "time_casa": "Hearts (Sco)",
+        "time_fora": "Benfica (Por)",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/Heart-of-Midlothian-FC-SL-Benfica/90345547/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0AW3SwpL"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Europa - League",
+        "time_casa": "Hearts (Sco)",
+        "time_fora": "Benfica (Por)",
+        "mercado": "+2.5 Gols (80%)",
+        "odd": "1.47",
+        "link_betano": "https://www.betano.bet.br/match-odds/Heart-of-Midlothian-FC-SL-Benfica/90345547/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0AW3SwpL"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Europa - League",
+        "time_casa": "Hearts (Sco)",
+        "time_fora": "Benfica (Por)",
+        "mercado": "Dupla Chance: 1X (80%)",
+        "odd": "2.63",
+        "link_betano": "https://www.betano.bet.br/match-odds/Heart-of-Midlothian-FC-SL-Benfica/90345547/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0AW3SwpL"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Europa - League",
+        "time_casa": "Hearts (Sco)",
+        "time_fora": "Benfica (Por)",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.67",
+        "link_betano": "https://www.betano.bet.br/match-odds/Heart-of-Midlothian-FC-SL-Benfica/90345547/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0AW3SwpL"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Europa - League",
+        "time_casa": "Hearts (Sco)",
+        "time_fora": "Benfica (Por)",
+        "mercado": "Chutes Totais no Jogo: 29.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Heart-of-Midlothian-FC-SL-Benfica/90345547/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0AW3SwpL"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Europa - League",
+        "time_casa": "Hearts (Sco)",
+        "time_fora": "Benfica (Por)",
+        "mercado": "Faltas Totais no Jogo: 23.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Heart-of-Midlothian-FC-SL-Benfica/90345547/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0AW3SwpL"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Europa - League",
+        "time_casa": "KF Egnatia (Alb)",
+        "time_fora": "Shamrock Rovers (Irl)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/KF-Egnatia-Shamrock-Rovers-FC/90234039/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6RNtUVeS"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Europa - League",
+        "time_casa": "KF Egnatia (Alb)",
+        "time_fora": "Shamrock Rovers (Irl)",
+        "mercado": "Chutes Totais no Jogo: 28.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/KF-Egnatia-Shamrock-Rovers-FC/90234039/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6RNtUVeS"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Europa - League",
+        "time_casa": "KF Egnatia (Alb)",
+        "time_fora": "Shamrock Rovers (Irl)",
+        "mercado": "Faltas Totais no Jogo: 25.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/KF-Egnatia-Shamrock-Rovers-FC/90234039/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6RNtUVeS"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "San Luis",
+        "time_fora": "Deportes Temuco",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/CD-San-Luis-de-Quillota-Deportes-Temuco/89773414/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jub46J1L"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "San Luis",
+        "time_fora": "Deportes Temuco",
+        "mercado": "Dupla Chance: 1X (100%)",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/CD-San-Luis-de-Quillota-Deportes-Temuco/89773414/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jub46J1L"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "San Luis",
+        "time_fora": "Deportes Temuco",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/CD-San-Luis-de-Quillota-Deportes-Temuco/89773414/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jub46J1L"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Libertadores",
+        "time_casa": "Mirassol (Bra)",
+        "time_fora": "LDU Quito (Ecu)",
+        "mercado": "Chutes Totais no Jogo: 28.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Mirassol-SP-LDU-Quito/86553410/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/zPjrqgkn"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Libertadores",
+        "time_casa": "Mirassol (Bra)",
+        "time_fora": "LDU Quito (Ecu)",
+        "mercado": "Faltas Totais no Jogo: 29.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Mirassol-SP-LDU-Quito/86553410/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/zPjrqgkn"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Santos (Bra)",
+        "time_fora": "Macara (Ecu)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Santos-SP-CSD-Macara/89864170/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/hjfHKDFG"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Santos (Bra)",
+        "time_fora": "Macara (Ecu)",
+        "mercado": "Chutes Totais no Jogo: 38.7",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Santos-SP-CSD-Macara/89864170/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/hjfHKDFG"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Santos (Bra)",
+        "time_fora": "Macara (Ecu)",
+        "mercado": "Faltas Totais no Jogo: 20.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Santos-SP-CSD-Macara/89864170/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/hjfHKDFG"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Vasco (Bra)",
+        "time_fora": "Olimpia Asuncion (Par)",
+        "mercado": "Dupla Chance: 1X (80%)",
+        "odd": "1.18",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vasco-da-Gama-RJ-Olimpia-Asuncion/90514197/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/I5PKEvaD"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Vasco (Bra)",
+        "time_fora": "Olimpia Asuncion (Par)",
+        "mercado": "Chutes Totais no Jogo: 39.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vasco-da-Gama-RJ-Olimpia-Asuncion/90514197/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/I5PKEvaD"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Vasco (Bra)",
+        "time_fora": "Olimpia Asuncion (Par)",
+        "mercado": "Faltas Totais no Jogo: 20.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Vasco-da-Gama-RJ-Olimpia-Asuncion/90514197/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/I5PKEvaD"
+    },
+    {
+        "horario": "20:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Philadelphia Union",
+        "time_fora": "Santos Laguna",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/Philadelphia-Union-Santos-Laguna/90647587/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/rPKJKcIi"
+    },
+    {
+        "horario": "20:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Philadelphia Union",
+        "time_fora": "Santos Laguna",
+        "mercado": "Dupla Chance: 1X (100%)",
+        "odd": "1.11",
+        "link_betano": "https://www.betano.bet.br/match-odds/Philadelphia-Union-Santos-Laguna/90647587/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/rPKJKcIi"
+    },
+    {
+        "horario": "20:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Philadelphia Union",
+        "time_fora": "Santos Laguna",
+        "mercado": "Resultado Final: Vitória Casa",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/Philadelphia-Union-Santos-Laguna/90647587/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/rPKJKcIi"
+    },
+    {
+        "horario": "20:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Philadelphia Union",
+        "time_fora": "Santos Laguna",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/Philadelphia-Union-Santos-Laguna/90647587/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/rPKJKcIi"
+    },
+    {
+        "horario": "20:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "New York City",
+        "time_fora": "Necaxa",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.17",
+        "link_betano": "https://www.betano.bet.br/match-odds/New-York-City-FC-Club-Necaxa/90647618/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bF7hHOBa"
+    },
+    {
+        "horario": "20:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "New York City",
+        "time_fora": "Necaxa",
+        "mercado": "Dupla Chance: 1X (80%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/New-York-City-FC-Club-Necaxa/90647618/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bF7hHOBa"
+    },
+    {
+        "horario": "20:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "New York City",
+        "time_fora": "Necaxa",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/New-York-City-FC-Club-Necaxa/90647618/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bF7hHOBa"
+    },
+    {
+        "horario": "21:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Club America",
+        "time_fora": "Austin FC",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-America-Austin-FC/90647630/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6uB0F2tC"
+    },
+    {
+        "horario": "21:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Club America",
+        "time_fora": "Austin FC",
+        "mercado": "+2.5 Gols (80%)",
+        "odd": "1.75",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-America-Austin-FC/90647630/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6uB0F2tC"
+    },
+    {
+        "horario": "21:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Club America",
+        "time_fora": "Austin FC",
+        "mercado": "Dupla Chance: 1X (80%)",
+        "odd": "1.36",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-America-Austin-FC/90647630/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6uB0F2tC"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "Curicó Unido",
+        "time_fora": "CD Santa Cruz",
+        "mercado": "Dupla Chance: 1X (80%)",
+        "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/Curico-Unido-Deportes-Santa-Cruz/89773380/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/2JH9pxu2"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "Deportes Iquique",
+        "time_fora": "Copiapó",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Iquique-Deportes-Copiapo/89773475/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Yu5C8lRi"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Chile - Liga Ascenso",
+        "time_casa": "Deportes Iquique",
+        "time_fora": "Copiapó",
+        "mercado": "Dupla Chance: 1X (100%)",
+        "odd": "1.29",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Iquique-Deportes-Copiapo/89773475/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Yu5C8lRi"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Rosario Central (Arg)",
+        "time_fora": "Corinthians (Bra)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-Corinthians-SP/86553918/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SOUwm2jK"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Rosario Central (Arg)",
+        "time_fora": "Corinthians (Bra)",
+        "mercado": "Chutes Totais no Jogo: 29.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-Corinthians-SP/86553918/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SOUwm2jK"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Rosario Central (Arg)",
+        "time_fora": "Corinthians (Bra)",
+        "mercado": "Faltas Totais no Jogo: 26.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/CA-Rosario-Central-Corinthians-SP/86553918/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/SOUwm2jK"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "Cienciano (Per)",
+        "time_fora": "Botafogo (Bra)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.34",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Cienciano-Botafogo-RJ/89917897/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EkCZFrdt"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "Cienciano (Per)",
+        "time_fora": "Botafogo (Bra)",
+        "mercado": "Dupla Chance: X2 (80%)",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Cienciano-Botafogo-RJ/89917897/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EkCZFrdt"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "Cienciano (Per)",
+        "time_fora": "Botafogo (Bra)",
+        "mercado": "Chutes Totais no Jogo: 34.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Cienciano-Botafogo-RJ/89917897/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EkCZFrdt"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "Cienciano (Per)",
+        "time_fora": "Botafogo (Bra)",
+        "mercado": "Faltas Totais no Jogo: 22.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Cienciano-Botafogo-RJ/89917897/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EkCZFrdt"
+    },
+    {
+        "horario": "22:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Cruz Azul",
+        "time_fora": "Chicago Fire",
+        "mercado": "+1.5 Gols (60%)",
+        "odd": "1.24",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cruz-Azul-Chicago-Fire-FC/90647640/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xSXXdfQp"
+    },
+    {
+        "horario": "22:00",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Cruz Azul",
+        "time_fora": "Chicago Fire",
+        "mercado": "Dupla Chance: 1X (80%)",
+        "odd": "1.44",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cruz-Azul-Chicago-Fire-FC/90647640/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/xSXXdfQp"
+    }
+]
