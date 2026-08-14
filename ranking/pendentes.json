@@ -1,75 +1,33 @@
 {
-    "data_geracao": "2026-08-13",
+    "data_geracao": "2026-08-14",
     "jogos": [
         {
-            "time_casa": "Mirassol (Bra)",
-            "time_fora": "LDU Quito (Ecu)",
+            "time_casa": "Ponte Preta",
+            "time_fora": "Náutico",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/zPjrqgkn/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/WQKA4OHq/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Rosario Central (Arg)",
-            "time_fora": "Corinthians (Bra)",
+            "time_casa": "São Bernardo",
+            "time_fora": "Botafogo-SP",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/SOUwm2jK/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/4vJI22nd/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Santos (Bra)",
-            "time_fora": "Macara (Ecu)",
+            "time_casa": "Sport",
+            "time_fora": "Londrina",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/hjfHKDFG/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/f5PoQdpK/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Vasco (Bra)",
-            "time_fora": "Olimpia Asuncion (Par)",
+            "time_casa": "Racing Club",
+            "time_fora": "Banfield",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/I5PKEvaD/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Cienciano (Per)",
-            "time_fora": "Botafogo (Bra)",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/EkCZFrdt/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Besiktas (Tur)",
-            "time_fora": "Hradec Kralove (Cze)",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/neOLCi6t/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Gornik Zabrze (Pol)",
-            "time_fora": "Ferencvaros (Hun)",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/rodtFNAc/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Omonia (Cyp)",
-            "time_fora": "Lincoln (Gib)",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bBXnVb1T/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Pafos (Cyp)",
-            "time_fora": "Red Bull Salzburg (Aut)",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/6Ltipv8U/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Univ. Craiova (Rou)",
-            "time_fora": "KuPS (Fin)",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/h6luiAbT/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/zkVpWF9O/#/resumo-de-jogo"
         },
         {
             "time_casa": "Klaksvik (Fai)",
@@ -79,116 +37,158 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/UTxAlWfL/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Vikingur Reykjavik (Ice)",
-            "time_fora": "Thun (Sui)",
+            "time_casa": "Neom SC",
+            "time_fora": "Al-Fayha",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/QeUJLL3K/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/6RwDrXH5/#/resumo-de-jogo"
         },
         {
-            "time_casa": "CSKA Sofia (Bul)",
-            "time_fora": "M. Tel Aviv (Isr)",
+            "time_casa": "Al-Ettifaq",
+            "time_fora": "Al-Riyadh",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/AqWiUvbB/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/hrxLtBnI/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Anderlecht (Bel)",
-            "time_fora": "PAOK (Gre)",
+            "time_casa": "Al-Hilal",
+            "time_fora": "Al-Faysaly",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jLURWwJG/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/08uTvkHU/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Rangers (Sco)",
-            "time_fora": "Jagiellonia (Pol)",
+            "time_casa": "Sporting",
+            "time_fora": "Vitória de Guimarães",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/hb0w8iCc/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/hpkd2WE4/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Hearts (Sco)",
-            "time_fora": "Benfica (Por)",
+            "time_casa": "Galatasaray",
+            "time_fora": "Corum",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/0AW3SwpL/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/jeJSIlq9/#/resumo-de-jogo"
         },
         {
-            "time_casa": "KF Egnatia (Alb)",
-            "time_fora": "Shamrock Rovers (Irl)",
+            "time_casa": "LASK",
+            "time_fora": "Ried",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/6RNtUVeS/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/tfsidTL5/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Abha",
-            "time_fora": "Al Hazem",
+            "time_casa": "Viborg",
+            "time_fora": "Aarhus",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Wz6dv8uH/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/0lRLJwkf/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Al Diriyah",
-            "time_fora": "Al-Ahli",
+            "time_casa": "Millonarios",
+            "time_fora": "Barranquilla",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/v194xnAT/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/69rsmXRE/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Al-Shabab",
-            "time_fora": "Al-Qadsiah",
+            "time_casa": "Llaneros",
+            "time_fora": "Tolima",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Aq0zXPXj/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/v74lEs0e/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Philadelphia Union",
-            "time_fora": "Santos Laguna",
+            "time_casa": "Real Sociedad B",
+            "time_fora": "Castellón",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/rPKJKcIi/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/WIn5JxjK/#/resumo-de-jogo"
         },
         {
-            "time_casa": "New York City",
-            "time_fora": "Necaxa",
+            "time_casa": "Braunschweig",
+            "time_fora": "Bochum",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/bF7hHOBa/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/nipkaQJ0/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Club America",
-            "time_fora": "Austin FC",
+            "time_casa": "Kiel",
+            "time_fora": "St. Pauli",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/6uB0F2tC/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/pOeB68RQ/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Cruz Azul",
-            "time_fora": "Chicago Fire",
+            "time_casa": "Annecy",
+            "time_fora": "Rodez",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/xSXXdfQp/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/jaV5IQvI/#/resumo-de-jogo"
         },
         {
-            "time_casa": "San Luis",
-            "time_fora": "Deportes Temuco",
+            "time_casa": "Dijon",
+            "time_fora": "Pau",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/jub46J1L/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/Mohw0IOj/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Curicó Unido",
-            "time_fora": "CD Santa Cruz",
+            "time_casa": "Grenoble",
+            "time_fora": "Metz",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/2JH9pxu2/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/lhpPNLGc/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Deportes Iquique",
-            "time_fora": "Copiapó",
+            "time_casa": "Guingamp",
+            "time_fora": "Boulogne",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Yu5C8lRi/#/resumo-de-jogo"
+            "link_h2h": "https://www.flashscore.com.br/jogo/dImXLaoA/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Laval",
+            "time_fora": "Nantes",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UVouKwGM/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Nancy",
+            "time_fora": "Montpellier",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/v5XAEHwp/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Red Star",
+            "time_fora": "Sochaux",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/nVzJCe8d/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Reims",
+            "time_fora": "Dunkerque",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vPN4za03/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "St. Etienne",
+            "time_fora": "Clermont",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/nkRCYxVF/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Epitsentr",
+            "time_fora": "Veres-Rivne",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8MzxhYvP/#/resumo-de-jogo"
         }
     ]
 }
