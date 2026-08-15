@@ -111,3 +111,52 @@ def liga_eh_permitida(texto_liga):
             
     return False
 
+# 🟢 LISTA DE LIGAS DE PONTOS CORRIDOS (Apenas pontos corridos nacionais puros)
+LIGAS_CLASSIFICACAO = [
+    "brasileirão série a",
+    "brasileirão série b",
+    "brasileiro serie c",
+    "brasileiro serie d",
+    "argentina - liga profesional",
+    "inglaterra - premier league",
+    "espanha - laliga",
+    "alemanha - bundesliga",
+    "italia - serie a",
+    "frança - ligue 1",
+    "arábia saudita - primeira liga",
+    "arábia saudita - divisao 1",
+    "portugal - primeira liga",
+    "países baixos - eredivisie",
+    "bélgica - pro league",
+    "turquia - super lig",
+    "áustria - bundesliga",
+    "dinamarca - superliga",
+    "irlanda - premier",
+    "colombia - primeira a",
+    "noruega - serie de elite",
+    "méxico - liga mx",
+    "espanha - la liga 2",
+    "alemanha - 2. bundesliga",
+    "itália - serie b",
+    "frança - ligue 2",
+    "países baixos - eerste divisie",
+    "ucrânia - premier league",
+    "chile - liga ascenso"
+]
+
+def liga_permite_classificacao(texto_liga):
+    """
+    Verifica se a liga atual é de pontos corridos para permitir a busca da tabela.
+    """
+    if not texto_liga:
+        return False
+    
+    texto_clean = normalizar_texto(texto_liga)
+    
+    for liga_clf in LIGAS_CLASSIFICACAO:
+        if normalizar_texto(liga_clf) in texto_clean:
+            return True
+            
+    return False
+    
+
