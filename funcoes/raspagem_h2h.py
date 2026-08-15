@@ -201,4 +201,50 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2):
         print(f"      ⚠️ Erro ao resolver URL do jogo: {e_geral}")
 
     return stats
+
+def pegar_posicao_tabela(driver, url_jogo_base, t1, t2):
+    """
+    Acessa a aba de classificação usando o ?mid= extraído da URL real
+    e busca a posição exata do mandante e do visitante na tabela.
+    """
+    posicoes = {"mandante_posicao": None, "visitante_posicao": None}
+    try:
+        url_real = obter_url_real_h2h(driver, url_jogo_base)
+        
+        # Pega o ID da partida (mid) atual da sessão ou da URL base
+        id_jogo = re.search(r'/jogo/([A-Za-z0-9]+)', url_jogo_base)
+        id_str = id_jogo.group(1) if id_jogo else ""
+        
+        # Monta a URL padrão de classificação com o mid exigido pelo Flashscore
+        # Exemplo: .../classificacao/classificacoes/geral/?mid=...
+        url_classificacao = f"{url_real}/classificacao/classificacoes/geral/"
+        
+        driver.get(url_classificacao)
+        time.sleep(1.5)
+        
+        # Seletores mapeados por você
+        linhas_tabela = driver.find_elements(By.CSS_SELECTOR, ".table__row, [class*='table__row']")
+        
+        for linha in linhas_tabela:
+            try:
+                div_rank = linha.find_element(By.CSS_SELECTOR, ".tableCellRank")
+                a_team = linha.find_element(By.CSS_SELECTOR, ".tableCellParticipant__name")
+                
+                if div_rank and a_team:
+                    pos_str = div_rank.text.strip().replace('.', '')
+                    nome_time = a_team.text.strip().lower()
+                    pos_int = int(pos_str)
+                    
+                    if t1.lower() in nome_time or nome_time in t1.lower():
+                        posicoes["mandante_posicao"] = pos_int
+                    elif t2.lower() in nome_time or nome_time in t2.lower():
+                        posicoes["visitante_posicao"] = pos_int
+            except Exception:
+                continue
+                
+    except Exception as e:
+        print(f"      ⚠️ Erro ao raspar posições da tabela: {e}")
+        
+    return posicoes
+                
         
