@@ -65,15 +65,12 @@ def verificar_gols(s):
     pode_apostar_under = not visitante_peneira
 
     # ==========================================================
-    # AVALIAÇÃO DE OVERS (+1.5 e +2.5)
+    # AVALIAÇÃO DE OVERS (+1.5 e +2.5) [Ajustado para 80% e 100%]
     # ==========================================================
     if pct_15 >= 80:
         overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
-    elif pct_15 == 60:
-        if media_total_confronto >= 2.4:
-            overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
 
-    if pct_25 >= 80:
+    if pct_25 == 100:
         if media_total_confronto >= 2.4:
             overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
