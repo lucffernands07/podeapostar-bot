@@ -60,7 +60,7 @@ def verificar_gols(s):
             tem_proximidade = True
 
     # ==========================================================
-    # AVALIAÇÃO DE OVERS (Favorecido por Disparidade/Topo vs Fundo)
+    # AVALIAÇÃO DE OVERS (Favorecido por boa distância na classificação)
     # ==========================================================
     if pct_15 >= 80 and (not m_pos or not v_pos or tem_disparidade or m_pos < 10):
         overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
@@ -69,7 +69,7 @@ def verificar_gols(s):
         overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
     # ==========================================================
-    # AVALIAÇÃO DE UNDERS (Favorecido por Proximidade na Tabela)
+    # AVALIAÇÃO DE UNDERS (Favorecido por Proximidade na classificação)
     # ==========================================================
     if tem_proximidade and pct_m45 >= 60:
         unders_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
