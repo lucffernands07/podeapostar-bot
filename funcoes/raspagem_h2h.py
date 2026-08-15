@@ -195,8 +195,13 @@ def pegar_posicao_tabela(driver, url_jogo_base, t1, t2):
         url_real = obter_url_real_h2h(driver, url_jogo_base)
         url_classificacao = f"{url_real}/classificacao/classificacoes/geral/"
         
+        # 🟢 Navega para a aba de classificação
         driver.get(url_classificacao)
-        time.sleep(1.5)
+        
+        # 🟢 Trava de segurança: aguarda a tabela carregar na tela antes de buscar os elementos
+        WebDriverWait(driver, 8).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".table__row, [class*='table__row']"))
+        )
         
         linhas_tabela = driver.find_elements(By.CSS_SELECTOR, ".table__row, [class*='table__row']")
         
@@ -221,4 +226,3 @@ def pegar_posicao_tabela(driver, url_jogo_base, t1, t2):
         print(f"      ⚠️ Erro ao raspar posições da tabela: {e}")
         
     return posicoes
-                            
