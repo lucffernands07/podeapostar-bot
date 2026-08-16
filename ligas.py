@@ -21,6 +21,8 @@ COMPETICOES = {
 
     # --- BLOCO 3: COPAS NACIONAIS ---
     "Inglaterra - FA Cup": "https://www.flashscore.com.br/futebol/inglaterra/copa-da-fpc/jogos/",
+    "Inglaterra - Supercopa": "https://www.flashscore.com.br/futebol/inglaterra/copa-da-liga-da-inglaterra/jogos/",
+    "França - Supercopa": "https://www.flashscore.com.br/futebol/franca/supercopa/jogos/",
     "Espanha - Copa del Rey": "https://www.flashscore.com.br/futebol/espanha/copa-do-rei/jogos/",
     "Alemanha - DFB Pokal": "https://www.flashscore.com.br/futebol/alemanha/copa-da-alemanha/jogos/",
     "Arábia Saudita - King Cup": "https://www.flashscore.com.br/futebol/arabia-saudita/copa-do-rei/jogos/",
@@ -28,6 +30,7 @@ COMPETICOES = {
     "Argentina - Copa": "https://www.flashscore.com.br/futebol/argentina/copa-argentina/jogos",
 
     # --- BLOCO 4: LIGAS SECUNDÁRIAS EUROPEIAS ---
+    "Inglaterra - Divisão 2": "https://www.flashscore.com.br/futebol/inglaterra/2-divisao/jogos",
     "Arábia Saudita - Primeira Liga": "https://www.flashscore.com.br/futebol/arabia-saudita/primeira-liga/jogos/",
     "Arábia Saudita - Divisão 1": "https://www.flashscore.com.br/futebol/arabia-saudita/divisao-1/jogos/",
     "Portugal - Primeira Liga": "https://www.flashscore.com.br/futebol/portugal/liga-portugal/jogos/",
@@ -76,10 +79,12 @@ LIGAS_ELITE_MERCADOS = [
     "argentina - liga profesional", 
     "europa - liga dos campeões", 
     "inglaterra - premier league", 
+    "inglaterra - supercopa",
     "espanha - laliga", 
     "alemanha - bundesliga", 
     "italia - serie a", 
-    "frança - ligue 1", 
+    "frança - ligue 1",
+    "frança - supercopa",
     "europa - league", 
     "europa - uefa",
     "fa cup", 
