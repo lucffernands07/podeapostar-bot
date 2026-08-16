@@ -16,7 +16,7 @@ def verificar_faltas_totais(s):
         return []
 
     # 1. Soma das Médias (Mandante em casa + Visitante fora)
-    media_esperada = media_m + media_v + 7
+    media_esperada = media_m + media_v
 
     mercados_aprovados = []
 
