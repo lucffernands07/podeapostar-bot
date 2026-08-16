@@ -29,7 +29,6 @@ def verificar_gols(s):
     if not isinstance(s, dict):
         return []
 
-    # Suas validações anteriores de porcentagem...
     c_15 = int(s.get("casa_15", 0) or 0)
     f_15 = int(s.get("fora_15", 0) or 0)
     
@@ -48,37 +47,48 @@ def verificar_gols(s):
     overs_aprovados = []
     unders_aprovados = []
 
-    # Exemplo de Aplicação da sua Regra de Tabela:
     tem_disparidade = False
     tem_proximidade = False
 
     if m_pos is not None and v_pos is not None:
         diferenca = abs(m_pos - v_pos)
-        if diferenca >= 8:  # Exemplo: Grande diferença de posições (G4 x Z4)
+        if diferenca >= 8:  
             tem_disparidade = True
-        elif diferenca <= 3: # Exemplo: Times muito próximos na tabela
+        elif diferenca <= 3: 
             tem_proximidade = True
 
     # ==========================================================
-    # AVALIAÇÃO DE OVERS (Favorecido por boa distância na classificação)
+    # AVALIAÇÃO DE OVERS
     # ==========================================================
-    if pct_15 >= 80 and (not m_pos or not v_pos or tem_disparidade or m_pos < 10):
-        overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
+    # Se não tem posição (liga sem tabela), usa a regra pura de porcentagem antiga!
+    if m_pos is None or v_pos is None:
+        if pct_15 >= 80:
+            overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
+        if pct_25 >= 80:  # ou == 100 conforme sua preferência
+            overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
+    else:
+        # Regra com tabela (Pontos Corridos)
+        if pct_15 >= 80 and (tem_disparidade or m_pos < 10 or not tem_proximidade):
+            overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
 
-    if pct_25 == 100 and tem_disparidade:
-        overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
+        if pct_25 == 100 and tem_disparidade:
+            overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
     # ==========================================================
-    # AVALIAÇÃO DE UNDERS (Favorecido por Proximidade na classificação)
+    # AVALIAÇÃO DE UNDERS (Apenas para ligas com tabela e proximidade)
     # ==========================================================
-    if tem_proximidade and pct_m45 >= 60:
-        unders_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
+    if m_pos is not None and v_pos is not None and tem_proximidade:
+        if pct_m45 >= 60:
+            unders_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
+        if pct_m35 >= 60:
+            unders_aprovados.append({"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"})
 
-    if tem_proximidade and pct_m35 >= 60:
-        unders_aprovados.append({"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"})
-
-    # Retorno padrão de exclusão mútua
+    # ==========================================================
+    # RETORNO SEGURO (Exclusão mútua sem descartar ligas sem tabela)
+    # ==========================================================
     if overs_aprovados:
         return overs_aprovados
-    else:
+    elif unders_aprovados:
         return unders_aprovados
+    
+    return []
