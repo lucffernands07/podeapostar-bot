@@ -1,15 +1,5 @@
 [
     {
-        "horario": "00:06",
-        "liga": "México - Liga MX",
-        "time_casa": "Pachuca",
-        "time_fora": "Puebla",
-        "mercado": "+1.5 Gols (80%)",
-        "odd": "1.22",
-        "link_betano": "https://www.betano.bet.br/match-odds/CF-Pachuca-Club-Puebla/89455164/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/jgv6VAAM"
-    },
-    {
         "horario": "13:15",
         "liga": "Arábia Saudita - King Cup",
         "time_casa": "Al-Jabalain",
@@ -25,7 +15,7 @@
         "time_casa": "Al-Najma",
         "time_fora": "Al-Ittihad",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.13",
+        "odd": "1.12",
         "link_betano": "https://www.betano.bet.br/match-odds/Al-Najma-KSA-Al-Ittihad-Club/90923914/",
         "link_h2h": "https://www.flashscore.com.br/jogo/GpifHmNF"
     },
@@ -35,7 +25,7 @@
         "time_casa": "Al-Najma",
         "time_fora": "Al-Ittihad",
         "mercado": "+2.5 Gols (80%)",
-        "odd": "1.42",
+        "odd": "1.41",
         "link_betano": "https://www.betano.bet.br/match-odds/Al-Najma-KSA-Al-Ittihad-Club/90923914/",
         "link_h2h": "https://www.flashscore.com.br/jogo/GpifHmNF"
     },
@@ -45,7 +35,7 @@
         "time_casa": "Al-Najma",
         "time_fora": "Al-Ittihad",
         "mercado": "Ambas Marcam: Sim",
-        "odd": "1.67",
+        "odd": "1.72",
         "link_betano": "https://www.betano.bet.br/match-odds/Al-Najma-KSA-Al-Ittihad-Club/90923914/",
         "link_h2h": "https://www.flashscore.com.br/jogo/GpifHmNF"
     },
@@ -55,7 +45,7 @@
         "time_casa": "Al Diriyah",
         "time_fora": "Al Nassr Riyadh",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.14",
+        "odd": "1.13",
         "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Nassr-FC/90924148/",
         "link_h2h": "https://www.flashscore.com.br/jogo/CUBM2l8M"
     },
@@ -65,7 +55,7 @@
         "time_casa": "Al Diriyah",
         "time_fora": "Al Nassr Riyadh",
         "mercado": "Dupla Chance: 1X (80%)",
-        "odd": "3.25",
+        "odd": "3.4",
         "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Nassr-FC/90924148/",
         "link_h2h": "https://www.flashscore.com.br/jogo/CUBM2l8M"
     },
@@ -75,7 +65,7 @@
         "time_casa": "Al Diriyah",
         "time_fora": "Al Nassr Riyadh",
         "mercado": "Resultado Final: Vitória Casa",
-        "odd": "7.6",
+        "odd": "7.9",
         "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Nassr-FC/90924148/",
         "link_h2h": "https://www.flashscore.com.br/jogo/CUBM2l8M"
     },
@@ -85,7 +75,7 @@
         "time_casa": "Al Diriyah",
         "time_fora": "Al Nassr Riyadh",
         "mercado": "Ambas Marcam: Sim",
-        "odd": "1.9",
+        "odd": "1.88",
         "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Nassr-FC/90924148/",
         "link_h2h": "https://www.flashscore.com.br/jogo/CUBM2l8M"
     },
@@ -95,7 +85,17 @@
         "time_casa": "Din. Zagreb (Cro)",
         "time_fora": "Viking (Nor)",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.22",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/GNK-Dinamo-Zagreb-Viking-FK/90616733/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/O49PC8FO"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Europa - Liga dos Campeões",
+        "time_casa": "Din. Zagreb (Cro)",
+        "time_fora": "Viking (Nor)",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.67",
         "link_betano": "https://www.betano.bet.br/match-odds/GNK-Dinamo-Zagreb-Viking-FK/90616733/",
         "link_h2h": "https://www.flashscore.com.br/jogo/O49PC8FO"
     },
@@ -125,7 +125,7 @@
         "time_casa": "Fenerbahce (Tur)",
         "time_fora": "Lyon (Fra)",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.27",
+        "odd": "1.25",
         "link_betano": "https://www.betano.bet.br/match-odds/Fenerbahce-SK-Olympique-Lyonnais/90619951/",
         "link_h2h": "https://www.flashscore.com.br/jogo/GYnRgMfm"
     },
@@ -175,7 +175,7 @@
         "time_casa": "Dep. Riestra",
         "time_fora": "Gimnasia L.P.",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.68",
+        "odd": "1.69",
         "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Riestra-Gimnasia-y-Esgrima-de-La-Plata/90355201/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lhjDzU5s"
     },
@@ -205,7 +205,7 @@
         "time_casa": "Recoleta (Par)",
         "time_fora": "Boca Juniors (Arg)",
         "mercado": "+1.5 Gols (100%)",
-        "odd": "1.37",
+        "odd": "1.29",
         "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Recoleta-Boca-Juniors/90627207/",
         "link_h2h": "https://www.flashscore.com.br/jogo/4h2j62o9"
     },
@@ -235,7 +235,7 @@
         "time_casa": "Londrina",
         "time_fora": "Atlético-GO",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.37",
+        "odd": "1.44",
         "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Atletico-GO/90842466/",
         "link_h2h": "https://www.flashscore.com.br/jogo/2V8dXDim"
     },
@@ -285,7 +285,7 @@
         "time_casa": "Tolima (Col)",
         "time_fora": "Ind. del Valle (Ecu)",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.42",
+        "odd": "1.5",
         "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Tolima-Independiente-del-Valle/90652113/",
         "link_h2h": "https://www.flashscore.com.br/jogo/UPvHp6Qj"
     },
@@ -315,7 +315,7 @@
         "time_casa": "Universidad Católica (Chi)",
         "time_fora": "Estudiantes (Arg)",
         "mercado": "Resultado Final: Vitória Casa",
-        "odd": "2.7",
+        "odd": "3.2",
         "link_betano": "https://www.betano.bet.br/match-odds/Universidad-Catolica-Estudiantes-de-La-Plata/90631550/",
         "link_h2h": "https://www.flashscore.com.br/jogo/KbsxYSto"
     },
