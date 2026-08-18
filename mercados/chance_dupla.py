@@ -17,8 +17,12 @@ def verificar_chance_dupla(s):
     v_sem_derrota_fora = int(s.get("visitante_sem_derrota_fora", 0) or 0)
 
     v_derrotas_fora = int(s.get("visitante_derrotas_fora", 0) or 0)
-    v_sofridos_fora = float(s.get("visitante_gols_sofridos_fora", 0) or 0)
     
+    # 🟢 Calculamos as derrotas do mandante em casa sem precisar de alterar a raspagem
+    # (Total de jogos analisados em casa (5) menos os jogos sem derrota)
+    m_derrotas_casa = max(0, 5 - m_sem_derrota_casa)
+    
+    v_sofridos_fora = float(s.get("visitante_gols_sofridos_fora", 0) or 0)
     m_sofridos_casa = float(s.get("mandante_gols_sofridos_casa", 0) or 0)
 
     # Variáveis de controle para testar cada lado de forma independente
