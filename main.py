@@ -419,16 +419,28 @@ def main():
                 }
 
             canal_id = os.getenv('CHANNEL_ID')
-            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros)
-            texto_bingos_final = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
+            
+            # 🟢 1. Passamos qtd_alvo=None para que o sistema recolha TODOS os jogos (em vez de limitar a 5)
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros, qtd_alvo=None)
+            
+            # 🟢 2. A formatação devolve agora uma LISTA de textos particionados (seguros contra limites)
+            textos_bingos_lista = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
     
-            if texto_bingos_final and canal_id:
-                try:
-                    msg_bingo_formatada = "💰 *MENU DE BINGOS*\n\n" + texto_bingos_final
-                    menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
-                    print("📢 Menu interativo enviado para o Canal.")
-                except Exception as e:
-                    print(f"⚠️ Erro ao enviar menu para o canal: {e}")
+            if textos_bingos_lista and canal_id:
+                for idx, texto_part in enumerate(textos_bingos_lista):
+                    try:
+                        msg_bingo_formatada = texto_part
+                        if idx == 0:
+                            msg_bingo_formatada = "💰 *LISTA COMPLETA AGRUPADA*\n\n" + msg_bingo_formatada
+                            
+                        menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
+                        print(f"📢 Parte {idx+1}/{len(textos_bingos_lista)} enviada para o Canal.")
+                        
+                        # Pausa de 1.5s entre o envio de cada pedaço para não tomar punição do Telegram
+                        time.sleep(1.5) 
+                    except Exception as e:
+                        print(f"⚠️ Erro ao enviar a parte {idx+1} para o canal: {e}")
+
 
             os.makedirs("ranking", exist_ok=True)
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
