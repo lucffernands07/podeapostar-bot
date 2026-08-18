@@ -10,6 +10,86 @@
         "link_h2h": "https://www.flashscore.com.br/jogo/jgv6VAAM"
     },
     {
+        "horario": "13:15",
+        "liga": "Arábia Saudita - King Cup",
+        "time_casa": "Al-Jabalain",
+        "time_fora": "Al-Ettifaq",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Jabalain-Al-Ettifaq/90923852/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OpDbDvMs"
+    },
+    {
+        "horario": "13:15",
+        "liga": "Arábia Saudita - King Cup",
+        "time_casa": "Al-Najma",
+        "time_fora": "Al-Ittihad",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.13",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Najma-KSA-Al-Ittihad-Club/90923914/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GpifHmNF"
+    },
+    {
+        "horario": "13:15",
+        "liga": "Arábia Saudita - King Cup",
+        "time_casa": "Al-Najma",
+        "time_fora": "Al-Ittihad",
+        "mercado": "+2.5 Gols (80%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Najma-KSA-Al-Ittihad-Club/90923914/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GpifHmNF"
+    },
+    {
+        "horario": "13:15",
+        "liga": "Arábia Saudita - King Cup",
+        "time_casa": "Al-Najma",
+        "time_fora": "Al-Ittihad",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.67",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Najma-KSA-Al-Ittihad-Club/90923914/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GpifHmNF"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - King Cup",
+        "time_casa": "Al Diriyah",
+        "time_fora": "Al Nassr Riyadh",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.14",
+        "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Nassr-FC/90924148/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/CUBM2l8M"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - King Cup",
+        "time_casa": "Al Diriyah",
+        "time_fora": "Al Nassr Riyadh",
+        "mercado": "Dupla Chance: 1X (80%)",
+        "odd": "3.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Nassr-FC/90924148/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/CUBM2l8M"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - King Cup",
+        "time_casa": "Al Diriyah",
+        "time_fora": "Al Nassr Riyadh",
+        "mercado": "Resultado Final: Vitória Casa",
+        "odd": "7.6",
+        "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Nassr-FC/90924148/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/CUBM2l8M"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - King Cup",
+        "time_casa": "Al Diriyah",
+        "time_fora": "Al Nassr Riyadh",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.9",
+        "link_betano": "https://www.betano.bet.br/match-odds/Diriyah-Club-Al-Nassr-FC/90924148/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/CUBM2l8M"
+    },
+    {
         "horario": "16:00",
         "liga": "Europa - Liga dos Campeões",
         "time_casa": "Din. Zagreb (Cro)",
@@ -45,7 +125,7 @@
         "time_casa": "Fenerbahce (Tur)",
         "time_fora": "Lyon (Fra)",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.26",
+        "odd": "1.27",
         "link_betano": "https://www.betano.bet.br/match-odds/Fenerbahce-SK-Olympique-Lyonnais/90619951/",
         "link_h2h": "https://www.flashscore.com.br/jogo/GYnRgMfm"
     },
@@ -98,5 +178,205 @@
         "odd": "1.68",
         "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Riestra-Gimnasia-y-Esgrima-de-La-Plata/90355201/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lhjDzU5s"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Libertadores",
+        "time_casa": "Ind. Rivadavia (Arg)",
+        "time_fora": "Fluminense (Bra)",
+        "mercado": "Chutes Totais no Jogo: 34.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-Rivadavia-de-Mendoza-Fluminense-RJ/90627323/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EaZojS2T"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Libertadores",
+        "time_casa": "Ind. Rivadavia (Arg)",
+        "time_fora": "Fluminense (Bra)",
+        "mercado": "Faltas Totais no Jogo: 22.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-Rivadavia-de-Mendoza-Fluminense-RJ/90627323/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EaZojS2T"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Recoleta (Par)",
+        "time_fora": "Boca Juniors (Arg)",
+        "mercado": "+1.5 Gols (100%)",
+        "odd": "1.37",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Recoleta-Boca-Juniors/90627207/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/4h2j62o9"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Recoleta (Par)",
+        "time_fora": "Boca Juniors (Arg)",
+        "mercado": "Chutes Totais no Jogo: 34.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Recoleta-Boca-Juniors/90627207/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/4h2j62o9"
+    },
+    {
+        "horario": "19:00",
+        "liga": "Sul-Americana",
+        "time_casa": "Recoleta (Par)",
+        "time_fora": "Boca Juniors (Arg)",
+        "mercado": "Faltas Totais no Jogo: 23.8",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportivo-Recoleta-Boca-Juniors/90627207/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/4h2j62o9"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Londrina",
+        "time_fora": "Atlético-GO",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.37",
+        "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Atletico-GO/90842466/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/2V8dXDim"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Londrina",
+        "time_fora": "Atlético-GO",
+        "mercado": "Chutes Totais no Jogo: 43.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Atletico-GO/90842466/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/2V8dXDim"
+    },
+    {
+        "horario": "19:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Londrina",
+        "time_fora": "Atlético-GO",
+        "mercado": "Faltas Totais no Jogo: 25.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Londrina-PR-Atletico-GO/90842466/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/2V8dXDim"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Náutico",
+        "time_fora": "Ceará",
+        "mercado": "Chutes Totais no Jogo: 38.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nautico-PE-Ceara-SC-CE/90842463/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/vVhUoD6t"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Náutico",
+        "time_fora": "Ceará",
+        "mercado": "Faltas Totais no Jogo: 36.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Nautico-PE-Ceara-SC-CE/90842463/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/vVhUoD6t"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Tolima (Col)",
+        "time_fora": "Ind. del Valle (Ecu)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Tolima-Independiente-del-Valle/90652113/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UPvHp6Qj"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Tolima (Col)",
+        "time_fora": "Ind. del Valle (Ecu)",
+        "mercado": "Chutes Totais no Jogo: 34.2",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Tolima-Independiente-del-Valle/90652113/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UPvHp6Qj"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Tolima (Col)",
+        "time_fora": "Ind. del Valle (Ecu)",
+        "mercado": "Faltas Totais no Jogo: 20.9",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Deportes-Tolima-Independiente-del-Valle/90652113/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/UPvHp6Qj"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Universidad Católica (Chi)",
+        "time_fora": "Estudiantes (Arg)",
+        "mercado": "Resultado Final: Vitória Casa",
+        "odd": "2.7",
+        "link_betano": "https://www.betano.bet.br/match-odds/Universidad-Catolica-Estudiantes-de-La-Plata/90631550/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/KbsxYSto"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Universidad Católica (Chi)",
+        "time_fora": "Estudiantes (Arg)",
+        "mercado": "Chutes Totais no Jogo: 30.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Universidad-Catolica-Estudiantes-de-La-Plata/90631550/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/KbsxYSto"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Universidad Católica (Chi)",
+        "time_fora": "Estudiantes (Arg)",
+        "mercado": "Faltas Totais no Jogo: 19.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Universidad-Catolica-Estudiantes-de-La-Plata/90631550/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/KbsxYSto"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "São Paulo (Bra)",
+        "time_fora": "Bolivar (Bol)",
+        "mercado": "Chutes Totais no Jogo: 32.4",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Sao-Paulo-SP-Bolivar-La-Paz/90631531/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/h2hPltFr"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Sul-Americana",
+        "time_casa": "São Paulo (Bra)",
+        "time_fora": "Bolivar (Bol)",
+        "mercado": "Faltas Totais no Jogo: 21.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Sao-Paulo-SP-Bolivar-La-Paz/90631531/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/h2hPltFr"
+    },
+    {
+        "horario": "21:35",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Goiás",
+        "time_fora": "Juventude",
+        "mercado": "Chutes Totais no Jogo: 31.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Goi-s-GO-Juventude-RS/90842470/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GhFCTVjC"
+    },
+    {
+        "horario": "21:35",
+        "liga": "Brasileirão Série B",
+        "time_casa": "Goiás",
+        "time_fora": "Juventude",
+        "mercado": "Faltas Totais no Jogo: 23.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Goi-s-GO-Juventude-RS/90842470/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/GhFCTVjC"
     }
 ]
