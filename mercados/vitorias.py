@@ -31,7 +31,7 @@ def verificar_vitorias(s):
     # Exige: Mandante com pelo menos 4 vitórias em casa (ou 100% de vitórias) 
     # E o visitante com muitas derrotas fora OU defesa extremamente vazada (>= 8 gols sofridos).
     # ----------------------------------------------------------
-    condicao_vitoria_casa = (m_vitorias_casa >= 4) and (v_derrotas_fora >= 3 or v_sofridos_fora >= 8)
+    condicao_vitoria_casa = (m_vitorias_casa >= 4) and (v_derrotas_fora >= 4 and v_sofridos_fora >= 8)
 
     if condicao_vitoria_casa:
         tem_vitoria_casa = True
@@ -41,7 +41,7 @@ def verificar_vitorias(s):
     # Exige: Visitante com pelo menos 4 vitórias fora 
     # E o mandante com muitas derrotas em casa (>= 3) OU defesa extremamente vazada (>= 8 gols sofridos).
     # ----------------------------------------------------------
-    condicao_vitoria_fora = (v_vitorias_fora >= 4) and (m_derrotas_casa >= 3 or m_sofridos_casa >= 8)
+    condicao_vitoria_fora = (v_vitorias_fora == 5) and (m_derrotas_casa == 5 and m_sofridos_casa >= 8)
 
     if condicao_vitoria_fora:
         tem_vitoria_fora = True
