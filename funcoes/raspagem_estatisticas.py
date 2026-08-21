@@ -20,7 +20,6 @@ def formatar_rota_h2h(url_base, sub_rota=""):
     return f"{path}/"
 
 def pegar_estatisticas_coletivas(driver, stats):
-    # 🛑 Trava de raiz: Se não for liga de elite, aborta imediatamente sem gastar tempo de navegação
     nome_comp = stats.get("liga", "")
     if not liga_eh_permitida(nome_comp):
         print(f"      ⏩ [RAIZ] Fase 2 ignorada: '{nome_comp}' não é liga de elite.")
@@ -31,13 +30,15 @@ def pegar_estatisticas_coletivas(driver, stats):
     # Chutes
     stats["chutes_mandante_h2h"] = []   
     stats["chutes_visitante_h2h"] = []  
-    stats["chutes_jogo_total_h2h"] = [] 
-    stats["dados_incompletos_chutes"] = False
 
-    # Faltas Totais
-    stats["faltas_mandante_h2h"] = []   
-    stats["faltas_visitante_h2h"] = []  
-    stats["faltas_jogo_total_h2h"] = [] 
+    # Escanteios
+    stats["cantos_mandante_h2h"] = []
+    stats["cantos_visitante_h2h"] = []
+
+    # Cartões
+    stats["cartoes_mandante_h2h"] = []
+    stats["cartoes_visitante_h2h"] = []
+    stats["dados_incompletos_cartoes"] = False
 
     if not EXECUTAR_SCRAPER:
         return stats
@@ -58,8 +59,8 @@ def pegar_estatisticas_coletivas(driver, stats):
         url_base_limpa = url_atual_carregada.replace("/h2h", "").rstrip("/")
 
         rotas_alvo = [
-            {"tipo": "MANDANTE", "url": formatar_rota_h2h(url_base_limpa, "casa"), "chave_array_chutes": "chutes_mandante_h2h", "chave_array_faltas": "faltas_mandante_h2h"},
-            {"tipo": "VISITANTE", "url": formatar_rota_h2h(url_base_limpa, "fora"), "chave_array_chutes": "chutes_visitante_h2h", "chave_array_faltas": "faltas_visitante_h2h"}
+            {"tipo": "MANDANTE", "url": formatar_rota_h2h(url_base_limpa, "casa"), "c_chutes": "chutes_mandante_h2h", "c_cantos": "cantos_mandante_h2h", "c_cartoes": "cartoes_mandante_h2h"},
+            {"tipo": "VISITANTE", "url": formatar_rota_h2h(url_base_limpa, "fora"), "c_chutes": "chutes_visitante_h2h", "c_cantos": "cantos_visitante_h2h", "c_cartoes": "cartoes_visitante_h2h"}
         ]
 
         for alvo in rotas_alvo:
@@ -70,8 +71,6 @@ def pegar_estatisticas_coletivas(driver, stats):
                 time.sleep(0.8)
                 
                 linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")
-                print(f"      📊 [LOG] Encontradas {len(linhas_confrontos)} linhas H2H para {alvo['tipo']}.")
-                
                 links_jogos = []
                 for linha in linhas_confrontos[:5]:
                     href = linha.get_attribute("href")
@@ -81,7 +80,6 @@ def pegar_estatisticas_coletivas(driver, stats):
                             href = a_tag.get_attribute("href")
                         except Exception:
                             pass
-                    
                     if href:
                         links_jogos.append(href)
 
@@ -92,98 +90,70 @@ def pegar_estatisticas_coletivas(driver, stats):
                     driver.get(url_stats_geral)
                     time.sleep(1.0)
 
-                    chutes_casa = 0
-                    chutes_fora = 0
+                    chutes_casa, chutes_fora = 0, 0
+                    cantos_casa, cantos_fora = 0, 0
+                    cartoes_casa, cartoes_fora = 0, 0
+                    
                     achou_chutes = False
-
-                    faltas_casa = 0
-                    faltas_fora = 0
-                    achou_faltas = False
+                    achou_cantos = False
+                    achou_cartoes = False
 
                     try:
                         todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
                         if len(todos_spans) > 0:
-                            achou_cartoes_ancora = False
                             for idx, span in enumerate(todos_spans):
                                 texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
                                 
-                                if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
-                                    achou_cartoes_ancora = True
-                                
-                                # Extração de Chutes
-                                if not achou_cartoes_ancora and texto_elemento in ["TOTAL DE FINALIZAÇÕES", "TOTAL SHOTS"]:
+                                # Chutes
+                                if texto_elemento in ["TOTAL DE FINALIZAÇÕES", "TOTAL SHOTS"]:
                                     if idx > 0 and (idx + 1) < len(todos_spans):
-                                        val_casa_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
-                                        val_fora_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                                        chutes_casa = int(re.search(r'\d+', val_casa_str).group()) if re.search(r'\d+', val_casa_str) else 0
-                                        chutes_fora = int(re.search(r'\d+', val_fora_str).group()) if re.search(r'\d+', val_fora_str) else 0
+                                        c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                                        f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                                        chutes_casa = int(re.search(r'\d+', c_str).group()) if re.search(r'\d+', c_str) else 0
+                                        chutes_fora = int(re.search(r'\d+', f_str).group()) if re.search(r'\d+', f_str) else 0
                                         achou_chutes = True
 
-                            # Extração de Faltas (Varre de trás para frente para garantir que pegamos a última tabela de Faltas)
-                            for idx in range(len(todos_spans) - 1, -1, -1):
-                                span = todos_spans[idx]
-                                texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
-                                
-                                if texto_elemento == "FALTAS":
+                                # Escanteios
+                                if texto_elemento in ["ESCANTEIOS", "CORNERS"]:
                                     if idx > 0 and (idx + 1) < len(todos_spans):
-                                        val_casa_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
-                                        val_fora_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                                        
-                                        match_c = re.search(r'\d+', val_casa_str)
-                                        match_f = re.search(r'\d+', val_fora_str)
-                                        
-                                        if match_c and match_f:
-                                            faltas_casa = int(match_c.group())
-                                            faltas_fora = int(match_f.group())
-                                            achou_faltas = True
-                                            break
+                                        c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                                        f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                                        cantos_casa = int(re.search(r'\d+', c_str).group()) if re.search(r'\d+', c_str) else 0
+                                        cantos_fora = int(re.search(r'\d+', f_str).group()) if re.search(r'\d+', f_str) else 0
+                                        achou_cantos = True
 
-                            # Gravação dos Chutes
+                                # Cartões Amarelos
+                                if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
+                                    if idx > 0 and (idx + 1) < len(todos_spans):
+                                        c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                                        f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                                        cartoes_casa = int(re.search(r'\d+', c_str).group()) if re.search(r'\d+', c_str) else 0
+                                        cartoes_fora = int(re.search(r'\d+', f_str).group()) if re.search(r'\d+', f_str) else 0
+                                        achou_cartoes = True
+
+                            # Gravações condicionais por alvo
                             if achou_chutes:
-                                valor_alvo_chutes = chutes_casa if alvo["tipo"] == "MANDANTE" else chutes_fora
-                                stats[alvo["chave_array_chutes"]].append(valor_alvo_chutes)
-
-                            # Gravação das Faltas
-                            if achou_faltas:
-                                valor_alvo_faltas = faltas_casa if alvo["tipo"] == "MANDANTE" else faltas_fora
-                                print(f"      ✅ [LOG] Faltas capturadas ({alvo['tipo']}): {valor_alvo_faltas} (Casa: {faltas_casa} | Fora: {faltas_fora})")
-                                stats[alvo["chave_array_faltas"]].append(valor_alvo_faltas)
-                            else:
-                                print(f"      ⚠️ [LOG] Estatística de 'Faltas' não localizada nos spans.")
-                        else:
-                            print(f"      ⏩ [LOG] Sem dados estatísticos para este jogo, pulando...")
+                                stats[alvo["c_chutes"]].append(chutes_casa if alvo["tipo"] == "MANDANTE" else chutes_fora)
+                            if achou_cantos:
+                                stats[alvo["c_cantos"]].append(cantos_casa if alvo["tipo"] == "MANDANTE" else cantos_fora)
+                            if achou_cartoes:
+                                stats[alvo["c_cartoes"]].append(cartoes_casa if alvo["tipo"] == "MANDANTE" else cartoes_fora)
 
                     except Exception as e_sp:
                         print(f"      ⚠️ [LOG] Erro ao ler spans estatísticos: {e_sp}")
 
             except Exception as e_coleta:
-                print(f"      ⚠️ [LOG] Erro ao listar linhas H2H para estatísticas ({alvo['tipo']}): {e_coleta}")
+                print(f"      ⚠️ [LOG] Erro ao listar linhas H2H: {e_coleta}")
                 continue
 
     except Exception as e:
         print(f"      ⚠️ [LOG] Erro Crítico na Raspagem Coletiva: {e}")
 
-    # Médias de Chutes
-    c_h2h = stats.get("chutes_mandante_h2h", [])
-    v_h2h = stats.get("chutes_visitante_h2h", [])
-    stats["mandante_media_chutes_casa"] = round(sum(c_h2h) / len(c_h2h), 2) if len(c_h2h) > 0 else 0.0
-    stats["visitante_media_chutes_fora"] = round(sum(v_h2h) / len(v_h2h), 2) if len(v_h2h) > 0 else 0.0
-
-    # Médias de Faltas
-    f_mandante = stats.get("faltas_mandante_h2h", [])
-    f_visitante = stats.get("faltas_visitante_h2h", [])
-    stats["mandante_media_faltas_casa"] = round(sum(f_mandante) / len(f_mandante), 2) if len(f_mandante) > 0 else 0.0
-    stats["visitante_media_faltas_fora"] = round(sum(f_visitante) / len(f_visitante), 2) if len(f_visitante) > 0 else 0.0
-
-    print(f"      📊 [LOG FINAL] Médias Chutes -> Mandante: {stats['mandante_media_chutes_casa']} | Visitante: {stats['visitante_media_chutes_fora']}")
-    print(f"      📊 [LOG FINAL] Médias Faltas -> Mandante: {stats['mandante_media_faltas_casa']} | Visitante: {stats['visitante_media_faltas_fora']}")
-
-    try:
-        if len(driver.window_handles) > 1:
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-    except Exception:
-        pass
+    # Médias Finais
+    c_h = stats.get("chutes_mandante_h2h", [])
+    c_v = stats.get("chutes_visitante_h2h", [])
+    stats["mandante_media_chutes_casa"] = round(sum(c_h) / len(c_h), 2) if len(c_h) > 0 else 0.0
+    stats["visitante_media_chutes_fora"] = round(sum(c_v) / len(c_v), 2) if len(c_v) > 0 else 0.0
 
     return stats
-                
+    
