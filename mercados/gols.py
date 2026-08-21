@@ -1,9 +1,7 @@
 """
-REGRAS DE GOLS - VERSÃO AJUSTADA ÀS CHAVES DA RASPAGEM
-Com trava de integridade de dados para abortar caso a raspagem falhe.
-Ordem de Prioridade e Exclusão:
-- Se houver Over (+1.5 ou +2.5), os Unders são vetados.
-- Se houver Under (-3.5 ou -4.5), os Overs são vetados.
+REGRAS DE GOLS - VERSÃO AJUSTADA COM FILTRO DE ÚLTIMO JOGO
+- OVER: Pelo menos um time vem de vitória e o outro de derrota.
+- UNDER: Os dois vêm de vitória, ou vitória e empate, ou empate.
 """
 
 def calcular_porcentagem_gols(c, f):
@@ -40,6 +38,24 @@ def verificar_gols(s):
     pct_m35 = calcular_porcentagem_gols(s.get("casa_35_under", 0), s.get("casa_35_under", 0))
     pct_m45 = calcular_porcentagem_gols(s.get("casa_45_under", 0), s.get("casa_45_under", 0))
 
+    # 🟢 CAPTURA DOS RESULTADOS DO ÚLTIMO JOGO (V, D ou E)
+    res_t1 = str(s.get("t1_resultado_1", "")).upper()
+    res_t2 = str(s.get("t2_resultado_1", "")).upper()
+
+    # ----------------------------------------------------------
+    # 🟢 REGRAS DE FILTRAGEM DO ÚLTIMO JOGO
+    # ----------------------------------------------------------
+    # Pelo menos um ganhou E o outro perdeu (independente de quem seja casa/fora)
+    condicao_over_momento = (res_t1 == "V" and res_t2 == "D") or (res_t1 == "D" and res_t2 == "V")
+
+    # Os dois ganharam, ou um ganhou e o outro empatou, ou os dois empataram
+    condicao_under_momento = (
+        (res_t1 == "V" and res_t2 == "V") or 
+        (res_t1 == "V" and res_t2 == "E") or 
+        (res_t1 == "E" and res_t2 == "V") or 
+        (res_t1 == "E" and res_t2 == "E")
+    )
+
     # 🟢 PEGANDO AS POSIÇÕES DA TABELA PASSADAS PELA RASPAGEM
     m_pos = s.get("mandante_posicao")
     v_pos = s.get("visitante_posicao")
@@ -58,33 +74,34 @@ def verificar_gols(s):
             tem_proximidade = True
 
     # ==========================================================
-    # AVALIAÇÃO DE OVERS
+    # AVALIAÇÃO DE OVERS (Exige a condição de Vitória + Derrota)
     # ==========================================================
-    # Se não tem posição (liga sem tabela), usa a regra pura de porcentagem antiga!
-    if m_pos is None or v_pos is None:
-        if pct_15 >= 80:
-            overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
-        if pct_25 >= 80:  # ou == 100 conforme sua preferência
-            overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
-    else:
-        # Regra com tabela (Pontos Corridos)
-        if pct_15 >= 80 and (tem_disparidade or m_pos < 10 or not tem_proximidade):
-            overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
+    if condicao_over_momento:
+        if m_pos is None or v_pos is None:
+            if pct_15 >= 80:
+                overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
+            if pct_25 >= 80:  
+                overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
+        else:
+            # Regra com tabela (Pontos Corridos)
+            if pct_15 >= 80 and (tem_disparidade or m_pos < 10 or not tem_proximidade):
+                overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
 
-        if pct_25 == 100 and tem_disparidade:
-            overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
-
-    # ==========================================================
-    # AVALIAÇÃO DE UNDERS (Apenas para ligas com tabela e proximidade)
-    # ==========================================================
-    if m_pos is not None and v_pos is not None and tem_proximidade:
-        if pct_m45 >= 60:
-            unders_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
-        if pct_m35 >= 60:
-            unders_aprovados.append({"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"})
+            if pct_25 == 100 and tem_disparidade:
+                overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
     # ==========================================================
-    # RETORNO SEGURO (Exclusão mútua sem descartar ligas sem tabela)
+    # AVALIAÇÃO DE UNDERS (Exige a condição de V/V, V/E ou E/E)
+    # ==========================================================
+    if condicao_under_momento:
+        if m_pos is not None and v_pos is not None and tem_proximidade:
+            if pct_m45 >= 60:
+                unders_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
+            if pct_m35 >= 60:
+                unders_aprovados.append({"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"})
+
+    # ==========================================================
+    # RETORNO SEGURO (Exclusão mútua)
     # ==========================================================
     if overs_aprovados:
         return overs_aprovados
@@ -92,3 +109,4 @@ def verificar_gols(s):
         return unders_aprovados
     
     return []
+            
