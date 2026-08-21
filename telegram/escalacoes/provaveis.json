@@ -1,109 +1,4 @@
 {
-    "aldosivixunion santa fe": {
-        "time_casa": "Aldosivi",
-        "time_fora": "Union Santa Fe",
-        "horario": "14:30",
-        "liga": "Argentina - Liga Profesional",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/aldosivi-Eu4qrEcB/union-santa-fe-lr2YMkTK/resumo/equipes/",
-        "titulares_casa": [
-            "Acosta L.",
-            "Lopez E.",
-            "Sigali L.",
-            "Pombo J.",
-            "Cufre B.",
-            "Anso F.",
-            "Sosa A.",
-            "Castro L.",
-            "Godoy M.",
-            "Vombergar A.",
-            "Gaitan N."
-        ],
-        "titulares_fora": [
-            "Mansilla M.",
-            "Juan Pintado",
-            "M. Rodriguez",
-            "Luduena J.",
-            "Pitton B.",
-            "Menossi L.",
-            "Palacios J.",
-            "Luna Diale M.",
-            "Giaccone E.",
-            "Tarragona C.",
-            "Estigarribia M."
-        ],
-        "texto_telegram": "**Aldosivi**:\nAcosta L., Lopez E., Sigali L., Pombo J.\nCufre B., Anso F., Sosa A., Castro L.\nGodoy M., Vombergar A., Gaitan N.\n\n**Union Santa Fe**:\nMansilla M., Juan Pintado, M. Rodriguez, Luduena J.\nPitton B., Menossi L., Palacios J., Luna Diale M.\nGiaccone E., Tarragona C., Estigarribia M.",
-        "atualizado_em": "2026-08-21 02:16"
-    },
-    "marseillexstrasbourg": {
-        "time_casa": "Marseille",
-        "time_fora": "Strasbourg",
-        "horario": "15:45",
-        "liga": "França - Ligue 1",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/marseille-SblU3Hee/strasbourg-nP6UzIU1/resumo/equipes/",
-        "titulares_casa": [
-            "De Lange J.",
-            "Weah T.",
-            "Egan-Riley C.",
-            "Kondogbia G.",
-            "Emerson",
-            "Abdelli H.",
-            "Hojbjerg P.",
-            "Harit A.",
-            "Gomes A.",
-            "Igor Paixão",
-            "Gouiri A."
-        ],
-        "titulares_fora": [
-            "Jorgensen F.",
-            "Doue G.",
-            "Omobamidele A.",
-            "Mitchell J.",
-            "Del Blanco M.",
-            "El Mourabet S.",
-            "Sousa D.",
-            "Nanasi S.",
-            "Amo-Ameyaw S.",
-            "Jorge Ortega",
-            "Godo M."
-        ],
-        "texto_telegram": "**Marseille**:\nDe Lange J., Weah T., Egan-Riley C., Kondogbia G.\nEmerson, Abdelli H., Hojbjerg P., Harit A.\nGomes A., Igor Paixão, Gouiri A.\n\n**Strasbourg**:\nJorgensen F., Doue G., Omobamidele A., Mitchell J.\nDel Blanco M., El Mourabet S., Sousa D., Nanasi S.\nAmo-Ameyaw S., Jorge Ortega, Godo M.",
-        "atualizado_em": "2026-08-21 02:16"
-    },
-    "arsenalxcoventry": {
-        "time_casa": "Arsenal",
-        "time_fora": "Coventry",
-        "horario": "16:00",
-        "liga": "Inglaterra - Premier League",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/arsenal-hA1Zm19f/coventry-GOvB22xg/resumo/equipes/",
-        "titulares_casa": [
-            "D. Raya",
-            "B. White",
-            "Mosquera C.",
-            "Gabriel",
-            "Calafiori R.",
-            "M. Odegaard",
-            "Lewis-Skelly M.",
-            "D. Rice",
-            "B. Saka",
-            "K. Havertz",
-            "Tzolis C."
-        ],
-        "titulares_fora": [
-            "Rushworth C.",
-            "van Ewijk M.",
-            "Thomas B.",
-            "Amenda A.",
-            "Dasilva J.",
-            "Onyeka F.",
-            "Grimes M.",
-            "Tchaouna L.",
-            "Yirenkyi C.",
-            "Thomas-Asante B.",
-            "Simms E."
-        ],
-        "texto_telegram": "**Arsenal**:\nD. Raya, B. White, Mosquera C., Gabriel\nCalafiori R., M. Odegaard, Lewis-Skelly M., D. Rice\nB. Saka, K. Havertz, Tzolis C.\n\n**Coventry**:\nRushworth C., van Ewijk M., Thomas B., Amenda A.\nDasilva J., Onyeka F., Grimes M., Tchaouna L.\nYirenkyi C., Thomas-Asante B., Simms E.",
-        "atualizado_em": "2026-08-21 02:16"
-    },
     "estudiantes rio cuartoxsan lorenzo": {
         "time_casa": "Estudiantes Rio Cuarto",
         "time_fora": "San Lorenzo",
@@ -116,7 +11,7 @@
             "Ojeda S.",
             "Quiroga A.",
             "Romero F.",
-            "Gonzalez G.",
+            "Rosane S.",
             "Talpone N.",
             "Gonzalez T.",
             "Alanis G.",
@@ -124,8 +19,8 @@
             "Garro J."
         ],
         "titulares_fora": [
-            "Gill O.",
-            "Blanco N.",
+            "Devecchi J.",
+            "Herrera E.",
             "Lorenzon F.",
             "Cordoba A.",
             "De Ritis M.",
@@ -136,7 +31,7 @@
             "Auzmendi R.",
             "Cuello A."
         ],
-        "texto_telegram": "**Estudiantes Rio Cuarto**:\nBruera L., Maffini G., Ojeda S., Quiroga A.\nRomero F., Gonzalez G., Talpone N., Gonzalez T.\nAlanis G., Moreno Y., Garro J.\n\n**San Lorenzo**:\nGill O., Blanco N., Lorenzon F., Cordoba A.\nDe Ritis M., Alvarez J., Tripichio N., Rattalino J.\nReali M., Auzmendi R., Cuello A.",
-        "atualizado_em": "2026-08-21 02:16"
+        "texto_telegram": "**Estudiantes Rio Cuarto**:\nBruera L., Maffini G., Ojeda S., Quiroga A.\nRomero F., Rosane S., Talpone N., Gonzalez T.\nAlanis G., Moreno Y., Garro J.\n\n**San Lorenzo**:\nDevecchi J., Herrera E., Lorenzon F., Cordoba A.\nDe Ritis M., Alvarez J., Tripichio N., Rattalino J.\nReali M., Auzmendi R., Cuello A.",
+        "atualizado_em": "2026-08-21 17:27"
     }
 }
