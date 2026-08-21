@@ -274,65 +274,58 @@ def main():
                             print(f"      ⚠️ Erro ao converter odd para float ({m_texto}) [Valor lido: {valor_odd_str}]: {e_conv}")
 
                     # ----------------------------------------------------------
-                    # FASE 2: RASPAGEM ESTATÍSTICA COLETIVA (CHUTES E FALTAS)
+                    # FASE 2: RASPAGEM ESTATÍSTICA COLETIVA (CHUTES, CARTÕES E ESCANTEIOS)
                     # ----------------------------------------------------------
-                    res_chutes = []
-                    res_faltas = []
-
                     if liga_eh_permitida(nome_comp):
-                        print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas (Chutes e Faltas) para {nome_comp}...")
+                        print(f"      📊 [FASE 2] Buscando Estatísticas Coletivas para {nome_comp}...")
                         try:
-                            # 🟢 Injeta o nome da competição no dicionário para a trava de raiz funcionar
                             if isinstance(dados_jogo, dict):
                                 dados_jogo["liga"] = nome_comp
 
-                            # Mantém a URL base H2H para a função construir as sub-abas internamente
                             dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
                             if dados_coletivos and isinstance(dados_coletivos, dict):
                                 dados_jogo.update(dados_coletivos)
                         except Exception as e_f2:
                             print(f"      ⚠️ Erro na Fase 2: {e_f2}")
-                            if "invalid session id" in str(e_f2).lower() or "session" in str(e_f2).lower():
-                                print("      🔄 Recuperando driver após queda na Fase 2...")
-                                try: driver.quit()
-                                except: pass
-                                driver = configurar_driver()
 
-                        # 🎯 Análise de Chutes Totais / Finalizações
+                        # 1. Chutes Separados por Time
                         res_chutes = chutes_totais.verificar_chutes_totais(dados_jogo)
-                        
-                        if res_chutes:
-                            for rc in res_chutes:
-                                m_texto = rc.get("mercado")
-                                m_tipo = rc.get("tipo", "CHUTES_JOGO_TOTAL")
-                                if m_texto:
-                                    print(f"      ✅ [CHUTES APROVADO]: {m_texto}")
-                                    mercados_para_processar.append({
-                                        "texto": f"Chutes Totais no Jogo: {m_texto.split(':')[-1].strip()}" if ":" in m_texto else m_texto, 
-                                        "chave": m_tipo, 
-                                        "odd": "Análise"
-                                    })
-                        else:
-                            print(f"      ℹ️ Chutes Totais: Nenhum padrão atingido para {t1} x {t2}")
+                        for rc in res_chutes:
+                            if rc.get("mercado"):
+                                mercados_para_processar.append({
+                                    "texto": rc["mercado"], 
+                                    "chave": rc["tipo"], 
+                                    "odd": "Análise"
+                                })
 
-                        # 🛑 Análise de Faltas Totais
-                        res_faltas = faltas_totais.verificar_faltas_totais(dados_jogo)
-                        
-                        if res_faltas:
-                            for rf in res_faltas:
-                                m_texto_f = rf.get("mercado")
-                                m_tipo_f = rf.get("tipo", "FALTAS_JOGO_TOTAL")
-                                if m_texto_f:
-                                    print(f"      ✅ [FALTAS APROVADO]: {m_texto_f}")
-                                    mercados_para_processar.append({
-                                        "texto": f"Faltas Totais no Jogo: {m_texto_f.split(':')[-1].strip()}" if ":" in m_texto_f else m_texto_f, 
-                                        "chave": m_tipo_f, 
-                                        "odd": "Análise"
-                                    })
-                        else:
-                            print(f"      ℹ️ Faltas Totais: Nenhum padrão atingido para {t1} x {t2}")
+                        # 2. Escanteios
+                        res_cantos = escanteios.analisar_dados_escanteios(
+                            dados_jogo.get("cantos_mandante_h2h", []), 
+                            dados_jogo.get("cantos_visitante_h2h", []), 
+                            nome_liga=nome_comp
+                        )
+                        if res_cantos.get("aprovado"):
+                            mercados_para_processar.append({
+                                "texto": res_cantos["mercado"], 
+                                "chave": "ESCANTEIOS_JOGO", 
+                                "odd": "Análise"
+                            })
+
+                        # 3. Cartões
+                        res_cartoes = cartoes.analisar_dados_cartoes(
+                            dados_jogo.get("cartoes_mandante_h2h", []), 
+                            dados_jogo.get("cartoes_visitante_h2h", []), 
+                            nome_liga=nome_comp, 
+                            dados_incompletos=dados_jogo.get("dados_incompletos_cartoes", False)
+                        )
+                        if res_cartoes.get("aprovado"):
+                            mercados_para_processar.append({
+                                "texto": res_cartoes["mercado"], 
+                                "chave": "CARTOES_JOGO", 
+                                "odd": "Análise"
+                            })
                     else:
-                        print(f"      ⏩ [FASE 2] Ignorada para '{nome_comp}' (Apenas mercados gerais/Fase 1 permitidos).")
+                        print(f"      ⏩ [FASE 2] Ignorada para '{nome_comp}'.")
 
                     url_h2h_final = dados_jogo.get("url_h2h_base", f"https://www.flashscore.com.br/jogo/{id_jogo}/")
     
