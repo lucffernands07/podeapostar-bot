@@ -1,47 +1,46 @@
 """
-REGRAS DE MERCADO - VITÓRIAS (CASA / FORA)
-Mercado de maior risco: exige rigor estatístico superior à Chance Dupla.
+REGRAS DE MERCADO - VITÓRIAS (CASA / FORA) USANDO TRAVA H2H (2025/2026)
+Mercado de maior risco: exige rigor estatístico superior à Chance Dupla baseado no confronto direto.
 """
 
 def verificar_vitorias(s):
     """
-    Recebe o dicionário 's' e retorna mercados de Vitórias aprovados (Vitória Casa ou Vitória Fora).
+    Recebe o dicionário 's' (contendo os dados do H2H do Superscore) 
+    e retorna mercados de Vitórias aprovados (Vitória Casa ou Vitória Fora).
     Se ambos baterem ou se as condições não forem estritamente fortes, descarta.
     """
     mercados_aprovados = []
     if not isinstance(s, dict):
         return mercados_aprovados
 
-    # --- CAPTURA DE DADOS COMPLEMENTARES ---
-    m_vitorias_casa = int(s.get("mandante_vitorias_casa", 0) or 0)
-    v_vitorias_fora = int(s.get("visitante_vitorias_fora", 0) or 0)
+    # --- CAPTURA DE DADOS DO H2H (2025/2026, Máx 5 jogos) ---
+    h2h_total = int(s.get("h2h_jogos_total", 0) or 0)
+    vitorias_t1 = int(s.get("h2h_vitorias_t1", 0) or 0)      # Vitórias do Mandante no H2H
+    vitorias_t2 = int(s.get("h2h_vitorias_t2", 0) or 0)      # Vitórias do Visitante no H2H
+    empates = int(s.get("h2h_empates", 0) or 0)              # Empates no H2H
 
-    v_derrotas_fora = int(s.get("visitante_derrotas_fora", 0) or 0)
-    m_sem_derrota_casa = int(s.get("mandante_sem_derrota_casa", 0) or 0)
-    m_derrotas_casa = 5 - m_sem_derrota_casa
-
-    v_sofridos_fora = float(s.get("visitante_gols_sofridos_fora", 0) or 0)
-    m_sofridos_casa = float(s.get("mandante_gols_sofridos_casa", 0) or 0)
+    # Se não houver histórico H2H válido para os anos recentes, descarta por segurança
+    if h2h_total == 0:
+        return []
 
     tem_vitoria_casa = False
     tem_vitoria_fora = False
 
     # ----------------------------------------------------------
-    # 🟢 REGRA VITÓRIA CADA (Nível Acima da Dupla Chance 1X)
-    # Exige: Mandante com pelo menos 4 vitórias em casa (ou 100% de vitórias) 
-    # E o visitante com muitas derrotas fora OU defesa extremamente vazada (>= 8 gols sofridos).
+    # 🟢 REGRA VITÓRIA CASA (Nível Acima da Dupla Chance 1X)
+    # Exige superioridade clara do mandante nos confrontos diretos recentes
     # ----------------------------------------------------------
-    condicao_vitoria_casa = (m_vitorias_casa >= 4) and (v_derrotas_fora >= 4 and v_sofridos_fora >= 8)
+    # Exemplo de trava rigorosa: Mandante venceu a maioria e o visitante não venceu nenhuma
+    condicao_vitoria_casa = (vitorias_t1 >= 3) and (vitorias_t2 == 0)
 
     if condicao_vitoria_casa:
         tem_vitoria_casa = True
 
     # ----------------------------------------------------------
     # 🟢 REGRA VITÓRIA FORA (Nível Acima da Dupla Chance X2)
-    # Exige: Visitante com pelo menos 4 vitórias fora 
-    # E o mandante com muitas derrotas em casa (>= 3) OU defesa extremamente vazada (>= 8 gols sofridos).
+    # Exige superioridade clara do visitante nos confrontos diretos recentes
     # ----------------------------------------------------------
-    condicao_vitoria_fora = (v_vitorias_fora == 5) and (m_derrotas_casa == 5 and m_sofridos_casa >= 8)
+    condicao_vitoria_fora = (vitorias_t2 >= 3) and (vitorias_t1 == 0)
 
     if condicao_vitoria_fora:
         tem_vitoria_fora = True
@@ -51,7 +50,7 @@ def verificar_vitorias(s):
     # Se os dois lados apontarem vitória seca, o jogo é inconclusivo e anula.
     # ----------------------------------------------------------
     if tem_vitoria_casa and tem_vitoria_fora:
-        print(f"      ⚠️ CONFLITO DE VITÓRIAS: Vitória Casa e Vitória Fora passaram juntas. Jogo descartado.")
+        print(f"      ⚠️ CONFLITO DE VITÓRIAS (H2H): Vitória Casa e Vitória Fora passaram juntas. Jogo descartado.")
         return []
 
     if tem_vitoria_casa:
@@ -67,4 +66,3 @@ def verificar_vitorias(s):
         })
 
     return mercados_aprovados
-    
