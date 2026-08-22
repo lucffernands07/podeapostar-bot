@@ -1,15 +1,15 @@
 """
-REGRAS DE MERCADO - FINALIZAÇÕES TOTAIS SEPARADAS POR TIME (SUPERSCORE)
-Retorna a média isolada de finalizações de cada time com base na aba de estatísticas.
+REGRAS DE MERCADO - CHUTES SEPARADOS POR TIME (FORMATO DECIMAL LIVRE)
+Retorna a média isolada de chutes de cada time (mandante em casa / visitante fora).
 """
 
 def verificar_chutes_totais(s):
     if not isinstance(s, dict):
         return []
 
-    # Lê as médias puxadas diretamente da aba de estatísticas do Superscore
-    media_m = float(s.get("media_finalizacoes_mandante", 0) or 0)
-    media_v = float(s.get("media_finalizacoes_visitante", 0) or 0)
+    # Lê as médias já calculadas pelo scraper dos últimos 5 jogos
+    media_m = float(s.get("mandante_media_chutes_casa", 0) or 0)
+    media_v = float(s.get("visitante_media_chutes_fora", 0) or 0)
 
     mercados_aprovados = []
 
@@ -28,3 +28,4 @@ def verificar_chutes_totais(s):
         })
 
     return mercados_aprovados
+    
