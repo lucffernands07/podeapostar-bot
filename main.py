@@ -394,4 +394,74 @@ def main():
                         cabecalho = "🎫 *LISTA (Continuação)*\n\n"
                         corpo = bloco
                     else:
-                       
+                        corpo += bloco
+                
+                enviar_telegram(cabecalho + corpo, meu_chat_id)
+                print("📨 Listão enviado.")
+    
+            cache_dados = {}
+            for j in lista_para_filtros:
+                chave = f"{j['time_casa']}x{j['time_fora']}".lower().strip()
+                cache_dados[chave] = {
+                    "link": j.get("link_betano"),
+                    "liga": j.get("liga"),
+                    "horario": j.get("horario"),
+                    "odd": j.get("odd"),
+                    "link_h2h": j.get("link_h2h"),
+                    "odds_todas": j.get("odds_todas", {})
+                }
+
+            canal_id = os.getenv('CHANNEL_ID')
+            
+            # 🟢 1. Passamos qtd_alvo=None para que o sistema recolha TODOS os jogos (em vez de limitar a 5)
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros, qtd_alvo=None)
+            
+            # 🟢 2. A formatação devolve agora uma LISTA de textos particionados (seguros contra limites)
+            textos_bingos_lista = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
+    
+            if textos_bingos_lista and canal_id:
+                for idx, texto_part in enumerate(textos_bingos_lista):
+                    try:
+                        msg_bingo_formatada = texto_part
+                        if idx == 0:
+                            msg_bingo_formatada = "💰 *LISTA COMPLETA AGRUPADA*\n\n" + msg_bingo_formatada
+                            
+                        menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
+                        print(f"📢 Parte {idx+1}/{len(textos_bingos_lista)} enviada para o Canal.")
+                        
+                        # Pausa de 1.5s entre o envio de cada pedaço para não tomar punição do Telegram
+                        time.sleep(1.5) 
+                    except Exception as e:
+                        print(f"⚠️ Erro ao enviar a parte {idx+1} para o canal: {e}")
+
+
+            os.makedirs("ranking", exist_ok=True)
+            with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
+                json.dump({"data_geracao": hoje_ref.strftime("%Y-%m-%d"), "jogos": jogos_para_pendentes}, f, indent=4, ensure_ascii=False)
+            
+            os.makedirs("telegram", exist_ok=True)
+            with open(f"telegram/jogos_{hoje_ref.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
+                json.dump([
+                    {
+                        "horario": j.get("horario"), 
+                        "liga": j.get("liga"), 
+                        "time_casa": j.get("time_casa"), 
+                        "time_fora": j.get("time_fora"), 
+                        "mercado": j.get("mercado"), 
+                        "odd": j.get("odd"), 
+                        "link_betano": j.get("link_betano"),
+                        "link_h2h": j.get("link_h2h")
+                    } 
+                    for j in lista_para_filtros
+                ], f, indent=4, ensure_ascii=False)
+        else:
+            print("⚠️ Nenhuma partida qualificada entrou na 'lista_para_filtros' após varrer os elementos.")
+
+    except Exception as e:
+        print(f"❌ Erro Crítico no Main: {e}")
+    finally:
+        try: driver.quit()
+        except: pass
+
+if __name__ == "__main__":
+    main()
