@@ -16,14 +16,14 @@ def verificar_chutes_totais(s):
     # Se houver média do mandante, retorna separadamente
     if media_m > 0:
         mercados_aprovados.append({
-            "mercado": f"Chutes do Mandante: {media_m:.1f}",
+            "mercado": f"Finalizações do Mandante: {media_m:.1f}",
             "tipo": "CHUTES_MANDANTE"
         })
 
     # Se houver média do visitante, retorna separadamente
     if media_v > 0:
         mercados_aprovados.append({
-            "mercado": f"Chutes do Visitante: {media_v:.1f}",
+            "mercado": f"Finalizações do Visitante: {media_v:.1f}",
             "tipo": "CHUTES_VISITANTE"
         })
 
