@@ -1,7 +1,6 @@
 import time
 import re
 import links 
-from ligas import liga_permite_classificacao 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -48,9 +47,7 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2, nome_comp=""):
         "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0, "casa_btts": 0, 
         "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0, "fora_btts": 0, 
         
-        # Chaves de Padrão e Posição
-        "mandante_posicao": None,
-        "visitante_posicao": None,
+        # Chaves de Padrão (Posições removidas)
         "mandante_vitorias_casa": 0,
         "visitante_vitorias_fora": 0,
         "mandante_sem_derrota_casa": 0,
@@ -147,8 +144,8 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2, nome_comp=""):
                                 if i == 0: stats["t2_placar_1"] = placar_str
                                 if total > 1.5: stats["fora_15"] += 1
                                 if total > 2.5: stats["fora_25"] += 1
-                                if total <= 3: stats["fora_35_under"] += 1  # 🟢 Corrigido para salvar no visitante
-                                if total <= 4: stats["fora_45_under"] += 1  # 🟢 Corrigido para salvar no visitante
+                                if total <= 3: stats["fora_35_under"] += 1  
+                                if total <= 4: stats["fora_45_under"] += 1  
                                 if g1 > 0 and g2 > 0: stats["fora_btts"] += 1
                                 
                                 stats["visitante_gols_feitos_fora"] += float(g2)
@@ -172,58 +169,8 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2, nome_comp=""):
             except Exception as e:
                 print(f"      ⚠️ Erro ao raspar jogos do {tipo.upper()} ({url}): {e}")
 
-        # 🟢 TRAVA UTILIZANDO A FUNÇÃO IMPORTADA DO LIGAS.PY
-        if liga_permite_classificacao(nome_comp):
-            print(f"      📊 Liga permitida para tabela ({nome_comp}). Buscando posições...")
-            posicoes = pegar_posicao_tabela(driver, url_jogo_base, t1, t2)
-            stats.update(posicoes)
-        else:
-            print(f"      ℹ️ Liga fora de pontos corridos ({nome_comp}). Ignorando tabela.")
-
     except Exception as e_geral:
         print(f"      ⚠️ Erro ao resolver URL do jogo: {e_geral}")
 
     return stats
-
-def pegar_posicao_tabela(driver, url_jogo_base, t1, t2):
-    """
-    Acessa a aba de classificação usando o ?mid= extraído da URL real
-    e busca a posição exata do mandante e do visitante na tabela.
-    """
-    posicoes = {"mandante_posicao": None, "visitante_posicao": None}
-    try:
-        url_real = obter_url_real_h2h(driver, url_jogo_base)
-        url_classificacao = f"{url_real}/classificacao/classificacoes/geral/"
         
-        # 🟢 Navega para a aba de classificação
-        driver.get(url_classificacao)
-        
-        # 🟢 Trava de segurança: aguarda a tabela carregar na tela antes de buscar os elementos
-        WebDriverWait(driver, 8).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".table__row, [class*='table__row']"))
-        )
-        
-        linhas_tabela = driver.find_elements(By.CSS_SELECTOR, ".table__row, [class*='table__row']")
-        
-        for linha in linhas_tabela:
-            try:
-                div_rank = linha.find_element(By.CSS_SELECTOR, ".tableCellRank")
-                a_team = linha.find_element(By.CSS_SELECTOR, ".tableCellParticipant__name")
-                
-                if div_rank and a_team:
-                    pos_str = div_rank.text.strip().replace('.', '')
-                    nome_time = a_team.text.strip().lower()
-                    pos_int = int(pos_str)
-                    
-                    if t1.lower() in nome_time or nome_time in t1.lower():
-                        posicoes["mandante_posicao"] = pos_int
-                    elif t2.lower() in nome_time or nome_time in t2.lower():
-                        posicoes["visitante_posicao"] = pos_int
-            except Exception:
-                continue
-                
-    except Exception as e:
-        print(f"      ⚠️ Erro ao raspar posições da tabela: {e}")
-        
-    return posicoes
-    
