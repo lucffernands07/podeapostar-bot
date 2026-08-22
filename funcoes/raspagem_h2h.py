@@ -147,8 +147,8 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2, nome_comp=""):
                                 if i == 0: stats["t2_placar_1"] = placar_str
                                 if total > 1.5: stats["fora_15"] += 1
                                 if total > 2.5: stats["fora_25"] += 1
-                                if total <= 3: stats["fora_35_under"] += 1
-                                if total <= 4: stats["fora_45_under"] += 1 
+                                if total <= 3: stats["fora_35_under"] += 1  # 🟢 Corrigido para salvar no visitante
+                                if total <= 4: stats["fora_45_under"] += 1  # 🟢 Corrigido para salvar no visitante
                                 if g1 > 0 and g2 > 0: stats["fora_btts"] += 1
                                 
                                 stats["visitante_gols_feitos_fora"] += float(g2)
@@ -226,3 +226,4 @@ def pegar_posicao_tabela(driver, url_jogo_base, t1, t2):
         print(f"      ⚠️ Erro ao raspar posições da tabela: {e}")
         
     return posicoes
+    
