@@ -1,22 +1,39 @@
 import time
+import unicodedata
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+def _normalizar_texto(texto):
+    """Remove acentos e deixa o texto minúsculo para facilitar o match."""
+    if not texto:
+        return ""
+    nfkd = unicodedata.normalize('NFKD', texto)
+    return "".join([c for c in nfkd if not unicodedata.combining(c)]).lower().strip()
+
 def _encontrar_id_por_nomes(driver, t1_procurado, t2_procurado):
-    """Varre a página de calendário atual do Flashscore para achar o ID correto do jogo pelos nomes."""
+    """Varre a página de calendário atual do Flashscore para achar o ID correto do jogo pelos nomes com alta tolerância."""
     try:
+        t1_limpo = _normalizar_texto(t1_procurado)
+        t2_limpo = _normalizar_texto(t2_procurado)
+        
+        # Pega a primeira palavra ou pedaço principal caso haja divergência de sufixos (ex: "São Paulo" vs "Sao Paulo FC")
+        t1_chave = t1_limpo.split()[0] if t1_limpo else ""
+        t2_chave = t2_limpo.split()[0] if t2_limpo else ""
+
         elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
         for el in elementos:
             try:
                 times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
                 if len(times) >= 2:
-                    t1_atual = times[0].text.strip().lower()
-                    t2_atual = times[1].text.strip().lower()
+                    t1_atual = _normalizar_texto(times[0].text)
+                    t2_atual = _normalizar_texto(times[1].text)
                     
-                    if (t1_procurado.lower() in t1_atual or t1_atual in t1_procurado.lower()) and \
-                       (t2_procurado.lower() in t2_atual or t2_atual in t2_procurado.lower()):
-                        
+                    # Critério flexível: contém o nome completo OU contém a palavra-chave principal de ambos os times
+                    match_t1 = (t1_limpo in t1_atual or t1_atual in t1_limpo or (t1_chave and t1_chave in t1_atual))
+                    match_t2 = (t2_limpo in t2_atual or t2_atual in t2_limpo or (t2_chave and t2_chave in t2_atual))
+                    
+                    if match_t1 and match_t2:
                         link_el = el.find_element(By.CSS_SELECTOR, "a.icon--preview, a.eventRowLink")
                         href = link_el.get_attribute('href')
                         if "mid=" in href:
@@ -173,4 +190,4 @@ def capturar_todas_as_odds(driver, id_ou_t1, t2=None):
                 driver.switch_to.window(driver.window_handles[0])
     
     return res
-            
+    
