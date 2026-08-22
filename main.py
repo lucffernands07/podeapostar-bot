@@ -195,13 +195,26 @@ def main():
                     dados_jogo["url_h2h_base"] = f"https://www.superscore.com/jogo/{id_jogo}/#/resumo-de-jogo"
                     dados_jogo["liga"] = nome_comp
 
-                    # Raspagem Estatística Coletiva
+                    # Raspagem Estatística Coletiva com Retry contra quedas de conexão
                     try:
-                        dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
+                        dados_coletivos = None
+                        tentativas_coletivas = 3
+                        for tentativa in range(tentativas_coletivas):
+                            try:
+                                dados_coletivos = pegar_estatisticas_coletivas(driver, dados_jogo)
+                                if dados_coletivos and isinstance(dados_coletivos, dict):
+                                    break
+                            except Exception as e_tentativa:
+                                if "ERR_CONNECTION_RESET" in str(e_tentativa) or "net::" in str(e_tentativa):
+                                    print(f"     ⚠️ Queda de conexão detectada (Tentativa {tentativa+1}/{tentativas_coletivas}). Aguardando reconexão...")
+                                    time.sleep(3)
+                                else:
+                                    raise e_tentativa
+
                         if dados_coletivos and isinstance(dados_coletivos, dict):
                             dados_jogo.update(dados_coletivos)
                     except Exception as e_f2:
-                        print(f"     ⚠️ Erro nas Estatísticas Coletivas: {e_f2}")
+                        print(f"     ⚠️ Erro definitivo nas Estatísticas Coletivas após tentativas: {e_f2}")
 
                     mercados_jogo_encontrados = []
 
