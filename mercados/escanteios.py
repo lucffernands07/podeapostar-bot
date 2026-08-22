@@ -1,13 +1,16 @@
 import re
+from . import jogadores
 
 def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_liga="", quantidade_jogos=3, dados_incompletos=False):
     nome_liga_limpo = nome_liga.strip() if nome_liga else "Liga Não Informada"
 
-    # Trava: Quantidade mínima de partidas coletadas
-    if len(cantos_mandante_h2h) < quantidade_jogos or len(cantos_visitante_h2h) < quantidade_jogos:
+    # Trava 1: Validação de Liga Elite
+    permite_coletivos = jogadores.validar_liga_para_jogadores(nome_liga_limpo)
+    if not permite_coletivos:
         return {"aprovado": False}
 
-    if dados_incompletos:
+    # Trava 3: Quantidade mínima de partidas coletadas
+    if len(cantos_mandante_h2h) < quantidade_jogos or len(cantos_visitante_h2h) < quantidade_jogos:
         return {"aprovado": False}
 
     try:
@@ -71,3 +74,4 @@ def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_li
         "mercado": texto_mercado, 
         "log_detalhado_cantos": log_detalhado
     }
+    
