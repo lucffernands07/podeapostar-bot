@@ -3,6 +3,11 @@ from . import jogadores
 
 def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_liga="", quantidade_jogos=3, dados_incompletos=False):
     nome_liga_limpo = nome_liga.strip() if nome_liga else "Liga Não Informada"
+    
+    permite_coletivos = jogadores.validar_liga_para_jogadores(nome_liga_limpo)
+    if not permite_coletivos:
+        print(f"      ⏩ [OTIMIZAÇÃO CARTÕES] Pulando média de cartões para {nome_liga_limpo} (Não é liga Elite).")
+        return {"aprovado": False}
 
     lista_mandante = cartoes_mandante_h2h if isinstance(cartoes_mandante_h2h, list) else []
     lista_visitante = cartoes_visitante_h2h if isinstance(cartoes_visitante_h2h, list) else []
@@ -65,3 +70,4 @@ def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_lig
         "mercado": texto_mercado, 
         "log_detalhado_jogadores": "" 
     }
+    
