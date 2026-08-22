@@ -35,8 +35,10 @@ def verificar_gols(s):
 
     pct_15 = calcular_porcentagem_gols(c_15, f_15)
     pct_25 = calcular_porcentagem_gols(s.get("casa_25", 0), s.get("fora_25", 0))
-    pct_m35 = calcular_porcentagem_gols(s.get("casa_35_under", 0), s.get("casa_35_under", 0))
-    pct_m45 = calcular_porcentagem_gols(s.get("casa_45_under", 0), s.get("casa_45_under", 0))
+    
+    # 🟢 CORRIGIDO: Agora lê corretamente os dados da casa e do fora para o under
+    pct_m35 = calcular_porcentagem_gols(s.get("casa_35_under", 0), s.get("fora_35_under", 0))
+    pct_m45 = calcular_porcentagem_gols(s.get("casa_45_under", 0), s.get("fora_45_under", 0))
 
     # 🟢 CAPTURA DOS RESULTADOS DO ÚLTIMO JOGO (V, D ou E)
     res_t1 = str(s.get("t1_resultado_1", "")).upper()
@@ -109,4 +111,4 @@ def verificar_gols(s):
         return unders_aprovados
     
     return []
-            
+    
