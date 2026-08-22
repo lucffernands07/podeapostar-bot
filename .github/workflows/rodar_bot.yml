@@ -1,4 +1,4 @@
-name: 2. Main Bot Apostas
+name: 1. Main Bot Apostas
 
 on:
   push:
@@ -59,7 +59,7 @@ jobs:
           python -m playwright install chromium --with-deps
 
       - name: 1. Executar bot Selenium (Bilhetes de Hoje)
-        timeout-minutes: 70
+        timeout-minutes: 90
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
