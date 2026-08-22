@@ -46,28 +46,27 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
                     tem_under_45_ativo = True
 
         if not tem_mercado_valido:
-            print("   ⚠️ BTTS BARRADO: Nenhum outro mercado foi aprovado para este jogo.")
+            print("    ⚠️ BTTS BARRADO: Nenhum outro mercado foi aprovado para este jogo.")
             return []
 
         # 🟢 REGRA 1: BTTS SIM (Entra se houver Over com odd <= 1.20)
         if over_valido_120:
             mercados_aprovados.append({"mercado": "Ambas Marcam: Sim", "tipo": "BTTS_SIM"})
         else:
-            print("   ⚠️ BTTS SIM, BARRADO: Nenhum Over ativo possui odd <= 1.20.")
+            print("    ⚠️ BTTS SIM, BARRADO: Nenhum Over ativo possui odd <= 1.20.")
 
         # 🔴 REGRA 2: BTTS NÃO (Entra se o Under -3.5 tiver odd <= 1.20 e não tiver -4.5)
         if over_valido_120:
-            print("   ⚠️ BTTS NÃO, BARRADO: Jogo tem Over válido (Exclusão Mútua).")
+            print("    ⚠️ BTTS NÃO, BARRADO: Jogo tem Over válido (Exclusão Mútua).")
         elif tem_under_45_ativo:
-            print("   ⚠️ BTTS NÃO, BARRADO: Jogo possui linha de -4.5 Gols ativa.")
+            print("    ⚠️ BTTS NÃO, BARRADO: Jogo possui linha de -4.5 Gols ativa.")
         elif under_35_valido_120:
             mercados_aprovados.append({"mercado": "Ambas Marcam: Não", "tipo": "BTTS_NAO"})
         else:
-            print("   ⚠️ BTTS NÃO, BARRADO: O mercado Under -3.5 não possui odd <= 1.20.")
+            print("    ⚠️ BTTS NÃO, BARRADO: O mercado Under -3.5 não possui odd <= 1.20.")
 
         return mercados_aprovados
 
     except Exception as e:
         print(f"      ⚠️ Erro ao processar mercado Ambas Marcam: {e}")
         return mercados_aprovados
-            
