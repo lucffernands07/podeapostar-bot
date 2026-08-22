@@ -1,39 +1,4 @@
 {
-    "hullxmanchester utd": {
-        "time_casa": "Hull",
-        "time_fora": "Manchester Utd",
-        "horario": "08:30",
-        "liga": "Inglaterra - Premier League",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/hull-S66R0t75/manchester-utd-ppjDR086/resumo/equipes/",
-        "titulares_casa": [
-            "Tzolakis K.",
-            "Mendy N.",
-            "Egan J.",
-            "Ajayi S.",
-            "Coyle L.(C)",
-            "Crooks M.",
-            "Slater R.",
-            "Giles R.",
-            "Stroud E.",
-            "Belloumi M.",
-            "McBurnie O."
-        ],
-        "titulares_fora": [
-            "Lammens S.",
-            "Mazraoui N.",
-            "H. Maguire",
-            "Heaven A.",
-            "L. Shaw",
-            "Andrey Santos",
-            "Tielemans Y.",
-            "Mbeumo B.",
-            "B. Fernandes(C)",
-            "Dorgu P.",
-            "Cunha M."
-        ],
-        "texto_telegram": "**Hull**:\nTzolakis K., Mendy N., Egan J., Ajayi S.\nCoyle L.(C), Crooks M., Slater R., Giles R.\nStroud E., Belloumi M., McBurnie O.\n\n**Manchester Utd**:\nLammens S., Mazraoui N., H. Maguire, Heaven A.\nL. Shaw, Andrey Santos, Tielemans Y., Mbeumo B.\nB. Fernandes(C), Dorgu P., Cunha M.",
-        "atualizado_em": "2026-08-22 08:30"
-    },
     "ipswichxsunderland": {
         "time_casa": "Ipswich",
         "time_fora": "Sunderland",
@@ -42,67 +7,32 @@
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/ipswich-thqhB2MB/sunderland-WSzc94ws/resumo/equipes/",
         "titulares_casa": [
             "Scherpen K.",
-            "O'Shea D.",
+            "O'Shea D.(C)",
             "Diop I.",
             "Greaves J.",
             "Davis L.",
-            "Lukic S.",
-            "Florentino",
-            "Fatawu I.",
             "Nunez M.",
+            "Lukic S.",
+            "Fatawu I.",
             "Maeda D.",
+            "Enciso J.",
             "Emersonn"
         ],
         "titulares_fora": [
             "Roefs R.",
-            "Hume T.",
+            "Meunier T.",
             "Ballard D.",
             "O'Nien L.",
             "Mandava R.",
-            "Xhaka G.",
-            "Talbi C.",
-            "Le Fee E.",
             "Sadiki N.",
+            "Xhaka G.(C)",
+            "Hume T.",
+            "Le Fee E.",
             "Angulo N.",
             "Brobbey B."
         ],
-        "texto_telegram": "**Ipswich**:\nScherpen K., O'Shea D., Diop I., Greaves J.\nDavis L., Lukic S., Florentino, Fatawu I.\nNunez M., Maeda D., Emersonn\n\n**Sunderland**:\nRoefs R., Hume T., Ballard D., O'Nien L.\nMandava R., Xhaka G., Talbi C., Le Fee E.\nSadiki N., Angulo N., Brobbey B.",
-        "atualizado_em": "2026-08-22 08:30"
-    },
-    "nottinghamxleeds": {
-        "time_casa": "Nottingham",
-        "time_fora": "Leeds",
-        "horario": "11:00",
-        "liga": "Inglaterra - Premier League",
-        "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/leeds-tUxUbLR2/nottingham-UsushcZr/resumo/equipes/",
-        "titulares_casa": [
-            "Sels M.",
-            "Diomande O.",
-            "Milenkovic N.",
-            "Murillo",
-            "Aina O.",
-            "Schlager X.",
-            "Gibbs-White M.",
-            "Sangare I.",
-            "Williams N.",
-            "Ndoye D.",
-            "Igor Jesus"
-        ],
-        "titulares_fora": [
-            "Trafford J.",
-            "Rodon J.",
-            "Bijol J.",
-            "Muharemovic T.",
-            "Bogle J.",
-            "Ampadu E.",
-            "Stach A.",
-            "Justin J.",
-            "Aaronson B.",
-            "Wilson H.",
-            "Calvert-Lewin D."
-        ],
-        "texto_telegram": "**Nottingham**:\nSels M., Diomande O., Milenkovic N., Murillo\nAina O., Schlager X., Gibbs-White M., Sangare I.\nWilliams N., Ndoye D., Igor Jesus\n\n**Leeds**:\nTrafford J., Rodon J., Bijol J., Muharemovic T.\nBogle J., Ampadu E., Stach A., Justin J.\nAaronson B., Wilson H., Calvert-Lewin D.",
-        "atualizado_em": "2026-08-22 08:30"
+        "texto_telegram": "**Ipswich**:\nScherpen K., O'Shea D.(C), Diop I., Greaves J.\nDavis L., Nunez M., Lukic S., Fatawu I.\nMaeda D., Enciso J., Emersonn\n\n**Sunderland**:\nRoefs R., Meunier T., Ballard D., O'Nien L.\nMandava R., Sadiki N., Xhaka G.(C), Hume T.\nLe Fee E., Angulo N., Brobbey B.",
+        "atualizado_em": "2026-08-22 10:38"
     },
     "marítimoxacadémico viseu": {
         "time_casa": "Marítimo",
@@ -114,12 +44,12 @@
             "Pastor A.",
             "Igor Juliao",
             "Fernandes R.",
-            "Correia R.",
+            "Correia R.(C)",
             "Henrique P.",
-            "Danilovic V.",
-            "Ricardo Andrade",
-            "Bouzaidi S.",
             "Raphael Guzzo",
+            "Danilovic V.",
+            "Bouzaidi S.",
+            "Ricardo Andrade",
             "Tejon M.",
             "Butzke A."
         ],
@@ -127,17 +57,17 @@
             "Ewerton",
             "Robinho",
             "Adriano Correia",
-            "Pereira R.",
-            "I. Milioransa",
-            "Mestanza A.",
-            "Messeguem S.",
+            "Pedro Barcelos",
+            "Michelis N.",
+            "André Ceitil",
+            "Messeguem S.(C)",
             "Joao Guilherme",
             "Kahraman C.",
-            "Zamora A.",
+            "Gohi L.",
             "Andre Clovis"
         ],
-        "texto_telegram": "**Marítimo**:\nPastor A., Igor Juliao, Fernandes R., Correia R.\nHenrique P., Danilovic V., Ricardo Andrade, Bouzaidi S.\nRaphael Guzzo, Tejon M., Butzke A.\n\n**Académico Viseu**:\nEwerton, Robinho, Adriano Correia, Pereira R.\nI. Milioransa, Mestanza A., Messeguem S., Joao Guilherme\nKahraman C., Zamora A., Andre Clovis",
-        "atualizado_em": "2026-08-22 08:30"
+        "texto_telegram": "**Marítimo**:\nPastor A., Igor Juliao, Fernandes R., Correia R.(C)\nHenrique P., Raphael Guzzo, Danilovic V., Bouzaidi S.\nRicardo Andrade, Tejon M., Butzke A.\n\n**Académico Viseu**:\nEwerton, Robinho, Adriano Correia, Pedro Barcelos\nMichelis N., André Ceitil, Messeguem S.(C), Joao Guilherme\nKahraman C., Gohi L., Andre Clovis",
+        "atualizado_em": "2026-08-22 10:38"
     },
     "lensxauxerre": {
         "time_casa": "Lens",
@@ -172,7 +102,7 @@
             "Zossou A."
         ],
         "texto_telegram": "**Lens**:\nRisser R., Aguilar R., Ganiou I., Nawrocki M.\nAbdulhamid S., Bulatovic A., Titraoui Y., Udol M.\nF. Thauvin, Ivanovic F., Edouard O.\n\n**Auxerre**:\nDiop M., Sy L., Diomande S., Akpa C.\nMakosso C., Piedfort A., Ahamada N., Faivre R.\nDanois K., Namaso D., Zossou A.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "brentfordxtottenham": {
         "time_casa": "Brentford",
@@ -206,7 +136,7 @@
             "Richarlison"
         ],
         "texto_telegram": "**Brentford**:\nKelleher C., Kayode M., K. Ajer, Collins N.\nLewis-Potter K., Sangare M., Janelt V., Ouattara Da.\nJensen M., Schade K., Thiago I.\n\n**Tottenham**:\nKinsky A., Gray A., van Hecke J. P., Senesi M.\nRobertson A., Tonali S., Moore M., Gallagher C.\nTel M., Richarlison",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "interxmonza": {
         "time_casa": "Inter",
@@ -241,7 +171,7 @@
             "Varela G."
         ],
         "texto_telegram": "**Inter**:\nMartinez J., M. Akanji, Bisseck Y., Bastoni A.\nDiouf A., Barella N., Calhanoglu H., Zielinski P.\nDimarco F., F. Esposito, Martinez L.\n\n**Monza**:\nPizzignacco S., Kouadio E., Delli Carri F., Carboni A.\nBirindelli S., Ondoa F., Colpani A., Mangas R.\nO. Forson, Cutrone P., Varela G.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "udinesexcomo": {
         "time_casa": "Udinese",
@@ -276,7 +206,7 @@
             "Douvikas A."
         ],
         "texto_telegram": "**Udinese**:\nOkoye M., Bertola N., Palma M., Solet O.\nVojvoda M., Karlstrom J., Piotrowski J., Kamara H.\nZaniolo N., Ekkelenkamp J., Davis K.\n\n**Como**:\nButez J., Smolcic I., Ramon J., Chalobah T.\nKaiki, Da Cunha L., Perrone M., Diao A.\nPaz N., Baturina M., Douvikas A.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "le mansxbrest": {
         "time_casa": "Le Mans",
@@ -311,7 +241,7 @@
             "Ajorque L."
         ],
         "texto_telegram": "**Le Mans**:\nKocik N., Buades L., Yohou S., Boisse N.\nBretelle L., Larouci Y., Bourabaa A., Lauray A.\nRobin M., Rabillard A., Mafouta L.\n\n**Brest**:\nSelvik E., Lala K., Lloris G., Le Guen R.\nLocko B., Nonge J., Chotard J., Del Castillo R.\nDoumbia K., Balde M., Ajorque L.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "nicexlorient": {
         "time_casa": "Nice",
@@ -346,7 +276,7 @@
             "Bernardeau G."
         ],
         "texto_telegram": "**Nice**:\nDiouf Y., Mendy A., Ndayishimiye Y., Mandza Tsiendi X.\nClauss J., Coulibaly D., Pereira E., Bard M.\nDiop S., Hein G., Diallo Z.\n\n**Lorient**:\nMvogo Y., Georgen A., Talbi M., Adjei N.\nKouassi A., Makengo J., Cadiou N., Avom A.\nLe Bris T., Tosin A., Bernardeau G.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "toulousexlyon": {
         "time_casa": "Toulouse",
@@ -381,7 +311,7 @@
             "Openda L."
         ],
         "texto_telegram": "**Toulouse**:\nRestes G., Diallo I., McKenzie M., Nicolaisen R.\nTape C., Schmidt N., Casseres C., Vignolo J.\nGboho Y., Azizi I., Hidalgo S.\n\n**Lyon**:\nGreif D., Athekame Z., Bacher F., Mata C.\nOuedraogo M., Bidstrup M., Morton T., Duranville J.\nNartey N., Boudache K., Openda L.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "troyesxparis fc": {
         "time_casa": "Troyes",
@@ -416,7 +346,7 @@
             "Sinayoko L."
         ],
         "texto_telegram": "**Troyes**:\nBeach P., Titi Y., Monfray A., Diaz Jr. M.\nOuzenadji A., Phliponeau A., Diop M., Picard H.\nIfnaoui M., Ripart R., Diawara K.\n\n**Paris FC**:\nTrapp K., Camara A., Coppola D., M. Mbow\nDe Smet T., Lees-Melou P., Matondo R., Kebbal I.\nPagis P., Koleosho L., Sinayoko L.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "genoaxnapoli": {
         "time_casa": "Genoa",
@@ -451,7 +381,7 @@
             "Alisson Santos"
         ],
         "texto_telegram": "**Genoa**:\nBijlow J., Marcandalli A., Ostigard L., Vasquez J.\nNorton-Cuffy B., Frendrup M., Sow D., Ellertsson M. E.\nBaldanzi T., Colombo L., Vitinha\n\n**Napoli**:\nMeret A., Di Lorenzo G., Marin R., Rrahmani A.\nSpinazzola L., Anguissa F., Lobotka S., S. McTominay\nPolitano M., R. Hojlund, Alisson Santos",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "parmaxcagliari": {
         "time_casa": "Parma",
@@ -486,7 +416,7 @@
             "Kevin"
         ],
         "texto_telegram": "**Parma**:\nCorvi E., Delprato E., Troilo M., Valenti L.\nValeri E., Bernabe A., Keita M., Sorensen O.\nAlmqvist P., Romero D., Toure E. B.\n\n**Cagliari**:\nCaprile E., Pedro J., Mina, Rodriguez J.\nObert A., Romano A., Winks H., Adopo M.\nMaldini D., Fazzini J., Kevin",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "atl. tucumanxinstituto": {
         "time_casa": "Atl. Tucuman",
@@ -521,7 +451,7 @@
             "Tissera M."
         ],
         "texto_telegram": "**Atl. Tucuman**:\nIngolotti L., Di Plácido, Ferreira Namandu C. D., Vallejo L.\nFernandez J., Vega L., Tesuri R., Godoy L.\nN. Franco, Lamendola N., Brondo M.\n\n**Instituto**:\nLedesma M., Galvan J., Mosevich L., Alarcon F. R.\nCerato G., Abregu G., Gallardo M., Sosa D.\nCordoba Mosquera J. E., Luna A., Tissera M.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "gimnasia l.p.xgimnasia mendoza": {
         "time_casa": "Gimnasia L.P.",
@@ -556,7 +486,7 @@
             "Ceballos J."
         ],
         "texto_telegram": "**Gimnasia L.P.**:\nInsfran N., Barros Schelotto B., Cortazzo J., Martinez E.\nSilva Torrejon P., Miramon I., Seoane M., Schelotto N.\nNacho Fernández, Auzmendi A., Colazo A.\n\n**Gimnasia Mendoza**:\nRigamonti C., Paredes L., Mondino D., Munoz E.\nM. Recalde, E. Fernández, Antonini F., Lencioni F.\nSabatini I., Modica A., Ceballos J.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "fluminensexremo": {
         "time_casa": "Fluminense",
@@ -591,7 +521,7 @@
             "Gabriel Taliari"
         ],
         "texto_telegram": "**Fluminense**:\nFábio, Samuel Xavier, Ignacio, Jemmes\nRené, Nonato, Martinelli, Agustín Canobbio\nGanso, Soteldo Y., Hulk\n\n**Remo**:\nMarcelo Rangel, Marcelinho, Marllon, Zé Ivaldo\nMarlon, Ze Welison, Picco L., Yago Pikachu\nVitor, Jajá, Gabriel Taliari",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "espanyolxreal madrid": {
         "time_casa": "Espanyol",
@@ -626,7 +556,7 @@
             "Mbappe K."
         ],
         "texto_telegram": "**Espanyol**:\nDmitrovic M., El Hilali O., Riedel C., Nunez U.\nHinojo R., Gonzalez U., Exposito, Calatrava A.\nHernandez J., Dolan T., Fernandez Jaen R.\n\n**Real Madrid**:\nCourtois T., Alexander-Arnold T., Konate I., Huijsen D.\nCarreras A., Valverde F., B. Silva, Diaz B.\nGuler A., Vinicius Junior, Mbappe K.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "cearáxlondrina": {
         "time_casa": "Ceará",
@@ -661,7 +591,7 @@
             "Willian Pottker"
         ],
         "texto_telegram": "**Ceará**:\nRichard, Rafael Ramos, Júllio, Gabriel Rocha\nSávio, Giovanni Pavani, João Gabriel, Ferreira Berrondo M. N.\nLucas Mugni, Giulio, Lucca\n\n**Londrina**:\nMauricio Kozlinski, Kauê Leonardo, Yago Lincoln, Gabriel Lacerda\nHeron, Lucas Marques, Vitinho Mota, João Tavares\nJoao Vitor, Paulinho Moccelin, Willian Pottker",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "independientexind. rivadavia": {
         "time_casa": "Independiente",
@@ -671,7 +601,7 @@
         "url_flashscore": "https://www.flashscore.com.br/jogo/futebol/ind-rivadavia-Eg51aDC4/independiente-UVatI5Y2/resumo/equipes/",
         "titulares_casa": [
             "Rey R.",
-            "Santiago Arias",
+            "Godoy L.",
             "Arrayago J.",
             "Lomonaco K.",
             "Zabala F.",
@@ -695,8 +625,8 @@
             "Arce A.",
             "Salas M."
         ],
-        "texto_telegram": "**Independiente**:\nRey R., Santiago Arias, Arrayago J., Lomonaco K.\nZabala F., Perez Curci M., Marcone I., Montiel S.\nMillan L., Abaldo M., Avalos G.\n\n**Ind. Rivadavia**:\nBolcato N., Bonifacio E., Villalba I., Studer S.\nElordi J. M., Fernandez M., Bottari T., Florentin Bobadilla J. I.\nBucca L., Arce A., Salas M.",
-        "atualizado_em": "2026-08-22 08:30"
+        "texto_telegram": "**Independiente**:\nRey R., Godoy L., Arrayago J., Lomonaco K.\nZabala F., Perez Curci M., Marcone I., Montiel S.\nMillan L., Abaldo M., Avalos G.\n\n**Ind. Rivadavia**:\nBolcato N., Bonifacio E., Villalba I., Studer S.\nElordi J. M., Fernandez M., Bottari T., Florentin Bobadilla J. I.\nBucca L., Arce A., Salas M.",
+        "atualizado_em": "2026-08-22 10:38"
     },
     "internacionalxatlético-mg": {
         "time_casa": "Internacional",
@@ -731,7 +661,7 @@
             "Cassierra M."
         ],
         "texto_telegram": "**Internacional**:\nMatheus Cunha, Bruno Gomes, Gabriel Mercado, Maripan G.\nVitor Naum, Villagra R., Bruno Henrique, Bernabei A.\nCarbonero J., Alerrandro, Alan Patrick\n\n**Atlético-MG**:\nEverson, Natanael, Ruan Tressoldi, Vitor Hugo\nRenan Lodi, Maycon, Alan Franco, Cuello\nVictor Hugo, Bernard, Cassierra M.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "cuiabáxgoiás": {
         "time_casa": "Cuiabá",
@@ -766,7 +696,7 @@
             "Cadu"
         ],
         "texto_telegram": "**Cuiabá**:\nJoão Carlos, Joao Basso, Calebe Costa, Vitor Mendes\nIgor Inocencio, David Miguel, Pepe, Lorenzo\nEliel, Jean Dias, Pedro H.\n\n**Goiás**:\nThiago Rodrigues, Rodrigo, Luiz Felipe, Ramon\nNicolas Vichiatto, Lourenço, Machado, Juninho\nLucas Lima, Kadu, Cadu",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "cruzeiroxflamengo": {
         "time_casa": "Cruzeiro",
@@ -801,7 +731,7 @@
             "Pedro"
         ],
         "texto_telegram": "**Cruzeiro**:\nOtávio Costa, Fagner, Fabrício Bruno, João Marcelo\nVillalba, Lucas Romero, Gérson, Arroyo K.\nMatheus Pereira, Kenji, Kaio Jorge\n\n**Flamengo**:\nAgustín Rossi, Varela, Léo Ortiz, Léo Pereira\nAyrton Lucas, Pulgar, Lucas Paqueta, Luiz Araújo\nCarrascal J., Samuel Lino, Pedro",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     },
     "huracánxdep. riestra": {
         "time_casa": "Huracán",
@@ -817,7 +747,7 @@
             "Lescano L.",
             "Kalinger F.",
             "Rodrigo Fernandez",
-            "Gil L.",
+            "Peralta T.",
             "Bisanz J.",
             "Pussetto I.",
             "Cortes O."
@@ -835,8 +765,8 @@
             "Alonso A.",
             "Diaz A."
         ],
-        "texto_telegram": "**Huracán**:\nGalindez H., Blondel L., Nervo H., Palazzo M.\nLescano L., Kalinger F., Rodrigo Fernandez, Gil L.\nBisanz J., Pussetto I., Cortes O.\n\n**Dep. Riestra**:\nArce I., Sansotre N., Mino F., Paz C.\nQuintana C., Ramirez P., Sanchez B., Celiz M.\nMonje P., Alonso A., Diaz A.",
-        "atualizado_em": "2026-08-22 08:30"
+        "texto_telegram": "**Huracán**:\nGalindez H., Blondel L., Nervo H., Palazzo M.\nLescano L., Kalinger F., Rodrigo Fernandez, Peralta T.\nBisanz J., Pussetto I., Cortes O.\n\n**Dep. Riestra**:\nArce I., Sansotre N., Mino F., Paz C.\nQuintana C., Ramirez P., Sanchez B., Celiz M.\nMonje P., Alonso A., Diaz A.",
+        "atualizado_em": "2026-08-22 10:38"
     },
     "newell's old boysxbanfield": {
         "time_casa": "Newell's Old Boys",
@@ -871,6 +801,6 @@
             "Machado A."
         ],
         "texto_telegram": "**Newell's Old Boys**:\nReinatti J., Escobar F., Cabrera B., Giannetti L.\nRusso J., Gomez J., Regiardo L., Mazzantti W.\nGuch F., Rios T., Ramirez I.\n\n**Banfield**:\nSanguinetti F., Oviedo B., Daniele S., Meriano N.\nS. López, Adoryan T., Villegas L., Abraham I.\nZalazar D., Medina F., Machado A.",
-        "atualizado_em": "2026-08-22 08:30"
+        "atualizado_em": "2026-08-22 10:38"
     }
 }
