@@ -19,20 +19,37 @@ def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_li
     except Exception:
         return {"aprovado": False}
 
-    # 🛑 TRAVA: Se em QUALQUER partida o TOTAL combinando Mandante + Visitante for 0, descarta!
-    for m, v in zip(jogos_mandante_total, jogos_visitante_total):
-        if (m + v) == 0:
-            print(f"⏩ [DESCARTADO ESCANTEIOS] Partida com total de escanteios zerado ({m} + {v} = 0) para {nome_liga_limpo}.")
-            return {"aprovado": False}
+    # Validações individuais e separadas por Mandante e Visitante
+    aprovado_mandante = False
+    aprovado_visitante = False
 
-    total_cantos_acumulados = sum(jogos_mandante_total) + sum(jogos_visitante_total)
-    media_geral_confronto = total_cantos_acumulados / (quantidade_jogos * 2)
+    # 1. Análise Mandante
+    if any(m == 0 for m in jogos_mandante_total):
+        pass
+    else:
+        media_mandante = sum(jogos_mandante_total) / quantidade_jogos
+        if media_mandante >= 2.0: # Ajuste o critério individual se necessário
+            aprovado_mandante = True
 
-    if media_geral_confronto < 4.0:
+    # 2. Análise Visitante
+    if any(v == 0 for v in jogos_visitante_total):
+        pass
+    else:
+        media_visitante = sum(jogos_visitante_total) / quantidade_jogos
+        if media_visitante >= 2.0: # Ajuste o critério individual se necessário
+            aprovado_visitante = True
+
+    # Se nenhum dos dois passar individualmente, rejeita o todo
+    if not aprovado_mandante and not aprovado_visitante:
         return {"aprovado": False}
 
-    media_historico_mandante = sum(jogos_mandante_total) / quantidade_jogos
-    media_historico_visitante = sum(jogos_visitante_total) / quantidade_jogos
+    total_mandante = sum(jogos_mandante_total)
+    total_visitante = sum(jogos_visitante_total)
+    total_cantos_acumulados = total_mandante + total_visitante
+    media_geral_confronto = total_cantos_acumulados / (quantidade_jogos * 2)
+
+    media_historico_mandante = total_mandante / quantidade_jogos
+    media_historico_visitante = total_visitante / quantidade_jogos
 
     texto_mercado = f"Média Escanteios: {media_geral_confronto:.1f}"
 
@@ -45,8 +62,13 @@ def analisar_dados_escanteios(cantos_mandante_h2h, cantos_visitante_h2h, nome_li
 
     return {
         "aprovado": True,
-        "total_mandante": sum(jogos_mandante_total),
-        "total_visitante": sum(jogos_visitante_total),
+        "tipo": "ESCANTEIOS_GERAL", # 🔑 Chave mantida para compatibilidade
+        "tipo_mandante": "ESCANTEIOS_MANDANTE",
+        "tipo_visitante": "ESCANTEIOS_VISITANTE",
+        "aprovado_mandante": aprovado_mandante,
+        "aprovado_visitante": aprovado_visitante,
+        "total_mandante": total_mandante,
+        "total_visitante": total_visitante,
         "total_confronto": total_cantos_acumulados,
         "media_confronto": round(media_geral_confronto, 2),
         "mercado": texto_mercado, 
