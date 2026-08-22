@@ -222,10 +222,11 @@ def main():
                         chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
                         mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
 
-                    # 🟢 CAPTURA DE ODDS (Mantido no Flashscore conforme solicitado)
+                    # 🟢 CAPTURA DE ODDS (Com matchmaking automático via odds.py)
                     v_odds = {}
                     try:
-                        v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
+                        print(f"     🔍 Buscando odds no Flashscore para: {t1} x {t2}...")
+                        v_odds = odds.capturar_todas_as_odds(driver, t1, t2)
                     except Exception as e_odds:
                         print(f"     ⚠️ Erro ao capturar odds prévias: {e_odds}")
                         if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
