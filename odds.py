@@ -3,8 +3,43 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-def capturar_todas_as_odds(driver, id_jogo):
-    # Dicionário completo atualizado com a chave correta 'BTTS_SIM'
+def _encontrar_id_por_nomes(driver, t1_procurado, t2_procurado):
+    """Varre a página de calendário atual do Flashscore para achar o ID correto do jogo pelos nomes."""
+    try:
+        elementos = driver.find_elements(By.CSS_SELECTOR, ".event__match")
+        for el in elementos:
+            try:
+                times = el.find_elements(By.CSS_SELECTOR, "span[class*='wcl-name']")
+                if len(times) >= 2:
+                    t1_atual = times[0].text.strip().lower()
+                    t2_atual = times[1].text.strip().lower()
+                    
+                    if (t1_procurado.lower() in t1_atual or t1_atual in t1_procurado.lower()) and \
+                       (t2_procurado.lower() in t2_atual or t2_atual in t2_procurado.lower()):
+                        
+                        link_el = el.find_element(By.CSS_SELECTOR, "a.icon--preview, a.eventRowLink")
+                        href = link_el.get_attribute('href')
+                        if "mid=" in href:
+                            return href.split("mid=")[-1].split("&")[0]
+                        else:
+                            id_el = link_el.get_attribute('id')
+                            if id_el:
+                                return id_el.split('_')[-1]
+            except:
+                continue
+    except Exception as e:
+        print(f"    ⚠️ Erro ao buscar ID no Flashscore por nomes: {e}")
+    return None
+
+def capturar_todas_as_odds(driver, id_ou_t1, t2=None):
+    """
+    Pode receber:
+      - capturar_todas_as_odds(driver, id_jogo) -> Se já tiver o ID do Flashscore.
+      - capturar_todas_as_odds(driver, t1, t2) -> Se precisar fazer o match por nome do time.
+    """
+    janela_principal = driver.current_window_handle
+    
+    # Dicionário completo padrão
     res = {
         "GOLS_15": "N/A", "GOLS_25": "N/A", "GOLS_M35": "N/A", "GOLS_M45": "N/A", 
         "BTTS_SIM": "N/A", "BTTS_NAO": "N/A",
@@ -12,12 +47,39 @@ def capturar_todas_as_odds(driver, id_jogo):
         "VITORIA_CASA": "N/A", "VITORIA_FORA": "N/A"
     }
 
-    # Abre a aba de resumo para pegar o link base
-    driver.execute_script(f"window.open('https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo', '_blank');")
-    driver.switch_to.window(driver.window_handles[-1])
-
     try:
-        time.sleep(1.5)
+        # Se t2 foi informado, significa que o segundo parâmetro é o time da casa e o terceiro é o visitante
+        if t2 is not None:
+            t1_procurado = id_ou_t1
+            t2_procurado = t2
+            
+            # Abre a página de jogos do dia no Flashscore para localizar o ID correspondente
+            driver.execute_script("window.open('https://www.flashscore.com.br/futebol/hoje/', '_blank');")
+            time.sleep(1.0)
+            driver.switch_to.window(driver.window_handles[-1])
+            time.sleep(1.5)
+            
+            id_jogo = _encontrar_id_por_nomes(driver, t1_procurado, t2_procurado)
+            
+            # Fecha a aba de busca e retorna para a janela principal
+            driver.close()
+            driver.switch_to.window(janela_principal)
+            
+            if not id_jogo:
+                print(f"    ⚠️ Matchmaking do Flashscore não encontrou o jogo: {t1_procurado} x {t2_procurado}")
+                return res
+        else:
+            id_jogo = id_ou_t1
+
+        # Abre a aba de resumo para pegar o link base de odds do jogo correto
+        driver.execute_script(f"window.open('https://www.flashscore.com.br/jogo/{id_jogo}/#/resumo', '_blank');")
+        time.sleep(1.0)
+        
+        if len(driver.window_handles) > 1:
+            driver.switch_to.window(driver.window_handles[-1])
+        else:
+            return res
+
         try:
             elemento_aba = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/odds/')]"))
@@ -25,7 +87,7 @@ def capturar_todas_as_odds(driver, id_jogo):
             link_odds_base = elemento_aba.get_attribute('href')
         except:
             driver.close()
-            driver.switch_to.window(driver.window_handles[0])
+            driver.switch_to.window(janela_principal)
             return res
 
         # --- 1. VITÓRIA SECA (1X2) ---
@@ -37,7 +99,6 @@ def capturar_todas_as_odds(driver, id_jogo):
             linha_1x2 = driver.find_element(By.CSS_SELECTOR, ".ui-table__row")
             odds_1x2 = linha_1x2.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
             if len(odds_1x2) >= 3:
-                # [0] = Casa | [1] = Empate | [2] = Fora
                 res["VITORIA_CASA"] = odds_1x2[0].text.replace('↑', '').replace('↓', '').strip()
                 res["VITORIA_FORA"] = odds_1x2[2].text.replace('↑', '').replace('↓', '').strip()
         except: pass
@@ -73,7 +134,6 @@ def capturar_todas_as_odds(driver, id_jogo):
             driver.get(link_odds_base.replace("/odds/", "/odds/ambos-marcam/tempo-regulamentar/"))
             time.sleep(1.5)
             
-            # Varre as linhas da tabela para ignorar traços (-) e pegar a primeira odd válida disponível
             linhas_b = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
             for linha_b in linhas_b:
                 odds_b = linha_b.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
@@ -101,8 +161,16 @@ def capturar_todas_as_odds(driver, id_jogo):
     except Exception as e:
         print(f"    ❌ Erro no odds.py: {e}")
     finally:
-        driver.close()
-        driver.switch_to.window(driver.window_handles[0])
+        try:
+            if len(driver.window_handles) > 1:
+                driver.close()
+        except:
+            pass
+        try:
+            driver.switch_to.window(janela_principal)
+        except:
+            if driver.window_handles:
+                driver.switch_to.window(driver.window_handles[0])
     
     return res
-                
+            
