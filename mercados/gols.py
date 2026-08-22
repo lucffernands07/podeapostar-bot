@@ -1,104 +1,86 @@
 """
-REGRAS DE GOLS - VERSÃO AJUSTADA SEM TRAVA DE TABELA PARA UNDERS
-- OVER: Pelo menos um time vem de vitória e o outro de derrota.
-- UNDER: Os dois vêm de vitória, ou vitória e empate, ou empate.
+REGRAS DE GOLS - SUPERSCORE (BASEADO NAS MÉDIAS DA ABA ESTATÍSTICAS)
 """
-
-def calcular_porcentagem_gols(c, f):
-    try:
-        c, f = int(c), int(f)
-    except:
-        return 0
-
-    if c < 2 or f < 2:
-        return 0
-
-    if c == 5 and f == 5:
-        return 100
-    elif c >= 4 and f >= 4:
-        return 80
-    elif c >= 3 and f >= 3:
-        return 60
-    else:
-        return 40
-
 
 def verificar_gols(s):
     if not isinstance(s, dict):
         return []
 
-    c_15 = int(s.get("casa_15", 0) or 0)
-    f_15 = int(s.get("fora_15", 0) or 0)
-    
-    if c_15 < 2 or f_15 < 2:
-        return []
-
-    pct_15 = calcular_porcentagem_gols(c_15, f_15)
-    pct_25 = calcular_porcentagem_gols(s.get("casa_25", 0), s.get("fora_25", 0))
-    
-    # 🟢 CORRIGIDO: Lê corretamente os dados da casa e do fora para o under
-    pct_m35 = calcular_porcentagem_gols(s.get("casa_35_under", 0), s.get("fora_35_under", 0))
-    pct_m45 = calcular_porcentagem_gols(s.get("casa_45_under", 0), s.get("fora_45_under", 0))
-
-    # 🟢 CAPTURA DOS RESULTADOS DO ÚLTIMO JOGO (V, D ou E)
-    res_t1 = str(s.get("t1_resultado_1", "")).upper()
-    res_t2 = str(s.get("t2_resultado_1", "")).upper()
-
-    # ----------------------------------------------------------
-    # 🟢 REGRAS DE FILTRAGEM DO ÚLTIMO JOGO
-    # ----------------------------------------------------------
-    condicao_over_momento = (res_t1 == "V" and res_t2 == "D") or (res_t1 == "D" and res_t2 == "V")
-
-    condicao_under_momento = (
-        (res_t1 == "V" and res_t2 == "V") or 
-        (res_t1 == "V" and res_t2 == "E") or 
-        (res_t1 == "E" and res_t2 == "V") or 
-        (res_t1 == "E" and res_t2 == "E")
-    )
-
-    m_pos = s.get("mandante_posicao")
-    v_pos = s.get("visitante_posicao")
+    # Captura as médias de gols do mandante e visitante vindas do Superscore
+    mg_mandante = float(s.get("media_gols_mandante", 0.0) or 0.0)
+    mg_visitante = float(s.get("media_gols_visitante", 0.0) or 0.0)
 
     overs_aprovados = []
     unders_aprovados = []
 
-    tem_disparidade = False
-    tem_proximidade = False
-
-    if m_pos is not None and v_pos is not None:
-        diferenca = abs(m_pos - v_pos)
-        if diferenca >= 8:  
-            tem_disparidade = True
-        elif diferenca <= 3: 
-            tem_proximidade = True
-
     # ==========================================================
-    # AVALIAÇÃO DE OVERS (Exige a condição de Vitória + Derrota)
+    # 🟢 REGRAS DE OVERS (+1.5 Gols)
     # ==========================================================
-    if condicao_over_momento:
-        if m_pos is None or v_pos is None:
-            if pct_15 >= 80:
-                overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
-            if pct_25 >= 80:  
-                overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
-        else:
-            if pct_15 >= 80 and (tem_disparidade or m_pos < 10 or not tem_proximidade):
-                overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
+    # Ordem decrescente de porcentagem (95% -> 85% -> 75%)
+    if (1.8 <= mg_mandante <= 1.9) and (1.8 <= mg_visitante <= 1.9):
+        overs_aprovados.append({"mercado": "+1.5 Gols (95%)", "tipo": "GOLS_15"})
+    elif (1.4 <= mg_mandante <= 1.7) and (1.4 <= mg_visitante <= 1.7):
+        overs_aprovados.append({"mercado": "+1.5 Gols (85%)", "tipo": "GOLS_15"})
+    elif (1.0 <= mg_mandante <= 1.3) and (1.0 <= mg_visitante <= 1.3):
+        overs_aprovados.append({"mercado": "+1.5 Gols (75%)", "tipo": "GOLS_15"})
 
-            if pct_25 == 100 and tem_disparidade:
-                overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
     # ==========================================================
-    # AVALIAÇÃO DE UNDERS (Sem a trava de proximidade de tabela)
+    # 🟢 REGRAS DE OVERS (+2.5 Gols)
+    # Um dos times tem média >= 2.0 e o outro entra na faixa secundária
     # ==========================================================
-    if condicao_under_momento:
-        if pct_m45 >= 60:
-            unders_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
-        if pct_m35 >= 60:
-            unders_aprovados.append({"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"})
+    tem_time_alto = (mg_mandante >= 2.0) or (mg_visitante >= 2.0)
+    
+    if tem_time_alto:
+        # Pega a média do "outro" time (o que não é o >= 2.0, ou qualquer um se ambos forem >= 2.0)
+        outro_time = mg_visitante if mg_mandante >= 2.0 else mg_mandante
+        
+        if 1.8 <= outro_time <= 1.9:
+            overs_aprovados.append({"mercado": "+2.5 Gols (95%)", "tipo": "GOLS_25"})
+        elif 1.4 <= outro_time <= 1.7:
+            overs_aprovados.append({"mercado": "+2.5 Gols (85%)", "tipo": "GOLS_25"})
+        elif 1.0 <= outro_time <= 1.3:
+            overs_aprovados.append({"mercado": "+2.5 Gols (75%)", "tipo": "GOLS_25"})
+
 
     # ==========================================================
-    # RETORNO SEGURO (Exclusão mútua)
+    # 🔴 REGRAS DE UNDERS (-4.5 Gols)
+    # Um time fixo em 1.0 e o outro variando
+    # ==========================================================
+    # Usamos uma margem de tolerância pequena (ex: 0.95 a 1.05) para garantir a leitura exata do float
+    eh_um_ponto_zero_1 = (0.95 <= mg_mandante <= 1.05)
+    eh_um_ponto_zero_2 = (0.95 <= mg_visitante <= 1.05)
+    
+    if eh_um_ponto_zero_1 or eh_um_ponto_zero_2:
+        outro_under_45 = mg_visitante if eh_um_ponto_zero_1 else mg_mandante
+        
+        if outro_under_45 <= 0.5:
+            unders_aprovados.append({"mercado": "-4.5 Gols (95%)", "tipo": "GOLS_M45"})
+        elif outro_under_45 <= 1.0:
+            unders_aprovados.append({"mercado": "-4.5 Gols (85%)", "tipo": "GOLS_M45"})
+        elif outro_under_45 >= 1.5:
+            unders_aprovados.append({"mercado": "-4.5 Gols (75%)", "tipo": "GOLS_M45"})
+
+
+    # ==========================================================
+    # 🔴 REGRAS DE UNDERS (-3.5 Gols)
+    # Um time < 1.0 e o outro <= limite
+    # ==========================================================
+    tem_baixo = (mg_mandante < 1.0) or (mg_visitante < 1.0)
+    
+    if tem_baixo:
+        outro_under_35 = mg_visitante if mg_mandante < 1.0 else mg_mandante
+        
+        if outro_under_35 <= 1.0:
+            unders_aprovados.append({"mercado": "-3.5 Gols (95%)", "tipo": "GOLS_M35"})
+        elif outro_under_35 <= 1.5:
+            unders_aprovados.append({"mercado": "-3.5 Gols (85%)", "tipo": "GOLS_M35"})
+        elif outro_under_35 <= 2.0:
+            unders_aprovados.append({"mercado": "-3.5 Gols (75%)", "tipo": "GOLS_M35"})
+
+
+    # ==========================================================
+    # RETORNO SEGURO 
     # ==========================================================
     if overs_aprovados:
         return overs_aprovados
@@ -106,4 +88,3 @@ def verificar_gols(s):
         return unders_aprovados
     
     return []
-                
