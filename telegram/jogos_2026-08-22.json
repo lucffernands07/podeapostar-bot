@@ -1,80 +1,20 @@
 [
     {
-        "horario": "11:00",
-        "liga": "Bélgica - Pro League",
-        "time_casa": "Waregem",
-        "time_fora": "Beveren",
-        "mercado": "+1.5 Gols (100%)",
-        "odd": "1.25",
-        "link_betano": "https://www.betano.bet.br/match-odds/SV-Zulte-Waregem-KV-RS-Waasland-Beveren/88941343/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/AsTRz40J"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Bélgica - Pro League",
-        "time_casa": "Waregem",
-        "time_fora": "Beveren",
-        "mercado": "+2.5 Gols (80%)",
-        "odd": "1.75",
-        "link_betano": "https://www.betano.bet.br/match-odds/SV-Zulte-Waregem-KV-RS-Waasland-Beveren/88941343/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/AsTRz40J"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Inglaterra - Divisão 2",
-        "time_casa": "Derby",
-        "time_fora": "Cardiff",
-        "mercado": "+1.5 Gols (80%)",
-        "odd": "1.28",
-        "link_betano": "https://www.betano.bet.br/match-odds/Derby-County-Cardiff-City/90376114/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/nkPLPUKM"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Inglaterra - Divisão 2",
-        "time_casa": "Preston",
-        "time_fora": "Wolverhampton",
-        "mercado": "+1.5 Gols (80%)",
-        "odd": "1.29",
-        "link_betano": "https://www.betano.bet.br/match-odds/Preston-Wolverhampton-Wanderers/90376134/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/QJI2IJFt"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Inglaterra - Divisão 2",
-        "time_casa": "Southampton",
-        "time_fora": "Stoke",
-        "mercado": "Dupla Chance: 1X (100%)",
-        "odd": "1.17",
-        "link_betano": "https://www.betano.bet.br/match-odds/Southampton-FC-Stoke-City/90376148/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/plFIEyF5"
-    },
-    {
-        "horario": "11:00",
-        "liga": "Inglaterra - Premier League",
-        "time_casa": "Ipswich",
-        "time_fora": "Sunderland",
-        "mercado": "Chutes do Mandante: 15.5",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Ipswich-Town-Sunderland/87685270/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/Cxf9qTRk"
-    },
-    {
-        "horario": "11:30",
-        "liga": "Portugal - Primeira Liga",
-        "time_casa": "Marítimo",
-        "time_fora": "Académico Viseu",
-        "mercado": "Chutes do Visitante: 9.5",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/CS-Maritimo-Academico-Viseu/90422099/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/bsWQ0vec"
+        "horario": "12:15",
+        "liga": "França - Ligue 1",
+        "time_casa": "Lens",
+        "time_fora": "Auxerre",
+        "mercado": "-4.5 Gols (60%)",
+        "odd": "1.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/RC-Lens-AJ-Auxerre/88456470/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/z9IoCzrR"
     },
     {
         "horario": "12:15",
         "liga": "França - Ligue 1",
         "time_casa": "Lens",
         "time_fora": "Auxerre",
-        "mercado": "Chutes do Mandante: 8.0",
+        "mercado": "Finalizações do Mandante: 8.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/RC-Lens-AJ-Auxerre/88456470/",
         "link_h2h": "https://www.flashscore.com.br/jogo/z9IoCzrR"
@@ -108,6 +48,26 @@
         "odd": "1.85",
         "link_betano": "https://www.betano.bet.br/match-odds/Caykur-Rizespor-Samsunspor/88835013/",
         "link_h2h": "https://www.flashscore.com.br/jogo/lCnyImAj"
+    },
+    {
+        "horario": "13:10",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Kholood",
+        "time_fora": "Al-Taawon",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Kholood-Club-Al-Taawoun-FC/89664963/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0zG7kg5F"
+    },
+    {
+        "horario": "13:10",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Kholood",
+        "time_fora": "Al-Taawon",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Kholood-Club-Al-Taawoun-FC/89664963/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0zG7kg5F"
     },
     {
         "horario": "13:15",
@@ -144,7 +104,17 @@
         "liga": "Inglaterra - Premier League",
         "time_casa": "Brentford",
         "time_fora": "Tottenham",
-        "mercado": "Chutes do Mandante: 16.0",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/Brentford-FC-Tottenham-Hotspur/87685269/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EPW0kJF8"
+    },
+    {
+        "horario": "13:30",
+        "liga": "Inglaterra - Premier League",
+        "time_casa": "Brentford",
+        "time_fora": "Tottenham",
+        "mercado": "Finalizações do Mandante: 16.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Brentford-FC-Tottenham-Hotspur/87685269/",
         "link_h2h": "https://www.flashscore.com.br/jogo/EPW0kJF8"
@@ -154,7 +124,7 @@
         "liga": "Inglaterra - Premier League",
         "time_casa": "Brentford",
         "time_fora": "Tottenham",
-        "mercado": "Chutes do Visitante: 16.5",
+        "mercado": "Finalizações do Visitante: 16.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Brentford-FC-Tottenham-Hotspur/87685269/",
         "link_h2h": "https://www.flashscore.com.br/jogo/EPW0kJF8"
@@ -164,7 +134,27 @@
         "liga": "Italia - Serie A",
         "time_casa": "Inter",
         "time_fora": "Monza",
-        "mercado": "Chutes do Mandante: 16.5",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.26",
+        "link_betano": "https://www.betano.bet.br/match-odds/Inter-Milan-AC-Monza/87697173/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/8Mn7Y8Zh"
+    },
+    {
+        "horario": "13:30",
+        "liga": "Italia - Serie A",
+        "time_casa": "Inter",
+        "time_fora": "Monza",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.62",
+        "link_betano": "https://www.betano.bet.br/match-odds/Inter-Milan-AC-Monza/87697173/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/8Mn7Y8Zh"
+    },
+    {
+        "horario": "13:30",
+        "liga": "Italia - Serie A",
+        "time_casa": "Inter",
+        "time_fora": "Monza",
+        "mercado": "Finalizações do Mandante: 16.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Inter-Milan-AC-Monza/87697173/",
         "link_h2h": "https://www.flashscore.com.br/jogo/8Mn7Y8Zh"
@@ -174,7 +164,7 @@
         "liga": "Italia - Serie A",
         "time_casa": "Inter",
         "time_fora": "Monza",
-        "mercado": "Chutes do Visitante: 14.6",
+        "mercado": "Finalizações do Visitante: 16.8",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Inter-Milan-AC-Monza/87697173/",
         "link_h2h": "https://www.flashscore.com.br/jogo/8Mn7Y8Zh"
@@ -184,10 +174,50 @@
         "liga": "Italia - Serie A",
         "time_casa": "Udinese",
         "time_fora": "Como",
-        "mercado": "Chutes do Visitante: 11.0",
+        "mercado": "Finalizações do Mandante: 10.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Udinese-Calcio-Como-1907/87697271/",
         "link_h2h": "https://www.flashscore.com.br/jogo/QuSvm8ln"
+    },
+    {
+        "horario": "13:30",
+        "liga": "Italia - Serie A",
+        "time_casa": "Udinese",
+        "time_fora": "Como",
+        "mercado": "Finalizações do Visitante: 11.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Udinese-Calcio-Como-1907/87697271/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/QuSvm8ln"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Ahli",
+        "time_fora": "Abha",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.31",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Ahli-SFC-Abha-Club/89664889/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6ZsuXpkl"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Turquia - Super Lig",
+        "time_casa": "Fenerbahce",
+        "time_fora": "Konyaspor",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.24",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fenerbahce-SK-Konyaspor/88835021/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ddtwx91M"
+    },
+    {
+        "horario": "15:30",
+        "liga": "Turquia - Super Lig",
+        "time_casa": "Fenerbahce",
+        "time_fora": "Konyaspor",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.57",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fenerbahce-SK-Konyaspor/88835021/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/ddtwx91M"
     },
     {
         "horario": "15:45",
@@ -195,7 +225,7 @@
         "time_casa": "Antwerp",
         "time_fora": "Genk",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.26",
+        "odd": "1.25",
         "link_betano": "https://www.betano.bet.br/match-odds/Royal-Antwerp-FC-KRC-Genk/88941342/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ITXjOoYA"
     },
@@ -214,7 +244,7 @@
         "liga": "França - Ligue 1",
         "time_casa": "Le Mans",
         "time_fora": "Brest",
-        "mercado": "Chutes do Visitante: 4.0",
+        "mercado": "Finalizações do Visitante: 4.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Le-Mans-UC-72-Stade-Brestois-29/88456402/",
         "link_h2h": "https://www.flashscore.com.br/jogo/2eKwEdDE"
@@ -225,7 +255,7 @@
         "time_casa": "Nice",
         "time_fora": "Lorient",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.34",
+        "odd": "1.36",
         "link_betano": "https://www.betano.bet.br/match-odds/OGC-Nice-FC-Lorient/88456478/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ClCP4hz1"
     },
@@ -234,7 +264,7 @@
         "liga": "França - Ligue 1",
         "time_casa": "Nice",
         "time_fora": "Lorient",
-        "mercado": "Chutes do Mandante: 21.0",
+        "mercado": "Finalizações do Mandante: 21.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/OGC-Nice-FC-Lorient/88456478/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ClCP4hz1"
@@ -244,7 +274,7 @@
         "liga": "França - Ligue 1",
         "time_casa": "Nice",
         "time_fora": "Lorient",
-        "mercado": "Chutes do Visitante: 14.0",
+        "mercado": "Finalizações do Visitante: 14.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/OGC-Nice-FC-Lorient/88456478/",
         "link_h2h": "https://www.flashscore.com.br/jogo/ClCP4hz1"
@@ -254,7 +284,7 @@
         "liga": "França - Ligue 1",
         "time_casa": "Toulouse",
         "time_fora": "Lyon",
-        "mercado": "Chutes do Visitante: 6.0",
+        "mercado": "Finalizações do Visitante: 6.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Toulouse-FC-Olympique-Lyonnais/88456455/",
         "link_h2h": "https://www.flashscore.com.br/jogo/C82JQZdK"
@@ -264,7 +294,7 @@
         "liga": "França - Ligue 1",
         "time_casa": "Troyes",
         "time_fora": "Paris FC",
-        "mercado": "Chutes do Mandante: 14.0",
+        "mercado": "Finalizações do Mandante: 14.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/ES-Troyes-AC-Paris-FC/88456460/",
         "link_h2h": "https://www.flashscore.com.br/jogo/rigkLDKs"
@@ -274,7 +304,17 @@
         "liga": "Italia - Serie A",
         "time_casa": "Genoa",
         "time_fora": "Napoli",
-        "mercado": "Chutes do Mandante: 24.0",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.21",
+        "link_betano": "https://www.betano.bet.br/match-odds/Genoa-CFC-SSC-Napoli/87697171/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/z9lazV4t"
+    },
+    {
+        "horario": "15:45",
+        "liga": "Italia - Serie A",
+        "time_casa": "Genoa",
+        "time_fora": "Napoli",
+        "mercado": "Finalizações do Mandante: 24.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Genoa-CFC-SSC-Napoli/87697171/",
         "link_h2h": "https://www.flashscore.com.br/jogo/z9lazV4t"
@@ -284,7 +324,7 @@
         "liga": "Italia - Serie A",
         "time_casa": "Genoa",
         "time_fora": "Napoli",
-        "mercado": "Chutes do Visitante: 9.0",
+        "mercado": "Finalizações do Visitante: 9.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Genoa-CFC-SSC-Napoli/87697171/",
         "link_h2h": "https://www.flashscore.com.br/jogo/z9lazV4t"
@@ -294,7 +334,7 @@
         "liga": "Italia - Serie A",
         "time_casa": "Parma",
         "time_fora": "Cagliari",
-        "mercado": "Chutes do Mandante: 12.0",
+        "mercado": "Finalizações do Mandante: 12.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Parma-Calcio-1913-Cagliari-Calcio/87697180/",
         "link_h2h": "https://www.flashscore.com.br/jogo/GnjFWn45"
@@ -304,9 +344,9 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Atl. Tucuman",
         "time_fora": "Instituto",
-        "mercado": "Chutes do Mandante: 10.7",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/busca/?q=Atl.%20Tucuman%20x%20Instituto",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.17",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Atletico-Tucuman-Instituto-AC-Cordoba/89890080/",
         "link_h2h": "https://www.flashscore.com.br/jogo/G0hUb5qS"
     },
     {
@@ -314,9 +354,19 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Atl. Tucuman",
         "time_fora": "Instituto",
-        "mercado": "Chutes do Visitante: 17.0",
+        "mercado": "Finalizações do Mandante: 10.7",
         "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/busca/?q=Atl.%20Tucuman%20x%20Instituto",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Atletico-Tucuman-Instituto-AC-Cordoba/89890080/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/G0hUb5qS"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Atl. Tucuman",
+        "time_fora": "Instituto",
+        "mercado": "Finalizações do Visitante: 17.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Atletico-Tucuman-Instituto-AC-Cordoba/89890080/",
         "link_h2h": "https://www.flashscore.com.br/jogo/G0hUb5qS"
     },
     {
@@ -326,7 +376,7 @@
         "time_fora": "Instituto",
         "mercado": "Média Escanteios: 7.5",
         "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/busca/?q=Atl.%20Tucuman%20x%20Instituto",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Atletico-Tucuman-Instituto-AC-Cordoba/89890080/",
         "link_h2h": "https://www.flashscore.com.br/jogo/G0hUb5qS"
     },
     {
@@ -336,7 +386,7 @@
         "time_fora": "Instituto",
         "mercado": "Média Cartões: 3.0",
         "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/busca/?q=Atl.%20Tucuman%20x%20Instituto",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Atletico-Tucuman-Instituto-AC-Cordoba/89890080/",
         "link_h2h": "https://www.flashscore.com.br/jogo/G0hUb5qS"
     },
     {
@@ -364,7 +414,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Gimnasia L.P.",
         "time_fora": "Gimnasia Mendoza",
-        "mercado": "Chutes do Mandante: 15.0",
+        "mercado": "Finalizações do Mandante: 15.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Gimnasia-y-Esgrima-de-La-Plata-Gimnasia-Y-Esgrima-Mendoza/89890304/",
         "link_h2h": "https://www.flashscore.com.br/jogo/8bX8iNy2"
@@ -374,7 +424,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Gimnasia L.P.",
         "time_fora": "Gimnasia Mendoza",
-        "mercado": "Chutes do Visitante: 9.0",
+        "mercado": "Finalizações do Visitante: 13.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Gimnasia-y-Esgrima-de-La-Plata-Gimnasia-Y-Esgrima-Mendoza/89890304/",
         "link_h2h": "https://www.flashscore.com.br/jogo/8bX8iNy2"
@@ -384,7 +434,27 @@
         "liga": "Brasileirão Série A",
         "time_casa": "Fluminense",
         "time_fora": "Remo",
-        "mercado": "Chutes do Mandante: 18.3",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.12",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fluminense-RJ-Remo-PA/90567177/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EcuFLwxe"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Fluminense",
+        "time_fora": "Remo",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.32",
+        "link_betano": "https://www.betano.bet.br/match-odds/Fluminense-RJ-Remo-PA/90567177/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/EcuFLwxe"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Fluminense",
+        "time_fora": "Remo",
+        "mercado": "Finalizações do Mandante: 18.3",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Fluminense-RJ-Remo-PA/90567177/",
         "link_h2h": "https://www.flashscore.com.br/jogo/EcuFLwxe"
@@ -394,7 +464,7 @@
         "liga": "Brasileirão Série A",
         "time_casa": "Fluminense",
         "time_fora": "Remo",
-        "mercado": "Chutes do Visitante: 12.5",
+        "mercado": "Finalizações do Visitante: 12.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Fluminense-RJ-Remo-PA/90567177/",
         "link_h2h": "https://www.flashscore.com.br/jogo/EcuFLwxe"
@@ -404,7 +474,27 @@
         "liga": "Espanha - LaLiga",
         "time_casa": "Espanyol",
         "time_fora": "Real Madrid",
-        "mercado": "Chutes do Mandante: 16.0",
+        "mercado": "-4.5 Gols (100%)",
+        "odd": "1.2",
+        "link_betano": "https://www.betano.bet.br/match-odds/RCD-Espanyol-Real-Madrid/88312293/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/l8fgco7b"
+    },
+    {
+        "horario": "16:30",
+        "liga": "Espanha - LaLiga",
+        "time_casa": "Espanyol",
+        "time_fora": "Real Madrid",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.5",
+        "link_betano": "https://www.betano.bet.br/match-odds/RCD-Espanyol-Real-Madrid/88312293/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/l8fgco7b"
+    },
+    {
+        "horario": "16:30",
+        "liga": "Espanha - LaLiga",
+        "time_casa": "Espanyol",
+        "time_fora": "Real Madrid",
+        "mercado": "Finalizações do Mandante: 16.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/RCD-Espanyol-Real-Madrid/88312293/",
         "link_h2h": "https://www.flashscore.com.br/jogo/l8fgco7b"
@@ -414,7 +504,7 @@
         "liga": "Espanha - LaLiga",
         "time_casa": "Espanyol",
         "time_fora": "Real Madrid",
-        "mercado": "Chutes do Visitante: 14.5",
+        "mercado": "Finalizações do Visitante: 14.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/RCD-Espanyol-Real-Madrid/88312293/",
         "link_h2h": "https://www.flashscore.com.br/jogo/l8fgco7b"
@@ -430,11 +520,21 @@
         "link_h2h": "https://www.flashscore.com.br/jogo/I347DK1t"
     },
     {
+        "horario": "17:00",
+        "liga": "Brasileiro Serie D",
+        "time_casa": "Uberlândia",
+        "time_fora": "ABC",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.13",
+        "link_betano": "https://www.betano.bet.br/match-odds/Uberlandia-MG-ABC-FC-RN/90967846/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0d3SUgKl"
+    },
+    {
         "horario": "18:00",
         "liga": "Brasileirão Série B",
         "time_casa": "Ceará",
         "time_fora": "Londrina",
-        "mercado": "Chutes do Mandante: 13.5",
+        "mercado": "Finalizações do Mandante: 13.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Ceara-SC-CE-Londrina-PR/90966654/",
         "link_h2h": "https://www.flashscore.com.br/jogo/UZiPf8kB"
@@ -444,7 +544,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Ceará",
         "time_fora": "Londrina",
-        "mercado": "Chutes do Visitante: 16.5",
+        "mercado": "Finalizações do Visitante: 16.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Ceara-SC-CE-Londrina-PR/90966654/",
         "link_h2h": "https://www.flashscore.com.br/jogo/UZiPf8kB"
@@ -454,17 +554,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Independiente",
         "time_fora": "Ind. Rivadavia",
-        "mercado": "Chutes do Mandante: 15.5",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/CA-Independiente-Independiente-Rivadavia-de-Mendoza/89890234/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/MJjE2mp3"
-    },
-    {
-        "horario": "18:30",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Independiente",
-        "time_fora": "Ind. Rivadavia",
-        "mercado": "Chutes do Visitante: 12.0",
+        "mercado": "Finalizações do Visitante: 12.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Independiente-Independiente-Rivadavia-de-Mendoza/89890234/",
         "link_h2h": "https://www.flashscore.com.br/jogo/MJjE2mp3"
@@ -474,7 +564,27 @@
         "liga": "Brasileirão Série A",
         "time_casa": "Internacional",
         "time_fora": "Atlético-MG",
-        "mercado": "Chutes do Mandante: 13.5",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.11",
+        "link_betano": "https://www.betano.bet.br/match-odds/Internacional-RS-Clube-Atletico-MG/90567195/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/KGJcWfjD"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Internacional",
+        "time_fora": "Atlético-MG",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.3",
+        "link_betano": "https://www.betano.bet.br/match-odds/Internacional-RS-Clube-Atletico-MG/90567195/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/KGJcWfjD"
+    },
+    {
+        "horario": "18:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Internacional",
+        "time_fora": "Atlético-MG",
+        "mercado": "Finalizações do Mandante: 13.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Internacional-RS-Clube-Atletico-MG/90567195/",
         "link_h2h": "https://www.flashscore.com.br/jogo/KGJcWfjD"
@@ -484,7 +594,7 @@
         "liga": "Brasileirão Série A",
         "time_casa": "Internacional",
         "time_fora": "Atlético-MG",
-        "mercado": "Chutes do Visitante: 13.0",
+        "mercado": "Finalizações do Visitante: 13.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Internacional-RS-Clube-Atletico-MG/90567195/",
         "link_h2h": "https://www.flashscore.com.br/jogo/KGJcWfjD"
@@ -494,7 +604,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Cuiabá",
         "time_fora": "Goiás",
-        "mercado": "Chutes do Mandante: 11.5",
+        "mercado": "Finalizações do Mandante: 11.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Cuiaba-MT-Goi-s-GO/90966655/",
         "link_h2h": "https://www.flashscore.com.br/jogo/868bdLQF"
@@ -504,7 +614,7 @@
         "liga": "Brasileirão Série B",
         "time_casa": "Cuiabá",
         "time_fora": "Goiás",
-        "mercado": "Chutes do Visitante: 13.0",
+        "mercado": "Finalizações do Visitante: 13.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Cuiaba-MT-Goi-s-GO/90966655/",
         "link_h2h": "https://www.flashscore.com.br/jogo/868bdLQF"
@@ -514,7 +624,27 @@
         "liga": "Brasileirão Série A",
         "time_casa": "Cruzeiro",
         "time_fora": "Flamengo",
-        "mercado": "Chutes do Mandante: 13.5",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.13",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Flamengo-RJ/90567196/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/n3LkYGL0"
+    },
+    {
+        "horario": "20:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Cruzeiro",
+        "time_fora": "Flamengo",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.34",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Flamengo-RJ/90567196/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/n3LkYGL0"
+    },
+    {
+        "horario": "20:30",
+        "liga": "Brasileirão Série A",
+        "time_casa": "Cruzeiro",
+        "time_fora": "Flamengo",
+        "mercado": "Finalizações do Mandante: 13.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Flamengo-RJ/90567196/",
         "link_h2h": "https://www.flashscore.com.br/jogo/n3LkYGL0"
@@ -524,10 +654,30 @@
         "liga": "Brasileirão Série A",
         "time_casa": "Cruzeiro",
         "time_fora": "Flamengo",
-        "mercado": "Chutes do Visitante: 14.5",
+        "mercado": "Finalizações do Visitante: 14.5",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Flamengo-RJ/90567196/",
         "link_h2h": "https://www.flashscore.com.br/jogo/n3LkYGL0"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - Copa MLS",
+        "time_casa": "Charlotte",
+        "time_fora": "DC United",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.21",
+        "link_betano": "https://www.betano.bet.br/match-odds/Charlotte-FC-D-C-United/86702915/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bgmSY65c"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - Copa MLS",
+        "time_casa": "Charlotte",
+        "time_fora": "DC United",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.52",
+        "link_betano": "https://www.betano.bet.br/match-odds/Charlotte-FC-D-C-United/86702915/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/bgmSY65c"
     },
     {
         "horario": "20:30",
@@ -562,6 +712,16 @@
     {
         "horario": "20:30",
         "liga": "EUA - Copa MLS",
+        "time_casa": "New York Red Bulls",
+        "time_fora": "Chicago Fire",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.33",
+        "link_betano": "https://www.betano.bet.br/match-odds/New-York-Red-Bulls-Chicago-Fire-FC/86702927/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/hzkrVO4M"
+    },
+    {
+        "horario": "20:30",
+        "liga": "EUA - Copa MLS",
         "time_casa": "Orlando City",
         "time_fora": "Real Salt Lake",
         "mercado": "+1.5 Gols (80%)",
@@ -584,7 +744,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Huracán",
         "time_fora": "Dep. Riestra",
-        "mercado": "Chutes do Mandante: 18.5",
+        "mercado": "Finalizações do Mandante: 21.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Huracan-Deportivo-Riestra/89890201/",
         "link_h2h": "https://www.flashscore.com.br/jogo/U3I3D4bL"
@@ -594,7 +754,7 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Huracán",
         "time_fora": "Dep. Riestra",
-        "mercado": "Chutes do Visitante: 15.2",
+        "mercado": "Finalizações do Visitante: 16.7",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/CA-Huracan-Deportivo-Riestra/89890201/",
         "link_h2h": "https://www.flashscore.com.br/jogo/U3I3D4bL"
@@ -604,7 +764,17 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Newell's Old Boys",
         "time_fora": "Banfield",
-        "mercado": "Chutes do Mandante: 9.7",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.21",
+        "link_betano": "https://www.betano.bet.br/match-odds/Newells-Old-Boys-CA-Banfield/89889966/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/Eyfz8rMr"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Argentina - Liga Profesional",
+        "time_casa": "Newell's Old Boys",
+        "time_fora": "Banfield",
+        "mercado": "Finalizações do Mandante: 10.0",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Newells-Old-Boys-CA-Banfield/89889966/",
         "link_h2h": "https://www.flashscore.com.br/jogo/Eyfz8rMr"
@@ -614,30 +784,30 @@
         "liga": "Argentina - Liga Profesional",
         "time_casa": "Newell's Old Boys",
         "time_fora": "Banfield",
-        "mercado": "Chutes do Visitante: 8.3",
+        "mercado": "Finalizações do Visitante: 8.3",
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Newells-Old-Boys-CA-Banfield/89889966/",
         "link_h2h": "https://www.flashscore.com.br/jogo/Eyfz8rMr"
     },
     {
-        "horario": "21:00",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Newell's Old Boys",
-        "time_fora": "Banfield",
-        "mercado": "Média Escanteios: 4.5",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Newells-Old-Boys-CA-Banfield/89889966/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/Eyfz8rMr"
+        "horario": "21:30",
+        "liga": "EUA - Copa MLS",
+        "time_casa": "St. Louis City",
+        "time_fora": "Houston Dynamo",
+        "mercado": "-4.5 Gols (60%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/St-Louis-City-SC-Houston-Dynamo-FC/86705234/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6wFHqOJF"
     },
     {
-        "horario": "21:00",
-        "liga": "Argentina - Liga Profesional",
-        "time_casa": "Newell's Old Boys",
-        "time_fora": "Banfield",
-        "mercado": "Média Cartões: 3.0",
-        "odd": "Análise",
-        "link_betano": "https://www.betano.bet.br/match-odds/Newells-Old-Boys-CA-Banfield/89889966/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/Eyfz8rMr"
+        "horario": "21:30",
+        "liga": "EUA - Copa MLS",
+        "time_casa": "St. Louis City",
+        "time_fora": "Houston Dynamo",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.39",
+        "link_betano": "https://www.betano.bet.br/match-odds/St-Louis-City-SC-Houston-Dynamo-FC/86705234/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/6wFHqOJF"
     },
     {
         "horario": "22:00",
@@ -665,7 +835,7 @@
         "time_casa": "Austin FC",
         "time_fora": "Philadelphia Union",
         "mercado": "Dupla Chance: 1X (80%)",
-        "odd": "1.7",
+        "odd": "1.8",
         "link_betano": "https://www.betano.bet.br/match-odds/Austin-FC-Philadelphia-Union/86705235/",
         "link_h2h": "https://www.flashscore.com.br/jogo/pYTMNtcd"
     },
@@ -675,7 +845,7 @@
         "time_casa": "Austin FC",
         "time_fora": "Philadelphia Union",
         "mercado": "Resultado Final: Vitória Casa",
-        "odd": "3.4",
+        "odd": "3.7",
         "link_betano": "https://www.betano.bet.br/match-odds/Austin-FC-Philadelphia-Union/86705235/",
         "link_h2h": "https://www.flashscore.com.br/jogo/pYTMNtcd"
     },
