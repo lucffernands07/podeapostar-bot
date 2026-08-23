@@ -12,11 +12,12 @@ def extrair_markup_filtros(escolhas=None):
     return {
         "inline_keyboard": [
             
-            # --- SEÇÃO 1: BINGOS (Bingo 3 e 5) ---
+            # --- SEÇÃO 1: BINGOS (Bingo 3, 5 e 10) ---
             [{"text": "1️⃣ Escolha um bingo:", "callback_data": "ignore"}],
             [
                 {"text": "Bingo 3", "callback_data": "cb_bingo_3"},
-                {"text": "Bingo 5", "callback_data": "cb_bingo_5"}
+                {"text": "Bingo 5", "callback_data": "cb_bingo_5"},
+                {"text": "Bingo 10", "callback_data": "cb_bingo_10"}
             ],
             # --- SEÇÃO 2: HORÁRIOS ---
             [{"text": "2️⃣ Escolha uma janela:", "callback_data": "ignore"}],
