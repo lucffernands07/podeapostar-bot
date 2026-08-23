@@ -1,5 +1,5 @@
 """
-REGRAS DE MERCADO - AMBAS MARCAM (COM FILTRO DE ODD <= 1.20)
+REGRAS DE MERCADO - AMBAS MARCAM (NOVA REGRA)
 """
 
 def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=None, odds_jogo=None):
@@ -9,65 +9,55 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
             return mercados_aprovados
 
         mercados_previos = outros_mercados_aprovados or mercados_gols_aprovados
-        odds = odds_jogo or {}
+        
+        tem_over = False
+        tem_under = False
 
-        tem_mercado_valido = False
-        over_valido_120 = False
-        under_35_valido_120 = False
-        tem_under_45_ativo = False
-
+        # Valida se tem mercado de Over ou Under ativo nos prévios
         if isinstance(mercados_previos, list) and len(mercados_previos) > 0:
-            tem_mercado_valido = True
             for item in mercados_previos:
                 if not isinstance(item, dict):
                     continue
                 tipo_upper = item.get("tipo", "").upper()
-                texto_upper = item.get("mercado", "").upper()
                 
-                # Valida Over (GOLS_15 ou GOLS_25) e checa se a odd é <= 1.20
-                if "GOLS_15" in tipo_upper or "GOLS_25" in tipo_upper or "OVER" in tipo_upper:
-                    odd_str = odds.get(tipo_upper, "99")
-                    try:
-                        if float(str(odd_str).replace(',', '.')) <= 1.20:
-                            over_valido_120 = True
-                    except:
-                        pass
-                
-                # Valida Under -3.5 e checa se a odd é <= 1.20
-                if "GOLS_M35" in tipo_upper or "M35" in tipo_upper or "3.5" in texto_upper or "-3.5" in texto_upper:
-                    odd_str = odds.get("GOLS_M35", "99")
-                    try:
-                        if float(str(odd_str).replace(',', '.')) <= 1.20:
-                            under_35_valido_120 = True
-                    except:
-                        pass
+                if "OVER" in tipo_upper or "GOLS_15" in tipo_upper or "GOLS_25" in tipo_upper:
+                    tem_over = True
+                if "UNDER" in tipo_upper or "M35" in tipo_upper or "M25" in tipo_upper or "GOLS_M" in tipo_upper:
+                    tem_under = True
 
-                if "GOLS_M45" in tipo_upper or "M45" in tipo_upper or "4.5" in texto_upper or "-4.5" in texto_upper:
-                    tem_under_45_ativo = True
+        # Pega os dados do último jogo salvos pelo scraper
+        gols_mandante_ult_casa = int(s.get("gols_mandante_ultimo_casa", 0) or 0)
+        gols_adversario_ult_casa = int(s.get("gols_adversario_ultimo_casa", 0) or 0)
+        
+        gols_visitante_ult_fora = int(s.get("gols_visitante_ultimo_fora", 0) or 0)
+        gols_adversario_ult_fora = int(s.get("gols_adversario_ultimo_fora", 0) or 0)
 
-        if not tem_mercado_valido:
-            print("   ⚠️ BTTS BARRADO: Nenhum outro mercado foi aprovado para este jogo.")
-            return []
+        # Soma total dos gols do último jogo de cada um
+        total_gols_ultimos_jogos = (gols_mandante_ult_casa + gols_adversario_ult_casa) + (gols_visitante_ult_fora + gols_adversario_ult_fora)
 
-        # 🟢 REGRA 1: BTTS SIM (Entra se houver Over com odd <= 1.20)
-        if over_valido_120:
+        # Visitante não tomou gol no último jogo fora (gols do adversário contra ele = 0)
+        visitante_nao_tomou_gol = (gols_adversario_ult_fora == 0)
+
+        # 🟢 REGRA BTTS SIM:
+        # 1. Ter over
+        # 2. Total de gols somados do último jogo de cada >= 7
+        if tem_over and total_gols_ultimos_jogos >= 7:
             mercados_aprovados.append({"mercado": "Ambas Marcam: Sim", "tipo": "BTTS_SIM"})
         else:
-            print("   ⚠️ BTTS SIM, BARRADO: Nenhum Over ativo possui odd <= 1.20.")
+            print(f"   ⚠️ BTTS SIM BARRADO: Over={tem_over}, Soma Gols Últimos Jogos={total_gols_ultimos_jogos} (Exige >= 7)")
 
-        # 🔴 REGRA 2: BTTS NÃO (Entra se o Under -3.5 tiver odd <= 1.20 e não tiver -4.5)
-        if over_valido_120:
-            print("   ⚠️ BTTS NÃO, BARRADO: Jogo tem Over válido (Exclusão Mútua).")
-        elif tem_under_45_ativo:
-            print("   ⚠️ BTTS NÃO, BARRADO: Jogo possui linha de -4.5 Gols ativa.")
-        elif under_35_valido_120:
+        # 🔴 REGRA BTTS NÃO:
+        # 1. Ter under
+        # 2. Total de gols somados do último jogo de cada <= 3
+        # 3. Visitante não tomou gol no último jogo (exclusivo para o NÃO)
+        if tem_under and total_gols_ultimos_jogos <= 3 and visitante_nao_tomou_gol:
             mercados_aprovados.append({"mercado": "Ambas Marcam: Não", "tipo": "BTTS_NAO"})
         else:
-            print("   ⚠️ BTTS NÃO, BARRADO: O mercado Under -3.5 não possui odd <= 1.20.")
+            print(f"   ⚠️ BTTS NÃO BARRADO: Under={tem_under}, Soma Gols={total_gols_ultimos_jogos} (Exige <= 3), Visitante Zero Gols Sofridos={visitante_nao_tomou_gol}")
 
         return mercados_aprovados
 
     except Exception as e:
-        print(f"      ⚠️ Erro ao processar mercado Ambas Marcam: {e}")
+        print(f"      ⚠️ Erro ao processar nova regra Ambas Marcam: {e}")
         return mercados_aprovados
-            
+        
