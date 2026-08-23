@@ -1,147 +1,159 @@
 import time
 import re
-import links 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from ligas import liga_eh_permitida
 
-def extrair_numero(texto):
-    """Extrai números decimais ou inteiros de uma string."""
+def formatar_rota_h2h(url_base, sub_rota=""):
+    path = url_base.split('?')[0].split('#')[0].rstrip('/')
+    for sufixo in ['/overall', '/casa', '/fora']:
+        if path.endswith(sufixo):
+            path = path[:-len(sufixo)]
+
+    if not path.endswith('/h2h'):
+        path = f"{path}/h2h"
+
+    if sub_rota:
+        path = f"{path}/{sub_rota}"
+
+    return f"{path}/"
+
+def pegar_estatisticas_coletivas(driver, stats):
+    nome_comp = stats.get("liga", "")
+    if not liga_eh_permitida(nome_comp):
+        print(f"      ⏩ [RAIZ] Fase 2 ignorada: '{nome_comp}' não é liga de elite.")
+        return stats
+
+    EXECUTAR_SCRAPER = True
+
+    # Chutes
+    stats["chutes_mandante_h2h"] = []   
+    stats["chutes_visitante_h2h"] = []  
+
+    # Escanteios
+    stats["cantos_mandante_h2h"] = []
+    stats["cantos_visitante_h2h"] = []
+
+    # Cartões
+    stats["cartoes_mandante_h2h"] = []
+    stats["cartoes_visitante_h2h"] = []
+    stats["dados_incompletos_cartoes"] = False
+
+    if not EXECUTAR_SCRAPER:
+        return stats
+
+    url_h2h_base = stats.get("url_h2h_base")
+    if not url_h2h_base:
+        print("      ⚠️ [LOG] url_h2h_base vazia nos stats.")
+        return stats
+
+    wait = WebDriverWait(driver, 10)
+
     try:
-        match = re.search(r'[\d\.]+', texto)
-        if match:
-            return float(match.group())
-    except:
-        pass
-    return 0.0
+        if driver.current_url.rstrip("/") != url_h2h_base.rstrip("/"):
+            driver.get(url_h2h_base)
+            time.sleep(1.2)
 
-def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2, nome_comp=""):
-    stats = {
-        "link_betano": None,
-        
-        # Médias da aba de Estatísticas
-        "media_gols_mandante": 0.0,
-        "media_gols_visitante": 0.0,
-        "media_finalizacoes_mandante": 0.0,
-        "media_finalizacoes_visitante": 0.0,
-        "media_chutes_gol_mandante": 0.0,
-        "media_chutes_gol_visitante": 0.0,
-        "media_escanteios_mandante": 0.0,
-        "media_escanteios_visitante": 0.0,
-        "media_cartoes_amarelos_mandante": 0.0,
-        "media_cartoes_amarelos_visitante": 0.0,
-        
-        # Dados do H2H (Apenas 2025/2026, máx 5 jogos)
-        "h2h_jogos_filtrados": [], 
-        "h2h_vitorias_t1": 0,
-        "h2h_vitorias_t2": 0,
-        "h2h_empates": 0,
-        
-        "url_h2h_base": url_jogo_base,
-    }
+        url_atual_carregada = driver.current_url.split('?')[0]
+        url_base_limpa = url_atual_carregada.replace("/h2h", "").rstrip("/")
 
-    try:
-        url_base = url_jogo_base.split('?')[0].rstrip('/')
-        
-        # ==========================================
-        # 1. CAPTURAR LINK BETANO
-        # ==========================================
-        try:
-            driver.get(url_base)
-            # Tratamento rápido do pop-up se aparecer na primeira abertura
+        rotas_alvo = [
+            {"tipo": "MANDANTE", "url": formatar_rota_h2h(url_base_limpa, "casa"), "c_chutes": "chutes_mandante_h2h", "c_cantos": "cantos_mandante_h2h", "c_cartoes": "cartoes_mandante_h2h"},
+            {"tipo": "VISITANTE", "url": formatar_rota_h2h(url_base_limpa, "fora"), "c_chutes": "chutes_visitante_h2h", "c_cantos": "cantos_visitante_h2h", "c_cartoes": "cartoes_visitante_h2h"}
+        ]
+
+        for alvo in rotas_alvo:
+            print(f"      🔍 [LOG] Acessando URL {alvo['tipo']}: {alvo['url']}")
             try:
-                driver.execute_script("document.elementFromPoint(10, 10).click();")
-            except:
-                pass
+                driver.get(alvo["url"])
+                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".h2h__row, [class*='h2h__row']")))
+                time.sleep(0.8)
                 
-            print(f"      🔗 Capturando link Betano para {t1} x {t2}...")
-            url_capturada = links.extrair_url_betano(driver)
-            if url_capturada:
-                stats["link_betano"] = url_capturada
-            else:
-                t1_q, t2_q = t1.replace(" ", "%20"), t2.replace(" ", "%20")
-                stats["link_betano"] = f"https://www.betano.bet.br/busca/?q={t1_q}%20x%20{t2_q}"
-        except Exception as e_link:
-            print(f"      ⚠️ Erro ao capturar link Betano: {e_link}")
-            t1_q, t2_q = t1.replace(" ", "%20"), t2.replace(" ", "%20")
-            stats["link_betano"] = f"https://www.betano.bet.br/busca/?q={t1_q}%20x%20{t2_q}"
+                linhas_confrontos = driver.find_elements(By.CSS_SELECTOR, "a.h2h__row, [class*='h2h__row']")
+                links_jogos = []
+                for linha in linhas_confrontos[:5]:
+                    href = linha.get_attribute("href")
+                    if not href:
+                        try:
+                            a_tag = linha.find_element(By.TAG_NAME, "a")
+                            href = a_tag.get_attribute("href")
+                        except Exception:
+                            pass
+                    if href:
+                        links_jogos.append(href)
 
-        # ==========================================
-        # 2. RASPAR ABA DE ESTATÍSTICAS (Média dos times)
-        # ==========================================
-        try:
-            url_estats = f"{url_base}/estatisticas"
-            driver.get(url_estats)
-            time.sleep(1.5)
-            
-            print(f"      📊 Buscando médias de estatísticas...")
-            nomes_estatisticas = [
-                ("Gols", "media_gols_mandante", "media_gols_visitante"),
-                ("Finalizações Totais", "media_finalizacoes_mandante", "media_finalizacoes_visitante"),
-                ("Chutes no gol", "media_chutes_gol_mandante", "media_chutes_gol_visitante"),
-                ("Escanteios", "media_escanteios_mandante", "media_escanteios_visitante"),
-                ("Cartões amarelos", "media_cartoes_amarelos_mandante", "media_cartoes_amarelos_visitante")
-            ]
-
-            for nome_pt, chave_mandante, chave_visitante in nomes_estatisticas:
-                try:
-                    elemento_texto = driver.find_element(By.XPATH, f"//div[text()='{nome_pt}']")
-                    linha_pai = elemento_texto.find_element(By.XPATH, "./..") 
-                    textos = linha_pai.text.split('\n')
+                for url_jogo in links_jogos:
+                    url_jogo_base = url_jogo.split("?")[0].split("#")[0].strip("/")
+                    url_stats_geral = f"{url_jogo_base}/resumo/estatisticas/total/"
                     
-                    if len(textos) >= 3:
-                        stats[chave_mandante] = extrair_numero(textos[0])
-                        stats[chave_visitante] = extrair_numero(textos[-1])
-                except Exception:
-                    continue
-        except Exception as e_est:
-            print(f"      ⚠️ Erro ao raspar estatísticas: {e_est}")
+                    driver.get(url_stats_geral)
+                    time.sleep(1.0)
 
-        # ==========================================
-        # 3. RASPAR ABA H2H (Filtro 2025/2026, máx 5)
-        # ==========================================
-        try:
-            url_h2h = f"{url_base}/h2h"
-            driver.get(url_h2h)
-            time.sleep(1.5)
-            
-            print(f"      ⚔️ Analisando confrontos diretos (H2H 2025/2026)...")
-            
-            # Localiza os blocos de jogos na página de H2H do Superscore
-            # (Ajustaremos o seletor exato após o primeiro teste de campo)
-            jogos_h2h = driver.find_elements(By.CSS_SELECTOR, ".h2h__row, [class*='row'], div[class*='match']")
-            
-            contador_validos = 0
-            vitorias_t1 = 0
-            vitorias_t2 = 0
-            empates = 0
-            
-            for jogo in jogos_h2h:
-                if contador_validos >= 5:
-                    break
-                try:
-                    texto_jogo = jogo.text
+                    chutes_casa, chutes_fora = 0, 0
+                    cantos_casa, cantos_fora = 0, 0
+                    cartoes_casa, cartoes_fora = 0, 0
                     
-                    # Verifica se o jogo é de 2025 ou 2026 pelo texto da data
-                    if "25" in texto_jogo or "26" in texto_jogo:
-                        # Extrai os placares e nomes para computar
-                        nums = re.findall(r'\d+', texto_jogo)
-                        if len(nums) >= 2:
-                            # Lógica para registrar o confronto válido dos anos 2025/2026
-                            contador_validos += 1
-                            stats["h2h_jogos_filtrados"].append(texto_jogo)
-                except:
-                    continue
-                    
-            stats["h2h_vitorias_t1"] = vitorias_t1
-            stats["h2h_vitorias_t2"] = vitorias_t2
-            stats["h2h_empates"] = empates
-            print(f"      ✅ H2H processado: {contador_validos} jogos encontrados de 2025/2026.")
+                    achou_chutes = False
+                    achou_cantos = False
+                    achou_cartoes = False
 
-        except Exception as e_h2h:
-            print(f"      ⚠️ Erro ao raspar aba H2H: {e_h2h}")
+                    try:
+                        todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
+                        if len(todos_spans) > 0:
+                            for idx, span in enumerate(todos_spans):
+                                texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
+                                
+                                # Chutes
+                                if texto_elemento in ["TOTAL DE FINALIZAÇÕES", "TOTAL SHOTS"]:
+                                    if idx > 0 and (idx + 1) < len(todos_spans):
+                                        c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                                        f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                                        chutes_casa = int(re.search(r'\d+', c_str).group()) if re.search(r'\d+', c_str) else 0
+                                        chutes_fora = int(re.search(r'\d+', f_str).group()) if re.search(r'\d+', f_str) else 0
+                                        achou_chutes = True
 
-    except Exception as e_geral:
-        print(f"      ⚠️ Erro geral no Superscore: {e_geral}")
+                                # Escanteios
+                                if texto_elemento in ["ESCANTEIOS", "CORNERS"]:
+                                    if idx > 0 and (idx + 1) < len(todos_spans):
+                                        c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                                        f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                                        cantos_casa = int(re.search(r'\d+', c_str).group()) if re.search(r'\d+', c_str) else 0
+                                        cantos_fora = int(re.search(r'\d+', f_str).group()) if re.search(r'\d+', f_str) else 0
+                                        achou_cantos = True
+
+                                # Cartões Amarelos
+                                if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
+                                    if idx > 0 and (idx + 1) < len(todos_spans):
+                                        c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                                        f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                                        cartoes_casa = int(re.search(r'\d+', c_str).group()) if re.search(r'\d+', c_str) else 0
+                                        cartoes_fora = int(re.search(r'\d+', f_str).group()) if re.search(r'\d+', f_str) else 0
+                                        achou_cartoes = True
+
+                            # Gravações condicionais por alvo
+                            if achou_chutes:
+                                stats[alvo["c_chutes"]].append(chutes_casa if alvo["tipo"] == "MANDANTE" else chutes_fora)
+                            if achou_cantos:
+                                stats[alvo["c_cantos"]].append(cantos_casa if alvo["tipo"] == "MANDANTE" else cantos_fora)
+                            if achou_cartoes:
+                                stats[alvo["c_cartoes"]].append(cartoes_casa if alvo["tipo"] == "MANDANTE" else cartoes_fora)
+
+                    except Exception as e_sp:
+                        print(f"      ⚠️ [LOG] Erro ao ler spans estatísticos: {e_sp}")
+
+            except Exception as e_coleta:
+                print(f"      ⚠️ [LOG] Erro ao listar linhas H2H: {e_coleta}")
+                continue
+
+    except Exception as e:
+        print(f"      ⚠️ [LOG] Erro Crítico na Raspagem Coletiva: {e}")
+
+    # Médias Finais
+    c_h = stats.get("chutes_mandante_h2h", [])
+    c_v = stats.get("chutes_visitante_h2h", [])
+    stats["mandante_media_chutes_casa"] = round(sum(c_h) / len(c_h), 2) if len(c_h) > 0 else 0.0
+    stats["visitante_media_chutes_fora"] = round(sum(c_v) / len(c_v), 2) if len(c_v) > 0 else 0.0
 
     return stats
+    
