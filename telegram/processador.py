@@ -395,23 +395,22 @@ def executar():
 
     if texto_final:
         try:
-            payload = {
-                "chat_id": chat_id, "text": texto_final, "parse_mode": "Markdown", "disable_web_page_preview": False
-            }
-            if menu_botoes: payload["reply_markup"] = menu_botoes
-            requests.post(url_msg, json=payload)
+            # Se for uma lista de mensagens, envia cada parte sequencialmente
+            lista_mensagens = texto_final if isinstance(texto_final, list) else [texto_final]
+            
+            for parte_msg in lista_mensagens:
+                payload = {
+                    "chat_id": chat_id, 
+                    "text": parte_msg, 
+                    "parse_mode": "Markdown", 
+                    "disable_web_page_preview": False
+                }
+                if menu_botoes: 
+                    payload["reply_markup"] = menu_botoes
+                requests.post(url_msg, json=payload)
+                
             print("🚀 [LOG PASSO 5] Mensagem enviada com sucesso ao Telegram!")
         except Exception as e: print(f"⚠️ Erro ao enviar Telegram: {e}")
-    else:
-        msg_erro = f"{config['aviso']}\n\n⚠️😢 Não foi encontrado nenhum bilhete com esse filtro."
-        try:
-            payload = {
-                "chat_id": chat_id, "text": msg_erro, "parse_mode": "Markdown", "disable_web_page_preview": True
-            }
-            if menu_botoes: payload["reply_markup"] = menu_botoes
-            requests.post(url_msg, json=payload)
-            print("⚠️ [LOG PASSO 5] Mensagem de erro enviada.")
-        except Exception as e: print(f"⚠️ Erro ao enviar erro Telegram: {e}")
 
 if __name__ == "__main__":
     executar()
