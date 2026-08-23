@@ -9,13 +9,6 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/MLyBuaTQ/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Red Bull Bragantino",
-            "time_fora": "Grêmio",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/h4Stzwil/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Vitória",
             "time_fora": "Bahia",
             "mercado": "MÚLTIPLOS",
@@ -51,25 +44,11 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/6Phht9zI/#/resumo-de-jogo"
         },
         {
-            "time_casa": "São Bernardo",
-            "time_fora": "Náutico",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/Ekd0vm5U/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Operário",
             "time_fora": "Vila Nova",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/xSZHdUKb/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Criciúma",
-            "time_fora": "Fortaleza",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/8nI4zv4d/#/resumo-de-jogo"
         },
         {
             "time_casa": "Brusque",
@@ -142,13 +121,6 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/ILLvry8r/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Newcastle",
-            "time_fora": "Liverpool",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/4xKntFxe/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Atl. Madrid",
             "time_fora": "Villarreal",
             "mercado": "MÚLTIPLOS",
@@ -156,25 +128,11 @@
             "link_h2h": "https://www.flashscore.com.br/jogo/ImSSgC06/#/resumo-de-jogo"
         },
         {
-            "time_casa": "Getafe",
-            "time_fora": "Racing Santander",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/dYc1ePyB/#/resumo-de-jogo"
-        },
-        {
             "time_casa": "Elche",
             "time_fora": "Barcelona",
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/Gfdoa7xn/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Frosinone",
-            "time_fora": "Juventus",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/nD9kGRJO/#/resumo-de-jogo"
         },
         {
             "time_casa": "Venezia",
@@ -203,27 +161,6 @@
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/lYTqhFje/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Le Havre",
-            "time_fora": "Monaco",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/zkSijgL7/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "Rennes",
-            "time_fora": "PSG",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/p2AX2W4D/#/resumo-de-jogo"
-        },
-        {
-            "time_casa": "San Diego FC",
-            "time_fora": "Colorado Rapids",
-            "mercado": "MÚLTIPLOS",
-            "mercado_ranking": "LISTÃO GERAL",
-            "link_h2h": "https://www.flashscore.com.br/jogo/byfdxtCk/#/resumo-de-jogo"
         },
         {
             "time_casa": "Atlanta Utd",
