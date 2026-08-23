@@ -1,5 +1,5 @@
 """
-REGRAS DE MERCADO - AMBAS MARCAM (NOVA REGRA)
+REGRAS DE MERCADO - AMBAS MARCAM (LENDO PLACARES JÁ EXISTENTES)
 """
 
 def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=None, odds_jogo=None):
@@ -13,7 +13,6 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
         tem_over = False
         tem_under = False
 
-        # Valida se tem mercado de Over ou Under ativo nos prévios
         if isinstance(mercados_previos, list) and len(mercados_previos) > 0:
             for item in mercados_previos:
                 if not isinstance(item, dict):
@@ -25,18 +24,30 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
                 if "UNDER" in tipo_upper or "M35" in tipo_upper or "M25" in tipo_upper or "GOLS_M" in tipo_upper:
                     tem_under = True
 
-        # Pega os dados do último jogo salvos pelo scraper
-        gols_mandante_ult_casa = int(s.get("gols_mandante_ultimo_casa", 0) or 0)
-        gols_adversario_ult_casa = int(s.get("gols_adversario_ultimo_casa", 0) or 0)
-        
-        gols_visitante_ult_fora = int(s.get("gols_visitante_ultimo_fora", 0) or 0)
-        gols_adversario_ult_fora = int(s.get("gols_adversario_ultimo_fora", 0) or 0)
+        # Lê os placares do último jogo que o raspagem_h2h.py já salva
+        placar_mandante_casa = s.get("t1_placar_1", "")  # Ex: "2-1[span_3](start_span)"[span_3](end_span)
+        placar_visitante_fora = s.get("t2_placar_1", "") # Ex: "0-2[span_4](start_span)"[span_4](end_span)
+
+        gols_m_casa, gols_adv_casa = 0, 0
+        gols_adv_fora, gols_v_fora = 0, 0
+
+        # Quebra o placar do mandante (casa)
+        if placar_mandante_casa and "-" in placar_mandante_casa:
+            partes = placar_mandante_casa.split("-")
+            gols_m_casa = int(partes[0].strip())
+            gols_adv_casa = int(partes[1].strip())
+
+        # Quebra o placar do visitante (fora)
+        if placar_visitante_fora and "-" in placar_visitante_fora:
+            partes = placar_visitante_fora.split("-")
+            gols_adv_fora = int(partes[0].strip()) # Gols que o mandante/adversário fez nele
+            gols_v_fora = int(partes[1].strip())   # Gols que o visitante fez
 
         # Soma total dos gols do último jogo de cada um
-        total_gols_ultimos_jogos = (gols_mandante_ult_casa + gols_adversario_ult_casa) + (gols_visitante_ult_fora + gols_adversario_ult_fora)
+        total_gols_ultimos_jogos = (gols_m_casa + gols_adv_casa) + (gols_adv_fora + gols_v_fora)
 
-        # Visitante não tomou gol no último jogo fora (gols do adversário contra ele = 0)
-        visitante_nao_tomou_gol = (gols_adversario_ult_fora == 0)
+        # Regra exclusiva para o NÃO: Visitante não tomou gol no último jogo (gols do adversário contra ele = 0)
+        visitante_nao_tomou_gol = (gols_adv_fora == 0)
 
         # 🟢 REGRA BTTS SIM:
         # 1. Ter over
@@ -49,7 +60,7 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
         # 🔴 REGRA BTTS NÃO:
         # 1. Ter under
         # 2. Total de gols somados do último jogo de cada <= 3
-        # 3. Visitante não tomou gol no último jogo (exclusivo para o NÃO)
+        # 3. Visitante não tomou gol no último jogo
         if tem_under and total_gols_ultimos_jogos <= 3 and visitante_nao_tomou_gol:
             mercados_aprovados.append({"mercado": "Ambas Marcam: Não", "tipo": "BTTS_NAO"})
         else:
@@ -60,4 +71,4 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
     except Exception as e:
         print(f"      ⚠️ Erro ao processar nova regra Ambas Marcam: {e}")
         return mercados_aprovados
-        
+                    
