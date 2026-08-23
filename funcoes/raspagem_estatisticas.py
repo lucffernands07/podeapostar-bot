@@ -149,11 +149,22 @@ def pegar_estatisticas_coletivas(driver, stats):
     except Exception as e:
         print(f"      ⚠️ [LOG] Erro Crítico na Raspagem Coletiva: {e}")
 
-    # Médias Finais
-    c_h = stats.get("chutes_mandante_h2h", [])
-    c_v = stats.get("chutes_visitante_h2h", [])
-    stats["mandante_media_chutes_casa"] = round(sum(c_h) / len(c_h), 2) if len(c_h) > 0 else 0.0
-    stats["visitante_media_chutes_fora"] = round(sum(c_v) / len(c_v), 2) if len(c_v) > 0 else 0.0
+    # Médias Finais com Critério de Amostra Mínima (Mínimo de 2 jogos com dados válidos)
+    MIN_JOGOS_VALIDOS = 2
+
+    c_h = [x for x in stats.get("chutes_mandante_h2h", []) if isinstance(x, (int, float)) and x > 0]
+    c_v = [x for x in stats.get("chutes_visitante_h2h", []) if isinstance(x, (int, float)) and x > 0]
+
+    if len(c_h) >= MIN_JOGOS_VALIDOS:
+        stats["mandante_media_chutes_casa"] = round(sum(c_h) / len(c_h), 2)[span_1](start_span)[span_1](end_span)
+    else:
+        stats["mandante_media_chutes_casa"] = 0.0
+
+    if len(c_v) >= MIN_JOGOS_VALIDOS:
+        stats["visitante_media_chutes_fora"] = round(sum(c_v) / len(c_v), 2)[span_2](start_span)[span_2](end_span)
+    else:
+        stats["visitante_media_chutes_fora"] = 0.0
 
     return stats
+
     
