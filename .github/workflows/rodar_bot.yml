@@ -87,4 +87,40 @@ jobs:
           git pull --rebase origin main
           
           git push origin main
+
+      - name: 4. Enviar JSON de Jogos para o Repositório do App Android (LifeBet)
+        env:
+          GH_TOKEN: ${{ secrets.MEU_TOKEN_GITHUB }} # Token da sua conta com permissão de repo
+        run: |
+          # Pega a data de hoje no formato YYYY-MM-DD
+          DATA_HOJE=$(date +'%Y-%m-%d')
+          ARQUIVO="telegram/jogos_$DATA_HOJE.json"
+
+          if [ -f "$ARQUIVO" ]; then
+            echo "Arquivo $ARQUIVO encontrado. Enviando para o LifeBet..."
+            
+            # Clona o repositório do app Android usando o Token
+            git clone https://x-access-token:${GH_TOKEN}@github.com/lucffernands07/lifebet.git repo_android
+            
+            # Cria a pasta de destino dentro do projeto Android (na pasta assets)
+            mkdir -p repo_android/app/src/main/assets/jogos/
+            
+            # Copia o JSON para dentro do projeto Android
+            cp "$ARQUIVO" repo_android/app/src/main/assets/jogos/jogos_$DATA_HOJE.json
+            
+            cd repo_android
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            
+            git add "app/src/main/assets/jogos/jogos_$DATA_HOJE.json"
+            git commit -m "Auto: Atualizando JSON de jogos do dia $DATA_HOJE [skip ci]" || echo "Sem alterações para commitar"
+            git push origin main
+            
+            echo "JSON enviado com sucesso para o LifeBet!"
+          else
+            echo "Aviso: O arquivo $ARQUIVO não foi encontrado para envio hoje."
+          fi
+          
+
+
           
