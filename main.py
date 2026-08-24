@@ -413,11 +413,11 @@ def main():
 
             canal_id = os.getenv('CHANNEL_ID')
             
-            # 🟢 1. Passamos qtd_alvo=None para que o sistema recolha TODOS os jogos (em vez de limitar a 5)[span_5](start_span)[span_5](end_span)
-            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros, qtd_alvo=None)[span_6](start_span)[span_6](end_span)
+            # 1. Passamos qtd_alvo=None para que o sistema recolha TODOS os jogos
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros, qtd_alvo=None)
             
-            # 🟢 2. A formatação devolve agora uma LISTA de textos particionados (seguros contra limites)[span_7](start_span)[span_7](end_span)
-            textos_bingos_lista = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)[span_8](start_span)[span_8](end_span)
+            # 2. A formatação devolve agora uma LISTA de textos particionados
+            textos_bingos_lista = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
     
             if textos_bingos_lista and canal_id:
                 total_partes = len(textos_bingos_lista)
@@ -445,10 +445,11 @@ def main():
                             requests.post(url_msg, json=payload)
                             print(f"📢 Parte {idx+1}/{total_partes} (Texto intermediário) enviada para o Canal.")
                         
-                        # Pausa de 1.5s entre o envio de cada pedaço para não tomar punição do Telegram[span_9](start_span)[span_9](end_span)
+                        # Pausa de 1.5s entre o envio de cada pedaço para não tomar punição do Telegram
                         time.sleep(1.5) 
                     except Exception as e:
                         print(f"⚠️ Erro ao enviar a parte {idx+1} para o canal: {e}")
+
 
             os.makedirs("ranking", exist_ok=True)
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
