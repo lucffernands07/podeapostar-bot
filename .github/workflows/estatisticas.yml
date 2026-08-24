@@ -52,4 +52,37 @@ jobs:
           # Só commita se houver mudanças reais para não quebrar a esteira
           git diff-index --quiet HEAD || git commit -m "Estatísticas e Links atualizados: $(date +'%d/%m/%Y %H:%M')"
           git push origin main
+
+      - name: Enviar Resultados Auditados para o LifeBet App
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATA_ONTEM=$(date -d "yesterday" +'%Y-%m-%d' 2>/dev/null || date -v-1d +'%Y-%m-%d')
+          ARQUIVO_PADROES="estatisticas/padroes_db.json"
+
+          if [ -f "$ARQUIVO_PADROES" ]; then
+            echo "Processando resultados para o app Android..."
+            
+            # Clona o repositório do app Android
+            git clone https://x-access-token:${GH_TOKEN}@github.com/lucffernands07/lifebet.git repo_android
+            
+            # Cria a pasta de destino dos resultados no projeto Android
+            mkdir -p repo_android/app/src/main/assets/resultados/
+            
+            # Copia o banco de padrões ou gera um JSON simplificado de resultados do dia
+            cp "$ARQUIVO_PADROES" repo_android/app/src/main/assets/resultados/padroes_db.json
+            
+            cd repo_android
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            
+            git add "app/src/main/assets/resultados/padroes_db.json"
+            git commit -m "Auto: Atualizando resultados e auditoria do dia [skip ci]" || echo "Sem alterações para commitar"
+            git push origin main
+            
+            echo "Resultados enviados com sucesso para o LifeBet!"
+          else
+            echo "Aviso: Arquivo de padrões não encontrado."
+          fi
+          
           
