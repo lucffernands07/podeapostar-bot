@@ -1,4 +1,4 @@
-name: 1. Gerador de Estatísticas e Padrões
+name: 1. Gerador de Resultados para app LifeBet
 
 on:
   schedule:
