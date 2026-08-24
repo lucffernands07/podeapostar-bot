@@ -2,8 +2,8 @@ name: 1. Gerador de Resultados para app LifeBet
 
 on:
   schedule:
-    # 05:11 UTC (02:11 AM Horário de Brasília) - Processa os Resultados de Ontem
-    - cron: '11 5 * * *'
+    # 03:07 UTC (00:07 AM Horário de Brasília) - Processa os Resultados de Ontem
+    - cron: '07 3 * * *'
   workflow_dispatch: # Permite que você clique em "Run workflow" para testar manualmente agora
 
 jobs:
