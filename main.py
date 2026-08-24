@@ -413,27 +413,42 @@ def main():
 
             canal_id = os.getenv('CHANNEL_ID')
             
-            # 🟢 1. Passamos qtd_alvo=None para que o sistema recolha TODOS os jogos (em vez de limitar a 5)
-            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros, qtd_alvo=None)
+            # 🟢 1. Passamos qtd_alvo=None para que o sistema recolha TODOS os jogos (em vez de limitar a 5)[span_5](start_span)[span_5](end_span)
+            novos_bilhetes = bingo357.montar_bilhetes_estrategicos(lista_para_filtros, qtd_alvo=None)[span_6](start_span)[span_6](end_span)
             
-            # 🟢 2. A formatação devolve agora uma LISTA de textos particionados (seguros contra limites)
-            textos_bingos_lista = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)
+            # 🟢 2. A formatação devolve agora uma LISTA de textos particionados (seguros contra limites)[span_7](start_span)[span_7](end_span)
+            textos_bingos_lista = bingo357.formatar_para_telegram(novos_bilhetes, cache_dados)[span_8](start_span)[span_8](end_span)
     
             if textos_bingos_lista and canal_id:
+                total_partes = len(textos_bingos_lista)
+                token = os.getenv('TELEGRAM_TOKEN')
+                url_msg = f"https://api.telegram.org/bot{token}/sendMessage"
+
                 for idx, texto_part in enumerate(textos_bingos_lista):
                     try:
                         msg_bingo_formatada = texto_part
                         if idx == 0:
                             msg_bingo_formatada = "💰 *LISTA COMPLETA AGRUPADA*\n\n" + msg_bingo_formatada
                             
-                        menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
-                        print(f"📢 Parte {idx+1}/{len(textos_bingos_lista)} enviada para o Canal.")
+                        # Se for a ÚLTIMA parte, enviamos com o menu completo de botões
+                        if idx == total_partes - 1:
+                            menus.enviar_menu_bingo(canal_id, msg_bingo_formatada)
+                            print(f"📢 Parte {idx+1}/{total_partes} (Final com Menu) enviada para o Canal.")
+                        else:
+                            # Nas partes anteriores (continuação), enviamos APENAS o texto sem o teclado
+                            payload = {
+                                "chat_id": canal_id,
+                                "text": msg_bingo_formatada,
+                                "parse_mode": "Markdown",
+                                "disable_web_page_preview": True
+                            }
+                            requests.post(url_msg, json=payload)
+                            print(f"📢 Parte {idx+1}/{total_partes} (Texto intermediário) enviada para o Canal.")
                         
-                        # Pausa de 1.5s entre o envio de cada pedaço para não tomar punição do Telegram
+                        # Pausa de 1.5s entre o envio de cada pedaço para não tomar punição do Telegram[span_9](start_span)[span_9](end_span)
                         time.sleep(1.5) 
                     except Exception as e:
                         print(f"⚠️ Erro ao enviar a parte {idx+1} para o canal: {e}")
-
 
             os.makedirs("ranking", exist_ok=True)
             with open("ranking/pendentes.json", "w", encoding="utf-8") as f:
