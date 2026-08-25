@@ -4,9 +4,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 def capturar_todas_as_odds(driver, id_jogo):
-    # Dicionário completo atualizado com a chave correta 'BTTS_SIM'
+    # Dicionário atualizado com as chaves para GOLS_05 e GOLS_M55
     res = {
-        "GOLS_15": "N/A", "GOLS_25": "N/A", "GOLS_M35": "N/A", "GOLS_M45": "N/A", 
+        "GOLS_05": "N/A", "GOLS_15": "N/A", "GOLS_25": "N/A", 
+        "GOLS_M35": "N/A", "GOLS_M45": "N/A", "GOLS_M55": "N/A", 
         "BTTS_SIM": "N/A", "BTTS_NAO": "N/A",
         "1X": "N/A", "X2": "N/A",
         "VITORIA_CASA": "N/A", "VITORIA_FORA": "N/A"
@@ -49,11 +50,14 @@ def capturar_todas_as_odds(driver, id_jogo):
             WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-table__row")))
             time.sleep(1.5)
             
+            # Mapeamento expandido para incluir 0.5 (Acima = coluna 0) e 5.5 (Abaixo = coluna 1)
             mercados_alvo = {
-                "1.5": {"chave": "GOLS_15", "col": 0},  # Acima
-                "2.5": {"chave": "GOLS_25", "col": 0},  # Acima
-                "3.5": {"chave": "GOLS_M35", "col": 1}, # Abaixo
-                "4.5": {"chave": "GOLS_M45", "col": 1}  # Abaixo
+                "0.5": {"chave": "GOLS_05",  "col": 0},  # Acima
+                "1.5": {"chave": "GOLS_15",  "col": 0},  # Acima
+                "2.5": {"chave": "GOLS_25",  "col": 0},  # Acima
+                "3.5": {"chave": "GOLS_M35", "col": 1},  # Abaixo
+                "4.5": {"chave": "GOLS_M45", "col": 1},  # Abaixo
+                "5.5": {"chave": "GOLS_M55", "col": 1}   # Abaixo
             }
 
             for valor, config in mercados_alvo.items():
@@ -73,7 +77,6 @@ def capturar_todas_as_odds(driver, id_jogo):
             driver.get(link_odds_base.replace("/odds/", "/odds/ambos-marcam/tempo-regulamentar/"))
             time.sleep(1.5)
             
-            # Varre as linhas da tabela para ignorar traços (-) e pegar a primeira odd válida disponível
             linhas_b = driver.find_elements(By.CSS_SELECTOR, ".ui-table__row")
             for linha_b in linhas_b:
                 odds_b = linha_b.find_elements(By.CSS_SELECTOR, "a.oddsCell__odd")
@@ -105,4 +108,4 @@ def capturar_todas_as_odds(driver, id_jogo):
         driver.switch_to.window(driver.window_handles[0])
     
     return res
-                
+            
