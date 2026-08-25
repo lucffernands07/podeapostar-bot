@@ -44,8 +44,8 @@ def obter_url_real_h2h(driver, url_jogo_input):
 def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2, nome_comp=""):
     stats = {
         "link_betano": None,
-        "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0, "casa_btts": 0, 
-        "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0, "fora_btts": 0, 
+        "casa_05": 0, "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0, "casa_55_under": 0, "casa_btts": 0, 
+        "fora_05": 0, "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0, "fora_55_under": 0, "fora_btts": 0, 
         
         # Chaves de Padrão (Posições removidas)
         "mandante_vitorias_casa": 0,
@@ -118,10 +118,12 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2, nome_comp=""):
 
                             if tipo == "casa":
                                 if i == 0: stats["t1_placar_1"] = placar_str
+                                if total > 0.5: stats["casa_05"] += 1
                                 if total > 1.5: stats["casa_15"] += 1
                                 if total > 2.5: stats["casa_25"] += 1
                                 if total <= 3: stats["casa_35_under"] += 1
-                                if total <= 4: stats["casa_45_under"] += 1 
+                                if total <= 4: stats["casa_45_under"] += 1
+                                if total <= 5: stats["casa_55_under"] += 1
                                 if g1 > 0 and g2 > 0: stats["casa_btts"] += 1
                                 
                                 stats["mandante_gols_feitos_casa"] += float(g1)
@@ -142,10 +144,12 @@ def pegar_estatisticas_h2h(driver, url_jogo_base, t1, t2, nome_comp=""):
 
                             elif tipo == "fora":
                                 if i == 0: stats["t2_placar_1"] = placar_str
+                                if total > 0.5: stats["fora_05"] += 1
                                 if total > 1.5: stats["fora_15"] += 1
                                 if total > 2.5: stats["fora_25"] += 1
                                 if total <= 3: stats["fora_35_under"] += 1  
-                                if total <= 4: stats["fora_45_under"] += 1  
+                                if total <= 4: stats["fora_45_under"] += 1
+                                if total <= 5: stats["fora_55_under"] += 1
                                 if g1 > 0 and g2 > 0: stats["fora_btts"] += 1
                                 
                                 stats["visitante_gols_feitos_fora"] += float(g2)
