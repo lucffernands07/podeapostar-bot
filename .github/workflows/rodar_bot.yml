@@ -90,7 +90,7 @@ jobs:
 
       - name: 4. Enviar JSON de Jogos para o Repositório do App Android (LifeBet)
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Usando o token padrão com permissões de write
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN_GH }} # Usando o PAT configurado nos Secrets para repositório privado
         run: |
           # Pega a data de hoje no formato YYYY-MM-DD
           DATA_HOJE=$(date +'%Y-%m-%d')
@@ -99,7 +99,7 @@ jobs:
           if [ -f "$ARQUIVO" ]; then
             echo "Arquivo $ARQUIVO encontrado. Enviando para o LifeBet..."
             
-            # Clona o repositório do app Android usando o Token nativo
+            # Clona o repositório do app Android usando o Token personalizado
             git clone https://x-access-token:${GH_TOKEN}@github.com/lucffernands07/lifebet.git repo_android
             
             # Cria a pasta de destino dentro do projeto Android (na pasta assets)
@@ -120,3 +120,4 @@ jobs:
           else
             echo "Aviso: O arquivo $ARQUIVO não foi encontrado para envio hoje."
           fi
+          
