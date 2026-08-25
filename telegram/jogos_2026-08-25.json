@@ -1,0 +1,162 @@
+[
+    {
+        "horario": "11:15",
+        "liga": "Dinamarca - Betano Pokalen",
+        "time_casa": "Bornholm",
+        "time_fora": "Hellerup",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.73",
+        "link_betano": "https://www.betano.bet.br/busca/?q=Bornholm%20x%20Hellerup",
+        "link_h2h": "https://www.flashscore.com.br/jogo/dxCuiDU6"
+    },
+    {
+        "horario": "13:00",
+        "liga": "Dinamarca - Betano Pokalen",
+        "time_casa": "Skovshoved",
+        "time_fora": "Tarnby FF",
+        "mercado": "Ambas Marcam: Sim",
+        "odd": "1.94",
+        "link_betano": "https://www.betano.bet.br/busca/?q=Skovshoved%20x%20Tarnby%20FF",
+        "link_h2h": "https://www.flashscore.com.br/jogo/213h8D5k"
+    },
+    {
+        "horario": "13:10",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Taawon",
+        "time_fora": "Al-Fayha",
+        "mercado": "-4.5 Gols (80%)",
+        "odd": "1.15",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Taawoun-FC-Al-Fayha-FC/89664936/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/rHzKqOYg"
+    },
+    {
+        "horario": "13:10",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Taawon",
+        "time_fora": "Al-Fayha",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.38",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Taawoun-FC-Al-Fayha-FC/89664936/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/rHzKqOYg"
+    },
+    {
+        "horario": "13:10",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Taawon",
+        "time_fora": "Al-Fayha",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.91",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Taawoun-FC-Al-Fayha-FC/89664936/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/rHzKqOYg"
+    },
+    {
+        "horario": "13:45",
+        "liga": "Europa - Liga dos Campeões",
+        "time_casa": "Sabah Baku (Aze)",
+        "time_fora": "H. Beer Sheva (Isr)",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/FC-Sabah-Hapoel-Beer-Sheva/91061370/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/0KccwcGq"
+    },
+    {
+        "horario": "15:00",
+        "liga": "Arábia Saudita - Primeira Liga",
+        "time_casa": "Al-Shabab",
+        "time_fora": "Al-Riyadh",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.21",
+        "link_betano": "https://www.betano.bet.br/match-odds/Al-Shabab-FC-Al-Riyadh-SC/89664893/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/jsvSs236"
+    },
+    {
+        "horario": "16:00",
+        "liga": "Europa - Liga dos Campeões",
+        "time_casa": "Bodo/Glimt (Nor)",
+        "time_fora": "Nijmegen (Ned)",
+        "mercado": "-4.5 Gols (60%)",
+        "odd": "1.42",
+        "link_betano": "https://www.betano.bet.br/match-odds/FK-Bodo-Glimt-NEC-Nijmegen/91060815/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/YwP3q51N"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Copa do Brasil",
+        "time_casa": "Cruzeiro",
+        "time_fora": "Atlético-MG",
+        "mercado": "-4.5 Gols (100%)",
+        "odd": "1.1",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Clube-Atletico-MG/90605709/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/tKAFQj8U"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Copa do Brasil",
+        "time_casa": "Cruzeiro",
+        "time_fora": "Atlético-MG",
+        "mercado": "-3.5 Gols (80%)",
+        "odd": "1.27",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Clube-Atletico-MG/90605709/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/tKAFQj8U"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Copa do Brasil",
+        "time_casa": "Cruzeiro",
+        "time_fora": "Atlético-MG",
+        "mercado": "Ambas Marcam: Não",
+        "odd": "1.8",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Clube-Atletico-MG/90605709/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/tKAFQj8U"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Copa do Brasil",
+        "time_casa": "Cruzeiro",
+        "time_fora": "Atlético-MG",
+        "mercado": "Média Escanteios: 4.5",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Clube-Atletico-MG/90605709/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/tKAFQj8U"
+    },
+    {
+        "horario": "21:00",
+        "liga": "Copa do Brasil",
+        "time_casa": "Cruzeiro",
+        "time_fora": "Atlético-MG",
+        "mercado": "Média Cartões: 5.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Clube-Atletico-MG/90605709/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/tKAFQj8U"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Ind. del Valle (Ecu)",
+        "time_fora": "Tolima (Col)",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.25",
+        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-del-Valle-Deportes-Tolima/91017497/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/MJR289Ic"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Ind. del Valle (Ecu)",
+        "time_fora": "Tolima (Col)",
+        "mercado": "Média Escanteios: 4.3",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-del-Valle-Deportes-Tolima/91017497/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/MJR289Ic"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Ind. del Valle (Ecu)",
+        "time_fora": "Tolima (Col)",
+        "mercado": "Média Cartões: 3.0",
+        "odd": "Análise",
+        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-del-Valle-Deportes-Tolima/91017497/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/MJR289Ic"
+    }
+]
