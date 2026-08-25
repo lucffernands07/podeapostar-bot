@@ -25,7 +25,7 @@
         "time_casa": "Al-Taawon",
         "time_fora": "Al-Fayha",
         "mercado": "-4.5 Gols (80%)",
-        "odd": "1.14",
+        "odd": "1.05",
         "link_betano": "https://www.betano.bet.br/match-odds/Al-Taawoun-FC-Al-Fayha-FC/89664936/",
         "link_h2h": "https://www.flashscore.com.br/jogo/rHzKqOYg"
     },
@@ -75,29 +75,9 @@
         "time_casa": "Bodo/Glimt (Nor)",
         "time_fora": "Nijmegen (Ned)",
         "mercado": "-4.5 Gols (60%)",
-        "odd": "1.45",
+        "odd": "1.2",
         "link_betano": "https://www.betano.bet.br/match-odds/FK-Bodo-Glimt-NEC-Nijmegen/91060815/",
         "link_h2h": "https://www.flashscore.com.br/jogo/YwP3q51N"
-    },
-    {
-        "horario": "20:00",
-        "liga": "Colombia - Primeira A",
-        "time_casa": "Bucaramanga",
-        "time_fora": "Aguilas",
-        "mercado": "-4.5 Gols (60%)",
-        "odd": "1.08",
-        "link_betano": "https://www.betano.bet.br/busca/?q=Bucaramanga%20x%20Aguilas",
-        "link_h2h": "https://www.flashscore.com.br/jogo/OjU5uuGi"
-    },
-    {
-        "horario": "21:00",
-        "liga": "Copa do Brasil",
-        "time_casa": "Cruzeiro",
-        "time_fora": "Atlético-MG",
-        "mercado": "-4.5 Gols (100%)",
-        "odd": "1.09",
-        "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Clube-Atletico-MG/90605709/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/tKAFQj8U"
     },
     {
         "horario": "21:00",
@@ -138,36 +118,6 @@
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Clube-Atletico-MG/90605709/",
         "link_h2h": "https://www.flashscore.com.br/jogo/tKAFQj8U"
-    },
-    {
-        "horario": "21:30",
-        "liga": "América - Copa das Ligas",
-        "time_casa": "Monterrey",
-        "time_fora": "Chicago Fire",
-        "mercado": "-4.5 Gols (60%)",
-        "odd": "1.22",
-        "link_betano": "https://www.betano.bet.br/match-odds/CF-Monterrey-Chicago-Fire-FC/91310005/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/lQgSs0Fr"
-    },
-    {
-        "horario": "21:30",
-        "liga": "América - Copa das Ligas",
-        "time_casa": "Monterrey",
-        "time_fora": "Chicago Fire",
-        "mercado": "-3.5 Gols (60%)",
-        "odd": "1.53",
-        "link_betano": "https://www.betano.bet.br/match-odds/CF-Monterrey-Chicago-Fire-FC/91310005/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/lQgSs0Fr"
-    },
-    {
-        "horario": "21:30",
-        "liga": "Libertadores",
-        "time_casa": "Ind. del Valle (Ecu)",
-        "time_fora": "Tolima (Col)",
-        "mercado": "-4.5 Gols (60%)",
-        "odd": "1.09",
-        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-del-Valle-Deportes-Tolima/91017497/",
-        "link_h2h": "https://www.flashscore.com.br/jogo/MJR289Ic"
     },
     {
         "horario": "21:30",
