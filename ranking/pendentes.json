@@ -56,6 +56,27 @@
             "mercado": "MÚLTIPLOS",
             "mercado_ranking": "LISTÃO GERAL",
             "link_h2h": "https://www.flashscore.com.br/jogo/213h8D5k/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Bucaramanga",
+            "time_fora": "Aguilas",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/OjU5uuGi/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Monterrey",
+            "time_fora": "Chicago Fire",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/lQgSs0Fr/#/resumo-de-jogo"
+        },
+        {
+            "time_casa": "Leon",
+            "time_fora": "Real Salt Lake",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/djcztvpe/#/resumo-de-jogo"
         }
     ]
 }

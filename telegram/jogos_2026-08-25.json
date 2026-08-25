@@ -15,7 +15,7 @@
         "time_casa": "Skovshoved",
         "time_fora": "Tarnby FF",
         "mercado": "Ambas Marcam: Sim",
-        "odd": "1.94",
+        "odd": "1.92",
         "link_betano": "https://www.betano.bet.br/busca/?q=Skovshoved%20x%20Tarnby%20FF",
         "link_h2h": "https://www.flashscore.com.br/jogo/213h8D5k"
     },
@@ -25,7 +25,7 @@
         "time_casa": "Al-Taawon",
         "time_fora": "Al-Fayha",
         "mercado": "-4.5 Gols (80%)",
-        "odd": "1.15",
+        "odd": "1.14",
         "link_betano": "https://www.betano.bet.br/match-odds/Al-Taawoun-FC-Al-Fayha-FC/89664936/",
         "link_h2h": "https://www.flashscore.com.br/jogo/rHzKqOYg"
     },
@@ -35,7 +35,7 @@
         "time_casa": "Al-Taawon",
         "time_fora": "Al-Fayha",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.38",
+        "odd": "1.37",
         "link_betano": "https://www.betano.bet.br/match-odds/Al-Taawoun-FC-Al-Fayha-FC/89664936/",
         "link_h2h": "https://www.flashscore.com.br/jogo/rHzKqOYg"
     },
@@ -55,7 +55,7 @@
         "time_casa": "Sabah Baku (Aze)",
         "time_fora": "H. Beer Sheva (Isr)",
         "mercado": "+1.5 Gols (80%)",
-        "odd": "1.27",
+        "odd": "1.26",
         "link_betano": "https://www.betano.bet.br/match-odds/FC-Sabah-Hapoel-Beer-Sheva/91061370/",
         "link_h2h": "https://www.flashscore.com.br/jogo/0KccwcGq"
     },
@@ -75,9 +75,19 @@
         "time_casa": "Bodo/Glimt (Nor)",
         "time_fora": "Nijmegen (Ned)",
         "mercado": "-4.5 Gols (60%)",
-        "odd": "1.42",
+        "odd": "1.45",
         "link_betano": "https://www.betano.bet.br/match-odds/FK-Bodo-Glimt-NEC-Nijmegen/91060815/",
         "link_h2h": "https://www.flashscore.com.br/jogo/YwP3q51N"
+    },
+    {
+        "horario": "20:00",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Bucaramanga",
+        "time_fora": "Aguilas",
+        "mercado": "-4.5 Gols (60%)",
+        "odd": "1.08",
+        "link_betano": "https://www.betano.bet.br/busca/?q=Bucaramanga%20x%20Aguilas",
+        "link_h2h": "https://www.flashscore.com.br/jogo/OjU5uuGi"
     },
     {
         "horario": "21:00",
@@ -85,7 +95,7 @@
         "time_casa": "Cruzeiro",
         "time_fora": "Atlético-MG",
         "mercado": "-4.5 Gols (100%)",
-        "odd": "1.1",
+        "odd": "1.09",
         "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Clube-Atletico-MG/90605709/",
         "link_h2h": "https://www.flashscore.com.br/jogo/tKAFQj8U"
     },
@@ -95,7 +105,7 @@
         "time_casa": "Cruzeiro",
         "time_fora": "Atlético-MG",
         "mercado": "-3.5 Gols (80%)",
-        "odd": "1.27",
+        "odd": "1.25",
         "link_betano": "https://www.betano.bet.br/match-odds/Cruzeiro-MG-Clube-Atletico-MG/90605709/",
         "link_h2h": "https://www.flashscore.com.br/jogo/tKAFQj8U"
     },
@@ -131,6 +141,36 @@
     },
     {
         "horario": "21:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Monterrey",
+        "time_fora": "Chicago Fire",
+        "mercado": "-4.5 Gols (60%)",
+        "odd": "1.22",
+        "link_betano": "https://www.betano.bet.br/match-odds/CF-Monterrey-Chicago-Fire-FC/91310005/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lQgSs0Fr"
+    },
+    {
+        "horario": "21:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Monterrey",
+        "time_fora": "Chicago Fire",
+        "mercado": "-3.5 Gols (60%)",
+        "odd": "1.53",
+        "link_betano": "https://www.betano.bet.br/match-odds/CF-Monterrey-Chicago-Fire-FC/91310005/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/lQgSs0Fr"
+    },
+    {
+        "horario": "21:30",
+        "liga": "Libertadores",
+        "time_casa": "Ind. del Valle (Ecu)",
+        "time_fora": "Tolima (Col)",
+        "mercado": "-4.5 Gols (60%)",
+        "odd": "1.09",
+        "link_betano": "https://www.betano.bet.br/match-odds/Independiente-del-Valle-Deportes-Tolima/91017497/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/MJR289Ic"
+    },
+    {
+        "horario": "21:30",
         "liga": "Libertadores",
         "time_casa": "Ind. del Valle (Ecu)",
         "time_fora": "Tolima (Col)",
@@ -158,5 +198,15 @@
         "odd": "Análise",
         "link_betano": "https://www.betano.bet.br/match-odds/Independiente-del-Valle-Deportes-Tolima/91017497/",
         "link_h2h": "https://www.flashscore.com.br/jogo/MJR289Ic"
+    },
+    {
+        "horario": "23:30",
+        "liga": "América - Copa das Ligas",
+        "time_casa": "Leon",
+        "time_fora": "Real Salt Lake",
+        "mercado": "+1.5 Gols (80%)",
+        "odd": "1.23",
+        "link_betano": "https://www.betano.bet.br/match-odds/Club-Leon-Real-Salt-Lake/91326562/",
+        "link_h2h": "https://www.flashscore.com.br/jogo/djcztvpe"
     }
 ]
