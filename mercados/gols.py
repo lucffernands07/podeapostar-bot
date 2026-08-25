@@ -69,11 +69,11 @@ def verificar_gols(s):
             tem_proximidade = True
 
     # ==========================================================
-    # AVALIAÇÃO DE OVERS (Agora validando ativamente o +0.5)
+    # AVALIAÇÃO DE OVERS (Validação ativa do +0.5)
     # ==========================================================
     if condicao_over_momento:
         if m_pos is None or v_pos is None:
-            if pct_05 >= 60:  # Flexibilizado para 60% já que 0.5 é muito comum
+            if pct_05 >= 60:  
                 overs_aprovados.append({"mercado": f"+0.5 Gols ({pct_05}%)", "tipo": "GOLS_05"})
             if pct_15 >= 80:
                 overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
@@ -90,13 +90,13 @@ def verificar_gols(s):
                 overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
     # ==========================================================
-    # AVALIAÇÃO DE UNDERS (Agora validando ativamente o -5.5)
+    # AVALIAÇÃO DE UNDERS (Validação ativa do -5.5 e -4.5 corrigido)
     # ==========================================================
     if condicao_under_momento:
         if pct_m55 >= 60:
             unders_aprovados.append({"mercado": f"-5.5 Gols ({pct_m55}%)", "tipo": "GOLS_M55"})
         if pct_m45 >= 60:
-            unders_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M55"}) # Mantido o m45 original
+            unders_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"}) # Chave corrigida para GOLS_M45
         if pct_m35 >= 60:
             unders_aprovados.append({"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"})
 
