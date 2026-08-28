@@ -1,0 +1,329 @@
+{
+    "data_geracao": "2026-08-28",
+    "jogos": [
+        {
+            "time_casa": "Goiás",
+            "time_fora": "São Bernardo",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zJuI1G2e/#/resumo-de-jogo",
+            "odd_casa": "1.81",
+            "odd_fora": "4.33"
+        },
+        {
+            "time_casa": "Náutico",
+            "time_fora": "Athletic Club",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zwWBNcPE/#/resumo-de-jogo",
+            "odd_casa": "1.76",
+            "odd_fora": "4.33"
+        },
+        {
+            "time_casa": "Novorizontino",
+            "time_fora": "Sport",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bJepmHm2/#/resumo-de-jogo",
+            "odd_casa": "1.68",
+            "odd_fora": "5.25"
+        },
+        {
+            "time_casa": "Union Santa Fe",
+            "time_fora": "Sarmiento Junin",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/M1cr6Mje/#/resumo-de-jogo",
+            "odd_casa": "1.81",
+            "odd_fora": "4.75"
+        },
+        {
+            "time_casa": "Boca Juniors",
+            "time_fora": "Lanús",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/08pAKL5l/#/resumo-de-jogo",
+            "odd_casa": "1.79",
+            "odd_fora": "4.75"
+        },
+        {
+            "time_casa": "Crystal Palace",
+            "time_fora": "Manchester City",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/C0b6Sk9l/#/resumo-de-jogo",
+            "odd_casa": "5.00",
+            "odd_fora": "1.65"
+        },
+        {
+            "time_casa": "Racing Santander",
+            "time_fora": "Elche",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/CrPiFJSq/#/resumo-de-jogo",
+            "odd_casa": "2.00",
+            "odd_fora": "3.60"
+        },
+        {
+            "time_casa": "Alavés",
+            "time_fora": "Villarreal",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6ots82LG/#/resumo-de-jogo",
+            "odd_casa": "3.20",
+            "odd_fora": "2.25"
+        },
+        {
+            "time_casa": "Bayern",
+            "time_fora": "Stuttgart",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xrtCcyAe/#/resumo-de-jogo",
+            "odd_casa": "1.22",
+            "odd_fora": "10.00"
+        },
+        {
+            "time_casa": "AC Milan",
+            "time_fora": "Venezia",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fciFyZo2/#/resumo-de-jogo",
+            "odd_casa": "1.48",
+            "odd_fora": "6.50"
+        },
+        {
+            "time_casa": "Lille",
+            "time_fora": "PSG",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/INhYSVse/#/resumo-de-jogo",
+            "odd_casa": "5.25",
+            "odd_fora": "1.62"
+        },
+        {
+            "time_casa": "Wrexham",
+            "time_fora": "Birmingham",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/46Z3f1sB/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.40"
+        },
+        {
+            "time_casa": "Al-Riyadh",
+            "time_fora": "Neom SC",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/StOad1Ia/#/resumo-de-jogo",
+            "odd_casa": "3.80",
+            "odd_fora": "1.75"
+        },
+        {
+            "time_casa": "Al-Fayha",
+            "time_fora": "Abha",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0fM7fumC/#/resumo-de-jogo",
+            "odd_casa": "2.38",
+            "odd_fora": "2.75"
+        },
+        {
+            "time_casa": "Al Nassr Riyadh",
+            "time_fora": "Al-Taawon",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/nBKFhJHO/#/resumo-de-jogo",
+            "odd_casa": "1.25",
+            "odd_fora": "7.50"
+        },
+        {
+            "time_casa": "Al-Khaleej",
+            "time_fora": "Al-Hilal",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/xz0PCM2t/#/resumo-de-jogo",
+            "odd_casa": "10.00",
+            "odd_fora": "1.20"
+        },
+        {
+            "time_casa": "Al-Raed",
+            "time_fora": "Hajer",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/bDOAApZA/#/resumo-de-jogo",
+            "odd_casa": "1.62",
+            "odd_fora": "5.10"
+        },
+        {
+            "time_casa": "Damac",
+            "time_fora": "Al-Orubah",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WQMI8O3N/#/resumo-de-jogo",
+            "odd_casa": "2.10",
+            "odd_fora": "3.30"
+        },
+        {
+            "time_casa": "Rio Ave",
+            "time_fora": "Sporting",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4buZ3476/#/resumo-de-jogo",
+            "odd_casa": "8.00",
+            "odd_fora": "1.30"
+        },
+        {
+            "time_casa": "Genk",
+            "time_fora": "Beveren",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/zmDOxom4/#/resumo-de-jogo",
+            "odd_casa": "1.45",
+            "odd_fora": "5.50"
+        },
+        {
+            "time_casa": "Genclerbirligi",
+            "time_fora": "Erzurumspor",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AJSes4w2/#/resumo-de-jogo",
+            "odd_casa": "2.01",
+            "odd_fora": "3.90"
+        },
+        {
+            "time_casa": "Horsens",
+            "time_fora": "Viborg",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/vaSLOPWj/#/resumo-de-jogo",
+            "odd_casa": "4.50",
+            "odd_fora": "1.68"
+        },
+        {
+            "time_casa": "Bohemians",
+            "time_fora": "Sligo Rovers",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/f1UoDTT0/#/resumo-de-jogo",
+            "odd_casa": "1.20",
+            "odd_fora": "11.00"
+        },
+        {
+            "time_casa": "Drogheda",
+            "time_fora": "Dundalk",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/tISgB7bD/#/resumo-de-jogo",
+            "odd_casa": "2.90",
+            "odd_fora": "2.25"
+        },
+        {
+            "time_casa": "Atlante",
+            "time_fora": "Leon",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/MLjck51e/#/resumo-de-jogo",
+            "odd_casa": "2.45",
+            "odd_fora": "2.82"
+        },
+        {
+            "time_casa": "Tenerife",
+            "time_fora": "Sporting Gijón",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WzUPmu1S/#/resumo-de-jogo",
+            "odd_casa": "2.25",
+            "odd_fora": "3.20"
+        },
+        {
+            "time_casa": "Bochum",
+            "time_fora": "Osnabruck",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/CfJOXpQP/#/resumo-de-jogo",
+            "odd_casa": "1.73",
+            "odd_fora": "4.50"
+        },
+        {
+            "time_casa": "Braunschweig",
+            "time_fora": "Hertha",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/8bQ9OtmC/#/resumo-de-jogo",
+            "odd_casa": "2.90",
+            "odd_fora": "2.30"
+        },
+        {
+            "time_casa": "Cremonese",
+            "time_fora": "Modena",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/fk3F3oFr/#/resumo-de-jogo",
+            "odd_casa": "2.15",
+            "odd_fora": "3.10"
+        },
+        {
+            "time_casa": "Clermont",
+            "time_fora": "Sochaux",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/4Sv1xtml/#/resumo-de-jogo",
+            "odd_casa": "2.40",
+            "odd_fora": "2.63"
+        },
+        {
+            "time_casa": "Laval",
+            "time_fora": "Grenoble",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/AocSuFgt/#/resumo-de-jogo",
+            "odd_casa": "2.00",
+            "odd_fora": "3.50"
+        },
+        {
+            "time_casa": "Montpellier",
+            "time_fora": "Boulogne",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/rDAZwgOh/#/resumo-de-jogo",
+            "odd_casa": "1.70",
+            "odd_fora": "4.50"
+        },
+        {
+            "time_casa": "Nancy",
+            "time_fora": "Dunkerque",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jwEsxXh5/#/resumo-de-jogo",
+            "odd_casa": "2.45",
+            "odd_fora": "2.55"
+        },
+        {
+            "time_casa": "Rodez",
+            "time_fora": "Pau",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WGFcYlhU/#/resumo-de-jogo",
+            "odd_casa": "1.70",
+            "odd_fora": "4.00"
+        },
+        {
+            "time_casa": "Plock",
+            "time_fora": "Korona",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Ew8G74Rp/#/resumo-de-jogo",
+            "odd_casa": "2.70",
+            "odd_fora": "2.45"
+        },
+        {
+            "time_casa": "Legia",
+            "time_fora": "Slask",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6i1BBDSI/#/resumo-de-jogo",
+            "odd_casa": "1.48",
+            "odd_fora": "6.50"
+        }
+    ]
+}
