@@ -59,7 +59,7 @@ jobs:
           python -m playwright install chromium --with-deps
 
       - name: 1. Executar bot Selenium (Bilhetes de Hoje)
-        timeout-minutes: 90
+        timeout-minutes: 120
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
