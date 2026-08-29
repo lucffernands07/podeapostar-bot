@@ -265,7 +265,7 @@ def main():
                             # 🛑 (A trava antiga de BTTS Sim > 1.20 foi removida daqui, 
                             # pois agora a regra de corte por odd é validada diretamente dentro do ambos_marcam.py)
 
-                            if odd_float >= 1.05:
+                            if odd_float >= 1.10:
                                 if "M45" in m_chave and odd_float >= 4.0: continue
                                 mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": str(odd_float)})
                             else:
