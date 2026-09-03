@@ -28,6 +28,7 @@ COMPETICOES = {
     "Arábia Saudita - King Cup": "https://www.flashscore.com.br/futebol/arabia-saudita/copa-do-rei/jogos/",
     "EUA - Copa MLS": "https://www.flashscore.com.br/futebol/eua/mls/jogos",
     "Argentina - Copa": "https://www.flashscore.com.br/futebol/argentina/copa-argentina/jogos",
+    "Itália - Copa": "https://www.flashscore.com.br/futebol/italia/copa-da-italia/jogos",
 
     # --- BLOCO 4: LIGAS SECUNDÁRIAS EUROPEIAS ---
     "Inglaterra - Divisão 2": "https://www.flashscore.com.br/futebol/inglaterra/2-divisao/jogos",
@@ -43,6 +44,8 @@ COMPETICOES = {
     #"Cazaquistão - Primeira Liga": "https://www.flashscore.com.br/futebol/cazaquistao/primeira-liga/jogos",
 
     # --- BLOCO 5: LIGAS E COPAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
+    "Suécia - Liga": "https://www.flashscore.com.br/futebol/suecia/allsvenskan/jogos/",
+    "Bélgica - Jupiler": "https://www.flashscore.com.br/futebol/belgica/liga-jupiler/jogos/",
     "Equador - Copa": "https://www.flashscore.com.br/futebol/equador/copa-do-equador/jogos/",
     "Dinamarca - Betano Pokalen": "https://www.flashscore.com.br/futebol/dinamarca/betano-pokalen/jogos/",
     "Irlanda - Premier": "https://www.flashscore.com.br/futebol/irlanda/divisao-premier/jogos/",
@@ -67,6 +70,7 @@ COMPETICOES = {
     "Ucrânia - Premier League": "https://www.flashscore.com.br/futebol/ucrania/premier-league/jogos/",
     #"Polônia - Ekstraklasa": "https://www.flashscore.com.br/futebol/polonia/ekstraklasa/jogos/",
     "Chile - Liga Ascenso": "https://www.flashscore.com.br/futebol/chile/liga-de-ascenso/jogos",
+    "Paraguai - Copa": "https://www.flashscore.com.br/futebol/paraguai/copa-de-primera/jogos",
 }
 
 # 🟢 LISTA BRANCA DE ELITE (Baseada puramente nos nomes fantasia/chaves do dicionário acima)
