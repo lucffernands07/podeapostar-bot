@@ -36,7 +36,6 @@ COMPETICOES = {
     "Arábia Saudita - Divisão 1": "https://www.flashscore.com.br/futebol/arabia-saudita/divisao-1/jogos/",
     "Portugal - Primeira Liga": "https://www.flashscore.com.br/futebol/portugal/liga-portugal/jogos/",
     "Países Baixos - Eredivisie": "https://www.flashscore.com.br/futebol/paises-baixos/eredivisie/jogos/",
-    "Bélgica - Pro League": "https://www.flashscore.com.br/futebol/belgica/liga-jupiler/jogos/",
     "Turquia - Super Lig": "https://www.flashscore.com.br/futebol/turquia/super-lig/jogos/",
     "Copa da Turquia": "https://www.flashscore.com.br/futebol/turquia/copa-da-turquia/jogos/",
     "Áustria - Bundesliga": "https://www.flashscore.com.br/futebol/austria/bundesliga/jogos/",
