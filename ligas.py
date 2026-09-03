@@ -45,6 +45,7 @@ COMPETICOES = {
 
     # --- BLOCO 5: LIGAS E COPAS ALTERNATIVAS E DIVISÕES DE ACESSO ---
     "Suécia - Liga": "https://www.flashscore.com.br/futebol/suecia/allsvenskan/jogos/",
+    "Suíça - Superliga": "https://www.flashscore.com.br/futebol/suica/superliga/jogos",
     "Bélgica - Jupiler": "https://www.flashscore.com.br/futebol/belgica/liga-jupiler/jogos/",
     "Equador - Copa": "https://www.flashscore.com.br/futebol/equador/copa-do-equador/jogos/",
     "Dinamarca - Betano Pokalen": "https://www.flashscore.com.br/futebol/dinamarca/betano-pokalen/jogos/",
