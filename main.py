@@ -226,6 +226,17 @@ def main():
                         chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
                         mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
 
+                    # 🟢 CAPTURA DAS ODDS (Mantida para alimentar o dicionário final do jogo)
+                    v_odds = {}
+                    try:
+                        v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
+                    except Exception as e_odds:
+                        print(f"      ⚠️ Erro ao capturar odds: {e_odds}")
+                        if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
+                            try: driver.quit()
+                            except: pass
+                            driver = configurar_driver()
+
                     # 4° AMBOS MARCAM SIM OU NÃO 
                     res_btts = ambos_marcam.verificar_btts(dados_jogo)
                     for rb in res_btts:
@@ -238,6 +249,7 @@ def main():
                             mercados_fase1.append({"texto": rb, "chave": chave_btts})
 
                     mercados_para_processar = []
+
 
                     for item in mercados_fase1:
                         m_texto, m_chave = item["texto"], item["chave"]
