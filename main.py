@@ -226,20 +226,8 @@ def main():
                         chave_vic = "VITORIA_FORA" if "Fora" in texto_vic else "VITORIA_CASA"
                         mercados_fase1.append({"texto": texto_vic, "chave": chave_vic})
 
-                    # 🟢 CAPTURA ANTECIPADA DAS ODDS (Necessária para o Ambas Marcam validar a regra de <= 1.20 nos gols)
-                    v_odds = {}
-                    try:
-                        v_odds = odds.capturar_todas_as_odds(driver, id_jogo)
-                    except Exception as e_odds:
-                        print(f"      ⚠️ Erro ao capturar odds prévias: {e_odds}")
-                        if "invalid session id" in str(e_odds).lower() or "session" in str(e_odds).lower():
-                            try: driver.quit()
-                            except: pass
-                            driver = configurar_driver()
-
-                    # 4° AMBOS MARCAM (Agora recebe as odds do jogo para validar se os gols estão <= 1.20)
-                    lista_gols_segura = res_gols if isinstance(res_gols, list) else []
-                    res_btts = ambos_marcam.verificar_btts(dados_jogo, mercados_gols_aprovados=lista_gols_segura, odds_jogo=v_odds)
+                    # 4° AMBOS MARCAM SIM OU NÃO 
+                    res_btts = ambos_marcam.verificar_btts(dados_jogo)
                     for rb in res_btts:
                         if isinstance(rb, dict):
                             m_texto = rb.get("mercado", "")
