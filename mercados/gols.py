@@ -1,9 +1,10 @@
 """
-REGRAS DE GOLS - VERSÃO PURA, DIRETA E CORRIGIDA
-- Over: Mínimo 4/5 (>= 80%), apenas o maior (+2.5 -> +1.5 -> +0.5)
-- Regra de Exceção 0x0: Se o último jogo do mandante em casa ou visitante fora for 0x0, +1.5 ou +2.5 vira +0.5
-- Under: Mínimo 4/5 (>= 80%), apenas o menor (-3.5 -> -4.5 -> -5.5)
-- Regra de Ouro: Ou Over, ou Under (prioridade para Over)
+REGRAS DE GOLS - ATUALIZADO
+- Over Geral: Mínimo 4/5 (>= 80%) para +1.5 e +2.5.
+- Over +0.5: Exige no mínimo 3/5 (>= 60%).
+- Regra de Exceção 0x0: Se o último jogo do mandante em casa ou visitante fora for 0x0, rebaixa para o -4.5.
+- Under: Mínimo 4/5 (>= 80%), apenas o menor (-3.5 -> -4.5 -> -5.5).
+- Regra de Ouro: Ou Over, ou Under (prioridade para Over).
 """
 
 def calcular_porcentagem_gols(c, f):
@@ -35,7 +36,7 @@ def verificar_gols(s):
     if c_15 < 2 or f_15 < 2:
         return []
 
-    # 1. Leitura direta das porcentagens dos 5 jogos (mínimo 4/5 = 80%)
+    # 1. Leitura direta das porcentagens dos 5 jogos
     pct_05 = calcular_porcentagem_gols(s.get("casa_05", 0), s.get("fora_05", 0))
     pct_15 = calcular_porcentagem_gols(c_15, f_15)
     pct_25 = calcular_porcentagem_gols(s.get("casa_25", 0), s.get("fora_25", 0))
@@ -60,13 +61,15 @@ def verificar_gols(s):
     unders_aprovados = []
 
     # ==========================================================
-    # AVALIAÇÃO DE OVERS (Apenas critério estatístico >= 80%)
+    # AVALIAÇÃO DE OVERS
     # ==========================================================
     if pct_25 >= 80:  
         overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
     if pct_15 >= 80:
         overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
-    if pct_05 >= 80:  
+    
+    # Over +0.5 agora exige no mínimo 3/5 (>= 60%)
+    if pct_05 >= 60:  
         overs_aprovados.append({"mercado": f"+0.5 Gols ({pct_05}%)", "tipo": "GOLS_05"})
 
     # ==========================================================
@@ -85,11 +88,11 @@ def verificar_gols(s):
     if overs_aprovados:
         escolha = overs_aprovados[0] # Pega o maior over
         
-        # Se deu 1.5 ou 2.5 mas teve 0x0 recente, rebaixa para +0.5 (se o 0.5 for válido >= 80%)
+        # Se deu 1.5 ou 2.5 mas teve 0x0 recente, converte para o -4.5 (se o -4.5 estiver aprovado nos unders)
         if teve_zero_a_zero and escolha["tipo"] in ["GOLS_15", "GOLS_25"]:
-            over_05 = next((item for item in overs_aprovados if item["tipo"] == "GOLS_05"), None)
-            if over_05:
-                escolha = over_05
+            under_45 = next((item for item in unders_aprovados if item["tipo"] == "GOLS_M45"), None)
+            if under_45:
+                return [under_45]
                 
         return [escolha]
     
@@ -97,4 +100,4 @@ def verificar_gols(s):
         return [unders_aprovados[0]] # Pega o menor under (-3.5 > -4.5 > -5.5)
     
     return []
-    
+        
