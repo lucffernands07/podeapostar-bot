@@ -1,5 +1,7 @@
 """
-REGRAS DE MERCADO - AMBAS MARCAM (LENDO PLACARES JÁ EXISTENTES)
+REGRAS DE MERCADO - AMBAS MARCAM (VERSÃO AJUSTADA)
+- BTTS SIM: Soma de gols do mandante em casa >= 8 E soma de gols do visitante fora >= 8 E visitante fora ganhou (vitória) por >= 3 gols? (Aguarde, vamos detalhar abaixo)
+- BTTS NÃO: Caso contrário.
 """
 
 def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=None, odds_jogo=None):
@@ -8,67 +10,46 @@ def verificar_btts(s, outros_mercados_aprovados=None, mercados_gols_aprovados=No
         if not isinstance(s, dict):
             return mercados_aprovados
 
-        mercados_previos = outros_mercados_aprovados or mercados_gols_aprovados
-        
-        tem_over = False
-        tem_under = False
+        # Lê os placares do último jogo (mandante em casa e visitante fora)[span_0](start_span)[span_0](end_span)
+        placar_mandante_casa = s.get("t1_placar_1", "")  # Ex: "2-1[span_1](start_span)"[span_1](end_span)
+        placar_visitante_fora = s.get("t2_placar_1", "") # Ex: "0-3[span_2](start_span)"[span_2](end_span)
 
-        if isinstance(mercados_previos, list) and len(mercados_previos) > 0:
-            for item in mercados_previos:
-                if not isinstance(item, dict):
-                    continue
-                tipo_upper = item.get("tipo", "").upper()
-                
-                if "OVER" in tipo_upper or "GOLS_15" in tipo_upper or "GOLS_25" in tipo_upper:
-                    tem_over = True
-                if "UNDER" in tipo_upper or "M35" in tipo_upper or "M25" in tipo_upper or "GOLS_M" in tipo_upper:
-                    tem_under = True
+        gols_mandante_feito, gols_mandante_sofrido = 0, 0
+        gols_visitante_sofrido, gols_visitante_feito = 0, 0
 
-        # Lê os placares do último jogo que o raspagem_h2h.py já salva
-        placar_mandante_casa = s.get("t1_placar_1", "")  # Ex: "2-1[span_3](start_span)"[span_3](end_span)
-        placar_visitante_fora = s.get("t2_placar_1", "") # Ex: "0-2[span_4](start_span)"[span_4](end_span)
-
-        gols_m_casa, gols_adv_casa = 0, 0
-        gols_adv_fora, gols_v_fora = 0, 0
-
-        # Quebra o placar do mandante (casa)
+        # Quebra o placar do mandante em casa (Gols feitos - Gols sofridos)
         if placar_mandante_casa and "-" in placar_mandante_casa:
             partes = placar_mandante_casa.split("-")
-            gols_m_casa = int(partes[0].strip())
-            gols_adv_casa = int(partes[1].strip())
+            gols_mandante_feito = int(partes[0].strip())
+            gols_mandante_sofrido = int(partes[1].strip())
 
-        # Quebra o placar do visitante (fora)
+        # Quebra o placar do visitante fora (Gols sofridos - Gols feitos)[span_3](start_span)[span_3](end_span)
         if placar_visitante_fora and "-" in placar_visitante_fora:
             partes = placar_visitante_fora.split("-")
-            gols_adv_fora = int(partes[0].strip()) # Gols que o mandante/adversário fez nele
-            gols_v_fora = int(partes[1].strip())   # Gols que o visitante fez
+            gols_visitante_sofrido = int(partes[0].strip()) #[span_4](start_span)[span_4](end_span)
+            gols_visitante_feito = int(partes[1].strip())   #[span_5](start_span)[span_5](end_span)
 
-        # Soma total dos gols do último jogo de cada um
-        total_gols_ultimos_jogos = (gols_m_casa + gols_adv_casa) + (gols_adv_fora + gols_v_fora)
+        # Soma total de gols do mandante em casa (feitos + sofridos no último jogo)
+        soma_gols_mandante_casa = gols_mandante_feito + gols_mandante_sofrido
+        
+        # Soma total de gols do visitante fora (feitos + sofridos no último jogo)
+        soma_gols_visitante_fora = gols_visitante_feito + gols_visitante_sofrido
 
-        # Regra exclusiva para o NÃO: Visitante não tomou gol no último jogo (gols do adversário contra ele = 0)
-        visitante_nao_tomou_gol = (gols_adv_fora == 0)
+        # Condição de vitória do visitante fora (gols feitos > gols sofridos) por diferença de 3 ou mais? 
+        # (Ou se refere a gols feitos do visitante fora >= 3? Ajustei para os gols feitos do visitante fora >= 3 baseado na sua frase)
+        visitante_condicao_vitoria = (gols_visitante_feito >= 3 and gols_visitante_feito > gols_visitante_sofrido)
 
         # 🟢 REGRA BTTS SIM:
-        # 1. Ter over
-        # 2. Total de gols somados do último jogo de cada >= 7
-        if tem_over and total_gols_ultimos_jogos >= 7:
+        # Soma mandante casa >= 8 E Soma visitante fora >= 8 E Visitante fora cumpriu a condição de vitória
+        if soma_gols_mandante_casa >= 8 and soma_gols_visitante_fora >= 8 and visitante_condicao_vitoria:
             mercados_aprovados.append({"mercado": "Ambas Marcam: Sim", "tipo": "BTTS_SIM"})
         else:
-            print(f"   ⚠️ BTTS SIM BARRADO: Over={tem_over}, Soma Gols Últimos Jogos={total_gols_ultimos_jogos} (Exige >= 7)")
-
-        # 🔴 REGRA BTTS NÃO:
-        # 1. Ter under
-        # 2. Total de gols somados do último jogo de cada <= 3
-        # 3. Visitante não tomou gol no último jogo
-        if tem_under and total_gols_ultimos_jogos <= 3 and visitante_nao_tomou_gol:
+            # 🔴 SE NÃO, RETORNA BTTS NÃO
             mercados_aprovados.append({"mercado": "Ambas Marcam: Não", "tipo": "BTTS_NAO"})
-        else:
-            print(f"   ⚠️ BTTS NÃO BARRADO: Under={tem_under}, Soma Gols={total_gols_ultimos_jogos} (Exige <= 3), Visitante Zero Gols Sofridos={visitante_nao_tomou_gol}")
 
         return mercados_aprovados
 
     except Exception as e:
-        print(f"      ⚠️ Erro ao processar nova regra Ambas Marcam: {e}")
+        print(f"      ⚠️ Erro ao processar regra Ambas Marcam: {e}")
         return mercados_aprovados
-                    
+        
