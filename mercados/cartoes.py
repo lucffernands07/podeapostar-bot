@@ -17,14 +17,30 @@ def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_lig
         return {"aprovado": False}
 
     try:
-        jogos_mandante = [int(str(x).strip()) for x in lista_mandante[:quantidade_jogos]]
-        jogos_visitante = [int(str(x).strip()) for x in lista_visitante[:quantidade_jogos]]
+        raw_mandante = [int(str(x).strip()) for x in lista_mandante[:quantidade_jogos]]
+        raw_visitante = [int(str(x).strip()) for x in lista_visitante[:quantidade_jogos]]
     except Exception as e_conv:
         print(f"⚠️ [ERRO CONVERSÃO] Erro ao converter dados de cartões para números: {e_conv}")
         return {"aprovado": False}
 
     if dados_incompletos:
         print(f"⏩ [DESCARTADO CARTÕES] Flag de dados incompletos ativada para {nome_liga_limpo}.")
+        return {"aprovado": False}
+
+    # 🟢 NOVO FILTRO CRUZADO: Descarta a partida APENAS se AMBOS forem 0 no mesmo jogo.
+    # Caso contrário, o time que registrou cartões entra normalmente no cálculo.
+    jogos_mandante = []
+    jogos_visitante = []
+
+    for m_val, v_val in zip(raw_mandante, raw_visitante):
+        if m_val == 0 and v_val == 0:
+            continue # Descarta apenas se ambos zeraram na mesma partida
+        jogos_mandante.append(m_val)
+        jogos_visitante.append(v_val)
+
+    # Valida se após o filtro cruzado ainda sobrou a quantidade mínima exigida de jogos
+    if len(jogos_mandante) < quantidade_jogos or len(jogos_visitante) < quantidade_jogos:
+        print(f"⏩ [HISTÓRICO INCOMPLETO] Jogos insuficientes após o filtro de zeros em cartões.")
         return {"aprovado": False}
 
     # Avaliação isolada por time para permitir o filtro separado
@@ -58,7 +74,7 @@ def analisar_dados_cartoes(cartoes_mandante_h2h, cartoes_visitante_h2h, nome_lig
 
     return {
         "aprovado": True,
-        "tipo": "CARTOES_GERAL", # 🔑 Chave mantida para compatibilidade
+        "tipo": "CARTOES_GERAL", 
         "tipo_mandante": "CARTOES_MANDANTE",
         "tipo_visitante": "CARTOES_VISITANTE",
         "aprovado_mandante": aprovado_mandante,
