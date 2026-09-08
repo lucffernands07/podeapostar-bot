@@ -1,58 +1,78 @@
 """
-REGRAS DE MERCADO - VITÓRIAS (CASA / FORA) USANDO TRAVA H2H (2025/2026)
-Mercado de maior risco: exige rigor estatístico superior à Chance Dupla baseado no confronto direto.
+REGRAS DE MERCADO - VITÓRIAS (CASA / FORA)
+- Vitória Casa: 3 vitórias seguidas do mandante em casa + média de gols feitos >= 2.0 nos últimos 3 jogos.
+- Vitória Fora: 3 vitórias seguidas do visitante fora + média de gols feitos >= 2.0 nos últimos 3 jogos.
+- Trava de Descarte Mútuo: Se ambos passarem, o jogo é descartado.
 """
 
 def verificar_vitorias(s):
-    """
-    Recebe o dicionário 's' (contendo os dados do H2H do Superscore) 
-    e retorna mercados de Vitórias aprovados (Vitória Casa ou Vitória Fora).
-    Se ambos baterem ou se as condições não forem estritamente fortes, descarta.
-    """
     mercados_aprovados = []
     if not isinstance(s, dict):
         return mercados_aprovados
 
-    # --- CAPTURA DE DADOS DO H2H (2025/2026, Máx 5 jogos) ---
-    h2h_total = int(s.get("h2h_jogos_total", 0) or 0)
-    vitorias_t1 = int(s.get("h2h_vitorias_t1", 0) or 0)      # Vitórias do Mandante no H2H
-    vitorias_t2 = int(s.get("h2h_vitorias_t2", 0) or 0)      # Vitórias do Visitante no H2H
-    empates = int(s.get("h2h_empates", 0) or 0)              # Empates no H2H
+    # --- 1. CAPTURA DOS DADOS DOS 3 ÚLTIMOS JOGOS (Mandante em casa e Visitante fora) ---
+    try:
+        # Mandante em casa (1 = mais recente, 3 = mais antigo)
+        m_gf1 = int(s.get("t1_gols_favor_1", 0) or 0)
+        m_gc1 = int(s.get("t1_gols_contra_1", 0) or 0)
+        
+        m_gf2 = int(s.get("t1_gols_favor_2", 0) or 0)
+        m_gc2 = int(s.get("t1_gols_contra_2", 0) or 0)
+        
+        m_gf3 = int(s.get("t1_gols_favor_3", 0) or 0)
+        m_gc3 = int(s.get("t1_gols_contra_3", 0) or 0)
 
-    # Se não houver histórico H2H válido para os anos recentes, descarta por segurança
-    if h2h_total == 0:
+        # Visitante fora (1 = mais recente, 3 = mais antigo)
+        v_gf1 = int(s.get("t2_gols_favor_1", 0) or 0)
+        v_gc1 = int(s.get("t2_gols_contra_1", 0) or 0)
+        
+        v_gf2 = int(s.get("t2_gols_favor_2", 0) or 0)
+        v_gc2 = int(s.get("t2_gols_contra_2", 0) or 0)
+        
+        v_gf3 = int(s.get("t2_gols_favor_3", 0) or 0)
+        v_gc3 = int(s.get("t2_gols_contra_3", 0) or 0)
+    except:
         return []
+
+    # --- 2. VALIDAÇÃO DE RESULTADOS (3 VITÓRIAS SEGUIDAS) ---
+    # Vitória = Gols a favor > Gols contra
+    m_vitoria_1 = m_gf1 > m_gc1
+    m_vitoria_2 = m_gf2 > m_gc2
+    m_vitoria_3 = m_gf3 > m_gc3
+    mandante_3_vitorias = m_vitoria_1 and m_vitoria_2 and m_vitoria_3
+
+    v_vitoria_1 = v_gf1 > v_gc1
+    v_vitoria_2 = v_gf2 > v_gc2
+    v_vitoria_3 = v_gf3 > v_gc3
+    visitante_3_vitorias = v_vitoria_1 and v_vitoria_2 and v_vitoria_3
+
+    # --- 3. CÁLCULO DE MÉDIAS DE GOLS FEITOS NOS ÚLTIMOS 3 JOGOS ---
+    media_gf_mandante = (m_gf1 + m_gf2 + m_gf3) / 3.0
+    media_gf_visitante = (v_gf1 + v_gf2 + v_gf3) / 3.0
 
     tem_vitoria_casa = False
     tem_vitoria_fora = False
 
     # ----------------------------------------------------------
-    # 🟢 REGRA VITÓRIA CASA (Nível Acima da Dupla Chance 1X)
-    # Exige superioridade clara do mandante nos confrontos diretos recentes
+    # 🟢 REGRA VITÓRIA CASA
     # ----------------------------------------------------------
-    # Exemplo de trava rigorosa: Mandante venceu a maioria e o visitante não venceu nenhuma
-    condicao_vitoria_casa = (vitorias_t1 >= 3) and (vitorias_t2 == 0)
-
-    if condicao_vitoria_casa:
+    if mandante_3_vitorias and (media_gf_mandante >= 2.0):
         tem_vitoria_casa = True
 
     # ----------------------------------------------------------
-    # 🟢 REGRA VITÓRIA FORA (Nível Acima da Dupla Chance X2)
-    # Exige superioridade clara do visitante nos confrontos diretos recentes
+    # 🟢 REGRA VITÓRIA FORA
     # ----------------------------------------------------------
-    condicao_vitoria_fora = (vitorias_t2 >= 3) and (vitorias_t1 == 0)
-
-    if condicao_vitoria_fora:
+    if visitante_3_vitorias and (media_gf_visitante >= 2.0):
         tem_vitoria_fora = True
 
     # ----------------------------------------------------------
     # 🛑 TRAVA DE DESCARTE MÚTUO
-    # Se os dois lados apontarem vitória seca, o jogo é inconclusivo e anula.
     # ----------------------------------------------------------
     if tem_vitoria_casa and tem_vitoria_fora:
-        print(f"      ⚠️ CONFLITO DE VITÓRIAS (H2H): Vitória Casa e Vitória Fora passaram juntas. Jogo descartado.")
+        print(f"      ⚠️ CONFLITO DE VITÓRIAS: Vitória Casa e Fora passaram juntas. Jogo descartado.")
         return []
 
+    # Adiciona os mercados aprovados
     if tem_vitoria_casa:
         mercados_aprovados.append({
             "mercado": "Resultado Final: Vitória Casa", 
@@ -66,3 +86,4 @@ def verificar_vitorias(s):
         })
 
     return mercados_aprovados
+        
