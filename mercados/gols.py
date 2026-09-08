@@ -1,6 +1,7 @@
 """
 REGRAS DE GOLS - ATUALIZADO
 - Over Geral: Mínimo 4/5 (>= 80%) para +1.5 e +2.5 (com regras específicas de resultado para o +2.5).
+- Over +1.5: Exige estatística >= 80% E que o mandante tenha feito pelo menos 1 gol no último jogo em casa.
 - Over +0.5: Exige no mínimo 3/5 (>= 60%).
 - Regra de Exceção 0x0: Se o último jogo do mandante em casa ou visitante fora for 0x0, rebaixa para o -4.5.
 - Under: Mínimo 4/5 (>= 80%), apenas o menor (-3.5 -> -4.5 -> -5.5).
@@ -64,14 +65,12 @@ def verificar_gols(s):
     # AVALIAÇÃO DE OVERS
     # ==========================================================
     
-    # Validação da nova regra específica para o +2.5 Gols
+    # Validação da regra específica para o +2.5 Gols
     casa_25_qtd = int(s.get("casa_25", 0) or 0)
     fora_25_qtd = int(s.get("fora_25", 0) or 0)
     
-    # Mandante: 4/5 em +2.5 E sem derrota em casa (vitória ou empate >= 4)
     mandante_ok_25 = (casa_25_qtd >= 4) and (int(s.get("mandante_sem_derrota_casa", 0) or 0) >= 4)
     
-    # Visitante: 4/5 em +2.5 E derrota ou empate fora (total 5 - vitorias >= 4)
     vis_vitorias = int(s.get("visitante_vitorias_fora", 0) or 0)
     vis_derrotas = int(s.get("visitante_derrotas_fora", 0) or 0)
     vis_empates = max(0, 5 - (vis_vitorias + vis_derrotas))
@@ -80,10 +79,25 @@ def verificar_gols(s):
     if mandante_ok_25 and visitante_ok_25 and pct_25 >= 80:  
         overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
 
-    if pct_15 >= 80:
+    # Validação da nova regra para o +1.5 Gols:
+    # Exige percentual estatístico >= 80% E que o mandante tenha feito pelo menos 1 gol no último jogo em casa.
+    # Como a raspagem armazena 't1_placar_1' (ex: "2-1"), podemos extrair o primeiro dígito ou usar gols_c_ult se disponível.
+    mandante_fez_gol_ult = False
+    try:
+        # Tenta pegar o primeiro número do placar do último jogo em casa do mandante
+        if placar_casa_ult and "-" in placar_casa_ult:
+            gols_mandante_ult_partida = int(placar_casa_ult.split("-")[0])
+            if gols_mandante_ult_partida >= 1:
+                mandante_fez_gol_ult = True
+        elif gols_c_ult is not None and int(gols_c_ult) >= 1:
+            mandante_fez_gol_ult = True
+    except:
+        pass
+
+    if pct_15 >= 80 and mandante_fez_gol_ult:
         overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
     
-    # Over +0.5 agora exige no mínimo 3/5 (>= 60%)
+    # Over +0.5 exige no mínimo 3/5 (>= 60%)
     if pct_05 >= 60:  
         overs_aprovados.append({"mercado": f"+0.5 Gols ({pct_05}%)", "tipo": "GOLS_05"})
 
