@@ -1,11 +1,8 @@
 """
-REGRAS DE GOLS - ATUALIZADO
-- Over Geral: Mínimo 4/5 (>= 80%) para +1.5 e +2.5 (com regras específicas de resultado para o +2.5).
-- Over +1.5: Exige estatística >= 80% E que o mandante tenha feito pelo menos 1 gol no último jogo em casa.
-- Over +0.5: Exige no mínimo 3/5 (>= 60%).
-- Regra de Exceção 0x0: Se o último jogo do mandante em casa ou visitante fora for 0x0, rebaixa para o -4.5.
-- Under: Mínimo 4/5 (>= 80%), apenas o menor (-3.5 -> -4.5 -> -5.5).
-- Regra de Ouro: Ou Over, ou Under (prioridade para Over).
+REGRAS DE GOLS - ATUALIZADO COM NOVA ORDEM DE PRIORIDADE
+- Sequência de Prioridade: +2.5 -> +1.5 -> -4.5 -> -3.5 -> +0.5
+- Regra do 0x0: Se houve 0x0 recente, o mercado escolhido será sempre o -4.5 (se disponível).
+- Over +0.5: Só entra se NÃO houver -3.5 e nem -4.5 aprovados.
 """
 
 def calcular_porcentagem_gols(c, f):
@@ -58,75 +55,82 @@ def verificar_gols(s):
     if (gols_c_ult == 0 and s.get("t1_gols_contra_1") == 0) or (gols_f_ult == 0 and s.get("t2_gols_contra_1") == 0):
         teve_zero_a_zero = True
 
-    overs_aprovados = []
-    unders_aprovados = []
-
     # ==========================================================
-    # AVALIAÇÃO DE OVERS
+    # VALIDAÇÃO DOS MERCADOS INDIVIDUAIS
     # ==========================================================
     
-    # Validação da regra específica para o +2.5 Gols
+    # +2.5 Gols (Regra de resultado mandante/visitante + estatística >= 80%)
     casa_25_qtd = int(s.get("casa_25", 0) or 0)
     fora_25_qtd = int(s.get("fora_25", 0) or 0)
-    
     mandante_ok_25 = (casa_25_qtd >= 4) and (int(s.get("mandante_sem_derrota_casa", 0) or 0) >= 4)
-    
     vis_vitorias = int(s.get("visitante_vitorias_fora", 0) or 0)
     vis_derrotas = int(s.get("visitante_derrotas_fora", 0) or 0)
     vis_empates = max(0, 5 - (vis_vitorias + vis_derrotas))
     visitante_ok_25 = (fora_25_qtd >= 4) and ((vis_derrotas + vis_empates) >= 4)
+    
+    valida_25 = (mandante_ok_25 and visitante_ok_25 and pct_25 >= 80)
 
-    if mandante_ok_25 and visitante_ok_25 and pct_25 >= 80:  
-        overs_aprovados.append({"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"})
-
-    # Validação da nova regra para o +1.5 Gols:
-    # Exige percentual estatístico >= 80% E que o mandante tenha feito pelo menos 1 gol no último jogo em casa.
-    # Como a raspagem armazena 't1_placar_1' (ex: "2-1"), podemos extrair o primeiro dígito ou usar gols_c_ult se disponível.
+    # +1.5 Gols (Estatística >= 80% + mandante fez >= 1 gol no último jogo em casa)
     mandante_fez_gol_ult = False
     try:
-        # Tenta pegar o primeiro número do placar do último jogo em casa do mandante
         if placar_casa_ult and "-" in placar_casa_ult:
-            gols_mandante_ult_partida = int(placar_casa_ult.split("-")[0])
-            if gols_mandante_ult_partida >= 1:
+            if int(placar_casa_ult.split("-")[0]) >= 1:
                 mandante_fez_gol_ult = True
         elif gols_c_ult is not None and int(gols_c_ult) >= 1:
             mandante_fez_gol_ult = True
     except:
         pass
+    valida_15 = (pct_15 >= 80 and mandante_fez_gol_ult)
 
-    if pct_15 >= 80 and mandante_fez_gol_ult:
-        overs_aprovados.append({"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"})
+    # Unders (Mínimo 4/5 >= 80%)
+    valida_m45 = (pct_m45 >= 80)
+    valida_m35 = (pct_m35 >= 80)
+    valida_m55 = (pct_m55 >= 80)
+
+    # Objeto dos unders para retorno rápido se necessário
+    under_45_obj = {"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"} if valida_m45 else None
+    under_35_obj = {"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"} if valida_m35 else None
+
+    # ==========================================================
+    # REGRA ABSOLUTA DO 0X0
+    # ==========================================================
+    if teve_zero_a_zero:
+        if under_45_obj:
+            return [under_45_obj]
+        elif valida_m35:
+            return [under_35_obj]
+        # Se teve 0x0 mas não tem -4.5 nem -3.5, tenta o menor under disponível ou retorna vazio conforme sua regra
+        return []
+
+    # ==========================================================
+    # APLICAÇÃO DA ORDEM DE PRIORIDADE ESTABELECIDA:
+    # 1. +2.5
+    # 2. +1.5
+    # 3. -4.5
+    # 4. -3.5
+    # 5. +0.5 (desde que NÃO tenha -3.5 e nem -4.5 aprovados)
+    # ==========================================================
+
+    if valida_25:
+        return [{"mercado": f"+2.5 Gols ({pct_25}%)", "tipo": "GOLS_25"}]
     
-    # Over +0.5 exige no mínimo 3/5 (>= 60%)
-    if pct_05 >= 60:  
-        overs_aprovados.append({"mercado": f"+0.5 Gols ({pct_05}%)", "tipo": "GOLS_05"})
+    if valida_15:
+        return [{"mercado": f"+1.5 Gols ({pct_15}%)", "tipo": "GOLS_15"}]
+    
+    if valida_m45:
+        return [under_45_obj]
+    
+    if valida_m35:
+        return [under_35_obj]
+    
+    # +0.5 Gols (Exige >= 60% E que NÃO exista -3.5 ou -4.5 aprovados)
+    sem_unders_fortes = not valida_m35 and not valida_m45
+    if (pct_05 >= 60) and sem_unders_fortes:
+        return [{"mercado": f"+0.5 Gols ({pct_05}%)", "tipo": "GOLS_05"}]
 
-    # ==========================================================
-    # AVALIAÇÃO DE UNDERS (Apenas critério estatístico >= 80%)
-    # ==========================================================
-    if pct_m35 >= 80:
-        unders_aprovados.append({"mercado": f"-3.5 Gols ({pct_m35}%)", "tipo": "GOLS_M35"})
-    if pct_m45 >= 80:
-        unders_aprovados.append({"mercado": f"-4.5 Gols ({pct_m45}%)", "tipo": "GOLS_M45"})
+    # Se nenhum dos critérios acima bater, verifica se sobrou o -5.5 como última alternativa de under
     if pct_m55 >= 80:
-        unders_aprovados.append({"mercado": f"-5.5 Gols ({pct_m55}%)", "tipo": "GOLS_M55"})
+        return [{"mercado": f"-5.5 Gols ({pct_m55}%)", "tipo": "GOLS_M55"}]
 
-    # ==========================================================
-    # APLICAÇÃO DAS REGRAS DE SELEÇÃO E CONVERSÃO DO 0x0
-    # ==========================================================
-    if overs_aprovados:
-        escolha = overs_aprovados[0] # Pega o maior over
-        
-        # Se deu 1.5 ou 2.5 mas teve 0x0 recente, converte para o -4.5 (se o -4.5 estiver aprovado nos unders)
-        if teve_zero_a_zero and escolha["tipo"] in ["GOLS_15", "GOLS_25"]:
-            under_45 = next((item for item in unders_aprovados if item["tipo"] == "GOLS_M45"), None)
-            if under_45:
-                return [under_45]
-                
-        return [escolha]
-    
-    elif unders_aprovados:
-        return [unders_aprovados[0]] # Pega o menor under (-3.5 > -4.5 > -5.5)
-    
     return []
     
