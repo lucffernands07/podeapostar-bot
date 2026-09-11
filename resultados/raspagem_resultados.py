@@ -43,11 +43,11 @@ def extrair_dados_completos(driver, url_h2h):
         
         log("URL ÚNICA", f"Acessando página de estatísticas: {url_stats_geral}")
         
-        # 2. Vai direto para a aba de estatísticas (onde tem o placar e as estatísticas)
+        # 2. Vai direto para a aba de estatísticas
         driver.get(url_stats_geral)
-        time.sleep(3.0) # Tempo para renderizar tudo na página
+        time.sleep(3.0)
         
-        # 3. Captura o Placar (Gols) diretamente da página de estatísticas
+        # 3. Captura o Placar (Gols)
         try:
             scores = driver.find_elements(By.CSS_SELECTOR, ".detailScore__wrapper span, [class*='detailScore'] span")
             if len(scores) >= 3:
@@ -56,43 +56,48 @@ def extrair_dados_completos(driver, url_h2h):
                 resultado_parcial["gols_casa"] = int(g_c) if g_c.isdigit() else 0
                 resultado_parcial["gols_fora"] = int(g_f) if g_f.isdigit() else 0
             else:
-                # Fallback alternativo para o placar no topo
                 sc_home = driver.find_element(By.CSS_SELECTOR, ".matchScore__home, [class*='score--home']").text.strip()
                 sc_away = driver.find_element(By.CSS_SELECTOR, ".matchScore__away, [class*='score--away']").text.strip()
                 resultado_parcial["gols_casa"] = int(sc_home) if sc_home.isdigit() else 0
                 resultado_parcial["gols_fora"] = int(sc_away) if sc_away.isdigit() else 0
         except Exception as e_gols:
-            log("AVISO GOLS", f"Não foi possível capturar o placar na página de stats: {e_gols}")
+            log("AVISO GOLS", f"Não foi possível capturar o placar: {e_gols}")
 
-        # 4. Captura Escanteios e Cartões com a lógica de spans do bot
-        try:
-            todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
-            if len(todos_spans) > 0:
-                for idx, span in enumerate(todos_spans):
-                    texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
-                    
-                    # Escanteios
-                    if texto_elemento in ["ESCANTEIOS", "CORNERS"]:
-                        if idx > 0 and (idx + 1) < len(todos_spans):
-                            c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
-                            f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                            match_c = re.search(r'\d+', c_str)
-                            match_f = re.search(r'\d+', f_str)
-                            resultado_parcial["escanteios_casa"] = int(match_c.group()) if match_c else 0
-                            resultado_parcial["escanteios_fora"] = int(match_f.group()) if match_f else 0
+        # Função auxiliar interna para buscar valores baseados no título da estatística
+        def buscar_stat_por_nome(nomes_alvo):
+            try:
+                spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
+                for span in spans:
+                    texto = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
+                    if any(n in texto for n in nomes_alvo):
+                        # Sobe para o container pai da linha para isolar os valores daquele item específico
+                        linha_pai = span.find_element(By.XPATH, "./ancestor::div[contains(@class, 'row') or ancestor::div[3]]")
+                        valores = linha_pai.find_elements(By.CSS_SELECTOR, "[class*='wcl-value']")
+                        
+                        if len(valores) < 2:
+                            # Fallback subindo mais um nível se necessário
+                            linha_pai = span.find_element(By.XPATH, "./ancestor::div[2]")
+                            valores = linha_pai.find_elements(By.CSS_SELECTOR, "[class*='wcl-value']")
 
-                    # Cartões Amarelos
-                    if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
-                        if idx > 0 and (idx + 1) < len(todos_spans):
-                            c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
-                            f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                            match_c = re.search(r'\d+', c_str)
-                            match_f = re.search(r'\d+', f_str)
-                            resultado_parcial["cartoes_casa"] = int(match_c.group()) if match_c else 0
-                            resultado_parcial["cartoes_fora"] = int(match_f.group()) if match_f else 0
+                        if len(valores) >= 2:
+                            m_c = re.search(r'\d+', valores[0].text)
+                            m_f = re.search(r'\d+', valores[-1].text)
+                            c_val = int(m_c.group()) if m_c else 0
+                            f_val = int(m_f.group()) if m_f else 0
+                            return c_val, f_val
+            except Exception as e:
+                log("AVISO BUSCA STAT", f"Erro ao buscar {nomes_alvo}: {e}")
+            return 0, 0
 
-        except Exception as e_sp:
-            log("AVISO STATS", f"Erro ao ler spans estatísticos: {e_sp}")
+        # 4. Captura Escanteios
+        c_esc, f_esc = buscar_stat_por_nome(["ESCANTEIOS", "CORNERS"])
+        resultado_parcial["escanteios_casa"] = c_esc
+        resultado_parcial["escanteios_fora"] = f_esc
+
+        # 5. Captura Cartões Amarelos
+        c_cart, f_cart = buscar_stat_por_nome(["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"])
+        resultado_parcial["cartoes_casa"] = c_cart
+        resultado_parcial["cartoes_fora"] = f_cart
 
     except Exception as e:
         log("ERRO PARTIDA", f"Falha ao processar link: {e}")
