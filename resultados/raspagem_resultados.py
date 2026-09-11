@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import re
 from datetime import datetime, date, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -49,8 +50,8 @@ def extrair_estatisticas_partida(driver, url_h2h):
                 g_c = driver.find_element(By.CSS_SELECTOR, ".event__score--home").text.strip()
                 g_f = driver.find_element(By.CSS_SELECTOR, ".event__score--away").text.strip()
                 
-            resultado_parcial["gols_casa"] = int(g_c)
-            resultado_parcial["gols_fora"] = int(g_f)
+            resultado_parcial["gols_casa"] = int(g_c) if g_c.isdigit() else 0
+            resultado_parcial["gols_fora"] = int(g_f) if g_f.isdigit() else 0
         except Exception as e:
             log("AVISO GOLS", f"Não foi possível extrair o placar exato: {e}")
 
@@ -65,20 +66,35 @@ def extrair_estatisticas_partida(driver, url_h2h):
             driver.get(url_estatisticas)
             time.sleep(2.5)
             
-            linhas = driver.find_elements(By.CSS_SELECTOR, ".statistics__row, .stat__row")
-            for linha in linhas:
-                texto_linha = linha.text.lower()
-                if "escanteios" in texto_linha or "corner" in texto_linha:
-                    valores = linha.find_elements(By.CSS_SELECTOR, ".statistics__value, .stat__homeValue, .stat__awayValue")
-                    if len(valores) >= 2:
-                        resultado_parcial["escanteios_casa"] = int(valores[0].text.strip() or 0)
-                        resultado_parcial["escanteios_fora"] = int(valores[1].text.strip() or 0)
-                
-                elif "cartões" in texto_linha or "cards" in texto_linha or "amarelos" in texto_linha:
-                    valores = linha.find_elements(By.CSS_SELECTOR, ".statistics__value, .stat__homeValue, .stat__awayValue")
-                    if len(valores) >= 2:
-                        resultado_parcial["cartoes_casa"] = int(valores[0].text.strip() or 0)
-                        resultado_parcial["cartoes_fora"] = int(valores[1].text.strip() or 0)
+            # Utilizando a mesma lógica robusta do bot baseada em spans do Flashscore
+            try:
+                todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
+                if len(todos_spans) > 0:
+                    for idx, span in enumerate(todos_spans):
+                        texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
+                        
+                        # Escanteios
+                        if texto_elemento in ["ESCANTEIOS", "CORNERS"]:
+                            if idx > 0 and (idx + 1) < len(todos_spans):
+                                c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                                f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                                match_c = re.search(r'\d+', c_str)
+                                match_f = re.search(r'\d+', f_str)
+                                resultado_parcial["escanteios_casa"] = int(match_c.group()) if match_c else 0
+                                resultado_parcial["escanteios_fora"] = int(match_f.group()) if match_f else 0
+
+                        # Cartões Amarelos
+                        if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
+                            if idx > 0 and (idx + 1) < len(todos_spans):
+                                c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                                f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                                match_c = re.search(r'\d+', c_str)
+                                match_f = re.search(r'\d+', f_str)
+                                resultado_parcial["cartoes_casa"] = int(match_c.group()) if match_c else 0
+                                resultado_parcial["cartoes_fora"] = int(match_f.group()) if match_f else 0
+
+            except Exception as e_sp:
+                log("AVISO STATS", f"Erro ao ler spans estatísticos: {e_sp}")
 
     except Exception as e:
         log("ERRO PARTIDA", f"Falha ao processar link: {e}")
@@ -136,4 +152,4 @@ def processar_resultados_ontem():
 
 if __name__ == "__main__":
     processar_resultados_ontem()
-    
+            
