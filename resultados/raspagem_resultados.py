@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# --- CONFIGURAÇÕES DE CAMINHO AJUSTADAS ---
+# --- CONFIGURAÇÕES DE CAMINHO ---
 PATH_DIR_JOGOS = "telegram"          # Onde estão os arquivos de jogos diários
 PATH_DIR_RESULTADOS = "resultados"     # Onde o JSON de resultados final será salvo
 
@@ -55,46 +55,43 @@ def extrair_estatisticas_partida(driver, url_h2h):
         except Exception as e:
             log("AVISO GOLS", f"Não foi possível extrair o placar exato: {e}")
 
-        # 2. Montagem e Acesso à URL de Estatísticas Detalhadas (/resumo/estatisticas/total/)
-        if "?mid=" in url_atual:
-            partes = url_atual.split("?mid=")
-            base_url = partes[0].rstrip("/")
-            mid_param = partes[1]
-            
-            url_estatisticas = f"{base_url}/resumo/estatisticas/total/?mid={mid_param}"
-            
-            driver.get(url_estatisticas)
-            time.sleep(2.5)
-            
-            # Utilizando a mesma lógica robusta do bot baseada em spans do Flashscore
-            try:
-                todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
-                if len(todos_spans) > 0:
-                    for idx, span in enumerate(todos_spans):
-                        texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
-                        
-                        # Escanteios
-                        if texto_elemento in ["ESCANTEIOS", "CORNERS"]:
-                            if idx > 0 and (idx + 1) < len(todos_spans):
-                                c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
-                                f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                                match_c = re.search(r'\d+', c_str)
-                                match_f = re.search(r'\d+', f_str)
-                                resultado_parcial["escanteios_casa"] = int(match_c.group()) if match_c else 0
-                                resultado_parcial["escanteios_fora"] = int(match_f.group()) if match_f else 0
+        # 2. Montagem da URL de estatísticas com LOG de validação
+        url_jogo_base = url_atual.split("?")[0].split("#")[0].strip("/")
+        url_stats_geral = f"{url_jogo_base}/resumo/estatisticas/total/"
+        
+        log("URL STATS", f"Acessando estatísticas: {url_stats_geral}")
+        
+        driver.get(url_stats_geral)
+        time.sleep(2.5)
+        
+        try:
+            todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
+            if len(todos_spans) > 0:
+                for idx, span in enumerate(todos_spans):
+                    texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
+                    
+                    # Escanteios
+                    if texto_elemento in ["ESCANTEIOS", "CORNERS"]:
+                        if idx > 0 and (idx + 1) < len(todos_spans):
+                            c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                            f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                            match_c = re.search(r'\d+', c_str)
+                            match_f = re.search(r'\d+', f_str)
+                            resultado_parcial["escanteios_casa"] = int(match_c.group()) if match_c else 0
+                            resultado_parcial["escanteios_fora"] = int(match_f.group()) if match_f else 0
 
-                        # Cartões Amarelos
-                        if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
-                            if idx > 0 and (idx + 1) < len(todos_spans):
-                                c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
-                                f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
-                                match_c = re.search(r'\d+', c_str)
-                                match_f = re.search(r'\d+', f_str)
-                                resultado_parcial["cartoes_casa"] = int(match_c.group()) if match_c else 0
-                                resultado_parcial["cartoes_fora"] = int(match_f.group()) if match_f else 0
+                    # Cartões Amarelos
+                    if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
+                        if idx > 0 and (idx + 1) < len(todos_spans):
+                            c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
+                            f_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx + 1]).strip()
+                            match_c = re.search(r'\d+', c_str)
+                            match_f = re.search(r'\d+', f_str)
+                            resultado_parcial["cartoes_casa"] = int(match_c.group()) if match_c else 0
+                            resultado_parcial["cartoes_fora"] = int(match_f.group()) if match_f else 0
 
-            except Exception as e_sp:
-                log("AVISO STATS", f"Erro ao ler spans estatísticos: {e_sp}")
+        except Exception as e_sp:
+            log("AVISO STATS", f"Erro ao ler spans estatísticos: {e_sp}")
 
     except Exception as e:
         log("ERRO PARTIDA", f"Falha ao processar link: {e}")
@@ -152,4 +149,4 @@ def processar_resultados_ontem():
 
 if __name__ == "__main__":
     processar_resultados_ontem()
-            
+                
