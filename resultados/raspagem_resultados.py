@@ -11,12 +11,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# --- CONFIGURAÇÕES DE CAMINHO ---
-PATH_DIR_JOGOS = "telegram"          # Onde estão os arquivos de jogos diários
-PATH_DIR_RESULTADOS = "resultados"     # Onde o JSON de resultados final será salvo
+PATH_DIR_JOGOS = "telegram"
+PATH_DIR_RESULTADOS = "resultados"
 
 def log(etapa, message):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] 📊 {etapa}: {message}")
+    print(f"[{datetime.now().strftime('%H:%M:%S']}] 📊 {etapa}: {message}")
 
 def configurar_driver():
     options = Options()
@@ -37,7 +36,7 @@ def extrair_estatisticas_partida(driver, url_h2h):
     
     try:
         driver.get(url_h2h)
-        time.sleep(3) # Aguarda o redirecionamento automático do Flashscore
+        time.sleep(3)
         url_atual = driver.current_url
         
         # 1. Extração de Gols (Placar)
@@ -55,14 +54,14 @@ def extrair_estatisticas_partida(driver, url_h2h):
         except Exception as e:
             log("AVISO GOLS", f"Não foi possível extrair o placar exato: {e}")
 
-        # 2. Montagem da URL de estatísticas com LOG de validação
+        # 2. Acesso à URL de estatísticas utilizando a lógica padrão do bot
         url_jogo_base = url_atual.split("?")[0].split("#")[0].strip("/")
         url_stats_geral = f"{url_jogo_base}/resumo/estatisticas/total/"
         
         log("URL STATS", f"Acessando estatísticas: {url_stats_geral}")
         
         driver.get(url_stats_geral)
-        time.sleep(2.5)
+        time.sleep(2.0)
         
         try:
             todos_spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
@@ -70,7 +69,7 @@ def extrair_estatisticas_partida(driver, url_h2h):
                 for idx, span in enumerate(todos_spans):
                     texto_elemento = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
                     
-                    # Escanteios
+                    # Escanteios (mesma lógica do bot)
                     if texto_elemento in ["ESCANTEIOS", "CORNERS"]:
                         if idx > 0 and (idx + 1) < len(todos_spans):
                             c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
@@ -80,7 +79,7 @@ def extrair_estatisticas_partida(driver, url_h2h):
                             resultado_parcial["escanteios_casa"] = int(match_c.group()) if match_c else 0
                             resultado_parcial["escanteios_fora"] = int(match_f.group()) if match_f else 0
 
-                    # Cartões Amarelos
+                    # Cartões Amarelos (mesma lógica do bot)
                     if texto_elemento in ["CARTÕES AMARELOS", "CARTÃO AMARELO", "YELLOW CARDS", "YELLOW CARD"]:
                         if idx > 0 and (idx + 1) < len(todos_spans):
                             c_str = driver.execute_script("return arguments[0].textContent;", todos_spans[idx - 1]).strip()
@@ -149,4 +148,4 @@ def processar_resultados_ontem():
 
 if __name__ == "__main__":
     processar_resultados_ontem()
-                
+                        
