@@ -10,8 +10,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-PATH_DIR_JOGOS = "app/src/main/assets/jogos"
-PATH_DIR_RESULTADOS = os.path.join("estatisticas")
+# --- CONFIGURAÇÕES DE CAMINHO AJUSTADAS ---
+PATH_DIR_JOGOS = "telegram"          # Onde estão os arquivos de jogos diários
+PATH_DIR_RESULTADOS = "resultados"     # Onde o JSON de resultados final será salvo
 
 def log(etapa, message):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] 📊 {etapa}: {message}")
@@ -35,7 +36,7 @@ def extrair_estatisticas_partida(driver, url_h2h):
     
     try:
         driver.get(url_h2h)
-        time.sleep(3) # Aguarda o redirecionamento automático do Flashscore para o jogo específico
+        time.sleep(3) # Aguarda o redirecionamento automático do Flashscore
         url_atual = driver.current_url
         
         # 1. Extração de Gols (Placar)
@@ -92,7 +93,7 @@ def processar_resultados_ontem():
     path_salvar_resultados = os.path.join(PATH_DIR_RESULTADOS, f"resultados_{data_ontem_str}.json")
     
     if not os.path.exists(path_arquivo_ontem):
-        log("AVISO", f"Nenhum arquivo de jogos encontrado para ontem ({data_ontem_str}).")
+        log("AVISO", f"Nenhum arquivo de jogos encontrado na pasta telegram para ontem ({data_ontem_str}).")
         return
 
     with open(path_arquivo_ontem, 'r', encoding='utf-8') as f:
@@ -110,7 +111,6 @@ def processar_resultados_ontem():
             log("SCRAPER", f"Raspando: {jogo['time_casa']} x {jogo['time_fora']}")
             dados_jogo = extrair_estatisticas_partida(driver, url_h2h)
             
-            # Salva o JSON limpo sem odd e sem status
             lista_resultados.append({
                 "horario": jogo.get("horario"),
                 "liga": jogo.get("liga"),
@@ -129,11 +129,11 @@ def processar_resultados_ontem():
         with open(path_salvar_resultados, 'w', encoding='utf-8') as f:
             json.dump(lista_resultados, f, indent=4, ensure_ascii=False)
             
-        log("SUCESSO", f"Resultados limpos salvos em: {path_salvar_resultados}")
+        log("SUCESSO", f"Resultados salvos com sucesso em: {path_salvar_resultados}")
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
     processar_resultados_ontem()
-      
+    
