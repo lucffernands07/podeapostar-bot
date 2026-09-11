@@ -1,0 +1,113 @@
+{
+    "data_geracao": "2026-09-10",
+    "jogos": [
+        {
+            "time_casa": "Ind. del Valle (Ecu)",
+            "time_fora": "Flamengo (Bra)",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Qsob4IQ9/#/resumo-de-jogo",
+            "odd_casa": "3.10",
+            "odd_fora": "2.40"
+        },
+        {
+            "time_casa": "Cienciano (Per)",
+            "time_fora": "Montevideo City (Uru)",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/llrn4fMs/#/resumo-de-jogo",
+            "odd_casa": "1.44",
+            "odd_fora": "7.50"
+        },
+        {
+            "time_casa": "São Bernardo",
+            "time_fora": "Londrina",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/Y9wactNp/#/resumo-de-jogo",
+            "odd_casa": "1.57",
+            "odd_fora": "5.50"
+        },
+        {
+            "time_casa": "Sport",
+            "time_fora": "Ponte Preta",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/jm9QXMbc/#/resumo-de-jogo",
+            "odd_casa": "1.09",
+            "odd_fora": "15.00"
+        },
+        {
+            "time_casa": "Fenerbahce",
+            "time_fora": "AS Roma",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/p4qtPzNN/#/resumo-de-jogo",
+            "odd_casa": "3.80",
+            "odd_fora": "1.90"
+        },
+        {
+            "time_casa": "PSV",
+            "time_fora": "Shakhtar",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/UTCOpiqp/#/resumo-de-jogo",
+            "odd_casa": "1.50",
+            "odd_fora": "5.50"
+        },
+        {
+            "time_casa": "Como",
+            "time_fora": "RB Leipzig",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/WhVkZZ2L/#/resumo-de-jogo",
+            "odd_casa": "1.67",
+            "odd_fora": "4.50"
+        },
+        {
+            "time_casa": "Slavia Praga",
+            "time_fora": "Lens",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/YepM57w0/#/resumo-de-jogo",
+            "odd_casa": "2.80",
+            "odd_fora": "2.30"
+        },
+        {
+            "time_casa": "Estrela da Amadora",
+            "time_fora": "Braga",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/0Ah40AqH/#/resumo-de-jogo",
+            "odd_casa": "5.75",
+            "odd_fora": "1.56"
+        },
+        {
+            "time_casa": "Sundby",
+            "time_fora": "Midtjylland",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/MDUEmPoC/#/resumo-de-jogo",
+            "odd_casa": "34.00",
+            "odd_fora": "1.04"
+        },
+        {
+            "time_casa": "Millonarios",
+            "time_fora": "Dep. Cali",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/6g6tG3Vr/#/resumo-de-jogo",
+            "odd_casa": "1.73",
+            "odd_fora": "4.75"
+        },
+        {
+            "time_casa": "Antofagasta",
+            "time_fora": "Cobreloa",
+            "mercado": "MÚLTIPLOS",
+            "mercado_ranking": "LISTÃO GERAL",
+            "link_h2h": "https://www.flashscore.com.br/jogo/nueb2SM8/#/resumo-de-jogo",
+            "odd_casa": "1.85",
+            "odd_fora": "3.70"
+        }
+    ]
+}
