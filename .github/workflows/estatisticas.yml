@@ -4,7 +4,7 @@ on:
   schedule:
     # 03:07 UTC (00:07 AM Horário de Brasília) - Processa os Resultados de Ontem
     - cron: '07 3 * * *'
-  workflow_dispatch: # Permite que você clique em "Run workflow" para testar manualmente agora
+  workflow_dispatch: # Permite testar manualmente no GitHub Actions
 
 jobs:
   rodar-estatisticas:
@@ -30,13 +30,13 @@ jobs:
         run: |
           pip install selenium webdriver-manager
 
-      # Executa o script direto que valida o pendentes.json e cruza os dados
+      # Executa o script correto na pasta resultados/
       - name: Processar Resultados de Ontem
         run: |
-          xvfb-run python estatisticas/analisador.py
+          xvfb-run python resultados/raspagem_resultados.py
 
-      # SALVAMENTO SEGURO: Salva as alterações e os novos JSONs de volta no repositório
-      - name: Commit e Push das atualizações
+      # Salva o JSON de resultados gerado de volta no repositório podeapostar-bot
+      - name: Commit e Push no podeapostar-bot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -45,45 +45,43 @@ jobs:
           
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           
-          # Garante a inclusão do histórico global atualizado
-          [ -f estatisticas/padroes_db.json ] && git add estatisticas/padroes_db.json
+          # Adiciona os arquivos JSON de resultados gerados na pasta resultados
+          git add resultados/resultados_*.json
           
-          # AJUSTE: Adiciona dinamicamente os novos arquivos de links gerados para hoje e amanhã
-          git add estatisticas/links_*.json
-          
-          # Só commita se houver mudanças reais para não quebrar a esteira
-          git diff-index --quiet HEAD || git commit -m "Estatísticas e Links atualizados: $(date +'%d/%m/%Y %H:%M')"
+          git diff-index --quiet HEAD || git commit -m "Resultados de ontem atualizados: $(date +'%d/%m/%Y %H:%M')"
           git push origin main
 
-      # NOVO PASSO: Envia os resultados auditados para o repositório do app Android
-      - name: Enviar Resultados Auditados para o LifeBet App
+      # Envia o JSON gerado para o repositório do app Android (lifebet)
+      - name: Enviar Resultados para o LifeBet App
         env:
-          GH_TOKEN: ${{ secrets.ACCESS_TOKEN_GH }} # Usando o PAT configurado nos Secrets para repositório privado
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN_GH }} # Token pessoal com permissão nos dois repositórios
         run: |
-          ARQUIVO_PADROES="estatisticas/padroes_db.json"
+          # Pega dinamicamente o arquivo de resultados de ontem gerado pelo script
+          DATA_ONTEM=$(date -d "yesterday" '+%Y-%m-%d')
+          ARQUIVO_RESULTADO="resultados/resultados_${DATA_ONTEM}.json"
 
-          if [ -f "$ARQUIVO_PADROES" ]; then
-            echo "Processando resultados para o app Android..."
+          if [ -f "$ARQUIVO_RESULTADO" ]; then
+            echo "Enviando $ARQUIVO_RESULTADO para o app Android..."
             
-            # Clona o repositório do app Android usando o token personalizado
+            # Clona o repositório do app Android
             git clone https://x-access-token:${GH_TOKEN}@github.com/lucffernands07/lifebet.git repo_android
             
-            # Cria a pasta de destino no projeto Android
+            # Cria a pasta de destino nos assets do app
             mkdir -p repo_android/app/src/main/assets/resultados/
             
-            # Copia o banco de padrões para dentro dos assets do app
-            cp "$ARQUIVO_PADROES" repo_android/app/src/main/assets/resultados/padroes_db.json
+            # Copia o arquivo de resultados para a pasta correta
+            cp "$ARQUIVO_RESULTADO" repo_android/app/src/main/assets/resultados/
             
             cd repo_android
             git config --global user.name "github-actions[bot]"
             git config --global user.email "github-actions[bot]@users.noreply.github.com"
             
-            git add "app/src/main/assets/resultados/padroes_db.json"
-            git commit -m "Auto: Atualizando resultados e auditoria do dia [skip ci]" || echo "Sem alterações para commitar"
+            git add "app/src/main/assets/resultados/"
+            git commit -m "Auto: Atualizando resultados de ${DATA_ONTEM} [skip ci]" || echo "Sem alterações para commitar"
             git push origin main
             
             echo "Resultados enviados com sucesso para o LifeBet!"
           else
-            echo "Aviso: Arquivo de padrões não encontrado."
+            echo "Aviso: O arquivo de resultados ${ARQUIVO_RESULTADO} não foi encontrado."
           fi
           
