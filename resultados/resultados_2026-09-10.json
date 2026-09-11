@@ -20,10 +20,10 @@
         "mercado": "+1.5 Gols (80%)",
         "gols_casa": 1,
         "gols_fora": 1,
-        "escanteios_casa": 0,
-        "escanteios_fora": 0,
-        "cartoes_casa": 0,
-        "cartoes_fora": 0
+        "escanteios_casa": 1,
+        "escanteios_fora": 5,
+        "cartoes_casa": 1,
+        "cartoes_fora": 5
     },
     {
         "horario": "13:45",
@@ -34,9 +34,9 @@
         "gols_casa": 1,
         "gols_fora": 1,
         "escanteios_casa": 0,
-        "escanteios_fora": 0,
+        "escanteios_fora": 7,
         "cartoes_casa": 0,
-        "cartoes_fora": 0
+        "cartoes_fora": 7
     },
     {
         "horario": "16:00",
@@ -46,10 +46,10 @@
         "mercado": "-4.5 Gols (80%)",
         "gols_casa": 4,
         "gols_fora": 1,
-        "escanteios_casa": 0,
-        "escanteios_fora": 0,
-        "cartoes_casa": 0,
-        "cartoes_fora": 0
+        "escanteios_casa": 2,
+        "escanteios_fora": 6,
+        "cartoes_casa": 2,
+        "cartoes_fora": 6
     },
     {
         "horario": "16:00",
@@ -59,10 +59,10 @@
         "mercado": "+1.5 Gols (100%)",
         "gols_casa": 2,
         "gols_fora": 3,
-        "escanteios_casa": 0,
-        "escanteios_fora": 0,
-        "cartoes_casa": 0,
-        "cartoes_fora": 0
+        "escanteios_casa": 1,
+        "escanteios_fora": 6,
+        "cartoes_casa": 1,
+        "cartoes_fora": 6
     },
     {
         "horario": "16:15",
@@ -73,9 +73,9 @@
         "gols_casa": 2,
         "gols_fora": 1,
         "escanteios_casa": 0,
-        "escanteios_fora": 0,
+        "escanteios_fora": 5,
         "cartoes_casa": 0,
-        "cartoes_fora": 0
+        "cartoes_fora": 5
     },
     {
         "horario": "19:30",
@@ -86,9 +86,9 @@
         "gols_casa": 1,
         "gols_fora": 2,
         "escanteios_casa": 0,
-        "escanteios_fora": 0,
+        "escanteios_fora": 13,
         "cartoes_casa": 0,
-        "cartoes_fora": 0
+        "cartoes_fora": 13
     },
     {
         "horario": "20:00",
@@ -98,10 +98,10 @@
         "mercado": "-4.5 Gols (80%)",
         "gols_casa": 0,
         "gols_fora": 0,
-        "escanteios_casa": 0,
-        "escanteios_fora": 0,
-        "cartoes_casa": 0,
-        "cartoes_fora": 0
+        "escanteios_casa": 48,
+        "escanteios_fora": 2,
+        "cartoes_casa": 48,
+        "cartoes_fora": 2
     },
     {
         "horario": "21:30",
@@ -111,10 +111,10 @@
         "mercado": "+1.5 Gols (100%)",
         "gols_casa": 2,
         "gols_fora": 0,
-        "escanteios_casa": 0,
-        "escanteios_fora": 0,
-        "cartoes_casa": 0,
-        "cartoes_fora": 0
+        "escanteios_casa": 3,
+        "escanteios_fora": 12,
+        "cartoes_casa": 3,
+        "cartoes_fora": 12
     },
     {
         "horario": "21:30",
@@ -124,10 +124,10 @@
         "mercado": "+1.5 Gols (80%)",
         "gols_casa": 0,
         "gols_fora": 2,
-        "escanteios_casa": 0,
-        "escanteios_fora": 0,
-        "cartoes_casa": 0,
-        "cartoes_fora": 0
+        "escanteios_casa": 1,
+        "escanteios_fora": 8,
+        "cartoes_casa": 1,
+        "cartoes_fora": 8
     },
     {
         "horario": "21:30",
@@ -137,10 +137,10 @@
         "mercado": "-4.5 Gols (80%)",
         "gols_casa": 2,
         "gols_fora": 0,
-        "escanteios_casa": 0,
-        "escanteios_fora": 0,
-        "cartoes_casa": 0,
-        "cartoes_fora": 0
+        "escanteios_casa": 2,
+        "escanteios_fora": 16,
+        "cartoes_casa": 2,
+        "cartoes_fora": 16
     },
     {
         "horario": "22:00",
@@ -150,9 +150,9 @@
         "mercado": "-4.5 Gols (100%)",
         "gols_casa": 1,
         "gols_fora": 1,
-        "escanteios_casa": 0,
-        "escanteios_fora": 0,
-        "cartoes_casa": 0,
-        "cartoes_fora": 0
+        "escanteios_casa": 1,
+        "escanteios_fora": 8,
+        "cartoes_casa": 1,
+        "cartoes_fora": 8
     }
 ]
