@@ -63,25 +63,25 @@ def extrair_dados_completos(driver, url_h2h):
         except Exception as e_gols:
             log("AVISO GOLS", f"Não foi possível capturar o placar: {e_gols}")
 
-        # Função auxiliar interna para buscar valores baseados no título da estatística
+        # Função auxiliar corrigida para varrer as linhas e isolar os valores corretos
         def buscar_stat_por_nome(nomes_alvo):
             try:
                 spans = driver.find_elements(By.CSS_SELECTOR, "[data-testid='wcl-scores-simple-text-01']")
                 for span in spans:
                     texto = driver.execute_script("return arguments[0].textContent;", span).strip().upper()
                     if any(n in texto for n in nomes_alvo):
-                        # Sobe para o container pai da linha para isolar os valores daquele item específico
-                        linha_pai = span.find_element(By.XPATH, "./ancestor::div[contains(@class, 'row') or ancestor::div[3]]")
+                        # Sobe para o elemento ancestral que contém a linha inteira da estatística
+                        linha_pai = span.find_element(By.XPATH, "./ancestor::div[contains(@class, 'row') or count(./div//div[contains(@class, 'wcl-value')]) >= 2]")
+                        
+                        # Se não achar pela classe row, sobe alguns níveis fixos seguros para o bloco da linha
+                        if not linha_pai:
+                            linha_pai = span.find_element(By.XPATH, "./ancestor::div[3]")
+                            
                         valores = linha_pai.find_elements(By.CSS_SELECTOR, "[class*='wcl-value']")
                         
-                        if len(valores) < 2:
-                            # Fallback subindo mais um nível se necessário
-                            linha_pai = span.find_element(By.XPATH, "./ancestor::div[2]")
-                            valores = linha_pai.find_elements(By.CSS_SELECTOR, "[class*='wcl-value']")
-
                         if len(valores) >= 2:
                             m_c = re.search(r'\d+', valores[0].text)
-                            m_f = re.search(r'\d+', valores[-1].text)
+                            m_f = re.search(r'\d+', valores[1].text)
                             c_val = int(m_c.group()) if m_c else 0
                             f_val = int(m_f.group()) if m_f else 0
                             return c_val, f_val
@@ -155,4 +155,4 @@ def processar_resultados_ontem():
 
 if __name__ == "__main__":
     processar_resultados_ontem()
-            
+                    
