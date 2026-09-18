@@ -1,103 +1,84 @@
 """
-REGRAS DE MERCADO - VITÓRIAS (CASA / FORA) ATUALIZADO
-- Vitória Casa: 
-  * 3 vitórias seguidas do mandante em casa.
-  * Média de gols feitos pelo mandante >= 2.0 nos últimos 3 jogos em casa.
-  * Média de gols sofridos pelo visitante >= 2.0 nos últimos 3 jogos fora.
-- Vitória Fora: 
-  * 3 vitórias seguidas do visitante fora.
-  * Média de gols feitos pelo visitante >= 2.0 nos últimos 3 jogos fora.
-  * Média de gols sofridos pelo mandante >= 2.0 nos últimos 3 jogos em casa.
+REGRAS DE MERCADO - VITÓRIAS (CASA / FORA)
+- Vitória Casa: Casa mínimo 4/5 vitórias E fora 4/5 derrotas.
+- Vitória Fora: Fora mínimo 4/5 vitórias E casa 4/5 derrotas.
 - Trava de Descarte Mútuo: Se ambos passarem, o jogo é descartado.
 """
+
+def contar_resultados(lista_resultados, tipo_alvo):
+    if not isinstance(lista_resultados, list):
+        return 0
+    count = 0
+    for r in lista_resultados:
+        res = str(r).strip().upper()
+        if res == tipo_alvo:
+            count += 1
+    return count
 
 def verificar_vitorias(s):
     mercados_aprovados = []
     if not isinstance(s, dict):
         return mercados_aprovados
 
-    # --- 1. CAPTURA DOS DADOS DOS 3 ÚLTIMOS JOGOS ---
     try:
-        # Mandante em casa (1 = mais recente, 3 = mais antigo)
-        m_gf1 = int(s.get("t1_gols_favor_1", 0) or 0)
-        m_gc1 = int(s.get("t1_gols_contra_1", 0) or 0)
-        
-        m_gf2 = int(s.get("t1_gols_favor_2", 0) or 0)
-        m_gc2 = int(s.get("t1_gols_contra_2", 0) or 0)
-        
-        m_gf3 = int(s.get("t1_gols_favor_3", 0) or 0)
-        m_gc3 = int(s.get("t1_gols_contra_3", 0) or 0)
-
-        # Visitante fora (1 = mais recente, 3 = mais antigo)
-        v_gf1 = int(s.get("t2_gols_favor_1", 0) or 0)
-        v_gc1 = int(s.get("t2_gols_contra_1", 0) or 0)
-        
-        v_gf2 = int(s.get("t2_gols_favor_2", 0) or 0)
-        v_gc2 = int(s.get("t2_gols_contra_2", 0) or 0)
-        
-        v_gf3 = int(s.get("t2_gols_favor_3", 0) or 0)
-        v_gc3 = int(s.get("t2_gols_contra_3", 0) or 0)
+        res_mandante = [
+            s.get("t1_resultado_1"), s.get("t1_resultado_2"), 
+            s.get("t1_resultado_3"), s.get("t1_resultado_4"), s.get("t1_resultado_5")
+        ]
+        res_visitante = [
+            s.get("t2_resultado_1"), s.get("t2_resultado_2"), 
+            s.get("t2_resultado_3"), s.get("t2_resultado_4"), s.get("t2_resultado_5")
+        ]
     except:
         return []
 
-    # --- 2. VALIDAÇÃO DE RESULTADOS (3 VITÓRIAS SEGUIDAS) ---
-    m_vitoria_1 = m_gf1 > m_gc1
-    m_vitoria_2 = m_gf2 > m_gc2
-    m_vitoria_3 = m_gf3 > m_gc3
-    mandante_3_vitorias = m_vitoria_1 and m_vitoria_2 and m_vitoria_3
+    # Fallback automático pelos gols caso o texto do resultado não venha preenchido
+    for i in range(1, 6):
+        if not res_mandante[i-1]:
+            gf = s.get(f"t1_gols_favor_{i}")
+            gc = s.get(f"t1_gols_contra_{i}")
+            if gf is not None and gc is not None:
+                if int(gf) > int(gc): res_mandante[i-1] = "V"
+                elif int(gf) < int(gc): res_mandante[i-1] = "D"
+                else: res_mandante[i-1] = "E"
 
-    v_vitoria_1 = v_gf1 > v_gc1
-    v_vitoria_2 = v_gf2 > v_gc2
-    v_vitoria_3 = v_gf3 > v_gc3
-    visitante_3_vitorias = v_vitoria_1 and v_vitoria_2 and v_vitoria_3
+        if not res_visitante[i-1]:
+            gf = s.get(f"t2_gols_favor_{i}")
+            gc = s.get(f"t2_gols_contra_{i}")
+            if gf is not None and gc is not None:
+                if int(gf) > int(gc): res_visitante[i-1] = "V"
+                elif int(gf) < int(gc): res_visitante[i-1] = "D"
+                else: res_visitante[i-1] = "E"
 
-    # --- 3. CÁLCULO DE MÉDIAS DOS ÚLTIMOS 3 JOGOS ---
-    # Gols Feitos
-    media_gf_mandante = (m_gf1 + m_gf2 + m_gf3) / 3.0
-    media_gf_visitante = (v_gf1 + v_gf2 + v_gf3) / 3.0
+    vitorias_mandante = contar_resultados(res_mandante, "V")
+    derrotas_mandante = contar_resultados(res_mandante, "D")
+    
+    vitorias_visitante = contar_resultados(res_visitante, "V")
+    derrotas_visitante = contar_resultados(res_visitante, "D")
 
-    # Gols Sofridos (Gols Contra)
-    media_gc_mandante = (m_gc1 + m_gc2 + m_gc3) / 3.0
-    media_gc_visitante = (v_gc1 + v_gc2 + v_gc3) / 3.0
+    # Regras de Vitórias Secas:
+    # Vitória Casa: Casa mínimo 4/5 vitórias E fora 4/5 derrotas
+    condicao_vitoria_casa = (vitorias_mandante >= 4) and (derrotas_visitante >= 4)
+    
+    # Vitória Fora: Fora mínimo 4/5 vitórias E casa 4/5 derrotas
+    condicao_vitoria_fora = (vitorias_visitante >= 4) and (derrotas_mandante >= 4)
 
-    tem_vitoria_casa = False
-    tem_vitoria_fora = False
-
-    # ----------------------------------------------------------
-    # 🟢 REGRA VITÓRIA CASA
-    # Mandante 3 vitórias em casa + Média gols feitos >= 2.0
-    # Visitante com média de gols sofridos fora >= 2.0
-    # ----------------------------------------------------------
-    if mandante_3_vitorias and (media_gf_mandante >= 2.0) and (media_gc_visitante >= 2.0):
-        tem_vitoria_casa = True
-
-    # ----------------------------------------------------------
-    # 🟢 REGRA VITÓRIA FORA
-    # Visitante 3 vitórias fora + Média gols feitos >= 2.0
-    # Mandante com média de gols sofridos em casa >= 2.0
-    # ----------------------------------------------------------
-    if visitante_3_vitorias and (media_gf_visitante >= 2.0) and (media_gc_mandante >= 2.0):
-        tem_vitoria_fora = True
-
-    # ----------------------------------------------------------
-    # 🛑 TRAVA DE DESCARTE MÚTUO
-    # ----------------------------------------------------------
-    if tem_vitoria_casa and tem_vitoria_fora:
+    # Trava de Descarte Mútuo
+    if condicao_vitoria_casa and condicao_vitoria_fora:
         print(f"      ⚠️ CONFLITO DE VITÓRIAS: Vitória Casa e Fora passaram juntas. Jogo descartado.")
         return []
 
-    # Adiciona os mercados aprovados
-    if tem_vitoria_casa:
+    if condicao_vitoria_casa:
         mercados_aprovados.append({
             "mercado": "Resultado Final: Vitória Casa", 
             "tipo": "VITORIA_CASA"
         })
     
-    if tem_vitoria_fora:
+    if condicao_vitoria_fora:
         mercados_aprovados.append({
             "mercado": "Resultado Final: Vitória Fora", 
             "tipo": "VITORIA_FORA"
         })
 
     return mercados_aprovados
-    
+ 
