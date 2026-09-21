@@ -62,24 +62,36 @@ def main():
         print(f"🏆 LIGA ENCONTRADA E EXPANDIDA: {nome_liga_alvo}")
         print(f"==================================================")
         
-        # Coleta os links e informações dos jogos da liga
-        bloco_pai_liga = container_liga.find_element(By.XPATH, "./following-sibling::div[1] | ./parent::div")
+        # Coleta os links e informações dos jogos restritamente dentro do bloco da liga
+        # Sobe até o bloco principal da accordion que engloba a liga e seus jogos
+        bloco_pai_liga = container_liga.find_element(By.XPATH, "./ancestor::div[contains(@class, 'border') or contains(@class, 'rounded') or contains(@class, 'space-y') or contains(@class, 'flex-col')][2]")
         elementos_jogos = bloco_pai_liga.find_elements(By.XPATH, ".//a[contains(@href, '/fixture/')]")
-        
-        if not elementos_jogos:
-            elementos_jogos = driver.find_elements(By.XPATH, "//a[contains(@href, '/fixture/')]")
             
         jogos_encontrados = []
         for el in elementos_jogos:
             url_fixture = el.get_attribute("href")
-            texto_card = el.text.strip().replace("\n", " ")
+            
             if url_fixture and url_fixture not in [j["url"] for j in jogos_encontrados]:
+                # Extrai apenas os nomes dos times ignorando botões ("Escalações") e nomes de árbitros
+                spans = el.find_elements(By.XPATH, ".//span[contains(@class, 'truncate') or contains(@class, 'font-normal')]")
+                nomes_times = [s.text.strip() for s in spans if s.text.strip() and "Escalações" not in s.text]
+                
+                # Procura elemento de horário (formato HH:MM)
+                horario_el = el.find_elements(By.XPATH, ".//*[contains(text(), ':')]")
+                horario = horário_el[0].text.strip() if horario_el else "--:--"
+                
+                if len(nomes_times) >= 2:
+                    t1_card, t2_card = nomes_times[0], nomes_times[1]
+                    info_formatada = f"{t1_card} x {t2_card} ({horario})"
+                else:
+                    info_formatada = el.text.replace("\n", " ").strip()
+
                 jogos_encontrados.append({
                     "url": url_fixture,
-                    "info_card": texto_card
+                    "info_card": info_formatada
                 })
                 
-        # LOG 2: Todos os jogos de hoje após expandir a liga
+        # LOG 2: Todos os jogos de hoje encontrados na liga
         print(f"\n📋 JOGOS DE HOJE ENCONTRADOS ({len(jogos_encontrados)} partidas):")
         for idx, j in enumerate(jogos_encontrados, 1):
             print(f"   {idx}. {j['info_card']}")
@@ -94,10 +106,19 @@ def main():
             url_jogo = jogo["url"]
             inicio_jogo = time.time()
             
-            # Extração rápida dos nomes dos times a partir da URL para a chamada do H2H
-            partes = url_jogo.split("/fixture/")[1].split("-vs-")
-            t1 = partes[0].replace("-", " ").title()
-            t2 = partes[1].split("-mubb")[0].replace("-", " ").title()
+            # Limpeza aprimorada do nome dos times a partir da URL
+            try:
+                slug_fixture = url_jogo.split("/fixture/")[1].split("/")[0]
+                partes_times = slug_fixture.split("-vs-")
+                
+                t1 = partes_times[0].replace("-", " ").title().strip()
+                
+                raw_t2 = partes_times[1]
+                if "-mub" in raw_t2:
+                    raw_t2 = raw_t2.split("-mub")[0]
+                t2 = raw_t2.replace("-", " ").title().strip()
+            except Exception:
+                t1, t2 = "Mandante", "Visitante"
             
             print(f"--------------------------------------------------")
             print(f"🏟️ [{idx}/{len(jogos_encontrados)}] {t1} x {t2}")
