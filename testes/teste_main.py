@@ -47,7 +47,7 @@ def main():
         # Localiza a Liga Argentina na lista
         xpath_liga = f"//a[contains(text(), '{nome_liga_alvo}')]"
         elemento_liga = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_locator((By.XPATH, xpath_liga))
+            EC.presence_of_element_located((By.XPATH, xpath_liga))
         )
         
         # Encontra o elemento clicável e expande a liga
