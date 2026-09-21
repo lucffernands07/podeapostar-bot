@@ -63,7 +63,6 @@ def main():
         print(f"==================================================")
         
         # Coleta os links e informações dos jogos restritamente dentro do bloco da liga
-        # Sobe até o bloco principal da accordion que engloba a liga e seus jogos
         bloco_pai_liga = container_liga.find_element(By.XPATH, "./ancestor::div[contains(@class, 'border') or contains(@class, 'rounded') or contains(@class, 'space-y') or contains(@class, 'flex-col')][2]")
         elementos_jogos = bloco_pai_liga.find_elements(By.XPATH, ".//a[contains(@href, '/fixture/')]")
             
@@ -78,7 +77,7 @@ def main():
                 
                 # Procura elemento de horário (formato HH:MM)
                 horario_el = el.find_elements(By.XPATH, ".//*[contains(text(), ':')]")
-                horario = horário_el[0].text.strip() if horario_el else "--:--"
+                horario = horario_el[0].text.strip() if horario_el else "--:--"
                 
                 if len(nomes_times) >= 2:
                     t1_card, t2_card = nomes_times[0], nomes_times[1]
