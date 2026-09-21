@@ -3,10 +3,32 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+def mesmo_time(nome_busca, nome_tabela):
+    """
+    Verifica se o nome vindo do site (ex: 'Estud dLP') corresponde ao time buscado (ex: 'Estudiantes').
+    """
+    if not nome_busca or not nome_tabela:
+        return False
+    nb = nome_busca.lower().strip()
+    nt = nome_tabela.lower().strip()
+    
+    # 1. Verificação de substring direta
+    if nb in nt or nt in nb:
+        return True
+    
+    # 2. Comparação pelos primeiros 3 caracteres do primeiro nome
+    palavra_busca = nb.split()[0]
+    palavra_tabela = nt.split()[0]
+    if len(palavra_busca) >= 3 and len(palavra_tabela) >= 3:
+        if palavra_busca[:3] == palavra_tabela[:3]:
+            return True
+            
+    return False
+
 def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
     """
     Raspa as métricas gerais (Overall, For, Against) e o histórico dos últimos 5 jogos
-    em casa do mandante e fora do visitante no StatsHub.
+    de cada time no StatsHub, lidando com abreviações nos nomes.
     """
     overall_casa, for_casa, against_casa = "N/A", "N/A", "N/A"
     overall_fora, for_fora, against_fora = "N/A", "N/A", "N/A"
@@ -29,8 +51,10 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
         except Exception as e:
             print(f"   ⚠️ Aviso: Falha ao clicar na aba Team Stats: {e}")
 
-        # 2. Rola a página para carregar os blocos e tabelas
-        driver.execute_script("window.scrollTo(0, 400);")
+        # 2. Rola a página em etapas para renderizar os blocos e tabelas inferiores
+        driver.execute_script("window.scrollTo(0, 500);")
+        time.sleep(1)
+        driver.execute_script("window.scrollTo(0, 1000);")
         time.sleep(2)
 
         # 3. EXTRAÇÃO DAS MÉTRICAS (OVERALL, FOR, AGAINST)
@@ -50,7 +74,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
                 for_fora = spans_fora[1].text.strip()
                 against_fora = spans_fora[2].text.strip()
 
-        # 4. EXTRAÇÃO DO HISTÓRICO DE JOGOS (LINHAS TR)
+        # 4. EXTRAÇÃO DAS LINHAS DE JOGOS (TR)
         linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
 
         for linha in linhas:
@@ -63,41 +87,38 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
                     gols_fora = colunas[3].text.strip()
                     away_nome = colunas[4].text.strip()
 
-                    # Valida se contêm valores numéricos nos gols
                     if data and gols_casa.isdigit() and gols_fora.isdigit():
                         info_jogo = f"{data} | {home_nome} {gols_casa} - {gols_fora} {away_nome}"
 
-                        # Jogos do Mandante jogando em Casa
-                        if len(lista_jogos_casa) < 5 and t1.lower() in home_nome.lower():
-                            lista_jogos_casa.append(info_jogo)
+                        # Filtra últimos 5 jogos do Mandante (Lanús)
+                        if mesmo_time(t1, home_nome) or mesmo_time(t1, away_nome):
+                            if len(lista_jogos_casa) < 5 and info_jogo not in lista_jogos_casa:
+                                lista_jogos_casa.append(info_jogo)
 
-                        # Jogos do Visitante jogando Fora
-                        elif len(lista_jogos_fora) < 5 and t2.lower() in away_nome.lower():
-                            lista_jogos_fora.append(info_jogo)
+                        # Filtra últimos 5 jogos do Visitante (Estudiantes / Estud dLP)
+                        if mesmo_time(t2, home_nome) or mesmo_time(t2, away_nome):
+                            if len(lista_jogos_fora) < 5 and info_jogo not in lista_jogos_fora:
+                                lista_jogos_fora.append(info_jogo)
             except Exception:
                 continue
 
     except Exception as e:
         print(f"   ⚠️ Erro durante a raspagem: {e}")
 
-    # LOG ESTRUTURADO NO TERMINAL
+    # LOG ORGANIZADO NO TERMINAL
     print("\n" + "="*60)
     print("📊 STATSHUB - MÉTRICAS & HISTÓRICO DE JOGOS")
     print("="*60)
     print(f"🏠 {t1} (Casa):")
-    print(f"   • Overall : {overall_casa}")
-    print(f"   • Marcados (For) : {for_casa}")
-    print(f"   • Sofridos (Against) : {against_casa}")
-    print("   • Últimos 5 jogos em casa:")
+    print(f"   • Overall : {overall_casa} | For: {for_casa} | Against: {against_casa}")
+    print("   • Últimos 5 jogos:")
     for j in lista_jogos_casa:
         print(f"     - {j}")
 
     print("-" * 60)
     print(f"✈️ {t2} (Fora):")
-    print(f"   • Overall : {overall_fora}")
-    print(f"   • Marcados (For) : {for_fora}")
-    print(f"   • Sofridos (Against) : {against_fora}")
-    print("   • Últimos 5 jogos fora:")
+    print(f"   • Overall : {overall_fora} | For: {for_fora} | Against: {against_fora}")
+    print("   • Últimos 5 jogos:")
     for j in lista_jogos_fora:
         print(f"     - {j}")
     print("="*60 + "\n")
