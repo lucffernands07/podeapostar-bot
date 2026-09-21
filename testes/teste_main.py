@@ -31,6 +31,12 @@ def configurar_driver():
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
     driver.set_page_load_timeout(30)
+
+    # AJUSTE DE FUSO HORÁRIO: Emula fuso de Brasília/Buenos Aires (UTC-3)
+    driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {
+        "timezoneId": "America/Sao_Paulo"
+    })
+
     return driver
 
 def main():
@@ -79,6 +85,16 @@ def main():
                 horario_el = el.find_elements(By.XPATH, ".//*[contains(text(), ':')]")
                 horario = horario_el[0].text.strip() if horario_el else "--:--"
                 
+                # FILTRO DE FUSO: Descarta jogos marcados entre 00:00 e 03:00 (que eram 21:00-24:00 do dia anterior em UTC)
+                if horario != "--:--":
+                    try:
+                        hora_int = int(horario.split(":")[0])
+                        if hora_int < 3:
+                            print(f"⏭️ Descartando partida de ontem/madrugada (fuso UTC): {horario}")
+                            continue
+                    except ValueError:
+                        pass
+
                 if len(nomes_times) >= 2:
                     t1_card, t2_card = nomes_times[0], nomes_times[1]
                     info_formatada = f"{t1_card} x {t2_card} ({horario})"
