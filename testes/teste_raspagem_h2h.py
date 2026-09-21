@@ -5,7 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def mesmo_time(nome_busca, nome_tabela):
     """
-    Verifica se o nome vindo do site (ex: 'Estud dLP') corresponde ao time buscado (ex: 'Estudiantes').
+    Verifica de forma flexível se o nome vindo do site (ex: 'Indep Rivad') 
+    corresponde ao time buscado (ex: 'Independiente Rivadavia').
     """
     if not nome_busca or not nome_tabela:
         return False
@@ -16,25 +17,32 @@ def mesmo_time(nome_busca, nome_tabela):
     if nb in nt or nt in nb:
         return True
     
-    # 2. Comparação pelos primeiros 3 caracteres do primeiro nome
-    palavra_busca = nb.split()[0]
-    palavra_tabela = nt.split()[0]
-    if len(palavra_busca) >= 3 and len(palavra_tabela) >= 3:
-        if palavra_busca[:3] == palavra_tabela[:3]:
-            return True
-            
+    # 2. Comparação por prefixos das palavras (mínimo de 3 letras)
+    palavras_busca = [p for p in nb.split() if len(p) >= 3]
+    palavras_tabela = [p for p in nt.split() if len(p) >= 3]
+    
+    for pb in palavras_busca:
+        for pt in palavras_tabela:
+            if pb[:3] == pt[:3] and (pb in pt or pt in pb or pb[:4] == pt[:4]):
+                return True
+                
     return False
 
-def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
+def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario=""):
     """
     Raspa as métricas gerais (Overall, For, Against) e o histórico dos últimos 5 jogos
-    de cada time no StatsHub, lidando com abreviações nos nomes.
+    de cada time no StatsHub.
     """
     overall_casa, for_casa, against_casa = "N/A", "N/A", "N/A"
     overall_fora, for_fora, against_fora = "N/A", "N/A", "N/A"
     
     lista_jogos_casa = []
     lista_jogos_fora = []
+
+    # Exibe cabeçalho padrão no console
+    texto_horario = f" - {horario}" if horario else ""
+    print(f"\n🏟️ Jogo: {t1} x {t2}{texto_horario}")
+    print(f"🔗 URL: {url_jogo}\n")
 
     try:
         driver.get(url_jogo)
@@ -51,7 +59,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
         except Exception as e:
             print(f"   ⚠️ Aviso: Falha ao clicar na aba Team Stats: {e}")
 
-        # 2. Rola a página em etapas para renderizar os blocos e tabelas inferiores
+        # 2. Rola a página para renderizar elementos inferiores
         driver.execute_script("window.scrollTo(0, 500);")
         time.sleep(1)
         driver.execute_script("window.scrollTo(0, 1000);")
@@ -74,7 +82,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
                 for_fora = spans_fora[1].text.strip()
                 against_fora = spans_fora[2].text.strip()
 
-        # 4. EXTRAÇÃO DAS LINHAS DE JOGOS (TR)
+        # 4. EXTRAÇÃO DOS JOGOS (LINHAS TR)
         linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
 
         for linha in linhas:
@@ -90,12 +98,12 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
                     if data and gols_casa.isdigit() and gols_fora.isdigit():
                         info_jogo = f"{data} | {home_nome} {gols_casa} - {gols_fora} {away_nome}"
 
-                        # Filtra últimos 5 jogos do Mandante (Lanús)
+                        # Jogos do Mandante
                         if mesmo_time(t1, home_nome) or mesmo_time(t1, away_nome):
                             if len(lista_jogos_casa) < 5 and info_jogo not in lista_jogos_casa:
                                 lista_jogos_casa.append(info_jogo)
 
-                        # Filtra últimos 5 jogos do Visitante (Estudiantes / Estud dLP)
+                        # Jogos do Visitante
                         if mesmo_time(t2, home_nome) or mesmo_time(t2, away_nome):
                             if len(lista_jogos_fora) < 5 and info_jogo not in lista_jogos_fora:
                                 lista_jogos_fora.append(info_jogo)
@@ -103,12 +111,12 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
                 continue
 
     except Exception as e:
-        print(f"   ⚠️ Erro durante a raspagem: {e}")
+        print(f"   ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
 
-    # LOG ORGANIZADO NO TERMINAL
-    print("\n" + "="*60)
+    # LOG PADRONIZADO NO TERMINAL
+    print("============================================================")
     print("📊 STATSHUB - MÉTRICAS & HISTÓRICO DE JOGOS")
-    print("="*60)
+    print("============================================================")
     print(f"🏠 {t1} (Casa):")
     print(f"   • Overall : {overall_casa} | For: {for_casa} | Against: {against_casa}")
     print("   • Últimos 5 jogos:")
@@ -121,7 +129,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
     print("   • Últimos 5 jogos:")
     for j in lista_jogos_fora:
         print(f"     - {j}")
-    print("="*60 + "\n")
+    print("============================================================\n")
 
     return {
         "overall_casa": overall_casa,
