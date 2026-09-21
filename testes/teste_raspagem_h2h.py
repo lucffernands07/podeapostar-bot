@@ -7,10 +7,9 @@ from selenium.webdriver.support import expected_conditions as EC
 def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
     """
     Raspa os últimos 5 jogos do mandante (casa) e visitante (fora) no StatsHub
-    e retorna o dicionário 'stats' pronto para os módulos de regras.
+    acessando a aba 'Team Stats' e lendo diretamente as tabelas de estatísticas.
     """
     stats = {
-        "link_betano": None,
         "casa_05": 0, "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0, "casa_55_under": 0, "casa_btts": 0, 
         "fora_05": 0, "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0, "fora_55_under": 0, "fora_btts": 0, 
         
@@ -35,10 +34,6 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
         "historico_visitante_am": {}, "historico_visitante_vm": {}
     }
 
-    # Gera link de busca na Betano
-    t1_q, t2_q = t1.replace(" ", "%20"), t2.replace(" ", "%20")
-    stats["link_betano"] = f"https://www.betano.bet.br/busca/?q={t1_q}%20x%20{t2_q}"
-
     try:
         driver.get(url_jogo)
         WebDriverWait(driver, 15).until(
@@ -46,120 +41,108 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
         )
         time.sleep(3)
 
-        # 1. Clicar na aba 'Team Stats' se existir
+        # 1. Garante a navegação até a aba 'Team Stats'
         try:
-            btn_team_stats = WebDriverWait(driver, 5).until(
+            aba_team_stats = WebDriverWait(driver, 8).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Team Stats')] | //div[contains(text(), 'Team Stats')]"))
             )
-            btn_team_stats.click()
-            time.sleep(2)
+            driver.execute_script("arguments[0].click();", aba_team_stats)
+            time.sleep(3)
         except Exception:
-            pass # Se já estiver na aba correta ou for carregamento direto
+            pass
 
-        # 2. Alternar e analisar "casa" (Mandante) e "fora" (Visitante)
-        perspectivas = ["casa", "fora"]
+        # 2. Localiza as tabelas de jogos exibidas na aba Team Stats
+        # O StatsHub organiza os jogos em linhas dentro de cada seção (Lanús e Estudiantes)
+        linhas_elementos = driver.find_elements(By.XPATH, "//tr[td] | //div[contains(@class, 'v-row') and .//div[contains(@class, 'text-center')]]")
 
-        for tipo in perspectivas:
-            try:
-                # Tenta alternar o menu suspenso de filtro para Home/Away
-                try:
-                    filtro = driver.find_element(By.XPATH, "//button[contains(., 'Fixtures') or contains(., 'Home') or contains(., 'Away') or contains(., 'All')]")
-                    filtro.click()
-                    time.sleep(1)
+        jogos_casa = []
+        jogos_fora = []
 
-                    alvo_filtro = "Home" if tipo == "casa" else "Away"
-                    opcao = driver.find_element(By.XPATH, f"//li[contains(., '{alvo_filtro}')] | //button[contains(., '{alvo_filtro}')] | //div[contains(text(), '{alvo_filtro}')]")
-                    opcao.click()
-                    time.sleep(2)
-                except Exception:
-                    pass
+        for elem in linhas_elementos:
+            texto = elem.text.strip()
+            if not texto:
+                continue
 
-                # Localiza as linhas da tabela contendo os jogos
-                linhas = driver.find_elements(By.XPATH, "//tbody/tr | //div[contains(@class, 'match')] | //div[contains(@class, 'row')]")
-                linhas_validas = []
+            # Procura placares no formato "0 3", "1 0", "1 1", etc.
+            match_placar = re.search(r'(\d+)\s*[\-–:]?\s*(\d+)', texto)
+            if match_placar:
+                g1, g2 = int(match_placar.group(1)), int(match_placar.group(2))
+                partes = [p.strip() for p in texto.split('\n') if p.strip()]
 
-                # Filtra apenas linhas que possuem um placar numérico (ex: "2 - 1" ou "1-0")
-                for l in linhas:
-                    texto = l.text
-                    if re.search(r'\d+\s*[\-–:]\s*\d+', texto):
-                        linhas_validas.append(l)
-                    if len(linhas_validas) == 5:
-                        break
+                # Filtragem para Mandante (Lanús em Casa)
+                if len(jogos_casa) < 5:
+                    if any("lanú" in p.lower() or "lanus" in p.lower() for p in partes[:3]):
+                        jogos_casa.append((g1, g2))
 
-                print(f"   🔍 [{tipo.upper()}] Encontrados {len(linhas_validas)} jogos no histórico.")
+                # Filtragem para Visitante (Estudiantes Fora)
+                if len(jogos_fora) < 5:
+                    if any("estud" in p.lower() for p in partes[2:]):
+                        jogos_fora.append((g1, g2))
 
-                for i, linha in enumerate(linhas_validas):
-                    try:
-                        match_placar = re.search(r'(\d+)\s*[\-–:]\s*(\d+)', linha.text)
-                        if not match_placar:
-                            continue
+        # --- PROCESSAMENTO DOS JOGOS DO MANDANTE (LANÚS EM CASA) ---
+        print(f"   🔍 [CASA] Encontrados {len(jogos_casa)} jogos do {t1} em casa.")
+        for i, (g1, g2) in enumerate(jogos_casa):
+            placar_str = f"{g1}-{g2}"
+            total = g1 + g2
 
-                        g1, g2 = int(match_placar.group(1)), int(match_placar.group(2))
-                        placar_str = f"{g1}-{g2}"
-                        total = g1 + g2
+            if i == 0: stats["t1_placar_1"] = placar_str
 
-                        if tipo == "casa":
-                            if i == 0: 
-                                stats["t1_placar_1"] = placar_str
-                            
-                            if total > 0.5: stats["casa_05"] += 1
-                            if total > 1.5: stats["casa_15"] += 1
-                            if total > 2.5: stats["casa_25"] += 1
-                            if total <= 3: stats["casa_35_under"] += 1
-                            if total <= 4: stats["casa_45_under"] += 1
-                            if total <= 5: stats["casa_55_under"] += 1
-                            if g1 > 0 and g2 > 0: stats["casa_btts"] += 1
+            if total > 0.5: stats["casa_05"] += 1
+            if total > 1.5: stats["casa_15"] += 1
+            if total > 2.5: stats["casa_25"] += 1
+            if total <= 3: stats["casa_35_under"] += 1
+            if total <= 4: stats["casa_45_under"] += 1
+            if total <= 5: stats["casa_55_under"] += 1
+            if g1 > 0 and g2 > 0: stats["casa_btts"] += 1
 
-                            stats["mandante_gols_feitos_casa"] += float(g1)
-                            stats["mandante_gols_sofridos_casa"] += float(g2)
-                            if g1 > 0: stats["mandante_jogos_com_gol_casa"] += 1
+            stats["mandante_gols_feitos_casa"] += float(g1)
+            stats["mandante_gols_sofridos_casa"] += float(g2)
+            if g1 > 0: stats["mandante_jogos_com_gol_casa"] += 1
 
-                            if g1 > g2:
-                                res_atual = "V"
-                                stats["mandante_vitorias_casa"] += 1
-                                stats["mandante_sem_derrota_casa"] += 1
-                            elif g1 < g2:
-                                res_atual = "D"
-                            else:
-                                res_atual = "E"
-                                stats["mandante_sem_derrota_casa"] += 1
+            if g1 > g2:
+                res = "V"
+                stats["mandante_vitorias_casa"] += 1
+                stats["mandante_sem_derrota_casa"] += 1
+            elif g1 < g2:
+                res = "D"
+            else:
+                res = "E"
+                stats["mandante_sem_derrota_casa"] += 1
 
-                            if i == 0: stats["t1_resultado_1"] = res_atual
+            if i == 0: stats["t1_resultado_1"] = res
 
-                        elif tipo == "fora":
-                            if i == 0: 
-                                stats["t2_placar_1"] = placar_str
-                            
-                            if total > 0.5: stats["fora_05"] += 1
-                            if total > 1.5: stats["fora_15"] += 1
-                            if total > 2.5: stats["fora_25"] += 1
-                            if total <= 3: stats["fora_35_under"] += 1
-                            if total <= 4: stats["fora_45_under"] += 1
-                            if total <= 5: stats["fora_55_under"] += 1
-                            if g1 > 0 and g2 > 0: stats["fora_btts"] += 1
+        # --- PROCESSAMENTO DOS JOGOS DO VISITANTE (ESTUDIANTES FORA) ---
+        print(f"   🔍 [FORA] Encontrados {len(jogos_fora)} jogos do {t2} fora.")
+        for i, (g1, g2) in enumerate(jogos_fora):
+            placar_str = f"{g1}-{g2}"
+            total = g1 + g2
 
-                            stats["visitante_gols_feitos_fora"] += float(g2)
-                            stats["visitante_gols_sofridos_fora"] += float(g1)
-                            if g2 > 0: stats["visitante_jogos_com_gol_fora"] += 1
+            if i == 0: stats["t2_placar_1"] = placar_str
 
-                            if g2 > g1:
-                                res_atual = "V"
-                                stats["visitante_vitorias_fora"] += 1
-                                stats["visitante_sem_derrota_fora"] += 1
-                            elif g2 < g1:
-                                res_atual = "D"
-                                stats["visitante_derrotas_fora"] += 1
-                            else:
-                                res_atual = "E"
-                                stats["visitante_sem_derrota_fora"] += 1
+            if total > 0.5: stats["fora_05"] += 1
+            if total > 1.5: stats["fora_15"] += 1
+            if total > 2.5: stats["fora_25"] += 1
+            if total <= 3: stats["fora_35_under"] += 1
+            if total <= 4: stats["fora_45_under"] += 1
+            if total <= 5: stats["fora_55_under"] += 1
+            if g1 > 0 and g2 > 0: stats["fora_btts"] += 1
 
-                            if i == 0: stats["t2_resultado_1"] = res_atual
+            stats["visitante_gols_feitos_fora"] += float(g2)
+            stats["visitante_gols_sofridos_fora"] += float(g1)
+            if g2 > 0: stats["visitante_jogos_com_gol_fora"] += 1
 
-                    except Exception as e_linha:
-                        continue
+            if g2 > g1:
+                res = "V"
+                stats["visitante_vitorias_fora"] += 1
+                stats["visitante_sem_derrota_fora"] += 1
+            elif g2 < g1:
+                res = "D"
+                stats["visitante_derrotas_fora"] += 1
+            else:
+                res = "E"
+                stats["visitante_sem_derrota_fora"] += 1
 
-            except Exception as e_tipo:
-                print(f"      ⚠️ Erro ao processar histórico {tipo.upper()}: {e_tipo}")
+            if i == 0: stats["t2_resultado_1"] = res
 
     except Exception as e_geral:
         print(f"      ⚠️ Erro geral ao raspar StatsHub: {e_geral}")
