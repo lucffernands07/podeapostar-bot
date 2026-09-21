@@ -1,161 +1,167 @@
-#testes/teste_raspagem_h2h.py
 import time
 import re
-import links
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-def pegar_estatisticas_h2h(driver, url_jogo, t1, t2):
+def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, nome_comp=""):
     """
-    RASPAGEM 1: Abre a aba, acessa o H2H, captura o link Betano, gols, placares e resultados.
-    MANTÉM A ABA ABERTA para o main avaliar se vale a pena continuar para os scouts avançados.
+    Raspa os últimos 5 jogos do mandante (casa) e visitante (fora) no StatsHub
+    e retorna o dicionário 'stats' pronto para os módulos de regras.
     """
     stats = {
         "link_betano": None,
-        "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0, "casa_btts": 0, 
-        "casa_vitorias_recente": 0, "ultimo_gols_casa": 0, "t1_resultado_1": "",
-        "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0, "fora_btts": 0, 
-        "fora_vitorias_recente": 0, "ultimo_gols_fora": 0, "t2_resultado_1": "",
-        "h2h_jogos": 0, "h2h_vitorias_t1": 0, "h2h_vitorias_t2": 0, "h2h_empates": 0,
-        "h2h_res_1": "", "h2h_res_2": "", 
-        "h2h_geral_res_1": "", "h2h_geral_res_2": "", "h2h_geral_res_3": "", "h2h_geral_res_4": "", "h2h_geral_res_5": "",
+        "casa_05": 0, "casa_15": 0, "casa_25": 0, "casa_35_under": 0, "casa_45_under": 0, "casa_55_under": 0, "casa_btts": 0, 
+        "fora_05": 0, "fora_15": 0, "fora_25": 0, "fora_35_under": 0, "fora_45_under": 0, "fora_55_under": 0, "fora_btts": 0, 
+        
+        "mandante_vitorias_casa": 0,
+        "visitante_vitorias_fora": 0,
+        "mandante_sem_derrota_casa": 0,
+        "visitante_sem_derrota_fora": 0,
+        "visitante_derrotas_fora": 0,
+        "visitante_gols_sofridos_fora": 0.0,
+        "mandante_gols_sofridos_casa": 0.0,
+        "mandante_gols_feitos_casa": 0.0,
+        "visitante_gols_feitos_fora": 0.0,
+        "mandante_jogos_com_gol_casa": 0,
+        "visitante_jogos_com_gol_fora": 0,
+
         "t1_placar_1": None, "t2_placar_1": None,     
-        "h2h_placar_1": None, "h2h_placar_2": None,   
+        "t1_resultado_1": None, "t2_resultado_1": None,
         "pular_gols": False,
-        "url_h2h_base": None,
-        # Inicializados vazios por segurança caso o jogo não passe nos filtros iniciais
+        "url_h2h_base": url_jogo,
         "historico_chutes": {}, 
         "historico_mandante_am": {}, "historico_mandante_vm": {},
         "historico_visitante_am": {}, "historico_visitante_vm": {}
     }
-    
-    # Abre o confronto em uma nova aba
-    driver.execute_script(f"window.open('{url_jogo}', '_blank');")
-    driver.switch_to.window(driver.window_handles[-1])
-    
+
+    # Gera link de busca na Betano
+    t1_q, t2_q = t1.replace(" ", "%20"), t2.replace(" ", "%20")
+    stats["link_betano"] = f"https://www.betano.bet.br/busca/?q={t1_q}%20x%20{t2_q}"
+
     try:
-        wait = WebDriverWait(driver, 15)
-        
-        # Clica na aba H2H do Flashscore
-        h2h_tab = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/h2h')]")))
-        h2h_tab.click()
-        time.sleep(2)
-        
-        # Guarda a URL base do H2H para a Raspagem 2 usar se for necessário
-        stats["url_h2h_base"] = driver.current_url
+        driver.get(url_jogo)
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
+        time.sleep(3)
 
-        # --- CAPTURA DO LINK DA BETANO ---
+        # 1. Clicar na aba 'Team Stats' se existir
         try:
-            print(f"      🔗 Capturando link Betano para {t1} x {t2}...")
-            # Presume que o seu módulo 'links' importado cuida dessa extração
-            stats["link_betano"] = links.extrair_url_betano(driver)
-        except Exception as e_link:
-            print(f"      ⚠️ Erro ao capturar link Betano inicial: {e_link}")
-        
-        # Rola a página para carregar as seções de jogos anteriores
-        driver.execute_script("window.scrollTo(0, 800);")
-        time.sleep(1)
+            btn_team_stats = WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Team Stats')] | //div[contains(text(), 'Team Stats')]"))
+            )
+            btn_team_stats.click()
+            time.sleep(2)
+        except Exception:
+            pass # Se já estiver na aba correta ou for carregamento direto
 
-        secoes = driver.find_elements(By.CSS_SELECTOR, ".h2h__section")
+        # 2. Alternar e analisar "casa" (Mandante) e "fora" (Visitante)
+        perspectivas = ["casa", "fora"]
 
-        # Varre as 3 seções clássicas: Últimos jogos Mandante, Últimos jogos Visitante e Confrontos Diretos
-        for idx, secao in enumerate(secoes[:3]): 
-            if idx == 2: 
-                # Tenta expandir para ver mais confrontos diretos se o botão existir
+        for tipo in perspectivas:
+            try:
+                # Tenta alternar o menu suspenso de filtro para Home/Away
                 try:
-                    seletor_btn = "span[data-testid='wcl-scores-caption-05']"
-                    botao_mais = secao.find_element(By.CSS_SELECTOR, seletor_btn)
-                    driver.execute_script("arguments[0].click();", botao_mais)
-                    WebDriverWait(secao, 6).until(lambda s: len(s.find_elements(By.CSS_SELECTOR, ".h2h__row")) >= 6)
-                except: 
-                    pass 
+                    filtro = driver.find_element(By.XPATH, "//button[contains(., 'Fixtures') or contains(., 'Home') or contains(., 'Away') or contains(., 'All')]")
+                    filtro.click()
+                    time.sleep(1)
 
-            limite = 6 if idx == 2 else 5
-            linhas = secao.find_elements(By.CSS_SELECTOR, ".h2h__row")[:limite] 
-            
-            for i, linha in enumerate(linhas):
-                try:
-                    n_casa_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__homeParticipant").text
-                    n_fora_h2h = linha.find_element(By.CSS_SELECTOR, ".h2h__awayParticipant").text
-                    res_texto = linha.find_element(By.CSS_SELECTOR, ".h2h__result").text
-                    
-                    # Salva placares textuais recentes para o relatório
-                    if idx == 0 and i == 0: stats["t1_placar_1"] = res_texto
-                    if idx == 1 and i == 0: stats["t2_placar_1"] = res_texto
-                    if idx == 2:
-                        if i == 0: stats["h2h_placar_1"] = res_texto
-                        if i == 1: stats["h2h_placar_2"] = res_texto
+                    alvo_filtro = "Home" if tipo == "casa" else "Away"
+                    opcao = driver.find_element(By.XPATH, f"//li[contains(., '{alvo_filtro}')] | //button[contains(., '{alvo_filtro}')] | //div[contains(text(), '{alvo_filtro}')]")
+                    opcao.click()
+                    time.sleep(2)
+                except Exception:
+                    pass
 
-                    # Extrai os gols numéricos do placar
-                    numeros_placar = re.findall(r'\d+', res_texto)
-                    if len(numeros_placar) < 2: 
-                        continue
-                    g1, g2 = int(numeros_placar[0]), int(numeros_placar[1])
-                    total = g1 + g2
+                # Localiza as linhas da tabela contendo os jogos
+                linhas = driver.find_elements(By.XPATH, "//tbody/tr | //div[contains(@class, 'match')] | //div[contains(@class, 'row')]")
+                linhas_validas = []
 
-                    # Seções 0 (Mandante) e 1 (Visitante)
-                    if idx < 2: 
-                        prefixo = "casa" if idx == 0 else "fora"
-                        t_ref = t1 if idx == 0 else t2
-                        
-                        if i == 0: stats[f"ultimo_gols_{prefixo}"] = total
-                        if total > 1.5: stats[f"{prefixo}_15"] += 1
-                        if total > 2.5: stats[f"{prefixo}_25"] += 1
-                        if total <= 3: stats[f"{prefixo}_35_under"] += 1   # 🟢 Contador adicionado para Menos de 3.5 gols
-                        if total <= 4: stats[f"{prefixo}_45_under"] += 1 
-                        if g1 > 0 and g2 > 0: stats[f"{prefixo}_btts"] += 1
-                        
-                        res_atual = "E"
-                        if (t_ref.lower() in n_casa_h2h.lower() and g1 > g2) or \
-                           (t_ref.lower() in n_fora_h2h.lower() and g2 > g1):
-                            res_atual = "V"
-                            stats[f"{prefixo}_vitorias_recente"] += 1
-                        elif (t_ref.lower() in n_casa_h2h.lower() and g1 < g2) or \
-                             (t_ref.lower() in n_fora_h2h.lower() and g2 < g1):
-                            res_atual = "D"
-                        
-                        if i == 0: stats[f"t{idx+1}_resultado_1"] = res_atual
-                 
-                    # Seção 2 (Confronto Direto H2H Histórico)
-                    elif idx == 2: 
-                        if i < 5:
-                            res_geral = "EMPATE"
-                            if g1 > g2:
-                                if t1.lower() in n_casa_h2h.lower(): res_geral = "CASA"
-                                elif t2.lower() in n_casa_h2h.lower(): res_geral = "FORA"
-                            elif g1 < g2:
-                                if t1.lower() in n_fora_h2h.lower(): res_geral = "CASA"
-                                elif t2.lower() in n_fora_h2h.lower(): res_geral = "FORA"
+                # Filtra apenas linhas que possuem um placar numérico (ex: "2 - 1" ou "1-0")
+                for l in linhas:
+                    texto = l.text
+                    if re.search(r'\d+\s*[\-–:]\s*\d+', texto):
+                        linhas_validas.append(l)
+                    if len(linhas_validas) == 5:
+                        break
+
+                print(f"   🔍 [{tipo.upper()}] Encontrados {len(linhas_validas)} jogos no histórico.")
+
+                for i, linha in enumerate(linhas_validas):
+                    try:
+                        match_placar = re.search(r'(\d+)\s*[\-–:]\s*(\d+)', linha.text)
+                        if not match_placar:
+                            continue
+
+                        g1, g2 = int(match_placar.group(1)), int(match_placar.group(2))
+                        placar_str = f"{g1}-{g2}"
+                        total = g1 + g2
+
+                        if tipo == "casa":
+                            if i == 0: 
+                                stats["t1_placar_1"] = placar_str
                             
-                            stats[f"h2h_geral_res_{i+1}"] = res_geral
+                            if total > 0.5: stats["casa_05"] += 1
+                            if total > 1.5: stats["casa_15"] += 1
+                            if total > 2.5: stats["casa_25"] += 1
+                            if total <= 3: stats["casa_35_under"] += 1
+                            if total <= 4: stats["casa_45_under"] += 1
+                            if total <= 5: stats["casa_55_under"] += 1
+                            if g1 > 0 and g2 > 0: stats["casa_btts"] += 1
 
-                        # Tratamento inteligente sem dar 'continue'
-                        stats["h2h_jogos"] += 1
-                        
-                        if g1 == g2:
-                            res_h2h = "E"
-                            stats["h2h_empates"] += 1
-                        else:
-                            # Verifica quem de fato ganhou o jogo baseado no t1
-                            t1_ganhou = (t1.lower() in n_casa_h2h.lower() and g1 > g2) or (t1.lower() in n_fora_h2h.lower() and g2 > g1)
-                            if t1_ganhou:
-                                res_h2h = "V"
-                                stats["h2h_vitorias_t1"] += 1
+                            stats["mandante_gols_feitos_casa"] += float(g1)
+                            stats["mandante_gols_sofridos_casa"] += float(g2)
+                            if g1 > 0: stats["mandante_jogos_com_gol_casa"] += 1
+
+                            if g1 > g2:
+                                res_atual = "V"
+                                stats["mandante_vitorias_casa"] += 1
+                                stats["mandante_sem_derrota_casa"] += 1
+                            elif g1 < g2:
+                                res_atual = "D"
                             else:
-                                res_h2h = "D"
-                                stats["h2h_vitorias_t2"] += 1
-                        
-                        if stats["h2h_res_1"] == "":
-                            stats["h2h_res_1"] = res_h2h
-                        elif stats["h2h_res_2"] == "":
-                            stats["h2h_res_2"] = res_h2h
+                                res_atual = "E"
+                                stats["mandante_sem_derrota_casa"] += 1
 
-                        if g1 == g2: stats["h2h_empates"] += 1
-                except: 
-                    continue
-    except Exception as e:
-        print(f"      ⚠️ Erro na Raspagem 1: {e}")
-        
+                            if i == 0: stats["t1_resultado_1"] = res_atual
+
+                        elif tipo == "fora":
+                            if i == 0: 
+                                stats["t2_placar_1"] = placar_str
+                            
+                            if total > 0.5: stats["fora_05"] += 1
+                            if total > 1.5: stats["fora_15"] += 1
+                            if total > 2.5: stats["fora_25"] += 1
+                            if total <= 3: stats["fora_35_under"] += 1
+                            if total <= 4: stats["fora_45_under"] += 1
+                            if total <= 5: stats["fora_55_under"] += 1
+                            if g1 > 0 and g2 > 0: stats["fora_btts"] += 1
+
+                            stats["visitante_gols_feitos_fora"] += float(g2)
+                            stats["visitante_gols_sofridos_fora"] += float(g1)
+                            if g2 > 0: stats["visitante_jogos_com_gol_fora"] += 1
+
+                            if g2 > g1:
+                                res_atual = "V"
+                                stats["visitante_vitorias_fora"] += 1
+                                stats["visitante_sem_derrota_fora"] += 1
+                            elif g2 < g1:
+                                res_atual = "D"
+                                stats["visitante_derrotas_fora"] += 1
+                            else:
+                                res_atual = "E"
+                                stats["visitante_sem_derrota_fora"] += 1
+
+                            if i == 0: stats["t2_resultado_1"] = res_atual
+
+                    except Exception as e_linha:
+                        continue
+
+            except Exception as e_tipo:
+                print(f"      ⚠️ Erro ao processar histórico {tipo.upper()}: {e_tipo}")
+
+    except Exception as e_geral:
+        print(f"      ⚠️ Erro geral ao raspar StatsHub: {e_geral}")
+
     return stats
-        
