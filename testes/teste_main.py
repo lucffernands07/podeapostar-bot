@@ -1,13 +1,15 @@
 import os
 import time
-import json
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Importa a função de raspagem do StatsHub
+# Importa a função de raspagem do StatsHub (seu caminho mantido)
 from testes.teste_raspagem_h2h import pegar_estatisticas_statshub
 
 def configurar_driver():
@@ -33,60 +35,94 @@ def configurar_driver():
 
 def main():
     driver = configurar_driver()
+    url_home = "https://www.statshub.com/pt"
+    nome_liga_alvo = "Liga Profesional de Fútbol"
     
-    # LISTA DE JOGOS PARA RASPAGEM
-    jogos_para_testar = [
-        {
-            "t1": "Lanús",
-            "t2": "Estudiantes",
-            "url": "https://www.statshub.com/fixture/lanus-vs-estudiantes-de-la-plata-mubbyl/383366"
-        },
-        {
-            "t1": "Barracas Central",
-            "t2": "Independiente Rivadavia",
-            "url": "https://www.statshub.com/fixture/barracas-central-vs-independiente-rivadavia-mubbv9/383374"
-        }
-    ]
-    
-    resultados_totais = []
     inicio_tempo_total = time.time()
     
-    print(f"\n🚀 Iniciando teste de raspagem StatsHub ({len(jogos_para_testar)} jogos na fila)...\n")
-    
     try:
-        for idx, jogo in enumerate(jogos_para_testar, 1):
-            t1 = jogo["t1"]
-            t2 = jogo["t2"]
-            url = jogo["url"]
+        driver.get(url_home)
+        time.sleep(3)
+        
+        # Localiza a Liga Argentina na lista
+        xpath_liga = f"//a[contains(text(), '{nome_liga_alvo}')]"
+        elemento_liga = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_locator((By.XPATH, xpath_liga))
+        )
+        
+        # Encontra o elemento clicável e expande a liga
+        container_liga = elemento_liga.find_element(By.XPATH, "./ancestor::div[contains(@class, 'flex') or contains(@class, 'cursor-pointer')][1]")
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", container_liga)
+        time.sleep(0.5)
+        driver.execute_script("arguments[0].click();", container_liga)
+        time.sleep(2)
+        
+        # LOG 1: Nome da liga encontrada e expandida
+        print(f"\n==================================================")
+        print(f"🏆 LIGA ENCONTRADA E EXPANDIDA: {nome_liga_alvo}")
+        print(f"==================================================")
+        
+        # Coleta os links e informações dos jogos da liga
+        bloco_pai_liga = container_liga.find_element(By.XPATH, "./following-sibling::div[1] | ./parent::div")
+        elementos_jogos = bloco_pai_liga.find_elements(By.XPATH, ".//a[contains(@href, '/fixture/')]")
+        
+        if not elementos_jogos:
+            elementos_jogos = driver.find_elements(By.XPATH, "//a[contains(@href, '/fixture/')]")
+            
+        jogos_encontrados = []
+        for el in elementos_jogos:
+            url_fixture = el.get_attribute("href")
+            texto_card = el.text.strip().replace("\n", " ")
+            if url_fixture and url_fixture not in [j["url"] for j in jogos_encontrados]:
+                jogos_encontrados.append({
+                    "url": url_fixture,
+                    "info_card": texto_card
+                })
+                
+        # LOG 2: Todos os jogos de hoje após expandir a liga
+        print(f"\n📋 JOGOS DE HOJE ENCONTRADOS ({len(jogos_encontrados)} partidas):")
+        for idx, j in enumerate(jogos_encontrados, 1):
+            print(f"   {idx}. {j['info_card']}")
+        print(f"--------------------------------------------------\n")
+        
+        if not jogos_encontrados:
+            print("⚠️ Nenhum jogo foi encontrado para esta liga hoje.")
+            return
+
+        # Processa cada jogo encontrado
+        for idx, jogo in enumerate(jogos_encontrados, 1):
+            url_jogo = jogo["url"]
+            inicio_jogo = time.time()
+            
+            # Extração rápida dos nomes dos times a partir da URL para a chamada do H2H
+            partes = url_jogo.split("/fixture/")[1].split("-vs-")
+            t1 = partes[0].replace("-", " ").title()
+            t2 = partes[1].split("-mubb")[0].replace("-", " ").title()
             
             print(f"--------------------------------------------------")
-            print(f"🏟️ [{idx}/{len(jogos_para_testar)}] Processando: {t1} x {t2}")
-            print(f"🔗 URL: {url}")
+            print(f"🏟️ [{idx}/{len(jogos_encontrados)}] {t1} x {t2}")
+            print(f"🔗 {url_jogo}")
             print(f"--------------------------------------------------")
             
             try:
-                inicio_jogo = time.time()
-                dados_jogo = pegar_estatisticas_statshub(driver, url, t1, t2)
-                tempo_jogo = round(time.time() - inicio_tempo_total if idx == 1 else time.time() - inicio_jogo, 2)
+                # LOG 3: A função pegar_estatisticas_statshub exibe no terminal o overall e últimos 5 jogos
+                pegar_estatisticas_statshub(driver, url_jogo, t1, t2)
                 
-                resultados_totais.append({
-                    "confronto": f"{t1} x {t2}",
-                    "dados": dados_jogo
-                })
-                print(f"✅ Raspagem de {t1} x {t2} concluída em {tempo_jogo}s\n")
+                # LOG 4: Tempo de execução por jogo
+                tempo_jogo = round(time.time() - inicio_jogo, 2)
+                print(f"⏱️ Tempo de raspagem deste jogo: {tempo_jogo}s\n")
                 
             except Exception as e_jogo:
                 print(f"❌ Erro ao raspar {t1} x {t2}: {e_jogo}\n")
-        
+
+        # LOG 5: Finalização com o tempo total de raspagem
         tempo_total = round(time.time() - inicio_tempo_total, 2)
-        
-        print("\n" + "="*50)
-        print("📊 RESULTADOS EXTRAÍDOS (LISTA CONSOLIDADA)")
         print("="*50)
-        print(json.dumps(resultados_totais, indent=4, ensure_ascii=False))
-        print("\n" + "="*50)
-        print(f"⏱️ Raspagem total finalizada em {tempo_total}s")
+        print(f"⏱️ RASPAGEM FINALIZADA: {len(jogos_encontrados)} jogos processados em {tempo_total}s")
         print("="*50 + "\n")
+
+    except Exception as e:
+        print(f"❌ Erro durante a raspagem da página inicial: {e}")
         
     finally:
         try:
