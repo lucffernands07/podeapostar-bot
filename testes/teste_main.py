@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Importa a função de raspagem do StatsHub
-from testes.teste_raspagem_h2h import pegar_estatisticas_statshub
+from funcoes.raspagem_h2h import pegar_estatisticas_statshub
 
 def configurar_driver():
     options = Options()
@@ -23,7 +23,7 @@ def configurar_driver():
     options.add_argument("--blink-settings=imagesEnabled=false")
     options.add_argument("--window-size=1920,1080")
     
-    # User-Agent Linux (compatível com o ambiente do runner)
+    # User-Agent Linux
     options.add_argument("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
     service = Service(ChromeDriverManager().install())
@@ -34,34 +34,59 @@ def configurar_driver():
 def main():
     driver = configurar_driver()
     
-    # URL de teste no StatsHub e metadados do confronto
-    url_jogo_test = "https://www.statshub.com/fixture/lanus-vs-estudiantes-de-la-plata-mubbyl/383366"
-    t1 = "Lanús"
-    t2 = "Estudiantes"
+    # LISTA DE JOGOS PARA RASPAGEM
+    jogos_para_testar = [
+        {
+            "t1": "Lanús",
+            "t2": "Estudiantes",
+            "url": "https://www.statshub.com/fixture/lanus-vs-estudiantes-de-la-plata-mubbyl/383366"
+        },
+        {
+            "t1": "Barracas Central",
+            "t2": "Independiente Rivadavia",
+            "url": "https://www.statshub.com/fixture/barracas-central-vs-independiente-rivadavia-mubbv9/383374"
+        }
+    ]
     
-    print(f"\n🚀 Iniciando teste de raspagem StatsHub...")
-    print(f"🏟️ Jogo: {t1} x {t2}")
-    print(f"🔗 URL: {url_jogo_test}\n")
+    resultados_totais = []
+    inicio_tempo_total = time.time()
+    
+    print(f"\n🚀 Iniciando teste de raspagem StatsHub ({len(jogos_para_testar)} jogos na fila)...\n")
     
     try:
-        # Executa a raspagem dos últimos 5 jogos em Casa (Lanús) e Fora (Estudiantes)
-        inicio_tempo = time.time()
-        dados_jogo = pegar_estatisticas_statshub(driver, url_jogo_test, t1, t2)
-        tempo_total = round(time.time() - inicio_tempo, 2)
+        for idx, jogo in enumerate(jogos_para_testar, 1):
+            t1 = jogo["t1"]
+            t2 = jogo["t2"]
+            url = jogo["url"]
+            
+            print(f"--------------------------------------------------")
+            print(f"🏟️ [{idx}/{len(jogos_para_testar)}] Processando: {t1} x {t2}")
+            print(f"🔗 URL: {url}")
+            print(f"--------------------------------------------------")
+            
+            try:
+                inicio_jogo = time.time()
+                dados_jogo = pegar_estatisticas_statshub(driver, url, t1, t2)
+                tempo_jogo = round(time.time() - inicio_tempo_total if idx == 1 else time.time() - inicio_jogo, 2)
+                
+                resultados_totais.append({
+                    "confronto": f"{t1} x {t2}",
+                    "dados": dados_jogo
+                })
+                print(f"✅ Raspagem de {t1} x {t2} concluída em {tempo_jogo}s\n")
+                
+            except Exception as e_jogo:
+                print(f"❌ Erro ao raspar {t1} x {t2}: {e_jogo}\n")
+        
+        tempo_total = round(time.time() - inicio_tempo_total, 2)
         
         print("\n" + "="*50)
-        print("📊 RESULTADOS EXTRAÍDOS (DICIONÁRIO 'STATS')")
+        print("📊 RESULTADOS EXTRAÍDOS (LISTA CONSOLIDADA)")
         print("="*50)
-        
-        # Exibe o dicionário resultante formatado no console
-        print(json.dumps(dados_jogo, indent=4, ensure_ascii=False))
-        
+        print(json.dumps(resultados_totais, indent=4, ensure_ascii=False))
         print("\n" + "="*50)
-        print(f"⏱️ Raspagem concluída em {tempo_total}s")
+        print(f"⏱️ Raspagem total finalizada em {tempo_total}s")
         print("="*50 + "\n")
-        
-    except Exception as e:
-        print(f"❌ Erro ao executar a raspagem de teste: {e}")
         
     finally:
         try:
