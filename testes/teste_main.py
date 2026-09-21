@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Importa a função de raspagem do StatsHub
-from funcoes.raspagem_h2h import pegar_estatisticas_statshub
+from testes.teste_raspagem_h2h import pegar_estatisticas_statshub
 
 def configurar_driver():
     options = Options()
