@@ -1,0 +1,15 @@
+[
+    {
+        "horario": "20:00",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Ind. Medellín",
+        "time_fora": "Jaguares de Cordoba",
+        "mercado": "-4.5 Gols",
+        "gols_casa": 2,
+        "gols_fora": 1,
+        "escanteios_casa": 2,
+        "escanteios_fora": 0,
+        "cartoes_casa": 2,
+        "cartoes_fora": 0
+    }
+]
