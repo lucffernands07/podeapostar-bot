@@ -49,15 +49,39 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario=""):
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
 
-        # 1. Clique na aba "Team Stats"
+        # 1. Clique Híbrido na aba "Stats dos times" (PT) / "Team Stats" (EN)
+        xpath_aba_stats = (
+            "//*[(self::span or self::button or self::a or self::div) and ("
+            "contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'stats dos times') or "
+            "contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'team stats')"
+            ")]"
+        )
+
         try:
             aba_team_stats = WebDriverWait(driver, 8).until(
-                EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Team Stats')]"))
+                EC.element_to_be_clickable((By.XPATH, xpath_aba_stats))
             )
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", aba_team_stats)
+            time.sleep(0.3)
             driver.execute_script("arguments[0].click();", aba_team_stats)
             time.sleep(3)
-        except Exception as e:
-            print(f"   ⚠️ Aviso: Falha ao clicar na aba Team Stats: {e}")
+        except Exception as e_click:
+            # Fallback via JavaScript caso o clique do Selenium encontre impedimentos
+            try:
+                driver.execute_script("""
+                    let elementos = Array.from(document.querySelectorAll('span, button, a, div'));
+                    let alvo = elementos.find(el => {
+                        let txt = el.innerText ? el.innerText.toLowerCase() : '';
+                        return txt.includes('stats dos times') || txt.includes('team stats');
+                    });
+                    if (alvo) {
+                        alvo.scrollIntoView({block: 'center'});
+                        alvo.click();
+                    }
+                """)
+                time.sleep(3)
+            except Exception as e_js:
+                print(f"   ⚠️ Aviso: Falha ao clicar na aba Team Stats / Stats dos times: {e_click}")
 
         # 2. Rola a página para renderizar elementos inferiores
         driver.execute_script("window.scrollTo(0, 500);")
