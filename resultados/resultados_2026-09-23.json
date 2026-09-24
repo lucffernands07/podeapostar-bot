@@ -1,0 +1,15 @@
+[
+    {
+        "horario": "22:30",
+        "liga": "EUA - Copa MLS",
+        "time_casa": "Seattle Sounders",
+        "time_fora": "Real Salt Lake",
+        "mercado": "-4.5 Gols",
+        "gols_casa": 2,
+        "gols_fora": 0,
+        "escanteios_casa": 0,
+        "escanteios_fora": 0,
+        "cartoes_casa": 0,
+        "cartoes_fora": 0
+    }
+]
