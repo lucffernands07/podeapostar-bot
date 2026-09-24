@@ -32,7 +32,7 @@ def configurar_driver():
     driver = webdriver.Chrome(service=service, options=options)
     driver.set_page_load_timeout(30)
 
-    # AJUSTE DE FUSO HORÁRIO: Emula fuso de Brasília/Buenos Aires (UTC-3)
+    # Emula fuso de Brasília (UTC-3)
     driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {
         "timezoneId": "America/Sao_Paulo"
     })
@@ -50,56 +50,76 @@ def main():
         driver.get(url_home)
         time.sleep(3)
         
-        # Localiza a Liga Argentina na lista
-        xpath_liga = f"//a[contains(text(), '{nome_liga_alvo}')]"
+        # Localiza o nome da liga de forma case-insensitive
+        xpath_liga = f"//*[(self::a or self::div or self::span) and contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{nome_liga_alvo.lower()}')]"
         elemento_liga = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, xpath_liga))
         )
         
-        # Encontra o elemento clicável e expande a liga
+        # Encontra o container clicável da liga
         container_liga = elemento_liga.find_element(By.XPATH, "./ancestor::div[contains(@class, 'flex') or contains(@class, 'cursor-pointer')][1]")
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", container_liga)
         time.sleep(0.5)
-        driver.execute_script("arguments[0].click();", container_liga)
-        time.sleep(2)
         
-        # LOG 1: Nome da liga encontrada e expandida
+        # Tenta buscar os jogos no bloco pai da sanfona
+        bloco_pai_liga = container_liga.find_element(By.XPATH, "./ancestor::div[contains(@class, 'border') or contains(@class, 'rounded') or contains(@class, 'space-y') or contains(@class, 'flex-col')][2]")
+        elementos_jogos = bloco_pai_liga.find_elements(By.XPATH, ".//a[contains(@href, '/fixture/')]")
+        
+        # Se estiver fechada/sem jogos visíveis, clica para expandir
+        if not elementos_jogos:
+            driver.execute_script("arguments[0].click();", container_liga)
+            time.sleep(2)
+            elementos_jogos = bloco_pai_liga.find_elements(By.XPATH, ".//a[contains(@href, '/fixture/')]")
+
+        # LOG 1: Nome da liga encontrada
         print(f"\n==================================================")
         print(f"🏆 LIGA ENCONTRADA E EXPANDIDA: {nome_liga_alvo}")
         print(f"==================================================")
-        
-        # Coleta os links e informações dos jogos restritamente dentro do bloco da liga
-        bloco_pai_liga = container_liga.find_element(By.XPATH, "./ancestor::div[contains(@class, 'border') or contains(@class, 'rounded') or contains(@class, 'space-y') or contains(@class, 'flex-col')][2]")
-        elementos_jogos = bloco_pai_liga.find_elements(By.XPATH, ".//a[contains(@href, '/fixture/')]")
             
         jogos_encontrados = []
         for el in elementos_jogos:
             url_fixture = el.get_attribute("href")
             
             if url_fixture and url_fixture not in [j["url"] for j in jogos_encontrados]:
-                # Extrai apenas os nomes dos times ignorando botões ("Escalações") e nomes de árbitros
+                texto_card = el.text.strip()
+                
+                # Extrai apenas os nomes dos times ignorando botões ("Escalações") e arbitragem
                 spans = el.find_elements(By.XPATH, ".//span[contains(@class, 'truncate') or contains(@class, 'font-normal')]")
                 nomes_times = [s.text.strip() for s in spans if s.text.strip() and "Escalações" not in s.text]
                 
                 # Procura elemento de horário (formato HH:MM)
                 horario_el = el.find_elements(By.XPATH, ".//*[contains(text(), ':')]")
                 horario = horario_el[0].text.strip() if horario_el else "--:--"
+
+                # -------------------------------------------------------------
+                # VALIDAÇÕES DE ESTADO SEGUNDO A INTERFACE DO STATSHUB
+                # -------------------------------------------------------------
+                # Placa / Resultado identificado por travessão ou hífen
+                tem_placar = any(str_placar in texto_card for str_placar in ["0—", "1—", "2—", "3—", "4—", "5—", "0-", "1-", "2-", "3-", "4-", "5-"])
+                is_ao_vivo = "AO VIVO" in texto_card.upper()
                 
-                # FILTRO DE FUSO: Descarta jogos marcados entre 00:00 e 03:00 (que eram 21:00-24:00 do dia anterior em UTC)
-                if horario != "--:--":
+                # REGRA 1: Descartar jogos já encerrados (que exibem horário + placar juntas)
+                if tem_placar and not is_ao_vivo:
+                    print(f"⏭️ Descartando jogo encerrado: {texto_card.replace(chr(10), ' ')}")
+                    continue
+
+                # REGRA 2: Trava de segurança para jogos passados da madrugada (00h-02h)
+                if horario != "--:--" and not is_ao_vivo:
                     try:
                         hora_int = int(horario.split(":")[0])
-                        if hora_int < 3:
-                            print(f"⏭️ Descartando partida de ontem/madrugada (fuso UTC): {horario}")
+                        if hora_int < 3 and tem_placar:
+                            print(f"⏭️ Descartando partida encerrada da madrugada: {horario}")
                             continue
                     except ValueError:
                         pass
 
+                # Formata a string do card conforme a situação
                 if len(nomes_times) >= 2:
                     t1_card, t2_card = nomes_times[0], nomes_times[1]
-                    info_formatada = f"{t1_card} x {t2_card} ({horario})"
+                    status_str = "AO VIVO" if is_ao_vivo else horario
+                    info_formatada = f"{t1_card} x {t2_card} ({status_str})"
                 else:
-                    info_formatada = el.text.replace("\n", " ").strip()
+                    info_formatada = texto_card.replace("\n", " ").strip()
 
                 jogos_encontrados.append({
                     "url": url_fixture,
@@ -113,7 +133,7 @@ def main():
         print(f"--------------------------------------------------\n")
         
         if not jogos_encontrados:
-            print("⚠️ Nenhum jogo foi encontrado para esta liga hoje.")
+            print("⚠️ Nenhum jogo pendente foi encontrado para esta liga hoje.")
             return
 
         # Processa cada jogo encontrado
@@ -121,7 +141,7 @@ def main():
             url_jogo = jogo["url"]
             inicio_jogo = time.time()
             
-            # Limpeza aprimorada do nome dos times a partir da URL
+            # Extração dos nomes dos times via URL da fixture
             try:
                 slug_fixture = url_jogo.split("/fixture/")[1].split("/")[0]
                 partes_times = slug_fixture.split("-vs-")
@@ -141,17 +161,14 @@ def main():
             print(f"--------------------------------------------------")
             
             try:
-                # LOG 3: A função pegar_estatisticas_statshub exibe no terminal o overall e últimos 5 jogos
                 pegar_estatisticas_statshub(driver, url_jogo, t1, t2)
                 
-                # LOG 4: Tempo de execução por jogo
                 tempo_jogo = round(time.time() - inicio_jogo, 2)
                 print(f"⏱️ Tempo de raspagem deste jogo: {tempo_jogo}s\n")
                 
             except Exception as e_jogo:
                 print(f"❌ Erro ao raspar {t1} x {t2}: {e_jogo}\n")
 
-        # LOG 5: Finalização com o tempo total de raspagem
         tempo_total = round(time.time() - inicio_tempo_total, 2)
         print("="*50)
         print(f"⏱️ RASPAGEM FINALIZADA: {len(jogos_encontrados)} jogos processados em {tempo_total}s")
