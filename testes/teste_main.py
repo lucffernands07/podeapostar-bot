@@ -42,7 +42,7 @@ def configurar_driver():
 def main():
     driver = configurar_driver()
     url_home = "https://www.statshub.com/pt"
-    nome_liga_alvo = "UEFA NAtions League"
+    nome_liga_alvo = "UEFA Nations League"
     
     inicio_tempo_total = time.time()
     
