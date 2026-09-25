@@ -5,8 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def mesmo_time(nome_busca, nome_tabela):
     """
-    Verifica de forma flexível se o nome vindo do site (ex: 'Indep Rivad') 
-    corresponde ao time buscado (ex: 'Independiente Rivadavia').
+    Verifica de forma flexível se o nome vindo do site
+    corresponde ao time buscado.
     """
     if not nome_busca or not nome_tabela:
         return False
@@ -28,10 +28,10 @@ def mesmo_time(nome_busca, nome_tabela):
                 
     return False
 
-def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario=""):
+def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_principal=None):
     """
     Raspa as métricas gerais (Overall, For, Against) e o histórico dos últimos 5 jogos
-    de cada time no StatsHub.
+    de cada time no StatsHub usando uma nova aba no Selenium.
     """
     overall_casa, for_casa, against_casa = "N/A", "N/A", "N/A"
     overall_fora, for_fora, against_fora = "N/A", "N/A", "N/A"
@@ -39,17 +39,27 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario=""):
     lista_jogos_casa = []
     lista_jogos_fora = []
 
-    # Exibe cabeçalho padrão no console
     texto_horario = f" - {horario}" if horario else ""
     print(f"\n🏟️ Jogo: {t1} x {t2}{texto_horario}")
     print(f"🔗 URL: {url_jogo}\n")
 
+    # Garante controle de janelas/abas
+    if aba_principal is None:
+        aba_principal = driver.current_window_handle
+
     try:
-        driver.get(url_jogo)
+        # Abre nova aba para o jogo sem perder o estado da lista principal
+        driver.execute_script("window.open(arguments[0], '_blank');", url_jogo)
+        
+        # Alterna para a nova aba criada
+        novas_abas = [handle for handle in driver.window_handles if handle != aba_principal]
+        if novas_abas:
+            driver.switch_to.window(novas_abas[-1])
+
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
 
-        # 1. Clique Híbrido na aba "Stats dos times" (PT) / "Team Stats" (EN)
+        # 1. Clique Híbrido na aba "Stats dos times" / "Team Stats"
         xpath_aba_stats = (
             "//*[(self::span or self::button or self::a or self::div) and ("
             "contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'stats dos times') or "
@@ -66,7 +76,6 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario=""):
             driver.execute_script("arguments[0].click();", aba_team_stats)
             time.sleep(3)
         except Exception as e_click:
-            # Fallback via JavaScript caso o clique do Selenium encontre impedimentos
             try:
                 driver.execute_script("""
                     let elementos = Array.from(document.querySelectorAll('span, button, a, div'));
@@ -80,10 +89,10 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario=""):
                     }
                 """)
                 time.sleep(3)
-            except Exception as e_js:
-                print(f"   ⚠️ Aviso: Falha ao clicar na aba Team Stats / Stats dos times: {e_click}")
+            except Exception:
+                pass
 
-        # 2. Rola a página para renderizar elementos inferiores
+        # 2. Rola a página para renderizar os cards de métricas
         driver.execute_script("window.scrollTo(0, 500);")
         time.sleep(1)
         driver.execute_script("window.scrollTo(0, 1000);")
@@ -122,12 +131,10 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario=""):
                     if data and gols_casa.isdigit() and gols_fora.isdigit():
                         info_jogo = f"{data} | {home_nome} {gols_casa} - {gols_fora} {away_nome}"
 
-                        # Jogos do Mandante
                         if mesmo_time(t1, home_nome) or mesmo_time(t1, away_nome):
                             if len(lista_jogos_casa) < 5 and info_jogo not in lista_jogos_casa:
                                 lista_jogos_casa.append(info_jogo)
 
-                        # Jogos do Visitante
                         if mesmo_time(t2, home_nome) or mesmo_time(t2, away_nome):
                             if len(lista_jogos_fora) < 5 and info_jogo not in lista_jogos_fora:
                                 lista_jogos_fora.append(info_jogo)
@@ -136,6 +143,15 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario=""):
 
     except Exception as e:
         print(f"   ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
+
+    finally:
+        # Garante que a aba do jogo seja fechada e o driver retorne à aba principal
+        try:
+            if len(driver.window_handles) > 1:
+                driver.close()
+            driver.switch_to.window(aba_principal)
+        except Exception:
+            pass
 
     # LOG PADRONIZADO NO TERMINAL
     print("============================================================")
