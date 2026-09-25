@@ -12,13 +12,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Adiciona a raiz do repositório ao sys.path
-RAIZ_PROJETO = Path(__file__).resolve().parent.parent.parent
-if str(RAIZ_PROJETO) not in sys.path:
-    sys.path.insert(0, str(RAIZ_PROJETO))
+# Adiciona o diretório atual do script e a raiz do projeto ao sys.path
+DIRETORIO_ATUAL = Path(__file__).resolve().parent
+sys.path.insert(0, str(DIRETORIO_ATUAL))
 
-# Agora os imports relativos à raiz vão funcionar normalmente!
-from sites.statshub.raspagem_h2h import pegar_estatisticas_statshub
+# Importa o módulo diretamente da mesma pasta
+try:
+    from raspagem_h2h import pegar_estatisticas_statshub
+except ModuleNotFoundError:
+    from sites.statshub.raspagem_h2h import pegar_estatisticas_statshub
 
 def configurar_driver():
     options = Options()
