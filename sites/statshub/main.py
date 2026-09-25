@@ -54,8 +54,8 @@ def limpar_nome_time(nome_bruto):
 
 def expandir_e_obter_bloco_liga(driver, nome_liga):
     """
-    Localiza o bloco da liga via JS (ignorando acentos e maiúsculas/minúsculas),
-    rola a página até o elemento e garante a expansão da sanfona.
+    Localiza o elemento do título da liga via JS e sobe de forma precisa
+    até o container individual exclusivo daquela liga.
     """
     js_script = """
         let nomeAlvo = arguments[0].toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
@@ -64,19 +64,36 @@ def expandir_e_obter_bloco_liga(driver, nome_liga):
         for (let el of elementos) {
             if (el.children.length === 0 && el.innerText) {
                 let textoNorm = el.innerText.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
-                if (textoNorm.includes(nomeAlvo)) {
-                    // Sobe no DOM até o container pai da liga
-                    let container = el.closest("div[class*='border'], div[class*='rounded'], div[class*='space-y'], div[class*='shadow']");
-                    if (!container) container = el.parentElement.parentElement;
+                
+                // Exigência de correspondência do título da liga
+                if (textoNorm === nomeAlvo || textoNorm.includes(nomeAlvo)) {
+                    // Sobe no DOM procurando especificamente pelo card/container da liga individual
+                    // (removido o 'space-y' que englobava a página inteira)
+                    let container = el.closest("div.border, div.rounded-lg, div.shadow-sm");
                     
-                    container.scrollIntoView({block: 'center'});
-                    
-                    // Expande o bloco caso esteja recolhido
-                    let links = container.querySelectorAll("a[href*='/fixture/']");
-                    if (links.length === 0) {
-                        el.click();
+                    // Fallback de segurança: sobe no máximo 3 níveis para evitar capturar a página inteira
+                    if (!container) {
+                        container = el.parentElement;
+                        for (let i = 0; i < 3; i++) {
+                            if (container && container.parentElement && container.parentElement.tagName !== 'BODY') {
+                                if (container.querySelectorAll("a[href*='/fixture/']").length > 0) {
+                                    break;
+                                }
+                                container = container.parentElement;
+                            }
+                        }
                     }
-                    return container;
+                    
+                    if (container) {
+                        container.scrollIntoView({block: 'center'});
+                        
+                        // Expande o bloco da liga caso esteja recolhido
+                        let links = container.querySelectorAll("a[href*='/fixture/']");
+                        if (links.length === 0) {
+                            el.click();
+                        }
+                        return container;
+                    }
                 }
             }
         }
@@ -123,7 +140,7 @@ def main():
                     print(f"⚠️ Liga '{nome_liga_alvo}' não possui jogos listados para hoje.")
                     continue
                 
-                # Busca os jogos no bloco expandido da liga
+                # Busca os jogos estritamente no bloco individual da liga selecionada
                 elementos_jogos = bloco_liga.find_elements(By.XPATH, ".//a[contains(@href, '/fixture/')]")
 
                 print(f"🏆 LIGA ENCONTRADA E EXPANDIDA: {nome_liga_alvo}")
@@ -234,3 +251,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+                        
