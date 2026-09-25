@@ -1,0 +1,15 @@
+[
+    {
+        "horario": "21:30",
+        "liga": "Colombia - Primeira A",
+        "time_casa": "Atl. Nacional",
+        "time_fora": "Millonarios",
+        "mercado": "-4.5 Gols",
+        "gols_casa": 1,
+        "gols_fora": 1,
+        "escanteios_casa": 0,
+        "escanteios_fora": 0,
+        "cartoes_casa": 0,
+        "cartoes_fora": 0
+    }
+]
