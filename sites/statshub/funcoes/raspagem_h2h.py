@@ -66,47 +66,15 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         if novas_abas:
             driver.switch_to.window(novas_abas[-1])
 
+        # 1. Espera inicial do carregamento da página
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        time.sleep(3)
-
-        # 1. Clique na aba "Stats dos times" / "Team Stats"
-        xpath_aba_stats = (
-            "//*[(self::span or self::button or self::a or self::div) and ("
-            "contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'stats dos times') or "
-            "contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'team stats')"
-            ")]"
-        )
-
-        try:
-            aba_team_stats = WebDriverWait(driver, 8).until(
-                EC.element_to_be_clickable((By.XPATH, xpath_aba_stats))
-            )
-            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", aba_team_stats)
-            time.sleep(0.3)
-            driver.execute_script("arguments[0].click();", aba_team_stats)
-            time.sleep(3)
-        except Exception:
-            try:
-                driver.execute_script("""
-                    let elementos = Array.from(document.querySelectorAll('span, button, a, div'));
-                    let alvo = elementos.find(el => {
-                        let txt = el.innerText ? el.innerText.toLowerCase() : '';
-                        return txt.includes('stats dos times') || txt.includes('team stats');
-                    });
-                    if (alvo) {
-                        alvo.scrollIntoView({block: 'center'});
-                        alvo.click();
-                    }
-                """)
-                time.sleep(3)
-            except Exception:
-                pass
-
-        # 2. Rola a página
-        driver.execute_script("window.scrollTo(0, 500);")
-        time.sleep(1)
-        driver.execute_script("window.scrollTo(0, 1000);")
         time.sleep(2)
+
+        # 2. Rolagem gradativa para carregar componentes dinâmicos (Lazy Loading)
+        driver.execute_script("window.scrollTo(0, 400);")
+        time.sleep(1)
+        driver.execute_script("window.scrollTo(0, 800);")
+        time.sleep(1.5)
 
         # 3. EXTRAÇÃO DAS MÉTRICAS (OVERALL, FOR, AGAINST)
         blocos = driver.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]")
@@ -175,8 +143,9 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
 
         ler_tabela()
 
-        # Fallback exclusivo para caso o mandante continue zerado (ex: retardo do primeiro jogo)
-        if not lista_jogos_casa:
+        # Fallback de segurança: se o primeiro jogo demorar para carregar a tabela, rola mais um pouco e relee
+        if not lista_jogos_casa and not lista_jogos_fora:
+            driver.execute_script("window.scrollTo(0, 1200);")
             time.sleep(2.5)
             ler_tabela()
 
