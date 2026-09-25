@@ -67,7 +67,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
             driver.switch_to.window(novas_abas[-1])
 
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        time.sleep(3)
+        time.sleep(2)
 
         # 1. Clique na aba "Stats dos times" / "Team Stats"
         xpath_aba_stats = (
@@ -84,7 +84,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
             driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", aba_team_stats)
             time.sleep(0.3)
             driver.execute_script("arguments[0].click();", aba_team_stats)
-            time.sleep(3)
+            time.sleep(1.5)
         except Exception:
             try:
                 driver.execute_script("""
@@ -98,15 +98,22 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                         alvo.click();
                     }
                 """)
-                time.sleep(3)
+                time.sleep(1.5)
             except Exception:
                 pass
 
-        # 2. Rola a página
+        # 2. Rola a página para acionar o Lazy Loading das tabelas
         driver.execute_script("window.scrollTo(0, 500);")
-        time.sleep(1)
+        time.sleep(0.5)
         driver.execute_script("window.scrollTo(0, 1000);")
-        time.sleep(2)
+
+        # ⏳ Aguarda explicitamente até 10s que as linhas da tabela estejam carregadas
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//tr[.//td]"))
+            )
+        except Exception:
+            time.sleep(2)
 
         # 3. EXTRAÇÃO DAS MÉTRICAS (OVERALL, FOR, AGAINST)
         blocos = driver.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]")
@@ -127,6 +134,12 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
 
         # 4. EXTRAÇÃO DOS JOGOS E COMPETIÇÃO
         linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
+
+        # Fallback: Se não encontrou nenhuma linha, tenta rolagem adicional e lê novamente
+        if not linhas:
+            driver.execute_script("window.scrollTo(0, 1500);")
+            time.sleep(1.5)
+            linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
 
         for linha in linhas:
             try:
@@ -179,7 +192,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                 continue
 
     except Exception as e:
-        print(f"   ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
+        print(f"    ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
 
     finally:
         try:
@@ -194,17 +207,17 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
     print("📊 STATSHUB - MÉTRICAS & HISTÓRICO COM COMPETIÇÕES")
     print("============================================================")
     print(f"🏠 {t1} (Casa):")
-    print(f"   • Overall : {overall_casa} | For: {for_casa} | Against: {against_casa}")
-    print("   • Últimos 5 jogos oficiais:")
+    print(f"    • Overall : {overall_casa} | For: {for_casa} | Against: {against_casa}")
+    print("    • Últimos 5 jogos oficiais:")
     for j in lista_jogos_casa:
-        print(f"     - {j['data']} | {j['home']} {j['gols_casa']} x {j['gols_fora']} {j['away']} | 🏆 {j['competicao']}")
+        print(f"      - {j['data']} | {j['home']} {j['gols_casa']} x {j['gols_fora']} {j['away']} | 🏆 {j['competicao']}")
 
     print("-" * 60)
     print(f"✈️ {t2} (Fora):")
-    print(f"   • Overall : {overall_fora} | For: {for_fora} | Against: {against_fora}")
-    print("   • Últimos 5 jogos oficiais:")
+    print(f"    • Overall : {overall_fora} | For: {for_fora} | Against: {against_fora}")
+    print("    • Últimos 5 jogos oficiais:")
     for j in lista_jogos_fora:
-        print(f"     - {j['data']} | {j['home']} {j['gols_casa']} x {j['gols_fora']} {j['away']} | 🏆 {j['competicao']}")
+        print(f"      - {j['data']} | {j['home']} {j['gols_casa']} x {j['gols_fora']} {j['away']} | 🏆 {j['competicao']}")
     print("============================================================\n")
 
     return {
