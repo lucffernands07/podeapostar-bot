@@ -1,5 +1,6 @@
 import os
 import time
+import re
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -9,7 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Importa a função de raspagem do StatsHub (seu caminho mantido)
+# Importa a função de raspagem do StatsHub (caminho original)
 from testes.teste_raspagem_h2h import pegar_estatisticas_statshub
 
 def configurar_driver():
@@ -25,7 +26,8 @@ def configurar_driver():
     options.add_argument("--blink-settings=imagesEnabled=false")
     options.add_argument("--window-size=1920,1080")
     
-    # User-Agent Linux
+    # Define a linguagem do navegador explicitamente para Português (BR)
+    options.add_argument("--lang=pt-BR")
     options.add_argument("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
     service = Service(ChromeDriverManager().install())
@@ -38,6 +40,17 @@ def configurar_driver():
     })
 
     return driver
+
+def limpar_nome_time(nome_bruto):
+    """
+    Remove hashs aleatórios e limpa o nome do time.
+    Exemplo: 'Malta Mufu7E' -> 'Malta', 'Germany Mug03R' -> 'Germany'
+    """
+    if not nome_bruto:
+        return ""
+    # Remove códigos alfanuméricos com letras e números no final da string (ex: Mufu7E, Mug03R)
+    nome_limpo = re.sub(r'\s+[A-Za-z0-9]*\d+[A-Za-z0-9]*$', '', nome_bruto.strip())
+    return nome_limpo.strip()
 
 def expandir_e_obter_bloco_liga(driver, nome_liga):
     """
@@ -96,7 +109,7 @@ def main():
                 WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
                 time.sleep(3)
                 
-                # 2. Rola a página suavemente para acionar o Lazy Loading de ligas inferiores
+                # 2. Rola a página suavemente para carregar todas as ligas do dia
                 driver.execute_script("window.scrollTo(0, 1000);")
                 time.sleep(1)
                 driver.execute_script("window.scrollTo(0, 0);")
@@ -107,7 +120,7 @@ def main():
                 time.sleep(2)
                 
                 if not bloco_liga:
-                    print(f"⚠️ Liga '{nome_liga_alvo}' não foi encontrada na lista hoje.")
+                    print(f"⚠️ Liga '{nome_liga_alvo}' não possui jogos listados para hoje.")
                     continue
                 
                 # Busca os jogos no bloco expandido da liga
@@ -122,17 +135,18 @@ def main():
                     if url_fixture and url_fixture not in [j["url"] for j in jogos_encontrados]:
                         texto_card = el.text.strip()
                         
-                        # Extrai apenas os nomes dos times ignorando botões ("Escalações") e arbitragem
+                        # Extrai os nomes dos times diretamente da tela (Português)
                         spans = el.find_elements(By.XPATH, ".//span[contains(@class, 'truncate') or contains(@class, 'font-normal')]")
-                        nomes_times = [s.text.strip() for s in spans if s.text.strip() and "Escalações" not in s.text]
+                        nomes_times_raw = [s.text.strip() for s in spans if s.text.strip() and "Escalações" not in s.text]
+                        
+                        # Limpa os nomes obtidos
+                        nomes_times = [limpar_nome_time(n) for n in nomes_times_raw if n]
                         
                         # Procura elemento de horário (formato HH:MM)
                         horario_el = el.find_elements(By.XPATH, ".//*[contains(text(), ':')]")
                         horario = horario_el[0].text.strip() if horario_el else "--:--"
 
-                        # -------------------------------------------------------------
-                        # VALIDAÇÕES DE ESTADO SEGUNDO A INTERFACE DO STATSHUB
-                        # -------------------------------------------------------------
+                        # Validações de placar / status
                         tem_placar = any(str_placar in texto_card for str_placar in ["0—", "1—", "2—", "3—", "4—", "5—", "0-", "1-", "2-", "3-", "4-", "5-"])
                         is_ao_vivo = "AO VIVO" in texto_card.upper()
                         
@@ -141,7 +155,7 @@ def main():
                             print(f"⏭️ Descartando jogo encerrado: {texto_card.replace(chr(10), ' ')}")
                             continue
 
-                        # REGRA 2: Trava de segurança para jogos passados da madrugada (00h-02h)
+                        # REGRA 2: Trava de segurança para jogos passados da madrugada
                         if horario != "--:--" and not is_ao_vivo:
                             try:
                                 hora_int = int(horario.split(":")[0])
@@ -151,17 +165,21 @@ def main():
                             except ValueError:
                                 pass
 
-                        # Formata a string do card conforme a situação
+                        # Captura e formata os nomes limpos em português
                         if len(nomes_times) >= 2:
                             t1_card, t2_card = nomes_times[0], nomes_times[1]
                             status_str = "AO VIVO" if is_ao_vivo else horario
                             info_formatada = f"{t1_card} x {t2_card} ({status_str})"
                         else:
+                            t1_card, t2_card = "Mandante", "Visitante"
                             info_formatada = texto_card.replace("\n", " ").strip()
 
                         jogos_encontrados.append({
                             "url": url_fixture,
-                            "info_card": info_formatada
+                            "info_card": info_formatada,
+                            "t1": t1_card,
+                            "t2": t2_card,
+                            "horario": horario
                         })
                         
                 print(f"\n📋 JOGOS DE HOJE ENCONTRADOS EM '{nome_liga_alvo}' ({len(jogos_encontrados)} partidas):")
@@ -176,21 +194,10 @@ def main():
                 # Processa cada jogo encontrado da liga atual
                 for idx, jogo in enumerate(jogos_encontrados, 1):
                     url_jogo = jogo["url"]
+                    t1 = jogo["t1"]
+                    t2 = jogo["t2"]
+                    horario_jogo = jogo["horario"]
                     inicio_jogo = time.time()
-                    
-                    # Extração dos nomes dos times via URL da fixture
-                    try:
-                        slug_fixture = url_jogo.split("/fixture/")[1].split("/")[0]
-                        partes_times = slug_fixture.split("-vs-")
-                        
-                        t1 = partes_times[0].replace("-", " ").title().strip()
-                        
-                        raw_t2 = partes_times[1]
-                        if "-mub" in raw_t2:
-                            raw_t2 = raw_t2.split("-mub")[0]
-                        t2 = raw_t2.replace("-", " ").title().strip()
-                    except Exception:
-                        t1, t2 = "Mandante", "Visitante"
                     
                     print(f"--------------------------------------------------")
                     print(f"🏟️ [{nome_liga_alvo}] Jogo [{idx}/{len(jogos_encontrados)}]: {t1} x {t2}")
@@ -198,7 +205,7 @@ def main():
                     print(f"--------------------------------------------------")
                     
                     try:
-                        pegar_estatisticas_statshub(driver, url_jogo, t1, t2)
+                        pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario_jogo)
                         total_jogos_processados += 1
                         
                         tempo_jogo = round(time.time() - inicio_jogo, 2)
