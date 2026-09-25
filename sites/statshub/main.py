@@ -1,8 +1,6 @@
 import os
 import time
 import re
-import sys
-from pathlib import Path
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -12,15 +10,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Adiciona o diretório atual do script e a raiz do projeto ao sys.path
-DIRETORIO_ATUAL = Path(__file__).resolve().parent
-sys.path.insert(0, str(DIRETORIO_ATUAL))
-
 # Importa o módulo diretamente da mesma pasta
-try:
-    from raspagem_h2h import pegar_estatisticas_statshub
-except ModuleNotFoundError:
-    from sites.statshub.raspagem_h2h import pegar_estatisticas_statshub
+from sites.statshub.funcoes.raspagem_h2h import pegar_estatisticas_statshub
 
 def configurar_driver():
     options = Options()
