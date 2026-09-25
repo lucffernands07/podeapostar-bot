@@ -28,10 +28,25 @@ def mesmo_time(nome_busca, nome_tabela):
                 
     return False
 
+def eh_amistoso(nome_competicao, url_competicao=""):
+    """
+    Retorna True se a competição for um amistoso.
+    """
+    termos_proibidos = ["friendly", "amistoso", "int. friendly", "friendly games"]
+    
+    comp_lower = nome_competicao.lower()
+    url_lower = url_competicao.lower()
+    
+    for termo in termos_proibidos:
+        if termo in comp_lower or termo in url_lower:
+            return True
+            
+    return False
+
 def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_principal=None):
     """
     Raspa as métricas gerais (Overall, For, Against) e o histórico dos últimos 5 jogos
-    de cada time no StatsHub usando uma nova aba no Selenium.
+    OFICIAIS (excluindo amistosos) de cada time no StatsHub.
     """
     overall_casa, for_casa, against_casa = "N/A", "N/A", "N/A"
     overall_fora, for_fora, against_fora = "N/A", "N/A", "N/A"
@@ -115,21 +130,39 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                 for_fora = spans_fora[1].text.strip()
                 against_fora = spans_fora[2].text.strip()
 
-        # 4. EXTRAÇÃO DOS JOGOS (LINHAS TR)
+        # 4. EXTRAÇÃO DOS JOGOS (LINHAS TR) E FILTRAGEM DE AMISTOSOS
         linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
 
         for linha in linhas:
             try:
                 colunas = linha.find_elements(By.TAG_NAME, "td")
-                if len(colunas) >= 5:
+                # Exige pelo menos 6 colunas para ler a competição
+                if len(colunas) >= 6:
                     data = colunas[0].text.strip()
                     home_nome = colunas[1].text.strip()
                     gols_casa = colunas[2].text.strip()
                     gols_fora = colunas[3].text.strip()
                     away_nome = colunas[4].text.strip()
+                    
+                    # Coluna 6: Competição
+                    coluna_comp = colunas[5]
+                    nome_comp = coluna_comp.text.strip()
+                    
+                    href_comp = ""
+                    try:
+                        link_elem = coluna_comp.find_element(By.TAG_NAME, "a")
+                        href_comp = link_elem.get_attribute("href") or ""
+                        if not nome_comp:
+                            nome_comp = link_elem.text.strip()
+                    except Exception:
+                        pass
+
+                    # 🚫 DESCARTA O JOGO SE FOR AMISTOSO
+                    if eh_amistoso(nome_comp, href_comp):
+                        continue
 
                     if data and gols_casa.isdigit() and gols_fora.isdigit():
-                        info_jogo = f"{data} | {home_nome} {gols_casa} - {gols_fora} {away_nome}"
+                        info_jogo = f"{data} | {home_nome} {gols_casa} - {gols_fora} {away_nome} [{nome_comp}]"
 
                         if mesmo_time(t1, home_nome) or mesmo_time(t1, away_nome):
                             if len(lista_jogos_casa) < 5 and info_jogo not in lista_jogos_casa:
@@ -155,18 +188,18 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
 
     # LOG PADRONIZADO NO TERMINAL
     print("============================================================")
-    print("📊 STATSHUB - MÉTRICAS & HISTÓRICO DE JOGOS")
+    print("📊 STATSHUB - MÉTRICAS & HISTÓRICO DE JOGOS (SEM AMISTOSOS)")
     print("============================================================")
     print(f"🏠 {t1} (Casa):")
     print(f"   • Overall : {overall_casa} | For: {for_casa} | Against: {against_casa}")
-    print("   • Últimos 5 jogos:")
+    print("   • Últimos 5 jogos oficiais:")
     for j in lista_jogos_casa:
         print(f"     - {j}")
 
     print("-" * 60)
     print(f"✈️ {t2} (Fora):")
     print(f"   • Overall : {overall_fora} | For: {for_fora} | Against: {against_fora}")
-    print("   • Últimos 5 jogos:")
+    print("   • Últimos 5 jogos oficiais:")
     for j in lista_jogos_fora:
         print(f"     - {j}")
     print("============================================================\n")
