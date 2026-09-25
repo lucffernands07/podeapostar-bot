@@ -64,7 +64,7 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
-        run: python sites.flashscore.main.py
+        run: python sites/flashscore/main.py
 
       # ⚽ Executa a raspagem de prováveis logo após a geração dos jogos do dia
       - name: 2. Raspar Escalações Prováveis (Playwright)
