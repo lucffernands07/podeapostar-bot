@@ -1,4 +1,4 @@
-name: 0. StstHub main bot de aposta
+name: 0. StatsHub main bot de aposta
 
 on:
   push:
@@ -32,5 +32,5 @@ jobs:
         run: |
           # Adiciona o diretório raiz ao PYTHONPATH para que os imports funcionem
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          python testes/teste_main.py
+          python sites/statshub/main.py
           
