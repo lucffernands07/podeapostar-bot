@@ -41,6 +41,32 @@ def configurar_driver():
 
     return driver
 
+def expandir_todas_as_ligas(driver):
+    """
+    Clica no botão 'Expandir Tudo' no topo do StatsHub usando a classe e texto exatos do elemento.
+    """
+    try:
+        js_expandir = """
+            let spans = Array.from(document.querySelectorAll('span'));
+            for (let span of spans) {
+                if (span.innerText && span.innerText.trim().toLowerCase() === 'expandir tudo') {
+                    // Tenta clicar no próprio span ou no elemento pai (caso o evento de clique esteja no container)
+                    let elementoClicavel = span.closest('button') || span.closest('div') || span;
+                    elementoClicavel.click();
+                    return true;
+                }
+            }
+            return false;
+        """
+        expandiu = driver.execute_script(js_expandir)
+        if expandiu:
+            print("🔓 Botão 'Expandir Tudo' acionado com sucesso!")
+            time.sleep(2)
+        else:
+            print("⚠️ Botão 'Expandir Tudo' não localizado na página.")
+    except Exception as e:
+        print(f"⚠️ Erro ao tentar expandir tudo: {e}")
+
 def limpar_nome_time(nome_bruto):
     """
     Remove hashs aleatórios e limpa o nome do time.
@@ -53,52 +79,55 @@ def limpar_nome_time(nome_bruto):
 
 def obter_jogos_da_liga(driver, nome_liga):
     """
-    Localiza o elemento da liga via JS e navega no DOM ate encontrar
-    o container pai exclusivo que engloba os jogos daquela liga.
+    Localiza a liga no DOM totalmente expandido e extrai os jogos.
     """
     js_script = """
         let nomeAlvo = arguments[0].toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
-        let elementos = Array.from(document.querySelectorAll('div, span, p, h1, h2, h3, a'));
+        let elementos = Array.from(document.querySelectorAll('div, span, p, h1, h2, h3'));
         
         for (let el of elementos) {
-            if (el.children.length === 0 && el.innerText) {
+            if (el.innerText && el.children.length === 0) {
                 let textoNorm = el.innerText.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
                 
-                if (textoNorm === nomeAlvo || textoNorm.includes(nomeAlvo)) {
-                    // Tenta expandir clicando no título caso o bloco esteja fechado
-                    el.click();
-                    
-                    // Sobe no DOM nível a nível até encontrar o container pai que guarda os jogos
-                    let container = el.parentElement;
-                    let links = [];
-                    
-                    for (let level = 0; level < 6; level++) {
-                        if (!container || container.tagName === 'BODY') break;
-                        
-                        links = container.querySelectorAll("a[href*='/fixture/']");
-                        // Se encontramos um bloco pai com links e ele não é a página inteira
-                        if (links.length > 0 && links.length < 35) {
+                // Normaliza e verifica palavras-chave (ex: 'brasileirao' e 'serie b')
+                let palavrasChave = nomeAlvo.split(" ").filter(p => p.length > 2);
+                let bateuLigas = palavrasChave.every(p => textoNorm.includes(p));
+                
+                if (bateuLigas || textoNorm.includes(nomeAlvo)) {
+                    // Sobe no DOM procurando o container pai que engloba a liga inteira
+                    let container = el;
+                    while (container && container.tagName !== 'BODY') {
+                        let links = container.querySelectorAll("a[href*='/fixture/']");
+                        if (links.length > 0 && links.length <= 40) {
                             break;
                         }
                         container = container.parentElement;
                     }
                     
-                    if (container && links.length > 0) {
+                    if (container) {
                         container.scrollIntoView({block: 'center'});
                         
                         let resultados = [];
+                        let links = container.querySelectorAll("a[href*='/fixture/']");
+                        
                         links.forEach(a => {
                             let href = a.href;
-                            let fullText = a.innerText || "";
                             
-                            let spans = Array.from(a.querySelectorAll("span"))
-                                            .map(s => s.innerText.trim())
-                                            .filter(t => t.length > 0 && !t.includes("Escalações"));
+                            // Procura o container pai da linha do jogo
+                            let linhaJogo = a;
+                            for (let i = 0; i < 4; i++) {
+                                if (linhaJogo.parentElement && linhaJogo.parentElement !== container) {
+                                    linhaJogo = linhaJogo.parentElement;
+                                }
+                            }
+                            
+                            let fullText = linhaJogo.innerText || "";
+                            let lines = fullText.split('\\n').map(l => l.trim()).filter(l => l.length > 0);
                             
                             resultados.push({
                                 url: href,
                                 texto_card: fullText,
-                                spans: spans
+                                linhas: lines
                             });
                         });
                         
@@ -125,26 +154,29 @@ def main():
     total_jogos_processados = 0
     
     try:
+        # 1. Carrega a página principal uma única vez
+        driver.get(url_home)
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        time.sleep(3)
+        
+        # 2. Rola a página para garantir carregamento dos elementos
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
+        time.sleep(1)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(1.5)
+        driver.execute_script("window.scrollTo(0, 0);")
+        time.sleep(1)
+        
+        # 3. Clica no botão "Expandir Tudo"[cite: 5]
+        expandir_todas_as_ligas(driver)
+
         for nome_liga_alvo in ligas_alvo:
             print(f"\n==================================================")
             print(f"🔍 INICIANDO BUSCA DA LIGA: {nome_liga_alvo}")
             print(f"==================================================")
             
             try:
-                # 1. Carrega a página principal
-                driver.get(url_home)
-                WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-                time.sleep(3)
-                
-                # 2. Rola a página para forçar o carregamento do conteúdo dinâmico
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
-                time.sleep(1)
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                time.sleep(1)
-                driver.execute_script("window.scrollTo(0, 0);")
-                time.sleep(1)
-                
-                # 3. Busca os elementos da liga corrigindo a navegação do DOM
+                # 4. Busca a liga e extrai os jogos
                 dados_jogos_raw = obter_jogos_da_liga(driver, nome_liga_alvo)
                 
                 if not dados_jogos_raw:
@@ -159,35 +191,26 @@ def main():
                     
                     if url_fixture and url_fixture not in [j["url"] for j in jogos_encontrados]:
                         texto_card = item.get("texto_card", "")
-                        spans = item.get("spans", [])
+                        linhas = item.get("linhas", [])
                         
-                        # Limpa os nomes obtidos dos spans
-                        nomes_times = [limpar_nome_time(n) for n in spans if n]
-                        
-                        # Extrai o horário no formato HH:MM
+                        # Extrai o horário (ex: 19:30, 20:30)
                         match_horario = re.search(r'\b\d{1,2}:\d{2}\b', texto_card)
                         horario = match_horario.group(0) if match_horario else "--:--"
 
-                        # Validações de placar / status
+                        # Filtra nomes de times excluindo horários e estatísticas do árbitro
+                        nomes_times = []
+                        for l in linhas:
+                            if not re.search(r'\b\d{1,2}:\d{2}\b', l) and not re.search(r'\d+\.\d+', l) and len(l) > 2:
+                                nomes_times.append(limpar_nome_time(l))
+
                         tem_placar = any(str_placar in texto_card for str_placar in ["0—", "1—", "2—", "3—", "4—", "5—", "0-", "1-", "2-", "3-", "4-", "5-"])
                         is_ao_vivo = "AO VIVO" in texto_card.upper()
                         
-                        # Descartar jogos já encerrados
+                        # Descartar jogos encerrados
                         if tem_placar and not is_ao_vivo:
                             print(f"⏭️ Descartando jogo encerrado: {texto_card.replace(chr(10), ' ')}")
                             continue
 
-                        # Trava de segurança para jogos passados da madrugada
-                        if horario != "--:--" and not is_ao_vivo:
-                            try:
-                                hora_int = int(horario.split(":")[0])
-                                if hora_int < 3 and tem_placar:
-                                    print(f"⏭️ Descartando partida encerrada da madrugada: {horario}")
-                                    continue
-                            except ValueError:
-                                pass
-
-                        # Captura e formata os nomes limpos em português
                         if len(nomes_times) >= 2:
                             t1_card, t2_card = nomes_times[0], nomes_times[1]
                             status_str = "AO VIVO" if is_ao_vivo else horario
@@ -213,7 +236,7 @@ def main():
                     print(f"⚠️ Nenhum jogo pendente foi encontrado para a liga '{nome_liga_alvo}' hoje.\n")
                     continue
 
-                # Processa cada jogo encontrado
+                # Processa cada jogo qualificado
                 for idx, jogo in enumerate(jogos_encontrados, 1):
                     url_jogo = jogo["url"]
                     t1 = jogo["t1"]
@@ -256,4 +279,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-                                                    
