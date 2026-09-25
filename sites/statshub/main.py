@@ -276,9 +276,7 @@ def main():
                     inicio_jogo = time.time()
                     
                     print(f"--------------------------------------------------")
-                    print(f"🏟️ [{nome_liga_alvo}] Jogo [{idx}/{len(jogos_encontrados)}]: {t1} x {t2}")
-                    print(f"🔗 {url_jogo}")
-                    print(f"--------------------------------------------------")
+                    print(f"🏟️ [{nome_liga_alvo}] Jogo [{idx}/{len(jogos_encontrados)}]:")
                     
                     try:
                         # 🔄 Executa a raspagem em aba dedicada mantendo a lista principal intacta
