@@ -53,7 +53,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
     lista_jogos_fora = []
 
     texto_horario = f" - {horario}" if horario else ""
-    print(f"\n🏟️ Jogo: {t1} x {t2}{texto_horario}")
+    print(f"🏟️ Jogo: {t1} x {t2}{texto_horario}")
     print(f"🔗 URL: {url_jogo}\n")
 
     if aba_principal is None:
