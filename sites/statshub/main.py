@@ -48,14 +48,13 @@ def limpar_nome_time(nome_bruto):
     """
     if not nome_bruto:
         return ""
-    # Remove códigos alfanuméricos com letras e números no final da string (ex: Mufu7E, Mug03R)
     nome_limpo = re.sub(r'\s+[A-Za-z0-9]*\d+[A-Za-z0-9]*$', '', nome_bruto.strip())
     return nome_limpo.strip()
 
-def expandir_e_obter_bloco_liga(driver, nome_liga):
+def obter_jogos_da_liga(driver, nome_liga):
     """
-    Localiza o elemento do título da liga via JS e sobe de forma precisa
-    até o container individual exclusivo daquela liga.
+    Localiza o container exclusivo da liga e extrai as informações de todos os links de jogos
+    diretamente no JavaScript para evitar StaleElementReferenceException do Selenium.
     """
     js_script = """
         let nomeAlvo = arguments[0].toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
@@ -65,13 +64,10 @@ def expandir_e_obter_bloco_liga(driver, nome_liga):
             if (el.children.length === 0 && el.innerText) {
                 let textoNorm = el.innerText.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
                 
-                // Exigência de correspondência do título da liga
                 if (textoNorm === nomeAlvo || textoNorm.includes(nomeAlvo)) {
-                    // Sobe no DOM procurando especificamente pelo card/container da liga individual
-                    // (removido o 'space-y' que englobava a página inteira)
+                    // Sobe no DOM procurando o container individual da liga
                     let container = el.closest("div.border, div.rounded-lg, div.shadow-sm");
                     
-                    // Fallback de segurança: sobe no máximo 3 níveis para evitar capturar a página inteira
                     if (!container) {
                         container = el.parentElement;
                         for (let i = 0; i < 3; i++) {
@@ -87,12 +83,35 @@ def expandir_e_obter_bloco_liga(driver, nome_liga):
                     if (container) {
                         container.scrollIntoView({block: 'center'});
                         
-                        // Expande o bloco da liga caso esteja recolhido
+                        // Expande se estiver recolhido
                         let links = container.querySelectorAll("a[href*='/fixture/']");
                         if (links.length === 0) {
                             el.click();
+                            // Aguarda um instante para renderização
+                            let start = Date.now();
+                            while (Date.now() - start < 500) {}
+                            links = container.querySelectorAll("a[href*='/fixture/']");
                         }
-                        return container;
+                        
+                        // Extrai os dados dos links diretamente em JS
+                        let resultados = [];
+                        links.forEach(a => {
+                            let href = a.href;
+                            let fullText = a.innerText || "";
+                            
+                            // Extrai textos dos spans internos
+                            let spans = Array.from(a.querySelectorAll("span"))
+                                            .map(s => s.innerText.trim())
+                                            .filter(t => t.length > 0 && !t.includes("Escalações"));
+                            
+                            resultados.push({
+                                url: href,
+                                texto_card: fullText,
+                                spans: spans
+                            });
+                        });
+                        
+                        return resultados;
                     }
                 }
             }
@@ -132,36 +151,29 @@ def main():
                 driver.execute_script("window.scrollTo(0, 0);")
                 time.sleep(1)
                 
-                # 3. Localiza e expande a liga através da função JS insensível a acentos
-                bloco_liga = expandir_e_obter_bloco_liga(driver, nome_liga_alvo)
-                time.sleep(2)
+                # 3. Busca e extrai os jogos diretamente no JS para evitar stale element
+                dados_jogos_raw = obter_jogos_da_liga(driver, nome_liga_alvo)
                 
-                if not bloco_liga:
-                    print(f"⚠️ Liga '{nome_liga_alvo}' não possui jogos listados para hoje.")
+                if dados_jogos_raw is None:
+                    print(f"⚠️ Liga '{nome_liga_alvo}' não foi encontrada ou não possui jogos listados para hoje.")
                     continue
                 
-                # Busca os jogos estritamente no bloco individual da liga selecionada
-                elementos_jogos = bloco_liga.find_elements(By.XPATH, ".//a[contains(@href, '/fixture/')]")
-
                 print(f"🏆 LIGA ENCONTRADA E EXPANDIDA: {nome_liga_alvo}")
                     
                 jogos_encontrados = []
-                for el in elementos_jogos:
-                    url_fixture = el.get_attribute("href")
+                for item in dados_jogos_raw:
+                    url_fixture = item.get("url")
                     
                     if url_fixture and url_fixture not in [j["url"] for j in jogos_encontrados]:
-                        texto_card = el.text.strip()
+                        texto_card = item.get("texto_card", "")
+                        spans = item.get("spans", [])
                         
-                        # Extrai os nomes dos times diretamente da tela (Português)
-                        spans = el.find_elements(By.XPATH, ".//span[contains(@class, 'truncate') or contains(@class, 'font-normal')]")
-                        nomes_times_raw = [s.text.strip() for s in spans if s.text.strip() and "Escalações" not in s.text]
+                        # Limpa os nomes obtidos dos spans
+                        nomes_times = [limpar_nome_time(n) for n in spans if n]
                         
-                        # Limpa os nomes obtidos
-                        nomes_times = [limpar_nome_time(n) for n in nomes_times_raw if n]
-                        
-                        # Procura elemento de horário (formato HH:MM)
-                        horario_el = el.find_elements(By.XPATH, ".//*[contains(text(), ':')]")
-                        horario = horario_el[0].text.strip() if horario_el else "--:--"
+                        # Tenta extrair o horário do texto completo
+                        match_horario = re.search(r'\b\d{1,2}:\d{2}\b', texto_card)
+                        horario = match_horario.group(0) if match_horario else "--:--"
 
                         # Validações de placar / status
                         tem_placar = any(str_placar in texto_card for str_placar in ["0—", "1—", "2—", "3—", "4—", "5—", "0-", "1-", "2-", "3-", "4-", "5-"])
@@ -251,4 +263,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                        
+    
