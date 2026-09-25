@@ -13,11 +13,9 @@ def mesmo_time(nome_busca, nome_tabela):
     nb = nome_busca.lower().strip()
     nt = nome_tabela.lower().strip()
     
-    # 1. Verificação de substring direta
     if nb in nt or nt in nb:
         return True
     
-    # 2. Comparação por prefixos das palavras (mínimo de 3 letras)
     palavras_busca = [p for p in nb.split() if len(p) >= 3]
     palavras_tabela = [p for p in nt.split() if len(p) >= 3]
     
@@ -45,8 +43,8 @@ def eh_amistoso(nome_competicao, url_competicao=""):
 
 def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_principal=None):
     """
-    Raspa as métricas gerais (Overall, For, Against) e o histórico dos últimos 5 jogos
-    OFICIAIS (excluindo amistosos) de cada time no StatsHub.
+    Raspa as métricas gerais e o histórico detalhado com o nome da competição
+    para cada jogo do histórico (excluindo amistosos).
     """
     overall_casa, for_casa, against_casa = "N/A", "N/A", "N/A"
     overall_fora, for_fora, against_fora = "N/A", "N/A", "N/A"
@@ -58,15 +56,12 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
     print(f"\n🏟️ Jogo: {t1} x {t2}{texto_horario}")
     print(f"🔗 URL: {url_jogo}\n")
 
-    # Garante controle de janelas/abas
     if aba_principal is None:
         aba_principal = driver.current_window_handle
 
     try:
-        # Abre nova aba para o jogo sem perder o estado da lista principal
         driver.execute_script("window.open(arguments[0], '_blank');", url_jogo)
         
-        # Alterna para a nova aba criada
         novas_abas = [handle for handle in driver.window_handles if handle != aba_principal]
         if novas_abas:
             driver.switch_to.window(novas_abas[-1])
@@ -74,7 +69,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
 
-        # 1. Clique Híbrido na aba "Stats dos times" / "Team Stats"
+        # 1. Clique na aba "Stats dos times" / "Team Stats"
         xpath_aba_stats = (
             "//*[(self::span or self::button or self::a or self::div) and ("
             "contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'stats dos times') or "
@@ -90,7 +85,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
             time.sleep(0.3)
             driver.execute_script("arguments[0].click();", aba_team_stats)
             time.sleep(3)
-        except Exception as e_click:
+        except Exception:
             try:
                 driver.execute_script("""
                     let elementos = Array.from(document.querySelectorAll('span, button, a, div'));
@@ -107,7 +102,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
             except Exception:
                 pass
 
-        # 2. Rola a página para renderizar os cards de métricas
+        # 2. Rola a página
         driver.execute_script("window.scrollTo(0, 500);")
         time.sleep(1)
         driver.execute_script("window.scrollTo(0, 1000);")
@@ -130,13 +125,12 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                 for_fora = spans_fora[1].text.strip()
                 against_fora = spans_fora[2].text.strip()
 
-        # 4. EXTRAÇÃO DOS JOGOS (LINHAS TR) E FILTRAGEM DE AMISTOSOS
+        # 4. EXTRAÇÃO DOS JOGOS E COMPETIÇÃO
         linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
 
         for linha in linhas:
             try:
                 colunas = linha.find_elements(By.TAG_NAME, "td")
-                # Exige pelo menos 6 colunas para ler a competição
                 if len(colunas) >= 6:
                     data = colunas[0].text.strip()
                     home_nome = colunas[1].text.strip()
@@ -144,11 +138,11 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                     gols_fora = colunas[3].text.strip()
                     away_nome = colunas[4].text.strip()
                     
-                    # Coluna 6: Competição
+                    # Extrai o nome e o link da Competição
                     coluna_comp = colunas[5]
                     nome_comp = coluna_comp.text.strip()
-                    
                     href_comp = ""
+                    
                     try:
                         link_elem = coluna_comp.find_element(By.TAG_NAME, "a")
                         href_comp = link_elem.get_attribute("href") or ""
@@ -157,20 +151,30 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                     except Exception:
                         pass
 
-                    # 🚫 DESCARTA O JOGO SE FOR AMISTOSO
+                    # Se for amistoso, pula
                     if eh_amistoso(nome_comp, href_comp):
                         continue
 
                     if data and gols_casa.isdigit() and gols_fora.isdigit():
-                        info_jogo = f"{data} | {home_nome} {gols_casa} - {gols_fora} {away_nome} [{nome_comp}]"
+                        # Dicionário estruturado com a competição separada
+                        dados_jogo = {
+                            "data": data,
+                            "home": home_nome,
+                            "gols_casa": int(gols_casa),
+                            "gols_fora": int(gols_fora),
+                            "away": away_nome,
+                            "competicao": nome_comp
+                        }
 
+                        # Adiciona ao time da Casa
                         if mesmo_time(t1, home_nome) or mesmo_time(t1, away_nome):
-                            if len(lista_jogos_casa) < 5 and info_jogo not in lista_jogos_casa:
-                                lista_jogos_casa.append(info_jogo)
+                            if len(lista_jogos_casa) < 5 and dados_jogo not in lista_jogos_casa:
+                                lista_jogos_casa.append(dados_jogo)
 
+                        # Adiciona ao time de Fora
                         if mesmo_time(t2, home_nome) or mesmo_time(t2, away_nome):
-                            if len(lista_jogos_fora) < 5 and info_jogo not in lista_jogos_fora:
-                                lista_jogos_fora.append(info_jogo)
+                            if len(lista_jogos_fora) < 5 and dados_jogo not in lista_jogos_fora:
+                                lista_jogos_fora.append(dados_jogo)
             except Exception:
                 continue
 
@@ -178,7 +182,6 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         print(f"   ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
 
     finally:
-        # Garante que a aba do jogo seja fechada e o driver retorne à aba principal
         try:
             if len(driver.window_handles) > 1:
                 driver.close()
@@ -186,22 +189,22 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         except Exception:
             pass
 
-    # LOG PADRONIZADO NO TERMINAL
+    # LOG PRINT
     print("============================================================")
-    print("📊 STATSHUB - MÉTRICAS & HISTÓRICO DE JOGOS (SEM AMISTOSOS)")
+    print("📊 STATSHUB - MÉTRICAS & HISTÓRICO COM COMPETIÇÕES")
     print("============================================================")
     print(f"🏠 {t1} (Casa):")
     print(f"   • Overall : {overall_casa} | For: {for_casa} | Against: {against_casa}")
     print("   • Últimos 5 jogos oficiais:")
     for j in lista_jogos_casa:
-        print(f"     - {j}")
+        print(f"     - {j['data']} | {j['home']} {j['gols_casa']} x {j['gols_fora']} {j['away']} | 🏆 {j['competicao']}")
 
     print("-" * 60)
     print(f"✈️ {t2} (Fora):")
     print(f"   • Overall : {overall_fora} | For: {for_fora} | Against: {against_fora}")
     print("   • Últimos 5 jogos oficiais:")
     for j in lista_jogos_fora:
-        print(f"     - {j}")
+        print(f"     - {j['data']} | {j['home']} {j['gols_casa']} x {j['gols_fora']} {j['away']} | 🏆 {j['competicao']}")
     print("============================================================\n")
 
     return {
