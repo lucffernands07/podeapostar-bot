@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Importa a função de raspagem do StatsHub (caminho original)
-from testes.teste_raspagem_h2h import pegar_estatisticas_statshub
+from sites.statshub.raspagem_h2h import pegar_estatisticas_statshub
 
 def configurar_driver():
     options = Options()
