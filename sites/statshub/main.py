@@ -94,7 +94,6 @@ def limpar_nome_time(nome_bruto):
 def obter_jogos_da_liga(driver, nome_liga):
     js_script = """
         let nomeAlvo = arguments[0].toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
-        
         let linksLiga = Array.from(document.querySelectorAll("a[href*='/leagues/']"));
         
         for (let aLiga of linksLiga) {
@@ -106,16 +105,12 @@ def obter_jogos_da_liga(driver, nome_liga):
             let bateuHref = palavrasChave.every(p => hrefLiga.includes(p));
             
             if (bateuTexto || bateuHref) {
-                // Sobe até encontrar o bloco da liga
                 let containerLiga = aLiga;
                 while (containerLiga && containerLiga.tagName !== 'BODY') {
                     let parent = containerLiga.parentElement;
                     if (!parent) break;
-                    
                     let outrosLinksLiga = parent.querySelectorAll("a[href*='/leagues/']");
-                    if (outrosLinksLiga.length > 1) {
-                        break;
-                    }
+                    if (outrosLinksLiga.length > 1) break;
                     containerLiga = parent;
                 }
                 
@@ -131,16 +126,28 @@ def obter_jogos_da_liga(driver, nome_liga):
                         if (!urlsVistas.has(href)) {
                             urlsVistas.add(href);
                             
-                            let linhaJogo = a.closest("div") || a.parentElement;
-                            if (linhaJogo && linhaJogo.parentElement && linhaJogo.innerText.length < 15) {
-                                linhaJogo = linhaJogo.parentElement;
-                            }
+                            // Tenta extrair nomes dos times diretamente da URL do jogo
+                            let slug = href.split('/fixture/')[1] || "";
+                            let parteSlug = slug.split('/')[0] || ""; // ex: "georgia-vs-northern-ireland-mugg2l"
+                            let partes = parteSlug.split('-vs-');
                             
-                            let fullText = linhaJogo ? (linhaJogo.innerText || "") : "";
+                            let t1_url = "";
+                            let t2_url = "";
+                            if (partes.length >= 2) {
+                                t1_url = partes[0].replace(/-/g, ' ').trim();
+                                // Remove os hashes do final (ex: 'mugg2l')
+                                t2_url = partes[1].replace(/-[a-z0-9]+$/i, '').replace(/-/g, ' ').trim();
+                            }
+
+                            // Pega elemento isolado apenas do link atual
+                            let cardElemento = a.closest("a") || a;
+                            let fullText = cardElemento ? (cardElemento.innerText || "") : "";
                             let lines = fullText.split('\\n').map(l => l.trim()).filter(l => l.length > 0);
                             
                             resultados.push({
                                 url: href,
+                                t1_slug: t1_url,
+                                t2_slug: t2_url,
                                 texto_card: fullText,
                                 linhas: lines
                             });
@@ -153,7 +160,7 @@ def obter_jogos_da_liga(driver, nome_liga):
         }
         return null;
     """
-    return driver.execute_script(js_script, nome_liga)
+    return driver.execute_script(js_script, nome_liga)    
 
 def main():
     driver = configurar_driver()
@@ -212,10 +219,14 @@ def main():
                     if url_fixture and url_fixture not in [j["url"] for j in jogos_encontrados]:
                         texto_card = item.get("texto_card", "")
                         linhas = item.get("linhas", [])
+                        t1_slug = item.get("t1_slug", "").title()
+                        t2_slug = item.get("t2_slug", "").title()
                         
+                        # Extrai o horário do card
                         match_horario = re.search(r'\b\d{1,2}:\d{2}\b', texto_card)
                         horario = match_horario.group(0) if match_horario else "--:--"
 
+                        # Filtra nomes de times pelas linhas do card se disponível
                         nomes_times = []
                         for l in linhas:
                             if not re.search(r'\b\d{1,2}:\d{2}\b', l) and not re.search(r'\d+\.\d+', l) and len(l) > 2:
@@ -228,13 +239,16 @@ def main():
                             print(f"⏭️ Descartando jogo encerrado: {texto_card.replace(chr(10), ' ')}")
                             continue
 
-                        if len(nomes_times) >= 2:
+                        # Prioridade de Nomes: 1º Nomes extraídos da URL (Garantia de não repetição) | 2º Nomes do Card
+                        if t1_slug and t2_slug:
+                            t1_card, t2_card = t1_slug, t2_slug
+                        elif len(nomes_times) >= 2:
                             t1_card, t2_card = nomes_times[0], nomes_times[1]
-                            status_str = "AO VIVO" if is_ao_vivo else horario
-                            info_formatada = f"{t1_card} x {t2_card} ({status_str})"
                         else:
                             t1_card, t2_card = "Mandante", "Visitante"
-                            info_formatada = texto_card.replace("\n", " ").strip()
+
+                        status_str = "AO VIVO" if is_ao_vivo else horario
+                        info_formatada = f"{t1_card} x {t2_card} ({status_str})"
 
                         jogos_encontrados.append({
                             "url": url_fixture,
