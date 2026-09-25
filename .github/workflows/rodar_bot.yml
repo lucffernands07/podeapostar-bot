@@ -3,7 +3,7 @@ name: 2. Main Bot Apostas
 on:
   push:
     paths:
-      - 'main.py'
+      - 'sites/flashscore/main.py'
   schedule:
     # 03:37 UTC corresponde às 00:37 de Brasília (GMT-3)
     - cron: '37 3 * * *'
