@@ -233,13 +233,13 @@ def main():
                                 nomes_times.append(limpar_nome_time(l))
 
                         tem_placar = any(str_placar in texto_card for str_placar in ["0—", "1—", "2—", "3—", "4—", "5—", "0-", "1-", "2-", "3-", "4-", "5-"])
-                        is_ao_vivo = "AO VIVO" in texto_card.upper()
+                        is_ao_vivo = "AO VIVO" in texto_card.upper() or "LIVE" in texto_card.upper()
                         
                         if tem_placar and not is_ao_vivo:
                             print(f"⏭️ Descartando jogo encerrado: {texto_card.replace(chr(10), ' ')}")
                             continue
 
-                        # Prioridade de Nomes: 1º Nomes extraídos da URL (Garantia de não repetição) | 2º Nomes do Card
+                        # Prioridade de Nomes: 1º Nomes extraídos da URL | 2º Nomes do Card
                         if t1_slug and t2_slug:
                             t1_card, t2_card = t1_slug, t2_slug
                         elif len(nomes_times) >= 2:
@@ -255,7 +255,8 @@ def main():
                             "info_card": info_formatada,
                             "t1": t1_card,
                             "t2": t2_card,
-                            "horario": horario
+                            "horario": horario,
+                            "is_ao_vivo": is_ao_vivo
                         })
                         
                 print(f"\n📋 JOGOS DE HOJE ENCONTRADOS EM '{nome_liga_alvo}' ({len(jogos_encontrados)} partidas):")
@@ -266,12 +267,19 @@ def main():
                     print(f"⚠️ Nenhum jogo pendente foi encontrado para a liga '{nome_liga_alvo}' hoje.\n")
                     continue
 
-                # Processa cada jogo isolando a navegação em nova aba
+                # Processa apenas jogos válidos com horário pré-jogo
                 for idx, jogo in enumerate(jogos_encontrados, 1):
-                    url_jogo = jogo["url"]
+                    horario_jogo = jogo["horario"]
+                    is_ao_vivo = jogo["is_ao_vivo"]
                     t1 = jogo["t1"]
                     t2 = jogo["t2"]
-                    horario_jogo = jogo["horario"]
+
+                    # 🚫 FILTRO AO VIVO / SEM HORÁRIO VÁLIDO
+                    if is_ao_vivo or horario_jogo == "--:--":
+                        print(f"\n⏩ Ignorando raspagem de jogo em andamento/sem horário: {t1} x {t2} ({'AO VIVO' if is_ao_vivo else '--:--'})")
+                        continue
+
+                    url_jogo = jogo["url"]
                     inicio_jogo = time.time()
                     
                     print(f"--------------------------------------------------")
