@@ -89,10 +89,6 @@ def limpar_nome_time(nome_bruto):
     return nome_limpo.strip()
 
 def obter_jogos_da_liga(driver, nome_liga):
-    """
-    Localiza a liga com base no link  do cabeçalho (/leagues/) 
-    e extrai os jogos estritamente contidos em seu container.
-    """
     js_script = """
         let nomeAlvo = arguments[0].toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
         
@@ -169,7 +165,7 @@ def main():
     
     # Lista de ligas que deseja analisar
     ligas_alvo = [
-        "UEFA Nations League",
+        #"UEFA Nations League",
         "Brasileirão Série B"
     ]
     
