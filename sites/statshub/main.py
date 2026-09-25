@@ -80,41 +80,40 @@ def expandir_todas_as_ligas(driver):
 
 def limpar_nome_time(nome_bruto):
     """
-    Remove hashs aleatórios e limpa o nome do time.
-    Exemplo: 'Malta Mufu7E' -> 'Malta', 'Germany Mug03R' -> 'Germany'
+    Remove hashes e ids adicionais dos nomes dos times.
+    Exemplo: 'Novorizontino mugg14' -> 'Novorizontino'
     """
     if not nome_bruto:
         return ""
+    # Remove palavras finais que misturam letras e números (IDs/Hashes)
     nome_limpo = re.sub(r'\s+[A-Za-z0-9]*\d+[A-Za-z0-9]*$', '', nome_bruto.strip())
+    # Remove códigos alfanuméricos isolados do StatsHub
+    nome_limpo = re.sub(r'\b[a-z]{2,4}\d{2,4}\b', '', nome_limpo, flags=re.IGNORECASE)
     return nome_limpo.strip()
 
 def obter_jogos_da_liga(driver, nome_liga):
     js_script = """
         let nomeAlvo = arguments[0].toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
         
-        // Busca especificamente todos os links de liga do StatsHub
         let linksLiga = Array.from(document.querySelectorAll("a[href*='/leagues/']"));
         
         for (let aLiga of linksLiga) {
             let textoLiga = (aLiga.innerText || "").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").trim();
             let hrefLiga = (aLiga.getAttribute("href") || "").toLowerCase();
             
-            // Quebra o nome em palavras-chave para garantir o casamento exato
             let palavrasChave = nomeAlvo.split(" ").filter(p => p.length > 2);
             let bateuTexto = palavrasChave.every(p => textoLiga.includes(p));
             let bateuHref = palavrasChave.every(p => hrefLiga.includes(p));
             
             if (bateuTexto || bateuHref) {
-                // Sobe no DOM até o container do card da liga (limita para não subir à página inteira)
+                // Sobe até encontrar o bloco da liga
                 let containerLiga = aLiga;
                 while (containerLiga && containerLiga.tagName !== 'BODY') {
                     let parent = containerLiga.parentElement;
                     if (!parent) break;
                     
-                    // O container correto tem links de jogos e não engloba outros links de liga
                     let outrosLinksLiga = parent.querySelectorAll("a[href*='/leagues/']");
                     if (outrosLinksLiga.length > 1) {
-                        // Se encontrou mais de um link de liga, o elemento atual já é o container isolado da liga!
                         break;
                     }
                     containerLiga = parent;
@@ -125,8 +124,6 @@ def obter_jogos_da_liga(driver, nome_liga):
                     
                     let resultados = [];
                     let linksFixture = Array.from(containerLiga.querySelectorAll("a[href*='/fixture/']"));
-                    
-                    // Deduplicação imediata por URL no JS
                     let urlsVistas = new Set();
                     
                     linksFixture.forEach(a => {
@@ -134,7 +131,6 @@ def obter_jogos_da_liga(driver, nome_liga):
                         if (!urlsVistas.has(href)) {
                             urlsVistas.add(href);
                             
-                            // Pega o card/linha do jogo
                             let linhaJogo = a.closest("div") || a.parentElement;
                             if (linhaJogo && linhaJogo.parentElement && linhaJogo.innerText.length < 15) {
                                 linhaJogo = linhaJogo.parentElement;
@@ -163,7 +159,7 @@ def main():
     driver = configurar_driver()
     url_home = "https://www.statshub.com/pt"
     
-    # Lista de ligas que deseja analisar
+    # Lista de ligas para analisar
     ligas_alvo = [
         "UEFA Nations League",
         "Brasileirão Série B"
@@ -178,14 +174,12 @@ def main():
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
         
-        # 2. Rola ligeiramente
+        # 2. Rola e clica em "Expandir Tudo"
         driver.execute_script("window.scrollTo(0, 300);")
         time.sleep(1)
-        
-        # 3. Clica em "Expandir Tudo"
         expandir_todas_as_ligas(driver)
 
-        # 4. Rola a página para renderizar tudo
+        # 3. Rola a página para forçar a renderização
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
         time.sleep(1)
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -193,13 +187,16 @@ def main():
         driver.execute_script("window.scrollTo(0, 0);")
         time.sleep(1)
 
+        # Guarda a aba principal da lista de ligas
+        aba_principal = driver.current_window_handle
+
         for nome_liga_alvo in ligas_alvo:
             print(f"\n==================================================")
             print(f"🔍 INICIANDO BUSCA DA LIGA: {nome_liga_alvo}")
             print(f"==================================================")
             
             try:
-                # 5. Extrai apenas os jogos pertencentes a esta liga
+                # Extrai os jogos pertencentes a esta liga sem sair da aba principal
                 dados_jogos_raw = obter_jogos_da_liga(driver, nome_liga_alvo)
                 
                 if not dados_jogos_raw:
@@ -216,11 +213,9 @@ def main():
                         texto_card = item.get("texto_card", "")
                         linhas = item.get("linhas", [])
                         
-                        # Extrai o horário
                         match_horario = re.search(r'\b\d{1,2}:\d{2}\b', texto_card)
                         horario = match_horario.group(0) if match_horario else "--:--"
 
-                        # Filtra nomes de times descartando números/arbitragem
                         nomes_times = []
                         for l in linhas:
                             if not re.search(r'\b\d{1,2}:\d{2}\b', l) and not re.search(r'\d+\.\d+', l) and len(l) > 2:
@@ -229,7 +224,6 @@ def main():
                         tem_placar = any(str_placar in texto_card for str_placar in ["0—", "1—", "2—", "3—", "4—", "5—", "0-", "1-", "2-", "3-", "4-", "5-"])
                         is_ao_vivo = "AO VIVO" in texto_card.upper()
                         
-                        # Descartar jogos já encerrados
                         if tem_placar and not is_ao_vivo:
                             print(f"⏭️ Descartando jogo encerrado: {texto_card.replace(chr(10), ' ')}")
                             continue
@@ -259,7 +253,7 @@ def main():
                     print(f"⚠️ Nenhum jogo pendente foi encontrado para a liga '{nome_liga_alvo}' hoje.\n")
                     continue
 
-                # Processa cada jogo qualificado
+                # Processa cada jogo isolando a navegação em nova aba
                 for idx, jogo in enumerate(jogos_encontrados, 1):
                     url_jogo = jogo["url"]
                     t1 = jogo["t1"]
@@ -273,7 +267,8 @@ def main():
                     print(f"--------------------------------------------------")
                     
                     try:
-                        pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario_jogo)
+                        # 🔄 Executa a raspagem em aba dedicada mantendo a lista principal intacta
+                        pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario_jogo, aba_principal=aba_principal)
                         total_jogos_processados += 1
                         
                         tempo_jogo = round(time.time() - inicio_jogo, 2)
