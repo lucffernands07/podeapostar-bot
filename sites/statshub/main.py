@@ -53,8 +53,8 @@ def limpar_nome_time(nome_bruto):
 
 def obter_jogos_da_liga(driver, nome_liga):
     """
-    Localiza o container exclusivo da liga e extrai as informações de todos os links de jogos
-    diretamente no JavaScript para evitar StaleElementReferenceException do Selenium.
+    Localiza o elemento da liga via JS e navega no DOM ate encontrar
+    o container pai exclusivo que engloba os jogos daquela liga.
     """
     js_script = """
         let nomeAlvo = arguments[0].toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
@@ -65,41 +65,32 @@ def obter_jogos_da_liga(driver, nome_liga):
                 let textoNorm = el.innerText.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
                 
                 if (textoNorm === nomeAlvo || textoNorm.includes(nomeAlvo)) {
-                    // Sobe no DOM procurando o container individual da liga
-                    let container = el.closest("div.border, div.rounded-lg, div.shadow-sm");
+                    // Tenta expandir clicando no título caso o bloco esteja fechado
+                    el.click();
                     
-                    if (!container) {
-                        container = el.parentElement;
-                        for (let i = 0; i < 3; i++) {
-                            if (container && container.parentElement && container.parentElement.tagName !== 'BODY') {
-                                if (container.querySelectorAll("a[href*='/fixture/']").length > 0) {
-                                    break;
-                                }
-                                container = container.parentElement;
-                            }
+                    // Sobe no DOM nível a nível até encontrar o container pai que guarda os jogos
+                    let container = el.parentElement;
+                    let links = [];
+                    
+                    for (let level = 0; level < 6; level++) {
+                        if (!container || container.tagName === 'BODY') break;
+                        
+                        links = container.querySelectorAll("a[href*='/fixture/']");
+                        // Se encontramos um bloco pai com links e ele não é a página inteira
+                        if (links.length > 0 && links.length < 35) {
+                            break;
                         }
+                        container = container.parentElement;
                     }
                     
-                    if (container) {
+                    if (container && links.length > 0) {
                         container.scrollIntoView({block: 'center'});
                         
-                        // Expande se estiver recolhido
-                        let links = container.querySelectorAll("a[href*='/fixture/']");
-                        if (links.length === 0) {
-                            el.click();
-                            // Aguarda um instante para renderização
-                            let start = Date.now();
-                            while (Date.now() - start < 500) {}
-                            links = container.querySelectorAll("a[href*='/fixture/']");
-                        }
-                        
-                        // Extrai os dados dos links diretamente em JS
                         let resultados = [];
                         links.forEach(a => {
                             let href = a.href;
                             let fullText = a.innerText || "";
                             
-                            // Extrai textos dos spans internos
                             let spans = Array.from(a.querySelectorAll("span"))
                                             .map(s => s.innerText.trim())
                                             .filter(t => t.length > 0 && !t.includes("Escalações"));
@@ -124,7 +115,7 @@ def main():
     driver = configurar_driver()
     url_home = "https://www.statshub.com/pt"
     
-    # 📌 Defina aqui a lista de ligas que deseja varrer
+    # Lista de ligas que deseja analisar
     ligas_alvo = [
         "UEFA Nations League",
         "Brasileirão Série B"
@@ -140,22 +131,24 @@ def main():
             print(f"==================================================")
             
             try:
-                # 1. Garante que abre a home limpa
+                # 1. Carrega a página principal
                 driver.get(url_home)
                 WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
                 time.sleep(3)
                 
-                # 2. Rola a página suavemente para carregar todas as ligas do dia
-                driver.execute_script("window.scrollTo(0, 1000);")
+                # 2. Rola a página para forçar o carregamento do conteúdo dinâmico
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
+                time.sleep(1)
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 time.sleep(1)
                 driver.execute_script("window.scrollTo(0, 0);")
                 time.sleep(1)
                 
-                # 3. Busca e extrai os jogos diretamente no JS para evitar stale element
+                # 3. Busca os elementos da liga corrigindo a navegação do DOM
                 dados_jogos_raw = obter_jogos_da_liga(driver, nome_liga_alvo)
                 
-                if dados_jogos_raw is None:
-                    print(f"⚠️ Liga '{nome_liga_alvo}' não foi encontrada ou não possui jogos listados para hoje.")
+                if not dados_jogos_raw:
+                    print(f"⚠️ Liga '{nome_liga_alvo}' não foi encontrada na página do dia.")
                     continue
                 
                 print(f"🏆 LIGA ENCONTRADA E EXPANDIDA: {nome_liga_alvo}")
@@ -171,7 +164,7 @@ def main():
                         # Limpa os nomes obtidos dos spans
                         nomes_times = [limpar_nome_time(n) for n in spans if n]
                         
-                        # Tenta extrair o horário do texto completo
+                        # Extrai o horário no formato HH:MM
                         match_horario = re.search(r'\b\d{1,2}:\d{2}\b', texto_card)
                         horario = match_horario.group(0) if match_horario else "--:--"
 
@@ -179,12 +172,12 @@ def main():
                         tem_placar = any(str_placar in texto_card for str_placar in ["0—", "1—", "2—", "3—", "4—", "5—", "0-", "1-", "2-", "3-", "4-", "5-"])
                         is_ao_vivo = "AO VIVO" in texto_card.upper()
                         
-                        # REGRA 1: Descartar jogos já encerrados
+                        # Descartar jogos já encerrados
                         if tem_placar and not is_ao_vivo:
                             print(f"⏭️ Descartando jogo encerrado: {texto_card.replace(chr(10), ' ')}")
                             continue
 
-                        # REGRA 2: Trava de segurança para jogos passados da madrugada
+                        # Trava de segurança para jogos passados da madrugada
                         if horario != "--:--" and not is_ao_vivo:
                             try:
                                 hora_int = int(horario.split(":")[0])
@@ -220,7 +213,7 @@ def main():
                     print(f"⚠️ Nenhum jogo pendente foi encontrado para a liga '{nome_liga_alvo}' hoje.\n")
                     continue
 
-                # Processa cada jogo encontrado da liga atual
+                # Processa cada jogo encontrado
                 for idx, jogo in enumerate(jogos_encontrados, 1):
                     url_jogo = jogo["url"]
                     t1 = jogo["t1"]
@@ -263,4 +256,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
+                                                    
