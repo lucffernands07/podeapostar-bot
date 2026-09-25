@@ -48,22 +48,15 @@ def expandir_todas_as_ligas(driver):
     xpath_btn = '//*[@id="main-content-area"]/div[2]/main/div/div[1]/div[8]/div[1]/div[2]/button[3]/span'
     
     try:
-        # Aguarda até 10 segundos para o botão do XPath aparecer
         elemento_btn = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, xpath_btn))
         )
-        
-        # Clica via JavaScript para garantir execução perfeita mesmo se sobreposto
         driver.execute_script("arguments[0].click();", elemento_btn)
         print("🔓 Botão 'Expandir Tudo' acionado com sucesso via XPath!")
-        
-        # Tempo essencial para o React carregar e injetar todos os jogos no DOM
         time.sleep(4)
         return True
     except Exception as e:
         print(f"⚠️ Erro ao clicar no botão 'Expandir Tudo' via XPath: {e}")
-        
-        # Fallback de segurança procurando pelo texto caso a estrutura div mude
         try:
             js_fallback = """
                 let spans = Array.from(document.querySelectorAll('span'));
@@ -97,45 +90,55 @@ def limpar_nome_time(nome_bruto):
 
 def obter_jogos_da_liga(driver, nome_liga):
     """
-    Busca o cabeçalho da liga e extrai todas as URLs de partidas
-    dentro do container correspondente.
+    Localiza a liga com base no link  do cabeçalho (/leagues/) 
+    e extrai os jogos estritamente contidos em seu container.
     """
     js_script = """
         let nomeAlvo = arguments[0].toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
-        let todosElementos = Array.from(document.querySelectorAll('*'));
         
-        for (let el of todosElementos) {
-            // Verifica apenas nós de texto direto ou com poucos filhos para pegar o título exato da liga
-            if (el.children.length <= 2 && el.innerText) {
-                let textoNorm = el.innerText.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").trim();
-                
-                let palavrasChave = nomeAlvo.split(" ").filter(p => p.length > 2);
-                let bateuLigas = palavrasChave.every(p => textoNorm.includes(p));
-                
-                if (bateuLigas || textoNorm === nomeAlvo) {
-                    // Sobe no DOM para encontrar o container que abraça os jogos desta liga
-                    let container = el;
-                    let linksEncontrados = [];
+        // Busca especificamente todos os links de liga do StatsHub
+        let linksLiga = Array.from(document.querySelectorAll("a[href*='/leagues/']"));
+        
+        for (let aLiga of linksLiga) {
+            let textoLiga = (aLiga.innerText || "").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").trim();
+            let hrefLiga = (aLiga.getAttribute("href") || "").toLowerCase();
+            
+            // Quebra o nome em palavras-chave para garantir o casamento exato
+            let palavrasChave = nomeAlvo.split(" ").filter(p => p.length > 2);
+            let bateuTexto = palavrasChave.every(p => textoLiga.includes(p));
+            let bateuHref = palavrasChave.every(p => hrefLiga.includes(p));
+            
+            if (bateuTexto || bateuHref) {
+                // Sobe no DOM até o container do card da liga (limita para não subir à página inteira)
+                let containerLiga = aLiga;
+                while (containerLiga && containerLiga.tagName !== 'BODY') {
+                    let parent = containerLiga.parentElement;
+                    if (!parent) break;
                     
-                    for (let i = 0; i < 10; i++) {
-                        if (!container || container.tagName === 'BODY') break;
-                        
-                        let links = container.querySelectorAll("a[href*='/fixture/']");
-                        if (links.length > 0) {
-                            linksEncontrados = Array.from(links);
-                            break;
-                        }
-                        container = container.parentElement;
+                    // O container correto tem links de jogos e não engloba outros links de liga
+                    let outrosLinksLiga = parent.querySelectorAll("a[href*='/leagues/']");
+                    if (outrosLinksLiga.length > 1) {
+                        // Se encontrou mais de um link de liga, o elemento atual já é o container isolado da liga!
+                        break;
                     }
+                    containerLiga = parent;
+                }
+                
+                if (containerLiga) {
+                    containerLiga.scrollIntoView({block: 'center'});
                     
-                    if (container && linksEncontrados.length > 0) {
-                        container.scrollIntoView({block: 'center'});
-                        
-                        let resultados = [];
-                        linksEncontrados.forEach(a => {
-                            let href = a.href;
+                    let resultados = [];
+                    let linksFixture = Array.from(containerLiga.querySelectorAll("a[href*='/fixture/']"));
+                    
+                    // Deduplicação imediata por URL no JS
+                    let urlsVistas = new Set();
+                    
+                    linksFixture.forEach(a => {
+                        let href = a.href;
+                        if (!urlsVistas.has(href)) {
+                            urlsVistas.add(href);
                             
-                            // Acessa o nó pai que descreve a partida (linhas de times/horários)
+                            // Pega o card/linha do jogo
                             let linhaJogo = a.closest("div") || a.parentElement;
                             if (linhaJogo && linhaJogo.parentElement && linhaJogo.innerText.length < 15) {
                                 linhaJogo = linhaJogo.parentElement;
@@ -149,10 +152,10 @@ def obter_jogos_da_liga(driver, nome_liga):
                                 texto_card: fullText,
                                 linhas: lines
                             });
-                        });
-                        
-                        return resultados;
-                    }
+                        }
+                    });
+                    
+                    return resultados;
                 }
             }
         }
@@ -179,14 +182,14 @@ def main():
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
         
-        # 2. Rola ligeiramente para garantir a renderização do painel de controle
+        # 2. Rola ligeiramente
         driver.execute_script("window.scrollTo(0, 300);")
         time.sleep(1)
         
-        # 3. Clica no botão "Expandir Tudo" no topo via XPath
+        # 3. Clica em "Expandir Tudo"
         expandir_todas_as_ligas(driver)
 
-        # 4. Rola até o rodapé para renderizar todos os jogos que foram expandidos na página
+        # 4. Rola a página para renderizar tudo
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
         time.sleep(1)
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -200,7 +203,7 @@ def main():
             print(f"==================================================")
             
             try:
-                # 5. Extrai os jogos do DOM expandido
+                # 5. Extrai apenas os jogos pertencentes a esta liga
                 dados_jogos_raw = obter_jogos_da_liga(driver, nome_liga_alvo)
                 
                 if not dados_jogos_raw:
