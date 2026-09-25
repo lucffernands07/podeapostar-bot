@@ -1,6 +1,8 @@
 import os
 import time
 import re
+import sys
+from pathlib import Path
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -10,9 +12,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Importa a função de raspagem do StatsHub (caminho original)
-from sites.statshub.raspagem_h2h import pegar_estatisticas_statshub
+# Adiciona a raiz do repositório ao sys.path
+RAIZ_PROJETO = Path(__file__).resolve().parent.parent.parent
+if str(RAIZ_PROJETO) not in sys.path:
+    sys.path.insert(0, str(RAIZ_PROJETO))
 
+# Agora os imports relativos à raiz vão funcionar normalmente!
+from sites.statshub.raspagem_h2h import pegar_estatisticas_statshub
 def configurar_driver():
     options = Options()
     
