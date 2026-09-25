@@ -43,29 +43,47 @@ def configurar_driver():
 
 def expandir_todas_as_ligas(driver):
     """
-    Clica no botão 'Expandir Tudo' no topo do StatsHub usando a classe e texto exatos do elemento.
+    Clica no botão 'Expandir Tudo' usando o XPath exato fornecido.
     """
+    xpath_btn = '//*[@id="main-content-area"]/div[2]/main/div/div[1]/div[8]/div[1]/div[2]/button[3]/span'
+    
     try:
-        js_expandir = """
-            let spans = Array.from(document.querySelectorAll('span'));
-            for (let span of spans) {
-                if (span.innerText && span.innerText.trim().toLowerCase() === 'expandir tudo') {
-                    // Tenta clicar no próprio span ou no elemento pai (caso o evento de clique esteja no container)
-                    let elementoClicavel = span.closest('button') || span.closest('div') || span;
-                    elementoClicavel.click();
-                    return true;
-                }
-            }
-            return false;
-        """
-        expandiu = driver.execute_script(js_expandir)
-        if expandiu:
-            print("🔓 Botão 'Expandir Tudo' acionado com sucesso!")
-            time.sleep(2)
-        else:
-            print("⚠️ Botão 'Expandir Tudo' não localizado na página.")
+        # Aguarda até 10 segundos para o botão do XPath aparecer
+        elemento_btn = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, xpath_btn))
+        )
+        
+        # Clica via JavaScript para garantir execução perfeita mesmo se sobreposto
+        driver.execute_script("arguments[0].click();", elemento_btn)
+        print("🔓 Botão 'Expandir Tudo' acionado com sucesso via XPath!")
+        
+        # Tempo essencial para o React carregar e injetar todos os jogos no DOM
+        time.sleep(4)
+        return True
     except Exception as e:
-        print(f"⚠️ Erro ao tentar expandir tudo: {e}")
+        print(f"⚠️ Erro ao clicar no botão 'Expandir Tudo' via XPath: {e}")
+        
+        # Fallback de segurança procurando pelo texto caso a estrutura div mude
+        try:
+            js_fallback = """
+                let spans = Array.from(document.querySelectorAll('span'));
+                for (let s of spans) {
+                    if (s.innerText && s.innerText.trim() === 'Expandir Tudo') {
+                        let btn = s.closest('button') || s;
+                        btn.click();
+                        return true;
+                    }
+                }
+                return false;
+            """
+            if driver.execute_script(js_fallback):
+                print("🔓 Botão 'Expandir Tudo' acionado via Fallback JS!")
+                time.sleep(4)
+                return True
+        except Exception as e_fb:
+            print(f"⚠️ Fallback JS também falhou: {e_fb}")
+            
+    return False
 
 def limpar_nome_time(nome_bruto):
     """
@@ -79,49 +97,51 @@ def limpar_nome_time(nome_bruto):
 
 def obter_jogos_da_liga(driver, nome_liga):
     """
-    Localiza a liga no DOM totalmente expandido e extrai os jogos.
+    Busca o cabeçalho da liga e extrai todas as URLs de partidas
+    dentro do container correspondente.
     """
     js_script = """
         let nomeAlvo = arguments[0].toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
-        let elementos = Array.from(document.querySelectorAll('div, span, p, h1, h2, h3'));
+        let todosElementos = Array.from(document.querySelectorAll('*'));
         
-        for (let el of elementos) {
-            if (el.innerText && el.children.length === 0) {
-                let textoNorm = el.innerText.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+        for (let el of todosElementos) {
+            // Verifica apenas nós de texto direto ou com poucos filhos para pegar o título exato da liga
+            if (el.children.length <= 2 && el.innerText) {
+                let textoNorm = el.innerText.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").trim();
                 
-                // Normaliza e verifica palavras-chave (ex: 'brasileirao' e 'serie b')
                 let palavrasChave = nomeAlvo.split(" ").filter(p => p.length > 2);
                 let bateuLigas = palavrasChave.every(p => textoNorm.includes(p));
                 
-                if (bateuLigas || textoNorm.includes(nomeAlvo)) {
-                    // Sobe no DOM procurando o container pai que engloba a liga inteira
+                if (bateuLigas || textoNorm === nomeAlvo) {
+                    // Sobe no DOM para encontrar o container que abraça os jogos desta liga
                     let container = el;
-                    while (container && container.tagName !== 'BODY') {
+                    let linksEncontrados = [];
+                    
+                    for (let i = 0; i < 10; i++) {
+                        if (!container || container.tagName === 'BODY') break;
+                        
                         let links = container.querySelectorAll("a[href*='/fixture/']");
-                        if (links.length > 0 && links.length <= 40) {
+                        if (links.length > 0) {
+                            linksEncontrados = Array.from(links);
                             break;
                         }
                         container = container.parentElement;
                     }
                     
-                    if (container) {
+                    if (container && linksEncontrados.length > 0) {
                         container.scrollIntoView({block: 'center'});
                         
                         let resultados = [];
-                        let links = container.querySelectorAll("a[href*='/fixture/']");
-                        
-                        links.forEach(a => {
+                        linksEncontrados.forEach(a => {
                             let href = a.href;
                             
-                            // Procura o container pai da linha do jogo
-                            let linhaJogo = a;
-                            for (let i = 0; i < 4; i++) {
-                                if (linhaJogo.parentElement && linhaJogo.parentElement !== container) {
-                                    linhaJogo = linhaJogo.parentElement;
-                                }
+                            // Acessa o nó pai que descreve a partida (linhas de times/horários)
+                            let linhaJogo = a.closest("div") || a.parentElement;
+                            if (linhaJogo && linhaJogo.parentElement && linhaJogo.innerText.length < 15) {
+                                linhaJogo = linhaJogo.parentElement;
                             }
                             
-                            let fullText = linhaJogo.innerText || "";
+                            let fullText = linhaJogo ? (linhaJogo.innerText || "") : "";
                             let lines = fullText.split('\\n').map(l => l.trim()).filter(l => l.length > 0);
                             
                             resultados.push({
@@ -154,21 +174,25 @@ def main():
     total_jogos_processados = 0
     
     try:
-        # 1. Carrega a página principal uma única vez
+        # 1. Carrega a página principal
         driver.get(url_home)
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
         
-        # 2. Rola a página para garantir carregamento dos elementos
+        # 2. Rola ligeiramente para garantir a renderização do painel de controle
+        driver.execute_script("window.scrollTo(0, 300);")
+        time.sleep(1)
+        
+        # 3. Clica no botão "Expandir Tudo" no topo via XPath
+        expandir_todas_as_ligas(driver)
+
+        # 4. Rola até o rodapé para renderizar todos os jogos que foram expandidos na página
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
         time.sleep(1)
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(1.5)
+        time.sleep(2)
         driver.execute_script("window.scrollTo(0, 0);")
         time.sleep(1)
-        
-        # 3. Clica no botão "Expandir Tudo"[cite: 5]
-        expandir_todas_as_ligas(driver)
 
         for nome_liga_alvo in ligas_alvo:
             print(f"\n==================================================")
@@ -176,7 +200,7 @@ def main():
             print(f"==================================================")
             
             try:
-                # 4. Busca a liga e extrai os jogos
+                # 5. Extrai os jogos do DOM expandido
                 dados_jogos_raw = obter_jogos_da_liga(driver, nome_liga_alvo)
                 
                 if not dados_jogos_raw:
@@ -193,11 +217,11 @@ def main():
                         texto_card = item.get("texto_card", "")
                         linhas = item.get("linhas", [])
                         
-                        # Extrai o horário (ex: 19:30, 20:30)
+                        # Extrai o horário
                         match_horario = re.search(r'\b\d{1,2}:\d{2}\b', texto_card)
                         horario = match_horario.group(0) if match_horario else "--:--"
 
-                        # Filtra nomes de times excluindo horários e estatísticas do árbitro
+                        # Filtra nomes de times descartando números/arbitragem
                         nomes_times = []
                         for l in linhas:
                             if not re.search(r'\b\d{1,2}:\d{2}\b', l) and not re.search(r'\d+\.\d+', l) and len(l) > 2:
@@ -206,7 +230,7 @@ def main():
                         tem_placar = any(str_placar in texto_card for str_placar in ["0—", "1—", "2—", "3—", "4—", "5—", "0-", "1-", "2-", "3-", "4-", "5-"])
                         is_ao_vivo = "AO VIVO" in texto_card.upper()
                         
-                        # Descartar jogos encerrados
+                        # Descartar jogos já encerrados
                         if tem_placar and not is_ao_vivo:
                             print(f"⏭️ Descartando jogo encerrado: {texto_card.replace(chr(10), ' ')}")
                             continue
