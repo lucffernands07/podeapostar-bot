@@ -19,6 +19,7 @@ if str(RAIZ_PROJETO) not in sys.path:
 
 # Agora os imports relativos à raiz vão funcionar normalmente!
 from sites.statshub.raspagem_h2h import pegar_estatisticas_statshub
+
 def configurar_driver():
     options = Options()
     
