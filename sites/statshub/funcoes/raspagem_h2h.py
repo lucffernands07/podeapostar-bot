@@ -67,10 +67,25 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
             driver.switch_to.window(novas_abas[-1])
 
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        time.sleep(2.5)  # Estabilização inicial da página e requisições XHR
+        time.sleep(3)
 
-        # Função interna para forçar o clique na aba de stats do time
-        def clicar_aba_stats():
+        # 1. Clique na aba "Stats dos times" / "Team Stats"
+        xpath_aba_stats = (
+            "//*[(self::span or self::button or self::a or self::div) and ("
+            "contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'stats dos times') or "
+            "contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'team stats')"
+            ")]"
+        )
+
+        try:
+            aba_team_stats = WebDriverWait(driver, 8).until(
+                EC.element_to_be_clickable((By.XPATH, xpath_aba_stats))
+            )
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", aba_team_stats)
+            time.sleep(0.3)
+            driver.execute_script("arguments[0].click();", aba_team_stats)
+            time.sleep(3)
+        except Exception:
             try:
                 driver.execute_script("""
                     let elementos = Array.from(document.querySelectorAll('span, button, a, div'));
@@ -83,31 +98,17 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                         alvo.click();
                     }
                 """)
-                time.sleep(1.5)
+                time.sleep(3)
             except Exception:
                 pass
 
-        # 1. Garante o clique na aba "Stats dos times"
-        clicar_aba_stats()
+        # 2. Rola a página
+        driver.execute_script("window.scrollTo(0, 500);")
+        time.sleep(1)
+        driver.execute_script("window.scrollTo(0, 1000);")
+        time.sleep(2)
 
-        # 2. Rolagens gradativas para disparar o Lazy Loading
-        driver.execute_script("window.scrollTo(0, 400);")
-        time.sleep(0.5)
-        driver.execute_script("window.scrollTo(0, 900);")
-        time.sleep(0.5)
-
-        # 3. Espera explícita pelas linhas da tabela
-        try:
-            WebDriverWait(driver, 8).until(
-                EC.presence_of_element_located((By.XPATH, "//tr[.//td]"))
-            )
-        except Exception:
-            # Re-tentativa em caso de atraso na resposta do servidor no 1º jogo
-            clicar_aba_stats()
-            driver.execute_script("window.scrollTo(0, 1200);")
-            time.sleep(2)
-
-        # 4. EXTRAÇÃO DAS MÉTRICAS (OVERALL, FOR, AGAINST)
+        # 3. EXTRAÇÃO DAS MÉTRICAS (OVERALL, FOR, AGAINST)
         blocos = driver.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]")
 
         if len(blocos) >= 1:
@@ -124,10 +125,10 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                 for_fora = spans_fora[1].text.strip()
                 against_fora = spans_fora[2].text.strip()
 
-        # 5. EXTRAÇÃO DOS JOGOS E COMPETIÇÃO
-        def processar_linhas():
-            linhas_locais = driver.find_elements(By.XPATH, "//tr[.//td]")
-            for linha in linhas_locais:
+        # 4. EXTRAÇÃO DOS JOGOS E COMPETIÇÃO
+        def ler_tabela():
+            linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
+            for linha in linhas:
                 try:
                     colunas = linha.find_elements(By.TAG_NAME, "td")
                     if len(colunas) >= 6:
@@ -172,14 +173,12 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                 except Exception:
                     continue
 
-        processar_linhas()
+        ler_tabela()
 
-        # 🔄 RE-CHECK DE SEGURANÇA: Se o mandante continuar sem jogos extraídos, faz recarregamento pontual da área
+        # Fallback exclusivo para caso o mandante continue zerado (ex: retardo do primeiro jogo)
         if not lista_jogos_casa:
-            clicar_aba_stats()
-            driver.execute_script("window.scrollTo(0, 1500);")
-            time.sleep(2)
-            processar_linhas()
+            time.sleep(2.5)
+            ler_tabela()
 
     except Exception as e:
         print(f"    ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
