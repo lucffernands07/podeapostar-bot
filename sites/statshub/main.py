@@ -261,7 +261,6 @@ def main():
                 print(f"\n📋 JOGOS DE HOJE ENCONTRADOS EM '{nome_liga_alvo}' ({len(jogos_encontrados)} partidas):")
                 for idx, j in enumerate(jogos_encontrados, 1):
                     print(f"   {idx}. {j['info_card']}")
-                print(f"--------------------------------------------------\n")
                 
                 if not jogos_encontrados:
                     print(f"⚠️ Nenhum jogo pendente foi encontrado para a liga '{nome_liga_alvo}' hoje.\n")
