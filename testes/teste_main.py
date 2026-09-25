@@ -39,6 +39,38 @@ def configurar_driver():
 
     return driver
 
+def expandir_e_obter_bloco_liga(driver, nome_liga):
+    """
+    Localiza o bloco da liga via JS (ignorando acentos e maiúsculas/minúsculas),
+    rola a página até o elemento e garante a expansão da sanfona.
+    """
+    js_script = """
+        let nomeAlvo = arguments[0].toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+        let elementos = Array.from(document.querySelectorAll('div, span, p, h1, h2, h3, a'));
+        
+        for (let el of elementos) {
+            if (el.children.length === 0 && el.innerText) {
+                let textoNorm = el.innerText.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+                if (textoNorm.includes(nomeAlvo)) {
+                    // Sobe no DOM até o container pai da liga
+                    let container = el.closest("div[class*='border'], div[class*='rounded'], div[class*='space-y'], div[class*='shadow']");
+                    if (!container) container = el.parentElement.parentElement;
+                    
+                    container.scrollIntoView({block: 'center'});
+                    
+                    // Expande o bloco caso esteja recolhido
+                    let links = container.querySelectorAll("a[href*='/fixture/']");
+                    if (links.length === 0) {
+                        el.click();
+                    }
+                    return container;
+                }
+            }
+        }
+        return null;
+    """
+    return driver.execute_script(js_script, nome_liga)
+
 def main():
     driver = configurar_driver()
     url_home = "https://www.statshub.com/pt"
@@ -59,30 +91,27 @@ def main():
             print(f"==================================================")
             
             try:
-                # Sempre abre a home para garanir que a página esteja limpa
+                # 1. Garante que abre a home limpa
                 driver.get(url_home)
+                WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
                 time.sleep(3)
                 
-                # Localiza o nome da liga de forma case-insensitive
-                xpath_liga = f"//*[(self::a or self::div or self::span) and contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{nome_liga_alvo.lower()}')]"
-                elemento_liga = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, xpath_liga))
-                )
+                # 2. Rola a página suavemente para acionar o Lazy Loading de ligas inferiores
+                driver.execute_script("window.scrollTo(0, 1000);")
+                time.sleep(1)
+                driver.execute_script("window.scrollTo(0, 0);")
+                time.sleep(1)
                 
-                # Encontra o container clicável da liga
-                container_liga = elemento_liga.find_element(By.XPATH, "./ancestor::div[contains(@class, 'flex') or contains(@class, 'cursor-pointer')][1]")
-                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", container_liga)
-                time.sleep(0.5)
+                # 3. Localiza e expande a liga através da função JS insensível a acentos
+                bloco_liga = expandir_e_obter_bloco_liga(driver, nome_liga_alvo)
+                time.sleep(2)
                 
-                # Tenta buscar os jogos no bloco pai da sanfona
-                bloco_pai_liga = container_liga.find_element(By.XPATH, "./ancestor::div[contains(@class, 'border') or contains(@class, 'rounded') or contains(@class, 'space-y') or contains(@class, 'flex-col')][2]")
-                elementos_jogos = bloco_pai_liga.find_elements(By.XPATH, ".//a[contains(@href, '/fixture/')]")
+                if not bloco_liga:
+                    print(f"⚠️ Liga '{nome_liga_alvo}' não foi encontrada na lista hoje.")
+                    continue
                 
-                # Se estiver fechada/sem jogos visíveis, clica para expandir
-                if not elementos_jogos:
-                    driver.execute_script("arguments[0].click();", container_liga)
-                    time.sleep(2)
-                    elementos_jogos = bloco_pai_liga.find_elements(By.XPATH, ".//a[contains(@href, '/fixture/')]")
+                # Busca os jogos no bloco expandido da liga
+                elementos_jogos = bloco_liga.find_elements(By.XPATH, ".//a[contains(@href, '/fixture/')]")
 
                 print(f"🏆 LIGA ENCONTRADA E EXPANDIDA: {nome_liga_alvo}")
                     
