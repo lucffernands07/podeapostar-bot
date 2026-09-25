@@ -165,7 +165,7 @@ def main():
     
     # Lista de ligas que deseja analisar
     ligas_alvo = [
-        #"UEFA Nations League",
+        "UEFA Nations League",
         "Brasileirão Série B"
     ]
     
