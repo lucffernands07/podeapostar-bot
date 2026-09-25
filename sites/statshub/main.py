@@ -276,7 +276,7 @@ def main():
 
                     # 🚫 FILTRO AO VIVO / SEM HORÁRIO VÁLIDO
                     if is_ao_vivo or horario_jogo == "--:--":
-                        print(f"\n⏩ Ignorando raspagem de jogo em andamento/sem horário: {t1} x {t2} ({'AO VIVO' if is_ao_vivo else '--:--'})")
+                        print(f"⏩ Ignorando raspagem de jogo em andamento/sem horário: {t1} x {t2} ({'AO VIVO' if is_ao_vivo else '--:--'})")
                         continue
 
                     url_jogo = jogo["url"]
