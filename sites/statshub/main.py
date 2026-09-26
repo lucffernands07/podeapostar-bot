@@ -2,6 +2,7 @@ import os
 import time
 import re
 from datetime import datetime
+import pytz
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -12,6 +13,32 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Importa o módulo diretamente da mesma pasta
 from sites.statshub.funcoes.raspagem_h2h import pegar_estatisticas_statshub
+
+def jogo_ja_comecou_ou_passou(horario_str):
+    """
+    Verifica se o horário do jogo (formato HH:MM) já passou ou está em andamento.
+    Retorna True se o jogo já passou/começou, ou False se é um jogo futuro.
+    """
+    if not horario_str or horario_str == "--:--":
+        return True
+
+    try:
+        # Pega o horário atual no fuso de Brasília (UTC-3)
+        fuso_sp = pytz.timezone("America/Sao_Paulo")
+        agora = datetime.now(fuso_sp)
+        minutos_atuais = agora.hour * 60 + agora.minute
+
+        # Converte o horário do jogo (HH:MM)
+        horas_jogo, minutos_jogo = map(int, horario_str.split(":"))
+        minutos_do_jogo = horas_jogo * 60 + minutos_jogo
+
+        # Se o horário do jogo for menor ou igual ao horário atual, considera iniciado/encerrado
+        if minutos_do_jogo <= minutos_atuais:
+            return True
+    except Exception as e:
+        print(f"⚠️ Erro ao comparar horário ({horario_str}): {e}")
+        
+    return False
 
 def configurar_driver():
     options = Options()
@@ -226,6 +253,10 @@ def main():
                         match_horario = re.search(r'\b\d{1,2}:\d{2}\b', texto_card)
                         horario = match_horario.group(0) if match_horario else "--:--"
 
+                        # Se a hora for de 1 dígito (ex: 9:30), formata para 09:30
+                        if horario != "--:--" and len(horario.split(":")[0]) == 1:
+                            horario = f"0{horario}"
+
                         # Filtra nomes de times pelas linhas do card se disponível
                         nomes_times = []
                         for l in linhas:
@@ -236,7 +267,7 @@ def main():
                         is_ao_vivo = "AO VIVO" in texto_card.upper() or "LIVE" in texto_card.upper()
                         
                         if tem_placar and not is_ao_vivo:
-                            print(f"⏭️ Descartando jogo encerrado: {texto_card.replace(chr(10), ' ')}")
+                            print(f"⏭️ Descartando jogo encerrado (com placar): {texto_card.replace(chr(10), ' ')}")
                             continue
 
                         # Prioridade de Nomes: 1º Nomes extraídos da URL | 2º Nomes do Card
@@ -277,6 +308,11 @@ def main():
                     # 🚫 FILTRO AO VIVO / SEM HORÁRIO VÁLIDO
                     if is_ao_vivo or horario_jogo == "--:--":
                         print(f"\n⏩ Ignorando raspagem de jogo em andamento/sem horário: {t1} x {t2} ({'AO VIVO' if is_ao_vivo else '--:--'})")
+                        continue
+
+                    # 🚫 FILTRO DE HORÁRIO PASSADO OU EM ANDAMENTO
+                    if jogo_ja_comecou_ou_passou(horario_jogo):
+                        print(f"\n⏩ Ignorando raspagem de jogo já iniciado/passado ({horario_jogo}): {t1} x {t2}")
                         continue
 
                     url_jogo = jogo["url"]
