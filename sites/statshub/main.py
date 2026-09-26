@@ -232,20 +232,20 @@ def main():
                             if not re.search(r'\b\d{1,2}:\d{2}\b', l) and not re.search(r'\d+\.\d+', l) and len(l) > 2:
                                 nomes_times.append(limpar_nome_time(l))
 
-                        # Prioridade de Nomes: 1º Nomes do Card | 2º Nomes extraídos da URL
-                        if len(nomes_times) >= 2:
-                            t1_card, t2_card = nomes_times[0], nomes_times[1]
-                        elif t1_slug and t2_slug:
-                            t1_card, t2_card = t1_slug, t2_slug
-                        else:
-                            t1_card, t2_card = "Mandante", "Visitante"
-
                         tem_placar = any(str_placar in texto_card for str_placar in ["0—", "1—", "2—", "3—", "4—", "5—", "0-", "1-", "2-", "3-", "4-", "5-"])
                         is_ao_vivo = "AO VIVO" in texto_card.upper() or "LIVE" in texto_card.upper()
                         
                         if tem_placar and not is_ao_vivo:
-                            print(f"⏭️ Descartando jogo encerrado: {t1_card} x {t2_card}")
+                            print(f"⏭️ Descartando jogo encerrado: {texto_card.replace(chr(10), ' ')}")
                             continue
+
+                        # Prioridade de Nomes: 1º Nomes extraídos da URL | 2º Nomes do Card
+                        if t1_slug and t2_slug:
+                            t1_card, t2_card = t1_slug, t2_slug
+                        elif len(nomes_times) >= 2:
+                            t1_card, t2_card = nomes_times[0], nomes_times[1]
+                        else:
+                            t1_card, t2_card = "Mandante", "Visitante"
 
                         status_str = "AO VIVO" if is_ao_vivo else horario
                         info_formatada = f"{t1_card} x {t2_card} ({status_str})"
@@ -276,7 +276,7 @@ def main():
 
                     # 🚫 FILTRO AO VIVO / SEM HORÁRIO VÁLIDO
                     if is_ao_vivo or horario_jogo == "--:--":
-                        print(f"⏩ Ignorando raspagem de jogo em andamento/sem horário: {t1} x {t2} ({'AO VIVO' if is_ao_vivo else '--:--'})")
+                        print(f"\n⏩ Ignorando raspagem de jogo em andamento/sem horário: {t1} x {t2} ({'AO VIVO' if is_ao_vivo else '--:--'})")
                         continue
 
                     url_jogo = jogo["url"]
