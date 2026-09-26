@@ -229,7 +229,17 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         # ------------------------------------------------------------
         # 4. CLIQUE NA ABA "CORNERS" E EXTRAÇÃO DE ESCANTEIOS
         # ------------------------------------------------------------
+        valor_antigo = dados_gols["overall_casa"]
+        
         if clicar_aba_corners(driver):
+            # Garante que a interface atualizou verificando se o elemento recarregou
+            try:
+                WebDriverWait(driver, 5).until(
+                    lambda d: d.find_element(By.XPATH, "//div[contains(@class, 'grid-cols-3')]//span").text.strip() != valor_antigo
+                )
+            except Exception:
+                time.sleep(1) # Fallback extra de tempo caso a média seja numericamente igual
+            
             dados_escanteios = extrair_bloco_dados(driver, t1, t2)
 
     except Exception as e:
