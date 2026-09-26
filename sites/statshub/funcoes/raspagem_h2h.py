@@ -41,6 +41,22 @@ def eh_amistoso(nome_competicao, url_competicao=""):
             
     return False
 
+def aguardar_elemento_ou_texto(driver, xpath, timeout=12):
+    """
+    Aguarda até que elementos pelo XPath existam e tenham texto visível/carregado.
+    """
+    fim = time.time() + timeout
+    while time.time() < fim:
+        try:
+            elementos = driver.find_elements(By.XPATH, xpath)
+            for el in elementos:
+                if el.text.strip() and "N/A" not in el.text.strip():
+                    return True
+        except Exception:
+            pass
+        time.sleep(0.5)
+    return False
+
 def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_principal=None):
     """
     Raspa as métricas gerais e o histórico detalhado com o nome da competição
@@ -66,34 +82,39 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         if novas_abas:
             driver.switch_to.window(novas_abas[-1])
 
-        # 1. Espera inicial do carregamento da página
+        # 1. Espera inicial do carregamento do body
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(2)
 
         # 2. Rolagem gradativa para carregar componentes dinâmicos (Lazy Loading)
         driver.execute_script("window.scrollTo(0, 400);")
         time.sleep(1)
-        driver.execute_script("window.scrollTo(0, 800);")
-        time.sleep(1.5)
 
-        # 3. EXTRAÇÃO DAS MÉTRICAS (OVERALL, FOR, AGAINST)
+        # 3. AGUARDA AS MÉTRICAS APARECEREM NO DOM
+        xpath_spans = "//span[contains(@class, 'font-bebas') or contains(@class, 'tabular-nums')]"
+        aguardar_elemento_ou_texto(driver, xpath_spans, timeout=10)
+
+        # Extração das métricas (Overall, For, Against)
         blocos = driver.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]")
 
         if len(blocos) >= 1:
             spans_casa = blocos[0].find_elements(By.XPATH, ".//span[contains(@class, 'font-bebas') or contains(@class, 'tabular-nums')]")
             if len(spans_casa) >= 3:
-                overall_casa = spans_casa[0].text.strip()
-                for_casa = spans_casa[1].text.strip()
-                against_casa = spans_casa[2].text.strip()
+                overall_casa = spans_casa[0].text.strip() or "N/A"
+                for_casa = spans_casa[1].text.strip() or "N/A"
+                against_casa = spans_casa[2].text.strip() or "N/A"
 
         if len(blocos) >= 2:
             spans_fora = blocos[1].find_elements(By.XPATH, ".//span[contains(@class, 'font-bebas') or contains(@class, 'tabular-nums')]")
             if len(spans_fora) >= 3:
-                overall_fora = spans_fora[0].text.strip()
-                for_fora = spans_fora[1].text.strip()
-                against_fora = spans_fora[2].text.strip()
+                overall_fora = spans_fora[0].text.strip() or "N/A"
+                for_fora = spans_fora[1].text.strip() or "N/A"
+                against_fora = spans_fora[2].text.strip() or "N/A"
 
-        # 4. EXTRAÇÃO DOS JOGOS E COMPETIÇÃO
+        # 4. EXTRAÇÃO DOS JOGOS E COMPETIÇÃO (COM RETRY)
+        driver.execute_script("window.scrollTo(0, 800);")
+        time.sleep(1)
+
         def ler_tabela():
             linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
             for linha in linhas:
@@ -141,13 +162,13 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                 except Exception:
                     continue
 
-        ler_tabela()
-
-        # Fallback de segurança: se o primeiro jogo demorar para carregar a tabela, rola mais um pouco e relee
-        if not lista_jogos_casa and not lista_jogos_fora:
-            driver.execute_script("window.scrollTo(0, 1200);")
-            time.sleep(2.5)
+        # Tenta ler a tabela até 3 vezes caso demore a carregar
+        for tentativa in range(3):
             ler_tabela()
+            if lista_jogos_casa or lista_jogos_fora:
+                break
+            driver.execute_script(f"window.scrollTo(0, {800 + (tentativa * 400)});")
+            time.sleep(2)
 
     except Exception as e:
         print(f"    ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
@@ -188,4 +209,5 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         "lista_jogos_casa": lista_jogos_casa,
         "lista_jogos_fora": lista_jogos_fora,
         "pular_gols": False
-    }
+        }
+                    
