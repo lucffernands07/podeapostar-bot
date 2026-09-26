@@ -122,10 +122,11 @@ def extrair_bloco_dados(driver, t1, t2):
         "lista_jogos_casa": lista_jogos_casa, "lista_jogos_fora": lista_jogos_fora
     }
 
-def clicar_aba_corners(driver):
+def clicar_aba_corners(driver, valor_antigo_referencia=""):
     """
     Clica na sub-aba 'Corners' e aguarda a atualização dinâmica dos dados.
     """
+    clicou = False
     try:
         xpath_corners = "//button[contains(translate(text(), 'CORNERS', 'corners'), 'corners')]"
         btn_corners = WebDriverWait(driver, 5).until(
@@ -133,24 +134,39 @@ def clicar_aba_corners(driver):
         )
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_corners)
         driver.execute_script("arguments[0].click();", btn_corners)
-        
-        # Pausa necessária para a API do site responder e atualizar o React/DOM
-        time.sleep(2.5) 
-        return True
+        clicou = True
     except Exception:
         try:
-            driver.execute_script("""
+            clicou = driver.execute_script("""
                 let btns = Array.from(document.querySelectorAll('button'));
                 let alvo = btns.find(b => b.innerText && b.innerText.trim().toUpperCase() === 'CORNERS');
                 if (alvo) {
                     alvo.scrollIntoView({block: 'center'});
                     alvo.click();
+                    return true;
                 }
+                return false;
             """)
-            time.sleep(2.5)
-            return True
         except Exception:
-            return False
+            clicou = False
+
+    if not clicou:
+        return False
+
+    # Aguarda ativamente até que os números no DOM reflitam a mudança de aba
+    time.sleep(1.0)
+    try:
+        if valor_antigo_referencia and valor_antigo_referencia != "N/A":
+            WebDriverWait(driver, 7).until(
+                lambda d: len(d.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]//span")) > 0 and 
+                          d.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]//span")[0].text.strip() != valor_antigo_referencia
+            )
+        else:
+            time.sleep(2.5)
+    except Exception:
+        time.sleep(2.0)
+
+    return True
 
 def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_principal=None):
     """
@@ -229,17 +245,9 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         # ------------------------------------------------------------
         # 4. CLIQUE NA ABA "CORNERS" E EXTRAÇÃO DE ESCANTEIOS
         # ------------------------------------------------------------
-        valor_antigo = dados_gols["overall_casa"]
+        referencia_gols = dados_gols["overall_casa"] if dados_gols else ""
         
-        if clicar_aba_corners(driver):
-            # Garante que a interface atualizou verificando se o elemento recarregou
-            try:
-                WebDriverWait(driver, 5).until(
-                    lambda d: d.find_element(By.XPATH, "//div[contains(@class, 'grid-cols-3')]//span").text.strip() != valor_antigo
-                )
-            except Exception:
-                time.sleep(1) # Fallback extra de tempo caso a média seja numericamente igual
-            
+        if clicar_aba_corners(driver, valor_antigo_referencia=referencia_gols):
             dados_escanteios = extrair_bloco_dados(driver, t1, t2)
 
     except Exception as e:
@@ -272,7 +280,6 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         print("    • Últimos 5 jogos oficiais:")
         for j in dados_gols['lista_jogos_fora']:
             print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
-    print("============================================================")
 
     # ------------------------------------------------------------
     # LOG PRINT DA PARTE DE ESCANTEIOS
