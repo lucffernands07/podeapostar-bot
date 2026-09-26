@@ -44,14 +44,14 @@ def eh_amistoso(nome_competicao, url_competicao=""):
 def extrair_bloco_dados(driver, t1, t2):
     """
     Extrai as métricas (Overall, For, Against) e o histórico de 5 jogos 
-    da aba que estiver ativa no momento (Gols ou Escanteios).
+    da aba que estiver ativa no momento (Gols, Escanteios ou Finalizações).
     """
     overall_casa, for_casa, against_casa = "N/A", "N/A", "N/A"
     overall_fora, for_fora, against_fora = "N/A", "N/A", "N/A"
     lista_jogos_casa = []
     lista_jogos_fora = []
 
-    # 1. Extração das Métricas Gerais (Gols ou Escanteios)
+    # 1. Extração das Métricas Gerais
     blocos = driver.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]")
 
     if len(blocos) >= 1:
@@ -139,7 +139,7 @@ def clicar_aba_corners(driver, valor_antigo_referencia=""):
         driver.execute_script("arguments[0].click();", btn_corners)
         clicou = True
     except Exception:
-        # 2. Fallback via XPath dinâmico do botão no container de botões
+        # 2. Fallback via XPath dinâmico
         try:
             xpath_fallback = "//button[contains(translate(text(), 'CORNERS', 'corners'), 'corners') or contains(translate(text(), 'ESCANTEIOS', 'escanteios'), 'escanteios')]"
             btn_corners = WebDriverWait(driver, 3).until(
@@ -149,7 +149,7 @@ def clicar_aba_corners(driver, valor_antigo_referencia=""):
             driver.execute_script("arguments[0].click();", btn_corners)
             clicou = True
         except Exception:
-            # 3. Fallback via Javascript disparando cliques
+            # 3. Fallback via JavaScript
             try:
                 clicou = driver.execute_script("""
                     let btns = Array.from(document.querySelectorAll('button'));
@@ -186,9 +186,73 @@ def clicar_aba_corners(driver, valor_antigo_referencia=""):
 
     return True
 
+def clicar_aba_shots(driver, valor_antigo_referencia=""):
+    """
+    Clica na sub-aba 'Shots' (Finalizações) utilizando prioritariamente o Full XPath
+    e fallbacks dinâmicos, aguardando a atualização dos dados.
+    """
+    clicou = False
+
+    # 1. Tentativa pelo Full XPath exato fornecido
+    full_xpath = "/html/body/div[1]/div[2]/div[2]/main/div/div/main/div/div[2]/div/div[2]/div/div[2]/div[1]/div/div/div[2]/div[1]/div/button[3]"
+    try:
+        btn_shots = WebDriverWait(driver, 3).until(
+            EC.element_to_be_clickable((By.XPATH, full_xpath))
+        )
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_shots)
+        driver.execute_script("arguments[0].click();", btn_shots)
+        clicou = True
+    except Exception:
+        # 2. Fallback via XPath dinâmico
+        try:
+            xpath_fallback = "//button[contains(translate(text(), 'SHOTS', 'shots'), 'shots') or contains(translate(text(), 'FINALIZAÇÕES', 'finalizações'), 'finalizações') or contains(translate(text(), 'CHUTES', 'chutes'), 'chutes')]"
+            btn_shots = WebDriverWait(driver, 3).until(
+                EC.element_to_be_clickable((By.XPATH, xpath_fallback))
+            )
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_shots)
+            driver.execute_script("arguments[0].click();", btn_shots)
+            clicou = True
+        except Exception:
+            # 3. Fallback via JavaScript
+            try:
+                clicou = driver.execute_script("""
+                    let btns = Array.from(document.querySelectorAll('button'));
+                    let alvo = btns.find(b => {
+                        let txt = b.innerText ? b.innerText.trim().toLowerCase() : '';
+                        return txt === 'shots' || txt === 'finalizações' || txt === 'chutes' || txt.includes('shots');
+                    });
+                    if (alvo) {
+                        alvo.scrollIntoView({block: 'center'});
+                        alvo.click();
+                        return true;
+                    }
+                    return false;
+                """)
+            except Exception:
+                clicou = False
+
+    if not clicou:
+        print("    ⚠️ Não foi possível localizar/clicar no botão da aba 'Shots'.")
+        return False
+
+    # 4. Espera a re-renderização dinâmica do DOM após o clique
+    time.sleep(1.0)
+    try:
+        if valor_antigo_referencia and valor_antigo_referencia != "N/A":
+            WebDriverWait(driver, 6).until(
+                lambda d: len(d.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]//span")) > 0 and 
+                          d.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]//span")[0].text.strip() != valor_antigo_referencia
+            )
+        else:
+            time.sleep(2.5)
+    except Exception:
+        time.sleep(2.0)
+
+    return True
+
 def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_principal=None):
     """
-    Raspa as métricas gerais e o histórico detalhado de Gols e Escanteios.
+    Raspa as métricas gerais e o histórico detalhado de Gols, Escanteios e Finalizações.
     """
     texto_horario = f" - {horario}" if horario else ""
     print(f"🏟️ Jogo: {t1} x {t2}{texto_horario}")
@@ -199,6 +263,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
 
     dados_gols = None
     dados_escanteios = None
+    dados_shots = None
 
     try:
         driver.execute_script("window.open(arguments[0], '_blank');", url_jogo)
@@ -268,6 +333,14 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         if clicar_aba_corners(driver, valor_antigo_referencia=referencia_gols):
             dados_escanteios = extrair_bloco_dados(driver, t1, t2)
 
+        # ------------------------------------------------------------
+        # 5. CLIQUE NA ABA "SHOTS" E EXTRAÇÃO DE FINALIZAÇÕES
+        # ------------------------------------------------------------
+        referencia_corners = dados_escanteios["overall_casa"] if dados_escanteios else referencia_gols
+        
+        if clicar_aba_shots(driver, valor_antigo_referencia=referencia_corners):
+            dados_shots = extrair_bloco_dados(driver, t1, t2)
+
     except Exception as e:
         print(f"    ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
 
@@ -320,10 +393,31 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         for j in dados_escanteios['lista_jogos_fora']:
             print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
 
+    # ------------------------------------------------------------
+    # LOG PRINT DA PARTE DE FINALIZAÇÕES (SHOTS)
+    # ------------------------------------------------------------
+    if dados_shots:
+        print(f"\n============================================================")
+        print(f"📊 STATSHUB - FINALIZAÇÕES (SHOTS) DE {t1} x {t2}")
+        print("============================================================")
+        print(f"🏠 {t1} (Casa):")
+        print(f"    • Overall : {dados_shots['overall_casa']} | For: {dados_shots['for_casa']} | Against: {dados_shots['against_casa']}")
+        print("    • Últimos 5 jogos oficiais:")
+        for j in dados_shots['lista_jogos_casa']:
+            print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
+
+        print("-" * 60)
+        print(f"✈️ {t2} (Fora):")
+        print(f"    • Overall : {dados_shots['overall_fora']} | For: {dados_shots['for_fora']} | Against: {dados_shots['against_fora']}")
+        print("    • Últimos 5 jogos oficiais:")
+        for j in dados_shots['lista_jogos_fora']:
+            print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
+
     print("\n")
 
     return {
         "gols": dados_gols,
         "escanteios": dados_escanteios,
+        "shots": dados_shots,
         "pular_gols": False
     }
