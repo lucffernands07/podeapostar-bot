@@ -41,23 +41,128 @@ def eh_amistoso(nome_competicao, url_competicao=""):
             
     return False
 
-def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_principal=None):
+def extrair_bloco_dados(driver, t1, t2):
     """
-    Raspa as métricas gerais e o histórico detalhado com o nome da competição
-    para cada jogo do histórico (excluindo amistosos).
+    Extrai as métricas (Overall, For, Against) e o histórico de 5 jogos 
+    da aba que estiver ativa no momento (Gols ou Escanteios).
     """
     overall_casa, for_casa, against_casa = "N/A", "N/A", "N/A"
     overall_fora, for_fora, against_fora = "N/A", "N/A", "N/A"
-    
     lista_jogos_casa = []
     lista_jogos_fora = []
 
+    # 1. Extração das Métricas Gerais (Gols ou Escanteios)
+    blocos = driver.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]")
+
+    if len(blocos) >= 1:
+        spans_casa = blocos[0].find_elements(By.XPATH, ".//span[contains(@class, 'font-bebas') or contains(@class, 'tabular-nums')]")
+        if len(spans_casa) >= 3:
+            overall_casa = spans_casa[0].text.strip()
+            for_casa = spans_casa[1].text.strip()
+            against_casa = spans_casa[2].text.strip()
+
+    if len(blocos) >= 2:
+        spans_fora = blocos[1].find_elements(By.XPATH, ".//span[contains(@class, 'font-bebas') or contains(@class, 'tabular-nums')]")
+        if len(spans_fora) >= 3:
+            overall_fora = spans_fora[0].text.strip()
+            for_fora = spans_fora[1].text.strip()
+            against_fora = spans_fora[2].text.strip()
+
+    # 2. Extração da Tabela de Histórico
+    linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
+
+    for linha in linhas:
+        try:
+            colunas = linha.find_elements(By.TAG_NAME, "td")
+            if len(colunas) >= 6:
+                data = colunas[0].text.strip()
+                home_nome = colunas[1].text.strip()
+                v1 = colunas[2].text.strip()
+                v2 = colunas[3].text.strip()
+                away_nome = colunas[4].text.strip()
+                
+                coluna_comp = colunas[5]
+                nome_comp = coluna_comp.text.strip()
+                href_comp = ""
+                
+                try:
+                    link_elem = coluna_comp.find_element(By.TAG_NAME, "a")
+                    href_comp = link_elem.get_attribute("href") or ""
+                    if not nome_comp:
+                        nome_comp = link_elem.text.strip()
+                except Exception:
+                    pass
+
+                if eh_amistoso(nome_comp, href_comp):
+                    continue
+
+                if data and v1.isdigit() and v2.isdigit():
+                    dados_jogo = {
+                        "data": data,
+                        "home": home_nome,
+                        "val_casa": int(v1),
+                        "val_fora": int(v2),
+                        "away": away_nome,
+                        "competicao": nome_comp
+                    }
+
+                    if mesmo_time(t1, home_nome) or mesmo_time(t1, away_nome):
+                        if len(lista_jogos_casa) < 5 and dados_jogo not in lista_jogos_casa:
+                            lista_jogos_casa.append(dados_jogo)
+
+                    if mesmo_time(t2, home_nome) or mesmo_time(t2, away_nome):
+                        if len(lista_jogos_fora) < 5 and dados_jogo not in lista_jogos_fora:
+                            lista_jogos_fora.append(dados_jogo)
+        except Exception:
+            continue
+
+    return {
+        "overall_casa": overall_casa, "for_casa": for_casa, "against_casa": against_casa,
+        "overall_fora": overall_fora, "for_fora": for_fora, "against_fora": against_fora,
+        "lista_jogos_casa": lista_jogos_casa, "lista_jogos_fora": lista_jogos_fora
+    }
+
+def clicar_aba_corners(driver):
+    """
+    Clica na sub-aba 'Corners'.
+    """
+    try:
+        xpath_corners = "//button[contains(translate(text(), 'CORNERS', 'corners'), 'corners')]"
+        btn_corners = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.XPATH, xpath_corners))
+        )
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_corners)
+        driver.execute_script("arguments[0].click();", btn_corners)
+        time.sleep(1.5)
+        return True
+    except Exception:
+        try:
+            driver.execute_script("""
+                let btns = Array.from(document.querySelectorAll('button'));
+                let alvo = btns.find(b => b.innerText && b.innerText.trim().toUpperCase() === 'CORNERS');
+                if (alvo) {
+                    alvo.scrollIntoView({block: 'center'});
+                    alvo.click();
+                }
+            """)
+            time.sleep(1.5)
+            return True
+        except Exception:
+            return False
+
+def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_principal=None):
+    """
+    Raspa as métricas gerais e o histórico detalhado de Gols e Escanteios.
+    """
     texto_horario = f" - {horario}" if horario else ""
     print(f"🏟️ Jogo: {t1} x {t2}{texto_horario}")
     print(f"🔗 URL: {url_jogo}\n")
 
     if aba_principal is None:
         aba_principal = driver.current_window_handle
+
+    dados_gols = None
+    dados_escanteios = None
 
     try:
         driver.execute_script("window.open(arguments[0], '_blank');", url_jogo)
@@ -69,7 +174,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(2)
 
-        # 1. Clique na aba "Stats dos times" / "Team Stats"
+        # 1. Clique na aba "Team Stats" / "Stats dos times"
         xpath_aba_stats = (
             "//*[(self::span or self::button or self::a or self::div) and ("
             "contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'stats dos times') or "
@@ -102,12 +207,11 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
             except Exception:
                 pass
 
-        # 2. Rola a página para acionar o Lazy Loading das tabelas
+        # 2. Rola para carregar o contêiner e tabelas
         driver.execute_script("window.scrollTo(0, 500);")
         time.sleep(0.5)
         driver.execute_script("window.scrollTo(0, 1000);")
 
-        # ⏳ Aguarda explicitamente até 10s que as linhas da tabela estejam carregadas
         try:
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//tr[.//td]"))
@@ -115,81 +219,16 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         except Exception:
             time.sleep(2)
 
-        # 3. EXTRAÇÃO DAS MÉTRICAS (OVERALL, FOR, AGAINST)
-        blocos = driver.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]")
+        # ------------------------------------------------------------
+        # 3. EXTRAÇÃO DE GOLS
+        # ------------------------------------------------------------
+        dados_gols = extrair_bloco_dados(driver, t1, t2)
 
-        if len(blocos) >= 1:
-            spans_casa = blocos[0].find_elements(By.XPATH, ".//span[contains(@class, 'font-bebas') or contains(@class, 'tabular-nums')]")
-            if len(spans_casa) >= 3:
-                overall_casa = spans_casa[0].text.strip()
-                for_casa = spans_casa[1].text.strip()
-                against_casa = spans_casa[2].text.strip()
-
-        if len(blocos) >= 2:
-            spans_fora = blocos[1].find_elements(By.XPATH, ".//span[contains(@class, 'font-bebas') or contains(@class, 'tabular-nums')]")
-            if len(spans_fora) >= 3:
-                overall_fora = spans_fora[0].text.strip()
-                for_fora = spans_fora[1].text.strip()
-                against_fora = spans_fora[2].text.strip()
-
-        # 4. EXTRAÇÃO DOS JOGOS E COMPETIÇÃO
-        linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
-
-        # Fallback: Se não encontrou nenhuma linha, tenta rolagem adicional e lê novamente
-        if not linhas:
-            driver.execute_script("window.scrollTo(0, 1500);")
-            time.sleep(1.5)
-            linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
-
-        for linha in linhas:
-            try:
-                colunas = linha.find_elements(By.TAG_NAME, "td")
-                if len(colunas) >= 6:
-                    data = colunas[0].text.strip()
-                    home_nome = colunas[1].text.strip()
-                    gols_casa = colunas[2].text.strip()
-                    gols_fora = colunas[3].text.strip()
-                    away_nome = colunas[4].text.strip()
-                    
-                    # Extrai o nome e o link da Competição
-                    coluna_comp = colunas[5]
-                    nome_comp = coluna_comp.text.strip()
-                    href_comp = ""
-                    
-                    try:
-                        link_elem = coluna_comp.find_element(By.TAG_NAME, "a")
-                        href_comp = link_elem.get_attribute("href") or ""
-                        if not nome_comp:
-                            nome_comp = link_elem.text.strip()
-                    except Exception:
-                        pass
-
-                    # Se for amistoso, pula
-                    if eh_amistoso(nome_comp, href_comp):
-                        continue
-
-                    if data and gols_casa.isdigit() and gols_fora.isdigit():
-                        # Dicionário estruturado com a competição separada
-                        dados_jogo = {
-                            "data": data,
-                            "home": home_nome,
-                            "gols_casa": int(gols_casa),
-                            "gols_fora": int(gols_fora),
-                            "away": away_nome,
-                            "competicao": nome_comp
-                        }
-
-                        # Adiciona ao time da Casa
-                        if mesmo_time(t1, home_nome) or mesmo_time(t1, away_nome):
-                            if len(lista_jogos_casa) < 5 and dados_jogo not in lista_jogos_casa:
-                                lista_jogos_casa.append(dados_jogo)
-
-                        # Adiciona ao time de Fora
-                        if mesmo_time(t2, home_nome) or mesmo_time(t2, away_nome):
-                            if len(lista_jogos_fora) < 5 and dados_jogo not in lista_jogos_fora:
-                                lista_jogos_fora.append(dados_jogo)
-            except Exception:
-                continue
+        # ------------------------------------------------------------
+        # 4. CLIQUE NA ABA "CORNERS" E EXTRAÇÃO DE ESCANTEIOS
+        # ------------------------------------------------------------
+        if clicar_aba_corners(driver):
+            dados_escanteios = extrair_bloco_dados(driver, t1, t2)
 
     except Exception as e:
         print(f"    ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
@@ -202,32 +241,51 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         except Exception:
             pass
 
-    # LOG PRINT
+    # ------------------------------------------------------------
+    # LOG PRINT DA PARTE DE GOLS
+    # ------------------------------------------------------------
     print("============================================================")
     print("📊 STATSHUB - MÉTRICAS & HISTÓRICO COM COMPETIÇÕES")
     print("============================================================")
-    print(f"🏠 {t1} (Casa):")
-    print(f"    • Overall : {overall_casa} | For: {for_casa} | Against: {against_casa}")
-    print("    • Últimos 5 jogos oficiais:")
-    for j in lista_jogos_casa:
-        print(f"      - {j['data']} | {j['home']} {j['gols_casa']} x {j['gols_fora']} {j['away']} | 🏆 {j['competicao']}")
+    if dados_gols:
+        print(f"🏠 {t1} (Casa):")
+        print(f"    • Overall : {dados_gols['overall_casa']} | For: {dados_gols['for_casa']} | Against: {dados_gols['against_casa']}")
+        print("    • Últimos 5 jogos oficiais:")
+        for j in dados_gols['lista_jogos_casa']:
+            print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
 
-    print("-" * 60)
-    print(f"✈️ {t2} (Fora):")
-    print(f"    • Overall : {overall_fora} | For: {for_fora} | Against: {against_fora}")
-    print("    • Últimos 5 jogos oficiais:")
-    for j in lista_jogos_fora:
-        print(f"      - {j['data']} | {j['home']} {j['gols_casa']} x {j['gols_fora']} {j['away']} | 🏆 {j['competicao']}")
-    print("============================================================\n")
+        print("-" * 60)
+        print(f"✈️ {t2} (Fora):")
+        print(f"    • Overall : {dados_gols['overall_fora']} | For: {dados_gols['for_fora']} | Against: {dados_gols['against_fora']}")
+        print("    • Últimos 5 jogos oficiais:")
+        for j in dados_gols['lista_jogos_fora']:
+            print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
+    print("============================================================")
+
+    # ------------------------------------------------------------
+    # LOG PRINT DA PARTE DE ESCANTEIOS
+    # ------------------------------------------------------------
+    if dados_escanteios:
+        print(f"\n============================================================")
+        print(f"📊 STATSHUB - ESCANTEIOS DE {t1} x {t2}")
+        print("============================================================")
+        print(f"🏠 {t1} (Casa):")
+        print(f"    • Overall : {dados_escanteios['overall_casa']} | For: {dados_escanteios['for_casa']} | Against: {dados_escanteios['against_casa']}")
+        print("    • Últimos 5 jogos oficiais:")
+        for j in dados_escanteios['lista_jogos_casa']:
+            print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
+
+        print("-" * 60)
+        print(f"✈️ {t2} (Fora):")
+        print(f"    • Overall : {dados_escanteios['overall_fora']} | For: {dados_escanteios['for_fora']} | Against: {dados_escanteios['against_fora']}")
+        print("    • Últimos 5 jogos oficiais:")
+        for j in dados_escanteios['lista_jogos_fora']:
+            print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
+
+    print("\n")
 
     return {
-        "overall_casa": overall_casa,
-        "for_casa": for_casa,
-        "against_casa": against_casa,
-        "overall_fora": overall_fora,
-        "for_fora": for_fora,
-        "against_fora": against_fora,
-        "lista_jogos_casa": lista_jogos_casa,
-        "lista_jogos_fora": lista_jogos_fora,
+        "gols": dados_gols,
+        "escanteios": dados_escanteios,
         "pular_gols": False
     }
