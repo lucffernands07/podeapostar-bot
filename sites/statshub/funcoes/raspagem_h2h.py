@@ -280,6 +280,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         print("    • Últimos 5 jogos oficiais:")
         for j in dados_gols['lista_jogos_fora']:
             print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
+    print("============================================================")
 
     # ------------------------------------------------------------
     # LOG PRINT DA PARTE DE ESCANTEIOS
