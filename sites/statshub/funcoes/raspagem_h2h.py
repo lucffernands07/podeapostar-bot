@@ -124,7 +124,7 @@ def extrair_bloco_dados(driver, t1, t2):
 
 def clicar_aba_corners(driver):
     """
-    Clica na sub-aba 'Corners'.
+    Clica na sub-aba 'Corners' e aguarda a atualização dinâmica dos dados.
     """
     try:
         xpath_corners = "//button[contains(translate(text(), 'CORNERS', 'corners'), 'corners')]"
@@ -133,7 +133,9 @@ def clicar_aba_corners(driver):
         )
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_corners)
         driver.execute_script("arguments[0].click();", btn_corners)
-        time.sleep(1.5)
+        
+        # Pausa necessária para a API do site responder e atualizar o React/DOM
+        time.sleep(2.5) 
         return True
     except Exception:
         try:
@@ -145,7 +147,7 @@ def clicar_aba_corners(driver):
                     alvo.click();
                 }
             """)
-            time.sleep(1.5)
+            time.sleep(2.5)
             return True
         except Exception:
             return False
