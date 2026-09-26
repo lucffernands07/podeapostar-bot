@@ -41,22 +41,6 @@ def eh_amistoso(nome_competicao, url_competicao=""):
             
     return False
 
-def aguardar_elemento_ou_texto(driver, xpath, timeout=12):
-    """
-    Aguarda até que elementos pelo XPath existam e tenham texto visível/carregado.
-    """
-    fim = time.time() + timeout
-    while time.time() < fim:
-        try:
-            elementos = driver.find_elements(By.XPATH, xpath)
-            for el in elementos:
-                if el.text.strip() and "N/A" not in el.text.strip():
-                    return True
-        except Exception:
-            pass
-        time.sleep(0.5)
-    return False
-
 def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_principal=None):
     """
     Raspa as métricas gerais e o histórico detalhado com o nome da competição
@@ -76,25 +60,24 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         aba_principal = driver.current_window_handle
 
     try:
+        # Abre o jogo em uma nova aba para preservar o estado da página principal
         driver.execute_script("window.open(arguments[0], '_blank');", url_jogo)
         
         novas_abas = [handle for handle in driver.window_handles if handle != aba_principal]
         if novas_abas:
             driver.switch_to.window(novas_abas[-1])
 
-        # 1. Espera inicial do carregamento do body
-        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        time.sleep(2)
+        # Aguarda o carregamento base da página
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        
+        # Pausa para garantir a hidratação dos dados após pular jogo ao vivo
+        time.sleep(2.5)
 
-        # 2. Rolagem gradativa para carregar componentes dinâmicos (Lazy Loading)
+        # Rola a página levemente para acionar o carregamento dos componentes
         driver.execute_script("window.scrollTo(0, 400);")
         time.sleep(1)
 
-        # 3. AGUARDA AS MÉTRICAS APARECEREM NO DOM
-        xpath_spans = "//span[contains(@class, 'font-bebas') or contains(@class, 'tabular-nums')]"
-        aguardar_elemento_ou_texto(driver, xpath_spans, timeout=10)
-
-        # Extração das métricas (Overall, For, Against)
+        # 1. BUSCA DAS MÉTRICAS (OVERALL, FOR, AGAINST)
         blocos = driver.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]")
 
         if len(blocos) >= 1:
@@ -111,69 +94,61 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                 for_fora = spans_fora[1].text.strip() or "N/A"
                 against_fora = spans_fora[2].text.strip() or "N/A"
 
-        # 4. EXTRAÇÃO DOS JOGOS E COMPETIÇÃO (COM RETRY)
+        # 2. BUSCA DO HISTÓRICO DE JOGOS NAS TABELAS
         driver.execute_script("window.scrollTo(0, 800);")
         time.sleep(1)
 
-        def ler_tabela():
-            linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
-            for linha in linhas:
-                try:
-                    colunas = linha.find_elements(By.TAG_NAME, "td")
-                    if len(colunas) >= 6:
-                        data = colunas[0].text.strip()
-                        home_nome = colunas[1].text.strip()
-                        gols_casa = colunas[2].text.strip()
-                        gols_fora = colunas[3].text.strip()
-                        away_nome = colunas[4].text.strip()
-                        
-                        coluna_comp = colunas[5]
-                        nome_comp = coluna_comp.text.strip()
-                        href_comp = ""
-                        
-                        try:
-                            link_elem = coluna_comp.find_element(By.TAG_NAME, "a")
-                            href_comp = link_elem.get_attribute("href") or ""
-                            if not nome_comp:
-                                nome_comp = link_elem.text.strip()
-                        except Exception:
-                            pass
+        linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
+        for linha in linhas:
+            try:
+                colunas = linha.find_elements(By.TAG_NAME, "td")
+                if len(colunas) >= 6:
+                    data = colunas[0].text.strip()
+                    home_nome = colunas[1].text.strip()
+                    gols_casa = colunas[2].text.strip()
+                    gols_fora = colunas[3].text.strip()
+                    away_nome = colunas[4].text.strip()
+                    
+                    coluna_comp = colunas[5]
+                    nome_comp = coluna_comp.text.strip()
+                    href_comp = ""
+                    
+                    try:
+                        link_elem = coluna_comp.find_element(By.TAG_NAME, "a")
+                        href_comp = link_elem.get_attribute("href") or ""
+                        if not nome_comp:
+                            nome_comp = link_elem.text.strip()
+                    except Exception:
+                        pass
 
-                        if eh_amistoso(nome_comp, href_comp):
-                            continue
+                    if eh_amistoso(nome_comp, href_comp):
+                        continue
 
-                        if data and gols_casa.isdigit() and gols_fora.isdigit():
-                            dados_jogo = {
-                                "data": data,
-                                "home": home_nome,
-                                "gols_casa": int(gols_casa),
-                                "gols_fora": int(gols_fora),
-                                "away": away_nome,
-                                "competicao": nome_comp
-                            }
+                    if data and gols_casa.isdigit() and gols_fora.isdigit():
+                        dados_jogo = {
+                            "data": data,
+                            "home": home_nome,
+                            "gols_casa": int(gols_casa),
+                            "gols_fora": int(gols_fora),
+                            "away": away_nome,
+                            "competicao": nome_comp
+                        }
 
-                            if mesmo_time(t1, home_nome) or mesmo_time(t1, away_nome):
-                                if len(lista_jogos_casa) < 5 and dados_jogo not in lista_jogos_casa:
-                                    lista_jogos_casa.append(dados_jogo)
+                        if mesmo_time(t1, home_nome) or mesmo_time(t1, away_nome):
+                            if len(lista_jogos_casa) < 5 and dados_jogo not in lista_jogos_casa:
+                                lista_jogos_casa.append(dados_jogo)
 
-                            if mesmo_time(t2, home_nome) or mesmo_time(t2, away_nome):
-                                if len(lista_jogos_fora) < 5 and dados_jogo not in lista_jogos_fora:
-                                    lista_jogos_fora.append(dados_jogo)
-                except Exception:
-                    continue
-
-        # Tenta ler a tabela até 3 vezes caso demore a carregar
-        for tentativa in range(3):
-            ler_tabela()
-            if lista_jogos_casa or lista_jogos_fora:
-                break
-            driver.execute_script(f"window.scrollTo(0, {800 + (tentativa * 400)});")
-            time.sleep(2)
+                        if mesmo_time(t2, home_nome) or mesmo_time(t2, away_nome):
+                            if len(lista_jogos_fora) < 5 and dados_jogo not in lista_jogos_fora:
+                                lista_jogos_fora.append(dados_jogo)
+            except Exception:
+                continue
 
     except Exception as e:
         print(f"    ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
 
     finally:
+        # Garante o fechamento da aba do jogo e o retorno para a aba principal
         try:
             if len(driver.window_handles) > 1:
                 driver.close()
@@ -209,5 +184,5 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         "lista_jogos_casa": lista_jogos_casa,
         "lista_jogos_fora": lista_jogos_fora,
         "pular_gols": False
-        }
-                    
+                        }
+    
