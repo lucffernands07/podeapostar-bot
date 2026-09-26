@@ -2,7 +2,7 @@ import os
 import time
 import re
 from datetime import datetime
-import pytz
+from zoneinfo import ZoneInfo
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -23,9 +23,8 @@ def jogo_ja_comecou_ou_passou(horario_str):
         return True
 
     try:
-        # Pega o horário atual no fuso de Brasília (UTC-3)
-        fuso_sp = pytz.timezone("America/Sao_Paulo")
-        agora = datetime.now(fuso_sp)
+        # Pega o horário atual no fuso de Brasília (UTC-3) usando zoneinfo
+        agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
         minutos_atuais = agora.hour * 60 + agora.minute
 
         # Converte o horário do jogo (HH:MM)
@@ -39,7 +38,7 @@ def jogo_ja_comecou_ou_passou(horario_str):
         print(f"⚠️ Erro ao comparar horário ({horario_str}): {e}")
         
     return False
-
+    
 def configurar_driver():
     options = Options()
     
