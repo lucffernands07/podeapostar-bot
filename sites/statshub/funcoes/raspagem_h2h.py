@@ -124,40 +124,58 @@ def extrair_bloco_dados(driver, t1, t2):
 
 def clicar_aba_corners(driver, valor_antigo_referencia=""):
     """
-    Clica na sub-aba 'Corners' e aguarda a atualização dinâmica dos dados.
+    Clica na sub-aba 'Corners' utilizando prioritariamente o Full XPath
+    e fallbacks dinâmicos, aguardando a atualização dos dados.
     """
     clicou = False
+
+    # 1. Tentativa pelo Full XPath exato fornecido
+    full_xpath = "/html/body/div[1]/div[2]/div[2]/main/div/div/main/div/div[2]/div/div[2]/div/div[2]/div[1]/div/div/div[2]/div[1]/div/button[2]"
     try:
-        xpath_corners = "//button[contains(translate(text(), 'CORNERS', 'corners'), 'corners')]"
-        btn_corners = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.XPATH, xpath_corners))
+        btn_corners = WebDriverWait(driver, 3).until(
+            EC.element_to_be_clickable((By.XPATH, full_xpath))
         )
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_corners)
         driver.execute_script("arguments[0].click();", btn_corners)
         clicou = True
     except Exception:
+        # 2. Fallback via XPath dinâmico do botão no container de botões
         try:
-            clicou = driver.execute_script("""
-                let btns = Array.from(document.querySelectorAll('button'));
-                let alvo = btns.find(b => b.innerText && b.innerText.trim().toUpperCase() === 'CORNERS');
-                if (alvo) {
-                    alvo.scrollIntoView({block: 'center'});
-                    alvo.click();
-                    return true;
-                }
-                return false;
-            """)
+            xpath_fallback = "//button[contains(translate(text(), 'CORNERS', 'corners'), 'corners') or contains(translate(text(), 'ESCANTEIOS', 'escanteios'), 'escanteios')]"
+            btn_corners = WebDriverWait(driver, 3).until(
+                EC.element_to_be_clickable((By.XPATH, xpath_fallback))
+            )
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_corners)
+            driver.execute_script("arguments[0].click();", btn_corners)
+            clicou = True
         except Exception:
-            clicou = False
+            # 3. Fallback via Javascript disparando cliques
+            try:
+                clicou = driver.execute_script("""
+                    let btns = Array.from(document.querySelectorAll('button'));
+                    let alvo = btns.find(b => {
+                        let txt = b.innerText ? b.innerText.trim().toLowerCase() : '';
+                        return txt === 'corners' || txt === 'escanteios' || txt.includes('corners');
+                    });
+                    if (alvo) {
+                        alvo.scrollIntoView({block: 'center'});
+                        alvo.click();
+                        return true;
+                    }
+                    return false;
+                """)
+            except Exception:
+                clicou = False
 
     if not clicou:
+        print("    ⚠️ Não foi possível localizar/clicar no botão da aba 'Corners'.")
         return False
 
-    # Aguarda ativamente até que os números no DOM reflitam a mudança de aba
+    # 4. Espera a re-renderização dinâmica do DOM após o clique
     time.sleep(1.0)
     try:
         if valor_antigo_referencia and valor_antigo_referencia != "N/A":
-            WebDriverWait(driver, 7).until(
+            WebDriverWait(driver, 6).until(
                 lambda d: len(d.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]//span")) > 0 and 
                           d.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]//span")[0].text.strip() != valor_antigo_referencia
             )
