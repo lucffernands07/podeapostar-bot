@@ -60,45 +60,87 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         aba_principal = driver.current_window_handle
 
     try:
-        # Abre o jogo em uma nova aba para preservar o estado da página principal
         driver.execute_script("window.open(arguments[0], '_blank');", url_jogo)
         
         novas_abas = [handle for handle in driver.window_handles if handle != aba_principal]
         if novas_abas:
             driver.switch_to.window(novas_abas[-1])
 
-        # Aguarda o carregamento base da página
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        
-        # Pausa para garantir a hidratação dos dados após pular jogo ao vivo
-        time.sleep(2.5)
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        time.sleep(2)
 
-        # Rola a página levemente para acionar o carregamento dos componentes
-        driver.execute_script("window.scrollTo(0, 400);")
-        time.sleep(1)
+        # 1. Clique na aba "Stats dos times" / "Team Stats"
+        xpath_aba_stats = (
+            "//*[(self::span or self::button or self::a or self::div) and ("
+            "contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'stats dos times') or "
+            "contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'team stats')"
+            ")]"
+        )
 
-        # 1. BUSCA DAS MÉTRICAS (OVERALL, FOR, AGAINST)
+        try:
+            aba_team_stats = WebDriverWait(driver, 8).until(
+                EC.element_to_be_clickable((By.XPATH, xpath_aba_stats))
+            )
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", aba_team_stats)
+            time.sleep(0.3)
+            driver.execute_script("arguments[0].click();", aba_team_stats)
+            time.sleep(1.5)
+        except Exception:
+            try:
+                driver.execute_script("""
+                    let elementos = Array.from(document.querySelectorAll('span, button, a, div'));
+                    let alvo = elementos.find(el => {
+                        let txt = el.innerText ? el.innerText.toLowerCase() : '';
+                        return txt.includes('stats dos times') || txt.includes('team stats');
+                    });
+                    if (alvo) {
+                        alvo.scrollIntoView({block: 'center'});
+                        alvo.click();
+                    }
+                """)
+                time.sleep(1.5)
+            except Exception:
+                pass
+
+        # 2. Rola a página para acionar o Lazy Loading das tabelas
+        driver.execute_script("window.scrollTo(0, 500);")
+        time.sleep(0.5)
+        driver.execute_script("window.scrollTo(0, 1000);")
+
+        # ⏳ Aguarda explicitamente até 10s que as linhas da tabela estejam carregadas
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//tr[.//td]"))
+            )
+        except Exception:
+            time.sleep(2)
+
+        # 3. EXTRAÇÃO DAS MÉTRICAS (OVERALL, FOR, AGAINST)
         blocos = driver.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]")
 
         if len(blocos) >= 1:
             spans_casa = blocos[0].find_elements(By.XPATH, ".//span[contains(@class, 'font-bebas') or contains(@class, 'tabular-nums')]")
             if len(spans_casa) >= 3:
-                overall_casa = spans_casa[0].text.strip() or "N/A"
-                for_casa = spans_casa[1].text.strip() or "N/A"
-                against_casa = spans_casa[2].text.strip() or "N/A"
+                overall_casa = spans_casa[0].text.strip()
+                for_casa = spans_casa[1].text.strip()
+                against_casa = spans_casa[2].text.strip()
 
         if len(blocos) >= 2:
             spans_fora = blocos[1].find_elements(By.XPATH, ".//span[contains(@class, 'font-bebas') or contains(@class, 'tabular-nums')]")
             if len(spans_fora) >= 3:
-                overall_fora = spans_fora[0].text.strip() or "N/A"
-                for_fora = spans_fora[1].text.strip() or "N/A"
-                against_fora = spans_fora[2].text.strip() or "N/A"
+                overall_fora = spans_fora[0].text.strip()
+                for_fora = spans_fora[1].text.strip()
+                against_fora = spans_fora[2].text.strip()
 
-        # 2. BUSCA DO HISTÓRICO DE JOGOS NAS TABELAS
-        driver.execute_script("window.scrollTo(0, 800);")
-        time.sleep(1)
-
+        # 4. EXTRAÇÃO DOS JOGOS E COMPETIÇÃO
         linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
+
+        # Fallback: Se não encontrou nenhuma linha, tenta rolagem adicional e lê novamente
+        if not linhas:
+            driver.execute_script("window.scrollTo(0, 1500);")
+            time.sleep(1.5)
+            linhas = driver.find_elements(By.XPATH, "//tr[.//td]")
+
         for linha in linhas:
             try:
                 colunas = linha.find_elements(By.TAG_NAME, "td")
@@ -109,6 +151,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                     gols_fora = colunas[3].text.strip()
                     away_nome = colunas[4].text.strip()
                     
+                    # Extrai o nome e o link da Competição
                     coluna_comp = colunas[5]
                     nome_comp = coluna_comp.text.strip()
                     href_comp = ""
@@ -121,10 +164,12 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                     except Exception:
                         pass
 
+                    # Se for amistoso, pula
                     if eh_amistoso(nome_comp, href_comp):
                         continue
 
                     if data and gols_casa.isdigit() and gols_fora.isdigit():
+                        # Dicionário estruturado com a competição separada
                         dados_jogo = {
                             "data": data,
                             "home": home_nome,
@@ -134,10 +179,12 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
                             "competicao": nome_comp
                         }
 
+                        # Adiciona ao time da Casa
                         if mesmo_time(t1, home_nome) or mesmo_time(t1, away_nome):
                             if len(lista_jogos_casa) < 5 and dados_jogo not in lista_jogos_casa:
                                 lista_jogos_casa.append(dados_jogo)
 
+                        # Adiciona ao time de Fora
                         if mesmo_time(t2, home_nome) or mesmo_time(t2, away_nome):
                             if len(lista_jogos_fora) < 5 and dados_jogo not in lista_jogos_fora:
                                 lista_jogos_fora.append(dados_jogo)
@@ -148,7 +195,6 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         print(f"    ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
 
     finally:
-        # Garante o fechamento da aba do jogo e o retorno para a aba principal
         try:
             if len(driver.window_handles) > 1:
                 driver.close()
@@ -184,5 +230,4 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         "lista_jogos_casa": lista_jogos_casa,
         "lista_jogos_fora": lista_jogos_fora,
         "pular_gols": False
-                        }
-    
+    }
