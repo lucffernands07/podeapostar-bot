@@ -44,7 +44,7 @@ def eh_amistoso(nome_competicao, url_competicao=""):
 def extrair_bloco_dados(driver, t1, t2):
     """
     Extrai as métricas (Overall, For, Against) e o histórico de 5 jogos 
-    da aba que estiver ativa no momento (Gols, Escanteios ou Finalizações).
+    da aba que estiver ativa no momento (Gols, Escanteios, Finalizações ou Cartões).
     """
     overall_casa, for_casa, against_casa = "N/A", "N/A", "N/A"
     overall_fora, for_fora, against_fora = "N/A", "N/A", "N/A"
@@ -129,7 +129,7 @@ def clicar_aba_corners(driver, valor_antigo_referencia=""):
     """
     clicou = False
 
-    # 1. Tentativa pelo Full XPath exato fornecido
+    # 1. Tentativa pelo Full XPath exato
     full_xpath = "/html/body/div[1]/div[2]/div[2]/main/div/div/main/div/div[2]/div/div[2]/div/div[2]/div[1]/div/div/div[2]/div[1]/div/button[2]"
     try:
         btn_corners = WebDriverWait(driver, 3).until(
@@ -193,7 +193,7 @@ def clicar_aba_shots(driver, valor_antigo_referencia=""):
     """
     clicou = False
 
-    # 1. Tentativa pelo Full XPath exato fornecido
+    # 1. Tentativa pelo Full XPath exato
     full_xpath = "/html/body/div[1]/div[2]/div[2]/main/div/div/main/div/div[2]/div/div[2]/div/div[2]/div[1]/div/div/div[2]/div[1]/div/button[3]"
     try:
         btn_shots = WebDriverWait(driver, 3).until(
@@ -250,9 +250,73 @@ def clicar_aba_shots(driver, valor_antigo_referencia=""):
 
     return True
 
+def clicar_aba_cards(driver, valor_antigo_referencia=""):
+    """
+    Clica na sub-aba 'Cards' (Cartões) utilizando prioritariamente o Full XPath
+    e fallbacks dinâmicos, aguardando a atualização dos dados.
+    """
+    clicou = False
+
+    # 1. Tentativa pelo Full XPath exato do botão Cards
+    full_xpath = "/html/body/div[1]/div[2]/div[2]/main/div/div/main/div/div[2]/div/div[2]/div/div[2]/div[1]/div/div/div[2]/div[1]/div/button[4]"
+    try:
+        btn_cards = WebDriverWait(driver, 3).until(
+            EC.element_to_be_clickable((By.XPATH, full_xpath))
+        )
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_cards)
+        driver.execute_script("arguments[0].click();", btn_cards)
+        clicou = True
+    except Exception:
+        # 2. Fallback via XPath dinâmico
+        try:
+            xpath_fallback = "//button[contains(translate(text(), 'CARDS', 'cards'), 'cards') or contains(translate(text(), 'CARTÕES', 'cartões'), 'cartões') or contains(translate(text(), 'CARTOES', 'cartoes'), 'cartoes')]"
+            btn_cards = WebDriverWait(driver, 3).until(
+                EC.element_to_be_clickable((By.XPATH, xpath_fallback))
+            )
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn_cards)
+            driver.execute_script("arguments[0].click();", btn_cards)
+            clicou = True
+        except Exception:
+            # 3. Fallback via JavaScript
+            try:
+                clicou = driver.execute_script("""
+                    let btns = Array.from(document.querySelectorAll('button'));
+                    let alvo = btns.find(b => {
+                        let txt = b.innerText ? b.innerText.trim().toLowerCase() : '';
+                        return txt === 'cards' || txt === 'cartões' || txt === 'cartoes' || txt.includes('cards');
+                    });
+                    if (alvo) {
+                        alvo.scrollIntoView({block: 'center'});
+                        alvo.click();
+                        return true;
+                    }
+                    return false;
+                """)
+            except Exception:
+                clicou = False
+
+    if not clicou:
+        print("    ⚠️ Não foi possível localizar/clicar no botão da aba 'Cards'.")
+        return False
+
+    # 4. Espera a re-renderização dinâmica do DOM após o clique
+    time.sleep(1.0)
+    try:
+        if valor_antigo_referencia and valor_antigo_referencia != "N/A":
+            WebDriverWait(driver, 6).until(
+                lambda d: len(d.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]//span")) > 0 and 
+                          d.find_elements(By.XPATH, "//div[contains(@class, 'grid-cols-3')]//span")[0].text.strip() != valor_antigo_referencia
+            )
+        else:
+            time.sleep(2.5)
+    except Exception:
+        time.sleep(2.0)
+
+    return True
+
 def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_principal=None):
     """
-    Raspa as métricas gerais e o histórico detalhado de Gols, Escanteios e Finalizações.
+    Raspa as métricas gerais e o histórico detalhado de Gols, Escanteios, Finalizações e Cartões.
     """
     texto_horario = f" - {horario}" if horario else ""
     print(f"🏟️ Jogo: {t1} x {t2}{texto_horario}")
@@ -264,6 +328,7 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
     dados_gols = None
     dados_escanteios = None
     dados_shots = None
+    dados_cards = None
 
     try:
         driver.execute_script("window.open(arguments[0], '_blank');", url_jogo)
@@ -341,6 +406,14 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         if clicar_aba_shots(driver, valor_antigo_referencia=referencia_corners):
             dados_shots = extrair_bloco_dados(driver, t1, t2)
 
+        # ------------------------------------------------------------
+        # 6. CLIQUE NA ABA "CARDS" E EXTRAÇÃO DE CARTÕES
+        # ------------------------------------------------------------
+        referencia_shots = dados_shots["overall_casa"] if dados_shots else referencia_corners
+        
+        if clicar_aba_cards(driver, valor_antigo_referencia=referencia_shots):
+            dados_cards = extrair_bloco_dados(driver, t1, t2)
+
     except Exception as e:
         print(f"    ⚠️ Erro durante a raspagem de {t1} x {t2}: {e}")
 
@@ -413,11 +486,32 @@ def pegar_estatisticas_statshub(driver, url_jogo, t1, t2, horario="", aba_princi
         for j in dados_shots['lista_jogos_fora']:
             print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
 
+    # ------------------------------------------------------------
+    # LOG PRINT DA PARTE DE CARTÕES (CARDS)
+    # ------------------------------------------------------------
+    if dados_cards:
+        print(f"\n============================================================")
+        print(f"📊 STATSHUB - CARTÕES (CARDS) DE {t1} x {t2}")
+        print("============================================================")
+        print(f"🏠 {t1} (Casa):")
+        print(f"    • Overall : {dados_cards['overall_casa']} | For: {dados_cards['for_casa']} | Against: {dados_cards['against_casa']}")
+        print("    • Últimos 5 jogos oficiais:")
+        for j in dados_cards['lista_jogos_casa']:
+            print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
+
+        print("-" * 60)
+        print(f"✈️ {t2} (Fora):")
+        print(f"    • Overall : {dados_cards['overall_fora']} | For: {dados_cards['for_fora']} | Against: {dados_cards['against_fora']}")
+        print("    • Últimos 5 jogos oficiais:")
+        for j in dados_cards['lista_jogos_fora']:
+            print(f"      - {j['data']} | {j['home']} {j['val_casa']} x {j['val_fora']} {j['away']} | 🏆 {j['competicao']}")
+
     print("\n")
 
     return {
         "gols": dados_gols,
         "escanteios": dados_escanteios,
         "shots": dados_shots,
+        "cards": dados_cards,
         "pular_gols": False
     }
