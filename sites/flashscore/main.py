@@ -10,7 +10,8 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Módulos de Mercados Ativos
-from testes.teste_ligas import COMPETICOES, liga_eh_permitida #testando estatísticas apenas na liga Brasileirão Betano 
+from testes.teste_ligas import COMPETICOES
+from sites.flashcore import liga_eh_permitida #testando estatísticas apenas na liga Brasileirão Betano 
 from mercados import gols, ambos_marcam, chance_dupla, vitorias, chutes_totais, escanteios, cartoes
 from sites.flashscore import bingo357, odds, links
 from telegram import menus
