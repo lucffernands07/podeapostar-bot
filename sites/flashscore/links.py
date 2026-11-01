@@ -3,6 +3,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+def gerar_link_copawn(id_jogo):
+    """
+    Gera o link direto para a partida na CopaWin usando o ID mapeado.
+    """
+    if id_jogo:
+        return f"https://copawnbr.com/match/{id_jogo}"
+    return "https://copawnbr.com/"
+    
+
 def extrair_url_betano(driver):
     """
     Extrai a URL real da Betano tentando os índices 3, 4 e 5.
