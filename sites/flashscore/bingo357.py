@@ -17,8 +17,7 @@ def extrair_porcentagem(texto_mercado):
 def extrair_odd(odd_str):
     """
     Retorna a odd convertida para float.
-    Para mercados estáticos/scouts (incluindo Finalizações Totais do Time),
-    atribui a odd invisível padrão de 1.30 para não zerar nem cair em travas.
+    Atribui a odd invisível padrão de 1.30 temporariamente enquanto a Betano estiver fora.
     """
     try:
         if not odd_str or odd_str == "N/A" or odd_str == "":
@@ -29,7 +28,6 @@ def extrair_odd(odd_str):
         if "análise" in odd_str_s.lower() or "analise" in odd_str_s.lower():
             return 1.30
             
-        # 🟢 Garante odd invisível de 1.30 para Finalizações Totais do Time (e legados de scouts/cartões/cantos)
         if any(term in odd_str_s.lower() for term in ["chutes", "chute", "finaliza", "finalização", "finalizacao", "falta", "cartã", "cartao", "cantos", "escanteio"]):
             return 1.30
             
@@ -51,7 +49,7 @@ def prioridade_mercado(mercado_texto):
     if "1x" in m: return 3
     if "2x" in m or "x2" in m: return 4
     if "vitória" in m or "vitoria" in m: return 5   
-    if "finalização" in m or "finalizacao" in m or "chute" in m: return 6  # 🎯 Finalizações do Time
+    if "finalização" in m or "finalizacao" in m or "chute" in m: return 6  
     if "falta" in m: return 7
     if "cartão" in m or "cartao" in m: return 8
     if "escanteio" in m: return 9
@@ -59,7 +57,6 @@ def prioridade_mercado(mercado_texto):
     return 10
 
 def carregar_ranking_pro():
-    """Lê o ranking pré-montado pelo ranking.py (Fallback)"""
     if os.path.exists(PATH_RANKING_DIARIO):
         try:
             with open(PATH_RANKING_DIARIO, 'r', encoding='utf-8') as f:
@@ -77,14 +74,9 @@ def chave_ordenacao_horario(chave_jogo):
     return chave_jogo
 
 def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=None, **kwargs):
-    """
-    Recebe os jogos já filtrados, agrupa por confronto.
-    Se qtd_alvo for None, gera um bilhete com TODOS os jogos do dia.
-    """
     bilhetes = []
     if not dados_entrada: return bilhetes
 
-    # 1. Agrupa todos os mercados por confronto preservando a ordem do fluxo
     jogos_agrupados = {}
     ordem_chaves = []
     for jogo in dados_entrada:
@@ -97,7 +89,6 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=None, **kwargs):
             ordem_chaves.append(chave)
         jogos_agrupados[chave].append(jogo)
 
-    # 2. Se não foi definida uma quantidade, seleciona TODOS os jogos
     if qtd_alvo is None:
         qtd_alvo = len(ordem_chaves)
 
@@ -121,11 +112,6 @@ def montar_bilhetes_estrategicos(dados_entrada, qtd_alvo=None, **kwargs):
 
 
 def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
-    """
-    Formata a mensagem interativa enviada para o Canal do Telegram.
-    Divide as mensagens automaticamente em partes de ~3800 caracteres.
-    Retorna uma LISTA de mensagens (strings).
-    """
     if not bilhetes: return []
     
     mensagens_finais = []
@@ -147,24 +133,11 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             liga = j.get('liga') or info_extra.get('liga', 'Futebol')
             
             mercado_raw = j.get('mercado', '')
-            odd_valor = j.get('odd') or info_extra.get('odd', '1.30')
             
-            # Mapeia a odd correta se presente no cache_dados
-            if isinstance(info_extra, dict) and "odds_todas" in info_extra:
-                odds_dic = info_extra["odds_todas"]
-                m_lower = mercado_raw.lower()
-                if "ambas marcam: não" in m_lower or "ambas marcam nao" in m_lower:
-                    odd_valor = odds_dic.get("BTTS_NAO", odd_valor)
-                elif "ambas marcam" in m_lower:
-                    odd_valor = odds_dic.get("BTTS", odd_valor)
-                elif "vitória fora" in m_lower or "vitoria fora" in m_lower:
-                    odd_valor = odds_dic.get("VITORIA_FORA", odd_valor)
-                elif "vitória casa" in m_lower or "vitoria casa" in m_lower:
-                    odd_valor = odds_dic.get("VITORIA_CASA", odd_valor)
-                elif "1x" in m_lower:
-                    odd_valor = odds_dic.get("1X", odd_valor)
-                elif "2x" in m_lower or "x2" in m_lower:
-                    odd_valor = odds_dic.get("X2", odd_valor)
+            # TEMPORÁRIO: Ignora a busca na Betano se estiver vazia/N/A e assume 1.30 de segurança
+            odd_valor = j.get('odd') or info_extra.get('odd', '1.30')
+            if odd_valor == "N/A" or not odd_valor:
+                odd_valor = "1.30"
             
             odd_valor = str(odd_valor).strip()
             link_h2h_resolvido = j.get('link_h2h') or info_extra.get('link_h2h')
@@ -196,7 +169,6 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             
             odd_total *= extrair_odd(odd_valor)
 
-        # 🟢 CONSTRUÇÃO DOS BLOCOS E CORTE INTELIGENTE
         for chave in sorted(agrupados.keys(), key=chave_ordenacao_horario):
             d = agrupados[chave]
             d["mercados"].sort(key=lambda x: x['prioridade'])
@@ -207,10 +179,9 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
             if d.get("link_h2h"): 
                 bloco += f"\n📊 [Estatísticas]({d['link_h2h']})"
                 
-            # Verifica se juntar este bloco ao texto atual ultrapassa o limite seguro do Telegram (~3800 chars)
             if len(corpo_atual) + len(bloco) > 3800:
-                mensagens_finais.append(corpo_atual)    # Guarda a parte cheia
-                corpo_atual = f"*(Continuação)*\n\n"    # Inicia uma nova parte
+                mensagens_finais.append(corpo_atual)    
+                corpo_atual = f"*(Continuação)*\n\n"    
                 
             corpo_atual += bloco + "\n\n"
 
@@ -220,3 +191,4 @@ def formatar_para_telegram(bilhetes, cache_dados, aviso_menu=""):
         mensagens_finais.append(corpo_atual)
         
     return mensagens_finais
+    
