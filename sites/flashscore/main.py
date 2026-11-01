@@ -255,21 +255,26 @@ def main():
                         m_texto, m_chave = item["texto"], item["chave"]
                         valor_odd_str = v_odds.get(m_chave, "N/A")
                         
+                        # 🟡 CONTORNO TEMPORÁRIO BETANO: Se estiver N/A ou vazio, assume 1.30 de segurança
                         if valor_odd_str == "N/A" or not valor_odd_str:
-                            print(f"      ⚠️ ALERTA ODD AUSENTE: O mercado '{m_texto}' (Chave: {m_chave}) retornou 'N/A' no odds.py e foi ignorado.")
-                            continue
+                            print(f"      ⚠️ Betano indisponível para '{m_texto}' (Chave: {m_chave}). Assumindo Odd provisória 1.30.")
+                            odd_float = 1.30
+                            valor_odd_str = "1.30"
+                        else:
+                            try:
+                                odd_float = float(str(valor_odd_str).replace(',', '.'))
+                            except Exception as e_conv:
+                                print(f"      ⚠️ Erro ao converter odd para float ({m_texto}): {e_conv}")
+                                odd_float = 1.30
+                                valor_odd_str = "1.30"
 
-                        try:
-                            odd_float = float(str(valor_odd_str).replace(',', '.'))
-                            
-                            # 🛑 (A trava antiga de BTTS Sim > 1.20 foi removida daqui, 
-                            # pois agora a regra de corte por odd é validada diretamente dentro do ambos_marcam.py)
+                        # Validação de odd mínima / regras de corte
+                        if odd_float >= 1.15:
+                            if "M45" in m_chave and odd_float >= 4.0: continue
+                            mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": str(valor_odd_str)})
+                        else:
+                            print(f"      ⚠️ Descartado (Odd baixa < 1.10): {m_texto} | Valor: {valor_odd_str}")
 
-                            if odd_float >= 1.15:
-                                if "M45" in m_chave and odd_float >= 4.0: continue
-                                mercados_para_processar.append({"texto": m_texto, "chave": m_chave, "odd": str(odd_float)})
-                            else:
-                                print(f"      ⚠️ Descartado (Odd baixa < 1.10): {m_texto} | Valor: {valor_odd_str}")
                         except Exception as e_conv:
                             print(f"      ⚠️ Erro ao converter odd para float ({m_texto}) [Valor lido: {valor_odd_str}]: {e_conv}")
 
